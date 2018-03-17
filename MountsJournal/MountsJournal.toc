@@ -1,0 +1,8 @@
+## Interface: 70300
+## Title: MountsJournal
+## Author: sfmict
+## Version: 0.1
+## Notes: Improved Mounts Journal
+## SavedVariables: MountsJournalDB
+Mounts.lua
+Journal.lua
