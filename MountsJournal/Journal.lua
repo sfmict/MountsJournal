@@ -80,7 +80,7 @@ end
 
 
 function journal:configureJournal()
-	function setColor(btn, mountsTbl)
+	local function setColor(btn, mountsTbl)
 		if journal:inTable(mountsTbl, btn.mountID) then
 			btn.background:SetColorTexture(journal.colors[2]())
 		else

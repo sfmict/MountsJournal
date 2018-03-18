@@ -30,7 +30,7 @@ end
 
 function mounts:summon(ids)
 	local usableIDs = {}
-	for index, mountID in ipairs(ids) do
+	for index, mountID in pairs(ids) do
 		if select(5, C_MountJournal.GetMountInfoByID(mountID)) then
 			tinsert(usableIDs, mountID)
 		end
