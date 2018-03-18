@@ -30,7 +30,7 @@ function journal:ADDON_LOADED(addon)
 		journal:Blizzard_Collections()
 	end
 
-	if addon == "CursorMod" then
+	if addon == "MountsJournal" then
 		if not journal.Blizzard_Collections_Loaded and IsAddOnLoaded("Blizzard_Collections") then
 			mounts.Journal:Blizzard_Collections()
 			print("bliz")
@@ -50,11 +50,9 @@ function journal:Blizzard_Collections()
 	-- journal:RegisterEvent("COMPANION_UPDATE")
 	-- journal:RegisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 
-	journal.flyButtons = {}
-	journal.groundButtons = {}
-	journal.swimmingButtons = {}
+	journal.buttons = {MountJournalListScrollFrameScrollChild:GetChildren()}
 
-	local function CreateButton(parent, pointX, pointY, bg, OnClick)
+	local function CreateButton(name, parent, pointX, pointY, bg, OnClick)
 		local btnFrame = CreateFrame("button", nil, parent)
 		-- mountFrame:SetNormalTexture("Interface\\AddOns\\CursorMod\\texture\\point.blp")
 		local btnTex = btnFrame:CreateTexture(nil, "BACKGROUND")
@@ -64,44 +62,53 @@ function journal:Blizzard_Collections()
 		btnFrame:SetPoint("TOPRIGHT", pointX, pointY)
 		btnFrame:SetSize(18, 12)
 		btnFrame:SetScript("OnClick", OnClick)
-		return btnFrame
+		parent[name] = btnFrame
 	end
 
-	for _,child in pairs({MountJournalListScrollFrameScrollChild:GetChildren()}) do
-		tinsert(journal.flyButtons, CreateButton(child, -2, -2, nil, function(self)
+	for _,child in pairs(journal.buttons) do
+		CreateButton("fly", child, -2, -2, nil, function(self)
 			journal:mountToggle(mounts.fly, self, self.mountID)
-		end))
-		tinsert(journal.groundButtons, CreateButton(child, -2, -17, nil, function(self)
+		end)
+		CreateButton("ground", child, -2, -17, nil, function(self)
 			journal:mountToggle(mounts.ground, self, self.mountID)
-		end))
-		tinsert(journal.swimmingButtons, CreateButton(child, -2, -32, nil, function(self)
+		end)
+		CreateButton("swimming", child, -2, -32, nil, function(self)
 			journal:mountToggle(mounts.swimming, self, self.mountID)
-		end))
+		end)
 	end
 end
 
 
 function journal:configureJournal()
-	local function setTexture(buttonsTbl, mountsTbl)
-		for _,btn in pairs(buttonsTbl) do
-			local index = btn:GetParent().index
-			if index then
-				if not btn:IsShown() then btn:Show() end
-				btn.mountID = select(12, C_MountJournal.GetDisplayedMountInfo(index))
-				if journal:inTable(mountsTbl, btn.mountID) then
-					btn.background:SetColorTexture(journal.colors[2]())
-				else
-					btn.background:SetColorTexture(journal.colors[1]())
-				end
-			else
-				if btn:IsShown() then btn:Hide() end
-			end
+	function setColor(btn, mountsTbl)
+		if journal:inTable(mountsTbl, btn.mountID) then
+			btn.background:SetColorTexture(journal.colors[2]())
+		else
+			btn.background:SetColorTexture(journal.colors[1]())
 		end
 	end
 
-	setTexture(journal.flyButtons, mounts.fly)
-	setTexture(journal.groundButtons, mounts.ground)
-	setTexture(journal.swimmingButtons, mounts.swimming)
+	for _,btn in pairs(journal.buttons) do
+		if btn.index then
+			if not btn.fly:IsShown() then
+				btn.fly:Show()
+				btn.ground:Show()
+				btn.swimming:Show()
+			end
+			btn.fly.mountID = select(12, C_MountJournal.GetDisplayedMountInfo(btn.index))
+			btn.ground.mountID = btn.fly.mountID
+			btn.swimming.mountID = btn.fly.mountID
+			setColor(btn.fly, mounts.fly)
+			setColor(btn.ground, mounts.ground)
+			setColor(btn.swimming, mounts.swimming)
+		else
+			if btn.fly:IsShown() then
+				btn.fly:Hide()
+				btn.ground:Hide()
+				btn.swimming:Hide()
+			end
+		end
+	end
 end
 
 
