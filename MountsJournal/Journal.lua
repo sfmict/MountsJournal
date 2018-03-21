@@ -3,7 +3,7 @@ local journal = CreateFrame("Frame", "MountsJounralFrames")
 
 journal.colors = {
 	function() return 0.2, 0.1843137254901961, 0.01568627450980392, 1 end,
-	function() return 0.8941176470588236, 0.7176470588235294, 0.11372549019607843, 1 end,
+	function() return 0.6823529411764706, 0.6431372549019608, 0.20392156862745098, 1 end,
 }
 
 
@@ -44,35 +44,30 @@ function journal:Blizzard_Collections()
 
 	MountJournal:HookScript("OnShow", journal.configureJournal)
 	MountJournalListScrollFrame:HookScript("OnUpdate", journal.configureJournal)
-	-- journal:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
-	-- journal:RegisterEvent("COMPANION_LEARNED")
-	-- journal:RegisterEvent("COMPANION_UNLEARNED")
-	-- journal:RegisterEvent("COMPANION_UPDATE")
-	-- journal:RegisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 
 	journal.buttons = {MountJournalListScrollFrameScrollChild:GetChildren()}
 
-	local function CreateButton(name, parent, pointX, pointY, bg, OnClick)
+	local function CreateButton(name, parent, pointX, pointY, bgTex, OnClick)
 		local btnFrame = CreateFrame("button", nil, parent)
-		-- mountFrame:SetNormalTexture("Interface\\AddOns\\CursorMod\\texture\\point.blp")
+		btnFrame:SetNormalTexture(bgTex)
 		local btnTex = btnFrame:CreateTexture(nil, "BACKGROUND")
 		btnFrame.background = btnTex
 		btnTex:SetAllPoints()
-		btnTex:SetColorTexture(journal.colors[1]())
 		btnFrame:SetPoint("TOPRIGHT", pointX, pointY)
-		btnFrame:SetSize(18, 12)
+		btnFrame:SetSize(24, 12)
 		btnFrame:SetScript("OnClick", OnClick)
 		parent[name] = btnFrame
 	end
 
+	local texPath = "Interface\\AddOns\\MountsJournal\\textures\\"
 	for _,child in pairs(journal.buttons) do
-		CreateButton("fly", child, -2, -2, nil, function(self)
+		CreateButton("fly", child, -2, -2, texPath.."fly.blp", function(self)
 			journal:mountToggle(mounts.fly, self, self.mountID)
 		end)
-		CreateButton("ground", child, -2, -17, nil, function(self)
+		CreateButton("ground", child, -2, -17, texPath.."ground.png", function(self)
 			journal:mountToggle(mounts.ground, self, self.mountID)
 		end)
-		CreateButton("swimming", child, -2, -32, nil, function(self)
+		CreateButton("swimming", child, -2, -32, texPath.."swimming.blp", function(self)
 			journal:mountToggle(mounts.swimming, self, self.mountID)
 		end)
 	end

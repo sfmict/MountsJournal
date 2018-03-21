@@ -1,7 +1,7 @@
 ## Interface: 70300
 ## Title: MountsJournal
 ## Author: sfmict
-## Version: 0.1
+## Version: 0.2a
 ## Notes: Improved Mounts Journal
 ## SavedVariables: MountsJournalDB
 Mounts.lua
