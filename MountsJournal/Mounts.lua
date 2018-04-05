@@ -11,6 +11,8 @@ mounts:RegisterEvent("ADDON_LOADED")
 
 function mounts:ADDON_LOADED(addon)
 	if addon == "MountsJournal" then
+		self:UnregisterEvent("ADDON_LOADED")
+
 		MountsJournalDB = MountsJournalDB or {}
 		MountsJournalDB.fly = MountsJournalDB.fly or {}
 		MountsJournalDB.ground = MountsJournalDB.ground or {}
@@ -23,8 +25,23 @@ function mounts:ADDON_LOADED(addon)
 			373, -- Вайш'ирский морской конек
 		}
 
+		mounts.continensGround = {
+			1463, -- Внешняя область Хельхейма
+			1514, -- Скитающийся остров
+		}
+
 		mounts:init()
 	end
+end
+
+
+function mounts:inTable(table, item)
+	for key, value in pairs(table) do
+		if value == item then
+			return key
+		end
+	end
+	return false
 end
 
 
@@ -45,6 +62,11 @@ end
 
 
 function mounts:getSpellKnown()
+	local continent = select(8, GetInstanceInfo())
+	if mounts:inTable(mounts.continensGround, continent) then
+		return false
+	end
+
 	if IsSpellKnown(34090) --Верховая езда (умелец)
 	or IsSpellKnown(34091) --Верховая езда (искусник)
 	or IsSpellKnown(90265) --Мастер верховой езды
@@ -63,10 +85,10 @@ function mounts:init()
 			Dismount()
 		else
 			if IsSwimming() and not IsAltKeyDown() then
-				if not mounts:summon(mounts.swimmingVashjir) then
-					if not mounts:summon(mounts.swimming) then C_MountJournal.SummonByID(0) end
+				if not mounts:summon(mounts.swimmingVashjir) and not mounts:summon(mounts.swimming) then
+					C_MountJournal.SummonByID(0)
 				end
-			elseif mounts:getSpellKnown() and IsFlyableArea() and (IsSwimming() or not IsAltKeyDown()) then
+			elseif IsFlyableArea() and (IsSwimming() or not IsAltKeyDown()) and mounts:getSpellKnown() then
 				if not mounts:summon(mounts.fly) then C_MountJournal.SummonByID(0) end
 			else
 				if not mounts:summon(mounts.ground) then C_MountJournal.SummonByID(0) end

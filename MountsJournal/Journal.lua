@@ -3,18 +3,9 @@ local journal = CreateFrame("Frame", "MountsJounralFrames")
 
 journal.colors = {
 	function() return 0.2, 0.1843137254901961, 0.01568627450980392, 1 end,
+	-- function() return 0.8941176470588236, 0.7176470588235294, 0.11372549019607843, 1 end,
 	function() return 0.6823529411764706, 0.6431372549019608, 0.20392156862745098, 1 end,
 }
-
-
-function journal:inTable(table, item)
-	for key, value in pairs(table) do
-		if value == item then
-			return key
-		end
-	end
-	return false
-end
 
 
 journal:SetScript("OnEvent", function(self, event, ...)
@@ -26,22 +17,14 @@ journal:RegisterEvent("ADDON_LOADED")
 
 
 function journal:ADDON_LOADED(addon)
-	if addon == "Blizzard_Collections" then
-		journal:Blizzard_Collections()
-	end
-
-	if addon == "MountsJournal" then
-		if not journal.Blizzard_Collections_Loaded and IsAddOnLoaded("Blizzard_Collections") then
-			mounts.Journal:Blizzard_Collections()
-			print("bliz")
-		end
+	if addon == "Blizzard_Collections" or addon == "MountJournal" and isAddonLoaded("Blizzard_Collections") then
+		self:UnregisterEvent("ADDON_LOADED")
+		self:Blizzard_Collections()
 	end
 end
 
 
 function journal:Blizzard_Collections()
-	journal.Blizzard_Collections_Loaded = true
-
 	MountJournal:HookScript("OnShow", journal.configureJournal)
 	MountJournalListScrollFrame:HookScript("OnUpdate", journal.configureJournal)
 
@@ -61,13 +44,16 @@ function journal:Blizzard_Collections()
 
 	local texPath = "Interface\\AddOns\\MountsJournal\\textures\\"
 	for _,child in pairs(journal.buttons) do
-		CreateButton("fly", child, -2, -2, texPath.."fly.blp", function(self)
+		child:SetWidth(child:GetWidth() - 25)
+		child.name:SetWidth(child.name:GetWidth() - 18)
+
+		CreateButton("fly", child, 25, -3, texPath.."fly.blp", function(self)
 			journal:mountToggle(mounts.fly, self, self.mountID)
 		end)
-		CreateButton("ground", child, -2, -17, texPath.."ground.blp", function(self)
+		CreateButton("ground", child, 25, -17, texPath.."ground.blp", function(self)
 			journal:mountToggle(mounts.ground, self, self.mountID)
 		end)
-		CreateButton("swimming", child, -2, -32, texPath.."swimming.blp", function(self)
+		CreateButton("swimming", child, 25, -31, texPath.."swimming.blp", function(self)
 			journal:mountToggle(mounts.swimming, self, self.mountID)
 		end)
 	end
@@ -76,7 +62,7 @@ end
 
 function journal:configureJournal()
 	local function setColor(btn, mountsTbl)
-		if journal:inTable(mountsTbl, btn.mountID) then
+		if mounts:inTable(mountsTbl, btn.mountID) then
 			btn.background:SetColorTexture(journal.colors[2]())
 		else
 			btn.background:SetColorTexture(journal.colors[1]())
@@ -108,7 +94,7 @@ end
 
 
 function journal:mountToggle(tbl, button, mountID)
-	local pos = journal:inTable(tbl, mountID)
+	local pos = mounts:inTable(tbl, mountID)
 	if pos then
 		tremove(tbl, pos)
 		button.background:SetColorTexture(journal.colors[1]())
