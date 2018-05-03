@@ -17,6 +17,7 @@ function mounts:ADDON_LOADED(addon)
 		MountsJournalDB.fly = MountsJournalDB.fly or {}
 		MountsJournalDB.ground = MountsJournalDB.ground or {}
 		MountsJournalDB.swimming = MountsJournalDB.swimming or {}
+		MountsJournalDB.config = MountsJournalDB.config or {}
 
 		mounts.fly = MountsJournalDB.fly
 		mounts.ground = MountsJournalDB.ground
@@ -30,7 +31,19 @@ function mounts:ADDON_LOADED(addon)
 			1514, -- Скитающийся остров
 		}
 
+		mounts.config = MountsJournalDB.config
+		mounts.config.modifier = mounts.config.modifier or "ALT"
+		mounts:setModifier(mounts.config.modifier)
+
 		mounts:init()
+	end
+end
+
+
+function mounts:setModifier(modifier)
+	if mounts:inTable({"ALT", "CTRL", "SHIFT"}, modifier) then
+		mounts.config.modifier = modifier
+		mounts.modifier = modifier == "ALT" and IsAltKeyDown or modifier == "CTRL" and IsControlKeyDown or IsShiftKeyDown
 	end
 end
 
@@ -63,14 +76,16 @@ end
 
 function mounts:getSpellKnown()
 	local continent = select(8, GetInstanceInfo())
-	if mounts:inTable(mounts.continensGround, continent) then
-		return false
-	end
+	if mounts:inTable(mounts.continensGround, continent) then return false end
 
 	if IsSpellKnown(34090) --Верховая езда (умелец)
 	or IsSpellKnown(34091) --Верховая езда (искусник)
 	or IsSpellKnown(90265) --Мастер верховой езды
 	then
+		-- Дренор
+		if mounts:inTable({1116, 1152, 1330, 1153, 1154, 1158, 1331, 1159, 1160}, continent) and not IsSpellKnown(191645)
+		-- Расколотые острова
+		or continent == 1220 and not IsSpellKnown(233368) then return false end
 		return true
 	else
 		return false
@@ -84,11 +99,11 @@ function mounts:init()
 		if IsMounted() then
 			Dismount()
 		else
-			if IsSwimming() and not IsAltKeyDown() then
+			if IsSwimming() and not mounts.modifier() then
 				if not mounts:summon(mounts.swimmingVashjir) and not mounts:summon(mounts.swimming) then
 					C_MountJournal.SummonByID(0)
 				end
-			elseif IsFlyableArea() and (IsSwimming() or not IsAltKeyDown()) and mounts:getSpellKnown() then
+			elseif IsFlyableArea() and (IsSwimming() or not mounts.modifier()) and mounts:getSpellKnown() then
 				if not mounts:summon(mounts.fly) then C_MountJournal.SummonByID(0) end
 			else
 				if not mounts:summon(mounts.ground) then C_MountJournal.SummonByID(0) end
