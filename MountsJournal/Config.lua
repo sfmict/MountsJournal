@@ -69,6 +69,10 @@ configFrame:SetScript("OnShow", function(...)
 		DeleteMacro(macroName)
 		CreateMacro(macroName, select(3, GetSpellInfo(150544)), "/mount")
 
+		if not IsAddOnLoaded("Blizzard_MacroUI") then
+			LoadAddOn("Blizzard_MacroUI")
+		end
+
 		MacroFrame_Show()
 		if MacroFrame.selectedTab ~= 1 then
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -144,7 +148,7 @@ configFrame:RegisterEvent("ADDON_LOADED")
 
 -- BUTTON CONFIG
 function configFrame:ADDON_LOADED(addonName)
-	if addonName == "Blizzard_Collections" or addonName == "MountJournal" and isAddonLoaded("Blizzard_Collections") then
+	if addonName == "Blizzard_Collections" or addonName == "MountJournal" and IsAddOnLoaded("Blizzard_Collections") then
 		self:UnregisterEvent("ADDON_LOADED")
 
 		local btnConfig = CreateFrame("Button", "MountsJournalBtnConfig", MountJournal, "UIPanelButtonTemplate")
