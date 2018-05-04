@@ -1,7 +1,7 @@
 ## Interface: 70300
 ## Title: MountsJournal
 ## Author: sfmict
-## Version: 1.0
+## Version: 1.1
 ## Notes: Improved Mounts Journal.
 ## Notes-ruRU: Улучшенный журнал средств передвижения.
 ## SavedVariables: MountsJournalDB
