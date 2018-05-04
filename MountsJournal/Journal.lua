@@ -1,6 +1,7 @@
 local mounts = MountsJournal
 local journal = CreateFrame("Frame", "MountsJounralFrames")
 
+
 journal.colors = {
 	function() return 0.2, 0.1843137254901961, 0.01568627450980392, 1 end,
 	-- function() return 0.8941176470588236, 0.7176470588235294, 0.11372549019607843, 1 end,
@@ -16,8 +17,8 @@ end)
 journal:RegisterEvent("ADDON_LOADED")
 
 
-function journal:ADDON_LOADED(addon)
-	if addon == "Blizzard_Collections" or addon == "MountJournal" and isAddonLoaded("Blizzard_Collections") then
+function journal:ADDON_LOADED(addonName)
+	if addonName == "Blizzard_Collections" or addonName == "MountJournal" and isAddonLoaded("Blizzard_Collections") then
 		self:UnregisterEvent("ADDON_LOADED")
 		self:Blizzard_Collections()
 	end

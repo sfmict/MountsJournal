@@ -1,9 +1,11 @@
 ## Interface: 70300
 ## Title: MountsJournal
 ## Author: sfmict
-## Version: 0.3a
-## Notes: Improved Mounts Journal
+## Version: 1.0
+## Notes: Improved Mounts Journal.
+## Notes-ruRU: Улучшенный журнал средств передвижения.
 ## SavedVariables: MountsJournalDB
+locales.xml
 Mounts.lua
 Journal.lua
 Config.lua

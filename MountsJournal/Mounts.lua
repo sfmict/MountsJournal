@@ -9,8 +9,8 @@ end)
 mounts:RegisterEvent("ADDON_LOADED")
 
 
-function mounts:ADDON_LOADED(addon)
-	if addon == "MountsJournal" then
+function mounts:ADDON_LOADED(addonName)
+	if addonName == "MountsJournal" then
 		self:UnregisterEvent("ADDON_LOADED")
 
 		MountsJournalDB = MountsJournalDB or {}
@@ -75,21 +75,37 @@ end
 
 
 function mounts:getSpellKnown()
+	if UnitLevel("player") < 20 then return false, false end
+
+	local ground, fly = false, false
+
+	if IsSpellKnown(33388) -- Верховая езда (ученик)
+	or IsSpellKnown(33391) -- Верховая езда (подмастерье)
+	then
+		ground = true
+	end
+
+	if IsSpellKnown(34090) -- Верховая езда (умелец)
+	or IsSpellKnown(34091) -- Верховая езда (искусник)
+	or IsSpellKnown(90265) -- Мастер верховой езды
+	then
+		ground, fly = true, true
+	end
+
+	return ground, fly
+end
+
+
+function mounts:isFlyLocation()
 	local continent = select(8, GetInstanceInfo())
 	if mounts:inTable(mounts.continensGround, continent) then return false end
 
-	if IsSpellKnown(34090) --Верховая езда (умелец)
-	or IsSpellKnown(34091) --Верховая езда (искусник)
-	or IsSpellKnown(90265) --Мастер верховой езды
-	then
-		-- Дренор
-		if mounts:inTable({1116, 1152, 1330, 1153, 1154, 1158, 1331, 1159, 1160}, continent) and not IsSpellKnown(191645)
-		-- Расколотые острова
-		or continent == 1220 and not IsSpellKnown(233368) then return false end
-		return true
-	else
-		return false
-	end
+	-- Дренор
+	if mounts:inTable({1116, 1152, 1330, 1153, 1154, 1158, 1331, 1159, 1160}, continent) and not IsSpellKnown(191645)
+	-- Расколотые острова
+	or continent == 1220 and not IsSpellKnown(233368) then return false end
+
+	return true
 end
 
 
@@ -99,11 +115,14 @@ function mounts:init()
 		if IsMounted() then
 			Dismount()
 		else
-			if IsSwimming() and not mounts.modifier() then
+			local isGroundSpell, isFlySpell = mounts:getSpellKnown()
+			if not isGroundSpell then
+				if not mounts:summon({678}) then C_MountJournal.SummonByID(0) end
+			elseif IsSwimming() and not mounts.modifier() then
 				if not mounts:summon(mounts.swimmingVashjir) and not mounts:summon(mounts.swimming) then
 					C_MountJournal.SummonByID(0)
 				end
-			elseif IsFlyableArea() and (IsSwimming() or not mounts.modifier()) and mounts:getSpellKnown() then
+			elseif isFlySpell and IsFlyableArea() and (IsSwimming() or not mounts.modifier()) and mounts:isFlyLocation() then
 				if not mounts:summon(mounts.fly) then C_MountJournal.SummonByID(0) end
 			else
 				if not mounts:summon(mounts.ground) then C_MountJournal.SummonByID(0) end
