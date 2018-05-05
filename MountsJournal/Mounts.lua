@@ -25,6 +25,10 @@ function mounts:ADDON_LOADED(addonName)
 		mounts.swimmingVashjir = {
 			373, -- Вайш'ирский морской конек
 		}
+		mounts.lowLevel = {
+			678, -- Механоцикл с шофером
+			679, -- Анжинерский чоппер с водителем
+		}
 
 		mounts.continensGround = {
 			1463, -- Внешняя область Хельхейма
@@ -75,8 +79,6 @@ end
 
 
 function mounts:getSpellKnown()
-	if UnitLevel("player") < 20 then return false, false end
-
 	local ground, fly = false, false
 
 	if IsSpellKnown(33388) -- Верховая езда (ученик)
@@ -117,7 +119,7 @@ function mounts:init()
 		else
 			local isGroundSpell, isFlySpell = mounts:getSpellKnown()
 			if not isGroundSpell then
-				if not mounts:summon({678}) then C_MountJournal.SummonByID(0) end
+				if not mounts:summon(mounts.lowLevel) then C_MountJournal.SummonByID(0) end
 			elseif IsSwimming() and not mounts.modifier() then
 				if not mounts:summon(mounts.swimmingVashjir) and not mounts:summon(mounts.swimming) then
 					C_MountJournal.SummonByID(0)
