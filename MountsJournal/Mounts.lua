@@ -19,9 +19,12 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalDB.swimming = MountsJournalDB.swimming or {}
 		MountsJournalDB.config = MountsJournalDB.config or {}
 
-		mounts.fly = MountsJournalDB.fly
-		mounts.ground = MountsJournalDB.ground
-		mounts.swimming = MountsJournalDB.swimming
+		MountsJournalChar = MountsJournalChar or {}
+		MountsJournalChar.fly =  MountsJournalChar.fly or {}
+		MountsJournalChar.ground = MountsJournalChar.ground or {}
+		MountsJournalChar.swimming = MountsJournalChar.swimming or {}
+
+		mounts:setMountsList()
 		mounts.swimmingVashjir = {
 			373, -- Вайш'ирский морской конек
 		}
@@ -36,18 +39,9 @@ function mounts:ADDON_LOADED(addonName)
 		}
 
 		mounts.config = MountsJournalDB.config
-		mounts.config.modifier = mounts.config.modifier or "ALT"
 		mounts:setModifier(mounts.config.modifier)
 
 		mounts:init()
-	end
-end
-
-
-function mounts:setModifier(modifier)
-	if mounts:inTable({"ALT", "CTRL", "SHIFT"}, modifier) then
-		mounts.config.modifier = modifier
-		mounts.modifier = modifier == "ALT" and IsAltKeyDown or modifier == "CTRL" and IsControlKeyDown or IsShiftKeyDown
 	end
 end
 
@@ -59,6 +53,33 @@ function mounts:inTable(table, item)
 		end
 	end
 	return false
+end
+
+
+function mounts:setModifier(modifier)
+	if mounts:inTable({"ALT", "CTRL", "SHIFT"}, modifier) then
+		mounts.config.modifier = modifier
+		mounts.modifier = modifier == "ALT" and IsAltKeyDown or modifier == "CTRL" and IsControlKeyDown or IsShiftKeyDown
+		return
+	end
+	mounts.config.modifier = "ALT"
+	mounts.modifier = IsAltKeyDown
+end
+
+
+function mounts:setMountsList(perChar)
+	if perChar ~= nil then
+		MountsJournalChar.enable = perChar
+		mounts.perChar = perChar
+	elseif MountsJournalChar and MountsJournalChar.enable then
+		mounts.perChar = true
+	end
+
+	mounts.list = {
+		["fly"] = mounts.perChar and MountsJournalChar.fly or MountsJournalDB.fly,
+		["ground"] = mounts.perChar and MountsJournalChar.ground or MountsJournalDB.ground,
+		["swimming"]= mounts.perChar and MountsJournalChar.swimming or MountsJournalDB.swimming
+	}
 end
 
 
@@ -121,13 +142,13 @@ function mounts:init()
 			if not isGroundSpell then
 				if not mounts:summon(mounts.lowLevel) then C_MountJournal.SummonByID(0) end
 			elseif IsSwimming() and not mounts.modifier() then
-				if not mounts:summon(mounts.swimmingVashjir) and not mounts:summon(mounts.swimming) then
+				if not mounts:summon(mounts.swimmingVashjir) and not mounts:summon(mounts.list.swimming) then
 					C_MountJournal.SummonByID(0)
 				end
 			elseif isFlySpell and IsFlyableArea() and (IsSwimming() or not mounts.modifier()) and mounts:isFlyLocation() then
-				if not mounts:summon(mounts.fly) then C_MountJournal.SummonByID(0) end
+				if not mounts:summon(mounts.list.fly) then C_MountJournal.SummonByID(0) end
 			else
-				if not mounts:summon(mounts.ground) then C_MountJournal.SummonByID(0) end
+				if not mounts:summon(mounts.list.ground) then C_MountJournal.SummonByID(0) end
 			end
 		end
 	end

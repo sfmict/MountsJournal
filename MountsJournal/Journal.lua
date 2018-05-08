@@ -18,7 +18,7 @@ journal:RegisterEvent("ADDON_LOADED")
 
 
 function journal:ADDON_LOADED(addonName)
-	if addonName == "Blizzard_Collections" or addonName == "MountJournal" and IsAddOnLoaded("Blizzard_Collections") then
+	if addonName == "Blizzard_Collections" or addonName == "MountsJournal" and IsAddOnLoaded("Blizzard_Collections") then
 		self:UnregisterEvent("ADDON_LOADED")
 		self:Blizzard_Collections()
 	end
@@ -49,13 +49,13 @@ function journal:Blizzard_Collections()
 		child.name:SetWidth(child.name:GetWidth() - 18)
 
 		CreateButton("fly", child, 25, -3, texPath.."fly.blp", function(self)
-			journal:mountToggle(mounts.fly, self, self.mountID)
+			journal:mountToggle(mounts.list.fly, self, self.mountID)
 		end)
 		CreateButton("ground", child, 25, -17, texPath.."ground.blp", function(self)
-			journal:mountToggle(mounts.ground, self, self.mountID)
+			journal:mountToggle(mounts.list.ground, self, self.mountID)
 		end)
 		CreateButton("swimming", child, 25, -31, texPath.."swimming.blp", function(self)
-			journal:mountToggle(mounts.swimming, self, self.mountID)
+			journal:mountToggle(mounts.list.swimming, self, self.mountID)
 		end)
 	end
 end
@@ -80,9 +80,9 @@ function journal:configureJournal()
 			btn.fly.mountID = select(12, C_MountJournal.GetDisplayedMountInfo(btn.index))
 			btn.ground.mountID = btn.fly.mountID
 			btn.swimming.mountID = btn.fly.mountID
-			setColor(btn.fly, mounts.fly)
-			setColor(btn.ground, mounts.ground)
-			setColor(btn.swimming, mounts.swimming)
+			setColor(btn.fly, mounts.list.fly)
+			setColor(btn.ground, mounts.list.ground)
+			setColor(btn.swimming, mounts.list.swimming)
 		else
 			if btn.fly:IsShown() then
 				btn.fly:Hide()

@@ -73,7 +73,12 @@ configFrame:SetScript("OnShow", function(...)
 			LoadAddOn("Blizzard_MacroUI")
 		end
 
-		MacroFrame_Show()
+		if MacroFrame:IsShown() then
+			MacroFrame_Update()
+		else
+			MacroFrame_Show()
+		end
+
 		if MacroFrame.selectedTab ~= 1 then
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			PanelTemplates_SetTab(MacroFrame, MacroFrameTab1:GetID())
@@ -84,7 +89,7 @@ configFrame:SetScript("OnShow", function(...)
 		local index = GetMacroIndexByName(macroName)
 		local line = ceil(index / 6)
 		MacroButtonScrollFrame:SetVerticalScroll(line < 3 and 0 or 46 * (line - 2))
-		MacroButton_OnClick(({MacroButtonContainer:GetChildren()})[index])
+		MacroButton_OnClick(_G["MacroButton"..index])
 	end)
 
 	createMacroBtn:SetScript("OnEnter", function()
@@ -146,15 +151,27 @@ end)
 configFrame:RegisterEvent("ADDON_LOADED")
 
 
--- BUTTON CONFIG
 function configFrame:ADDON_LOADED(addonName)
-	if addonName == "Blizzard_Collections" or addonName == "MountJournal" and IsAddOnLoaded("Blizzard_Collections") then
+	if addonName == "Blizzard_Collections" and IsAddOnLoaded("MountsJournal") or addonName == "MountsJournal" and IsAddOnLoaded("Blizzard_Collections") then
 		self:UnregisterEvent("ADDON_LOADED")
 
+		-- SETTINGS BTN
 		local btnConfig = CreateFrame("Button", "MountsJournalBtnConfig", MountJournal, "UIPanelButtonTemplate")
 		btnConfig:SetSize(80, 22)
 		btnConfig:SetPoint("TOPLEFT", MountJournal.MountCount, "TOPRIGHT", 8, 1)
 		btnConfig:SetText(L["Settings"])
 		btnConfig:SetScript("OnClick", openConfig)
+
+		-- PER CHARACTER CHECK
+		local perCharCheck = CreateFrame("CheckButton", "MountsJournalPerChar", MountJournal, "InterfaceOptionsCheckButtonTemplate")
+		perCharCheck:SetPoint("TOPLEFT", btnConfig, "TOPRIGHT", 6, 2)
+		perCharCheck.label = _G[perCharCheck:GetName().."Text"]
+		perCharCheck.label:SetPoint("LEFT", perCharCheck, "RIGHT", 1, 0)
+		perCharCheck.label:SetSize(150, 35)
+		perCharCheck.label:SetText(L["Character Specific Mount List"])
+		perCharCheck:SetChecked(MountsJournal.perChar)
+		perCharCheck:SetScript("OnClick", function(self)
+			MountsJournal:setMountsList(self:GetChecked())
+		end)
 	end
 end

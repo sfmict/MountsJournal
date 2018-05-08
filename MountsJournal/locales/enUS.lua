@@ -8,6 +8,7 @@ L["CreateMacroBtn"] = "Create Macro: \"/mount\""
 L["CreateMacro"] = "Create Macro"
 L["CreateMacroTooltip"] = "The created macro is used to call the selected mounts."
 L["Settings"] = "Settings"
+L["Character Specific Mount List"] = "Character Specific Mount List"
 
 setmetatable(L, {__index = function(self, key)
   self[key] = key or ""
