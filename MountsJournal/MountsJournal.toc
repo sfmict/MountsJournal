@@ -8,5 +8,5 @@
 ## SavedVariablesPerCharacter: MountsJournalChar
 locales.xml
 Mounts.lua
-Journal.lua
 Config.lua
+Journal.lua

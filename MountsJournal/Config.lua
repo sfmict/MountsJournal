@@ -1,16 +1,30 @@
 local addon, L = ...
-local configFrame = CreateFrame("Frame", "MountsJournalConfigFrame", InterfaceOptionsFramePanelContainer)
-configFrame.name = addon
+local config = CreateFrame("Frame", "MountsJournalConfig", InterfaceOptionsFramePanelContainer)
+config.name = addon
 
 
-configFrame:SetScript("OnShow", function(...)
+config:SetScript("OnShow", function()
+	-- TOOLTIP
+	local function setTooltip(frame, anchor, title, text)
+		frame:SetScript("OnEnter", function()
+			GameTooltip:SetOwner(frame, anchor)
+			GameTooltip:SetText(title)
+			GameTooltip:AddLine(text, 1, 1, 1, 1, true)
+			GameTooltip:Show()
+		end)
+
+		frame:SetScript("OnLeave", function()
+			GameTooltip_Hide()
+		end)
+	end
+
 	-- TITLE
-	local title = configFrame:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+	local title = config:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 	title:SetPoint("TOPLEFT", 16, -16)
 	title:SetText(format(L["%s Configuration"], addon))
 
 	-- SUBTITLE
-	local subtitle = configFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	local subtitle = config:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	subtitle:SetHeight(30)
 	subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -8)
 	subtitle:SetNonSpaceWrap(true)
@@ -19,22 +33,21 @@ configFrame:SetScript("OnShow", function(...)
 	subtitle:SetText(format(L["ConfigPanelTitle %s."], addon))
 
 	-- MODIFIER TEXT
-	local modifierText = configFrame:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	local modifierText = config:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	modifierText:SetPoint("TOPLEFT", subtitle, "BOTTOMLEFT", 8, 0)
 	modifierText:SetText(L["Modifier"]..":")
 
 	-- MODIFIER COMBOBOX
-	local modifierCombobox = CreateFrame("Frame", "MountsJournalModifier", configFrame, "UIDropDownMenuTemplate")
+	local modifierCombobox = CreateFrame("Frame", "MountsJournalModifier", config, "UIDropDownMenuTemplate")
 	modifierCombobox:SetPoint("TOPLEFT", modifierText, "BOTTOMRIGHT", -8, 21)
-	UIDropDownMenu_SetText(modifierCombobox, "ALT key")
 
-	configFrame.modifierValue = MountsJournal.config.modifier
+	config.modifierValue = MountsJournal.config.modifier
 
 	UIDropDownMenu_Initialize(modifierCombobox, function (self, level, menuList)
-		local info = UIDropDownMenu_CreateInfo()
+		local info = {}
 		for i, modifier in pairs({"ALT", "CTRL", "SHIFT"}) do
 			info.menuList = i - 1
-			info.checked = modifier == configFrame.modifierValue
+			info.checked = modifier == config.modifierValue
 			info.text = modifier.." key"
 			info.arg1 = modifier
 			info.func = self.SetValue
@@ -43,24 +56,25 @@ configFrame:SetScript("OnShow", function(...)
 	end)
 
 	function modifierCombobox:SetValue(newValue)
-		configFrame.modifierValue = newValue
+		config.modifierValue = newValue
 		UIDropDownMenu_SetText(modifierCombobox, newValue.." key")
 		CloseDropDownMenus()
 	end
 
-	modifierCombobox:SetScript("OnEnter", function()
-		GameTooltip:SetOwner(modifierCombobox, "ANCHOR_TOPLEFT")
-		GameTooltip:SetText(L["Modifier"])
-		GameTooltip:AddLine(L["ModifierDescription"], 1, 1, 1, 1, true)
-		GameTooltip:Show()
-	end)
+	setTooltip(modifierCombobox, "ANCHOR_TOPLEFT", L["Modifier"], L["ModifierDescription"])
 
-	modifierCombobox:SetScript("OnLeave", function()
-		GameTooltip_Hide()
-	end)
+	-- WATER WALK CHECK
+	local waterWalkCheck = CreateFrame("CheckButton", "MountsJournalWaterWalk", config, "InterfaceOptionsCheckButtonTemplate")
+	waterWalkCheck:SetPoint("LEFT", modifierCombobox, "RIGHT", 180, 2)
+	waterWalkCheck.label = _G[waterWalkCheck:GetName().."Text"]
+	waterWalkCheck.label:SetFont("GameFontHighlight", 30)
+	waterWalkCheck.label:SetPoint("LEFT", waterWalkCheck, "RIGHT", 1, 0)
+	waterWalkCheck.label:SetText(L["Water Walking in Eye of Azchara"])
+	waterWalkCheck.tooltipText = L["Water Walking"]
+	waterWalkCheck.tooltipRequirement = L["WaterWalkingDescription"]
 
 	-- CREATE MACRO
-	local createMacroBtn = CreateFrame("Button", nil, configFrame, "UIPanelButtonTemplate")
+	local createMacroBtn = CreateFrame("Button", nil, config, "UIPanelButtonTemplate")
 	createMacroBtn:SetSize(232, 40)
 	createMacroBtn:SetPoint("TOPLEFT", modifierText, "BOTTOMLEFT", 0, -25)
 	createMacroBtn:SetText(L["CreateMacroBtn"])
@@ -92,41 +106,34 @@ configFrame:SetScript("OnShow", function(...)
 		MacroButton_OnClick(_G["MacroButton"..index])
 	end)
 
-	createMacroBtn:SetScript("OnEnter", function()
-		GameTooltip:SetOwner(createMacroBtn, "ANCHOR_TOP")
-		GameTooltip:SetText(L["CreateMacro"])
-		GameTooltip:AddLine(L["CreateMacroTooltip"], 1, 1, 1, 1, true)
-		GameTooltip:Show()
-	end)
-
-	createMacroBtn:SetScript("OnLeave", function()
-		GameTooltip_Hide()
-	end)
+	setTooltip(createMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
 
 	-- REFRESH
 	local function refresh()
-		if not configFrame:IsVisible() then return end
-		configFrame.modifierValue = MountsJournal.config.modifier
-		UIDropDownMenu_SetText(modifierCombobox, configFrame.modifierValue.." key")
+		if not config:IsVisible() then return end
+		config.modifierValue = MountsJournal.config.modifier
+		UIDropDownMenu_SetText(modifierCombobox, config.modifierValue.." key")
+		waterWalkCheck:SetChecked(MountsJournal.config.waterWalkInstance)
 	end
 
-	configFrame:SetScript("OnShow", refresh)
+	config:SetScript("OnShow", refresh)
 	refresh()
 end)
 
 
-configFrame.okay = function()
-	MountsJournal:setModifier(configFrame.modifierValue)
+config.okay = function()
+	MountsJournal:setModifier(config.modifierValue)
+	MountsJournal.config.waterWalkInstance = MountsJournalWaterWalk:GetChecked()
 end
 
 
 -- ADD CATEGORY
-InterfaceOptions_AddCategory(configFrame)
+InterfaceOptions_AddCategory(config)
 
 
 -- OPEN CONFIG
-local function openConfig()
-	if InterfaceOptionsFrameAddOns:IsVisible() and MountsJournalConfigFrame:IsVisible() then
+function config:openConfig()
+	if InterfaceOptionsFrameAddOns:IsVisible() and MountsJournalConfig:IsVisible() then
 		InterfaceOptionsFrame:Hide()
 	else
 		InterfaceOptionsFrame_OpenToCategory(addon)
@@ -139,39 +146,4 @@ end
 
 SLASH_MOUNTSCONFIG1 = "/mountconfig"
 SLASH_MOUNTSCONFIG2 = "/mco"
-SlashCmdList["MOUNTSCONFIG"] = openConfig
-
-
--- EVENTS
-configFrame:SetScript("OnEvent", function(self, event, ...)
-	if configFrame[event] then
-		configFrame[event](self, ...)
-	end
-end)
-configFrame:RegisterEvent("ADDON_LOADED")
-
-
-function configFrame:ADDON_LOADED(addonName)
-	if addonName == "Blizzard_Collections" and IsAddOnLoaded("MountsJournal") or addonName == "MountsJournal" and IsAddOnLoaded("Blizzard_Collections") then
-		self:UnregisterEvent("ADDON_LOADED")
-
-		-- SETTINGS BTN
-		local btnConfig = CreateFrame("Button", "MountsJournalBtnConfig", MountJournal, "UIPanelButtonTemplate")
-		btnConfig:SetSize(80, 22)
-		btnConfig:SetPoint("TOPLEFT", MountJournal.MountCount, "TOPRIGHT", 8, 1)
-		btnConfig:SetText(L["Settings"])
-		btnConfig:SetScript("OnClick", openConfig)
-
-		-- PER CHARACTER CHECK
-		local perCharCheck = CreateFrame("CheckButton", "MountsJournalPerChar", MountJournal, "InterfaceOptionsCheckButtonTemplate")
-		perCharCheck:SetPoint("TOPLEFT", btnConfig, "TOPRIGHT", 6, 2)
-		perCharCheck.label = _G[perCharCheck:GetName().."Text"]
-		perCharCheck.label:SetPoint("LEFT", perCharCheck, "RIGHT", 1, 0)
-		perCharCheck.label:SetSize(150, 35)
-		perCharCheck.label:SetText(L["Character Specific Mount List"])
-		perCharCheck:SetChecked(MountsJournal.perChar)
-		perCharCheck:SetScript("OnClick", function(self)
-			MountsJournal:setMountsList(self:GetChecked())
-		end)
-	end
-end
+SlashCmdList["MOUNTSCONFIG"] = config.openConfig

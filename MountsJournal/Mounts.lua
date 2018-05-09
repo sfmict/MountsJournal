@@ -18,6 +18,10 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalDB.ground = MountsJournalDB.ground or {}
 		MountsJournalDB.swimming = MountsJournalDB.swimming or {}
 		MountsJournalDB.config = MountsJournalDB.config or {}
+		mounts.config = MountsJournalDB.config
+		if mounts.config.waterWalkInstance == nil then
+			mounts.config.waterWalkInstance = true
+		end
 
 		MountsJournalChar = MountsJournalChar or {}
 		MountsJournalChar.fly =  MountsJournalChar.fly or {}
@@ -32,13 +36,16 @@ function mounts:ADDON_LOADED(addonName)
 			678, -- Механоцикл с шофером
 			679, -- Анжинерский чоппер с водителем
 		}
+		mounts.waterWalk = {
+			488, -- Багровый водный долгоног
+			449, -- Лазурный водный долгоног
+		}
 
 		mounts.continensGround = {
 			1463, -- Внешняя область Хельхейма
 			1514, -- Скитающийся остров
 		}
 
-		mounts.config = MountsJournalDB.config
 		mounts:setModifier(mounts.config.modifier)
 
 		mounts:init()
@@ -120,15 +127,26 @@ end
 
 
 function mounts:isFlyLocation()
-	local continent = select(8, GetInstanceInfo())
-	if mounts:inTable(mounts.continensGround, continent) then return false end
+	local instance = select(8, GetInstanceInfo())
 
+	if mounts:inTable(mounts.continensGround, instance)
 	-- Дренор
-	if mounts:inTable({1116, 1152, 1330, 1153, 1154, 1158, 1331, 1159, 1160}, continent) and not IsSpellKnown(191645)
+	or mounts:inTable({1116, 1152, 1330, 1153, 1154, 1158, 1331, 1159, 1160}, instance) and not IsSpellKnown(191645)
 	-- Расколотые острова
-	or continent == 1220 and not IsSpellKnown(233368) then return false end
+	or instance == 1220 and not IsSpellKnown(233368) then return false end
 
 	return true
+end
+
+
+function mounts:isWaterWalkLocation()
+	local instance = select(8, GetInstanceInfo())
+	local locations = {
+		1456, -- Око Азшары
+	}
+
+	if mounts:inTable(locations, instance) then return true end
+	return false
 end
 
 
@@ -148,7 +166,9 @@ function mounts:init()
 			elseif isFlySpell and IsFlyableArea() and (IsSwimming() or not mounts.modifier()) and mounts:isFlyLocation() then
 				if not mounts:summon(mounts.list.fly) then C_MountJournal.SummonByID(0) end
 			else
-				if not mounts:summon(mounts.list.ground) then C_MountJournal.SummonByID(0) end
+				if not ((mounts.modifier() and IsSwimming() or mounts.config.waterWalkInstance and mounts:isWaterWalkLocation()) and mounts:summon(mounts.waterWalk)) and not mounts:summon(mounts.list.ground) then
+					C_MountJournal.SummonByID(0)
+				end
 			end
 		end
 	end
