@@ -1,3 +1,3 @@
-1.4.2-alpha
+1.5-alpha
 
 * Added toggle to water walker in journal
