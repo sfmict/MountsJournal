@@ -1,0 +1,7 @@
+package-as: MountsJournal
+
+move-folders:
+	MountsJournal/MountsJournal: MountsJournal
+
+ignore:
+	- README.md
