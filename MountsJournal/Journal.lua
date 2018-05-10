@@ -32,12 +32,23 @@ function journal:ADDON_LOADED(addonName)
 		local perCharCheck = CreateFrame("CheckButton", "MountsJournalPerChar", MountJournal, "InterfaceOptionsCheckButtonTemplate")
 		perCharCheck:SetPoint("TOPLEFT", btnConfig, "TOPRIGHT", 6, 2)
 		perCharCheck.label = _G[perCharCheck:GetName().."Text"]
+		perCharCheck.label:SetFont("GameFontHighlight", 30)
 		perCharCheck.label:SetPoint("LEFT", perCharCheck, "RIGHT", 1, 0)
 		perCharCheck.label:SetSize(150, 35)
 		perCharCheck.label:SetText(L["Character Specific Mount List"])
-		perCharCheck:SetChecked(MountsJournal.perChar)
+		perCharCheck:SetChecked(mounts.perChar)
 		perCharCheck:SetScript("OnClick", function(self)
-			MountsJournal:setMountsList(self:GetChecked())
+			mounts:setMountsList(self:GetChecked())
+		end)
+
+		-- WATER WALKER CHECK
+		local waterWalkerCheck = CreateFrame("CheckButton", "MountsJournalWaterWalker", MountJournal, "InterfaceOptionsCheckButtonTemplate")
+		waterWalkerCheck:SetPoint("LEFT", MountJournalMountButton, "RIGHT", 6, -1)
+		waterWalkerCheck.label = _G[waterWalkerCheck:GetName().."Text"]
+		waterWalkerCheck.label:SetText("Water Walker Mod")
+		waterWalkerCheck:SetChecked(mounts.config.waterWalkAll)
+		waterWalkerCheck:SetScript("OnClick", function(self)
+			mounts.config.waterWalkAll = self:GetChecked()
 		end)
 		
 		-- BUTTONS

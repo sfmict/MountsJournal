@@ -64,7 +64,7 @@ config:SetScript("OnShow", function()
 	setTooltip(modifierCombobox, "ANCHOR_TOPLEFT", L["Modifier"], L["ModifierDescription"])
 
 	-- WATER WALK CHECK
-	local waterWalkCheck = CreateFrame("CheckButton", "MountsJournalWaterWalk", config, "InterfaceOptionsCheckButtonTemplate")
+	local waterWalkCheck = CreateFrame("CheckButton", "MountsJournalWaterWalkEye", config, "InterfaceOptionsCheckButtonTemplate")
 	waterWalkCheck:SetPoint("LEFT", modifierCombobox, "RIGHT", 180, 2)
 	waterWalkCheck.label = _G[waterWalkCheck:GetName().."Text"]
 	waterWalkCheck.label:SetFont("GameFontHighlight", 30)
