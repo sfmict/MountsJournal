@@ -1,19 +1,9 @@
 package-as: MountsJournal
 
-move-folders:
-	MountsJournal/MountsJournal/locales: MountsJournal/locales
-	MountsJournal/MountsJournal/textures: MountsJournal/textures
-	MountsJournal/MountsJournal/Config.lua: MountsJournal/Config.lua
-	MountsJournal/MountsJournal/Journal.lua: MountsJournal/Journal.lua
-	MountsJournal/MountsJournal/locales.xml: MountsJournal/locales.xml
-	MountsJournal/MountsJournal/Mounts.lua: MountsJournal/Mounts.lua
-	MountsJournal/MountsJournal/MountsJournal.toc: MountsJournal/MountsJournal.toc
-
 manual-changelog:
 	filename: CHANGELOG.md
 	markup-type: markdown
 
 ignore:
 	- README.md
-	- MmountsJournal/MountsJournal
 	- _config.yml
