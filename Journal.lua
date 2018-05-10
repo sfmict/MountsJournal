@@ -42,12 +42,15 @@ function journal:ADDON_LOADED(addonName)
 		end)
 
 		-- WATER WALKER CHECK
-		local waterWalkerCheck = CreateFrame("CheckButton", "MountsJournalWaterWalker", MountJournal, "InterfaceOptionsCheckButtonTemplate")
-		waterWalkerCheck:SetPoint("LEFT", MountJournalMountButton, "RIGHT", 6, -1)
-		waterWalkerCheck.label = _G[waterWalkerCheck:GetName().."Text"]
-		waterWalkerCheck.label:SetText("Water Walker Mod")
-		waterWalkerCheck:SetChecked(mounts.config.waterWalkAll)
-		waterWalkerCheck:SetScript("OnClick", function(self)
+		local waterWalkerAll = CreateFrame("CheckButton", "MountsJournalWaterWalker", MountJournal, "InterfaceOptionsCheckButtonTemplate")
+		waterWalkerAll:SetPoint("LEFT", MountJournalMountButton, "RIGHT", 6, -1)
+		waterWalkerAll.label = _G[waterWalkerAll:GetName().."Text"]
+		waterWalkerAll.label:SetFont("GameFontHighlight", 30)
+		waterWalkerAll.label:SetText(L["Mode of Water Walking"])
+		waterWalkerAll:SetChecked(mounts.config.waterWalkAll)
+		waterWalkerAll.tooltipText = L["Water Walking"]
+		waterWalkerAll.tooltipRequirement = L["WaterWalkingModeDescription"]
+		waterWalkerAll:SetScript("OnClick", function(self)
 			mounts.config.waterWalkAll = self:GetChecked()
 		end)
 		

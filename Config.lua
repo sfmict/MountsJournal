@@ -64,14 +64,14 @@ config:SetScript("OnShow", function()
 	setTooltip(modifierCombobox, "ANCHOR_TOPLEFT", L["Modifier"], L["ModifierDescription"])
 
 	-- WATER WALK CHECK
-	local waterWalkCheck = CreateFrame("CheckButton", "MountsJournalWaterWalkEye", config, "InterfaceOptionsCheckButtonTemplate")
-	waterWalkCheck:SetPoint("LEFT", modifierCombobox, "RIGHT", 180, 2)
-	waterWalkCheck.label = _G[waterWalkCheck:GetName().."Text"]
-	waterWalkCheck.label:SetFont("GameFontHighlight", 30)
-	waterWalkCheck.label:SetPoint("LEFT", waterWalkCheck, "RIGHT", 1, 0)
-	waterWalkCheck.label:SetText(L["Water Walking in Eye of Azchara"])
-	waterWalkCheck.tooltipText = L["Water Walking"]
-	waterWalkCheck.tooltipRequirement = L["WaterWalkingDescription"]
+	local waterWalkerEye = CreateFrame("CheckButton", "MountsJournalWaterWalkEye", config, "InterfaceOptionsCheckButtonTemplate")
+	waterWalkerEye:SetPoint("LEFT", modifierCombobox, "RIGHT", 180, 2)
+	waterWalkerEye.label = _G[waterWalkerEye:GetName().."Text"]
+	waterWalkerEye.label:SetFont("GameFontHighlight", 30)
+	waterWalkerEye.label:SetPoint("LEFT", waterWalkerEye, "RIGHT", 1, 0)
+	waterWalkerEye.label:SetText(L["Water Walking in Eye of Azchara"])
+	waterWalkerEye.tooltipText = L["Water Walking"]
+	waterWalkerEye.tooltipRequirement = L["WaterWalkingDescription"]
 
 	-- CREATE MACRO
 	local createMacroBtn = CreateFrame("Button", nil, config, "UIPanelButtonTemplate")
@@ -113,7 +113,7 @@ config:SetScript("OnShow", function()
 		if not config:IsVisible() then return end
 		config.modifierValue = MountsJournal.config.modifier
 		UIDropDownMenu_SetText(modifierCombobox, config.modifierValue.." key")
-		waterWalkCheck:SetChecked(MountsJournal.config.waterWalkInstance)
+		waterWalkerEye:SetChecked(MountsJournal.config.waterWalkInstance)
 	end
 
 	config:SetScript("OnShow", refresh)
@@ -123,7 +123,7 @@ end)
 
 config.okay = function()
 	MountsJournal:setModifier(config.modifierValue)
-	MountsJournal.config.waterWalkInstance = MountsJournalWaterWalk:GetChecked()
+	MountsJournal.config.waterWalkInstance = MountsJournalWaterWalkEye:GetChecked()
 end
 
 

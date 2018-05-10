@@ -6,4 +6,5 @@ manual-changelog:
 
 ignore:
 	- README.md
+	- CHANGELOG.md
 	- _config.yml
