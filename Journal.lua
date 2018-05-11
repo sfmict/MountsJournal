@@ -41,19 +41,6 @@ function journal:ADDON_LOADED(addonName)
 			mounts:setMountsList(self:GetChecked())
 		end)
 
-		-- WATER WALKER CHECK
-		local waterWalkerAll = CreateFrame("CheckButton", "MountsJournalWaterWalker", MountJournal, "InterfaceOptionsCheckButtonTemplate")
-		waterWalkerAll:SetPoint("LEFT", MountJournalMountButton, "RIGHT", 6, -1)
-		waterWalkerAll.label = _G[waterWalkerAll:GetName().."Text"]
-		waterWalkerAll.label:SetFont("GameFontHighlight", 30)
-		waterWalkerAll.label:SetText(L["Mode of Water Walking"])
-		waterWalkerAll:SetChecked(mounts.config.waterWalkAll)
-		waterWalkerAll.tooltipText = L["Water Walking"]
-		waterWalkerAll.tooltipRequirement = L["WaterWalkingModeDescription"]
-		waterWalkerAll:SetScript("OnClick", function(self)
-			mounts.config.waterWalkAll = self:GetChecked()
-		end)
-		
 		-- BUTTONS
 		journal.buttons = {MountJournalListScrollFrameScrollChild:GetChildren()}
 

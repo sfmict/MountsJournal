@@ -1,1 +1,1 @@
-* Added toggle to water walker in journal
+* Added toggle for Water Walker Always.

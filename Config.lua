@@ -1,4 +1,5 @@
 local addon, L = ...
+local mounts = MountsJournal
 local config = CreateFrame("Frame", "MountsJournalConfig", InterfaceOptionsFramePanelContainer)
 config.name = addon
 
@@ -41,7 +42,7 @@ config:SetScript("OnShow", function()
 	local modifierCombobox = CreateFrame("Frame", "MountsJournalModifier", config, "UIDropDownMenuTemplate")
 	modifierCombobox:SetPoint("TOPLEFT", modifierText, "BOTTOMRIGHT", -8, 21)
 
-	config.modifierValue = MountsJournal.config.modifier
+	config.modifierValue = mounts.config.modifier
 
 	UIDropDownMenu_Initialize(modifierCombobox, function (self, level, menuList)
 		local info = {}
@@ -63,7 +64,7 @@ config:SetScript("OnShow", function()
 
 	setTooltip(modifierCombobox, "ANCHOR_TOPLEFT", L["Modifier"], L["ModifierDescription"])
 
-	-- WATER WALK CHECK
+	-- WATER WALKER EYE
 	local waterWalkerEye = CreateFrame("CheckButton", "MountsJournalWaterWalkEye", config, "InterfaceOptionsCheckButtonTemplate")
 	waterWalkerEye:SetPoint("LEFT", modifierCombobox, "RIGHT", 180, 2)
 	waterWalkerEye.label = _G[waterWalkerEye:GetName().."Text"]
@@ -72,6 +73,16 @@ config:SetScript("OnShow", function()
 	waterWalkerEye.label:SetText(L["Water Walking in Eye of Azchara"])
 	waterWalkerEye.tooltipText = L["Water Walking"]
 	waterWalkerEye.tooltipRequirement = L["WaterWalkingDescription"]
+
+	-- WATER WALKER ALWAYS
+	local waterWalkerAlways = CreateFrame("CheckButton", "MountsJournalWaterWalkAlways", config, "InterfaceOptionsCheckButtonTemplate")
+	waterWalkerAlways:SetPoint("TOPLEFT", waterWalkerEye, "BOTTOMLEFT", 0, 0)
+	waterWalkerAlways.label = _G[waterWalkerAlways:GetName().."Text"]
+	waterWalkerAlways.label:SetFont("GameFontHighlight", 30)
+	waterWalkerAlways.label:SetPoint("LEFT", waterWalkerAlways, "RIGHT", 1, 0)
+	waterWalkerAlways.label:SetText(L["Water Walking Always"])
+	waterWalkerAlways.tooltipText = L["Water Walking"]
+	waterWalkerAlways.tooltipRequirement = L["WaterWalkingDescription"]
 
 	-- CREATE MACRO
 	local createMacroBtn = CreateFrame("Button", nil, config, "UIPanelButtonTemplate")
@@ -111,9 +122,10 @@ config:SetScript("OnShow", function()
 	-- REFRESH
 	local function refresh()
 		if not config:IsVisible() then return end
-		config.modifierValue = MountsJournal.config.modifier
+		config.modifierValue = mounts.config.modifier
 		UIDropDownMenu_SetText(modifierCombobox, config.modifierValue.." key")
-		waterWalkerEye:SetChecked(MountsJournal.config.waterWalkInstance)
+		waterWalkerEye:SetChecked(mounts.config.waterWalkInstance)
+		waterWalkerAlways:SetChecked(mounts.config.waterWalkAll)
 	end
 
 	config:SetScript("OnShow", refresh)
@@ -122,8 +134,9 @@ end)
 
 
 config.okay = function()
-	MountsJournal:setModifier(config.modifierValue)
-	MountsJournal.config.waterWalkInstance = MountsJournalWaterWalkEye:GetChecked()
+	mounts:setModifier(config.modifierValue)
+	mounts.config.waterWalkInstance = MountsJournalWaterWalkEye:GetChecked()
+	mounts.config.waterWalkAll = MountsJournalWaterWalkAlways:GetChecked()
 end
 
 
