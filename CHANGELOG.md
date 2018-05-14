@@ -1,1 +1,1 @@
-* Added toggle for Water Walker Always.
+* update buttons (need restart game).
