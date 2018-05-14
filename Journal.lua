@@ -4,14 +4,9 @@ local journal = CreateFrame("Frame", "MountsJounralFrames")
 
 
 journal.colors = {
-	function() return 0.2, 0.1843137254901961, 0.01568627450980392, 1 end,
-	function() return 0.6823529411764706, 0.6431372549019608, 0.20392156862745098, 1 end,
+	["gold"] = {0.8, 0.6, 0},
+	["gray"] = {0.5, 0.5, 0.5},
 }
-
--- local colors = {
--- 	["gold"] = {0.8, 0.6, 0}
--- }
--- print(unpack(colors.gold))
 
 
 journal:SetScript("OnEvent", function(self, event, ...)
@@ -48,8 +43,7 @@ function journal:ADDON_LOADED(addonName)
 
 		-- BUTTONS
 		journal.buttons = {MountJournalListScrollFrameScrollChild:GetChildren()}
-
-		print(journal.buttons[1].background:GetAtlas(), GetAtlasInfo(journal.buttons[1].background:GetAtlas()))
+		local texPath = "Interface/AddOns/MountsJournal/textures/"
 
 		local function CreateButton(name, parent, pointX, pointY, bgTex, OnClick)
 			local btnFrame = CreateFrame("button", nil, parent)
@@ -58,52 +52,36 @@ function journal:ADDON_LOADED(addonName)
 			btnFrame:SetScript("OnClick", OnClick)
 			parent[name] = btnFrame
 
-			btnFrame:SetNormalTexture("Interface/AddOns/MountsJournal/textures/button.blp")
-			btnFrame:SetHighlightTexture("Interface/AddOns/MountsJournal/textures/button.blp")
+			btnFrame:SetNormalTexture(texPath.."button.blp")
+			btnFrame:SetHighlightTexture(texPath.."button.blp")
 			local background, hightlight = btnFrame:GetRegions()
 			background:SetTexCoord(0.00390625, 0.8203125, 0.00390625, 0.18359375)
-			print(background:GetPoint())
-			-- background:SetVertexColor(0.1,0.08,0.01)
 			background:SetVertexColor(0.2,0.18,0.01)
 			hightlight:SetTexCoord(0.00390625, 0.8203125, 0.19140625, 0.37109375)
 
 			btnFrame.check = btnFrame:CreateTexture(nil, "ARTWORK")
-			btnFrame.check:SetTexture("Interface/AddOns/MountsJournal/textures/button.blp")
+			btnFrame.check:SetTexture(texPath.."button.blp")
 			btnFrame.check:SetTexCoord(0.00390625, 0.8203125, 0.37890625, 0.55859375)
-			btnFrame.check:SetVertexColor(0.8,0.6,0)
+			btnFrame.check:SetVertexColor(unpack(journal.colors.gold))
 			btnFrame.check:SetAllPoints()
 
 			btnFrame.icon = btnFrame:CreateTexture(nil, "OVERLAY")
 			btnFrame.icon:SetTexture(bgTex)
 			btnFrame.icon:SetAllPoints()
-			-- btnFrame.icon:SetPoint("TOPLEFT", btnFrame, "TOPLEFT", 1,-1)
-			-- btnFrame.icon:SetSize(23, 11)
-
-			-- btnFrame:SetNormalTexture(bgTex)
-			-- btnFrame:SetHighligatTexture("Interface/Buttons/CheckButtonHilight-Blue")
-			-- btnFrame.icon, btnFrame.hightlight = btnFrame:GetRegions()
-			-- btnFrame.hightlight:SetTexCoord(0.25, 0.75, 0.2, 0.8)
-			-- btnFrame.hightlight:SetAllPoints()
-			-- btnFrame.hightlight:SetBlendMode("ADD")
-			-- btnFrame.hightlight:SetVertexColor(0.8,0.6,0)
-			-- local btnTex = btnFrame:CreateTexture(nil, "BACKGROUND")
-			-- btnFrame.background = btnTex
-			-- btnTex:SetAllPoints()
 		end
 
-		local texPath = "Interface/AddOns/MountsJournal/textures/"
-		for _,child in pairs(journal.buttons) do
+		for _, child in pairs(journal.buttons) do
 			child:SetWidth(child:GetWidth() - 25)
 			child.name:SetWidth(child.name:GetWidth() - 18)
 
 			CreateButton("fly", child, 25, -3, texPath.."fly.blp", function(self)
-				journal:mountToggle(mounts.list.fly, self, self.mountID)
+				journal:mountToggle(mounts.list.fly, self.mountID)
 			end)
 			CreateButton("ground", child, 25, -17, texPath.."ground.blp", function(self)
-				journal:mountToggle(mounts.list.ground, self, self.mountID)
+				journal:mountToggle(mounts.list.ground, self.mountID)
 			end)
 			CreateButton("swimming", child, 25, -31, texPath.."swimming.blp", function(self)
-				journal:mountToggle(mounts.list.swimming, self, self.mountID)
+				journal:mountToggle(mounts.list.swimming, self.mountID)
 			end)
 		end
 
@@ -117,17 +95,15 @@ end
 function journal:configureJournal()
 	local function setColor(btn, mountsTbl)
 		if mounts:inTable(mountsTbl, btn.mountID) then
-			btn.icon:SetVertexColor(0.8,0.6,0)
-			btn.check:Show()
-			-- btn.background:SetColorTexture(journal.colors[2]())
+			btn.icon:SetVertexColor(unpack(journal.colors.gold))
+			if not btn.check:IsShown() then btn.check:Show() end
 		else
-			btn.icon:SetVertexColor(0.5,0.5,0.5)
-			btn.check:Hide()
-			-- btn.background:SetColorTexture(journal.colors[1]())
+			btn.icon:SetVertexColor(unpack(journal.colors.gray))
+			if btn.check:IsShown() then btn.check:Hide() end
 		end
 	end
 
-	for _,btn in pairs(journal.buttons) do
+	for _, btn in pairs(journal.buttons) do
 		if btn.index then
 			if not btn.fly:IsShown() then
 				btn.fly:Show()
@@ -151,15 +127,11 @@ function journal:configureJournal()
 end
 
 
-function journal:mountToggle(tbl, button, mountID)
+function journal:mountToggle(tbl, mountID)
 	local pos = mounts:inTable(tbl, mountID)
 	if pos then
 		tremove(tbl, pos)
-		btn.icon:SetVertexColor(0.5,0.5,0.5)
-		-- button.background:SetColorTexture(journal.colors[1]())
 	else
 		tinsert(tbl, mountID)
-		btn.icon:SetVertexColor(0.8,0.6,0)
-		-- button.background:SetColorTexture(journal.colors[2]())
 	end
 end
