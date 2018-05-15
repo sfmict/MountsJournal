@@ -163,10 +163,11 @@ function mounts:init()
 				if not mounts:summon(mounts.swimmingVashjir) and not mounts:summon(mounts.list.swimming) then
 					C_MountJournal.SummonByID(0)
 				end
-			elseif isFlySpell and IsFlyableArea() and (IsSwimming() or not mounts.modifier()) and mounts:isFlyLocation() then
-				if not mounts:summon(mounts.list.fly) then C_MountJournal.SummonByID(0) end
 			else
-				if not ((mounts.config.waterWalkAll or mounts.modifier() and IsSwimming() or mounts.config.waterWalkInstance and mounts:isWaterWalkLocation()) and mounts:summon(mounts.waterWalk)) and not mounts:summon(mounts.list.ground) then
+				local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation()
+				if isFlyableLocation and (IsSwimming() or not mounts:modifier()) then
+					if not mounts:summon(mounts.list.fly) then C_MountJournal.SummonByID(0) end
+				elseif not ((mounts.config.waterWalkAll or mounts.modifier() and not isFlyableLocation or mounts.config.waterWalkInstance and mounts:isWaterWalkLocation()) and mounts:summon(mounts.waterWalk)) and not mounts:summon(mounts.list.ground) then
 					C_MountJournal.SummonByID(0)
 				end
 			end
