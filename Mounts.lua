@@ -44,10 +44,10 @@ function mounts:ADDON_LOADED(addonName)
 		mounts.continensGround = {
 			1463, -- Внешняя область Хельхейма
 			1514, -- Скитающийся остров
+			1688, -- Мертвые копи
 		}
 
 		mounts:setModifier(mounts.config.modifier)
-
 		mounts:init()
 	end
 end
@@ -167,7 +167,7 @@ function mounts:init()
 				local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation()
 				if isFlyableLocation and (IsSwimming() or not mounts:modifier()) then
 					if not mounts:summon(mounts.list.fly) then C_MountJournal.SummonByID(0) end
-				elseif not ((mounts.config.waterWalkAll or mounts.modifier() and not isFlyableLocation or mounts.config.waterWalkInstance and mounts:isWaterWalkLocation()) and mounts:summon(mounts.waterWalk)) and not mounts:summon(mounts.list.ground) then
+				elseif not ((mounts.config.waterWalkAll or not isFlyableLocation and mounts.modifier() or mounts.config.waterWalkInstance and mounts:isWaterWalkLocation()) and mounts:summon(mounts.waterWalk)) and not mounts:summon(mounts.list.ground) then
 					C_MountJournal.SummonByID(0)
 				end
 			end
