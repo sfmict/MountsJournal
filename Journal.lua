@@ -1,6 +1,6 @@
 local _, L = ...
 local mounts, config = MountsJournal, MountsJournalConfig
-local journal = CreateFrame("Frame", "MountsJounralFrames")
+local journal = CreateFrame("Frame", "MountsJournalFrame")
 
 
 journal.colors = {
