@@ -39,6 +39,7 @@ function journal:ADDON_LOADED(addonName)
 		perCharCheck:SetChecked(mounts.perChar)
 		perCharCheck:SetScript("OnClick", function(self)
 			mounts:setMountsList(self:GetChecked())
+			journal:configureJournal()
 		end)
 
 		-- BUTTONS
@@ -59,7 +60,7 @@ function journal:ADDON_LOADED(addonName)
 			background:SetVertexColor(0.2,0.18,0.01)
 			hightlight:SetTexCoord(0.00390625, 0.8203125, 0.19140625, 0.37109375)
 
-			btnFrame.check = btnFrame:CreateTexture(nil, "ARTWORK")
+			btnFrame.check = btnFrame:CreateTexture(nil, "OVERLAY")
 			btnFrame.check:SetTexture(texPath.."button.blp")
 			btnFrame.check:SetTexCoord(0.00390625, 0.8203125, 0.37890625, 0.55859375)
 			btnFrame.check:SetVertexColor(unpack(journal.colors.gold))
@@ -75,19 +76,23 @@ function journal:ADDON_LOADED(addonName)
 			child.name:SetWidth(child.name:GetWidth() - 18)
 
 			CreateButton("fly", child, 25, -3, texPath.."fly.blp", function(self)
-				journal:mountToggle(mounts.list.fly, self.mountID)
+				journal:mountToggle(mounts.list.fly, self)
 			end)
 			CreateButton("ground", child, 25, -17, texPath.."ground.blp", function(self)
-				journal:mountToggle(mounts.list.ground, self.mountID)
+				journal:mountToggle(mounts.list.ground, self)
 			end)
 			CreateButton("swimming", child, 25, -31, texPath.."swimming.blp", function(self)
-				journal:mountToggle(mounts.list.swimming, self.mountID)
+				journal:mountToggle(mounts.list.swimming, self)
 			end)
 		end
 
-		-- EVENTS
-		MountJournal:HookScript("OnShow", journal.configureJournal)
-		MountJournalListScrollFrame:HookScript("OnUpdate", journal.configureJournal)
+		-- UPADTE MOUNT LIST
+		local UpdateMountList = MountJournal_UpdateMountList
+		function MountJournal_UpdateMountList()
+			UpdateMountList()
+			journal:configureJournal()
+		end
+		MountJournal.ListScrollFrame.update = MountJournal_UpdateMountList
 	end
 end
 
@@ -127,11 +132,15 @@ function journal:configureJournal()
 end
 
 
-function journal:mountToggle(tbl, mountID)
-	local pos = mounts:inTable(tbl, mountID)
+function journal:mountToggle(tbl, btn)
+	local pos = mounts:inTable(tbl, btn.mountID)
 	if pos then
 		tremove(tbl, pos)
+		btn.icon:SetVertexColor(unpack(journal.colors.gray))
+		btn.check:Hide()
 	else
-		tinsert(tbl, mountID)
+		tinsert(tbl, btn.mountID)
+		btn.icon:SetVertexColor(unpack(journal.colors.gold))
+		btn.check:Show()
 	end
 end
