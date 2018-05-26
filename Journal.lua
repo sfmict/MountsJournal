@@ -43,7 +43,7 @@ function journal:ADDON_LOADED(addonName)
 		end)
 
 		-- BUTTONS
-		journal.buttons = {MountJournalListScrollFrameScrollChild:GetChildren()}
+		journal.buttons = MountJournal.ListScrollFrame.buttons
 		local texPath = "Interface/AddOns/MountsJournal/textures/"
 
 		local function CreateButton(name, parent, pointX, pointY, bgTex, OnClick)
@@ -86,13 +86,25 @@ function journal:ADDON_LOADED(addonName)
 			end)
 		end
 
-		-- UPADTE MOUNT LIST
-		local UpdateMountList = MountJournal_UpdateMountList
+		-- HOOKS
+		journal.func = {}
+		journal:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", function() return #journal.displayedMounts end)
+		journal:setSecureFunc(C_MountJournal, "GetDisplayedMountInfo")
+		journal:setSecureFunc(C_MountJournal, "Pickup")
+		journal:setSecureFunc(C_MountJournal, "SetIsFavorite")
+		journal:setSecureFunc(C_MountJournal, "GetIsFavorite")
+		journal:setSecureFunc(C_MountJournal, "GetDisplayedMountInfoExtra")
+		journal:setSecureFunc(C_MountJournal, "GetDisplayedMountAllCreatureDisplayInfo")
+
+		local updateMountList = MountJournal_UpdateMountList
 		function MountJournal_UpdateMountList()
-			UpdateMountList()
+			journal:setDisplayedMounts()
+			updateMountList()
 			journal:configureJournal()
 		end
 		MountJournal.ListScrollFrame.update = MountJournal_UpdateMountList
+
+		journal:setDisplayedMounts()
 	end
 end
 
@@ -143,4 +155,32 @@ function journal:mountToggle(tbl, btn)
 		btn.icon:SetVertexColor(unpack(journal.colors.gold))
 		btn.check:Show()
 	end
+end
+
+
+function journal:setSecureFunc(obj, funcName, func)
+	if journal.func[funcName] ~= nil then return end
+
+	journal.func[funcName] = obj[funcName]
+	if func then
+		obj[funcName] = func
+	else
+		obj[funcName] = function(index, ...)
+			return journal.func[funcName](journal.displayedMounts[index], ...)
+		end
+	end
+end
+
+
+function journal:setDisplayedMounts()
+	local displayedMounts = {}
+	for i = 1, journal.func.GetNumDisplayedMounts() do
+		local mountID = select(12, journal.func.GetDisplayedMountInfo(i))
+		local mountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
+		-- if mountType == 248 then
+			tinsert(displayedMounts, i)
+		-- end
+	end
+
+	journal.displayedMounts = displayedMounts
 end
