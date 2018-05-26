@@ -86,6 +86,66 @@ function journal:ADDON_LOADED(addonName)
 			end)
 		end
 
+		-- FILTERS SEARTCH
+		MountJournal.searchBox:SetPoint("TOPLEFT", MountJournal.LeftInset, "TOPLEFT", 34, -9)
+		MountJournal.searchBox:SetSize(128, 20)
+
+		-- FILTERS TOGGLE BTN
+		local btnToggle = CreateFrame("button", nil, MountJournal.LeftInset)
+		btnToggle:SetPoint("TOPLEFT", MountJournal.LeftInset, "TOPLEFT", 4, -7)
+		btnToggle:SetSize(24, 24)
+		btnToggle:SetHitRectInsets(-2, -2, -2, -2)
+
+		btnToggle.TopLeft = btnToggle:CreateTexture(nil, "BACKGROUND")
+		btnToggle.TopLeft:SetTexture("Interface/Buttons/UI-Silver-Button-Up")
+		btnToggle.TopLeft:SetTexCoord(0, 0.1015625, 0, 0.1875)
+		btnToggle.TopLeft:SetSize(13, 6)
+		btnToggle.TopLeft:SetVertexColor(0.65, 0.65, 0.65)
+		btnToggle.TopLeft:SetPoint("TOPLEFT")
+
+		btnToggle.TopRight = btnToggle:CreateTexture(nil, "BACKGROUND")
+		btnToggle.TopRight:SetTexture("Interface/Buttons/UI-Silver-Button-Up")
+		btnToggle.TopRight:SetTexCoord(0.5234375, 0.625, 0, 0.1875)
+		btnToggle.TopRight:SetSize(13, 6)
+		btnToggle.TopRight:SetVertexColor(0.65, 0.65, 0.65)
+		btnToggle.TopRight:SetPoint("TOPRIGHT")
+
+		btnToggle.BottomLeft = btnToggle:CreateTexture(nil, "BACKGROUND")
+		btnToggle.BottomLeft:SetTexture("Interface/Buttons/UI-Silver-Button-Up")
+		btnToggle.BottomLeft:SetTexCoord(0, 0.1015625, 0.625, 0.8125)
+		btnToggle.BottomLeft:SetSize(13, 6)
+		btnToggle.BottomLeft:SetVertexColor(0.65, 0.65, 0.65)
+		btnToggle.BottomLeft:SetPoint("BOTTOMLEFT")
+
+		btnToggle.BottomRight = btnToggle:CreateTexture(nil, "BACKGROUND")
+		btnToggle.BottomRight:SetTexture("Interface/Buttons/UI-Silver-Button-Up")
+		btnToggle.BottomRight:SetTexCoord(0.5234375, 0.625, 0.625, 0.8125)
+		btnToggle.BottomRight:SetSize(13, 6)
+		btnToggle.BottomRight:SetVertexColor(0.65, 0.65, 0.65)
+		btnToggle.BottomRight:SetPoint("BOTTOMRIGHT")
+
+		btnToggle.Left = btnToggle:CreateTexture(nil, "BACKGROUND")
+		btnToggle.Left:SetTexture("Interface/Buttons/UI-Silver-Button-Up")
+		btnToggle.Left:SetTexCoord(0, 0.09375, 0.1875, 0.625)
+		btnToggle.Left:SetSize(12, 14)
+		btnToggle.Left:SetVertexColor(0.65, 0.65, 0.65)
+		btnToggle.Left:SetPoint("LEFT")
+
+		btnToggle.Right = btnToggle:CreateTexture(nil, "BACKGROUND")
+		btnToggle.Right:SetTexture("Interface/Buttons/UI-Silver-Button-Up")
+		btnToggle.Right:SetTexCoord(0.53125, 0.625, 0.1875, 0.625)
+		btnToggle.Right:SetSize(12, 14)
+		btnToggle.Right:SetVertexColor(0.65, 0.65, 0.65)
+		btnToggle.Right:SetPoint("RIGHT")
+
+		btnToggle.Icon = btnToggle:CreateTexture(nil, "ARTWORK")
+		btnToggle.Icon:SetTexture("Interface/ChatFrame/ChatFrameExpandArrow")
+		-- btnToggle.Icon:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
+		btnToggle.Icon:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
+		-- btnToggle.Icon:SetTexCoord(1, 0, 0, 0, 1, 1, 0, 1)
+		btnToggle.Icon:SetSize(14, 14)
+		btnToggle.Icon:SetPoint("CENTER", 0, -1)
+
 		-- HOOKS
 		journal.func = {}
 		journal:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", function() return #journal.displayedMounts end)
