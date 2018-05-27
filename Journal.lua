@@ -46,42 +46,50 @@ function journal:ADDON_LOADED(addonName)
 		journal.buttons = MountJournal.ListScrollFrame.buttons
 		local texPath = "Interface/AddOns/MountsJournal/textures/"
 
-		local function CreateButton(name, parent, pointX, pointY, bgTex, OnClick)
+		local function CreateButton(name, parent, pointX, pointY, OnClick)
 			local btnFrame = CreateFrame("button", nil, parent)
 			btnFrame:SetPoint("TOPRIGHT", pointX, pointY)
 			btnFrame:SetSize(24, 12)
 			btnFrame:SetScript("OnClick", OnClick)
 			parent[name] = btnFrame
 
-			btnFrame:SetNormalTexture(texPath.."button.blp")
-			btnFrame:SetHighlightTexture(texPath.."button.blp")
+			btnFrame:SetNormalTexture(texPath.."button")
+			btnFrame:SetHighlightTexture(texPath.."button")
 			local background, hightlight = btnFrame:GetRegions()
 			background:SetTexCoord(0.00390625, 0.8203125, 0.00390625, 0.18359375)
 			background:SetVertexColor(0.2,0.18,0.01)
 			hightlight:SetTexCoord(0.00390625, 0.8203125, 0.19140625, 0.37109375)
 
 			btnFrame.check = btnFrame:CreateTexture(nil, "OVERLAY")
-			btnFrame.check:SetTexture(texPath.."button.blp")
+			btnFrame.check:SetTexture(texPath.."button")
 			btnFrame.check:SetTexCoord(0.00390625, 0.8203125, 0.37890625, 0.55859375)
 			btnFrame.check:SetVertexColor(unpack(journal.colors.gold))
 			btnFrame.check:SetAllPoints()
 
 			btnFrame.icon = btnFrame:CreateTexture(nil, "OVERLAY")
-			btnFrame.icon:SetTexture(bgTex)
+			btnFrame.icon:SetTexture(texPath..name)
 			btnFrame.icon:SetAllPoints()
+
+			btnFrame:SetScript("OnMouseDown", function(self)
+				self.icon:SetPoint("TOPLEFT", 1, -1)
+				self.icon:SetPoint("BOTTOMRIGHT", -1, 1)
+			end)
+			btnFrame:SetScript("OnMouseUp", function(self)
+				self.icon:SetAllPoints()
+			end)
 		end
 
 		for _, child in pairs(journal.buttons) do
 			child:SetWidth(child:GetWidth() - 25)
 			child.name:SetWidth(child.name:GetWidth() - 18)
 
-			CreateButton("fly", child, 25, -3, texPath.."fly.blp", function(self)
+			CreateButton("fly", child, 25, -3, function(self)
 				journal:mountToggle(mounts.list.fly, self)
 			end)
-			CreateButton("ground", child, 25, -17, texPath.."ground.blp", function(self)
+			CreateButton("ground", child, 25, -17, function(self)
 				journal:mountToggle(mounts.list.ground, self)
 			end)
-			CreateButton("swimming", child, 25, -31, texPath.."swimming.blp", function(self)
+			CreateButton("swimming", child, 25, -31, function(self)
 				journal:mountToggle(mounts.list.swimming, self)
 			end)
 		end
@@ -90,38 +98,73 @@ function journal:ADDON_LOADED(addonName)
 		MountJournal.searchBox:SetPoint("TOPLEFT", MountJournal.LeftInset, "TOPLEFT", 34, -9)
 		MountJournal.searchBox:SetSize(128, 20)
 
+		-- FILTERS FLY GROUND SWIMMING
+		local typeBar = CreateFrame("FRAME", nil, MountJournal.LeftInset)
+		typeBar:SetSize(220, 30)
+		typeBar:SetPoint("TOP", 0, -31)
+		typeBar:SetBackdrop({
+			edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+			tile = true,
+			edgeSize = 16,
+		})
+		typeBar:SetBackdropBorderColor(0.6, 0.6, 0.6)
+
+		local function CreateButtonFilter(name, pointX, pointY)
+			local btn = CreateFrame("button", nil, typeBar)
+			btn:SetSize(70, 20)
+			btn:SetPoint("TOP", pointX, pointY)
+			btn:SetBackdrop({
+				edgeFile = texPath.."border",
+				tile = true,
+				edgeSize = 8,
+			})
+			btn:SetBackdropBorderColor(0.4, 0.4, 0.4)
+
+			-- btn:SetNormalTexture(texPath.."button")
+			-- btn:SetHighlightTexture(texPath.."button")
+			-- local background, hightlight = btn:GetRegions()
+			-- background:SetTexCoord(0.00390625, 0.8203125, 0.00390625, 0.18359375)
+			-- background:SetVertexColor(0.2,0.18,0.01)
+			-- hightlight:SetTexCoord(0.00390625, 0.8203125, 0.19140625, 0.37109375)
+
+			btn.icon = btn:CreateTexture(nil, "OVERLAY")
+			btn.icon:SetTexture(texPath..name)
+			btn.icon:SetPoint("TOP", -1, -3)
+		end
+
+		CreateButtonFilter("fly", -70, -5)
+		CreateButtonFilter("ground", 0, -5)
+		CreateButtonFilter("swimming", 70, -5)
+
 		-- FILTERS TOGGLE BTN
 		local btnToggle = CreateFrame("button", nil, MountJournal.LeftInset)
 		btnToggle:SetPoint("TOPLEFT", MountJournal.LeftInset, "TOPLEFT", 4, -7)
 		btnToggle:SetSize(24, 24)
 		btnToggle:SetHitRectInsets(-2, -2, -2, -2)
+		btnToggle:SetHighlightTexture("Interface/BUTTONS/UI-Common-MouseHilight")
 
 		btnToggle.TopLeft = btnToggle:CreateTexture(nil, "BACKGROUND")
 		btnToggle.TopLeft:SetTexture("Interface/Buttons/UI-Silver-Button-Up")
 		btnToggle.TopLeft:SetTexCoord(0, 0.1015625, 0, 0.1875)
 		btnToggle.TopLeft:SetSize(13, 6)
-		btnToggle.TopLeft:SetVertexColor(0.65, 0.65, 0.65)
 		btnToggle.TopLeft:SetPoint("TOPLEFT")
 
 		btnToggle.TopRight = btnToggle:CreateTexture(nil, "BACKGROUND")
 		btnToggle.TopRight:SetTexture("Interface/Buttons/UI-Silver-Button-Up")
 		btnToggle.TopRight:SetTexCoord(0.5234375, 0.625, 0, 0.1875)
 		btnToggle.TopRight:SetSize(13, 6)
-		btnToggle.TopRight:SetVertexColor(0.65, 0.65, 0.65)
 		btnToggle.TopRight:SetPoint("TOPRIGHT")
 
 		btnToggle.BottomLeft = btnToggle:CreateTexture(nil, "BACKGROUND")
 		btnToggle.BottomLeft:SetTexture("Interface/Buttons/UI-Silver-Button-Up")
 		btnToggle.BottomLeft:SetTexCoord(0, 0.1015625, 0.625, 0.8125)
 		btnToggle.BottomLeft:SetSize(13, 6)
-		btnToggle.BottomLeft:SetVertexColor(0.65, 0.65, 0.65)
 		btnToggle.BottomLeft:SetPoint("BOTTOMLEFT")
 
 		btnToggle.BottomRight = btnToggle:CreateTexture(nil, "BACKGROUND")
 		btnToggle.BottomRight:SetTexture("Interface/Buttons/UI-Silver-Button-Up")
 		btnToggle.BottomRight:SetTexCoord(0.5234375, 0.625, 0.625, 0.8125)
 		btnToggle.BottomRight:SetSize(13, 6)
-		btnToggle.BottomRight:SetVertexColor(0.65, 0.65, 0.65)
 		btnToggle.BottomRight:SetPoint("BOTTOMRIGHT")
 
 		btnToggle.Left = btnToggle:CreateTexture(nil, "BACKGROUND")
@@ -135,16 +178,67 @@ function journal:ADDON_LOADED(addonName)
 		btnToggle.Right:SetTexture("Interface/Buttons/UI-Silver-Button-Up")
 		btnToggle.Right:SetTexCoord(0.53125, 0.625, 0.1875, 0.625)
 		btnToggle.Right:SetSize(12, 14)
-		btnToggle.Right:SetVertexColor(0.65, 0.65, 0.65)
 		btnToggle.Right:SetPoint("RIGHT")
 
 		btnToggle.Icon = btnToggle:CreateTexture(nil, "ARTWORK")
 		btnToggle.Icon:SetTexture("Interface/ChatFrame/ChatFrameExpandArrow")
-		-- btnToggle.Icon:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
-		btnToggle.Icon:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
-		-- btnToggle.Icon:SetTexCoord(1, 0, 0, 0, 1, 1, 0, 1)
 		btnToggle.Icon:SetSize(14, 14)
-		btnToggle.Icon:SetPoint("CENTER", 0, -1)
+
+		btnToggle:SetScript("OnMouseDown", function(self)
+			self.TopLeft:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
+			self.TopRight:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
+			self.BottomLeft:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
+			self.BottomRight:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
+			self.Left:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
+			self.Right:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
+			if mounts.config.filterToggle then
+				self.Icon:SetPoint("CENTER", -1, 0)
+			else
+				self.Icon:SetPoint("CENTER", -1, -2)
+			end
+		end)
+
+		btnToggle:SetScript("OnMouseUp", function(self)
+			self.TopLeft:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
+			self.TopRight:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
+			self.BottomLeft:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
+			self.BottomRight:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
+			self.Left:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
+			self.Right:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
+			if mounts.config.filterToggle then
+				self.Icon:SetPoint("CENTER", 0, 1)
+			else
+				self.Icon:SetPoint("CENTER", 0, -1)
+			end
+		end)
+
+		local filterHeight = 27
+		local scrollFrame = MountJournal.ListScrollFrame
+		local sfp = {scrollFrame:GetPoint()}
+		local scrollBar = scrollFrame.scrollBar
+		local sbp = {scrollBar:GetPoint()}
+
+		local function setBtnToggleCheck()
+			if mounts.config.filterToggle then
+				btnToggle.Icon:SetPoint("CENTER", 0, 1)
+				btnToggle.Icon:SetTexCoord(1, 0, 0, 0, 1, 1, 0, 1)
+				scrollFrame:SetPoint(sfp[1], sfp[2], sfp[3], sfp[4], sfp[5] - filterHeight)
+				scrollBar:SetPoint(sbp[1], sbp[2], sbp[3], sbp[4], sbp[5] + filterHeight)
+				typeBar:Show()
+			else
+				btnToggle.Icon:SetPoint("CENTER", 0, -1)
+				btnToggle.Icon:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
+				scrollFrame:SetPoint(sfp[1], sfp[2], sfp[3], sfp[4], sfp[5])
+				scrollBar:SetPoint(sbp[1], sbp[2], sbp[3], sbp[4], sbp[5])
+				typeBar:Hide()
+			end
+		end
+		setBtnToggleCheck()
+
+		btnToggle:SetScript("OnClick", function()
+			mounts.config.filterToggle = not mounts.config.filterToggle
+			setBtnToggleCheck()
+		end)
 
 		-- HOOKS
 		journal.func = {}
@@ -162,7 +256,7 @@ function journal:ADDON_LOADED(addonName)
 			updateMountList()
 			journal:configureJournal()
 		end
-		MountJournal.ListScrollFrame.update = MountJournal_UpdateMountList
+		scrollFrame.update = MountJournal_UpdateMountList
 
 		journal:setDisplayedMounts()
 	end
