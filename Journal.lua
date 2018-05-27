@@ -4,8 +4,19 @@ local journal = CreateFrame("Frame", "MountsJournalFrame")
 
 
 journal.colors = {
-	["gold"] = {0.8, 0.6, 0},
-	["gray"] = {0.5, 0.5, 0.5},
+	gold = {0.8, 0.6, 0},
+	gray = {0.5, 0.5, 0.5},
+	flyMount = {0.824, 0.78, 0.235},
+	groundMount = {0.42, 0.302, 0.224},
+	swimmingMount = {0.031, 0.333, 0.388},
+}
+
+
+journal.filters = {
+	checked = false,
+	fly = false,
+	ground = false,
+	swimming = false,
 }
 
 
@@ -30,11 +41,10 @@ function journal:ADDON_LOADED(addonName)
 
 		-- PER CHARACTER CHECK
 		local perCharCheck = CreateFrame("CheckButton", "MountsJournalPerChar", MountJournal, "InterfaceOptionsCheckButtonTemplate")
-		perCharCheck:SetPoint("TOPLEFT", btnConfig, "TOPRIGHT", 6, 2)
+		perCharCheck:SetPoint("LEFT", MountJournal.MountButton, "RIGHT", 6, -2)
 		perCharCheck.label = _G[perCharCheck:GetName().."Text"]
 		perCharCheck.label:SetFont("GameFontHighlight", 30)
-		perCharCheck.label:SetPoint("LEFT", perCharCheck, "RIGHT", 1, 0)
-		perCharCheck.label:SetSize(150, 35)
+		perCharCheck.label:SetPoint("LEFT", perCharCheck, "RIGHT", 1, 1)
 		perCharCheck.label:SetText(L["Character Specific Mount List"])
 		perCharCheck:SetChecked(mounts.perChar)
 		perCharCheck:SetScript("OnClick", function(self)
@@ -98,21 +108,47 @@ function journal:ADDON_LOADED(addonName)
 		MountJournal.searchBox:SetPoint("TOPLEFT", MountJournal.LeftInset, "TOPLEFT", 34, -9)
 		MountJournal.searchBox:SetSize(128, 20)
 
-		-- FILTERS FLY GROUND SWIMMING
-		local typeBar = CreateFrame("FRAME", nil, MountJournal.LeftInset)
-		typeBar:SetSize(220, 30)
-		typeBar:SetPoint("TOP", 0, -31)
-		typeBar:SetBackdrop({
+		-- FILTERS BAR
+		journal.typeBar = CreateFrame("FRAME", nil, MountJournal.LeftInset)
+		journal.typeBar:SetSize(229, 30)
+		journal.typeBar:SetPoint("TOPLEFT", 4, -31)
+		journal.typeBar:SetBackdrop({
 			edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
 			tile = true,
 			edgeSize = 16,
 		})
-		typeBar:SetBackdropBorderColor(0.6, 0.6, 0.6)
+		journal.typeBar:SetBackdropBorderColor(0.6, 0.6, 0.6)
 
-		local function CreateButtonFilter(name, pointX, pointY)
-			local btn = CreateFrame("button", nil, typeBar)
-			btn:SetSize(70, 20)
+		-- FILTERS CLEAR
+		local clear = CreateFrame("button", nil, journal.typeBar)
+		journal.typeBar.clear = clear
+		clear:SetPoint("LEFT", journal.typeBar, "RIGHT", 2, 0)
+		clear:SetSize(18, 18)
+		clear:SetHitRectInsets(-2, -2, -2, -2)
+		clear:SetNormalTexture("Interface/FriendsFrame/ClearBroadcastIcon")
+		clear.texture = clear:GetRegions()
+		clear.texture:SetAlpha(0.5)
+		clear:SetScript("OnEnter", function(self) self.texture:SetAlpha(1) end)
+		clear:SetScript("OnLeave", function(self) self.texture:SetAlpha(0.5) end)
+		clear:SetScript("OnMouseDown", function(self) self:SetPoint("LEFT", journal.typeBar, "RIGHT", 3, -1) end)
+		clear:SetScript("OnMouseUp", function(self) self:SetPoint("LEFT", journal.typeBar, "RIGHT", 2, 0) end)
+		clear:SetScript("OnClick", journal.clearFilters)
+		clear:Hide()
+
+		-- FILTERS FLY GROUND SWIMMING
+		journal.typeBar.buttons = {}
+		local function CreateButtonFilter(name, pointX, pointY, color)
+			local btn = CreateFrame("CheckButton", nil, journal.typeBar)
+			btn.type = name
+			btn:SetSize(73, 20)
 			btn:SetPoint("TOP", pointX, pointY)
+
+			btn:SetHighlightTexture(texPath.."button")
+			btn:SetCheckedTexture("Interface/BUTTONS/ListButtons")
+			local hightlight, checked = btn:GetRegions()
+			hightlight:SetTexCoord(0.00390625, 0.8203125, 0.19140625, 0.37109375)
+			checked:SetTexCoord(0.00390625, 0.8203125, 0.37890625, 0.55859375)
+
 			btn:SetBackdrop({
 				edgeFile = texPath.."border",
 				tile = true,
@@ -120,21 +156,27 @@ function journal:ADDON_LOADED(addonName)
 			})
 			btn:SetBackdropBorderColor(0.4, 0.4, 0.4)
 
-			-- btn:SetNormalTexture(texPath.."button")
-			-- btn:SetHighlightTexture(texPath.."button")
-			-- local background, hightlight = btn:GetRegions()
-			-- background:SetTexCoord(0.00390625, 0.8203125, 0.00390625, 0.18359375)
-			-- background:SetVertexColor(0.2,0.18,0.01)
-			-- hightlight:SetTexCoord(0.00390625, 0.8203125, 0.19140625, 0.37109375)
-
 			btn.icon = btn:CreateTexture(nil, "OVERLAY")
 			btn.icon:SetTexture(texPath..name)
 			btn.icon:SetPoint("TOP", -1, -3)
+			btn.icon:SetVertexColor(unpack(color))
+
+			btn:SetScript("OnMouseDown", function()
+				btn.icon:SetPoint("TOP", 0, -4)
+				btn.icon:SetSize(30, 14)
+			end)
+			btn:SetScript("OnMouseUp", function()
+				btn.icon:SetPoint("TOP", -1, -3)
+				btn.icon:SetSize(32, 16)
+			end)
+			btn:SetScript("OnClick", journal.updateFilters)
+
+			tinsert(journal.typeBar.buttons, btn)
 		end
 
-		CreateButtonFilter("fly", -70, -5)
-		CreateButtonFilter("ground", 0, -5)
-		CreateButtonFilter("swimming", 70, -5)
+		CreateButtonFilter("fly", -73, -5, journal.colors.flyMount)
+		CreateButtonFilter("ground", 0, -5, journal.colors.groundMount)
+		CreateButtonFilter("swimming", 73, -5, journal.colors.swimmingMount)
 
 		-- FILTERS TOGGLE BTN
 		local btnToggle = CreateFrame("button", nil, MountJournal.LeftInset)
@@ -224,18 +266,19 @@ function journal:ADDON_LOADED(addonName)
 				btnToggle.Icon:SetTexCoord(1, 0, 0, 0, 1, 1, 0, 1)
 				scrollFrame:SetPoint(sfp[1], sfp[2], sfp[3], sfp[4], sfp[5] - filterHeight)
 				scrollBar:SetPoint(sbp[1], sbp[2], sbp[3], sbp[4], sbp[5] + filterHeight)
-				typeBar:Show()
+				journal.typeBar:Show()
 			else
 				btnToggle.Icon:SetPoint("CENTER", 0, -1)
 				btnToggle.Icon:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
-				scrollFrame:SetPoint(sfp[1], sfp[2], sfp[3], sfp[4], sfp[5])
-				scrollBar:SetPoint(sbp[1], sbp[2], sbp[3], sbp[4], sbp[5])
-				typeBar:Hide()
+				scrollFrame:SetPoint(unpack(sfp))
+				scrollBar:SetPoint(unpack(sbp))
+				journal.typeBar:Hide()
 			end
 		end
 		setBtnToggleCheck()
 
 		btnToggle:SetScript("OnClick", function()
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			mounts.config.filterToggle = not mounts.config.filterToggle
 			setBtnToggleCheck()
 		end)
@@ -299,6 +342,7 @@ end
 
 
 function journal:mountToggle(tbl, btn)
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	local pos = mounts:inTable(tbl, btn.mountID)
 	if pos then
 		tremove(tbl, pos)
@@ -326,14 +370,60 @@ function journal:setSecureFunc(obj, funcName, func)
 end
 
 
+function journal:clearFilters()
+	for _, btn in pairs(journal.typeBar.buttons) do
+		btn:SetChecked(false)
+	end
+
+	journal:updateFilters()
+end
+
+
+function journal:updateFilters()
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	journal.filters.checked = false
+	for _, btn in pairs(journal.typeBar.buttons) do
+		journal.filters[btn.type] = btn:GetChecked()
+		btn.icon:SetVertexColor(unpack(journal.colors[btn.type.."Mount"]))
+		if journal.filters[btn.type] then journal.filters.checked = true end
+	end
+
+	if journal.filters.checked then
+		for _, btn in pairs(journal.typeBar.buttons) do
+			if not btn:GetChecked() then
+				btn.icon:SetVertexColor(0.3, 0.3, 0.3)
+			end
+		end
+		journal.typeBar.clear:Show()
+	else
+		journal.typeBar.clear:Hide()
+	end
+
+	MountJournal_UpdateMountList()
+end
+
+
 function journal:setDisplayedMounts()
 	local displayedMounts = {}
 	for i = 1, journal.func.GetNumDisplayedMounts() do
-		local mountID = select(12, journal.func.GetDisplayedMountInfo(i))
-		local mountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
-		-- if mountType == 248 then
+		if journal.filters.checked then
+			local mountID = select(12, journal.func.GetDisplayedMountInfo(i))
+			local mountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
+
+			if journal.filters.fly and mounts:inTable({242, 247, 248}, mountType) then
+				tinsert(displayedMounts, i)
+			end
+
+			if journal.filters.ground and mounts:inTable({230, 241, 269, 284}, mountType) then
+				tinsert(displayedMounts, i)
+			end
+
+			if journal.filters.swimming and mounts:inTable({231, 232, 254}, mountType) then
+				tinsert(displayedMounts, i)
+			end
+		else
 			tinsert(displayedMounts, i)
-		-- end
+		end
 	end
 
 	journal.displayedMounts = displayedMounts
