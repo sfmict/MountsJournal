@@ -85,16 +85,7 @@ function journal:ADDON_LOADED(addonName)
 			while button do
 				if button.categoryID == COLLECTION_ACHIEVEMENT_CATEGORY then
 					button:Click()
-					break
-				end
-				i = i + 1
-				button = _G["AchievementFrameCategoriesContainerButton"..i]
-			end
-
-			i = i + 1
-			button = _G["AchievementFrameCategoriesContainerButton"..i]
-			while button do
-				if button.categoryID == MOUNT_ACHIEVEMENT_CATEGORY then
+				elseif button.categoryID == MOUNT_ACHIEVEMENT_CATEGORY then
 					button:Click()
 					return
 				end
