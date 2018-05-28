@@ -3,6 +3,10 @@ local mounts, config = MountsJournal, MountsJournalConfig
 local journal = CreateFrame("Frame", "MountsJournalFrame")
 
 
+local COLLECTION_ACHIEVEMENT_CATEGORY = 15246
+local MOUNT_ACHIEVEMENT_CATEGORY = 15248
+
+
 journal.colors = {
 	gold = {0.8, 0.6, 0},
 	gray = {0.5, 0.5, 0.5},
@@ -38,6 +42,68 @@ function journal:ADDON_LOADED(addonName)
 		btnConfig:SetPoint("TOPLEFT", MountJournal.MountCount, "TOPRIGHT", 8, 1)
 		btnConfig:SetText(L["Settings"])
 		btnConfig:SetScript("OnClick", config.openConfig)
+
+		-- ACHIEVEMENT
+		local achiev = CreateFrame("button", nil, MountJournal)
+		journal.achiev = achiev
+		achiev:SetPoint("TOP", MountJournal, "TOP", 60, -21)
+		achiev:SetSize(60, 40)
+
+		achiev.hightlight = achiev:CreateTexture(nil, "BACKGROUND")
+		achiev.hightlight:SetAtlas("PetJournal-PetBattleAchievementGlow")
+		achiev.hightlight:SetPoint("TOP")
+		achiev.hightlight:SetSize(210, 40)
+		achiev.hightlight:Hide()
+
+		achiev.left = achiev:CreateTexture(nil, "BACKGROUND")
+		achiev.left:SetAtlas("PetJournal-PetBattleAchievementBG")
+		achiev.left:SetSize(46, 18)
+		achiev.left:SetPoint("TOP", -56, -12)
+
+		achiev.right = achiev:CreateTexture(nil, "BACKGROUND")
+		achiev.right:SetAtlas("PetJournal-PetBattleAchievementBG")
+		achiev.right:SetSize(46, 18)
+		achiev.right:SetPoint("TOP", 55, -12)
+		achiev.right:SetTexCoord(1, 0, 0, 1)
+
+		achiev.icon = achiev:CreateTexture(nil, "OVERLAY")
+		achiev.icon:SetTexture("Interface/AchievementFrame/UI-Achievement-Shields-NoPoints")
+		achiev.icon:SetSize(30, 30)
+		achiev.icon:SetPoint("RIGHT", 1, -2)
+		achiev.icon:SetTexCoord(0, 0.5, 0, 0.5)
+
+		achiev.text = achiev:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+		achiev.text:SetPoint("CENTER", -17, 0)
+		journal:ACHIEVEMENT_EARNED()
+
+		achiev:SetScript("OnEnter", function(self) self.hightlight:Show() end)
+		achiev:SetScript("OnLeave", function(self) self.hightlight:Hide() end)
+		achiev:SetScript("OnClick", function(self)
+			ToggleAchievementFrame()
+			local i = 1
+			local button = _G["AchievementFrameCategoriesContainerButton"..i]
+			while button do
+				if button.element.id == COLLECTION_ACHIEVEMENT_CATEGORY then
+					button:Click()
+					break
+				else
+					i = i + 1
+					button = _G["AchievementFrameCategoriesContainerButton"..i]
+				end
+			end
+
+			i = 1
+			button = _G["AchievementFrameCategoriesContainerButton"..i]
+			while button do
+				if button.element.id == MOUNT_ACHIEVEMENT_CATEGORY then
+					button:Click()
+					return
+				end
+				i = i + 1
+				button = _G["AchievementFrameCategoriesContainerButton"..i]
+			end
+		end)
+		self:RegisterEvent("ACHIEVEMENT_EARNED")
 
 		-- PER CHARACTER CHECK
 		local perCharCheck = CreateFrame("CheckButton", "MountsJournalPerChar", MountJournal, "InterfaceOptionsCheckButtonTemplate")
@@ -303,6 +369,11 @@ function journal:ADDON_LOADED(addonName)
 
 		journal:setDisplayedMounts()
 	end
+end
+
+
+function journal:ACHIEVEMENT_EARNED()
+	journal.achiev.text:SetText(GetCategoryAchievementPoints(MOUNT_ACHIEVEMENT_CATEGORY, true))
 end
 
 
