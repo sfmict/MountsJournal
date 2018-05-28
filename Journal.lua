@@ -350,6 +350,7 @@ function journal:ADDON_LOADED(addonName)
 		journal:setSecureFunc(C_MountJournal, "GetIsFavorite")
 		journal:setSecureFunc(C_MountJournal, "GetDisplayedMountInfoExtra")
 		journal:setSecureFunc(C_MountJournal, "GetDisplayedMountAllCreatureDisplayInfo")
+		journal:setDisplayedMounts()
 
 		local updateMountList = MountJournal_UpdateMountList
 		function MountJournal_UpdateMountList()
@@ -358,8 +359,6 @@ function journal:ADDON_LOADED(addonName)
 			journal:configureJournal()
 		end
 		scrollFrame.update = MountJournal_UpdateMountList
-
-		journal:setDisplayedMounts()
 	end
 end
 
@@ -474,7 +473,7 @@ end
 
 
 function journal:setDisplayedMounts()
-	local displayedMounts = {}
+	local displayedMounts = {[0] = 0}
 	for i = 1, journal.func.GetNumDisplayedMounts() do
 		if journal.filters.checked then
 			local mountID = select(12, journal.func.GetDisplayedMountInfo(i))
