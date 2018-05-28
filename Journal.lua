@@ -46,7 +46,7 @@ function journal:ADDON_LOADED(addonName)
 		-- ACHIEVEMENT
 		local achiev = CreateFrame("button", nil, MountJournal)
 		journal.achiev = achiev
-		achiev:SetPoint("TOP", MountJournal, "TOP", 60, -21)
+		achiev:SetPoint("TOP", 60, -21)
 		achiev:SetSize(60, 40)
 
 		achiev.hightlight = achiev:CreateTexture(nil, "BACKGROUND")
@@ -78,7 +78,7 @@ function journal:ADDON_LOADED(addonName)
 
 		achiev:SetScript("OnEnter", function(self) self.hightlight:Show() end)
 		achiev:SetScript("OnLeave", function(self) self.hightlight:Hide() end)
-		achiev:SetScript("OnClick", function(self)
+		achiev:SetScript("OnClick", function()
 			ToggleAchievementFrame()
 			local i = 1
 			local button = _G["AchievementFrameCategoriesContainerButton"..i]
@@ -212,7 +212,9 @@ function journal:ADDON_LOADED(addonName)
 			btn:SetHighlightTexture(texPath.."button")
 			btn:SetCheckedTexture("Interface/BUTTONS/ListButtons")
 			local hightlight, checked = btn:GetRegions()
+			hightlight:SetAlpha(0.8)
 			hightlight:SetTexCoord(0.00390625, 0.8203125, 0.19140625, 0.37109375)
+			checked:SetAlpha(0.8)
 			checked:SetTexCoord(0.00390625, 0.8203125, 0.37890625, 0.55859375)
 
 			btn:SetBackdrop({
@@ -451,25 +453,32 @@ end
 
 
 function journal:updateFilters()
-	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	journal.filters.checked = false
+	local checked = 0
 	for _, btn in pairs(journal.typeBar.buttons) do
 		journal.filters[btn.type] = btn:GetChecked()
 		btn.icon:SetVertexColor(unpack(journal.colors[btn.type.."Mount"]))
-		if journal.filters[btn.type] then journal.filters.checked = true end
+		if journal.filters[btn.type] then checked = checked + 1 end
 	end
 
-	if journal.filters.checked then
+	if checked == #journal.typeBar.buttons then
+		journal:clearFilters()
+		return
+	end
+
+	if checked ~= 0 then
 		for _, btn in pairs(journal.typeBar.buttons) do
 			if not btn:GetChecked() then
 				btn.icon:SetVertexColor(0.3, 0.3, 0.3)
 			end
 		end
+		journal.filters.checked = true
 		journal.typeBar.clear:Show()
 	else
+		journal.filters.checked = false
 		journal.typeBar.clear:Hide()
 	end
 
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	MountJournal_UpdateMountList()
 end
 
