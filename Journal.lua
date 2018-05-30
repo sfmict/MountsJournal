@@ -24,6 +24,13 @@ journal.filters = {
 }
 
 
+journal.displayedMounts = {}
+setmetatable(journal.displayedMounts, {__index = function(self, key)
+	self[key] = ""
+	return key
+end})
+
+
 journal:SetScript("OnEvent", function(self, event, ...)
 	if journal[event] then
 		journal[event](self, ...)
@@ -343,22 +350,18 @@ function journal:ADDON_LOADED(addonName)
 
 		-- HOOKS
 		journal.func = {}
-		journal:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", function() return #journal.displayedMounts end)
+		journal:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", journal.getNumDisplayedMounts)
 		journal:setSecureFunc(C_MountJournal, "GetDisplayedMountInfo")
 		journal:setSecureFunc(C_MountJournal, "Pickup")
 		journal:setSecureFunc(C_MountJournal, "SetIsFavorite")
 		journal:setSecureFunc(C_MountJournal, "GetIsFavorite")
 		journal:setSecureFunc(C_MountJournal, "GetDisplayedMountInfoExtra")
 		journal:setSecureFunc(C_MountJournal, "GetDisplayedMountAllCreatureDisplayInfo")
-		journal:setDisplayedMounts()
 
-		local updateMountList = MountJournal_UpdateMountList
-		function MountJournal_UpdateMountList()
-			journal:setDisplayedMounts()
-			updateMountList()
-			journal:configureJournal()
-		end
+		hooksecurefunc("MountJournal_UpdateMountList", journal.configureJournal)
 		scrollFrame.update = MountJournal_UpdateMountList
+
+		MountJournalFilterDropDown.initialize = journal.filterDropDown_Initialize
 	end
 end
 
@@ -432,6 +435,79 @@ function journal:setSecureFunc(obj, funcName, func)
 end
 
 
+function journal:filterDropDown_Initialize(level)
+	local info = UIDropDownMenu_CreateInfo()
+	info.keepShownOnClick = true
+
+	if level == 1 then
+		info.text = COLLECTED
+		info.func = function(_, _, _, value)
+			C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED,value)
+		end
+		info.checked = C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED)
+		info.isNotRadio = true
+		UIDropDownMenu_AddButton(info, level)
+
+		info.text = NOT_COLLECTED
+		info.func = function(_, _, _, value)
+				C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED,value)
+			end
+		info.checked = C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED)
+		info.isNotRadio = true
+		UIDropDownMenu_AddButton(info, level)
+
+		info.text = MOUNT_JOURNAL_FILTER_UNUSABLE
+		info.func = function(_, _, _, value)
+			C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, value)
+		end
+		info.checked = C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE)
+		info.isNotRadio = true
+		UIDropDownMenu_AddButton(info, level)
+
+		info.checked = nil
+		info.isNotRadio = nil
+		info.func =  nil
+		info.hasArrow = true
+		info.notCheckable = true
+
+		info.text = SOURCES
+		info.value = 1
+		UIDropDownMenu_AddButton(info, level)
+	else
+		info.hasArrow = false
+		info.isNotRadio = true
+		info.notCheckable = true
+
+		info.text = CHECK_ALL
+		info.func = function()
+			C_MountJournal.SetAllSourceFilters(true)
+			UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+		end
+		UIDropDownMenu_AddButton(info, level)
+
+		info.text = UNCHECK_ALL
+		info.func = function()
+			C_MountJournal.SetAllSourceFilters(false)
+			UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+		end
+		UIDropDownMenu_AddButton(info, level)
+
+		info.notCheckable = false
+		local numSources = C_PetJournal.GetNumPetSources()
+		for i=1,numSources do
+			if C_MountJournal.IsValidSourceFilter(i) then
+				info.text = _G["BATTLE_PET_SOURCE_"..i]
+				info.func = function(_, _, _, value)
+					C_MountJournal.SetSourceFilter(i,value)
+				end
+				info.checked = function() return C_MountJournal.IsSourceChecked(i) end
+				UIDropDownMenu_AddButton(info, level)
+			end
+		end
+	end
+end
+
+
 function journal:clearFilters()
 	for _, btn in pairs(journal.typeBar.buttons) do
 		btn:SetChecked(false)
@@ -472,28 +548,29 @@ function journal:updateFilters()
 end
 
 
-function journal:setDisplayedMounts()
-	local displayedMounts = {[0] = 0}
+function journal:getNumDisplayedMounts()
+	wipe(journal.displayedMounts)
+	journal.displayedMounts[0] = 0
 	for i = 1, journal.func.GetNumDisplayedMounts() do
 		if journal.filters.checked then
 			local mountID = select(12, journal.func.GetDisplayedMountInfo(i))
 			local mountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
 
 			if journal.filters.fly and mounts:inTable({242, 247, 248}, mountType) then
-				tinsert(displayedMounts, i)
+				tinsert(journal.displayedMounts, i)
 			end
 
 			if journal.filters.ground and mounts:inTable({230, 241, 269, 284}, mountType) then
-				tinsert(displayedMounts, i)
+				tinsert(journal.displayedMounts, i)
 			end
 
 			if journal.filters.swimming and mounts:inTable({231, 232, 254}, mountType) then
-				tinsert(displayedMounts, i)
+				tinsert(journal.displayedMounts, i)
 			end
 		else
-			tinsert(displayedMounts, i)
+			tinsert(journal.displayedMounts, i)
 		end
 	end
 
-	journal.displayedMounts = displayedMounts
+	return #journal.displayedMounts
 end

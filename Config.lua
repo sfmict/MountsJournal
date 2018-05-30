@@ -45,22 +45,19 @@ config:SetScript("OnShow", function()
 	config.modifierValue = mounts.config.modifier
 
 	UIDropDownMenu_Initialize(modifierCombobox, function (self, level, menuList)
-		local info = {}
+		local info = UIDropDownMenu_CreateInfo()
 		for i, modifier in pairs({"ALT", "CTRL", "SHIFT"}) do
 			info.menuList = i - 1
 			info.checked = modifier == config.modifierValue
 			info.text = modifier.." key"
 			info.arg1 = modifier
-			info.func = self.SetValue
+			info.func = function(_, value)
+				config.modifierValue = value
+				UIDropDownMenu_SetText(modifierCombobox, value.." key")
+			end
 			UIDropDownMenu_AddButton(info)
 		end
 	end)
-
-	function modifierCombobox:SetValue(newValue)
-		config.modifierValue = newValue
-		UIDropDownMenu_SetText(modifierCombobox, newValue.." key")
-		CloseDropDownMenus()
-	end
 
 	setTooltip(modifierCombobox, "ANCHOR_TOPLEFT", L["Modifier"], L["ModifierDescription"])
 

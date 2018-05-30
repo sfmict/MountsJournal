@@ -15,6 +15,6 @@ L["Settings"] = "Settings"
 L["Character Specific Mount List"] = "Character Specific Mount List"
 
 setmetatable(L, {__index = function(self, key)
-  self[key] = key or ""
-  return key
+	self[key] = key or ""
+	return key
 end})
