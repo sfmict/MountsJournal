@@ -13,6 +13,10 @@ L["CreateMacro"] = "Create Macro"
 L["CreateMacroTooltip"] = "The created macro is used to call the selected mounts."
 L["Settings"] = "Settings"
 L["Character Specific Mount List"] = "Character Specific Mount List"
+L["Types"] = "Types"
+L["MOUNT_TYPE_FLY"] = "Flying"
+L["MOUNT_TYPE_GROUND"] = "Ground"
+L["MOUNT_TYPE_SWIMMING"] = "Underwater"
 
 setmetatable(L, {__index = function(self, key)
 	self[key] = key or ""

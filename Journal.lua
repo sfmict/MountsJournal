@@ -10,6 +10,7 @@ local MOUNT_ACHIEVEMENT_CATEGORY = 15248
 journal.colors = {
 	gold = {0.8, 0.6, 0},
 	gray = {0.5, 0.5, 0.5},
+	dark = {0.3, 0.3, 0.3},
 	flyMount = {0.824, 0.78, 0.235},
 	groundMount = {0.42, 0.302, 0.224},
 	swimmingMount = {0.031, 0.333, 0.388},
@@ -17,10 +18,15 @@ journal.colors = {
 
 
 journal.filters = {
-	checked = false,
-	fly = false,
-	ground = false,
-	swimming = false,
+	types = {
+		-- checked = false,
+		fly = true,
+		ground = true,
+		swimming = true,
+	},
+	-- sources = {
+	-- 	checked = 0,
+	-- },
 }
 
 
@@ -234,7 +240,7 @@ function journal:ADDON_LOADED(addonName)
 				btn.icon:SetPoint("TOP", -1, -3)
 				btn.icon:SetSize(32, 16)
 			end)
-			btn:SetScript("OnClick", journal.updateFilters)
+			btn:SetScript("OnClick", journal.setBtnFilters)
 
 			tinsert(journal.typeBar.buttons, btn)
 		end
@@ -361,6 +367,27 @@ function journal:ADDON_LOADED(addonName)
 		hooksecurefunc("MountJournal_UpdateMountList", journal.configureJournal)
 		scrollFrame.update = MountJournal_UpdateMountList
 
+		-- INIT SOURCE FILTERS
+		-- local sources = journal.filters.sources
+		-- local numSources = C_PetJournal.GetNumPetSources()
+		-- for i = 1, numSources do
+		-- 	if C_MountJournal.IsValidSourceFilter(i) then
+		-- 		sources[i] = C_MountJournal.IsSourceChecked(i)
+		-- 		if sources[i] then
+		-- 			sources.checked = sources.checked + 1
+		-- 		end
+		-- 	end
+		-- end
+		-- if sources.checked == 9 then
+		-- 	for i = 1, numSources do
+		-- 		if C_MountJournal.IsValidSourceFilter(i) then
+		-- 			sources[i] = false
+		-- 		end
+		-- 	end
+		-- else
+		-- 	sources.checked = 9 - sources.checked
+		-- end
+		-- FILTERS
 		MountJournalFilterDropDown.initialize = journal.filterDropDown_Initialize
 	end
 end
@@ -435,25 +462,58 @@ function journal:setSecureFunc(obj, funcName, func)
 end
 
 
+-- function journal:setSourceFilter(i, value)
+-- 	local sources = journal.filters.sources
+
+-- 	if value then
+-- 		if sources.checked ~= 1 then
+-- 			if sources.checked == 9 then
+-- 				C_MountJournal.SetAllSourceFilters(false)
+-- 			end
+-- 			sources.checked = sources.checked - 1
+-- 			sources[i] = value
+-- 			C_MountJournal.SetSourceFilter(i, value)
+-- 		else
+-- 			for i = 1, C_PetJournal.GetNumPetSources() do
+-- 				if C_MountJournal.IsValidSourceFilter(i) then
+-- 					sources[i] = false
+-- 				end
+-- 			end
+-- 			sources.checked = 9
+-- 			C_MountJournal.SetAllSourceFilters(true)
+-- 			UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+-- 		end
+-- 	else
+-- 		sources.checked = sources.checked + 1
+-- 		sources[i] = value
+-- 		if sources.checked == 9 then
+-- 			C_MountJournal.SetAllSourceFilters(true)
+-- 		else
+-- 			C_MountJournal.SetSourceFilter(i, value)
+-- 		end
+-- 	end
+-- end
+
+
 function journal:filterDropDown_Initialize(level)
 	local info = UIDropDownMenu_CreateInfo()
 	info.keepShownOnClick = true
 
 	if level == 1 then
+		info.isNotRadio = true
+
 		info.text = COLLECTED
 		info.func = function(_, _, _, value)
 			C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED,value)
 		end
 		info.checked = C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED)
-		info.isNotRadio = true
 		UIDropDownMenu_AddButton(info, level)
 
 		info.text = NOT_COLLECTED
 		info.func = function(_, _, _, value)
-				C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED,value)
-			end
+			C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED,value)
+		end
 		info.checked = C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED)
-		info.isNotRadio = true
 		UIDropDownMenu_AddButton(info, level)
 
 		info.text = MOUNT_JOURNAL_FILTER_UNUSABLE
@@ -461,7 +521,6 @@ function journal:filterDropDown_Initialize(level)
 			C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, value)
 		end
 		info.checked = C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE)
-		info.isNotRadio = true
 		UIDropDownMenu_AddButton(info, level)
 
 		info.checked = nil
@@ -470,104 +529,202 @@ function journal:filterDropDown_Initialize(level)
 		info.hasArrow = true
 		info.notCheckable = true
 
-		info.text = SOURCES
+		info.text = L["Types"]
 		info.value = 1
 		UIDropDownMenu_AddButton(info, level)
+
+		info.text = SOURCES
+		info.value = 2
+		UIDropDownMenu_AddButton(info, level)
 	else
-		info.hasArrow = false
 		info.isNotRadio = true
 		info.notCheckable = true
 
-		info.text = CHECK_ALL
-		info.func = function()
-			C_MountJournal.SetAllSourceFilters(true)
-			UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
-		end
-		UIDropDownMenu_AddButton(info, level)
+		if UIDROPDOWNMENU_MENU_VALUE == 1 then
+			info.text = CHECK_ALL
+			info.func = function()
+				journal:setAllTypesFilters(true)
+				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+			end
+			UIDropDownMenu_AddButton(info, level)
 
-		info.text = UNCHECK_ALL
-		info.func = function()
-			C_MountJournal.SetAllSourceFilters(false)
-			UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
-		end
-		UIDropDownMenu_AddButton(info, level)
+			info.text = UNCHECK_ALL
+			info.func = function()
+				journal:setAllTypesFilters(false)
+				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+			end
+			UIDropDownMenu_AddButton(info, level)
 
-		info.notCheckable = false
-		local numSources = C_PetJournal.GetNumPetSources()
-		for i=1,numSources do
-			if C_MountJournal.IsValidSourceFilter(i) then
-				info.text = _G["BATTLE_PET_SOURCE_"..i]
+			info.notCheckable = false
+			local types = journal.filters.types
+			for k in pairs(types) do
+				info.text = L["MOUNT_TYPE_"..strupper(k)]
 				info.func = function(_, _, _, value)
-					C_MountJournal.SetSourceFilter(i,value)
+					types[k] = value
+					journal:updateBtnFilters()
 				end
-				info.checked = function() return C_MountJournal.IsSourceChecked(i) end
+				info.checked = function() return types[k] end
 				UIDropDownMenu_AddButton(info, level)
 			end
+		else
+			info.text = CHECK_ALL
+			info.func = function()
+				C_MountJournal.SetAllSourceFilters(true)
+				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+			end
+			UIDropDownMenu_AddButton(info, level)
+
+			info.text = UNCHECK_ALL
+			info.func = function()
+				C_MountJournal.SetAllSourceFilters(false)
+				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+			end
+			UIDropDownMenu_AddButton(info, level)
+
+			info.notCheckable = false
+			for i = 1, C_PetJournal.GetNumPetSources() do
+				if C_MountJournal.IsValidSourceFilter(i) then
+					info.text = _G["BATTLE_PET_SOURCE_"..i]
+					info.func = function(_, _, _, value)
+						-- journal:setSourceFilter(i, value)
+						C_MountJournal.SetSourceFilter(i, value)
+					end
+					-- info.checked = function() return journal.filters.sources[i] end
+					info.checked = function() return C_MountJournal.IsSourceChecked(i) end
+					UIDropDownMenu_AddButton(info, level)
+				end
+			end
+
+			-- info.notCheckable = true
+			-- info.checked = nil
+			-- info.text = RESET
+			-- info.func = function()
+			-- 	local sources = journal.filters.sources
+			-- 	sources.checked = 9
+			-- 	for i = 1, C_PetJournal.GetNumPetSources() do
+			-- 		if C_MountJournal.IsValidSourceFilter(i) then
+			-- 			sources[i] = false
+			-- 		end
+			-- 	end
+			-- 	C_MountJournal.SetAllSourceFilters(true)
+			-- 	UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+			-- end
+			-- UIDropDownMenu_AddButton(info, level)
 		end
 	end
 end
 
 
 function journal:clearFilters()
-	for _, btn in pairs(journal.typeBar.buttons) do
-		btn:SetChecked(false)
+	local types = journal.filters.types
+	for k in pairs(types) do
+		types[k] = true
 	end
+	-- for _, btn in pairs(journal.typeBar.buttons) do
+	-- 	btn:SetChecked(false)
+	-- end
 
-	journal:updateFilters()
+	journal:updateBtnFilters()
 end
 
 
-function journal:updateFilters()
-	local checked = 0
+function journal:setBtnFilters()
+	local types, i = journal.filters.types, 0
+
 	for _, btn in pairs(journal.typeBar.buttons) do
-		journal.filters[btn.type] = btn:GetChecked()
-		btn.icon:SetVertexColor(unpack(journal.colors[btn.type.."Mount"]))
-		if journal.filters[btn.type] then checked = checked + 1 end
+		local checked = btn:GetChecked()
+		types[btn.type] = checked
+		if not checked then i = i + 1 end
 	end
 
-	if checked == #journal.typeBar.buttons then
-		journal:clearFilters()
-		return
-	end
-
-	if checked ~= 0 then
-		for _, btn in pairs(journal.typeBar.buttons) do
-			if not btn:GetChecked() then
-				btn.icon:SetVertexColor(0.3, 0.3, 0.3)
-			end
+	if i == 3 then
+		for k in pairs(types) do
+			types[k] = true
 		end
-		journal.filters.checked = true
-		journal.typeBar.clear:Show()
-	else
-		journal.filters.checked = false
-		journal.typeBar.clear:Hide()
 	end
 
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	journal:updateBtnFilters()
+end
+
+
+function journal:setAllTypesFilters(enabled)
+	local types = journal.filters.types
+	for k in pairs(types) do
+		types[k] = enabled
+	end
+	journal:updateBtnFilters()
+end
+
+
+function journal:updateBtnFilters()
+	local types, i = journal.filters.types, 0
+
+	for _, v in pairs(types) do
+		if v then i = i + 1 end
+	end
+
+	if i == 3 then
+		for _, btn in pairs(journal.typeBar.buttons) do
+			btn:SetChecked(false)
+			btn.icon:SetVertexColor(unpack(journal.colors[btn.type.."Mount"]))
+			journal.typeBar.clear:Hide()
+		end
+	else
+		for _, btn in pairs(journal.typeBar.buttons) do
+			local checked = types[btn.type]
+			local color = checked and journal.colors[btn.type.."Mount"] or journal.colors.dark
+			btn:SetChecked(checked)
+			btn.icon:SetVertexColor(unpack(color))
+			journal.typeBar.clear:Show()
+		end
+	end
+
+	-- local checked = 0
+	-- local types = journal.filters.types
+	-- for _, btn in pairs(journal.typeBar.buttons) do
+	-- 	types[btn.type] = btn:GetChecked()
+	-- 	btn.icon:SetVertexColor(unpack(journal.colors[btn.type.."Mount"]))
+	-- 	if types[btn.type] then checked = checked + 1 end
+	-- end
+
+	-- if checked == #journal.typeBar.buttons then
+	-- 	journal:clearFilters()
+	-- 	return
+	-- end
+
+	-- if checked ~= 0 then
+	-- 	for _, btn in pairs(journal.typeBar.buttons) do
+	-- 		if not btn:GetChecked() then
+	-- 			btn.icon:SetVertexColor(0.3, 0.3, 0.3)
+	-- 		end
+	-- 	end
+	-- 	types.checked = true
+	-- 	journal.typeBar.clear:Show()
+	-- else
+	-- 	types.checked = false
+	-- 	journal.typeBar.clear:Hide()
+	-- end
+
 	MountJournal_UpdateMountList()
 end
 
 
 function journal:getNumDisplayedMounts()
+	local types = journal.filters.types
 	wipe(journal.displayedMounts)
 	journal.displayedMounts[0] = 0
+
 	for i = 1, journal.func.GetNumDisplayedMounts() do
-		if journal.filters.checked then
-			local mountID = select(12, journal.func.GetDisplayedMountInfo(i))
-			local mountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
+		local mountID = select(12, journal.func.GetDisplayedMountInfo(i))
+		local mountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
 
-			if journal.filters.fly and mounts:inTable({242, 247, 248}, mountType) then
-				tinsert(journal.displayedMounts, i)
-			end
-
-			if journal.filters.ground and mounts:inTable({230, 241, 269, 284}, mountType) then
-				tinsert(journal.displayedMounts, i)
-			end
-
-			if journal.filters.swimming and mounts:inTable({231, 232, 254}, mountType) then
-				tinsert(journal.displayedMounts, i)
-			end
-		else
+		-- FLY
+		if types.fly and mounts:inTable({242, 247, 248}, mountType)
+		-- GROUND
+		or types.ground and mounts:inTable({230, 241, 269, 284}, mountType)
+		-- SWIMMING
+		or types.swimming and mounts:inTable({231, 232, 254}, mountType) then
 			tinsert(journal.displayedMounts, i)
 		end
 	end
