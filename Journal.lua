@@ -19,14 +19,10 @@ journal.colors = {
 
 journal.filters = {
 	types = {
-		-- checked = false,
 		fly = true,
 		ground = true,
 		swimming = true,
 	},
-	-- sources = {
-	-- 	checked = 0,
-	-- },
 }
 
 
@@ -367,26 +363,6 @@ function journal:ADDON_LOADED(addonName)
 		hooksecurefunc("MountJournal_UpdateMountList", journal.configureJournal)
 		scrollFrame.update = MountJournal_UpdateMountList
 
-		-- INIT SOURCE FILTERS
-		-- local sources = journal.filters.sources
-		-- local numSources = C_PetJournal.GetNumPetSources()
-		-- for i = 1, numSources do
-		-- 	if C_MountJournal.IsValidSourceFilter(i) then
-		-- 		sources[i] = C_MountJournal.IsSourceChecked(i)
-		-- 		if sources[i] then
-		-- 			sources.checked = sources.checked + 1
-		-- 		end
-		-- 	end
-		-- end
-		-- if sources.checked == 9 then
-		-- 	for i = 1, numSources do
-		-- 		if C_MountJournal.IsValidSourceFilter(i) then
-		-- 			sources[i] = false
-		-- 		end
-		-- 	end
-		-- else
-		-- 	sources.checked = 9 - sources.checked
-		-- end
 		-- FILTERS
 		MountJournalFilterDropDown.initialize = journal.filterDropDown_Initialize
 	end
@@ -460,39 +436,6 @@ function journal:setSecureFunc(obj, funcName, func)
 		end
 	end
 end
-
-
--- function journal:setSourceFilter(i, value)
--- 	local sources = journal.filters.sources
-
--- 	if value then
--- 		if sources.checked ~= 1 then
--- 			if sources.checked == 9 then
--- 				C_MountJournal.SetAllSourceFilters(false)
--- 			end
--- 			sources.checked = sources.checked - 1
--- 			sources[i] = value
--- 			C_MountJournal.SetSourceFilter(i, value)
--- 		else
--- 			for i = 1, C_PetJournal.GetNumPetSources() do
--- 				if C_MountJournal.IsValidSourceFilter(i) then
--- 					sources[i] = false
--- 				end
--- 			end
--- 			sources.checked = 9
--- 			C_MountJournal.SetAllSourceFilters(true)
--- 			UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
--- 		end
--- 	else
--- 		sources.checked = sources.checked + 1
--- 		sources[i] = value
--- 		if sources.checked == 9 then
--- 			C_MountJournal.SetAllSourceFilters(true)
--- 		else
--- 			C_MountJournal.SetSourceFilter(i, value)
--- 		end
--- 	end
--- end
 
 
 function journal:filterDropDown_Initialize(level)
@@ -594,22 +537,6 @@ function journal:filterDropDown_Initialize(level)
 					UIDropDownMenu_AddButton(info, level)
 				end
 			end
-
-			-- info.notCheckable = true
-			-- info.checked = nil
-			-- info.text = RESET
-			-- info.func = function()
-			-- 	local sources = journal.filters.sources
-			-- 	sources.checked = 9
-			-- 	for i = 1, C_PetJournal.GetNumPetSources() do
-			-- 		if C_MountJournal.IsValidSourceFilter(i) then
-			-- 			sources[i] = false
-			-- 		end
-			-- 	end
-			-- 	C_MountJournal.SetAllSourceFilters(true)
-			-- 	UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
-			-- end
-			-- UIDropDownMenu_AddButton(info, level)
 		end
 	end
 end
@@ -620,9 +547,6 @@ function journal:clearFilters()
 	for k in pairs(types) do
 		types[k] = true
 	end
-	-- for _, btn in pairs(journal.typeBar.buttons) do
-	-- 	btn:SetChecked(false)
-	-- end
 
 	journal:updateBtnFilters()
 end
@@ -679,32 +603,6 @@ function journal:updateBtnFilters()
 			journal.typeBar.clear:Show()
 		end
 	end
-
-	-- local checked = 0
-	-- local types = journal.filters.types
-	-- for _, btn in pairs(journal.typeBar.buttons) do
-	-- 	types[btn.type] = btn:GetChecked()
-	-- 	btn.icon:SetVertexColor(unpack(journal.colors[btn.type.."Mount"]))
-	-- 	if types[btn.type] then checked = checked + 1 end
-	-- end
-
-	-- if checked == #journal.typeBar.buttons then
-	-- 	journal:clearFilters()
-	-- 	return
-	-- end
-
-	-- if checked ~= 0 then
-	-- 	for _, btn in pairs(journal.typeBar.buttons) do
-	-- 		if not btn:GetChecked() then
-	-- 			btn.icon:SetVertexColor(0.3, 0.3, 0.3)
-	-- 		end
-	-- 	end
-	-- 	types.checked = true
-	-- 	journal.typeBar.clear:Show()
-	-- else
-	-- 	types.checked = false
-	-- 	journal.typeBar.clear:Hide()
-	-- end
 
 	MountJournal_UpdateMountList()
 end
