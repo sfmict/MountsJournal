@@ -1,1 +1,1 @@
-* favorites button drag fix
+* added filter button by source
