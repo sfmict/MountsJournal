@@ -18,7 +18,9 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalDB.ground = MountsJournalDB.ground or {}
 		MountsJournalDB.swimming = MountsJournalDB.swimming or {}
 		MountsJournalDB.config = MountsJournalDB.config or {}
+		MountsJournalDB.filters = MountsJournalDB.filters or {}
 		mounts.config = MountsJournalDB.config
+		mounts.filters = MountsJournalDB.filters
 		if mounts.config.waterWalkInstance == nil then
 			mounts.config.waterWalkInstance = true
 		end
