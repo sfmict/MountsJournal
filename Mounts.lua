@@ -161,7 +161,7 @@ function mounts:init()
 			local isGroundSpell, isFlySpell = mounts:getSpellKnown()
 			if not isGroundSpell then
 				if not mounts:summon(mounts.lowLevel) then C_MountJournal.SummonByID(0) end
-			elseif IsSwimming() and not mounts.modifier() then
+			elseif not mounts.modifier() and (IsSwimming() or UnitBuff("player", GetSpellInfo(76377))) then
 				if not mounts:summon(mounts.swimmingVashjir) and not mounts:summon(mounts.list.swimming) then
 					C_MountJournal.SummonByID(0)
 				end

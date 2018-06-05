@@ -1,1 +1,1 @@
-* added filter button by source
+* Fix summoned mount while walking on the bottom of the Vashj'ir.
