@@ -152,6 +152,11 @@ function mounts:isWaterWalkLocation()
 end
 
 
+function mounts:errorNoFavorites()
+	UIErrorsFrame:AddMessage(format("|cffff0000%s|r", ERR_MOUNT_NO_FAVORITES))
+end
+
+
 function mounts:init()
 	SLASH_MOUNTSJOURNAL1 = "/mount"
 	SlashCmdList["MOUNTSJOURNAL"] = function()
@@ -160,17 +165,14 @@ function mounts:init()
 		else
 			local isGroundSpell, isFlySpell = mounts:getSpellKnown()
 			if not isGroundSpell then
-				if not mounts:summon(mounts.lowLevel) then C_MountJournal.SummonByID(0) end
-			elseif not mounts.modifier() and (IsSwimming() or UnitBuff("player", GetSpellInfo(76377))) then
-				if not mounts:summon(mounts.swimmingVashjir) and not mounts:summon(mounts.list.swimming) then
-					C_MountJournal.SummonByID(0)
-				end
-			else
+				if not mounts:summon(mounts.lowLevel) then mounts:errorNoFavorites() end
+			elseif mounts.modifier() or not IsSubmerged()
+			or not mounts:summon(mounts.swimmingVashjir) and not mounts:summon(mounts.list.swimming) then -- swimming
 				local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation()
-				if isFlyableLocation and (IsSwimming() or not mounts:modifier()) then
-					if not mounts:summon(mounts.list.fly) then C_MountJournal.SummonByID(0) end
-				elseif not ((mounts.config.waterWalkAll or not isFlyableLocation and mounts.modifier() or mounts.config.waterWalkInstance and mounts:isWaterWalkLocation()) and mounts:summon(mounts.waterWalk)) and not mounts:summon(mounts.list.ground) then
-					C_MountJournal.SummonByID(0)
+				if (not isFlyableLocation or mounts:modifier() and not IsSubmerged() or not mounts:summon(mounts.list.fly)) -- fly
+				and not ((mounts.config.waterWalkAll or not isFlyableLocation and mounts.modifier() or mounts.config.waterWalkInstance and mounts:isWaterWalkLocation()) and mounts:summon(mounts.waterWalk)) -- water walk
+				and not mounts:summon(mounts.list.ground) and not mounts:summon(mounts.list.fly) and not mounts:summon(mounts.lowLevel) then -- ground
+					mounts:errorNoFavorites()
 				end
 			end
 		end
