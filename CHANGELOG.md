@@ -1,1 +1,3 @@
-* Fix summoned mount while walking on the bottom of the Vashj'ir.
+* Change IsSwimming to IsSubmerged.
+* Change condition to summon mounts.
+* Added filter to selected mounts.
