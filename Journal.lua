@@ -45,18 +45,18 @@ local function setTabs(frame, ...)
 
 	for i = 1, select("#", ...) do
 		local tab = CreateFrame("Button", nil, frame)
-		tab.id = i
-		tab:SetSize(105, 24)
+		tab.id = select(i, ...)
+		tab:SetSize(75, 24)
 		
 		if i == 1 then
-			tab:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", 7, -4)
+			tab:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", 4, -4)
 		else
 			tab:SetPoint("LEFT", frame.tabs[i - 1], "RIGHT", -5, 0)
 		end
 
 		tab.text = tab:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 		tab.text:SetPoint("CENTER")
-		tab.text:SetText(select(i, ...))
+		tab.text:SetText(L[select(i, ...)])
 
 		tab.bgLeft = tab:CreateTexture(nil, "BACKGROUND")
 		tab.bgLeft:SetTexture("Interface/ChatFrame/ChatFrameTab-BGLeft")
@@ -194,7 +194,12 @@ function journal:ADDON_LOADED(addonName)
 	if addonName == "Blizzard_Collections" and IsAddOnLoaded("MountsJournal") or addonName == "MountsJournal" and IsAddOnLoaded("Blizzard_Collections") then
 		self:UnregisterEvent("ADDON_LOADED")
 
+		local texPath = "Interface/AddOns/MountsJournal/textures/"
+		local scrollFrame = MountJournal.ListScrollFrame
+		journal.scrollButtons = scrollFrame.buttons
+		journal.leftInset = MountJournal.LeftInset
 		mounts.filters.types = mounts.filters.types or {true, true, true}
+		mounts.filters.selected = mounts.filters.selected or {false, false, false}
 
 		-- SETTINGS BUTTON
 		local btnConfig = CreateFrame("Button", "MountsJournalBtnConfig", MountJournal, "UIPanelButtonTemplate")
@@ -270,9 +275,6 @@ function journal:ADDON_LOADED(addonName)
 		end)
 
 		-- SELECTED BUTTONS
-		journal.scrollButtons = MountJournal.ListScrollFrame.buttons
-		local texPath = "Interface/AddOns/MountsJournal/textures/"
-
 		local function CreateButton(name, parent, pointX, pointY, OnClick)
 			local btnFrame = CreateFrame("button", nil, parent)
 			btnFrame:SetPoint("TOPRIGHT", pointX, pointY)
@@ -321,27 +323,64 @@ function journal:ADDON_LOADED(addonName)
 			end)
 		end
 
-		-- FILTERS SEARTCH
-		MountJournal.searchBox:SetPoint("TOPLEFT", MountJournal.LeftInset, "TOPLEFT", 34, -9)
-		MountJournal.searchBox:SetSize(128, 20)
+		-- FILTERS PANEL
+		local filtersPanel = CreateFrame("FRAME", nil, MountJournal, "InsetFrameTemplate")
+		journal.filtersPanel = filtersPanel
+		filtersPanel:SetPoint("TOPLEFT", 4, -60)
+		filtersPanel:SetSize(280, 29)
+
+		MountJournal.searchBox:SetPoint("TOPLEFT", filtersPanel, "TOPLEFT", 33, -4)
+		MountJournal.searchBox:SetSize(151, 20)
+		MountJournalFilterButton:SetPoint("TOPRIGHT", filtersPanel, "TOPRIGHT", -3, -4)
+
+		-- FILTERS SHOWN PANEL
+		local shownPanel = CreateFrame("FRAME", nil, MountJournal, "InsetFrameTemplate")
+		journal.shownPanel = shownPanel
+		shownPanel:SetPoint("TOPLEFT", filtersPanel, "BOTTOMLEFT", 0, -2)
+		shownPanel:SetSize(280, 26)
+		
+		shownPanel.text = shownPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+		shownPanel.text:SetPoint("LEFT", 8, -1)
+		shownPanel.text:SetText(L["Shown:"])
+		
+		shownPanel.count = shownPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+		shownPanel.count:SetPoint("LEFT", shownPanel.text ,"RIGHT", 2, 0)
+
+		shownPanel.clear = CreateFrame("button", nil, shownPanel)
+		shownPanel.clear:SetPoint("RIGHT", -5, 0)
+		shownPanel.clear:SetSize(18, 18)
+		shownPanel.clear:SetHitRectInsets(-2, -2, -2, -2)
+		shownPanel.clear:SetNormalTexture("Interface/FriendsFrame/ClearBroadcastIcon")
+		shownPanel.clear.texture = shownPanel.clear:GetRegions()
+		shownPanel.clear.texture:SetAlpha(0.5)
+		shownPanel.clear:SetScript("OnEnter", function(self) self.texture:SetAlpha(1) end)
+		shownPanel.clear:SetScript("OnLeave", function(self) self.texture:SetAlpha(0.5) end)
+		shownPanel.clear:SetScript("OnMouseDown", function(self) self:SetPoint("RIGHT", -4, -1) end)
+		shownPanel.clear:SetScript("OnMouseUp", function(self) self:SetPoint("RIGHT", -5, 0) end)
+		shownPanel.clear:SetScript("OnClick", journal.clearFilters)
+
+		-- SCROLL FRAME
+		journal.leftInset:SetPoint("TOPLEFT", shownPanel, "BOTTOMLEFT", 0, -2)
+		scrollFrame:SetPoint("TOPLEFT", journal.leftInset, "TOPLEFT", 3, -5)
+		scrollFrame.scrollBar:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", 1, -12)
 
 		-- FILTERS BAR
-		journal.filtersBar = CreateFrame("FRAME", nil, MountJournal.LeftInset)
-		local filtersBar = journal.filtersBar
+		local filtersBar = CreateFrame("FRAME", nil, filtersPanel)
+		journal.filtersBar = filtersBar
 		filtersBar:SetSize(235, 35)
-		filtersBar:SetPoint("TOP", 0, -50)
+		filtersBar:SetPoint("TOP", 0, -46)
 		filtersBar:SetBackdrop({
 			edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
 			tile = true,
 			edgeSize = 16,
 		})
 		filtersBar:SetBackdropBorderColor(0.6, 0.6, 0.6)
-		filtersBar.types, filtersBar.sources = setTabs(filtersBar, L["Types"], SOURCES)
+		filtersBar.types, filtersBar.selected, filtersBar.sources = setTabs(filtersBar, "types", "selected", "sources")
 
 		-- FILTERS CLEAR
 		local clear = CreateFrame("button", nil, filtersBar)
 		filtersBar.clear = clear
-		clear:SetPoint("BOTTOMRIGHT", filtersBar, "TOPRIGHT", -5, 0)
+		clear:SetPoint("BOTTOMRIGHT", filtersBar, "TOPRIGHT")
 		clear:SetSize(18, 18)
 		clear:SetHitRectInsets(-2, -2, -2, -2)
 		clear:SetNormalTexture("Interface/FriendsFrame/ClearBroadcastIcon")
@@ -349,8 +388,8 @@ function journal:ADDON_LOADED(addonName)
 		clear.texture:SetAlpha(0.5)
 		clear:SetScript("OnEnter", function(self) self.texture:SetAlpha(1) end)
 		clear:SetScript("OnLeave", function(self) self.texture:SetAlpha(0.5) end)
-		clear:SetScript("OnMouseDown", function(self) self:SetPoint("BOTTOMRIGHT", filtersBar, "TOPRIGHT", -4, -1) end)
-		clear:SetScript("OnMouseUp", function(self) self:SetPoint("BOTTOMRIGHT", filtersBar, "TOPRIGHT", -5, 0) end)
+		clear:SetScript("OnMouseDown", function(self) self:SetPoint("BOTTOMRIGHT", filtersBar, "TOPRIGHT", 1, -1) end)
+		clear:SetScript("OnMouseUp", function(self) self:SetPoint("BOTTOMRIGHT", filtersBar, "TOPRIGHT") end)
 		clear:SetScript("OnClick", journal.clearFilters)
 
 		-- FILTERS BUTTONS
@@ -397,11 +436,9 @@ function journal:ADDON_LOADED(addonName)
 			if texture.texCoord then btn.icon:SetTexCoord(unpack(texture.texCoord)) end
 
 			btn:SetScript("OnMouseDown", function()
-				btn.icon:SetPoint("CENTER", 1, -1)
 				btn.icon:SetSize(texture.width - 2, texture.height - 2)
 			end)
 			btn:SetScript("OnMouseUp", function()
-				btn.icon:SetPoint("CENTER")
 				btn.icon:SetSize(texture.width, texture.height)
 			end)
 			btn:SetScript("OnEnter", function()
@@ -428,6 +465,11 @@ function journal:ADDON_LOADED(addonName)
 			CreateButtonFilter(i, filtersBar.types, 75, 25, typesTextures[i], L["MOUNT_TYPE_"..i])
 		end
 
+		-- FILTERS SELECTED BUTTONS
+		for i = 1, #typesTextures do
+			CreateButtonFilter(i, filtersBar.selected, 75, 25, typesTextures[i], L["MOUNT_TYPE_"..i])
+		end
+
 		-- FILTERS SOURCES BUTTONS
 		local sourcesTextures = {
 			{path = texPath.."sources", texCoord = {0, 0.25, 0, 0.25}, width = 20, height = 20},
@@ -451,8 +493,8 @@ function journal:ADDON_LOADED(addonName)
 		journal:updateBtnFilters()
 
 		-- FILTERS TOGGLE BTN
-		local btnToggle = CreateFrame("button", nil, MountJournal.LeftInset)
-		btnToggle:SetPoint("TOPLEFT", MountJournal.LeftInset, "TOPLEFT", 4, -7)
+		local btnToggle = CreateFrame("button", nil, filtersPanel)
+		btnToggle:SetPoint("TOPLEFT", 3, -3)
 		btnToggle:SetSize(24, 24)
 		btnToggle:SetHitRectInsets(-2, -2, -2, -2)
 		btnToggle:SetHighlightTexture("Interface/BUTTONS/UI-Common-MouseHilight")
@@ -526,24 +568,16 @@ function journal:ADDON_LOADED(addonName)
 			end
 		end)
 
-		local filterHeight = 51
-		local scrollFrame = MountJournal.ListScrollFrame
-		local sfp = {scrollFrame:GetPoint()}
-		local scrollBar = scrollFrame.scrollBar
-		local sbp = {scrollBar:GetPoint()}
-
 		local function setBtnToggleCheck()
 			if mounts.config.filterToggle then
 				btnToggle.Icon:SetPoint("CENTER", 0, 1)
 				btnToggle.Icon:SetTexCoord(1, 0, 0, 0, 1, 1, 0, 1)
-				scrollFrame:SetPoint(sfp[1], sfp[2], sfp[3], sfp[4], sfp[5] - filterHeight)
-				scrollBar:SetPoint(sbp[1], sbp[2], sbp[3], sbp[4], sbp[5] + filterHeight)
+				filtersPanel:SetHeight(84)
 				filtersBar:Show()
 			else
 				btnToggle.Icon:SetPoint("CENTER", 0, -1)
 				btnToggle.Icon:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
-				scrollFrame:SetPoint(unpack(sfp))
-				scrollBar:SetPoint(unpack(sbp))
+				filtersPanel:SetHeight(29)
 				filtersBar:Hide()
 			end
 		end
@@ -676,12 +710,16 @@ function journal:filterDropDown_Initialize(level)
 		info.hasArrow = true
 		info.notCheckable = true
 
-		info.text = L["Types"]
+		info.text = L["types"]
 		info.value = 1
 		UIDropDownMenu_AddButton(info, level)
 
-		info.text = SOURCES
+		info.text = L["selected"]
 		info.value = 2
+		UIDropDownMenu_AddButton(info, level)
+
+		info.text = SOURCES
+		info.value = 3
 		UIDropDownMenu_AddButton(info, level)
 	else
 		info.notCheckable = true
@@ -689,14 +727,14 @@ function journal:filterDropDown_Initialize(level)
 		if UIDROPDOWNMENU_MENU_VALUE == 1 then -- TYPES
 			info.text = CHECK_ALL
 			info.func = function()
-				journal:setAllTypesFilters(true)
+				journal:setAllFilters("types", true)
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
 
 			info.text = UNCHECK_ALL
 			info.func = function()
-				journal:setAllTypesFilters(false)
+				journal:setAllFilters("types", false)
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -708,9 +746,34 @@ function journal:filterDropDown_Initialize(level)
 				info.func = function(_, _, _, value)
 					types[i] = value
 					journal:updateBtnFilters()
-					MountJournal_UpdateMountList()
 				end
 				info.checked = function() return types[i] end
+				UIDropDownMenu_AddButton(info, level)
+			end
+		elseif UIDROPDOWNMENU_MENU_VALUE == 2 then -- SELECTED
+			info.text = CHECK_ALL
+			info.func = function()
+				journal:setAllFilters("selected", true)
+				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+			end
+			UIDropDownMenu_AddButton(info, level)
+
+			info.text = UNCHECK_ALL
+			info.func = function()
+				journal:setAllFilters("selected", false)
+				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+			end
+			UIDropDownMenu_AddButton(info, level)
+
+			info.notCheckable = false
+			local selected = mounts.filters.selected
+			for i = 1, #selected do
+				info.text = L["MOUNT_TYPE_"..i]
+				info.func = function(_, _, _, value)
+					selected[i] = value
+					journal:updateBtnFilters()
+				end
+				info.checked = function() return selected[i] end
 				UIDropDownMenu_AddButton(info, level)
 			end
 		else -- SOURCES
@@ -749,7 +812,8 @@ end
 
 function journal:clearFilters()
 	C_MountJournal.SetAllSourceFilters(true)
-	journal:setAllTypesFilters(true)
+	journal:setAllFilters("types", true)
+	journal:setAllFilters("selected", false)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 end
 
@@ -757,19 +821,20 @@ end
 function journal:setBtnFilters(tab)
 	local i = 0
 
-	if tab == 1 then
-		local types = mounts.filters.types
-		local children = {journal.filtersBar.types:GetChildren()}
+	if tab ~= "sources" then
+		local default = tab == "types" and true or false
+		local filters = mounts.filters[tab]
+		local children = {journal.filtersBar[tab]:GetChildren()}
 
 		for _, btn in pairs(children) do
 			local checked = btn:GetChecked()
-			types[btn.id] = checked
-			if not checked then i = i + 1 end
+			filters[btn.id] = checked
+			if not checked and default then i = i + 1 end
 		end
 
-		if i == #children then
-			for k in pairs(types) do
-				types[k] = true
+		if i == #filters then
+			for k in pairs(filters) do
+				filters[k] = default
 			end
 		end
 	else
@@ -788,44 +853,46 @@ function journal:setBtnFilters(tab)
 
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	journal:updateBtnFilters()
-	MountJournal_UpdateMountList()
 end
 
 
-function journal:setAllTypesFilters(enabled)
-	local types = mounts.filters.types
-	for k in pairs(types) do
-		types[k] = enabled
+function journal:setAllFilters(type, enabled)
+	local filters = mounts.filters[type]
+	for k in pairs(filters) do
+		filters[k] = enabled
 	end
 	journal:updateBtnFilters()
-	MountJournal_UpdateMountList()
 end
 
 
 function journal:updateBtnFilters()
-	local types, filtersBar, i = mounts.filters.types, journal.filtersBar, 0
+	local filtersBar, f = journal.filtersBar, {}
 
-	-- TYPES
-	for _, v in pairs(types) do
-		if v then i = i + 1 end
-	end
+	-- TYPES AND SELECTED
+	for typeFilter, filter in pairs(mounts.filters) do
+		local default = typeFilter == "types" and true or false
+		local i = 0
+		for _, v in pairs(filter) do
+			if v == default then i = i + 1 end
+		end
 
-	if i == #types then
-		for _, btn in pairs({filtersBar.types:GetChildren()}) do
-			btn:SetChecked(false)
-			btn.icon:SetVertexColor(unpack(journal.colors["mount"..btn.id]))
+		if i == #filter then
+			f[typeFilter] = true
+			for _, btn in pairs({filtersBar[typeFilter]:GetChildren()}) do
+				local color = default and journal.colors["mount"..btn.id] or journal.colors.dark
+				btn:SetChecked(false)
+				btn.icon:SetVertexColor(unpack(color))
+			end
+			filtersBar[typeFilter]:GetParent().filtred:Hide()
+		else
+			for _, btn in pairs({filtersBar[typeFilter]:GetChildren()}) do
+				local checked = filter[btn.id]
+				local color = checked and journal.colors["mount"..btn.id] or journal.colors.dark
+				btn:SetChecked(checked)
+				btn.icon:SetVertexColor(unpack(color))
+			end
+			filtersBar[typeFilter]:GetParent().filtred:Show()
 		end
-		filtersBar.clear:Hide()
-		filtersBar.types:GetParent().filtred:Hide()
-	else
-		for _, btn in pairs({filtersBar.types:GetChildren()}) do
-			local checked = types[btn.id]
-			local color = checked and journal.colors["mount"..btn.id] or journal.colors.dark
-			btn:SetChecked(checked)
-			btn.icon:SetVertexColor(unpack(color))
-		end
-		filtersBar.clear:Show()
-		filtersBar.types:GetParent().filtred:Show()
 	end
 
 	-- SOURCES
@@ -854,12 +921,23 @@ function journal:updateBtnFilters()
 	end
 
 	-- CLEAR FILTERS
-	filtersBar.clear:SetShown(i ~= #types or n ~= #sources - 1)
+	if not f.types or not f.selected or n ~= #sources - 1 then
+		filtersBar.clear:Show()
+		journal.shownPanel:Show()
+		journal.leftInset:SetPoint("TOPLEFT", journal.shownPanel, "BOTTOMLEFT", 0, -2)
+	else
+		filtersBar.clear:Hide()
+		journal.shownPanel:Hide()
+		journal.leftInset:SetPoint("TOPLEFT", journal.filtersPanel, "BOTTOMLEFT", 0, -2)
+	end
+
+	journal.leftInset:GetHeight()
+	MountJournal_UpdateMountList()
 end
 
 
 function journal:getNumDisplayedMounts()
-	local types = mounts.filters.types
+	local types, selected, list = mounts.filters.types, mounts.filters.selected, mounts.list
 	wipe(journal.displayedMounts)
 	journal.displayedMounts[0] = 0
 
@@ -867,15 +945,25 @@ function journal:getNumDisplayedMounts()
 		local mountID = select(12, journal.func.GetDisplayedMountInfo(i))
 		local mountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
 
-		-- FLY
-		if types[1] and mounts:inTable({242, 247, 248}, mountType)
-		-- GROUND
+		-- TYPE
+			-- FLY
+		if (types[1] and mounts:inTable({242, 247, 248}, mountType)
+			-- GROUND
 		or types[2] and mounts:inTable({230, 241, 269, 284}, mountType)
-		-- SWIMMING
-		or types[3] and mounts:inTable({231, 232, 254}, mountType) then
+			-- SWIMMING
+		or types[3] and mounts:inTable({231, 232, 254}, mountType))
+		-- SELECTED
+		and (not selected[1] and not selected[2] and not selected[3]
+			-- FLY
+		or selected[1] and mounts:inTable(list.fly, mountID)
+			-- GROUND
+		or selected[2] and mounts:inTable(list.ground, mountID)
+			-- SWIMMING
+		or selected[3] and mounts:inTable(list.swimming, mountID)) then
 			tinsert(journal.displayedMounts, i)
 		end
 	end
 
+	journal.shownPanel.count:SetText(#journal.displayedMounts)
 	return #journal.displayedMounts
 end
