@@ -1,0 +1,140 @@
+<Ui>
+	<Frame name="MountsJournalFrame">
+		<Frames>
+			<Button parentKey="achiev">
+				<Size x="60" y="40"/>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture atlas="PetJournal-PetBattleAchievementBG">
+							<Size x="46" y="18"/>
+							<Anchors>
+								<Anchor point="TOP" x="-56" y="-12"/>
+							</Anchors>
+						</Texture>
+						<Texture atlas="PetJournal-PetBattleAchievementBG">
+							<Size x="46" y="18"/>
+							<Anchors>
+								<Anchor point="TOP" x="55" y="-12"/>
+							</Anchors>
+							<TexCoords left="1" right="0" top="0" bottom="1"/>
+						</Texture>
+						<Texture parentKey="highlight" atlas="PetJournal-PetBattleAchievementGlow" hidden="true">
+							<Size x="210" y="40"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+					<Layer level="OVERLAY">
+						<Texture file="Interface/AchievementFrame/UI-Achievement-Shields-NoPoints">
+							<Size x="30" y="30"/>
+							<Anchors>
+								<Anchor point="RIGHT" x="1" y="-2"/>
+							</Anchors>
+							<TexCoords left="0" right="0.5" top="0" bottom="0.5"/>
+						</Texture>
+						<FontString parentKey="text" inherits="GameFontNormalLarge">
+							<Anchors>
+								<Anchor point="CENTER" x="-17" y="0"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnEnter>self.highlight:Show()</OnEnter>
+					<OnLeave>self.highlight:Hide()</OnLeave>
+				</Scripts>
+			</Button>
+
+			<Button parentKey="btnToggle">
+				<Size x="24" y="24"/>
+				<HitRectInsets>
+					<AbsInset left="-2" right="-2" top="-2" bottom="-2"/>
+				</HitRectInsets>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="topLeft" file="Interface/Buttons/UI-Silver-Button-Up">
+							<Size x="13" y="6"/>
+							<Anchors>
+								<Anchor point="TOPLEFT"/>
+							</Anchors>
+							<TexCoords left="0" right="0.1015625" top="0" bottom="0.1875"/>
+						</Texture>
+						<Texture parentKey="topRight" file="Interface/Buttons/UI-Silver-Button-Up">
+							<Size x="13" y="6"/>
+							<Anchors>
+								<Anchor point="TOPRIGHT"/>
+							</Anchors>
+							<TexCoords left="0.5234375" right="0.625" top="0" bottom="0.1875"/>
+						</Texture>
+						<Texture parentKey="bottomLeft" file="Interface/Buttons/UI-Silver-Button-Up">
+							<Size x="13" y="6"/>
+							<Anchors>
+								<Anchor point="BOTTOMLEFT"/>
+							</Anchors>
+							<TexCoords left="0" right="0.1015625" top="0.625" bottom="0.8125"/>
+						</Texture>
+						<Texture parentKey="bottomRight" file="Interface/Buttons/UI-Silver-Button-Up">
+							<Size x="13" y="6"/>
+							<Anchors>
+								<Anchor point="BOTTOMRIGHT"/>
+							</Anchors>
+							<TexCoords left="0.5234375" right="0.625" top="0.625" bottom="0.8125"/>
+						</Texture>
+						<Texture parentKey="left" file="Interface/Buttons/UI-Silver-Button-Up">
+							<Size x="12" y="14"/>
+							<Anchors>
+								<Anchor point="LEFT"/>
+							</Anchors>
+							<TexCoords left="0" right="0.09375" top="0.1875" bottom="0.625"/>
+						</Texture>
+						<Texture parentKey="right" file="Interface/Buttons/UI-Silver-Button-Up">
+							<Size x="12" y="14"/>
+							<Anchors>
+								<Anchor point="RIGHT"/>
+							</Anchors>
+							<TexCoords left="0.53125" right="0.625" top="0.1875" bottom="0.625"/>
+						</Texture>
+					</Layer>
+					<Layer level="ARTWORK">
+						<Texture parentKey="icon" file="Interface/ChatFrame/ChatFrameExpandArrow">
+							<Size x="14" y="14"/>
+							<Anchors>
+								<Anchor point="CENTER" x="0" y="-1"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alpha="0.75" alphaMode="ADD"/>
+				<Scripts>
+					<OnMouseDown>
+						self.topLeft:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
+						self.topRight:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
+						self.bottomLeft:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
+						self.bottomRight:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
+						self.left:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
+						self.right:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
+						if MountsJournal.config.filterToggle then
+							self.icon:SetPoint("CENTER", -1, 0)
+						else
+							self.icon:SetPoint("CENTER", -1, -2)
+						end
+					</OnMouseDown>
+					<OnMouseUp>
+						self.topLeft:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
+						self.topRight:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
+						self.bottomLeft:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
+						self.bottomRight:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
+						self.left:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
+						self.right:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
+						if MountsJournal.config.filterToggle then
+							self.icon:SetPoint("CENTER", 0, 1)
+						else
+							self.icon:SetPoint("CENTER", 0, -1)
+						end
+					</OnMouseUp>
+				</Scripts>
+			</Button>
+		</Frames>
+	</Frame>
+</Ui>

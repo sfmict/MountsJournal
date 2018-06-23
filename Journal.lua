@@ -1,6 +1,6 @@
 local _, L = ...
 local mounts, config = MountsJournal, MountsJournalConfig
-local journal = CreateFrame("Frame", "MountsJournalFrame")
+local journal = MountsJournalFrame
 
 
 local COLLECTION_ACHIEVEMENT_CATEGORY = 15246
@@ -44,131 +44,19 @@ local function setTabs(frame, ...)
 	local contents = {}
 
 	for i = 1, select("#", ...) do
-		local tab = CreateFrame("Button", nil, frame)
+		local tab = CreateFrame("Button", nil, frame, "MJTabTemplate")
 		tab.id = select(i, ...)
-		tab:SetSize(75, 24)
-		
+
 		if i == 1 then
 			tab:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", 4, -4)
 		else
 			tab:SetPoint("LEFT", frame.tabs[i - 1], "RIGHT", -5, 0)
 		end
 
-		tab.text = tab:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-		tab.text:SetPoint("CENTER")
 		tab.text:SetText(L[select(i, ...)])
-
-		tab.bgLeft = tab:CreateTexture(nil, "BACKGROUND")
-		tab.bgLeft:SetTexture("Interface/ChatFrame/ChatFrameTab-BGLeft")
-		tab.bgLeft:SetSize(16, 24)
-		tab.bgLeft:SetPoint("TOPLEFT", 0, 2)
-		tab.bgLeft:SetTexCoord(0, 1, 0.25, 1)
-
-		tab.bgRight = tab:CreateTexture(nil, "BACKGROUND")
-		tab.bgRight:SetTexture("Interface/ChatFrame/ChatFrameTab-BGRight")
-		tab.bgRight:SetSize(16, 24)
-		tab.bgRight:SetPoint("TOPRIGHT", 0, 2)
-		tab.bgRight:SetTexCoord(0, 1, 0.25, 1)
-
-		tab.bgCenter = tab:CreateTexture(nil, "BACKGROUND")
-		tab.bgCenter:SetTexture("Interface/ChatFrame/ChatFrameTab-BGMid")
-		tab.bgCenter:SetSize(3, 24)
-		tab.bgCenter:SetPoint("TOPLEFT", 16, 2)
-		tab.bgCenter:SetPoint("TOPRIGHT", -16, 2)
-		tab.bgCenter:SetTexCoord(0, 1, 0.25, 1)
-
-		tab.filtred = tab:CreateTexture(nil, "OVERLAY")
-		tab.filtred:SetTexture("Interface/PaperDollInfoFrame/UI-Character-Tab-Highlight")
-		tab.filtred:SetSize(16, 24)
-		tab.filtred:SetPoint("TOPLEFT", 3, -6)
-		tab.filtred:SetPoint("BOTTOMRIGHT", -3, 2)
-		tab.filtred:SetTexCoord(0, 1, 0.40625, 0.75)
-		tab.filtred:SetVertexColor(1, 1, 0.75)
-		tab.filtred:SetBlendMode("ADD")
-
-		tab.hlLeft = tab:CreateTexture(nil, "HIGHTLIGHT")
-		tab.hlLeft:SetTexture("Interface/ChatFrame/ChatFrameTab-HighlightLeft")
-		tab.hlLeft:SetSize(16, 24)
-		tab.hlLeft:SetPoint("TOPLEFT", 0, 2)
-		tab.hlLeft:SetTexCoord(0, 1, 0.25, 1)
-		tab.hlLeft:SetVertexColor(0.1, 0.25, 0.5)
-		tab.hlLeft:SetBlendMode("ADD")
-		tab.hlLeft:Hide()
-
-		tab.hlRight = tab:CreateTexture(nil, "HIGHTLIGHT")
-		tab.hlRight:SetTexture("Interface/ChatFrame/ChatFrameTab-HighlightRight")
-		tab.hlRight:SetSize(16, 24)
-		tab.hlRight:SetPoint("TOPRIGHT", 0, 2)
-		tab.hlRight:SetTexCoord(0, 1, 0.25, 1)
-		tab.hlRight:SetVertexColor(0.1, 0.25, 0.5)
-		tab.hlRight:SetBlendMode("ADD")
-		tab.hlRight:Hide()
-
-		tab.hlCenter = tab:CreateTexture(nil, "HIGHTLIGHT")
-		tab.hlCenter:SetTexture("Interface/ChatFrame/ChatFrameTab-HighlightMid")
-		tab.hlCenter:SetSize(3, 24)
-		tab.hlCenter:SetPoint("TOPLEFT", 16, 2)
-		tab.hlCenter:SetPoint("TOPRIGHT", -16, 2)
-		tab.hlCenter:SetTexCoord(0, 1, 0.25, 1)
-		tab.hlCenter:SetVertexColor(0.1, 0.25, 0.5)
-		tab.hlCenter:SetBlendMode("ADD")
-		tab.hlCenter:Hide()
-
-		tab.selected = CreateFrame("FRAME", nil, tab)
-		local selected = tab.selected
-		selected:SetAllPoints()
-
-		selected.left = selected:CreateTexture(nil, "OVERLAY")
-		selected.left:SetTexture("Interface/ChatFrame/ChatFrameTab-SelectedLeft")
-		selected.left:SetSize(16, 24)
-		selected.left:SetPoint("TOPLEFT", 2, 0)
-		selected.left:SetTexCoord(0, 1, 0.25, 1)
-		selected.left:SetVertexColor(unpack(journal.colors.gold))
-		selected.left:SetBlendMode("ADD")
-
-		selected.right = selected:CreateTexture(nil, "OVERLAY")
-		selected.right:SetTexture("Interface/ChatFrame/ChatFrameTab-SelectedRight")
-		selected.right:SetSize(16, 24)
-		selected.right:SetPoint("TOPRIGHT", -2, 0)
-		selected.right:SetTexCoord(0, 1, 0.25, 1)
-		selected.right:SetVertexColor(unpack(journal.colors.gold))
-		selected.right:SetBlendMode("ADD")
-
-		selected.center = selected:CreateTexture(nil, "OVERLAY")
-		selected.center:SetTexture("Interface/ChatFrame/ChatFrameTab-SelectedMid")
-		selected.center:SetSize(3, 24)
-		selected.center:SetPoint("TOPLEFT", 18, 0)
-		selected.center:SetPoint("TOPRIGHT", -18, 0)
-		selected.center:SetTexCoord(0, 1, 0.25, 1)
-		selected.center:SetVertexColor(unpack(journal.colors.gold))
-		selected.center:SetBlendMode("ADD")
-
-		selected.bg = selected:CreateTexture(nil, "ARTWORK")
-		selected.bg:SetColorTexture(0.065, 0.065, 0.065)
-		selected.bg:SetPoint("TOPLEFT", selected, "BOTTOMLEFT", 6, 2)
-		selected.bg:SetPoint("BOTTOMRIGHT", selected, "BOTTOMRIGHT", -6, -2)
-
-		tab:SetScript("OnEnter", function(self)
-			self.hlLeft:Show()
-			self.hlRight:Show()
-			self.hlCenter:Show()
-		end)
-		tab:SetScript("OnLeave", function(self)
-			self.hlLeft:Hide()
-			self.hlRight:Hide()
-			self.hlCenter:Hide()
-		end)
-		tab:SetScript("OnMouseDown", function(self)
-			self.text:SetPoint("CENTER", 1, -1)
-		end)
-		tab:SetScript("OnMouseUp", function(self)
-			self.text:SetPoint("CENTER")
-		end)
-		tab:SetScript("OnClick", tabClick)
-
-		tab.content = CreateFrame("FRAME", nil, tab)
 		tab.content:SetPoint("TOPLEFT", frame, "TOPLEFT")
 		tab.content:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
+		tab:SetScript("OnClick", tabClick)
 
 		tinsert(frame.tabs, tab)
 		tinsert(contents, tab.content)
@@ -209,41 +97,10 @@ function journal:ADDON_LOADED(addonName)
 		btnConfig:SetScript("OnClick", config.openConfig)
 
 		-- ACHIEVEMENT
-		local achiev = CreateFrame("button", nil, MountJournal)
-		journal.achiev = achiev
-		achiev:SetPoint("TOP", 60, -21)
-		achiev:SetSize(60, 40)
-
-		achiev.hightlight = achiev:CreateTexture(nil, "BACKGROUND")
-		achiev.hightlight:SetAtlas("PetJournal-PetBattleAchievementGlow")
-		achiev.hightlight:SetPoint("TOP")
-		achiev.hightlight:SetSize(210, 40)
-		achiev.hightlight:Hide()
-
-		achiev.left = achiev:CreateTexture(nil, "BACKGROUND")
-		achiev.left:SetAtlas("PetJournal-PetBattleAchievementBG")
-		achiev.left:SetSize(46, 18)
-		achiev.left:SetPoint("TOP", -56, -12)
-
-		achiev.right = achiev:CreateTexture(nil, "BACKGROUND")
-		achiev.right:SetAtlas("PetJournal-PetBattleAchievementBG")
-		achiev.right:SetSize(46, 18)
-		achiev.right:SetPoint("TOP", 55, -12)
-		achiev.right:SetTexCoord(1, 0, 0, 1)
-
-		achiev.icon = achiev:CreateTexture(nil, "OVERLAY")
-		achiev.icon:SetTexture("Interface/AchievementFrame/UI-Achievement-Shields-NoPoints")
-		achiev.icon:SetSize(30, 30)
-		achiev.icon:SetPoint("RIGHT", 1, -2)
-		achiev.icon:SetTexCoord(0, 0.5, 0, 0.5)
-
-		achiev.text = achiev:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-		achiev.text:SetPoint("CENTER", -17, 0)
+		journal.achiev:SetParent(MountJournal)
+		journal.achiev:SetPoint("TOP", 60, -21)
 		journal:ACHIEVEMENT_EARNED()
-
-		achiev:SetScript("OnEnter", function(self) self.hightlight:Show() end)
-		achiev:SetScript("OnLeave", function(self) self.hightlight:Hide() end)
-		achiev:SetScript("OnClick", function()
+		journal.achiev:SetScript("OnClick", function()
 			ToggleAchievementFrame()
 			local i = 1
 			local button = _G["AchievementFrameCategoriesContainerButton"..i]
@@ -346,18 +203,9 @@ function journal:ADDON_LOADED(addonName)
 		shownPanel.count = shownPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 		shownPanel.count:SetPoint("LEFT", shownPanel.text ,"RIGHT", 2, 0)
 
-		shownPanel.clear = CreateFrame("button", nil, shownPanel)
+		shownPanel.clear = CreateFrame("button", nil, shownPanel, "MJClearButtonTemplate")
 		shownPanel.clear:SetPoint("RIGHT", -5, 0)
-		shownPanel.clear:SetSize(18, 18)
-		shownPanel.clear:SetHitRectInsets(-2, -2, -2, -2)
-		shownPanel.clear:SetNormalTexture("Interface/FriendsFrame/ClearBroadcastIcon")
-		shownPanel.clear.texture = shownPanel.clear:GetRegions()
-		shownPanel.clear.texture:SetAlpha(0.5)
-		shownPanel.clear:SetScript("OnEnter", function(self) self.texture:SetAlpha(1) end)
-		shownPanel.clear:SetScript("OnLeave", function(self) self.texture:SetAlpha(0.5) end)
-		shownPanel.clear:SetScript("OnMouseDown", function(self) self:SetPoint("RIGHT", -4, -1) end)
-		shownPanel.clear:SetScript("OnMouseUp", function(self) self:SetPoint("RIGHT", -5, 0) end)
-		shownPanel.clear:SetScript("OnClick", journal.clearFilters)
+		shownPanel.clear:SetScript("OnClick", journal.clearAllFilters)
 
 		-- SCROLL FRAME
 		journal.leftInset:SetPoint("TOPLEFT", shownPanel, "BOTTOMLEFT", 0, -2)
@@ -378,19 +226,9 @@ function journal:ADDON_LOADED(addonName)
 		filtersBar.types, filtersBar.selected, filtersBar.sources = setTabs(filtersBar, "types", "selected", "sources")
 
 		-- FILTERS CLEAR
-		local clear = CreateFrame("button", nil, filtersBar)
-		filtersBar.clear = clear
-		clear:SetPoint("BOTTOMRIGHT", filtersBar, "TOPRIGHT")
-		clear:SetSize(18, 18)
-		clear:SetHitRectInsets(-2, -2, -2, -2)
-		clear:SetNormalTexture("Interface/FriendsFrame/ClearBroadcastIcon")
-		clear.texture = clear:GetRegions()
-		clear.texture:SetAlpha(0.5)
-		clear:SetScript("OnEnter", function(self) self.texture:SetAlpha(1) end)
-		clear:SetScript("OnLeave", function(self) self.texture:SetAlpha(0.5) end)
-		clear:SetScript("OnMouseDown", function(self) self:SetPoint("BOTTOMRIGHT", filtersBar, "TOPRIGHT", 1, -1) end)
-		clear:SetScript("OnMouseUp", function(self) self:SetPoint("BOTTOMRIGHT", filtersBar, "TOPRIGHT") end)
-		clear:SetScript("OnClick", journal.clearFilters)
+		filtersBar.clear = CreateFrame("button", nil, filtersBar, "MJClearButtonTemplate")
+		filtersBar.clear:SetPoint("BOTTOMRIGHT", filtersBar, "TOPRIGHT")
+		filtersBar.clear:SetScript("OnClick", journal.clearBtnFilters)
 
 		-- FILTERS BUTTONS
 		local function CreateButtonFilter(id, parent, width, height, texture, tooltip)
@@ -490,100 +328,26 @@ function journal:ADDON_LOADED(addonName)
 			end
 		end
 
-		journal:updateBtnFilters()
-
-		-- FILTERS TOGGLE BTN
-		local btnToggle = CreateFrame("button", nil, filtersPanel)
-		btnToggle:SetPoint("TOPLEFT", 3, -3)
-		btnToggle:SetSize(24, 24)
-		btnToggle:SetHitRectInsets(-2, -2, -2, -2)
-		btnToggle:SetHighlightTexture("Interface/BUTTONS/UI-Common-MouseHilight")
-
-		btnToggle.TopLeft = btnToggle:CreateTexture(nil, "BACKGROUND")
-		btnToggle.TopLeft:SetTexture("Interface/Buttons/UI-Silver-Button-Up")
-		btnToggle.TopLeft:SetTexCoord(0, 0.1015625, 0, 0.1875)
-		btnToggle.TopLeft:SetSize(13, 6)
-		btnToggle.TopLeft:SetPoint("TOPLEFT")
-
-		btnToggle.TopRight = btnToggle:CreateTexture(nil, "BACKGROUND")
-		btnToggle.TopRight:SetTexture("Interface/Buttons/UI-Silver-Button-Up")
-		btnToggle.TopRight:SetTexCoord(0.5234375, 0.625, 0, 0.1875)
-		btnToggle.TopRight:SetSize(13, 6)
-		btnToggle.TopRight:SetPoint("TOPRIGHT")
-
-		btnToggle.BottomLeft = btnToggle:CreateTexture(nil, "BACKGROUND")
-		btnToggle.BottomLeft:SetTexture("Interface/Buttons/UI-Silver-Button-Up")
-		btnToggle.BottomLeft:SetTexCoord(0, 0.1015625, 0.625, 0.8125)
-		btnToggle.BottomLeft:SetSize(13, 6)
-		btnToggle.BottomLeft:SetPoint("BOTTOMLEFT")
-
-		btnToggle.BottomRight = btnToggle:CreateTexture(nil, "BACKGROUND")
-		btnToggle.BottomRight:SetTexture("Interface/Buttons/UI-Silver-Button-Up")
-		btnToggle.BottomRight:SetTexCoord(0.5234375, 0.625, 0.625, 0.8125)
-		btnToggle.BottomRight:SetSize(13, 6)
-		btnToggle.BottomRight:SetPoint("BOTTOMRIGHT")
-
-		btnToggle.Left = btnToggle:CreateTexture(nil, "BACKGROUND")
-		btnToggle.Left:SetTexture("Interface/Buttons/UI-Silver-Button-Up")
-		btnToggle.Left:SetTexCoord(0, 0.09375, 0.1875, 0.625)
-		btnToggle.Left:SetSize(12, 14)
-		btnToggle.Left:SetVertexColor(0.65, 0.65, 0.65)
-		btnToggle.Left:SetPoint("LEFT")
-
-		btnToggle.Right = btnToggle:CreateTexture(nil, "BACKGROUND")
-		btnToggle.Right:SetTexture("Interface/Buttons/UI-Silver-Button-Up")
-		btnToggle.Right:SetTexCoord(0.53125, 0.625, 0.1875, 0.625)
-		btnToggle.Right:SetSize(12, 14)
-		btnToggle.Right:SetPoint("RIGHT")
-
-		btnToggle.Icon = btnToggle:CreateTexture(nil, "ARTWORK")
-		btnToggle.Icon:SetTexture("Interface/ChatFrame/ChatFrameExpandArrow")
-		btnToggle.Icon:SetSize(14, 14)
-
-		btnToggle:SetScript("OnMouseDown", function(self)
-			self.TopLeft:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
-			self.TopRight:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
-			self.BottomLeft:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
-			self.BottomRight:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
-			self.Left:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
-			self.Right:SetTexture("Interface/Buttons/UI-Silver-Button-Down")
-			if mounts.config.filterToggle then
-				self.Icon:SetPoint("CENTER", -1, 0)
-			else
-				self.Icon:SetPoint("CENTER", -1, -2)
-			end
-		end)
-
-		btnToggle:SetScript("OnMouseUp", function(self)
-			self.TopLeft:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
-			self.TopRight:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
-			self.BottomLeft:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
-			self.BottomRight:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
-			self.Left:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
-			self.Right:SetTexture("Interface/Buttons/UI-Silver-Button-UP")
-			if mounts.config.filterToggle then
-				self.Icon:SetPoint("CENTER", 0, 1)
-			else
-				self.Icon:SetPoint("CENTER", 0, -1)
-			end
-		end)
+		-- FILTERS BTN TOGGLE
+		journal.btnToggle:SetParent(filtersPanel)
+		journal.btnToggle:SetPoint("TOPLEFT", 3, -3)
 
 		local function setBtnToggleCheck()
 			if mounts.config.filterToggle then
-				btnToggle.Icon:SetPoint("CENTER", 0, 1)
-				btnToggle.Icon:SetTexCoord(1, 0, 0, 0, 1, 1, 0, 1)
+				journal.btnToggle.icon:SetPoint("CENTER", 0, 1)
+				journal.btnToggle.icon:SetTexCoord(1, 0, 0, 0, 1, 1, 0, 1)
 				filtersPanel:SetHeight(84)
 				filtersBar:Show()
 			else
-				btnToggle.Icon:SetPoint("CENTER", 0, -1)
-				btnToggle.Icon:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
+				journal.btnToggle.icon:SetPoint("CENTER", 0, -1)
+				journal.btnToggle.icon:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
 				filtersPanel:SetHeight(29)
 				filtersBar:Hide()
 			end
 		end
 		setBtnToggleCheck()
 
-		btnToggle:SetScript("OnClick", function()
+		journal.btnToggle:SetScript("OnClick", function()
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			mounts.config.filterToggle = not mounts.config.filterToggle
 			setBtnToggleCheck()
@@ -591,7 +355,7 @@ function journal:ADDON_LOADED(addonName)
 
 		-- HOOKS
 		journal.func = {}
-		journal:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", journal.getNumDisplayedMounts)
+		journal:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", function() return #journal.displayedMounts end)
 		journal:setSecureFunc(C_MountJournal, "GetDisplayedMountInfo")
 		journal:setSecureFunc(C_MountJournal, "Pickup")
 		journal:setSecureFunc(C_MountJournal, "SetIsFavorite")
@@ -604,6 +368,7 @@ function journal:ADDON_LOADED(addonName)
 
 		-- FILTERS
 		MountJournalFilterDropDown.initialize = journal.filterDropDown_Initialize
+		journal:updateBtnFilters()
 	end
 end
 
@@ -685,14 +450,16 @@ function journal:filterDropDown_Initialize(level)
 	if level == 1 then
 		info.text = COLLECTED
 		info.func = function(_, _, _, value)
-			C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED,value)
+			C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, value)
+			journal:updateBtnFilters()
 		end
 		info.checked = C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED)
 		UIDropDownMenu_AddButton(info, level)
 
 		info.text = NOT_COLLECTED
 		info.func = function(_, _, _, value)
-			C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED,value)
+			C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, value)
+			journal:updateBtnFilters()
 		end
 		info.checked = C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED)
 		UIDropDownMenu_AddButton(info, level)
@@ -700,6 +467,7 @@ function journal:filterDropDown_Initialize(level)
 		info.text = MOUNT_JOURNAL_FILTER_UNUSABLE
 		info.func = function(_, _, _, value)
 			C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, value)
+			journal:updateBtnFilters()
 		end
 		info.checked = C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE)
 		UIDropDownMenu_AddButton(info, level)
@@ -810,7 +578,7 @@ function journal:filterDropDown_Initialize(level)
 end
 
 
-function journal:clearFilters()
+function journal:clearBtnFilters()
 	C_MountJournal.SetAllSourceFilters(true)
 	journal:setAllFilters("types", true)
 	journal:setAllFilters("selected", false)
@@ -818,11 +586,19 @@ function journal:clearFilters()
 end
 
 
+function journal:clearAllFilters()
+	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
+	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
+	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, true)
+	journal:clearBtnFilters()
+end
+
+
 function journal:setBtnFilters(tab)
 	local i = 0
 
 	if tab ~= "sources" then
-		local default = tab == "types" and true or false
+		local default = tab == "types"
 		local filters = mounts.filters[tab]
 		local children = {journal.filtersBar[tab]:GetChildren()}
 
@@ -870,7 +646,7 @@ function journal:updateBtnFilters()
 
 	-- TYPES AND SELECTED
 	for typeFilter, filter in pairs(mounts.filters) do
-		local default = typeFilter == "types" and true or false
+		local default = typeFilter == "types"
 		local i = 0
 		for _, v in pairs(filter) do
 			if v == default then i = i + 1 end
@@ -920,23 +696,23 @@ function journal:updateBtnFilters()
 		filtersBar.sources:GetParent().filtred:Show()
 	end
 
-	-- CLEAR FILTERS
-	if not f.types or not f.selected or n ~= #sources - 1 then
-		filtersBar.clear:Show()
+	-- CLEAR BTN FILTERS
+	filtersBar.clear:SetShown(not f.types or not f.selected or n ~= #sources - 1)
+	if not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE) or not f.types or not f.selected or n ~= #sources - 1 then
 		journal.shownPanel:Show()
 		journal.leftInset:SetPoint("TOPLEFT", journal.shownPanel, "BOTTOMLEFT", 0, -2)
 	else
-		filtersBar.clear:Hide()
 		journal.shownPanel:Hide()
 		journal.leftInset:SetPoint("TOPLEFT", journal.filtersPanel, "BOTTOMLEFT", 0, -2)
 	end
 
+	journal:updateMountsList()
 	journal.leftInset:GetHeight()
 	MountJournal_UpdateMountList()
 end
 
 
-function journal:getNumDisplayedMounts()
+function journal:updateMountsList()
 	local types, selected, list = mounts.filters.types, mounts.filters.selected, mounts.list
 	wipe(journal.displayedMounts)
 	journal.displayedMounts[0] = 0
@@ -965,5 +741,4 @@ function journal:getNumDisplayedMounts()
 	end
 
 	journal.shownPanel.count:SetText(#journal.displayedMounts)
-	return #journal.displayedMounts
 end
