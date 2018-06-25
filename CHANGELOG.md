@@ -1,2 +1,1 @@
-* added info collected mounts
-* fix bugs
+* fix filters bug + optimization

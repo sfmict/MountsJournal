@@ -367,7 +367,7 @@ function journal:ADDON_LOADED(addonName)
 
 		-- HOOKS
 		journal.func = {}
-		journal:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", function() return min(#journal.displayedMounts, journal.func.GetNumDisplayedMounts()) end)
+		journal:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", function() return #journal.displayedMounts end)
 		journal:setSecureFunc(C_MountJournal, "GetDisplayedMountInfo")
 		journal:setSecureFunc(C_MountJournal, "Pickup")
 		journal:setSecureFunc(C_MountJournal, "SetIsFavorite")
@@ -377,6 +377,12 @@ function journal:ADDON_LOADED(addonName)
 
 		hooksecurefunc("MountJournal_UpdateMountList", journal.configureJournal)
 		scrollFrame.update = MountJournal_UpdateMountList
+
+		local fullUpdate = MountJournal_FullUpdate
+		function MountJournal_FullUpdate(self)
+			if self:IsVisible() then journal:updateMountsList() end
+			fullUpdate(self)
+		end
 
 		-- FILTERS
 		MountJournalFilterDropDown.initialize = journal.filterDropDown_Initialize
@@ -521,6 +527,7 @@ function journal:filterDropDown_Initialize(level)
 			info.text = CHECK_ALL
 			info.func = function()
 				journal:setAllFilters("types", true)
+				MountJournal_UpdateMountList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -528,6 +535,7 @@ function journal:filterDropDown_Initialize(level)
 			info.text = UNCHECK_ALL
 			info.func = function()
 				journal:setAllFilters("types", false)
+				MountJournal_UpdateMountList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -539,6 +547,7 @@ function journal:filterDropDown_Initialize(level)
 				info.func = function(_, _, _, value)
 					types[i] = value
 					journal:updateBtnFilters()
+					MountJournal_UpdateMountList()
 				end
 				info.checked = function() return types[i] end
 				UIDropDownMenu_AddButton(info, level)
@@ -547,6 +556,7 @@ function journal:filterDropDown_Initialize(level)
 			info.text = CHECK_ALL
 			info.func = function()
 				journal:setAllFilters("selected", true)
+				MountJournal_UpdateMountList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -554,6 +564,7 @@ function journal:filterDropDown_Initialize(level)
 			info.text = UNCHECK_ALL
 			info.func = function()
 				journal:setAllFilters("selected", false)
+				MountJournal_UpdateMountList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -565,6 +576,7 @@ function journal:filterDropDown_Initialize(level)
 				info.func = function(_, _, _, value)
 					selected[i] = value
 					journal:updateBtnFilters()
+					MountJournal_UpdateMountList()
 				end
 				info.checked = function() return selected[i] end
 				UIDropDownMenu_AddButton(info, level)
@@ -654,6 +666,7 @@ function journal:setBtnFilters(tab)
 
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	journal:updateBtnFilters()
+	MountJournal_UpdateMountList()
 end
 
 
@@ -733,7 +746,6 @@ function journal:updateBtnFilters()
 
 	journal:updateMountsList()
 	journal.leftInset:GetHeight()
-	MountJournal_UpdateMountList()
 end
 
 
