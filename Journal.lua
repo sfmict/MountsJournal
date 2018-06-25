@@ -19,7 +19,6 @@ journal.colors = {
 
 journal.displayedMounts = {}
 setmetatable(journal.displayedMounts, {__index = function(self, key)
-	self[key] = ""
 	return key
 end})
 
@@ -89,16 +88,29 @@ function journal:ADDON_LOADED(addonName)
 		mounts.filters.types = mounts.filters.types or {true, true, true}
 		mounts.filters.selected = mounts.filters.selected or {false, false, false}
 
+		-- MOUNT COUNT
+		local mountCount = MountJournal.MountCount
+		journal.mountCount = mountCount
+		mountCount:SetPoint("TOPLEFT", 70, -25)
+		mountCount:SetHeight(34)
+		mountCount.Count:SetPoint("RIGHT", -10, 6)
+		mountCount.Label:SetPoint("LEFT", 10, 6)
+		mountCount.collected = mountCount:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+		mountCount.collected:SetPoint("RIGHT", -10, -6)
+		mountCount.collectedLabel = mountCount:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+		mountCount.collectedLabel:SetPoint("LEFT", 10, -6)
+		mountCount.collectedLabel:SetText(L["Collected:"])
+
 		-- SETTINGS BUTTON
 		local btnConfig = CreateFrame("Button", "MountsJournalBtnConfig", MountJournal, "UIPanelButtonTemplate")
 		btnConfig:SetSize(80, 22)
-		btnConfig:SetPoint("TOPLEFT", MountJournal.MountCount, "TOPRIGHT", 8, 1)
+		btnConfig:SetPoint("BOTTOMRIGHT", -6, 4)
 		btnConfig:SetText(L["Settings"])
 		btnConfig:SetScript("OnClick", config.openConfig)
 
 		-- ACHIEVEMENT
 		journal.achiev:SetParent(MountJournal)
-		journal.achiev:SetPoint("TOP", 60, -21)
+		journal.achiev:SetPoint("TOP", 0, -21)
 		journal:ACHIEVEMENT_EARNED()
 		journal.achiev:SetScript("OnClick", function()
 			ToggleAchievementFrame()
@@ -355,7 +367,7 @@ function journal:ADDON_LOADED(addonName)
 
 		-- HOOKS
 		journal.func = {}
-		journal:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", function() return #journal.displayedMounts end)
+		journal:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", function() return min(#journal.displayedMounts, journal.func.GetNumDisplayedMounts()) end)
 		journal:setSecureFunc(C_MountJournal, "GetDisplayedMountInfo")
 		journal:setSecureFunc(C_MountJournal, "Pickup")
 		journal:setSecureFunc(C_MountJournal, "SetIsFavorite")
@@ -410,6 +422,19 @@ function journal:configureJournal()
 			end
 		end
 	end
+
+	local count, collected = 0, 0
+	for _, mountID in pairs(C_MountJournal.GetMountIDs()) do
+		local name, _, _, _, _, _, _, _, _, hideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+		if not hideOnChar then
+			count = count + 1
+			if isCollected then
+				collected = collected + 1
+			end
+		end
+	end
+	journal.mountCount.Count:SetText(count)
+	journal.mountCount.collected:SetText(collected)
 end
 
 
@@ -715,7 +740,6 @@ end
 function journal:updateMountsList()
 	local types, selected, list = mounts.filters.types, mounts.filters.selected, mounts.list
 	wipe(journal.displayedMounts)
-	journal.displayedMounts[0] = 0
 
 	for i = 1, journal.func.GetNumDisplayedMounts() do
 		local mountID = select(12, journal.func.GetDisplayedMountInfo(i))

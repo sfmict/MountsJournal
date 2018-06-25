@@ -1,2 +1,2 @@
-* optimization
-* update for BFA
+* added info collected mounts
+* fix bugs
