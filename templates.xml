@@ -128,7 +128,7 @@
 		</HitRectInsets>
 		<Layers>
 			<Layer level="ARTWORK">
-				<Texture file="Interface\FriendsFrame\ClearBroadcastIcon" alpha="0.5" parentKey="texture">
+				<Texture file="Interface/FriendsFrame/ClearBroadcastIcon" alpha="0.5" parentKey="texture">
 					<Size x="18" y="18"/>
 					<Anchors>
 						<Anchor point="TOPLEFT"/>

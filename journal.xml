@@ -105,7 +105,7 @@
 						</Texture>
 					</Layer>
 				</Layers>
-				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alpha="0.75" alphaMode="ADD"/>
+				<HighlightTexture file="Interface/Buttons/UI-Common-MouseHilight" alpha="0.75" alphaMode="ADD"/>
 				<Scripts>
 					<OnMouseDown>
 						self.topLeft:SetTexture("Interface/Buttons/UI-Silver-Button-Down")

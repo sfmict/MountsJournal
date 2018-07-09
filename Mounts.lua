@@ -44,6 +44,7 @@ function mounts:ADDON_LOADED(addonName)
 		}
 
 		mounts.continensGround = {
+			1107, -- Разлом Зловещего Шрама
 			1463, -- Внешняя область Хельхейма
 			1514, -- Скитающийся остров
 			1688, -- Мертвые копи
@@ -69,6 +70,7 @@ function mounts:ADDON_LOADED(addonName)
 		end
 
 		mounts:setModifier(mounts.config.modifier)
+		mounts:setHandleWaterJump(mounts.config.waterJump)
 		mounts:init()
 	end
 end
@@ -108,6 +110,35 @@ function mounts:setMountsList(perChar)
 		["ground"] = mounts.perChar and MountsJournalChar.ground or MountsJournalDB.ground,
 		["swimming"]= mounts.perChar and MountsJournalChar.swimming or MountsJournalDB.swimming
 	}
+end
+
+
+function mounts:setHandleWaterJump(enable)
+	if type(enable) == "boolean" then
+		self.config.waterJump = enable
+		local registred = self:IsEventRegistered("MOUNT_JOURNAL_USABILITY_CHANGED")
+		if enable then
+			if not registred then
+				self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
+			end
+		else
+			if registred then
+				self:UnregisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
+			end
+		end
+	end
+end
+
+
+function mounts:MOUNT_JOURNAL_USABILITY_CHANGED()
+	if not IsSubmerged() then
+		self.lastJumpTime = GetTime()
+	end
+end
+
+
+function mounts:isFloating()
+	return self.config.waterJump and GetTime() - (self.lastJumpTime or 0) < 1
 end
 
 
@@ -185,10 +216,10 @@ function mounts:init()
 			local isGroundSpell, isFlySpell = mounts:getSpellKnown()
 			if not isGroundSpell then
 				if not mounts:summon(mounts.lowLevel) then mounts:errorNoFavorites() end
-			elseif mounts.modifier() or not IsSubmerged() or not (mounts:inTable(mounts.mapVashjir, GetCurrentMapAreaID()) and mounts:summon(mounts.swimmingVashjir)) and not mounts:summon(mounts.list.swimming) then -- swimming
+			elseif mounts:isFloating() or mounts.modifier() or not IsSubmerged() or not (mounts:inTable(mounts.mapVashjir, GetCurrentMapAreaID()) and mounts:summon(mounts.swimmingVashjir)) and not mounts:summon(mounts.list.swimming) then -- swimming
 				local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation()
 				if (not isFlyableLocation or mounts:modifier() and not IsSubmerged() or not mounts:summon(mounts.list.fly)) -- fly
-				and not ((mounts.config.waterWalkAll or not isFlyableLocation and mounts.modifier() or mounts.config.waterWalkInstance and mounts:isWaterWalkLocation()) and mounts:summon(mounts.waterWalk)) -- water walk
+				and not ((mounts.config.waterWalkAll or mounts:isFloating() or not isFlyableLocation and mounts.modifier() or mounts.config.waterWalkInstance and mounts:isWaterWalkLocation()) and mounts:summon(mounts.waterWalk)) -- water walk
 				and not mounts:summon(mounts.list.ground) and not mounts:summon(mounts.list.fly) and not mounts:summon(mounts.lowLevel) then -- ground
 					mounts:errorNoFavorites()
 				end

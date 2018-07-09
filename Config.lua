@@ -61,30 +61,20 @@ config:SetScript("OnShow", function()
 
 	setTooltip(modifierCombobox, "ANCHOR_TOPLEFT", L["Modifier"], L["ModifierDescription"])
 
-	-- WATER WALKER EYE
-	local waterWalkerEye = CreateFrame("CheckButton", "MountsJournalWaterWalkEye", config, "InterfaceOptionsCheckButtonTemplate")
-	waterWalkerEye:SetPoint("LEFT", modifierCombobox, "RIGHT", 180, 2)
-	waterWalkerEye.label = _G[waterWalkerEye:GetName().."Text"]
-	waterWalkerEye.label:SetFont("GameFontHighlight", 30)
-	waterWalkerEye.label:SetPoint("LEFT", waterWalkerEye, "RIGHT", 1, 0)
-	waterWalkerEye.label:SetText(L["Water Walking in Eye of Azchara"])
-	waterWalkerEye.tooltipText = L["Water Walking"]
-	waterWalkerEye.tooltipRequirement = L["WaterWalkingDescription"]
-
-	-- WATER WALKER ALWAYS
-	local waterWalkerAlways = CreateFrame("CheckButton", "MountsJournalWaterWalkAlways", config, "InterfaceOptionsCheckButtonTemplate")
-	waterWalkerAlways:SetPoint("TOPLEFT", waterWalkerEye, "BOTTOMLEFT", 0, 0)
-	waterWalkerAlways.label = _G[waterWalkerAlways:GetName().."Text"]
-	waterWalkerAlways.label:SetFont("GameFontHighlight", 30)
-	waterWalkerAlways.label:SetPoint("LEFT", waterWalkerAlways, "RIGHT", 1, 0)
-	waterWalkerAlways.label:SetText(L["Water Walking Always"])
-	waterWalkerAlways.tooltipText = L["Water Walking"]
-	waterWalkerAlways.tooltipRequirement = L["WaterWalkingDescription"]
+	-- WATER JUMP
+	local waterJump = CreateFrame("CheckButton", "MountsJournalWaterJump", config, "InterfaceOptionsCheckButtonTemplate")
+	waterJump:SetPoint("TOPLEFT", modifierText, "BOTTOMLEFT", 0, -10)
+	waterJump.label = _G[waterJump:GetName().."Text"]
+	waterJump.label:SetFont("GameFontHighlight", 30)
+	waterJump.label:SetPoint("LEFT", waterJump, "RIGHT", 1, 0)
+	waterJump.label:SetText(L["Handle a jump in water"])
+	waterJump.tooltipText = L["Handle a jump in water"]
+	waterJump.tooltipRequirement = L["После прыжка в воде будет вызывать не подводный маунт."]
 
 	-- CREATE MACRO
 	local createMacroBtn = CreateFrame("Button", nil, config, "UIPanelButtonTemplate")
 	createMacroBtn:SetSize(232, 40)
-	createMacroBtn:SetPoint("TOPLEFT", modifierText, "BOTTOMLEFT", 0, -25)
+	createMacroBtn:SetPoint("TOPLEFT", waterJump, "BOTTOMLEFT", 0, -25)
 	createMacroBtn:SetText(L["CreateMacroBtn"])
 	createMacroBtn:SetScript("OnClick", function()
 		local macroName = addon.."Macro"
@@ -116,11 +106,32 @@ config:SetScript("OnShow", function()
 
 	setTooltip(createMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
 
+	-- WATER WALKER EYE
+	local waterWalkerEye = CreateFrame("CheckButton", "MountsJournalWaterWalkEye", config, "InterfaceOptionsCheckButtonTemplate")
+	waterWalkerEye:SetPoint("LEFT", modifierCombobox, "RIGHT", 180, 2)
+	waterWalkerEye.label = _G[waterWalkerEye:GetName().."Text"]
+	waterWalkerEye.label:SetFont("GameFontHighlight", 30)
+	waterWalkerEye.label:SetPoint("LEFT", waterWalkerEye, "RIGHT", 1, 0)
+	waterWalkerEye.label:SetText(L["Water Walking in Eye of Azchara"])
+	waterWalkerEye.tooltipText = L["Water Walking"]
+	waterWalkerEye.tooltipRequirement = L["WaterWalkingDescription"]
+
+	-- WATER WALKER ALWAYS
+	local waterWalkerAlways = CreateFrame("CheckButton", "MountsJournalWaterWalkAlways", config, "InterfaceOptionsCheckButtonTemplate")
+	waterWalkerAlways:SetPoint("TOPLEFT", waterWalkerEye, "BOTTOMLEFT", 0, 0)
+	waterWalkerAlways.label = _G[waterWalkerAlways:GetName().."Text"]
+	waterWalkerAlways.label:SetFont("GameFontHighlight", 30)
+	waterWalkerAlways.label:SetPoint("LEFT", waterWalkerAlways, "RIGHT", 1, 0)
+	waterWalkerAlways.label:SetText(L["Water Walking Always"])
+	waterWalkerAlways.tooltipText = L["Water Walking"]
+	waterWalkerAlways.tooltipRequirement = L["WaterWalkingDescription"]
+
 	-- REFRESH
 	local function refresh()
 		if not config:IsVisible() then return end
 		config.modifierValue = mounts.config.modifier
 		UIDropDownMenu_SetText(modifierCombobox, config.modifierValue.." key")
+		waterJump:SetChecked(mounts.config.waterJump)
 		waterWalkerEye:SetChecked(mounts.config.waterWalkInstance)
 		waterWalkerAlways:SetChecked(mounts.config.waterWalkAll)
 	end
@@ -132,6 +143,7 @@ end)
 
 config.okay = function()
 	mounts:setModifier(config.modifierValue)
+	mounts:setHandleWaterJump(MountsJournalWaterJump:GetChecked())
 	mounts.config.waterWalkInstance = MountsJournalWaterWalkEye:GetChecked()
 	mounts.config.waterWalkAll = MountsJournalWaterWalkAlways:GetChecked()
 end

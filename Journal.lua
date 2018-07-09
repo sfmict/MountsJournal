@@ -431,7 +431,7 @@ function journal:configureJournal()
 
 	local count, collected = 0, 0
 	for _, mountID in pairs(C_MountJournal.GetMountIDs()) do
-		local name, _, _, _, _, _, _, _, _, hideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+		local _, _, _, _, _, _, _, _, _, hideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 		if not hideOnChar then
 			count = count + 1
 			if isCollected then
@@ -633,11 +633,11 @@ end
 
 function journal:setBtnFilters(tab)
 	local i = 0
+	local children = {journal.filtersBar[tab]:GetChildren()}
 
 	if tab ~= "sources" then
 		local default = tab == "types"
 		local filters = mounts.filters[tab]
-		local children = {journal.filtersBar[tab]:GetChildren()}
 
 		for _, btn in pairs(children) do
 			local checked = btn:GetChecked()
@@ -651,8 +651,6 @@ function journal:setBtnFilters(tab)
 			end
 		end
 	else
-		local children = {journal.filtersBar.sources:GetChildren()}
-
 		for _, btn in pairs(children) do
 			local checked = btn:GetChecked()
 			C_MountJournal.SetSourceFilter(btn.id, checked)
