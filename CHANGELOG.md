@@ -1,1 +1,1 @@
-* fix filters bug + optimization
+* Added option in settings: After you jump in water will be summoned non underwater mount. (thx panseit)
