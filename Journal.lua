@@ -620,6 +620,7 @@ function journal:clearBtnFilters()
 	journal:setAllFilters("types", true)
 	journal:setAllFilters("selected", false)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	MountJournal_UpdateMountList()
 end
 
 
