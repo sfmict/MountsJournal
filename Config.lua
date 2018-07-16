@@ -176,8 +176,9 @@ InterfaceOptions_AddCategory(config)
 
 -- OPEN CONFIG
 function config:openConfig()
-	if InterfaceOptionsFrameAddOns:IsVisible() and MountsJournalConfig:IsVisible() then
+	if InterfaceOptionsFrameAddOns:IsVisible() and config:IsVisible() then
 		InterfaceOptionsFrame:Hide()
+		config:cancel()
 	else
 		InterfaceOptionsFrame_OpenToCategory(addon)
 		if not InterfaceOptionsFrameAddOns:IsVisible() then
