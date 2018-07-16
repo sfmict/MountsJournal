@@ -1,1 +1,1 @@
-* fix update mounts list when cleaning filters
+* Add key binding.

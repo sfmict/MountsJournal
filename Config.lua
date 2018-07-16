@@ -35,7 +35,7 @@ config:SetScript("OnShow", function()
 
 	-- MODIFIER TEXT
 	local modifierText = config:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	modifierText:SetPoint("TOPLEFT", subtitle, "BOTTOMLEFT", 8, 0)
+	modifierText:SetPoint("TOPLEFT", subtitle, "BOTTOMLEFT", 8, -20)
 	modifierText:SetText(L["Modifier"]..":")
 
 	-- MODIFIER COMBOBOX
@@ -106,6 +106,15 @@ config:SetScript("OnShow", function()
 
 	setTooltip(createMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
 
+	-- OR TEXT
+	local macroOrBind = config:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	macroOrBind:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -3)
+	macroOrBind:SetText(L["or key bind"])
+
+	-- BIND MOUNT
+	bindMount:SetSize(232, 22)
+	bindMount:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -20)
+
 	-- WATER WALKER EYE
 	local waterWalkerEye = CreateFrame("CheckButton", "MountsJournalWaterWalkEye", config, "InterfaceOptionsCheckButtonTemplate")
 	waterWalkerEye:SetPoint("LEFT", modifierCombobox, "RIGHT", 180, 2)
@@ -134,6 +143,7 @@ config:SetScript("OnShow", function()
 		waterJump:SetChecked(mounts.config.waterJump)
 		waterWalkerEye:SetChecked(mounts.config.waterWalkInstance)
 		waterWalkerAlways:SetChecked(mounts.config.waterWalkAll)
+		binding:setButtonText(bindMount)
 	end
 
 	config:SetScript("OnShow", refresh)
@@ -143,9 +153,15 @@ end)
 
 config.okay = function()
 	mounts:setModifier(config.modifierValue)
+	binding:saveBinding()
 	mounts:setHandleWaterJump(MountsJournalWaterJump:GetChecked())
 	mounts.config.waterWalkInstance = MountsJournalWaterWalkEye:GetChecked()
 	mounts.config.waterWalkAll = MountsJournalWaterWalkAlways:GetChecked()
+end
+
+
+config.cancel = function()
+	binding:resetBinding()
 end
 
 
