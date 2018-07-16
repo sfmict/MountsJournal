@@ -18,10 +18,22 @@ function binding:createButtonBinding(parent, name, macro)
 	button.secure:SetAttribute("type", "macro")
 	button.secure:SetAttribute("macrotext", macro)
 	button.command = "CLICK "..name..":LeftButton"
-	local key1 = GetBindingKey(button.command, self.mode)
-	if key1 then button.Text:SetText(GetBindingText(key1)) end
 	button:SetScript("OnClick", function(self, button) binding:OnClick(self, button) end)
+	self:setButtonText(button)
 	return button
+end
+
+
+function binding:setButtonText(button)
+	local key1 = GetBindingKey(button.command, self.mode)
+
+	if key1 then
+		button:SetText(GetBindingText(key1))
+		button:SetAlpha(1)
+	else
+		button:SetText(GRAY_FONT_COLOR_CODE..NOT_BOUND..FONT_COLOR_CODE_CLOSE)
+		button:SetAlpha(0.8)
+	end
 end
 
 
@@ -152,6 +164,7 @@ function binding:OnKeyDown(key)
 
 		self.selected.oldKey = GetBindingKey(self.selected.command, self.mode)
 		self:setBinding(keyPressed, self.selected.command)
+		self:setButtonText(self.selected)
 		self:setSelected()
 	end
 end
@@ -173,8 +186,5 @@ function binding:setBinding(key, selectedBinding)
 				SaveBindings(GetCurrentBindingSet())
 			end
 		end
-
-		local key1 = GetBindingKey(selectedBinding, self.mode)
-		self.selected.Text:SetText(GetBindingText(key1))
 	end
 end

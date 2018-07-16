@@ -143,8 +143,7 @@ config:SetScript("OnShow", function()
 		waterWalkerEye:SetChecked(mounts.config.waterWalkInstance)
 		waterWalkerAlways:SetChecked(mounts.config.waterWalkAll)
 		bindMount.oldKey = false
-		local key1 = GetBindingKey(bindMount.command, binding.mode)
-		bindMount.Text:SetText(key1 and GetBindingText(key1) or "")
+		binding:setButtonText(bindMount)
 	end
 
 	config:SetScript("OnShow", refresh)
