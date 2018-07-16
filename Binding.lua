@@ -6,11 +6,10 @@ binding:Hide()
 
 function binding:createButtonBinding(parent, name, macro)
 	local button = CreateFrame("Button", nil, parent, "UIMenuButtonStretchTemplate")
-	button:SetSize(180, 22)
 	button.selectedHighlight = button:CreateTexture(nil, "OVERLAY")
 	button.selectedHighlight:SetTexture("Interface/Buttons/UI-Silver-Button-Select")
-	button.selectedHighlight:SetSize(180, 20)
-	button.selectedHighlight:SetPoint("CENTER", 0, -3)
+	button.selectedHighlight:SetPoint("TOPLEFT", 0, -3)
+	button.selectedHighlight:SetPoint("BOTTOMRIGHT", 0, -3)
 	button.selectedHighlight:SetBlendMode("ADD")
 	button.selectedHighlight:Hide()
 	button:RegisterForClicks("AnyUp")
@@ -67,7 +66,6 @@ function binding:OnClick(button, key)
 		self:OnKeyDown(key)
 	end
 end
-
 
 
 function binding:OnKeyDown(key)
@@ -162,7 +160,6 @@ function binding:OnKeyDown(key)
 			keyPressed = "ALT-"..keyPressed
 		end
 
-		self.selected.oldKey = GetBindingKey(self.selected.command, self.mode)
 		self:setBinding(keyPressed, self.selected.command)
 		self:setButtonText(self.selected)
 		self:setSelected()
@@ -175,16 +172,20 @@ function binding:setBinding(key, selectedBinding)
 	if not InCombatLockdown() then
 		local oldKey = GetBindingKey(selectedBinding, self.mode)
 
-		if key then
-			if SetBinding(key, selectedBinding, self.mode) then
-				if oldKey then SetBinding(oldKey, nil, self.mode) end
-				SaveBindings(GetCurrentBindingSet())
-			end
-		else
-			if oldKey then
-				SetBinding(oldKey, nil, self.mode)
-				SaveBindings(GetCurrentBindingSet())
-			end
+		if SetBinding(key, selectedBinding, self.mode) then
+			if oldKey then SetBinding(oldKey, nil, self.mode) end
 		end
 	end
+end
+
+
+function binding:saveBinding()
+	self:setSelected()
+	SaveBindings(GetCurrentBindingSet())
+end
+
+
+function binding:resetBinding()
+	self:setSelected()
+	LoadBindings(GetCurrentBindingSet())
 end
