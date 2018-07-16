@@ -1,7 +1,12 @@
 local addon, L = ...
 local mounts = MountsJournal
+local binding = _G[addon.."Binding"]
 local config = CreateFrame("Frame", "MountsJournalConfig", InterfaceOptionsFramePanelContainer)
 config.name = addon
+
+
+-- BIND MOUNT
+local bindMount = binding:createButtonBinding(config, "MountsJournal_Mount", "/mount")
 
 
 config:SetScript("OnShow", function()
@@ -106,6 +111,9 @@ config:SetScript("OnShow", function()
 
 	setTooltip(createMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
 
+	-- BIND MOUNT
+	bindMount:SetPoint("TOPLEFT", createMacroBtn, "BOTTOMLEFT", 0, -20)
+
 	-- WATER WALKER EYE
 	local waterWalkerEye = CreateFrame("CheckButton", "MountsJournalWaterWalkEye", config, "InterfaceOptionsCheckButtonTemplate")
 	waterWalkerEye:SetPoint("LEFT", modifierCombobox, "RIGHT", 180, 2)
@@ -134,6 +142,9 @@ config:SetScript("OnShow", function()
 		waterJump:SetChecked(mounts.config.waterJump)
 		waterWalkerEye:SetChecked(mounts.config.waterWalkInstance)
 		waterWalkerAlways:SetChecked(mounts.config.waterWalkAll)
+		bindMount.oldKey = false
+		local key1 = GetBindingKey(bindMount.command, binding.mode)
+		bindMount.Text:SetText(key1 and GetBindingText(key1) or "")
 	end
 
 	config:SetScript("OnShow", refresh)
@@ -148,6 +159,13 @@ config.okay = function()
 	mounts.config.waterWalkAll = MountsJournalWaterWalkAlways:GetChecked()
 end
 
+
+config.cancel = function()
+	if bindMount.oldKey ~= false then
+		binding:setBinding(bindMount.oldKey, bindMount.command)
+		bindMount.oldKey = false
+	end
+end
 
 -- ADD CATEGORY
 InterfaceOptions_AddCategory(config)
