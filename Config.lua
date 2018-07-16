@@ -1,12 +1,13 @@
 local addon, L = ...
 local mounts = MountsJournal
-<<<<<<< HEAD
-=======
 
 local binding = _G[addon.."Binding"]
->>>>>>> dev
 local config = CreateFrame("Frame", "MountsJournalConfig", InterfaceOptionsFramePanelContainer)
 config.name = addon
+
+
+-- BIND MOUNT
+local bindMount = binding:createButtonBinding(config, "MountsJournal_Mount", "/mount")
 
 
 config:SetScript("OnShow", function()
