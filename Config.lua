@@ -1,5 +1,10 @@
 local addon, L = ...
 local mounts = MountsJournal
+<<<<<<< HEAD
+=======
+
+local binding = _G[addon.."Binding"]
+>>>>>>> dev
 local config = CreateFrame("Frame", "MountsJournalConfig", InterfaceOptionsFramePanelContainer)
 config.name = addon
 
