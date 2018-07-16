@@ -113,7 +113,7 @@ config:SetScript("OnShow", function()
 
 	-- OR TEXT
 	local macroOrBind = config:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	macroOrBind:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -4)
+	macroOrBind:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -3)
 	macroOrBind:SetText(L["or key bind"])
 
 	-- BIND MOUNT
@@ -148,7 +148,6 @@ config:SetScript("OnShow", function()
 		waterJump:SetChecked(mounts.config.waterJump)
 		waterWalkerEye:SetChecked(mounts.config.waterWalkInstance)
 		waterWalkerAlways:SetChecked(mounts.config.waterWalkAll)
-		bindMount.oldKey = false
 		binding:setButtonText(bindMount)
 	end
 

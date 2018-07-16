@@ -18,6 +18,7 @@ function binding:createButtonBinding(parent, name, macro)
 	button.secure:SetAttribute("macrotext", macro)
 	button.command = "CLICK "..name..":LeftButton"
 	button:SetScript("OnClick", function(self, button) binding:OnClick(self, button) end)
+	button:SetScript("OnMouseWheel", function(self, delta) binding:OnKeyDown(delta > 0 and "MOUSEWHEELUP" or "MOUSEWHEELDOWN") end)
 	self:setButtonText(button)
 	return button
 end
