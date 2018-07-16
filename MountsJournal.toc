@@ -9,7 +9,6 @@
 locales.xml
 templates.xml
 Mounts.lua
-Binding.lua
 Config.lua
 journal.xml
 Journal.lua
