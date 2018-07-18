@@ -69,11 +69,10 @@ function binding:OnClick(button, key)
 end
 
 
-function binding:OnKeyDown(key)
-	if GetBindingFromClick(key) == "SCREENSHOT" then
+function binding:OnKeyDown(keyPressed)
+	if GetBindingFromClick(keyPressed) == "SCREENSHOT" then
 		Screenshot()
 	elseif self.selected then
-		local keyPressed = key
 		if keyPressed == "UNKNOWN" then return end
 
 		if keyPressed == "LeftButton" then
@@ -173,8 +172,8 @@ function binding:setBinding(key, selectedBinding)
 	if not InCombatLockdown() then
 		local oldKey = GetBindingKey(selectedBinding, self.mode)
 
-		if SetBinding(key, selectedBinding, self.mode) then
-			if oldKey then SetBinding(oldKey, nil, self.mode) end
+		if SetBinding(key, selectedBinding, self.mode) and oldKey then
+			SetBinding(oldKey, nil, self.mode)
 		end
 	end
 end

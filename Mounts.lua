@@ -49,25 +49,12 @@ function mounts:ADDON_LOADED(addonName)
 			1514, -- Скитающийся остров
 			1688, -- Мертвые копи
 		}
-		if select(4, GetBuildInfo()) == 70300 then
-			mounts.mapVashjir = {
-				610, -- Лес Келп’тар
-				613, -- Вайш'ир
-				614, -- Бездонные глубины
-				615, -- Мерцающий простор
-			}
-		else
-			mounts.mapVashjir = {
-				201, -- Лес Келп’тар
-				203, -- Вайш'ир
-				204, -- Бездонные глубины
-				205, -- Мерцающий простор
-			}
-
-			function GetCurrentMapAreaID()
-				return C_Map.GetBestMapForUnit("player")
-			end
-		end
+		mounts.mapVashjir = {
+			201, -- Лес Келп’тар
+			203, -- Вайш'ир
+			204, -- Бездонные глубины
+			205, -- Мерцающий простор
+		}
 
 		mounts:setModifier(mounts.config.modifier)
 		mounts:setHandleWaterJump(mounts.config.waterJump)
@@ -216,7 +203,7 @@ function mounts:init()
 			local isGroundSpell, isFlySpell = mounts:getSpellKnown()
 			if not isGroundSpell then
 				if not mounts:summon(mounts.lowLevel) then mounts:errorNoFavorites() end
-			elseif mounts:isFloating() or mounts.modifier() or not IsSubmerged() or not (mounts:inTable(mounts.mapVashjir, GetCurrentMapAreaID()) and mounts:summon(mounts.swimmingVashjir)) and not mounts:summon(mounts.list.swimming) then -- swimming
+			elseif mounts:isFloating() or mounts.modifier() or not IsSubmerged() or not (mounts:inTable(mounts.mapVashjir, C_Map.GetBestMapForUnit("player")) and mounts:summon(mounts.swimmingVashjir)) and not mounts:summon(mounts.list.swimming) then -- swimming
 				local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation()
 				if (not isFlyableLocation or mounts:modifier() and not IsSubmerged() or not mounts:summon(mounts.list.fly)) -- fly
 				and not ((mounts.config.waterWalkAll or mounts:isFloating() or not isFlyableLocation and mounts.modifier() or mounts.config.waterWalkInstance and mounts:isWaterWalkLocation()) and mounts:summon(mounts.waterWalk)) -- water walk
