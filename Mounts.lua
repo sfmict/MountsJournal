@@ -24,6 +24,12 @@ function mounts:ADDON_LOADED(addonName)
 		if mounts.config.waterWalkInstance == nil then
 			mounts.config.waterWalkInstance = true
 		end
+		if mounts.config.waterWalkList == nil or type(mounts.config.waterWalkList) ~= "table" then
+			mounts.config.waterWalkList = {
+				1456, -- Око Азшары
+				1771, -- Тол Дагор
+			}
+		end
 
 		MountsJournalChar = MountsJournalChar or {}
 		MountsJournalChar.fly =  MountsJournalChar.fly or {}
@@ -48,6 +54,7 @@ function mounts:ADDON_LOADED(addonName)
 			1463, -- Внешняя область Хельхейма
 			1514, -- Скитающийся остров
 			1688, -- Мертвые копи
+			1763, -- Атал'Дазар
 		}
 		mounts.mapVashjir = {
 			201, -- Лес Келп’тар
@@ -179,12 +186,10 @@ end
 
 
 function mounts:isWaterWalkLocation()
-	local instance = select(8, GetInstanceInfo())
-	local locations = {
-		1456, -- Око Азшары
-	}
-
-	if mounts:inTable(locations, instance) then return true end
+	if mounts.config.waterWalkInstance then
+		local instance = select(8, GetInstanceInfo())
+		if mounts:inTable(mounts.config.waterWalkList, instance) then return true end
+	end
 	return false
 end
 
@@ -206,7 +211,7 @@ function mounts:init()
 			elseif mounts:isFloating() or mounts.modifier() or not IsSubmerged() or not (mounts:inTable(mounts.mapVashjir, C_Map.GetBestMapForUnit("player")) and mounts:summon(mounts.swimmingVashjir)) and not mounts:summon(mounts.list.swimming) then -- swimming
 				local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation()
 				if (not isFlyableLocation or mounts:modifier() and not IsSubmerged() or not mounts:summon(mounts.list.fly)) -- fly
-				and not ((mounts.config.waterWalkAll or mounts:isFloating() or not isFlyableLocation and mounts.modifier() or mounts.config.waterWalkInstance and mounts:isWaterWalkLocation()) and mounts:summon(mounts.waterWalk)) -- water walk
+				and not ((mounts.config.waterWalkAll or mounts:isFloating() or not isFlyableLocation and mounts.modifier() or mounts:isWaterWalkLocation()) and mounts:summon(mounts.waterWalk)) -- water walk
 				and not mounts:summon(mounts.list.ground) and not mounts:summon(mounts.list.fly) and not mounts:summon(mounts.lowLevel) then -- ground
 					mounts:errorNoFavorites()
 				end

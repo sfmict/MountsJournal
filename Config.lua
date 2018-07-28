@@ -67,19 +67,18 @@ config:SetScript("OnShow", function()
 	setTooltip(modifierCombobox, "ANCHOR_TOPLEFT", L["Modifier"], L["ModifierDescription"])
 
 	-- WATER JUMP
-	local waterJump = CreateFrame("CheckButton", "MountsJournalWaterJump", config, "InterfaceOptionsCheckButtonTemplate")
-	waterJump:SetPoint("TOPLEFT", modifierText, "BOTTOMLEFT", 0, -10)
-	waterJump.label = _G[waterJump:GetName().."Text"]
-	waterJump.label:SetFont("GameFontHighlight", 30)
-	waterJump.label:SetPoint("LEFT", waterJump, "RIGHT", 1, 0)
-	waterJump.label:SetText(L["Handle a jump in water"])
-	waterJump.tooltipText = L["Handle a jump in water"]
-	waterJump.tooltipRequirement = L["После прыжка в воде будет вызывать не подводный маунт."]
+	config.waterJump = CreateFrame("CheckButton", nil, config, "InterfaceOptionsCheckButtonTemplate")
+	config.waterJump:SetPoint("TOPLEFT", modifierText, "BOTTOMLEFT", 0, -10)
+	config.waterJump.Text:SetFont("GameFontHighlight", 30)
+	config.waterJump.Text:SetPoint("LEFT", config.waterJump, "RIGHT", 1, 0)
+	config.waterJump.Text:SetText(L["Handle a jump in water"])
+	config.waterJump.tooltipText = L["Handle a jump in water"]
+	config.waterJump.tooltipRequirement = L["После прыжка в воде будет вызывать не подводный маунт."]
 
 	-- CREATE MACRO
 	local createMacroBtn = CreateFrame("Button", nil, config, "UIPanelButtonTemplate")
 	createMacroBtn:SetSize(232, 40)
-	createMacroBtn:SetPoint("TOPLEFT", waterJump, "BOTTOMLEFT", 0, -25)
+	createMacroBtn:SetPoint("TOPLEFT", config.waterJump, "BOTTOMLEFT", 0, -25)
 	createMacroBtn:SetText(L["CreateMacroBtn"])
 	createMacroBtn:SetScript("OnClick", function()
 		local macroName = addon.."Macro"
@@ -120,35 +119,59 @@ config:SetScript("OnShow", function()
 	bindMount:SetSize(232, 22)
 	bindMount:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -20)
 
-	-- WATER WALKER EYE
-	local waterWalkerEye = CreateFrame("CheckButton", "MountsJournalWaterWalkEye", config, "InterfaceOptionsCheckButtonTemplate")
-	waterWalkerEye:SetPoint("LEFT", modifierCombobox, "RIGHT", 180, 2)
-	waterWalkerEye.label = _G[waterWalkerEye:GetName().."Text"]
-	waterWalkerEye.label:SetFont("GameFontHighlight", 30)
-	waterWalkerEye.label:SetPoint("LEFT", waterWalkerEye, "RIGHT", 1, 0)
-	waterWalkerEye.label:SetText(L["Water Walking in Eye of Azchara"])
-	waterWalkerEye.tooltipText = L["Water Walking"]
-	waterWalkerEye.tooltipRequirement = L["WaterWalkingDescription"]
-
 	-- WATER WALKER ALWAYS
-	local waterWalkerAlways = CreateFrame("CheckButton", "MountsJournalWaterWalkAlways", config, "InterfaceOptionsCheckButtonTemplate")
-	waterWalkerAlways:SetPoint("TOPLEFT", waterWalkerEye, "BOTTOMLEFT", 0, 0)
-	waterWalkerAlways.label = _G[waterWalkerAlways:GetName().."Text"]
-	waterWalkerAlways.label:SetFont("GameFontHighlight", 30)
-	waterWalkerAlways.label:SetPoint("LEFT", waterWalkerAlways, "RIGHT", 1, 0)
-	waterWalkerAlways.label:SetText(L["Water Walking Always"])
-	waterWalkerAlways.tooltipText = L["Water Walking"]
-	waterWalkerAlways.tooltipRequirement = L["WaterWalkingDescription"]
+	config.waterWalkAlways = CreateFrame("CheckButton", nil, config, "InterfaceOptionsCheckButtonTemplate")
+	config.waterWalkAlways:SetPoint("LEFT", modifierCombobox, "RIGHT", 180, 2)
+	config.waterWalkAlways.Text:SetFont("GameFontHighlight", 30)
+	config.waterWalkAlways.Text:SetPoint("LEFT", config.waterWalkAlways, "RIGHT", 1, 0)
+	config.waterWalkAlways.Text:SetText(L["Water Walking Always"])
+	config.waterWalkAlways.tooltipText = L["Water Walking"]
+	config.waterWalkAlways.tooltipRequirement = L["WaterWalkingDescription"]
+
+	-- WATER WALK INSTANCE
+	config.waterWalkInstance = CreateFrame("CheckButton", nil, config, "InterfaceOptionsCheckButtonTemplate")
+	config.waterWalkInstance:SetPoint("TOPLEFT", config.waterWalkAlways, "BOTTOMLEFT", 0, 0)
+	config.waterWalkInstance.Text:SetFont("GameFontHighlight", 30)
+	config.waterWalkInstance.Text:SetPoint("LEFT", config.waterWalkInstance, "RIGHT", 1, 0)
+	config.waterWalkInstance.Text:SetText(L["Water Walking in dungeons"])
+	config.waterWalkInstance.tooltipText = L["Water Walking"]
+	config.waterWalkInstance.tooltipRequirement = L["WaterWalkingDescription"]
+	config.waterWalkInstance:SetScript("OnClick", function(self) config:setEnableDungeons() end)
+
+-- WATER WALK IN DUNGEONS
+	config.dungeons = {}
+	local function createDungeonCheckbox(text, id)
+		local dungeon = CreateFrame("CheckButton", nil, config, "InterfaceOptionsCheckButtonTemplate")
+		dungeon.id = id
+		if #config.dungeons == 0 then
+			dungeon:SetPoint("TOPLEFT", config.waterWalkInstance, "BOTTOMLEFT", 20, 0)
+		else
+			dungeon:SetPoint("TOPLEFT", config.dungeons[#config.dungeons], "BOTTOMLEFT", 0, 0)
+		end
+		dungeon.Text:SetFont("GameFontHighlight", 30)
+		dungeon.Text:SetPoint("LEFT", dungeon, "RIGHT", 1, 0)
+		dungeon.Text:SetText(L[text])
+		dungeon.tooltipText = L["Water Walking"]
+		dungeon.tooltipRequirement = L["WaterWalkingDescription"]
+		tinsert(config.dungeons, dungeon)
+	end
+
+	createDungeonCheckbox("Eye of Azchara (Legion)", 1456)
+	createDungeonCheckbox("Tol Dagor (BFA)", 1771)
 
 	-- REFRESH
 	local function refresh()
 		if not config:IsVisible() then return end
 		config.modifierValue = mounts.config.modifier
 		UIDropDownMenu_SetText(modifierCombobox, config.modifierValue.." key")
-		waterJump:SetChecked(mounts.config.waterJump)
-		waterWalkerEye:SetChecked(mounts.config.waterWalkInstance)
-		waterWalkerAlways:SetChecked(mounts.config.waterWalkAll)
+		config.waterJump:SetChecked(mounts.config.waterJump)
 		binding:setButtonText(bindMount)
+		config.waterWalkAlways:SetChecked(mounts.config.waterWalkAll)
+		config.waterWalkInstance:SetChecked(mounts.config.waterWalkInstance)
+		config:setEnableDungeons()
+		for _, dungeon in pairs(config.dungeons) do
+			dungeon:SetChecked(mounts:inTable(mounts.config.waterWalkList, dungeon.id))
+		end
 	end
 
 	config:SetScript("OnShow", refresh)
@@ -156,12 +179,31 @@ config:SetScript("OnShow", function()
 end)
 
 
-config.okay = function()
-	mounts:setModifier(config.modifierValue)
+function config:setEnableDungeons()
+	if self.waterWalkInstance:GetChecked() then
+		for _, dungeon in pairs(self.dungeons) do
+			dungeon:Enable()
+		end
+	else
+		for _, dungeon in pairs(self.dungeons) do
+			dungeon:Disable()
+		end
+	end
+end
+
+
+config.okay = function(self)
+	mounts:setModifier(self.modifierValue)
 	binding:saveBinding()
-	mounts:setHandleWaterJump(MountsJournalWaterJump:GetChecked())
-	mounts.config.waterWalkInstance = MountsJournalWaterWalkEye:GetChecked()
-	mounts.config.waterWalkAll = MountsJournalWaterWalkAlways:GetChecked()
+	mounts:setHandleWaterJump(self.waterJump:GetChecked())
+	mounts.config.waterWalkAll = self.waterWalkAlways:GetChecked()
+	mounts.config.waterWalkInstance = self.waterWalkInstance:GetChecked()
+	wipe(mounts.config.waterWalkList)
+	for _, dungeon in pairs(self.dungeons) do
+		if dungeon:GetChecked() then
+			tinsert(mounts.config.waterWalkList, dungeon.id)
+		end
+	end
 end
 
 

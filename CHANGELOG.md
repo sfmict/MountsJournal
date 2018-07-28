@@ -1,1 +1,1 @@
-* Update toc file.
+* Add Tol Dagor to water walking dungeons list.

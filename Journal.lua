@@ -130,12 +130,11 @@ function journal:ADDON_LOADED(addonName)
 		self:RegisterEvent("ACHIEVEMENT_EARNED")
 
 		-- PER CHARACTER CHECK
-		local perCharCheck = CreateFrame("CheckButton", "MountsJournalPerChar", MountJournal, "InterfaceOptionsCheckButtonTemplate")
+		local perCharCheck = CreateFrame("CheckButton", nil, MountJournal, "InterfaceOptionsCheckButtonTemplate")
 		perCharCheck:SetPoint("LEFT", MountJournal.MountButton, "RIGHT", 6, -2)
-		perCharCheck.label = _G[perCharCheck:GetName().."Text"]
-		perCharCheck.label:SetFont("GameFontHighlight", 30)
-		perCharCheck.label:SetPoint("LEFT", perCharCheck, "RIGHT", 1, 1)
-		perCharCheck.label:SetText(L["Character Specific Mount List"])
+		perCharCheck.Text:SetFont("GameFontHighlight", 30)
+		perCharCheck.Text:SetPoint("LEFT", perCharCheck, "RIGHT", 1, 1)
+		perCharCheck.Text:SetText(L["Character Specific Mount List"])
 		perCharCheck:SetChecked(mounts.perChar)
 		perCharCheck:SetScript("OnClick", function(self)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
