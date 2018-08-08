@@ -1,1 +1,1 @@
-* Add Tol Dagor to water walking dungeons list.
+* Battle for Lordaeron Scenario added to ground location.
