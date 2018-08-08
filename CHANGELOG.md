@@ -1,1 +1,2 @@
-* Battle for Lordaeron Scenario added to ground location.
+* Update binding system.
+* fixed "Handle a jump in water" description.
