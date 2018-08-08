@@ -73,7 +73,7 @@ config:SetScript("OnShow", function()
 	config.waterJump.Text:SetPoint("LEFT", config.waterJump, "RIGHT", 1, 0)
 	config.waterJump.Text:SetText(L["Handle a jump in water"])
 	config.waterJump.tooltipText = L["Handle a jump in water"]
-	config.waterJump.tooltipRequirement = L["После прыжка в воде будет вызывать не подводный маунт."]
+	config.waterJump.tooltipRequirement = L["WaterJumpDescription"]
 
 	-- CREATE MACRO
 	local createMacroBtn = CreateFrame("Button", nil, config, "UIPanelButtonTemplate")
