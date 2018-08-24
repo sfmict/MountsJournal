@@ -1,2 +1,1 @@
-* Update binding system.
-* fixed "Handle a jump in water" description.
+* Island Expeditions added to ground locations.
