@@ -48,6 +48,9 @@ function mounts:ADDON_LOADED(addonName)
 			488, -- Багровый водный долгоног
 			449, -- Лазурный водный долгоног
 		}
+		mounts.herbalismMounts = {
+			522, -- Небесный голем
+		}
 
 		mounts.continensGround = {
 			1107, -- Разлом Зловещего Шрама
@@ -69,6 +72,7 @@ function mounts:ADDON_LOADED(addonName)
 			204, -- Бездонные глубины
 			205, -- Мерцающий простор
 		}
+		-- 1170, -- Горгронд - сценарий маг'харов
 
 		mounts:setModifier(mounts.config.modifier)
 		mounts:setHandleWaterJump(mounts.config.waterJump)
@@ -109,7 +113,7 @@ function mounts:setMountsList(perChar)
 	mounts.list = {
 		["fly"] = mounts.perChar and MountsJournalChar.fly or MountsJournalDB.fly,
 		["ground"] = mounts.perChar and MountsJournalChar.ground or MountsJournalDB.ground,
-		["swimming"]= mounts.perChar and MountsJournalChar.swimming or MountsJournalDB.swimming
+		["swimming"] = mounts.perChar and MountsJournalChar.swimming or MountsJournalDB.swimming
 	}
 end
 
@@ -179,6 +183,17 @@ function mounts:getSpellKnown()
 end
 
 
+function mounts:summonHerbOr(ids)
+	if mounts.config.useHerbMounts then
+		local prof1, prof2 = GetProfessions()
+		if (prof1 and select(7, GetProfessionInfo(prof1)) == 182 or prof2 and select(7, GetProfessionInfo(prof2)) == 182) and mounts:summon(mounts.herbalismMounts) then -- herbalism
+			return true
+		end
+	end
+	return mounts:summon(ids)
+end
+
+
 function mounts:isFlyLocation()
 	local instance = select(8, GetInstanceInfo())
 
@@ -217,9 +232,9 @@ function mounts:init()
 				if not mounts:summon(mounts.lowLevel) then mounts:errorNoFavorites() end
 			elseif mounts:isFloating() or mounts.modifier() or not IsSubmerged() or not (mounts:inTable(mounts.mapVashjir, C_Map.GetBestMapForUnit("player")) and mounts:summon(mounts.swimmingVashjir)) and not mounts:summon(mounts.list.swimming) then -- swimming
 				local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation()
-				if (not isFlyableLocation or mounts:modifier() and not IsSubmerged() or not mounts:summon(mounts.list.fly)) -- fly
+				if (not isFlyableLocation or mounts:modifier() and not IsSubmerged() or not mounts:summonHerbOr(mounts.list.fly)) -- fly
 				and not ((mounts.config.waterWalkAll or mounts:isFloating() or not isFlyableLocation and mounts.modifier() or mounts:isWaterWalkLocation()) and mounts:summon(mounts.waterWalk)) -- water walk
-				and not mounts:summon(mounts.list.ground) and not mounts:summon(mounts.list.fly) and not mounts:summon(mounts.lowLevel) then -- ground
+				and not mounts:summonHerbOr(mounts.list.ground) and not mounts:summon(mounts.list.fly) and not mounts:summon(mounts.lowLevel) then -- ground
 					mounts:errorNoFavorites()
 				end
 			end

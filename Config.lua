@@ -159,6 +159,15 @@ config:SetScript("OnShow", function()
 	createDungeonCheckbox("Eye of Azchara (Legion)", 1456)
 	createDungeonCheckbox("Tol Dagor (BFA)", 1771)
 
+	-- USE HERBALISM MOUNTS
+	config.useHerbMounts = CreateFrame("CheckButton", nil, config, "InterfaceOptionsCheckButtonTemplate")
+	config.useHerbMounts:SetPoint("TOPLEFT", config.waterWalkInstance, "BOTTOMLEFT", 0, -26 * 3)
+	config.useHerbMounts.Text:SetFont("GameFontHighlight", 30)
+	config.useHerbMounts.Text:SetPoint("LEFT", config.useHerbMounts, "RIGHT", 1, 0)
+	config.useHerbMounts.Text:SetText(L["UseHerbMounts"])
+	config.useHerbMounts.tooltipText = L["UseHerbMounts"]
+	config.useHerbMounts.tooltipRequirement = L["UseHerbMountsDescription"]
+
 	-- REFRESH
 	local function refresh()
 		if not config:IsVisible() then return end
@@ -172,6 +181,7 @@ config:SetScript("OnShow", function()
 		for _, dungeon in pairs(config.dungeons) do
 			dungeon:SetChecked(mounts:inTable(mounts.config.waterWalkList, dungeon.id))
 		end
+		config.useHerbMounts:SetChecked(mounts.config.useHerbMounts)
 	end
 
 	config:SetScript("OnShow", refresh)
@@ -204,6 +214,7 @@ config.okay = function(self)
 			tinsert(mounts.config.waterWalkList, dungeon.id)
 		end
 	end
+	mounts.config.useHerbMounts = self.useHerbMounts:GetChecked()
 end
 
 

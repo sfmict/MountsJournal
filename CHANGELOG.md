@@ -1,1 +1,1 @@
-* Island Expeditions added to ground locations.
+* Add options for use Sky Golem in settings.
