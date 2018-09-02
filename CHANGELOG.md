@@ -1,1 +1,1 @@
-* Add options for use Sky Golem in settings.
+* Island Expeditions list update.
