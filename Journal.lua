@@ -1,4 +1,4 @@
-local _, L = ...
+local addon, L = ...
 local mounts, config = MountsJournal, MountsJournalConfig
 local journal = MountsJournalFrame
 
@@ -78,7 +78,7 @@ journal:RegisterEvent("ADDON_LOADED")
 
 
 function journal:ADDON_LOADED(addonName)
-	if addonName == "Blizzard_Collections" and IsAddOnLoaded("MountsJournal") or addonName == "MountsJournal" and IsAddOnLoaded("Blizzard_Collections") then
+	if addonName == "Blizzard_Collections" and IsAddOnLoaded(addon) or addonName == addon and IsAddOnLoaded("Blizzard_Collections") then
 		self:UnregisterEvent("ADDON_LOADED")
 
 		local texPath = "Interface/AddOns/MountsJournal/textures/"

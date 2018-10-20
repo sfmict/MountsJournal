@@ -1,3 +1,4 @@
+local addon = ...
 local mounts = CreateFrame("Frame", "MountsJournal")
 
 
@@ -10,7 +11,7 @@ mounts:RegisterEvent("ADDON_LOADED")
 
 
 function mounts:ADDON_LOADED(addonName)
-	if addonName == "MountsJournal" then
+	if addonName == addon then
 		self:UnregisterEvent("ADDON_LOADED")
 
 		MountsJournalDB = MountsJournalDB or {}
@@ -60,6 +61,7 @@ function mounts:ADDON_LOADED(addonName)
 			1760, -- Лордерон
 			1763, -- Атал'Дазар
 			1813, -- Экспедиция: Руины Ун'гола
+			1876, -- Фронт Арати (Орда)
 			1882, -- Экспедиция: Зеленые дебри
 			1883, -- Экспедиция: Шепчущий риф
 			1892, -- Экспедиция: Гниющая трясина
@@ -184,13 +186,46 @@ function mounts:getSpellKnown()
 end
 
 
-function mounts:summonHerbOr(ids)
+function mounts:herbMountsExists()
+	if mounts.config.useHerbMounts then
+		local prof1, prof2 = GetProfessions()
+		if (prof1 and select(7, GetProfessionInfo(prof1)) == 182 or prof2 and select(7, GetProfessionInfo(prof2)) == 182) then
+			for _, mountID in pairs(mounts.herbalismMounts) do
+				if select(5, C_MountJournal.GetMountInfoByID(mountID)) then
+					return true
+				end
+			end
+		end
+	end
+	return false
+end
+
+
+function mounts:waterWalkMountsExists()
+	if mounts.config.waterWalkAll or mounts:isWaterWalkLocation() then
+		for _, mountID in pairs(mounts.waterWalk) do
+			if select(5, C_MountJournal.GetMountInfoByID(mountID)) then
+				return true
+			end
+		end
+	end
+	return false
+end
+
+
+function mounts:summonListOr(ids)
 	if mounts.config.useHerbMounts then
 		local prof1, prof2 = GetProfessions()
 		if (prof1 and select(7, GetProfessionInfo(prof1)) == 182 or prof2 and select(7, GetProfessionInfo(prof2)) == 182) and mounts:summon(mounts.herbalismMounts) then -- herbalism
 			return true
 		end
 	end
+
+	if not mounts.config.waterWalkAll and GetItemCount(37011) ~= 0 then
+		-- broom
+		return true
+	end
+	
 	return mounts:summon(ids)
 end
 
@@ -233,9 +268,9 @@ function mounts:init()
 				if not mounts:summon(mounts.lowLevel) then mounts:errorNoFavorites() end
 			elseif mounts:isFloating() or mounts.modifier() or not IsSubmerged() or not (mounts:inTable(mounts.mapVashjir, C_Map.GetBestMapForUnit("player")) and mounts:summon(mounts.swimmingVashjir)) and not mounts:summon(mounts.list.swimming) then -- swimming
 				local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation()
-				if (not isFlyableLocation or mounts:modifier() and not IsSubmerged() or not mounts:summonHerbOr(mounts.list.fly)) -- fly
+				if (not isFlyableLocation or mounts.modifier() and not IsSubmerged() or not mounts:summonListOr(mounts.list.fly)) -- fly
 				and not ((mounts.config.waterWalkAll or mounts:isFloating() or not isFlyableLocation and mounts.modifier() or mounts:isWaterWalkLocation()) and mounts:summon(mounts.waterWalk)) -- water walk
-				and not mounts:summonHerbOr(mounts.list.ground) and not mounts:summon(mounts.list.fly) and not mounts:summon(mounts.lowLevel) then -- ground
+				and not mounts:summonListOr(mounts.list.ground) and not mounts:summon(mounts.list.fly) and not mounts:summon(mounts.lowLevel) then -- ground
 					mounts:errorNoFavorites()
 				end
 			end

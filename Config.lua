@@ -5,10 +5,68 @@ local config = CreateFrame("Frame", "MountsJournalConfig", InterfaceOptionsFrame
 config.name = addon
 
 
+config:SetScript("OnEvent", function(self, event, ...)
+	if config[event] then
+		config[event](self, ...)
+	end
+end)
+config:RegisterEvent("PLAYER_LOGIN")
+
+
 -- BIND MOUNT
-local bindMount = binding:createButtonBinding(config, "MountsJournal_Mount", "/mount")
+local function getMacroBinding()
+	local text = "/"
+	if mounts:herbMountsExists() or mounts:waterWalkMountsExists() or not config.broom then
+		text = text.."mount"
+	else
+		local modifier = mounts.config.modifier
+		text = text.."use [nomounted,noswimming,nomod:"..modifier.."][nomounted,swimming,flyable,mod:"..modifier.."]"..config.broom.."\n/mount"
+	end
+	return text
+end
 
+local function setMacroText()
+	if not InCombatLockdown() then
+		local macrotext = getMacroBinding()
+		config.bindMount.secure:SetAttribute("macrotext", macrotext)
+		local texture = select(2, GetMacroInfo("MJMacro"))
+		if texture then
+			EditMacro("MJMacro", "MJMacro", texture, macrotext)
+		end
+	else
+		config:RegisterEvent("PLAYER_REGEN_ENABLED")
+	end
+end
 
+function config:PLAYER_LOGIN(addonName)
+	self.broom = GetItemInfo(37011)
+	self.bindMount = binding:createButtonBinding(config, "MountsJournal_Mount")
+	if self.broom then
+		setMacroText()
+	else
+		self:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+	end
+	self:RegisterEvent("PLAYER_ENTERING_WORLD")
+end
+
+function config:GET_ITEM_INFO_RECEIVED(itemID)
+	if itemID == 37011 then
+		self:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
+		self.broom = GetItemInfo(37011)
+		setMacroText()
+	end
+end
+
+function config:PLAYER_REGEN_ENABLED()
+	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+	setMacroText()
+end
+
+function config:PLAYER_ENTERING_WORLD()
+	setMacroText()
+end
+
+-- SHOW CONFIG
 config:SetScript("OnShow", function()
 	-- TOOLTIP
 	local function setTooltip(frame, anchor, title, text)
@@ -81,7 +139,7 @@ config:SetScript("OnShow", function()
 	createMacroBtn:SetPoint("TOPLEFT", config.waterJump, "BOTTOMLEFT", 0, -25)
 	createMacroBtn:SetText(L["CreateMacroBtn"])
 	createMacroBtn:SetScript("OnClick", function()
-		local macroName = addon.."Macro"
+		local macroName = "MJMacro"
 		DeleteMacro(macroName)
 		CreateMacro(macroName, select(3, GetSpellInfo(150544)), "/mount")
 
@@ -116,8 +174,8 @@ config:SetScript("OnShow", function()
 	macroOrBind:SetText(L["or key bind"])
 
 	-- BIND MOUNT
-	bindMount:SetSize(232, 22)
-	bindMount:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -20)
+	config.bindMount:SetSize(232, 22)
+	config.bindMount:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -20)
 
 	-- WATER WALKER ALWAYS
 	config.waterWalkAlways = CreateFrame("CheckButton", nil, config, "InterfaceOptionsCheckButtonTemplate")
@@ -174,7 +232,7 @@ config:SetScript("OnShow", function()
 		config.modifierValue = mounts.config.modifier
 		UIDropDownMenu_SetText(modifierCombobox, config.modifierValue.." key")
 		config.waterJump:SetChecked(mounts.config.waterJump)
-		binding:setButtonText(bindMount)
+		binding:setButtonText(config.bindMount)
 		config.waterWalkAlways:SetChecked(mounts.config.waterWalkAll)
 		config.waterWalkInstance:SetChecked(mounts.config.waterWalkInstance)
 		config:setEnableDungeons()
@@ -215,6 +273,7 @@ config.okay = function(self)
 		end
 	end
 	mounts.config.useHerbMounts = self.useHerbMounts:GetChecked()
+	setMacroText()
 end
 
 

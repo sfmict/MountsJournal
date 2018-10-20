@@ -1,1 +1,1 @@
-* Island Expeditions list update.
+* Magic broom used by default.
