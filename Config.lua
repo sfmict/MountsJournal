@@ -142,7 +142,7 @@ config:SetScript("OnShow", function()
 	createMacroBtn:SetScript("OnClick", function()
 		local macroName = "MJMacro"
 		DeleteMacro(macroName)
-		CreateMacro(macroName, select(3, GetSpellInfo(150544)), "/mount")
+		CreateMacro(macroName, select(3, GetSpellInfo(150544)), getMacroText())
 
 		if not IsAddOnLoaded("Blizzard_MacroUI") then
 			LoadAddOn("Blizzard_MacroUI")
@@ -233,7 +233,7 @@ config:SetScript("OnShow", function()
 	config.useMagicBroom.Text:SetPoint("LEFT", config.useMagicBroom, "RIGHT", 1, 0)
 	config.useMagicBroom.Text:SetText(L["UseMagicBroom"])
 	config.useMagicBroom.tooltipText = L["UseMagicBroom"]
-	config.useMagicBroom.tooltipRequirement = format(L["%s\n\n|cffff0000%s|r"], L["UseMagicBroomDescription"], L["NeedRecreateMacro"])
+	config.useMagicBroom.tooltipRequirement = format("%s\n\n|cffff0000%s|r", L["UseMagicBroomDescription"], L["NeedRecreateMacro"])
 
 	-- REFRESH
 	local function refresh()
