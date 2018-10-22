@@ -1,1 +1,2 @@
-* Magic broom used by default.
+* Magic broom option in settings.
+* Fix save binding in combat.

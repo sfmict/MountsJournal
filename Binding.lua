@@ -4,6 +4,12 @@ binding.mode = 1
 binding:Hide()
 
 
+binding:SetScript("OnEvent", function()
+	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+	SaveBindings(GetCurrentBindingSet())
+end)
+
+
 function binding:createButtonBinding(parent, name, macro)
 	local button = CreateFrame("Button", nil, parent, "UIMenuButtonStretchTemplate")
 	button.selectedHighlight = button:CreateTexture(nil, "OVERLAY")
@@ -100,7 +106,11 @@ end
 
 function binding:saveBinding()
 	self:setSelected()
-	SaveBindings(GetCurrentBindingSet())
+	if InCombatLockdown() then
+		self:RegisterEvent("PLAYER_REGEN_ENABLED")
+	else
+		SaveBindings(GetCurrentBindingSet())
+	end
 end
 
 

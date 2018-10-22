@@ -14,9 +14,9 @@ config:RegisterEvent("PLAYER_LOGIN")
 
 
 -- BIND MOUNT
-local function getMacroBinding()
+local function getMacroText()
 	local text = "/"
-	if mounts:herbMountsExists() or mounts:waterWalkMountsExists() or not config.broom then
+	if not mounts.config.useMagicBroom or mounts:herbMountsExists() or mounts:waterWalkMountsExists() or not config.broom then
 		text = text.."mount"
 	else
 		local modifier = mounts.config.modifier
@@ -27,7 +27,7 @@ end
 
 local function setMacroText()
 	if not InCombatLockdown() then
-		local macrotext = getMacroBinding()
+		local macrotext = getMacroText()
 		config.bindMount.secure:SetAttribute("macrotext", macrotext)
 		local texture = select(2, GetMacroInfo("MJMacro"))
 		if texture then
@@ -41,6 +41,7 @@ end
 function config:PLAYER_LOGIN(addonName)
 	self.broom = GetItemInfo(37011)
 	self.bindMount = binding:createButtonBinding(config, "MountsJournal_Mount")
+	self.bindMount:SetSize(232, 22)
 	if self.broom then
 		setMacroText()
 	else
@@ -174,7 +175,6 @@ config:SetScript("OnShow", function()
 	macroOrBind:SetText(L["or key bind"])
 
 	-- BIND MOUNT
-	config.bindMount:SetSize(232, 22)
 	config.bindMount:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -20)
 
 	-- WATER WALKER ALWAYS
@@ -226,6 +226,15 @@ config:SetScript("OnShow", function()
 	config.useHerbMounts.tooltipText = L["UseHerbMounts"]
 	config.useHerbMounts.tooltipRequirement = L["UseHerbMountsDescription"]
 
+	-- USE MAGIC BROOM
+	config.useMagicBroom = CreateFrame("CheckButton", nil, config, "InterfaceOptionsCheckButtonTemplate")
+	config.useMagicBroom:SetPoint("TOPLEFT", config.useHerbMounts, "BOTTOMLEFT", 0, -26)
+	config.useMagicBroom.Text:SetFont("GameFontHighlight", 30)
+	config.useMagicBroom.Text:SetPoint("LEFT", config.useMagicBroom, "RIGHT", 1, 0)
+	config.useMagicBroom.Text:SetText(L["UseMagicBroom"])
+	config.useMagicBroom.tooltipText = L["UseMagicBroom"]
+	config.useMagicBroom.tooltipRequirement = format(L["%s\n\n|cffff0000%s|r"], L["UseMagicBroomDescription"], L["NeedRecreateMacro"])
+
 	-- REFRESH
 	local function refresh()
 		if not config:IsVisible() then return end
@@ -240,6 +249,7 @@ config:SetScript("OnShow", function()
 			dungeon:SetChecked(mounts:inTable(mounts.config.waterWalkList, dungeon.id))
 		end
 		config.useHerbMounts:SetChecked(mounts.config.useHerbMounts)
+		config.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
 	end
 
 	config:SetScript("OnShow", refresh)
@@ -273,6 +283,7 @@ config.okay = function(self)
 		end
 	end
 	mounts.config.useHerbMounts = self.useHerbMounts:GetChecked()
+	mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
 	setMacroText()
 end
 

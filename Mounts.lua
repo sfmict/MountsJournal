@@ -221,9 +221,9 @@ function mounts:summonListOr(ids)
 		end
 	end
 
-	if not mounts.config.waterWalkAll and GetItemCount(37011) ~= 0 then
-		-- broom
-		return true
+	if not mounts.config.waterWalkAll and mounts.config.useMagicBroom and GetItemCount(37011) ~= 0 then
+		mounts.lastUseTime = GetTime()
+		return true -- magic broom
 	end
 	
 	return mounts:summon(ids)
@@ -261,7 +261,9 @@ function mounts:init()
 	SLASH_MOUNTSJOURNAL1 = "/mount"
 	SlashCmdList["MOUNTSJOURNAL"] = function()
 		if IsMounted() then
-			Dismount()
+			if not mounts.lastUseTime or GetTime() - mounts.lastUseTime > 0.5 then
+				Dismount()
+			end
 		else
 			local isGroundSpell, isFlySpell = mounts:getSpellKnown()
 			if not isGroundSpell then
