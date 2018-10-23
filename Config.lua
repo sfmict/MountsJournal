@@ -20,7 +20,7 @@ local function getMacroText()
 		text = text.."mount"
 	else
 		local modifier = mounts.config.modifier
-		text = text.."use [nomounted,noswimming,nomod:"..modifier.."][nomounted,swimming,flyable,mod:"..modifier.."]"..config.broom.."\n/mount"
+		text = text.."use [nomounted,noswimming,nomod:"..modifier.."][nomounted,flyable,mod:"..modifier.."]"..config.broom.."\n/mount"
 	end
 	return text
 end
@@ -66,6 +66,7 @@ end
 function config:PLAYER_ENTERING_WORLD()
 	setMacroText()
 end
+
 
 -- SHOW CONFIG
 config:SetScript("OnShow", function()

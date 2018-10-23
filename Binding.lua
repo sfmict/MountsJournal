@@ -4,9 +4,13 @@ binding.mode = 1
 binding:Hide()
 
 
-binding:SetScript("OnEvent", function()
+binding:SetScript("OnEvent", function(self)
 	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-	SaveBindings(GetCurrentBindingSet())
+	if self.action == "save" then
+		SaveBindings(GetCurrentBindingSet())
+	elseif self.action == "load" then
+		LoadBindings(GetCurrentBindingSet())
+	end
 end)
 
 
@@ -107,6 +111,7 @@ end
 function binding:saveBinding()
 	self:setSelected()
 	if InCombatLockdown() then
+		self.action = "save"
 		self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	else
 		SaveBindings(GetCurrentBindingSet())
@@ -116,5 +121,10 @@ end
 
 function binding:resetBinding()
 	self:setSelected()
-	LoadBindings(GetCurrentBindingSet())
+	if InCombatLockdown() then
+		self.action = "load"
+		self:RegisterEvent("PLAYER_REGEN_ENABLED")
+	else
+		LoadBindings(GetCurrentBindingSet())
+	end
 end
