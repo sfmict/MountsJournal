@@ -87,6 +87,7 @@ function journal:ADDON_LOADED(addonName)
 		journal.leftInset = MountJournal.LeftInset
 		mounts.filters.types = mounts.filters.types or {true, true, true}
 		mounts.filters.selected = mounts.filters.selected or {false, false, false}
+		mounts.filters.expansions = mounts.filters.expansions or {true, true, true, true, true, true, true, true}
 
 		-- MOUNT COUNT
 		local mountCount = MountJournal.MountCount
@@ -519,6 +520,10 @@ function journal:filterDropDown_Initialize(level)
 		info.text = SOURCES
 		info.value = 3
 		UIDropDownMenu_AddButton(info, level)
+
+		info.text = L["expansions"]
+		info.value = 4
+		UIDropDownMenu_AddButton(info, level)
 	else
 		info.notCheckable = true
 
@@ -580,7 +585,7 @@ function journal:filterDropDown_Initialize(level)
 				info.checked = function() return selected[i] end
 				UIDropDownMenu_AddButton(info, level)
 			end
-		else -- SOURCES
+		elseif UIDROPDOWNMENU_MENU_VALUE == 3 then -- SOURCES
 			info.text = CHECK_ALL
 			info.func = function()
 				C_MountJournal.SetAllSourceFilters(true)
@@ -609,6 +614,35 @@ function journal:filterDropDown_Initialize(level)
 					UIDropDownMenu_AddButton(info, level)
 				end
 			end
+		else
+			info.text = CHECK_ALL
+			info.func = function()
+				journal:setAllFilters("expansions", true)
+				MountJournal_UpdateMountList()
+				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+			end
+			UIDropDownMenu_AddButton(info, level)
+
+			info.text = UNCHECK_ALL
+			info.func = function()
+				journal:setAllFilters("expansions", false)
+				MountJournal_UpdateMountList()
+				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+			end
+			UIDropDownMenu_AddButton(info, level)
+
+			info.notCheckable = false
+			local expansions = mounts.filters.expansions
+			for i = 1, 8 do
+				info.text = L["EXPANSION_"..i]
+				info.func = function(_, _, _, value)
+					expansions[i] = value
+					journal:updateBtnFilters()
+					MountJournal_UpdateMountList()
+				end
+				info.checked = function() return expansions[i] end
+				UIDropDownMenu_AddButton(info, level)
+			end
 		end
 	end
 end
@@ -627,6 +661,7 @@ function journal:clearAllFilters()
 	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
 	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
 	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, true)
+	journal:setAllFilters("expansions", true)
 	journal:clearBtnFilters()
 end
 
@@ -682,7 +717,7 @@ function journal:updateBtnFilters()
 
 	-- TYPES AND SELECTED
 	for typeFilter, filter in pairs(mounts.filters) do
-		local default = typeFilter == "types"
+		local default = typeFilter ~= "selected"
 		local i = 0
 		for _, v in pairs(filter) do
 			if v == default then i = i + 1 end
@@ -690,13 +725,15 @@ function journal:updateBtnFilters()
 
 		if i == #filter then
 			f[typeFilter] = true
-			for _, btn in pairs({filtersBar[typeFilter]:GetChildren()}) do
-				local color = default and journal.colors["mount"..btn.id] or journal.colors.dark
-				btn:SetChecked(false)
-				btn.icon:SetVertexColor(unpack(color))
+			if filtersBar[typeFilter] then
+				for _, btn in pairs({filtersBar[typeFilter]:GetChildren()}) do
+					local color = default and journal.colors["mount"..btn.id] or journal.colors.dark
+					btn:SetChecked(false)
+					btn.icon:SetVertexColor(unpack(color))
+				end
+				filtersBar[typeFilter]:GetParent().filtred:Hide()
 			end
-			filtersBar[typeFilter]:GetParent().filtred:Hide()
-		else
+		elseif filtersBar[typeFilter] then
 			for _, btn in pairs({filtersBar[typeFilter]:GetChildren()}) do
 				local checked = filter[btn.id]
 				local color = checked and journal.colors["mount"..btn.id] or journal.colors.dark
@@ -734,7 +771,7 @@ function journal:updateBtnFilters()
 
 	-- CLEAR BTN FILTERS
 	filtersBar.clear:SetShown(not f.types or not f.selected or n ~= #sources - 1)
-	if not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE) or not f.types or not f.selected or n ~= #sources - 1 then
+	if not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE) or not f.types or not f.selected or not f.expansions or n ~= #sources - 1 then
 		journal.shownPanel:Show()
 		journal.leftInset:SetPoint("TOPLEFT", journal.shownPanel, "BOTTOMLEFT", 0, -2)
 	else
@@ -746,9 +783,11 @@ function journal:updateBtnFilters()
 	journal.leftInset:GetHeight()
 end
 
-
+local flyType = {242, 247, 248}
+local groundType = {230, 241, 269, 284}
+local swimmingType = {231, 232, 254}
 function journal:updateMountsList()
-	local types, selected, list = mounts.filters.types, mounts.filters.selected, mounts.list
+	local types, selected, expansions, list = mounts.filters.types, mounts.filters.selected, mounts.filters.expansions, mounts.list
 	wipe(journal.displayedMounts)
 
 	for i = 1, journal.func.GetNumDisplayedMounts() do
@@ -757,11 +796,11 @@ function journal:updateMountsList()
 
 		-- TYPE
 			-- FLY
-		if (types[1] and mounts:inTable({242, 247, 248}, mountType)
+		if (types[1] and mounts:inTable(flyType, mountType)
 			-- GROUND
-		or types[2] and mounts:inTable({230, 241, 269, 284}, mountType)
+		or types[2] and mounts:inTable(groundType, mountType)
 			-- SWIMMING
-		or types[3] and mounts:inTable({231, 232, 254}, mountType))
+		or types[3] and mounts:inTable(swimmingType, mountType))
 		-- SELECTED
 		and (not selected[1] and not selected[2] and not selected[3]
 			-- FLY
@@ -769,7 +808,9 @@ function journal:updateMountsList()
 			-- GROUND
 		or selected[2] and mounts:inTable(list.ground, mountID)
 			-- SWIMMING
-		or selected[3] and mounts:inTable(list.swimming, mountID)) then
+		or selected[3] and mounts:inTable(list.swimming, mountID))
+		-- EXPANSIONS
+		and expansions[mounts.db[mountID]] then
 			tinsert(journal.displayedMounts, i)
 		end
 	end

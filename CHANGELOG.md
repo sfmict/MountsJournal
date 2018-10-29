@@ -1,2 +1,1 @@
-* Magic broom option in settings.
-* Fix save binding in combat.
+* Added filter "Expansions"
