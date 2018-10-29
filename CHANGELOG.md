@@ -1,1 +1,1 @@
-* Added filter "Expansions"
+* Added filter "Expansions" (created automaticaly based on wowhead data)
