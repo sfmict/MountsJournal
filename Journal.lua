@@ -832,11 +832,6 @@ local mountTypes = {
 	[232] = 3,
 	[254] = 3,
 }
-local mountFactions = {
-	[0] = 1, -- HORDE
-	[1] = 2, -- ALLIANCE
-	[2] = 3, -- BOTH
-}
 function journal:updateMountsList()
 	local types, selected, factions, expansions, list = mounts.filters.types, mounts.filters.selected, mounts.filters.factions, mounts.filters.expansions, mounts.list
 	wipe(journal.displayedMounts)
@@ -849,7 +844,7 @@ function journal:updateMountsList()
 		-- TYPE
 		if types[mountTypes[mountType]]
 		-- FACTION
-		and factions[mountFactions[mountFaction]]
+		and factions[mountFaction + 1]
 		-- SELECTED
 		and (not selected[1] and not selected[2] and not selected[3]
 			-- FLY
