@@ -87,6 +87,7 @@ function journal:ADDON_LOADED(addonName)
 		journal.leftInset = MountJournal.LeftInset
 		mounts.filters.types = mounts.filters.types or {true, true, true}
 		mounts.filters.selected = mounts.filters.selected or {false, false, false}
+		mounts.filters.factions = mounts.filters.factions or {true, true, true}
 		mounts.filters.expansions = mounts.filters.expansions or {true, true, true, true, true, true, true, true}
 
 		-- MOUNT COUNT
@@ -521,8 +522,12 @@ function journal:filterDropDown_Initialize(level)
 		info.value = 3
 		UIDropDownMenu_AddButton(info, level)
 
-		info.text = L["expansions"]
+		info.text = L["factions"]
 		info.value = 4
+		UIDropDownMenu_AddButton(info, level)
+
+		info.text = L["expansions"]
+		info.value = 5
 		UIDropDownMenu_AddButton(info, level)
 	else
 		info.notCheckable = true
@@ -614,7 +619,36 @@ function journal:filterDropDown_Initialize(level)
 					UIDropDownMenu_AddButton(info, level)
 				end
 			end
-		else
+		elseif UIDROPDOWNMENU_MENU_VALUE == 4 then -- FACTIONS
+			info.text = CHECK_ALL
+			info.func = function()
+				journal:setAllFilters("factions", true)
+				MountJournal_UpdateMountList()
+				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+			end
+			UIDropDownMenu_AddButton(info, level)
+
+			info.text = UNCHECK_ALL
+			info.func = function()
+				journal:setAllFilters("factions", false)
+				MountJournal_UpdateMountList()
+				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+			end
+			UIDropDownMenu_AddButton(info, level)
+
+			info.notCheckable = false
+			local factions = mounts.filters.factions
+			for i = 1, #factions do
+				info.text = L["MOUNT_FACTION_"..i]
+				info.func = function(_, _, _, value)
+					factions[i] = value
+					journal:updateBtnFilters()
+					MountJournal_UpdateMountList()
+				end
+				info.checked = function() return factions[i] end
+				UIDropDownMenu_AddButton(info, level)
+			end
+		else -- EXPANSIONS
 			info.text = CHECK_ALL
 			info.func = function()
 				journal:setAllFilters("expansions", true)
@@ -634,7 +668,7 @@ function journal:filterDropDown_Initialize(level)
 			info.notCheckable = false
 			local expansions = mounts.filters.expansions
 			for i = 1, 8 do
-				info.text = L["EXPANSION_"..i]
+				info.text = L["MOUNT_EXPANSION_"..i]
 				info.func = function(_, _, _, value)
 					expansions[i] = value
 					journal:updateBtnFilters()
@@ -661,6 +695,7 @@ function journal:clearAllFilters()
 	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
 	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
 	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, true)
+	journal:setAllFilters("factions", true)
 	journal:setAllFilters("expansions", true)
 	journal:clearBtnFilters()
 end
@@ -771,7 +806,7 @@ function journal:updateBtnFilters()
 
 	-- CLEAR BTN FILTERS
 	filtersBar.clear:SetShown(not f.types or not f.selected or n ~= #sources - 1)
-	if not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE) or not f.types or not f.selected or not f.expansions or n ~= #sources - 1 then
+	if not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE) or not f.types or not f.selected or not f.factions or not f.expansions or n ~= #sources - 1 then
 		journal.shownPanel:Show()
 		journal.leftInset:SetPoint("TOPLEFT", journal.shownPanel, "BOTTOMLEFT", 0, -2)
 	else
@@ -783,24 +818,38 @@ function journal:updateBtnFilters()
 	journal.leftInset:GetHeight()
 end
 
-local flyType = {242, 247, 248}
-local groundType = {230, 241, 269, 284}
-local swimmingType = {231, 232, 254}
+
+-- 1 FLY, 2 GROUND, 3 SWIMMING
+local mountTypes = {
+	[242] = 1,
+	[247] = 1,
+	[248] = 1,
+	[230] = 2,
+	[241] = 2,
+	[269] = 2,
+	[284] = 2,
+	[231] = 3,
+	[232] = 3,
+	[254] = 3,
+}
+local mountFactions = {
+	[0] = 1, -- HORDE
+	[1] = 2, -- ALLIANCE
+	[2] = 3, -- BOTH
+}
 function journal:updateMountsList()
-	local types, selected, expansions, list = mounts.filters.types, mounts.filters.selected, mounts.filters.expansions, mounts.list
+	local types, selected, factions, expansions, list = mounts.filters.types, mounts.filters.selected, mounts.filters.factions, mounts.filters.expansions, mounts.list
 	wipe(journal.displayedMounts)
 
 	for i = 1, journal.func.GetNumDisplayedMounts() do
-		local mountID = select(12, journal.func.GetDisplayedMountInfo(i))
+		local _,_,_,_,_,_,_,_,mountFaction,_,_,mountID = journal.func.GetDisplayedMountInfo(i)
 		local mountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
+		mountFaction = mountFaction or 2
 
 		-- TYPE
-			-- FLY
-		if (types[1] and mounts:inTable(flyType, mountType)
-			-- GROUND
-		or types[2] and mounts:inTable(groundType, mountType)
-			-- SWIMMING
-		or types[3] and mounts:inTable(swimmingType, mountType))
+		if types[mountTypes[mountType]]
+		-- FACTION
+		and factions[mountFactions[mountFaction]]
 		-- SELECTED
 		and (not selected[1] and not selected[2] and not selected[3]
 			-- FLY
