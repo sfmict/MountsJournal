@@ -181,6 +181,8 @@ function journal:ADDON_LOADED(addonName)
 		for _, child in pairs(journal.scrollButtons) do
 			child:SetWidth(child:GetWidth() - 25)
 			child.name:SetWidth(child.name:GetWidth() - 18)
+			child.icon:SetPoint("LEFT", child, "LEFT", -41, 0)
+			child.icon:SetSize(40, 40)
 
 			CreateButton("fly", child, 25, -3, function(self)
 				journal:mountToggle(mounts.list.fly, self)
@@ -191,6 +193,8 @@ function journal:ADDON_LOADED(addonName)
 			CreateButton("swimming", child, 25, -31, function(self)
 				journal:mountToggle(mounts.list.swimming, self)
 			end)
+
+			child:HookScript("OnClick", function(self) journal:mountDblClick(self.index) end)
 		end
 
 		-- FILTERS PANEL
@@ -456,6 +460,16 @@ function journal:mountToggle(tbl, btn)
 		tinsert(tbl, btn.mountID)
 		btn.icon:SetVertexColor(unpack(journal.colors.gold))
 		btn.check:Show()
+	end
+end
+
+
+local lastMountClick = 0
+function journal:mountDblClick(index)
+	if GetTime() - lastMountClick < 0.4 then
+		C_MountJournal.SummonByID(select(12, C_MountJournal.GetDisplayedMountInfo(index)))
+	else
+		lastMountClick = GetTime()
 	end
 end
 
