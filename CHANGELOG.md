@@ -1,1 +1,2 @@
-* Added filter "Expansions" (created automaticaly based on wowhead data)
+* Added filter "Factions"
+* Summon mount with double click in journal.
