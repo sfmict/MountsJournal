@@ -143,4 +143,18 @@
 			<OnMouseUp>self.texture:SetPoint("TOPLEFT")</OnMouseUp>
 		</Scripts>
 	</Button>
+
+	<Frame name="MJOptionsPanel" virtual="true">
+		<Backdrop bgFile="Interface/ChatFrame/ChatFrameBackground" edgeFile="Interface/Tooltips/UI-Tooltip-border" tile="true">
+			<EdgeSize val="14"/>
+			<TileSize val="14"/>
+			<BackgroundInsets left="4" right="4" top="4" bottom="4"/>
+		</Backdrop>
+		<Scripts>
+			<OnLoad>
+				self:SetBackdropColor(.1,.1,.1,.3);
+				self:SetBackdropBorderColor(.5,.5,.5);
+			</OnLoad>
+		</Scripts>
+	</Frame>
 </Ui>

@@ -1,2 +1,1 @@
-* Added filter "Factions"
-* Summon mount with double click in journal.
+* Expeditions added to list on Water Walking options.

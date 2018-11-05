@@ -31,6 +31,9 @@ function mounts:ADDON_LOADED(addonName)
 				1771, -- Тол Дагор
 			}
 		end
+		if mounts.config.waterWalkExpeditionList == nil or type(mounts.config.waterWalkExpeditionList) ~= "table" then
+			mounts.config.waterWalkExpeditionList = {}
+		end
 
 		MountsJournalChar = MountsJournalChar or {}
 		MountsJournalChar.fly =  MountsJournalChar.fly or {}
@@ -202,7 +205,7 @@ end
 
 
 function mounts:waterWalkMountsExists()
-	if mounts.config.waterWalkAll or mounts:isWaterWalkLocation() then
+	if mounts.config.waterWalkAll or mounts:isWaterWalkLocation(select(8, GetInstanceInfo())) then
 		for _, mountID in pairs(mounts.waterWalk) do
 			if select(5, C_MountJournal.GetMountInfoByID(mountID)) then
 				return true
@@ -230,12 +233,11 @@ function mounts:summonListOr(ids)
 end
 
 
-function mounts:isFlyLocation()
-	local instance = select(8, GetInstanceInfo())
-
+local draenorLocations = {1116, 1152, 1330, 1153, 1154, 1158, 1331, 1159, 1160}
+function mounts:isFlyLocation(instance)
 	if mounts:inTable(mounts.continensGround, instance)
 	-- Дренор
-	or mounts:inTable({1116, 1152, 1330, 1153, 1154, 1158, 1331, 1159, 1160}, instance) and not IsSpellKnown(191645)
+	or mounts:inTable(draenorLocations, instance) and not IsSpellKnown(191645)
 	-- Расколотые острова
 	or instance == 1220 and not IsSpellKnown(233368) then return false end
 
@@ -243,11 +245,12 @@ function mounts:isFlyLocation()
 end
 
 
-function mounts:isWaterWalkLocation()
-	if mounts.config.waterWalkInstance then
-		local instance = select(8, GetInstanceInfo())
-		if mounts:inTable(mounts.config.waterWalkList, instance) then return true end
+function mounts:isWaterWalkLocation(instance)
+	if mounts.config.waterWalkInstance and mounts:inTable(mounts.config.waterWalkList, instance)
+	or mounts.config.waterWalkExpedition and mounts:inTable(mounts.config.waterWalkExpeditionList, instance) then
+		return true
 	end
+
 	return false
 end
 
@@ -269,9 +272,10 @@ function mounts:init()
 			if not isGroundSpell then
 				if not mounts:summon(mounts.lowLevel) then mounts:errorNoFavorites() end
 			elseif mounts:isFloating() or mounts.modifier() or not IsSubmerged() or not (mounts:inTable(mounts.mapVashjir, C_Map.GetBestMapForUnit("player")) and mounts:summon(mounts.swimmingVashjir)) and not mounts:summon(mounts.list.swimming) then -- swimming
-				local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation()
+				local instance = select(8, GetInstanceInfo())
+				local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation(instance)
 				if (not isFlyableLocation or mounts.modifier() and not IsSubmerged() or not mounts:summonListOr(mounts.list.fly)) -- fly
-				and not ((mounts.config.waterWalkAll or mounts:isFloating() or not isFlyableLocation and mounts.modifier() or mounts:isWaterWalkLocation()) and mounts:summon(mounts.waterWalk)) -- water walk
+				and not ((mounts.config.waterWalkAll or mounts:isFloating() or not isFlyableLocation and mounts.modifier() or mounts:isWaterWalkLocation(instance)) and mounts:summon(mounts.waterWalk)) -- water walk
 				and not mounts:summonListOr(mounts.list.ground) and not mounts:summon(mounts.list.fly) and not mounts:summon(mounts.lowLevel) then -- ground
 					mounts:errorNoFavorites()
 				end

@@ -4,6 +4,7 @@ end
 
 local _, L = ...
 
+L["author"] = "Автор"
 L["Modifier"] = "Модификатор"
 L["%s Configuration"] = "%s настройки"
 L["ConfigPanelTitle %s."] = "Эта панель используется для настройки %s."
@@ -13,6 +14,14 @@ L["WaterJumpDescription"] = "После прыжка в воде будет пр
 L["Water Walking in dungeons"] = "Хождение по воде в подземельях"
 L["Eye of Azchara (Legion)"] = "Око Азшары (Legion)"
 L["Tol Dagor (BFA)"] = "Тол Дагор (BFA)"
+L["Water Walking in expeditions"] = "Хождение по воде в экспедициях"
+L["Un'gol Ruins"] = "Руины Ун'гола"
+L["Verdant Wilds"] = "Зеленые дебри"
+L["Whispering Reef"] = "Шепчущий риф"
+L["Rotting Mire"] = "Гниющая трясина"
+L["Dread Chain"] = "Оковы Ужаса"
+L["Molten Cay"] = "Раскаленный остров"
+L["Skittering Hollow"] = "Паучья лощина"
 L["Water Walking"] = "Хождение по воде"
 L["WaterWalkingDescription"] = "Вместо выбранных наземных средств передвижения используется \"Водный догоног\", если он доступен."
 L["Water Walking Always"] = "Хождения по воде всегда"
