@@ -38,10 +38,10 @@ local function setMacroText()
 	end
 end
 
-function config:PLAYER_LOGIN(addonName)
-	self.broom = GetItemInfo(37011)
+function config:PLAYER_LOGIN()
 	self.bindMount = binding:createButtonBinding(config, "MountsJournal_Mount")
 	self.bindMount:SetSize(232, 22)
+	self.broom = GetItemInfo(37011)
 	if self.broom then
 		setMacroText()
 	else
@@ -82,6 +82,23 @@ config:SetScript("OnShow", function()
 		frame:SetScript("OnLeave", function()
 			GameTooltip_Hide()
 		end)
+	end
+
+	-- CHECKBOX CHILD
+	local function createCheckboxChild(text, id, tbl, parent, point)
+		local check = CreateFrame("CheckButton", nil, parent, "InterfaceOptionsCheckButtonTemplate")
+		check.id = id
+		if #tbl == 0 then
+			check:SetPoint("TOPLEFT", point, "BOTTOMLEFT", 20, 0)
+		else
+			check:SetPoint("TOPLEFT", tbl[#tbl], "BOTTOMLEFT", 0, 0)
+		end
+		check.Text:SetFont("GameFontHighlight", 30)
+		check.Text:SetPoint("LEFT", check, "RIGHT", 1, 0)
+		check.Text:SetText(text)
+		check.tooltipText = L["Water Walking"]
+		check.tooltipRequirement = L["WaterWalkingDescription"]
+		tinsert(tbl, check)
 	end
 
 	-- ADDON INFO
@@ -220,26 +237,15 @@ config:SetScript("OnShow", function()
 	config.waterWalkInstance.Text:SetText(L["Water Walking in dungeons"])
 	config.waterWalkInstance.tooltipText = L["Water Walking"]
 	config.waterWalkInstance.tooltipRequirement = L["WaterWalkingDescription"]
-	config.waterWalkInstance:SetScript("OnClick", function() config:setEnableDungeons() end)
+	config.waterWalkInstance:SetScript("OnClick", function(self)
+		config:setEnableCheckButtons(self:GetChecked(), config.dungeons)
+	end)
 
 	-- WATER WALK IN DUNGEONS
 	config.dungeons = {}
 	local function createDungeonCheckbox(text, id)
-		local dungeon = CreateFrame("CheckButton", nil, rightPanelScroll.child, "InterfaceOptionsCheckButtonTemplate")
-		dungeon.id = id
-		if #config.dungeons == 0 then
-			dungeon:SetPoint("TOPLEFT", config.waterWalkInstance, "BOTTOMLEFT", 20, 0)
-		else
-			dungeon:SetPoint("TOPLEFT", config.dungeons[#config.dungeons], "BOTTOMLEFT", 0, 0)
-		end
-		dungeon.Text:SetFont("GameFontHighlight", 30)
-		dungeon.Text:SetPoint("LEFT", dungeon, "RIGHT", 1, 0)
-		dungeon.Text:SetText(text)
-		dungeon.tooltipText = L["Water Walking"]
-		dungeon.tooltipRequirement = L["WaterWalkingDescription"]
-		tinsert(config.dungeons, dungeon)
+		createCheckboxChild(text, id, config.dungeons, rightPanelScroll.child, config.waterWalkInstance)
 	end
-
 	createDungeonCheckbox(L["Eye of Azchara (Legion)"], 1456)
 	createDungeonCheckbox(L["Tol Dagor (BFA)"], 1771)
 
@@ -251,26 +257,15 @@ config:SetScript("OnShow", function()
 	config.waterWalkExpedition.Text:SetText(L["Water Walking in expeditions"])
 	config.waterWalkExpedition.tooltipText = L["Water Walking"]
 	config.waterWalkExpedition.tooltipRequirement = L["WaterWalkingDescription"]
-	config.waterWalkExpedition:SetScript("OnClick", function() config:setEnableExpeditions() end)
+	config.waterWalkExpedition:SetScript("OnClick", function(self)
+		config:setEnableCheckButtons(self:GetChecked(), config.expeditions)
+	end)
 
 	-- WATER WALK IN EXPEDITIONS
 	config.expeditions = {}
 	local function createExpeditionCheckbox(text, id)
-		local expedition = CreateFrame("CheckButton", nil, rightPanelScroll.child, "InterfaceOptionsCheckButtonTemplate")
-		expedition.id = id
-		if #config.expeditions == 0 then
-			expedition:SetPoint("TOPLEFT", config.waterWalkExpedition, "BOTTOMLEFT", 20, 0)
-		else
-			expedition:SetPoint("TOPLEFT", config.expeditions[#config.expeditions], "BOTTOMLEFT", 0, 0)
-		end
-		expedition.Text:SetFont("GameFontHighlight", 30)
-		expedition.Text:SetPoint("LEFT", expedition, "RIGHT", 1, 0)
-		expedition.Text:SetText(text)
-		expedition.tooltipText = L["Water Walking"]
-		expedition.tooltipRequirement = L["WaterWalkingDescription"]
-		tinsert(config.expeditions, expedition)
+		createCheckboxChild(text, id, config.expeditions, rightPanelScroll.child, config.waterWalkExpedition)
 	end
-
 	createExpeditionCheckbox(L["Un'gol Ruins"], 1813)
 	createExpeditionCheckbox(L["Verdant Wilds"], 1882)
 	createExpeditionCheckbox(L["Whispering Reef"], 1883)
@@ -306,14 +301,14 @@ config:SetScript("OnShow", function()
 		binding:setButtonText(config.bindMount)
 		config.waterWalkAlways:SetChecked(mounts.config.waterWalkAll)
 		config.waterWalkInstance:SetChecked(mounts.config.waterWalkInstance)
-		config:setEnableDungeons()
+		config:setEnableCheckButtons(mounts.config.waterWalkInstance, config.dungeons)
 		for _, dungeon in pairs(config.dungeons) do
-			dungeon:SetChecked(mounts:inTable(mounts.config.waterWalkList, dungeon.id))
+			dungeon:SetChecked(mounts.config.waterWalkList[dungeon.id])
 		end
 		config.waterWalkExpedition:SetChecked(mounts.config.waterWalkExpedition)
-		config:setEnableExpeditions()
+		config:setEnableCheckButtons(mounts.config.waterWalkExpedition, config.expeditions)
 		for _, expedition in pairs(config.expeditions) do
-			expedition:SetChecked(mounts:inTable(mounts.config.waterWalkExpeditionList, expedition.id))
+			expedition:SetChecked(mounts.config.waterWalkExpeditionList[expedition.id])
 		end
 		config.useHerbMounts:SetChecked(mounts.config.useHerbMounts)
 		config.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
@@ -324,31 +319,16 @@ config:SetScript("OnShow", function()
 end)
 
 
-function config:setEnableDungeons()
-	if self.waterWalkInstance:GetChecked() then
-		for _, dungeon in pairs(self.dungeons) do
-			dungeon:Enable()
-			dungeon.Text:SetTextColor(1,1,1,1)
+function config:setEnableCheckButtons(enable, tbl)
+	if enable then
+		for _, check in pairs(tbl) do
+			check:Enable()
+			check.Text:SetTextColor(1,1,1,1)
 		end
 	else
-		for _, dungeon in pairs(self.dungeons) do
-			dungeon:Disable()
-			dungeon.Text:SetTextColor(.5,.5,.5,1)
-		end
-	end
-end
-
-
-function config:setEnableExpeditions()
-	if self.waterWalkExpedition:GetChecked() then
-		for _, expedition in pairs(self.expeditions) do
-			expedition:Enable()
-			expedition.Text:SetTextColor(1,1,1,1)
-		end
-	else
-		for _, expedition in pairs(self.expeditions) do
-			expedition:Disable()
-			expedition.Text:SetTextColor(.5,.5,.5,1)
+		for _, check in pairs(tbl) do
+			check:Disable()
+			check.Text:SetTextColor(.5,.5,.5,1)
 		end
 	end
 end
@@ -362,16 +342,12 @@ config.okay = function(self)
 	mounts.config.waterWalkInstance = self.waterWalkInstance:GetChecked()
 	wipe(mounts.config.waterWalkList)
 	for _, dungeon in pairs(self.dungeons) do
-		if dungeon:GetChecked() then
-			tinsert(mounts.config.waterWalkList, dungeon.id)
-		end
+		mounts.config.waterWalkList[dungeon.id] = dungeon:GetChecked()
 	end
 	mounts.config.waterWalkExpedition = self.waterWalkExpedition:GetChecked()
 	wipe(mounts.config.waterWalkExpeditionList)
 	for _, expedition in pairs(self.expeditions) do
-		if expedition:GetChecked() then
-			tinsert(mounts.config.waterWalkExpeditionList, expedition.id)
-		end
+		mounts.config.waterWalkExpeditionList[expedition.id] = expedition:GetChecked()
 	end
 	mounts.config.useHerbMounts = self.useHerbMounts:GetChecked()
 	mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()

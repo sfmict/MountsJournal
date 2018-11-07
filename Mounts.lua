@@ -27,8 +27,8 @@ function mounts:ADDON_LOADED(addonName)
 		end
 		if mounts.config.waterWalkList == nil or type(mounts.config.waterWalkList) ~= "table" then
 			mounts.config.waterWalkList = {
-				1456, -- Око Азшары
-				1771, -- Тол Дагор
+				[1456] = true, -- Око Азшары
+				[1771] = true, -- Тол Дагор
 			}
 		end
 		if mounts.config.waterWalkExpeditionList == nil or type(mounts.config.waterWalkExpeditionList) ~= "table" then
@@ -57,26 +57,26 @@ function mounts:ADDON_LOADED(addonName)
 		}
 
 		mounts.continensGround = {
-			1107, -- Разлом Зловещего Шрама
-			1463, -- Внешняя область Хельхейма
-			1514, -- Скитающийся остров
-			1688, -- Мертвые копи
-			1760, -- Лордерон
-			1763, -- Атал'Дазар
-			1813, -- Экспедиция: Руины Ун'гола
-			1876, -- Фронт Арати (Орда)
-			1882, -- Экспедиция: Зеленые дебри
-			1883, -- Экспедиция: Шепчущий риф
-			1892, -- Экспедиция: Гниющая трясина
-			1893, -- Экспедиция: Оковы Ужаса
-			1897, -- Экспедиция: Раскаленный остров
-			1898, -- Экспедиция: Паучья лощина
+			[1107] = true, -- Разлом Зловещего Шрама
+			[1463] = true, -- Внешняя область Хельхейма
+			[1514] = true, -- Скитающийся остров
+			[1688] = true, -- Мертвые копи
+			[1760] = true, -- Лордерон
+			[1763] = true, -- Атал'Дазар
+			[1813] = true, -- Экспедиция: Руины Ун'гола
+			[1876] = true, -- Фронт Арати (Орда)
+			[1882] = true, -- Экспедиция: Зеленые дебри
+			[1883] = true, -- Экспедиция: Шепчущий риф
+			[1892] = true, -- Экспедиция: Гниющая трясина
+			[1893] = true, -- Экспедиция: Оковы Ужаса
+			[1897] = true, -- Экспедиция: Раскаленный остров
+			[1898] = true, -- Экспедиция: Паучья лощина
 		}
 		mounts.mapVashjir = {
-			201, -- Лес Келп’тар
-			203, -- Вайш'ир
-			204, -- Бездонные глубины
-			205, -- Мерцающий простор
+			[201] = true, -- Лес Келп’тар
+			[203] = true, -- Вайш'ир
+			[204] = true, -- Бездонные глубины
+			[205] = true, -- Мерцающий простор
 		}
 		-- 1170, -- Горгронд - сценарий маг'харов
 
@@ -233,11 +233,21 @@ function mounts:summonListOr(ids)
 end
 
 
-local draenorLocations = {1116, 1152, 1330, 1153, 1154, 1158, 1331, 1159, 1160}
+local draenorLocations = {
+	[1116] = true,
+	[1152] = true,
+	[1330] = true,
+	[1153] = true,
+	[1154] = true,
+	[1158] = true,
+	[1331] = true,
+	[1159] = true,
+	[1160] = true,
+}
 function mounts:isFlyLocation(instance)
-	if mounts:inTable(mounts.continensGround, instance)
+	if mounts.continensGround[instance]
 	-- Дренор
-	or mounts:inTable(draenorLocations, instance) and not IsSpellKnown(191645)
+	or draenorLocations[instance] and not IsSpellKnown(191645)
 	-- Расколотые острова
 	or instance == 1220 and not IsSpellKnown(233368) then return false end
 
@@ -246,8 +256,8 @@ end
 
 
 function mounts:isWaterWalkLocation(instance)
-	if mounts.config.waterWalkInstance and mounts:inTable(mounts.config.waterWalkList, instance)
-	or mounts.config.waterWalkExpedition and mounts:inTable(mounts.config.waterWalkExpeditionList, instance) then
+	if mounts.config.waterWalkInstance and mounts.config.waterWalkList[instance]
+	or mounts.config.waterWalkExpedition and mounts.config.waterWalkExpeditionList[instance] then
 		return true
 	end
 
@@ -271,7 +281,7 @@ function mounts:init()
 			local isGroundSpell, isFlySpell = mounts:getSpellKnown()
 			if not isGroundSpell then
 				if not mounts:summon(mounts.lowLevel) then mounts:errorNoFavorites() end
-			elseif mounts:isFloating() or mounts.modifier() or not IsSubmerged() or not (mounts:inTable(mounts.mapVashjir, C_Map.GetBestMapForUnit("player")) and mounts:summon(mounts.swimmingVashjir)) and not mounts:summon(mounts.list.swimming) then -- swimming
+			elseif mounts:isFloating() or mounts.modifier() or not IsSubmerged() or not (mounts.mapVashjir[C_Map.GetBestMapForUnit("player")] and mounts:summon(mounts.swimmingVashjir)) and not mounts:summon(mounts.list.swimming) then -- swimming
 				local instance = select(8, GetInstanceInfo())
 				local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation(instance)
 				if (not isFlyableLocation or mounts.modifier() and not IsSubmerged() or not mounts:summonListOr(mounts.list.fly)) -- fly
