@@ -157,4 +157,13 @@
 			</OnLoad>
 		</Scripts>
 	</Frame>
+
+	<CheckButton name="MJCheckButtonTemplate" inherits="InterfaceOptionsCheckButtonTemplate" virtual="true">
+		<Scripts>
+			<OnLoad>
+				self.Text:SetFont("GameFontHighlight", 30);
+				self.Text:SetPoint("LEFT", self, "RIGHT", 1, 0);
+			</OnLoad>
+		</Scripts>
+	</CheckButton>
 </Ui>

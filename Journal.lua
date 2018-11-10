@@ -132,10 +132,8 @@ function journal:ADDON_LOADED(addonName)
 		self:RegisterEvent("ACHIEVEMENT_EARNED")
 
 		-- PER CHARACTER CHECK
-		local perCharCheck = CreateFrame("CheckButton", nil, MountJournal, "InterfaceOptionsCheckButtonTemplate")
+		local perCharCheck = CreateFrame("CheckButton", nil, MountJournal, "MJCheckButtonTemplate")
 		perCharCheck:SetPoint("LEFT", MountJournal.MountButton, "RIGHT", 6, -2)
-		perCharCheck.Text:SetFont("GameFontHighlight", 30)
-		perCharCheck.Text:SetPoint("LEFT", perCharCheck, "RIGHT", 1, 1)
 		perCharCheck.Text:SetText(L["Character Specific Mount List"])
 		perCharCheck:SetChecked(mounts.perChar)
 		perCharCheck:SetScript("OnClick", function(self)

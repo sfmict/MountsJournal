@@ -86,15 +86,13 @@ config:SetScript("OnShow", function()
 
 	-- CHECKBOX CHILD
 	local function createCheckboxChild(text, id, tbl, parent, point)
-		local check = CreateFrame("CheckButton", nil, parent, "InterfaceOptionsCheckButtonTemplate")
+		local check = CreateFrame("CheckButton", nil, parent, "MJCheckButtonTemplate")
 		check.id = id
 		if #tbl == 0 then
 			check:SetPoint("TOPLEFT", point, "BOTTOMLEFT", 20, 0)
 		else
 			check:SetPoint("TOPLEFT", tbl[#tbl], "BOTTOMLEFT", 0, 0)
 		end
-		check.Text:SetFont("GameFontHighlight", 30)
-		check.Text:SetPoint("LEFT", check, "RIGHT", 1, 0)
 		check.Text:SetText(text)
 		check.tooltipText = L["Water Walking"]
 		check.tooltipRequirement = L["WaterWalkingDescription"]
@@ -155,10 +153,8 @@ config:SetScript("OnShow", function()
 	setTooltip(modifierCombobox, "ANCHOR_TOPLEFT", L["Modifier"], L["ModifierDescription"])
 
 	-- WATER JUMP
-	config.waterJump = CreateFrame("CheckButton", nil, config, "InterfaceOptionsCheckButtonTemplate")
+	config.waterJump = CreateFrame("CheckButton", nil, config, "MJCheckButtonTemplate")
 	config.waterJump:SetPoint("TOPLEFT", modifierText, "BOTTOMLEFT", 0, -10)
-	config.waterJump.Text:SetFont("GameFontHighlight", 30)
-	config.waterJump.Text:SetPoint("LEFT", config.waterJump, "RIGHT", 1, 0)
 	config.waterJump.Text:SetText(L["Handle a jump in water"])
 	config.waterJump.tooltipText = L["Handle a jump in water"]
 	config.waterJump.tooltipRequirement = L["WaterJumpDescription"]
@@ -221,19 +217,15 @@ config:SetScript("OnShow", function()
 	rightPanelScroll:SetScrollChild(rightPanelScroll.child)
 
 	-- WATER WALKER ALWAYS
-	config.waterWalkAlways = CreateFrame("CheckButton", nil, rightPanelScroll.child, "InterfaceOptionsCheckButtonTemplate")
+	config.waterWalkAlways = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
 	config.waterWalkAlways:SetPoint("TOPLEFT", rightPanelScroll.child, 9, -11)
-	config.waterWalkAlways.Text:SetFont("GameFontHighlight", 30)
-	config.waterWalkAlways.Text:SetPoint("LEFT", config.waterWalkAlways, "RIGHT", 1, 0)
 	config.waterWalkAlways.Text:SetText(L["Water Walking Always"])
 	config.waterWalkAlways.tooltipText = L["Water Walking"]
 	config.waterWalkAlways.tooltipRequirement = L["WaterWalkingDescription"]
 
 	-- WATER WALK INSTANCE
-	config.waterWalkInstance = CreateFrame("CheckButton", nil, rightPanelScroll.child, "InterfaceOptionsCheckButtonTemplate")
+	config.waterWalkInstance = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
 	config.waterWalkInstance:SetPoint("TOPLEFT", config.waterWalkAlways, "BOTTOMLEFT", 0, 0)
-	config.waterWalkInstance.Text:SetFont("GameFontHighlight", 30)
-	config.waterWalkInstance.Text:SetPoint("LEFT", config.waterWalkInstance, "RIGHT", 1, 0)
 	config.waterWalkInstance.Text:SetText(L["Water Walking in dungeons"])
 	config.waterWalkInstance.tooltipText = L["Water Walking"]
 	config.waterWalkInstance.tooltipRequirement = L["WaterWalkingDescription"]
@@ -253,10 +245,8 @@ config:SetScript("OnShow", function()
 	createDungeonCheckbox(974, "(BFA)", 1771) -- Тол Дагор
 
 	-- WATER WALK EXPEDITION
-	config.waterWalkExpedition = CreateFrame("CheckButton", nil, rightPanelScroll.child, "InterfaceOptionsCheckButtonTemplate")
+	config.waterWalkExpedition = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
 	config.waterWalkExpedition:SetPoint("TOPLEFT", config.dungeons[#config.dungeons], "BOTTOMLEFT", -20, 0)
-	config.waterWalkExpedition.Text:SetFont("GameFontHighlight", 30)
-	config.waterWalkExpedition.Text:SetPoint("LEFT", config.waterWalkExpedition, "RIGHT", 1, 0)
 	config.waterWalkExpedition.Text:SetText(L["Water Walking in expeditions"])
 	config.waterWalkExpedition.tooltipText = L["Water Walking"]
 	config.waterWalkExpedition.tooltipRequirement = L["WaterWalkingDescription"]
@@ -281,19 +271,15 @@ config:SetScript("OnShow", function()
 	createExpeditionCheckbox(1032, 1898) -- Паучья лощина
 
 	-- USE HERBALISM MOUNTS
-	config.useHerbMounts = CreateFrame("CheckButton", nil, rightPanelScroll.child, "InterfaceOptionsCheckButtonTemplate")
+	config.useHerbMounts = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
 	config.useHerbMounts:SetPoint("TOPLEFT", config.expeditions[#config.expeditions], "BOTTOMLEFT", -20, -26)
-	config.useHerbMounts.Text:SetFont("GameFontHighlight", 30)
-	config.useHerbMounts.Text:SetPoint("LEFT", config.useHerbMounts, "RIGHT", 1, 0)
 	config.useHerbMounts.Text:SetText(L["UseHerbMounts"])
 	config.useHerbMounts.tooltipText = L["UseHerbMounts"]
 	config.useHerbMounts.tooltipRequirement = L["UseHerbMountsDescription"]
 
 	-- USE MAGIC BROOM
-	config.useMagicBroom = CreateFrame("CheckButton", nil, rightPanelScroll.child, "InterfaceOptionsCheckButtonTemplate")
+	config.useMagicBroom = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
 	config.useMagicBroom:SetPoint("TOPLEFT", config.useHerbMounts, "BOTTOMLEFT", 0, -26)
-	config.useMagicBroom.Text:SetFont("GameFontHighlight", 30)
-	config.useMagicBroom.Text:SetPoint("LEFT", config.useMagicBroom, "RIGHT", 1, 0)
 	config.useMagicBroom.Text:SetText(L["UseMagicBroom"])
 	config.useMagicBroom.tooltipText = L["UseMagicBroom"]
 	config.useMagicBroom.tooltipRequirement = format("%s\n\n|cffff0000%s|r", L["UseMagicBroomDescription"], L["NeedRecreateMacro"])
