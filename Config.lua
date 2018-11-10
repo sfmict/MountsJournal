@@ -243,11 +243,14 @@ config:SetScript("OnShow", function()
 
 	-- WATER WALK IN DUNGEONS
 	config.dungeons = {}
-	local function createDungeonCheckbox(text, id)
-		createCheckboxChild(text, id, config.dungeons, rightPanelScroll.child, config.waterWalkInstance)
+	local function createDungeonCheckbox(mapID, expansion, instanceID)
+		local info = C_Map.GetMapInfo(mapID)
+		if info and info.name then
+			createCheckboxChild(format("%s %s", info.name, expansion), instanceID, config.dungeons, rightPanelScroll.child, config.waterWalkInstance)
+		end
 	end
-	createDungeonCheckbox(L["Eye of Azchara (Legion)"], 1456)
-	createDungeonCheckbox(L["Tol Dagor (BFA)"], 1771)
+	createDungeonCheckbox(713, "(Legion)", 1456) -- Око Азшары
+	createDungeonCheckbox(974, "(BFA)", 1771) -- Тол Дагор
 
 	-- WATER WALK EXPEDITION
 	config.waterWalkExpedition = CreateFrame("CheckButton", nil, rightPanelScroll.child, "InterfaceOptionsCheckButtonTemplate")
@@ -263,16 +266,19 @@ config:SetScript("OnShow", function()
 
 	-- WATER WALK IN EXPEDITIONS
 	config.expeditions = {}
-	local function createExpeditionCheckbox(text, id)
-		createCheckboxChild(text, id, config.expeditions, rightPanelScroll.child, config.waterWalkExpedition)
+	local function createExpeditionCheckbox(mapID, instanceID)
+		local info = C_Map.GetMapInfo(mapID)
+		if info and info.name then
+			createCheckboxChild(info.name, instanceID, config.expeditions, rightPanelScroll.child, config.waterWalkExpedition)
+		end
 	end
-	createExpeditionCheckbox(L["Un'gol Ruins"], 1813)
-	createExpeditionCheckbox(L["Verdant Wilds"], 1882)
-	createExpeditionCheckbox(L["Whispering Reef"], 1883)
-	createExpeditionCheckbox(L["Rotting Mire"], 1892)
-	createExpeditionCheckbox(L["Dread Chain"], 1893)
-	createExpeditionCheckbox(L["Molten Cay"], 1897)
-	createExpeditionCheckbox(L["Skittering Hollow"], 1898)
+	createExpeditionCheckbox(981, 1813) -- Руины Ун'гола
+	createExpeditionCheckbox(1034, 1882) -- Зеленые дебри
+	createExpeditionCheckbox(1037, 1883) -- Шепчущий риф
+	createExpeditionCheckbox(1033, 1892) -- Гниющая трясина
+	createExpeditionCheckbox(1036, 1893) -- Оковы Ужаса
+	createExpeditionCheckbox(1035, 1897) -- Раскаленный остров
+	createExpeditionCheckbox(1032, 1898) -- Паучья лощина
 
 	-- USE HERBALISM MOUNTS
 	config.useHerbMounts = CreateFrame("CheckButton", nil, rightPanelScroll.child, "InterfaceOptionsCheckButtonTemplate")

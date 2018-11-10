@@ -684,7 +684,7 @@ function journal:filterDropDown_Initialize(level)
 			info.notCheckable = false
 			local expansions = mounts.filters.expansions
 			for i = 1, 8 do
-				info.text = L["MOUNT_EXPANSION_"..i]
+				info.text = _G["EXPANSION_NAME"..(i - 1)]
 				info.func = function(_, _, _, value)
 					expansions[i] = value
 					journal:updateBtnFilters()
