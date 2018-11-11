@@ -270,6 +270,11 @@ function mounts:errorNoFavorites()
 end
 
 
+function mounts:errorInCombat()
+	UIErrorsFrame:AddMessage(format("|cffff0000%s|r", ERR_NOT_IN_COMBAT))
+end
+
+
 function mounts:init()
 	SLASH_MOUNTSJOURNAL1 = "/mount"
 	SlashCmdList["MOUNTSJOURNAL"] = function()
@@ -278,6 +283,10 @@ function mounts:init()
 				Dismount()
 			end
 		else
+			if InCombatLockdown() then
+				mounts:errorInCombat()
+				return
+			end
 			local isGroundSpell, isFlySpell = mounts:getSpellKnown()
 			if not isGroundSpell then
 				if not mounts:summon(mounts.lowLevel) then mounts:errorNoFavorites() end
