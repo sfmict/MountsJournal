@@ -266,7 +266,7 @@ end
 
 
 function mounts:errorNoFavorites()
-	UIErrorsFrame:AddMessage(format("|cffff0000%s|r", ERR_MOUNT_NO_FAVORITES))
+	UIErrorsFrame:AddMessage(InCombatLockdown() and SPELL_FAILED_AFFECTING_COMBAT or ERR_MOUNT_NO_FAVORITES, 1, .1, .1, 1)
 end
 
 
