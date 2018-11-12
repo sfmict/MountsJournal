@@ -466,7 +466,10 @@ local lastMountClick = 0
 local lastMountIndex = 0
 function journal:mountDblClick(index)
 	if lastMountIndex == index and GetTime() - lastMountClick < 0.4 then
-		C_MountJournal.SummonByID(select(12, C_MountJournal.GetDisplayedMountInfo(index)))
+		local isCollected, mountID = select(11, C_MountJournal.GetDisplayedMountInfo(index))
+		if isCollected then
+			C_MountJournal.SummonByID(mountID)
+		end
 	else
 		lastMountIndex = index
 		lastMountClick = GetTime()

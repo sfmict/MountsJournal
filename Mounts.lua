@@ -265,7 +265,7 @@ function mounts:isWaterWalkLocation(instance)
 end
 
 
-function mounts:errorNoFavorites()
+function mounts:errorSummon()
 	UIErrorsFrame:AddMessage(InCombatLockdown() and SPELL_FAILED_AFFECTING_COMBAT or ERR_MOUNT_NO_FAVORITES, 1, .1, .1, 1)
 end
 
@@ -280,14 +280,14 @@ function mounts:init()
 		else
 			local isGroundSpell, isFlySpell = mounts:getSpellKnown()
 			if not isGroundSpell then
-				if not mounts:summon(mounts.lowLevel) then mounts:errorNoFavorites() end
+				if not mounts:summon(mounts.lowLevel) then mounts:errorSummon() end
 			elseif mounts:isFloating() or mounts.modifier() or not IsSubmerged() or not (mounts.mapVashjir[C_Map.GetBestMapForUnit("player")] and mounts:summon(mounts.swimmingVashjir)) and not mounts:summon(mounts.list.swimming) then -- swimming
 				local instance = select(8, GetInstanceInfo())
 				local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation(instance)
 				if (not isFlyableLocation or mounts.modifier() and not IsSubmerged() or not mounts:summonListOr(mounts.list.fly)) -- fly
 				and not ((mounts.config.waterWalkAll or mounts:isFloating() or not isFlyableLocation and mounts.modifier() or mounts:isWaterWalkLocation(instance)) and mounts:summon(mounts.waterWalk)) -- water walk
 				and not mounts:summonListOr(mounts.list.ground) and not mounts:summon(mounts.list.fly) and not mounts:summon(mounts.lowLevel) then -- ground
-					mounts:errorNoFavorites()
+					mounts:errorSummon()
 				end
 			end
 		end

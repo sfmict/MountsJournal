@@ -1,2 +1,2 @@
-* Expeditions added to list on Water Walking options.
-* Optimization. (Water Walk list is reseted, must be configured again.)
+* Fixed error message on summon mount in combat.
+* Fixed summon not collected mount on double click in journal.
