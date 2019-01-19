@@ -263,6 +263,8 @@ config:SetScript("OnShow", function()
 		end
 	end
 	createExpeditionCheckbox(981, 1813) -- Руины Ун'гола
+	createExpeditionCheckbox(1336, 1814) -- Тихая Сень
+	createExpeditionCheckbox(1337, 1879) -- Йорундалль
 	createExpeditionCheckbox(1034, 1882) -- Зеленые дебри
 	createExpeditionCheckbox(1037, 1883) -- Шепчущий риф
 	createExpeditionCheckbox(1033, 1892) -- Гниющая трясина
