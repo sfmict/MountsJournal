@@ -1,2 +1,1 @@
-* Update expeditions list.
-* Update mounts DB.
+* Update toc file.
