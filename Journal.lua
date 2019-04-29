@@ -192,7 +192,7 @@ function journal:ADDON_LOADED(addonName)
 				journal:mountToggle(mounts.list.swimming, self)
 			end)
 
-			child:HookScript("OnClick", function(self) journal:mountDblClick(self.index) end)
+			child:HookScript("OnClick", function(self, btn) journal:mountDblClick(self.index, btn) end)
 		end
 
 		-- FILTERS PANEL
@@ -464,7 +464,9 @@ end
 
 local lastMountClick = 0
 local lastMountIndex = 0
-function journal:mountDblClick(index)
+function journal:mountDblClick(index, btn)
+	if btn == "RightButton" then return end
+
 	if lastMountIndex == index and GetTime() - lastMountClick < 0.4 then
 		local isCollected, mountID = select(11, C_MountJournal.GetDisplayedMountInfo(index))
 		if isCollected then

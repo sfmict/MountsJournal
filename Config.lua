@@ -233,7 +233,7 @@ config:SetScript("OnShow", function()
 		config:setEnableCheckButtons(self:GetChecked(), config.dungeons)
 	end)
 
-	-- WATER WALK IN DUNGEONS
+	-- WATER WALK DUNGEONS
 	config.dungeons = {}
 	local function createDungeonCheckbox(mapID, expansion, instanceID)
 		local info = C_Map.GetMapInfo(mapID)
@@ -244,7 +244,7 @@ config:SetScript("OnShow", function()
 	createDungeonCheckbox(713, "(Legion)", 1456) -- Око Азшары
 	createDungeonCheckbox(974, "(BFA)", 1771) -- Тол Дагор
 
-	-- WATER WALK EXPEDITION
+	-- WATER WALK IN EXPEDITIONS
 	config.waterWalkExpedition = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
 	config.waterWalkExpedition:SetPoint("TOPLEFT", config.dungeons[#config.dungeons], "BOTTOMLEFT", -20, 0)
 	config.waterWalkExpedition.Text:SetText(L["Water Walking in expeditions"])
@@ -254,23 +254,17 @@ config:SetScript("OnShow", function()
 		config:setEnableCheckButtons(self:GetChecked(), config.expeditions)
 	end)
 
-	-- WATER WALK IN EXPEDITIONS
-	config.expeditions = {}
-	local function createExpeditionCheckbox(mapID, instanceID)
+	-- WATER WALK EXPEDITIONS
+	local expeditions = {}
+	for instanceID, mapID in pairs(mounts.expeditions) do
 		local info = C_Map.GetMapInfo(mapID)
-		if info and info.name then
-			createCheckboxChild(info.name, instanceID, config.expeditions, rightPanelScroll.child, config.waterWalkExpedition)
-		end
+		tinsert(expeditions, {instanceID, info.name})
 	end
-	createExpeditionCheckbox(981, 1813) -- Руины Ун'гола
-	createExpeditionCheckbox(1336, 1814) -- Тихая Сень
-	createExpeditionCheckbox(1337, 1879) -- Йорундалль
-	createExpeditionCheckbox(1034, 1882) -- Зеленые дебри
-	createExpeditionCheckbox(1037, 1883) -- Шепчущий риф
-	createExpeditionCheckbox(1033, 1892) -- Гниющая трясина
-	createExpeditionCheckbox(1036, 1893) -- Оковы Ужаса
-	createExpeditionCheckbox(1035, 1897) -- Раскаленный остров
-	createExpeditionCheckbox(1032, 1898) -- Паучья лощина
+	table.sort(expeditions, function(a, b) return a[2] < b[2] end)
+	config.expeditions = {}
+	for i = 1, #expeditions do
+		createCheckboxChild(expeditions[i][2], expeditions[i][1], config.expeditions, rightPanelScroll.child, config.waterWalkExpedition)
+	end
 
 	-- USE HERBALISM MOUNTS
 	config.useHerbMounts = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
