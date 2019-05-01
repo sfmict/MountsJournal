@@ -1,6 +1,7 @@
 local addon, L = ...
 local mounts, config = MountsJournal, MountsJournalConfig
 local journal = MountsJournalFrame
+local interface = select(4, GetBuildInfo())
 
 
 local COLLECTION_ACHIEVEMENT_CATEGORY = 15246
@@ -102,6 +103,23 @@ function journal:ADDON_LOADED(addonName)
 		mountCount.collectedLabel = mountCount:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
 		mountCount.collectedLabel:SetPoint("LEFT", 10, -6)
 		mountCount.collectedLabel:SetText(L["Collected:"])
+
+		-- MOUNT EQUIPMENT
+		if interface >= 80200 then
+			local bottomLeftInset = MountJournal.BottomLeftInset
+			local slotButton = bottomLeftInset.SlotButton
+			bottomLeftInset.SlotLabel:SetPoint("LEFT", bottomLeftInset, "LEFT", 0, 0)
+			bottomLeftInset:Hide()
+			slotButton:SetParent(MountJournal)
+			slotButton:SetPoint("TOPLEFT", journal.mountCount, "TOPRIGHT", 2, -2)
+			slotButton:SetSize(32, 32)
+			for _,region in pairs({slotButton:GetRegions()}) do
+				region:SetSize(32, 32)
+			end
+			journal.leftInset:SetPoint("BOTTOMLEFT", MountJournal, "BOTTOMLEFT", 0, 26)
+			HybridScrollFrame_CreateButtons(scrollFrame, "MountListButtonTemplate", 44, 0);
+			MountJournal.RightInset:SetPoint("BOTTOMLEFT", journal.leftInset, "BOTTOMRIGHT", 20, 0)
+		end
 
 		-- SETTINGS BUTTON
 		local btnConfig = CreateFrame("Button", "MountsJournalBtnConfig", MountJournal, "UIPanelButtonTemplate")
@@ -223,7 +241,6 @@ function journal:ADDON_LOADED(addonName)
 		shownPanel.clear:SetScript("OnClick", journal.clearAllFilters)
 
 		-- SCROLL FRAME
-		journal.leftInset:SetPoint("TOPLEFT", shownPanel, "BOTTOMLEFT", 0, -2)
 		scrollFrame:SetPoint("TOPLEFT", journal.leftInset, "TOPLEFT", 3, -5)
 		scrollFrame.scrollBar:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", 1, -12)
 

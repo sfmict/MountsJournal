@@ -1,5 +1,6 @@
 local addon = ...
 local mounts = CreateFrame("Frame", "MountsJournal")
+local interface = select(4, GetBuildInfo())
 
 
 mounts:SetScript("OnEvent", function(self, event, ...)
@@ -252,13 +253,20 @@ local draenorLocations = {
 	[1159] = true,
 	[1160] = true,
 }
+local bfaLocations = {
+	[1642] = true, -- Зандалар
+	[1643] = true, -- Кул-Тирас
+}
 function mounts:isFlyLocation(instance)
 	if mounts.continentsGround[instance]
-	or mounts.expeditions[instance]
-	-- Дренор
-	or draenorLocations[instance] and not IsSpellKnown(191645)
-	-- Расколотые острова
-	or instance == 1220 and not IsSpellKnown(233368) then return false end
+		or mounts.expeditions[instance]
+		-- Дренор
+		or draenorLocations[instance] and not IsSpellKnown(191645)
+		-- Расколотые острова
+		or instance == 1220 and not IsSpellKnown(233368)
+		-- Битва за Азерот
+		or bfaLocations[instance] and not IsSpellKnown(278833)
+	then return false end
 
 	return true
 end
@@ -290,11 +298,26 @@ function mounts:init()
 			local isGroundSpell, isFlySpell = mounts:getSpellKnown()
 			if not isGroundSpell then
 				if not mounts:summon(mounts.lowLevel) then mounts:errorSummon() end
-			elseif mounts:isFloating() or mounts.modifier() or not IsSubmerged() or not (mounts.mapVashjir[C_Map.GetBestMapForUnit("player")] and mounts:summon(mounts.swimmingVashjir)) and not mounts:summon(mounts.list.swimming) then -- swimming
+			-- swimming
+			elseif mounts:isFloating()
+				or mounts.modifier()
+				or not IsSubmerged()
+				or not (mounts.mapVashjir[C_Map.GetBestMapForUnit("player")] and mounts:summon(mounts.swimmingVashjir))
+				and not mounts:summon(mounts.list.swimming) then
+				-- fly
 				local instance = select(8, GetInstanceInfo())
 				local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation(instance)
-				if (not isFlyableLocation or mounts.modifier() and not IsSubmerged() or not mounts:summonListOr(mounts.list.fly)) -- fly
-				and not ((mounts.config.waterWalkAll or mounts:isFloating() or not isFlyableLocation and mounts.modifier() or mounts:isWaterWalkLocation(instance)) and mounts:summon(mounts.waterWalk)) -- water walk
+				if (not isFlyableLocation
+					or mounts.modifier() and not IsSubmerged()
+					or not mounts:summonListOr(mounts.list.fly))
+				-- water walk
+				and not ((mounts.config.waterWalkAll
+						or mounts:isFloating()
+						or not isFlyableLocation and mounts.modifier()
+						or mounts:isWaterWalkLocation(instance))
+					and (interface < 80200 or C_MountJournal.GetAppliedMountEquipmentID() ~= 168416) -- Водные долгоноги рыболова
+					and mounts:summon(mounts.waterWalk))
+				-- ground
 				and not mounts:summonListOr(mounts.list.ground) and not mounts:summon(mounts.list.fly) and not mounts:summon(mounts.lowLevel) then -- ground
 					mounts:errorSummon()
 				end
