@@ -9,6 +9,7 @@ mounts:SetScript("OnEvent", function(self, event, ...)
 	end
 end)
 mounts:RegisterEvent("ADDON_LOADED")
+if interface >= 80200 then mounts:RegisterEvent("MOUNT_EQUIPMENT_APPLY_RESULT") end
 
 
 function mounts:ADDON_LOADED(addonName)
@@ -89,10 +90,16 @@ function mounts:ADDON_LOADED(addonName)
 			[205] = true, -- Мерцающий простор
 		}
 
+		if interface >= 80200 then mounts:MOUNT_EQUIPMENT_APPLY_RESULT() end
 		mounts:setModifier(mounts.config.modifier)
 		mounts:setHandleWaterJump(mounts.config.waterJump)
 		mounts:init()
 	end
+end
+
+
+function mounts:MOUNT_EQUIPMENT_APPLY_RESULT()
+	mounts.waterWalkEquipment = C_MountJournal.GetAppliedMountEquipmentID() == 168416 -- Водные долгоноги рыболова
 end
 
 
@@ -315,10 +322,13 @@ function mounts:init()
 						or mounts:isFloating()
 						or not isFlyableLocation and mounts.modifier()
 						or mounts:isWaterWalkLocation(instance))
-					and (interface < 80200 or C_MountJournal.GetAppliedMountEquipmentID() ~= 168416) -- Водные долгоноги рыболова
+					and not mounts.waterWalkEquipment
 					and mounts:summon(mounts.waterWalk))
 				-- ground
-				and not mounts:summonListOr(mounts.list.ground) and not mounts:summon(mounts.list.fly) and not mounts:summon(mounts.lowLevel) then -- ground
+				and not mounts:summonListOr(mounts.list.ground)
+				and not mounts:summon(mounts.waterWalk)
+				and not mounts:summon(mounts.list.fly)
+				and not mounts:summon(mounts.lowLevel) then
 					mounts:errorSummon()
 				end
 			end
