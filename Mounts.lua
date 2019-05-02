@@ -232,15 +232,19 @@ function mounts:waterWalkMountsExists()
 end
 
 
-function mounts:summonListOr(ids)
+function mounts:summonListOr(ids, flyable)
 	if mounts.config.useHerbMounts then
 		local prof1, prof2 = GetProfessions()
-		if (prof1 and select(7, GetProfessionInfo(prof1)) == 182 or prof2 and select(7, GetProfessionInfo(prof2)) == 182) and mounts:summon(mounts.herbalismMounts) then -- herbalism
+		if (prof1 and select(7, GetProfessionInfo(prof1)) == 182
+		or prof2 and select(7, GetProfessionInfo(prof2)) == 182)
+		and mounts:summon(mounts.herbalismMounts) then -- herbalism
 			return true
 		end
 	end
 
-	if not mounts.config.waterWalkAll and mounts.config.useMagicBroom and GetItemCount(37011) ~= 0 then
+	if (not mounts.config.waterWalkAll or flyable)
+	and mounts.config.useMagicBroom
+	and GetItemCount(37011) ~= 0 then
 		mounts.lastUseTime = GetTime()
 		return true -- magic broom
 	end
@@ -316,7 +320,7 @@ function mounts:init()
 				local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation(instance)
 				if (not isFlyableLocation
 					or mounts.modifier() and not IsSubmerged()
-					or not mounts:summonListOr(mounts.list.fly))
+					or not mounts:summonListOr(mounts.list.fly, true))
 				-- water walk
 				and not ((mounts.config.waterWalkAll
 						or mounts:isFloating()

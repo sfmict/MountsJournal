@@ -884,11 +884,11 @@ function journal:updateMountsList()
 		-- SELECTED
 		and (not selected[1] and not selected[2] and not selected[3]
 			-- FLY
-		or selected[1] and mounts:inTable(list.fly, mountID)
+			or selected[1] and mounts:inTable(list.fly, mountID)
 			-- GROUND
-		or selected[2] and mounts:inTable(list.ground, mountID)
+			or selected[2] and mounts:inTable(list.ground, mountID)
 			-- SWIMMING
-		or selected[3] and mounts:inTable(list.swimming, mountID))
+			or selected[3] and mounts:inTable(list.swimming, mountID))
 		-- EXPANSIONS
 		and expansions[mounts.db[mountID]] then
 			tinsert(journal.displayedMounts, i)
