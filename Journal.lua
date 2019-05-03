@@ -433,17 +433,15 @@ end
 
 
 function journal:setMountsList()
-	journal.db = mounts.perChar and MountsJournalChar or MountsJournalDB
-
 	local mapID = journal.navBar.mapID
 	if mapID == mounts.defMountsListID then
 		journal.list = {
-			fly = journal.db.fly,
-			ground = journal.db.ground,
-			swimming = journal.db.swimming,
+			fly = mounts.db.fly,
+			ground = mounts.db.ground,
+			swimming = mounts.db.swimming,
 		}
 	else
-		journal.list = journal.db.zoneMounts[mapID]
+		journal.list = mounts.db.zoneMounts[mapID]
 	end
 end
 
@@ -502,18 +500,18 @@ end
 
 
 function journal:createMountList()
-	journal.db.zoneMounts[journal.navBar.mapID] = {
+	mounts.db.zoneMounts[journal.navBar.mapID] = {
 		fly = {},
 		ground = {},
 		swimming = {},
 	}
-	journal.list = journal.db.zoneMounts[journal.navBar.mapID]
+	journal.list = mounts.db.zoneMounts[journal.navBar.mapID]
 end
 
 
 function journal:getRemoveMountList()
 	if #journal.list.fly + #journal.list.ground + #journal.list.swimming == 0 then
-		journal.db.zoneMounts[journal.navBar.mapID] = nil
+		mounts.db.zoneMounts[journal.navBar.mapID] = nil
 		journal.list = nil
 	end
 end
