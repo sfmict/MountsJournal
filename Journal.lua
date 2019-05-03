@@ -537,7 +537,7 @@ function journal:mountToggle(btn)
 		btn.icon:SetVertexColor(unpack(journal.colors.gold))
 		btn.check:Show()
 	end
-	mounts.setMountsList()
+	mounts:setMountsList()
 end
 
 
