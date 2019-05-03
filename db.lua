@@ -1,4 +1,4 @@
-MountsJournal.db = {
+MountsJournal.mountsDB = {
 	[6] = 1, -- 458 Гнедой конь
 	[7] = 1, -- 459 Серый волк
 	[8] = 1, -- 468 Белый жеребец
@@ -727,7 +727,7 @@ MountsJournal.db = {
 	[1219] = 8, -- 289555 Ледяной шквал
 	[1222] = 8, -- 290133 Космический лис
 }
-setmetatable(MountsJournal.db, {__index = function(self, key)
+setmetatable(MountsJournal.mountsDB, {__index = function(self, key)
 	self[key] = 8
 	return 8
 end})

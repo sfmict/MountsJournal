@@ -6,6 +6,8 @@ local interface = select(4, GetBuildInfo())
 mounts:SetScript("OnEvent", function(self, event, ...)
 	if mounts[event] then
 		mounts[event](self, ...)
+	else
+		mounts:setMountsList()
 	end
 end)
 mounts:RegisterEvent("ADDON_LOADED")
@@ -20,6 +22,7 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalDB.fly = MountsJournalDB.fly or {}
 		MountsJournalDB.ground = MountsJournalDB.ground or {}
 		MountsJournalDB.swimming = MountsJournalDB.swimming or {}
+		MountsJournalDB.zoneMounts = MountsJournalDB.zoneMounts or {}
 		MountsJournalDB.config = MountsJournalDB.config or {}
 		MountsJournalDB.filters = MountsJournalDB.filters or {}
 		mounts.config = MountsJournalDB.config
@@ -41,7 +44,9 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalChar.fly =  MountsJournalChar.fly or {}
 		MountsJournalChar.ground = MountsJournalChar.ground or {}
 		MountsJournalChar.swimming = MountsJournalChar.swimming or {}
+		MountsJournalChar.zoneMounts = MountsJournalChar.zoneMounts or {}
 
+		mounts.defMountsListID = 946
 		mounts:setMountsList()
 		mounts.swimmingVashjir = {
 			373, -- Вайш'ирский морской конек
@@ -90,6 +95,10 @@ function mounts:ADDON_LOADED(addonName)
 			[205] = true, -- Мерцающий простор
 		}
 
+		self:RegisterEvent("ZONE_CHANGED")
+		self:RegisterEvent("ZONE_CHANGED_INDOORS")
+		self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+
 		if interface >= 80200 then mounts:MOUNT_EQUIPMENT_APPLY_RESULT() end
 		mounts:setModifier(mounts.config.modifier)
 		mounts:setHandleWaterJump(mounts.config.waterJump)
@@ -124,6 +133,19 @@ function mounts:setModifier(modifier)
 end
 
 
+function mounts:getMountsListID()
+	local mapInfo = C_Map.GetMapInfo(MapUtil.GetDisplayableMapForPlayer())
+	local zoneMounts = mounts.db.zoneMounts
+	while mapInfo do
+		if zoneMounts[mapInfo.mapID] then
+			return mapInfo.mapID
+		end
+		mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
+	end
+	return mounts.defMountsListID
+end
+
+
 function mounts:setMountsList(perChar)
 	if perChar ~= nil then
 		MountsJournalChar.enable = perChar
@@ -132,11 +154,18 @@ function mounts:setMountsList(perChar)
 		mounts.perChar = true
 	end
 
-	mounts.list = {
-		["fly"] = mounts.perChar and MountsJournalChar.fly or MountsJournalDB.fly,
-		["ground"] = mounts.perChar and MountsJournalChar.ground or MountsJournalDB.ground,
-		["swimming"] = mounts.perChar and MountsJournalChar.swimming or MountsJournalDB.swimming
-	}
+	mounts.db = mounts.perChar and MountsJournalChar or MountsJournalDB
+	local mapID = mounts:getMountsListID()
+
+	if mapID == mounts.defMountsListID then
+		mounts.list = {
+			fly = mounts.db.fly,
+			ground = mounts.db.ground,
+			swimming = mounts.db.swimming,
+		}
+	else
+		mounts.list = mounts.db.zoneMounts[mapID]
+	end
 end
 
 

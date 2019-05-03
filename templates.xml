@@ -167,7 +167,8 @@
 		</Scripts>
 	</CheckButton>
 
-	<Frame name="MJNavBarTemplate" inherits="NavBarTemplate" virtual="true">
+	<Frame name="MJNavBarTemplate" inherits="NavBarTemplate" mixin="MJNavBarMixin" virtual="true">
+		<Size x="600" y="28"/>
 		<Anchors>
 			<Anchor point="TOPLEFT" relativeKey="$parent.BorderFrame" x="10" y="-23"/>
 		</Anchors>
@@ -203,5 +204,110 @@
 				</Texture>
 			</Layer>
 		</Layers>
+		<Frames>
+			<Button name="$parentOverflowButton" parentKey="overflow">
+				<Size x="44" y="24"/>
+				<Scripts>
+					<OnLoad>
+						self.xoffset = -18
+					</OnLoad>
+					<OnClick>
+						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+					</OnClick>
+				</Scripts>
+				<NormalTexture file="Interface\HelpFrame\CS_HelpTextures">
+					<TexCoords left="0.54296875" right="0.62890625" top="0.75781250" bottom="0.99218750"/>
+				</NormalTexture>		
+				<PushedTexture file="Interface\HelpFrame\CS_HelpTextures">
+					<TexCoords left="0.45312500" right="0.53906250" top="0.75781250" bottom="0.99218750"/>
+				</PushedTexture>
+				<HighlightTexture file="Interface\HelpFrame\CS_HelpTextures" alphaMode="ADD" alpha="0.4">
+					<TexCoords left="0.54296875" right="0.62890625" top="0.75781250" bottom="0.99218750"/>
+				</HighlightTexture>
+			</Button>
+			<Button name="$parentHomeButton" parentKey="home" text="HOME">
+				<Size x="128" y="24"/>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture name="$parentLeft" file="Interface\Common\ShadowOverlay-Left">
+							<Size x="30" y="30"/>
+							<Anchors>
+								<Anchor point="LEFT" x="0" y="0"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>
+						self.xoffset = -15;
+						local newWidth = min(128, self.text:GetStringWidth()+50)
+						local texCoordoffsetX = (newWidth/128)*0.25;
+							
+						self:GetNormalTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.70312500, 0.00781250, 0.24218750);
+						self:GetPushedTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.70312500, 0.25781250, 0.49218750);
+						self:GetHighlightTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.71312500, 0.50781250, 0.74218750);
+						
+						self:SetWidth(newWidth);
+					</OnLoad>
+					<OnClick>
+						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+					</OnClick>
+				</Scripts>
+				<NormalTexture file="Interface\HelpFrame\CS_HelpTextures">
+				</NormalTexture>		
+				<PushedTexture file="Interface\HelpFrame\CS_HelpTextures">
+				</PushedTexture>
+				<HighlightTexture file="Interface\HelpFrame\CS_HelpTextures" alphaMode="ADD">
+				</HighlightTexture>
+				<ButtonText name="$parentText" inherits="GameFontNormal" justifyH="LEFT" parentKey="text">
+					<Size x="0" y="12"/>
+					<Anchors>
+						<Anchor point="LEFT" x="10" y="0"/>
+						<Anchor point="RIGHT" x="-30" y="0"/>
+					</Anchors>
+				</ButtonText>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad method="onLoad"/>
+		</Scripts>
 	</Frame>
+
+	<Button name="MJMiniMapBtnTemplate" virtual="true">
+		<Size x="48" y="32"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentShadow" inherits="UI-EJ-ShowMapBG">
+					<Anchors>
+						<Anchor point="LEFT" x="-3" y="5"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture name="$parentTexture" file="Interface\QuestFrame\UI-QuestMap_Button" parentKey="texture">
+					<Size x="48" y="32"/>
+					<Anchors>
+						<Anchor point="RIGHT"/>
+					</Anchors>
+					<TexCoords left="0.125" right="0.875" top="0.0" bottom="0.5"/>
+				</Texture>
+			</Layer>
+			<Layer level="HIGHLIGHT">
+				<Texture name="$parentHighlight" file="Interface\BUTTONS\ButtonHilight-Square" alphaMode="ADD">
+					<Size x="36" y="25"/>
+					<Anchors>
+						<Anchor point="RIGHT" x="-7" y="0"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnMouseDown>
+				self.texture:SetTexCoord(0.125, 0.875, 0.5, 1.0);
+			</OnMouseDown>
+			<OnMouseUp>
+				self.texture:SetTexCoord(0.125, 0.875, 0.0, 0.5);
+			</OnMouseUp>
+		</Scripts>
+	</Button>
 </Ui>
