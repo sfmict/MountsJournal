@@ -36,6 +36,7 @@ L["MOUNT_FACTION_1"] = "Horde"
 L["MOUNT_FACTION_2"] = "Alliance"
 L["MOUNT_FACTION_3"] = "Both"
 L["expansions"] = "Expansions"
+L["Current Location"] = "Current Location"
 
 setmetatable(L, {__index = function(self, key)
 	self[key] = key or ""
