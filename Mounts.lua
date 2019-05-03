@@ -47,7 +47,7 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalChar.zoneMounts = MountsJournalChar.zoneMounts or {}
 
 		mounts.defMountsListID = 946
-		mounts:setMountsList()
+		mounts:setMountsListPerChar()
 		mounts.swimmingVashjir = {
 			373, -- Вайш'ирский морской конек
 		}
@@ -133,20 +133,25 @@ function mounts:setModifier(modifier)
 end
 
 
-function mounts:getMountsListID()
+function mounts:setMountsList()
 	local mapInfo = C_Map.GetMapInfo(MapUtil.GetDisplayableMapForPlayer())
 	local zoneMounts = mounts.db.zoneMounts
 	while mapInfo do
 		if zoneMounts[mapInfo.mapID] then
-			return mapInfo.mapID
+			mounts.list = zoneMounts[mapInfo.mapID]
+			return
 		end
 		mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
 	end
-	return mounts.defMountsListID
+	mounts.list = {
+		fly = mounts.db.fly,
+		ground = mounts.db.ground,
+		swimming = mounts.db.swimming,
+	}
 end
 
 
-function mounts:setMountsList(perChar)
+function mounts:setMountsListPerChar(perChar)
 	if perChar ~= nil then
 		MountsJournalChar.enable = perChar
 		mounts.perChar = perChar
@@ -155,17 +160,7 @@ function mounts:setMountsList(perChar)
 	end
 
 	mounts.db = mounts.perChar and MountsJournalChar or MountsJournalDB
-	local mapID = mounts:getMountsListID()
-
-	if mapID == mounts.defMountsListID then
-		mounts.list = {
-			fly = mounts.db.fly,
-			ground = mounts.db.ground,
-			swimming = mounts.db.swimming,
-		}
-	else
-		mounts.list = mounts.db.zoneMounts[mapID]
-	end
+	mounts:setMountsList()
 end
 
 
