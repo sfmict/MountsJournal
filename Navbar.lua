@@ -16,7 +16,7 @@ function MJNavBarMixin:onLoad()
 		name = WORLD,
 		OnClick = function() self:setDefMap() end
 	}
-	NavBar_Initialize(self, "NavButtonTemplate", homeData, self.home, self.overflow)
+	NavBar_Initialize(self, "MJNavButtonTemplate", homeData, self.home, self.overflow)
 	self:setDefMap()
 end
 

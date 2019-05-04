@@ -25,6 +25,7 @@ end})
 
 
 local function tabClick(self)
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	local id = self.id
 
 	for _, tab in pairs(self:GetParent().tabs) do
@@ -130,7 +131,7 @@ function journal:ADDON_LOADED(addonName)
 		navBar:SetPoint("TOPLEFT", 8, -60)
 		navBar:SetPoint("TOPRIGHT", navBarBtn, "TOPLEFT", 0, 0)
 		journal.rightInset:SetPoint("TOPRIGHT", navBarBtn, "BOTTOMRIGHT", -4, 0)
-		navBarBtn:SetScript("OnClick", function() navBar:setCurrentMap() end)
+		navBarBtn:HookScript("OnClick", function() navBar:setCurrentMap() end)
 		navBarBtn:SetScript("OnEnter", function()
 			GameTooltip:SetOwner(navBarBtn, "ANCHOR_RIGHT", -4, -32)
 			GameTooltip:SetText(L["Current Location"])
