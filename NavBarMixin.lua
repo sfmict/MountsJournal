@@ -12,9 +12,10 @@ MJNavBarMixin = {}
 
 
 function MJNavBarMixin:onLoad()
+	self.journal = MountsJournalFrame
 	local homeData = {
 		name = WORLD,
-		OnClick = function() self:setDefMap() end
+		OnClick = function() self:setDefMap() end,
 	}
 	NavBar_Initialize(self, "MJNavButtonTemplate", homeData, self.home, self.overflow)
 	self:setDefMap()
@@ -31,7 +32,7 @@ function MJNavBarMixin:refresh()
 			OnClick = function(self) self:GetParent():setMapID(self.data.id) end,
 		}
 		if isMapValidForNavBarDropDown(mapInfo.mapType) then
-			btnData.listFunc = self.getDropDownList;
+			btnData.listFunc = self.getDropDownList
 		end
 		tinsert(hierarchy, 1, btnData)
 		mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
@@ -69,6 +70,7 @@ end
 
 function MJNavBarMixin:setMapID(mapID)
 	self.mapID = mapID
+	if self.journal.worldMap then self.journal.worldMap:setMapID(mapID) end
 	if type(self.click) == "function" then self.click() end
 	self:refresh()
 end

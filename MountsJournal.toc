@@ -12,6 +12,5 @@ Mounts.lua
 db.lua
 Binding.lua
 Config.lua
-Navbar.lua
 journal.xml
 Journal.lua

@@ -1,4 +1,7 @@
 <Ui>
+	<Script file="NavBarMixin.lua"/>
+	<Script file="WorldMapMixin.lua"/>
+
 	<Button name="MJTabTemplate" virtual="true">
 		<Size x="75" y="24"/>
 		<Layers>
@@ -158,12 +161,28 @@
 		</Scripts>
 	</Frame>
 
-	<CheckButton name="MJCheckButtonTemplate" inherits="InterfaceOptionsCheckButtonTemplate" virtual="true">
+	<CheckButton name="MJCheckButtonTemplate" inherits="OptionsBaseCheckButtonTemplate" virtual="true">
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString name="$parentText" inherits="GameFontHighlightLeft" parentKey="Text">
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="RIGHT">
+							<Offset>
+								<AbsDimension x="1" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
 		<Scripts>
-			<OnLoad>
-				self.Text:SetFont("GameFontHighlight", 30);
-				self.Text:SetPoint("LEFT", self, "RIGHT", 1, 0);
-			</OnLoad>
+			<OnClick>
+				if ( self:GetChecked() ) then
+					PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+				else
+					PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF);
+				end
+			</OnClick>
 		</Scripts>
 	</CheckButton>
 
@@ -397,7 +416,7 @@
 		</Scripts>
 	</Frame>
 
-	<Button name="MJMiniMapBtnTemplate" virtual="true">
+	<CheckButton name="MJMiniMapBtnTemplate" virtual="true">
 		<Size x="48" y="32"/>
 		<Layers>
 			<Layer level="BACKGROUND">
@@ -436,5 +455,66 @@
 				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
 			</OnClick>
 		</Scripts>
-	</Button>
+		<CheckedTexture file="Interface/Buttons/CheckButtonHilight" alphaMode="ADD" alpha=".5">
+			<Anchors>
+				<Anchor point="TOPLEFT" x="4" y="-1"/>
+				<Anchor point="BOTTOMRIGHT" x="-4" y="1"/>
+			</Anchors>
+		</CheckedTexture>
+	</CheckButton>
+
+	<Frame name="MJMapTemplate" hidden="true" inherits="InsetFrameTemplate" mixin="MJMapCanvasMixin" virtual="true">
+		<Size y="276"/>
+		<Frames>
+			<ScrollFrame parentKey="ScrollContainer">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="4" y="-4"/>
+					<Anchor point="BOTTOMRIGHT" x="-5" y="0"/>
+				</Anchors>
+				<ScrollChild>
+					<Frame parentKey="Child" >
+						<Anchors>
+							<Anchor point="TOPLEFT"/>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture parentKey="HighlightTexture" alphaMode="ADD" hidden="true">
+									<Anchors>
+										<Anchor point="TOPLEFT"/>
+									</Anchors>
+								</Texture>
+							</Layer>
+						</Layers>
+					</Frame>
+				</ScrollChild>
+			</ScrollFrame>
+		</Frames>
+		<Scripts>
+			<OnLoad method="onLoad"/>
+			<OnShow method="onShow"/>
+			<OnUpdate method="onUpdate"/>
+			<OnMouseUp method="onClick"/>
+		</Scripts>
+	</Frame>
+
+	<Frame name="MJMapSettingsTemplate" hidden="true" inherits="InsetFrameTemplate" virtual="true">
+		<Frames>
+			<Button parentKey="CurrentMap" inherits="UIPanelButtonTemplate">
+				<Size x="250" y="35"/>
+				<Anchors>
+					<Anchor point="TOP" x="0" y="-10"/>
+				</Anchors>
+			</Button>
+			<CheckButton parentKey="Ground" inherits="MJCheckButtonTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.CurrentMap" relativePoint="BOTTOMLEFT" x="-20" y="-37"/>
+				</Anchors>
+			</CheckButton>
+			<CheckButton parentKey="WaterWalk" inherits="MJCheckButtonTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.Ground" relativePoint="BOTTOM" x="0" y="-37"/>
+				</Anchors>
+			</CheckButton>
+		</Frames>
+	</Frame>
 </Ui>

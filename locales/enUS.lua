@@ -36,7 +36,10 @@ L["MOUNT_FACTION_1"] = "Horde"
 L["MOUNT_FACTION_2"] = "Alliance"
 L["MOUNT_FACTION_3"] = "Both"
 L["expansions"] = "Expansions"
+L["Map / Model"] = "Map / Model"
 L["Current Location"] = "Current Location"
+L["Ground Mounts Only"] = "Ground Mounts Only"
+L["Water Walk Mounts Only"] = "Water Walk Mounts Only"
 
 setmetatable(L, {__index = function(self, key)
 	self[key] = key or ""

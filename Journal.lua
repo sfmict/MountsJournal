@@ -124,17 +124,23 @@ function journal:ADDON_LOADED(addonName)
 		end
 
 		-- NAVBAR
-		local navBarBtn = CreateFrame("BUTTON", nil, MountJournal, "MJMiniMapBtnTemplate")
+		local navBarBtn = CreateFrame("CheckButton", nil, MountJournal, "MJMiniMapBtnTemplate")
+		journal.navBarBtn = navBarBtn
 		navBarBtn:SetPoint("TOPRIGHT", -2, -60)
 		local navBar = CreateFrame("FRAME", nil, MountJournal, "MJNavBarTemplate")
 		journal.navBar = navBar
 		navBar:SetPoint("TOPLEFT", 8, -60)
 		navBar:SetPoint("TOPRIGHT", navBarBtn, "TOPLEFT", 0, 0)
 		journal.rightInset:SetPoint("TOPRIGHT", navBarBtn, "BOTTOMRIGHT", -4, 0)
-		navBarBtn:HookScript("OnClick", function() navBar:setCurrentMap() end)
+		navBarBtn:HookScript("OnClick", function(self)
+			local checked = self:GetChecked()
+			MountJournal.MountDisplay:SetShown(not checked)
+			journal.mapSettings:SetShown(checked)
+			journal.worldMap:SetShown(checked)
+		end)
 		navBarBtn:SetScript("OnEnter", function()
 			GameTooltip:SetOwner(navBarBtn, "ANCHOR_RIGHT", -4, -32)
-			GameTooltip:SetText(L["Current Location"])
+			GameTooltip:SetText(L["Map / Model"])
 			GameTooltip:Show()
 		end)
 		navBarBtn:SetScript("OnLeave", function() GameTooltip_Hide() end)
@@ -142,7 +148,31 @@ function journal:ADDON_LOADED(addonName)
 			journal:setMountsList()
 			journal:updateMountsList()
 			MountJournal_UpdateMountList()
+			journal:updateMapSettings()
 		end
+
+		-- WORDL MAP
+		local worldMap = CreateFrame("FRAME", nil, MountJournal, "MJMapTemplate")
+		journal.worldMap = worldMap
+		worldMap:SetPoint("TOPLEFT", journal.rightInset)
+		worldMap:SetPoint("TOPRIGHT", journal.rightInset)
+
+		-- MAP SETTINGS
+		local mapSettings = CreateFrame("FRAME", nil, MountJournal, "MJMapSettingsTemplate")
+		journal.mapSettings = mapSettings
+		mapSettings:SetPoint("TOPLEFT", worldMap, "BOTTOMLEFT", 0, -1)
+		mapSettings:SetPoint("BOTTOMRIGHT", journal.rightInset)
+		mapSettings.CurrentMap:SetText(L["Current Location"])
+		mapSettings.CurrentMap:SetScript("OnClick", function()
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+			navBar:setCurrentMap()
+		end)
+		mapSettings.Ground.Text:SetText(L["Ground Mounts Only"])
+		mapSettings.Ground:HookScript("OnClick", function(self) journal:setFlag("groundOnly", self:GetChecked()) end)
+		mapSettings.WaterWalk.Text:SetText(L["Water Walk Mounts Only"])
+		mapSettings.WaterWalk:HookScript("OnClick", function(self) journal:setFlag("waterWalkOnly", self:GetChecked()) end)
+		journal:updateMapSettings()
+
 
 		-- SETTINGS BUTTON
 		local btnConfig = CreateFrame("Button", "MountsJournalBtnConfig", MountJournal, "UIPanelButtonTemplate")
@@ -177,8 +207,7 @@ function journal:ADDON_LOADED(addonName)
 		perCharCheck:SetPoint("LEFT", MountJournal.MountButton, "RIGHT", 6, -2)
 		perCharCheck.Text:SetText(L["Character Specific Mount List"])
 		perCharCheck:SetChecked(mounts.perChar)
-		perCharCheck:SetScript("OnClick", function(self)
-			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		perCharCheck:HookScript("OnClick", function(self)
 			mounts:setMountsListPerChar(self:GetChecked())
 			journal:setMountsList()
 			journal:configureJournal()
@@ -505,13 +534,15 @@ function journal:createMountList()
 		fly = {},
 		ground = {},
 		swimming = {},
+		flags = {},
 	}
 	journal.list = mounts.db.zoneMounts[journal.navBar.mapID]
 end
 
 
 function journal:getRemoveMountList()
-	if #journal.list.fly + #journal.list.ground + #journal.list.swimming == 0 then
+	if #journal.list.fly + #journal.list.ground + #journal.list.swimming == 0
+	and not journal.list.flags.waterWalkOnly and not journal.list.flags.groundOnly then
 		mounts.db.zoneMounts[journal.navBar.mapID] = nil
 		journal.list = nil
 	end
@@ -540,19 +571,59 @@ function journal:mountToggle(btn)
 end
 
 
-local lastMountClick = 0
-local lastMountIndex = 0
-function journal:mountDblClick(index, btn)
-	if btn == "RightButton" then return end
+function journal:setFlag(flag, enable)
+	if journal.navBar.mapID == mounts.defMountsListID then return end
 
-	if lastMountIndex == index and GetTime() - lastMountClick < 0.4 then
-		local isCollected, mountID = select(11, C_MountJournal.GetDisplayedMountInfo(index))
-		if isCollected then
-			C_MountJournal.SummonByID(mountID)
+	if enable and (not journal.list or not journal.list.flags) then
+		journal:createMountList()
+	end
+	mounts.db.zoneMounts[journal.navBar.mapID].flags[flag] = enable
+	if not enable then
+		journal:getRemoveMountList()
+	end
+	mounts:setMountsList()
+end
+
+
+function journal:updateMapSettings()
+	local groundCheck = journal.mapSettings.Ground
+	local waterWalkCheck = journal.mapSettings.WaterWalk
+	groundCheck:SetChecked(journal.list and journal.list.flags and journal.list.flags.groundOnly)
+	waterWalkCheck:SetChecked(journal.list and journal.list.flags and journal.list.flags.waterWalkOnly)
+
+	if journal.navBar.mapID == mounts.defMountsListID then
+		if groundCheck:IsEnabled() then
+			groundCheck:Disable()
+			groundCheck.Text:SetTextColor(.5,.5,.5,1)
+			waterWalkCheck:Disable()
+			waterWalkCheck.Text:SetTextColor(.5,.5,.5,1)
 		end
 	else
-		lastMountIndex = index
-		lastMountClick = GetTime()
+		if not groundCheck:IsEnabled() then
+			groundCheck:Enable()
+			groundCheck.Text:SetTextColor(1,1,1,1)
+			waterWalkCheck:Enable()
+			waterWalkCheck.Text:SetTextColor(1,1,1,1)
+		end
+	end
+end
+
+
+do
+	local lastMountClick = 0
+	local lastMountIndex = 0
+	function journal:mountDblClick(index, btn)
+		if btn == "RightButton" then return end
+
+		if lastMountIndex == index and GetTime() - lastMountClick < 0.4 then
+			local isCollected, mountID = select(11, C_MountJournal.GetDisplayedMountInfo(index))
+			if isCollected then
+				C_MountJournal.SummonByID(mountID)
+			end
+		else
+			lastMountIndex = index
+			lastMountClick = GetTime()
+		end
 	end
 end
 
@@ -916,44 +987,46 @@ function journal:updateBtnFilters()
 end
 
 
--- 1 FLY, 2 GROUND, 3 SWIMMING
-local mountTypes = {
-	[242] = 1,
-	[247] = 1,
-	[248] = 1,
-	[230] = 2,
-	[241] = 2,
-	[269] = 2,
-	[284] = 2,
-	[231] = 3,
-	[232] = 3,
-	[254] = 3,
-}
-function journal:updateMountsList()
-	local types, selected, factions, expansions, list = mounts.filters.types, mounts.filters.selected, mounts.filters.factions, mounts.filters.expansions, journal.list
-	wipe(journal.displayedMounts)
+do
+	-- 1 FLY, 2 GROUND, 3 SWIMMING
+	local mountTypes = {
+		[242] = 1,
+		[247] = 1,
+		[248] = 1,
+		[230] = 2,
+		[241] = 2,
+		[269] = 2,
+		[284] = 2,
+		[231] = 3,
+		[232] = 3,
+		[254] = 3,
+	}
+	function journal:updateMountsList()
+		local types, selected, factions, expansions, list = mounts.filters.types, mounts.filters.selected, mounts.filters.factions, mounts.filters.expansions, journal.list
+		wipe(journal.displayedMounts)
 
-	for i = 1, journal.func.GetNumDisplayedMounts() do
-		local _,_,_,_,_,_,_,_,mountFaction,_,_,mountID = journal.func.GetDisplayedMountInfo(i)
-		local mountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
-		mountFaction = mountFaction or 2
+		for i = 1, journal.func.GetNumDisplayedMounts() do
+			local _,_,_,_,_,_,_,_,mountFaction,_,_,mountID = journal.func.GetDisplayedMountInfo(i)
+			local mountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
+			mountFaction = mountFaction or 2
 
-		-- TYPE
-		if types[mountTypes[mountType]]
-		-- FACTION
-		and factions[mountFaction + 1]
-		-- SELECTED
-		and (not selected[1] and not selected[2] and not selected[3]
-			-- FLY
-			or selected[1] and list and mounts:inTable(list.fly, mountID)
-			-- GROUND
-			or selected[2] and list and mounts:inTable(list.ground, mountID)
-			-- SWIMMING
-			or selected[3] and list and mounts:inTable(list.swimming, mountID))
-		-- EXPANSIONS
-		and expansions[mounts.mountsDB[mountID]] then
-			tinsert(journal.displayedMounts, i)
+			-- TYPE
+			if types[mountTypes[mountType]]
+			-- FACTION
+			and factions[mountFaction + 1]
+			-- SELECTED
+			and (not selected[1] and not selected[2] and not selected[3]
+				-- FLY
+				or selected[1] and list and mounts:inTable(list.fly, mountID)
+				-- GROUND
+				or selected[2] and list and mounts:inTable(list.ground, mountID)
+				-- SWIMMING
+				or selected[3] and list and mounts:inTable(list.swimming, mountID))
+			-- EXPANSIONS
+			and expansions[mounts.mountsDB[mountID]] then
+				tinsert(journal.displayedMounts, i)
+			end
 		end
+		journal.shownPanel.count:SetText(#journal.displayedMounts)
 	end
-	journal.shownPanel.count:SetText(#journal.displayedMounts)
 end

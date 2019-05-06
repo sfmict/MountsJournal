@@ -136,10 +136,15 @@ end
 function mounts:setMountsList()
 	local mapInfo = C_Map.GetMapInfo(MapUtil.GetDisplayableMapForPlayer())
 	local zoneMounts = mounts.db.zoneMounts
+	mounts.flags = nil
 	while mapInfo do
-		if zoneMounts[mapInfo.mapID] then
-			mounts.list = zoneMounts[mapInfo.mapID]
-			return
+		local list = zoneMounts[mapInfo.mapID]
+		if list then
+			if not mounts.flags then mounts.flags = list.flags end
+			if #list.fly + #list.ground + #list.swimming ~= 0 then
+				mounts.list = zoneMounts[mapInfo.mapID]
+				return
+			end
 		end
 		mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
 	end
@@ -309,7 +314,8 @@ end
 
 function mounts:isWaterWalkLocation(instance)
 	if mounts.config.waterWalkInstance and mounts.config.waterWalkList[instance]
-	or mounts.config.waterWalkExpedition and mounts.config.waterWalkExpeditionList[instance] then
+	or mounts.config.waterWalkExpedition and mounts.config.waterWalkExpeditionList[instance]
+	or mounts.flags and mounts.flags.waterWalkOnly then
 		return true
 	end
 
@@ -341,7 +347,7 @@ function mounts:init()
 				and not mounts:summon(mounts.list.swimming) then
 				-- fly
 				local instance = select(8, GetInstanceInfo())
-				local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation(instance)
+				local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation(instance) and not (mounts.flags and mounts.flags.groundOnly)
 				if (not isFlyableLocation
 					or mounts.modifier() and not IsSubmerged()
 					or not mounts:summonListOr(mounts.list.fly, true))

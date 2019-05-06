@@ -229,7 +229,7 @@ config:SetScript("OnShow", function()
 	config.waterWalkInstance.Text:SetText(L["Water Walking in dungeons"])
 	config.waterWalkInstance.tooltipText = L["Water Walking"]
 	config.waterWalkInstance.tooltipRequirement = L["WaterWalkingDescription"]
-	config.waterWalkInstance:SetScript("OnClick", function(self)
+	config.waterWalkInstance:HookScript("OnClick", function(self)
 		config:setEnableCheckButtons(self:GetChecked(), config.dungeons)
 	end)
 
@@ -250,7 +250,7 @@ config:SetScript("OnShow", function()
 	config.waterWalkExpedition.Text:SetText(L["Water Walking in expeditions"])
 	config.waterWalkExpedition.tooltipText = L["Water Walking"]
 	config.waterWalkExpedition.tooltipRequirement = L["WaterWalkingDescription"]
-	config.waterWalkExpedition:SetScript("OnClick", function(self)
+	config.waterWalkExpedition:HookScript("OnClick", function(self)
 		config:setEnableCheckButtons(self:GetChecked(), config.expeditions)
 	end)
 
