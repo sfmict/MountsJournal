@@ -282,33 +282,35 @@ function mounts:summonListOr(ids, flyable)
 end
 
 
-local draenorLocations = {
-	[1116] = true,
-	[1152] = true,
-	[1330] = true,
-	[1153] = true,
-	[1154] = true,
-	[1158] = true,
-	[1331] = true,
-	[1159] = true,
-	[1160] = true,
-}
-local bfaLocations = {
-	[1642] = true, -- Зандалар
-	[1643] = true, -- Кул-Тирас
-}
-function mounts:isFlyLocation(instance)
-	if mounts.continentsGround[instance]
-		or mounts.expeditions[instance]
-		-- Дренор
-		or draenorLocations[instance] and not IsSpellKnown(191645)
-		-- Расколотые острова
-		or instance == 1220 and not IsSpellKnown(233368)
-		-- Битва за Азерот
-		or bfaLocations[instance] and not IsSpellKnown(278833)
-	then return false end
+do
+	local draenorLocations = {
+		[1116] = true,
+		[1152] = true,
+		[1330] = true,
+		[1153] = true,
+		[1154] = true,
+		[1158] = true,
+		[1331] = true,
+		[1159] = true,
+		[1160] = true,
+	}
+	local bfaLocations = {
+		[1642] = true, -- Зандалар
+		[1643] = true, -- Кул-Тирас
+	}
+	function mounts:isFlyLocation(instance)
+		if mounts.continentsGround[instance]
+			or mounts.expeditions[instance]
+			-- Дренор
+			or draenorLocations[instance] and not IsSpellKnown(191645)
+			-- Расколотые острова
+			or instance == 1220 and not IsSpellKnown(233368)
+			-- Битва за Азерот
+			or bfaLocations[instance] and not IsSpellKnown(278833)
+		then return false end
 
-	return true
+		return true
+	end
 end
 
 

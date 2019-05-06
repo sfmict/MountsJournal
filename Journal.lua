@@ -173,6 +173,13 @@ function journal:ADDON_LOADED(addonName)
 		mapSettings.WaterWalk:HookScript("OnClick", function(self) journal:setFlag("waterWalkOnly", self:GetChecked()) end)
 		journal:updateMapSettings()
 
+		--MOUNTJOURNAL ONSHOW
+		MountJournal:HookScript("OnShow", function()
+			navBarBtn:SetChecked(false)
+			MountJournal.MountDisplay:Show()
+			journal.mapSettings:Hide()
+			journal.worldMap:Hide()
+		end)
 
 		-- SETTINGS BUTTON
 		local btnConfig = CreateFrame("Button", "MountsJournalBtnConfig", MountJournal, "UIPanelButtonTemplate")
@@ -211,6 +218,7 @@ function journal:ADDON_LOADED(addonName)
 			mounts:setMountsListPerChar(self:GetChecked())
 			journal:setMountsList()
 			journal:configureJournal()
+			journal:updateMapSettings()
 		end)
 
 		-- SELECTED BUTTONS
