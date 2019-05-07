@@ -92,47 +92,47 @@ function MJMapCanvasMixin:refreshLayers()
 		local tileHeight = layers[1].tileHeight
 
 		for i, exploredTextureInfo in ipairs(exploredMapTextures) do
-			local numTexturesWide = ceil(exploredTextureInfo.textureWidth/tileWidth);
-			local numTexturesTall = ceil(exploredTextureInfo.textureHeight/tileHeight);
-			local texturePixelWidth, textureFileWidth, texturePixelHeight, textureFileHeight;
+			local numTexturesWide = ceil(exploredTextureInfo.textureWidth/tileWidth)
+			local numTexturesTall = ceil(exploredTextureInfo.textureHeight/tileHeight)
+			local texturePixelWidth, textureFileWidth, texturePixelHeight, textureFileHeight
 			for j = 1, numTexturesTall do
-				if ( j < numTexturesTall ) then
-					texturePixelHeight = tileHeight;
-					textureFileHeight = tileHeight;
+				if j < numTexturesTall then
+					texturePixelHeight = tileHeight
+					textureFileHeight = tileHeight
 				else
-					texturePixelHeight = mod(exploredTextureInfo.textureHeight, tileHeight);
-					if ( texturePixelHeight == 0 ) then
-						texturePixelHeight = tileHeight;
+					texturePixelHeight = mod(exploredTextureInfo.textureHeight, tileHeight)
+					if texturePixelHeight == 0 then
+						texturePixelHeight = tileHeight
 					end
-					textureFileHeight = 16;
+					textureFileHeight = 16
 					while(textureFileHeight < texturePixelHeight) do
-						textureFileHeight = textureFileHeight * 2;
+						textureFileHeight = textureFileHeight * 2
 					end
 				end
 				for k = 1, numTexturesWide do
-					local texture = self.explorationLayerPool:Acquire();
-					if ( k < numTexturesWide ) then
-						texturePixelWidth = tileWidth;
-						textureFileWidth = tileWidth;
+					local texture = self.explorationLayerPool:Acquire()
+					if k < numTexturesWide then
+						texturePixelWidth = tileWidth
+						textureFileWidth = tileWidth
 					else
-						texturePixelWidth = mod(exploredTextureInfo.textureWidth, tileWidth);
-						if ( texturePixelWidth == 0 ) then
-							texturePixelWidth = tileWidth;
+						texturePixelWidth = mod(exploredTextureInfo.textureWidth, tileWidth)
+						if texturePixelWidth == 0 then
+							texturePixelWidth = tileWidth
 						end
-						textureFileWidth = 16;
+						textureFileWidth = 16
 						while(textureFileWidth < texturePixelWidth) do
-							textureFileWidth = textureFileWidth * 2;
+							textureFileWidth = textureFileWidth * 2
 						end
 					end
-					texture:SetWidth(texturePixelWidth);
-					texture:SetHeight(texturePixelHeight);
-					texture:SetTexCoord(0, texturePixelWidth/textureFileWidth, 0, texturePixelHeight/textureFileHeight);
-					texture:SetPoint("TOPLEFT", exploredTextureInfo.offsetX + (tileWidth * (k-1)), -(exploredTextureInfo.offsetY + (tileHeight * (j - 1))));
-					texture:SetTexture(exploredTextureInfo.fileDataIDs[((j - 1) * numTexturesWide) + k], nil, nil, "TRILINEAR");
+					texture:SetWidth(texturePixelWidth)
+					texture:SetHeight(texturePixelHeight)
+					texture:SetTexCoord(0, texturePixelWidth/textureFileWidth, 0, texturePixelHeight/textureFileHeight)
+					texture:SetPoint("TOPLEFT", exploredTextureInfo.offsetX + (tileWidth * (k-1)), -(exploredTextureInfo.offsetY + (tileHeight * (j - 1))))
+					texture:SetTexture(exploredTextureInfo.fileDataIDs[((j - 1) * numTexturesWide) + k], nil, nil, "TRILINEAR")
 
 					if not exploredTextureInfo.isShownByMouseOver then
-						texture:SetDrawLayer("ARTWORK", 0);
-						texture:Show();
+						texture:SetDrawLayer("ARTWORK", 0)
+						texture:Show()
 					end
 				end
 			end
