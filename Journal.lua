@@ -582,7 +582,7 @@ end
 function journal:setFlag(flag, enable)
 	if journal.navBar.mapID == mounts.defMountsListID then return end
 
-	if enable and (not journal.list or not journal.list.flags) then
+	if enable and not (journal.list and journal.list.flags) then
 		journal:createMountList()
 	end
 	mounts.db.zoneMounts[journal.navBar.mapID].flags[flag] = enable

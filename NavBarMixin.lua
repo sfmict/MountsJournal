@@ -70,7 +70,7 @@ end
 
 function MJNavBarMixin:setMapID(mapID)
 	self.mapID = mapID
-	if self.journal.worldMap then self.journal.worldMap:setMapID(mapID) end
+	if self.journal.worldMap then self.journal.worldMap:refresh() end
 	if type(self.click) == "function" then self.click() end
 	self:refresh()
 end

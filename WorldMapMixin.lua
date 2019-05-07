@@ -3,8 +3,10 @@ MJMapCanvasMixin = {}
 
 function MJMapCanvasMixin:onLoad()
 	self.navBar = self:GetParent().navBar
-	self.highlight = self:getCanvas().HighlightTexture
-	self.detailLayerPool = CreateFramePool("Frame", self:getCanvas(), "MapCanvasDetailLayerTemplate")
+	self.child = self.ScrollContainer.Child
+	self.highlight = self.child.HighlightTexture
+	self.detailLayerPool = CreateFramePool("FRAME", self.child, "MapCanvasDetailLayerTemplate")
+	self.explorationLayerPool = CreateTexturePool(self.child.Exploration, "ARTWORK", 0)
 end
 
 
@@ -14,15 +16,14 @@ function MJMapCanvasMixin:onUpdate()
 
 	if fileDataID and fileDataID > 0 or atlasID then
 		self.highlight:SetTexCoord(0, texPercentageX, 0, texPercentageY)
-		local width = self:getCanvas():GetWidth()
-		local height = self:getCanvas():GetHeight()
+		local width = self.child:GetWidth()
+		local height = self.child:GetHeight()
 		self.highlight:ClearAllPoints()
 		if atlasID then
 			self.highlight:SetAtlas(atlasID, true, "TRILINEAR")
 			scrollChildX = (scrollChildX + 0.5 * textureX - 0.5) * width
 			scrollChildY = -(scrollChildY + 0.5 * textureY - 0.5) * height
 			self.highlight:SetPoint("CENTER", scrollChildX, scrollChildY)
-			self.highlight:Show()
 		else
 			self.highlight:SetTexture(fileDataID, nil, nil, "TRILINEAR")
 			textureX = textureX * width
@@ -33,9 +34,9 @@ function MJMapCanvasMixin:onUpdate()
 				self.highlight:SetWidth(textureX)
 				self.highlight:SetHeight(textureY)
 				self.highlight:SetPoint("TOPLEFT", scrollChildX, scrollChildY)
-				self.highlight:Show()
 			end
 		end
+		self.highlight:Show()
 	else
 		self.highlight:Hide()
 	end
@@ -57,56 +58,106 @@ function MJMapCanvasMixin:onClick(btn)
 end
 
 
-function MJMapCanvasMixin:setMapID(mapID)
-	self.mapID = mapID
+function MJMapCanvasMixin:refresh()
 	if self:IsShown() then
-		self:refreshDetailLayers()
+		self:refreshLayers()
 	end
 end
 
 
-function MJMapCanvasMixin:getCanvas()
-	return self.ScrollContainer.Child
-end
-
-
 function MJMapCanvasMixin:onShow()
-	self.mapID = self.navBar.mapID
-	self:refreshDetailLayers()
+	self:refreshLayers()
 end
 
-function MJMapCanvasMixin:refreshDetailLayers()
+
+function MJMapCanvasMixin:refreshLayers()
+	if self.mapID == self.navBar.mapID then return end
+	self.mapID = self.navBar.mapID
 	self.detailLayerPool:ReleaseAll()
 
 	local layers = C_Map.GetMapArtLayers(self.mapID)
 	self:setCanvasSize(layers[1].layerWidth, layers[1].layerHeight)
 	for index, layerInfo in ipairs(layers) do
 		local detailLayer = self.detailLayerPool:Acquire()
-		detailLayer:SetAllPoints(self:getCanvas())
+		detailLayer:SetAllPoints(self.child)
 		detailLayer:SetMapAndLayer(self.mapID, index)
 		detailLayer:SetGlobalAlpha(1)
 		detailLayer:Show()
+	end
+
+	self.explorationLayerPool:ReleaseAll()
+	local exploredMapTextures = C_MapExplorationInfo.GetExploredMapTextures(self.mapID)
+	if exploredMapTextures then
+		local tileWidth = layers[1].tileWidth
+		local tileHeight = layers[1].tileHeight
+
+		for i, exploredTextureInfo in ipairs(exploredMapTextures) do
+			local numTexturesWide = ceil(exploredTextureInfo.textureWidth/tileWidth);
+			local numTexturesTall = ceil(exploredTextureInfo.textureHeight/tileHeight);
+			local texturePixelWidth, textureFileWidth, texturePixelHeight, textureFileHeight;
+			for j = 1, numTexturesTall do
+				if ( j < numTexturesTall ) then
+					texturePixelHeight = tileHeight;
+					textureFileHeight = tileHeight;
+				else
+					texturePixelHeight = mod(exploredTextureInfo.textureHeight, tileHeight);
+					if ( texturePixelHeight == 0 ) then
+						texturePixelHeight = tileHeight;
+					end
+					textureFileHeight = 16;
+					while(textureFileHeight < texturePixelHeight) do
+						textureFileHeight = textureFileHeight * 2;
+					end
+				end
+				for k = 1, numTexturesWide do
+					local texture = self.explorationLayerPool:Acquire();
+					if ( k < numTexturesWide ) then
+						texturePixelWidth = tileWidth;
+						textureFileWidth = tileWidth;
+					else
+						texturePixelWidth = mod(exploredTextureInfo.textureWidth, tileWidth);
+						if ( texturePixelWidth == 0 ) then
+							texturePixelWidth = tileWidth;
+						end
+						textureFileWidth = 16;
+						while(textureFileWidth < texturePixelWidth) do
+							textureFileWidth = textureFileWidth * 2;
+						end
+					end
+					texture:SetWidth(texturePixelWidth);
+					texture:SetHeight(texturePixelHeight);
+					texture:SetTexCoord(0, texturePixelWidth/textureFileWidth, 0, texturePixelHeight/textureFileHeight);
+					texture:SetPoint("TOPLEFT", exploredTextureInfo.offsetX + (tileWidth * (k-1)), -(exploredTextureInfo.offsetY + (tileHeight * (j - 1))));
+					texture:SetTexture(exploredTextureInfo.fileDataIDs[((j - 1) * numTexturesWide) + k], nil, nil, "TRILINEAR");
+
+					if not exploredTextureInfo.isShownByMouseOver then
+						texture:SetDrawLayer("ARTWORK", 0);
+						texture:Show();
+					end
+				end
+			end
+		end
 	end
 end
 
 
 function MJMapCanvasMixin:setCanvasSize(width, height)
-	local canvas = self:getCanvas()
+	local child = self.child
 	local scroll = self.ScrollContainer
-	canvas:SetSize(width, height)
+	child:SetSize(width, height)
 	
-	self.currentScale = math.min(scroll:GetWidth() / canvas:GetWidth(), scroll:GetHeight() / canvas:GetHeight())
-	canvas:SetScale(self.currentScale)
+	self.currentScale = math.min(scroll:GetWidth() / child:GetWidth(), scroll:GetHeight() / child:GetHeight())
+	child:SetScale(self.currentScale)
 end
 
 
 function MJMapCanvasMixin:normalizeHorizontalSize(size)
-	return size / self:getCanvas():GetWidth()
+	return size / self.child:GetWidth()
 end
 
 
 function MJMapCanvasMixin:normalizeVerticalSize(size)
-	return size / self:getCanvas():GetHeight()
+	return size / self.child:GetHeight()
 end
 
 
@@ -114,5 +165,5 @@ function MJMapCanvasMixin:getCursorPosition()
 	local x, y = GetCursorPosition()
 	local effectiveScale = UIParent:GetEffectiveScale()
 	x, y = x / effectiveScale, y / effectiveScale
-	return Saturate(self:normalizeHorizontalSize(x / self.currentScale - self:getCanvas():GetLeft())), Saturate(self:normalizeVerticalSize(self:getCanvas():GetTop() - y / self.currentScale))
+	return Saturate(self:normalizeHorizontalSize(x / self.currentScale - self.child:GetLeft())), Saturate(self:normalizeVerticalSize(self.child:GetTop() - y / self.currentScale))
 end

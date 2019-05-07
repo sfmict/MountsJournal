@@ -485,6 +485,9 @@
 								</Texture>
 							</Layer>
 						</Layers>
+						<Frames>
+							<Frame parentKey="Exploration" setAllPoints="true"/>
+						</Frames>
 					</Frame>
 				</ScrollChild>
 			</ScrollFrame>
