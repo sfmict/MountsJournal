@@ -333,7 +333,9 @@ end
 function mounts:init()
 	SLASH_MOUNTSJOURNAL1 = "/mount"
 	SlashCmdList["MOUNTSJOURNAL"] = function()
-		if IsMounted() then
+		if UnitInVehicle("player") then
+			VehicleExit()
+		elseif IsMounted() then
 			if not mounts.lastUseTime or GetTime() - mounts.lastUseTime > 0.5 then
 				Dismount()
 			end
