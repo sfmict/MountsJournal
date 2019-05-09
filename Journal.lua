@@ -549,6 +549,8 @@ end
 
 
 function journal:getRemoveMountList()
+	if journal.navBar.mapID == mounts.defMountsListID then return end
+
 	if #journal.list.fly + #journal.list.ground + #journal.list.swimming == 0
 	and not journal.list.flags.waterWalkOnly and not journal.list.flags.groundOnly then
 		mounts.db.zoneMounts[journal.navBar.mapID] = nil

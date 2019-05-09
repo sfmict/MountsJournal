@@ -1,4 +1,5 @@
 <Ui>
+	<Script file="MacroMixin.lua"/>
 	<Script file="NavBarMixin.lua"/>
 	<Script file="WorldMapMixin.lua"/>
 
@@ -519,5 +520,13 @@
 				</Anchors>
 			</CheckButton>
 		</Frames>
+	</Frame>
+
+	<Frame name="MJSecureActionButtonTemplate" inherits="SecureActionButtonTemplate" mixin="MJMacroMixin" virtual="true">
+		<Scripts>
+			<OnEvent method="onEvent"/>
+			<OnLoad method="onLoad"/>
+			<PreClick method="preClick"/>
+		</Scripts>
 	</Frame>
 </Ui>
