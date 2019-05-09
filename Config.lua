@@ -14,60 +14,58 @@ config:RegisterEvent("PLAYER_LOGIN")
 
 
 -- BIND MOUNT
-do
-	local function getMacroText()
-		local text = "/"
-		if not mounts.config.useMagicBroom or mounts:herbMountsExists() or mounts:waterWalkMountsExists() or not config.broom then
-			text = text.."mount"
-		else
-			local modifier = mounts.config.modifier
-			text = text.."use [nomounted,noswimming,nomod:"..modifier.."][nomounted,flyable,mod:"..modifier.."]"..config.broom.."\n/mount"
-		end
-		return text
+local function getMacroText()
+	local text = "/"
+	if not mounts.config.useMagicBroom or mounts:herbMountsExists() or mounts:waterWalkMountsExists() or not config.broom then
+		text = text.."mount"
+	else
+		local modifier = mounts.config.modifier
+		text = text.."use [nomounted,noswimming,nomod:"..modifier.."][nomounted,flyable,mod:"..modifier.."]"..config.broom.."\n/mount"
 	end
+	return text
+end
 
-	local function setMacroText()
-		if not InCombatLockdown() then
-			local macrotext = getMacroText()
-			config.bindMount.secure:SetAttribute("macrotext", macrotext)
+local function setMacroText()
+	if not InCombatLockdown() then
+		local macrotext = getMacroText()
+		config.bindMount.secure:SetAttribute("macrotext", macrotext)
 
-			local texture = select(2, GetMacroInfo("MJMacro"))
-			if texture then
-				EditMacro("MJMacro", "MJMacro", texture, "/click MountsJournal_Mount")
-			end
-		else
-			config:RegisterEvent("PLAYER_REGEN_ENABLED")
+		local texture = select(2, GetMacroInfo("MJMacro"))
+		if texture then
+			EditMacro("MJMacro", "MJMacro", texture, "/click MountsJournal_Mount")
 		end
+	else
+		config:RegisterEvent("PLAYER_REGEN_ENABLED")
 	end
+end
 
-	function config:PLAYER_LOGIN()
-		self.bindMount = binding:createButtonBinding(config, "MountsJournal_Mount")
-		self.bindMount:SetSize(232, 22)
+function config:PLAYER_LOGIN()
+	self.bindMount = binding:createButtonBinding(config, "MountsJournal_Mount")
+	self.bindMount:SetSize(232, 22)
+	self.broom = GetItemInfo(37011)
+	if self.broom then
+		setMacroText()
+	else
+		self:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+	end
+	self:RegisterEvent("PLAYER_ENTERING_WORLD")
+end
+
+function config:GET_ITEM_INFO_RECEIVED(itemID)
+	if itemID == 37011 then
+		self:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
 		self.broom = GetItemInfo(37011)
-		if self.broom then
-			setMacroText()
-		else
-			self:RegisterEvent("GET_ITEM_INFO_RECEIVED")
-		end
-		self:RegisterEvent("PLAYER_ENTERING_WORLD")
-	end
-
-	function config:GET_ITEM_INFO_RECEIVED(itemID)
-		if itemID == 37011 then
-			self:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
-			self.broom = GetItemInfo(37011)
-			setMacroText()
-		end
-	end
-
-	function config:PLAYER_REGEN_ENABLED()
-		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 		setMacroText()
 	end
+end
 
-	function config:PLAYER_ENTERING_WORLD()
-		setMacroText()
-	end
+function config:PLAYER_REGEN_ENABLED()
+	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+	setMacroText()
+end
+
+function config:PLAYER_ENTERING_WORLD()
+	setMacroText()
 end
 
 
