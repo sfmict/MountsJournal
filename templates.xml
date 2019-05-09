@@ -386,11 +386,11 @@
 						self.xoffset = -15;
 						local newWidth = min(128, self.text:GetStringWidth()+50)
 						local texCoordoffsetX = (newWidth/128)*0.25;
-							
+
 						self:GetNormalTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.70312500, 0.00781250, 0.24218750);
 						self:GetPushedTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.70312500, 0.25781250, 0.49218750);
 						self:GetHighlightTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.71312500, 0.50781250, 0.74218750);
-						
+
 						self:SetWidth(newWidth);
 					</OnLoad>
 					<OnClick>

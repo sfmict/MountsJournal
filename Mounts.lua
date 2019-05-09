@@ -46,20 +46,20 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalChar.zoneMounts = MountsJournalChar.zoneMounts or {}
 
 		mounts.macroTable = {
-			[7] = {
+			SHAMAN = {
 				macroEnable = true,
 				macroAlways = false,
-				macro = "/cast Призрачный волк",
+				-- macro = "/cast Призрачный волк",
 			},
-			[11] = {
+			DRUID = {
 				macroEnable = true,
 				macroAlways = false,
-				macro = "/cast [indoors,noswimming]Облик кошки(Смена облика);Походный облик(Смена облика)",
+				-- macro = "/cast [indoors,noswimming]Облик кошки(Смена облика);Походный облик(Смена облика)",
 			},
 		}
 
-		mounts.mFlags = {}
-		mounts.defMountsListID = 946
+		mounts.sFlags = {}
+		mounts.defMountsListID = MapUtil.GetMapParentInfo(MapUtil.GetDisplayableMapForPlayer(), Enum.UIMapType.Cosmic, true).mapID
 		mounts:setMountsListPerChar()
 		mounts.swimmingVashjir = {
 			373, -- Вайш'ирский морской конек
@@ -267,19 +267,8 @@ end
 
 
 function mounts:summonListOr(ids, flyable)
-	-- if mounts.config.useHerbMounts then
-		-- local prof1, prof2 = GetProfessions()
-		-- if (prof1 and select(7, GetProfessionInfo(prof1)) == 182
-		-- or prof2 and select(7, GetProfessionInfo(prof2)) == 182)
-	if mounts.mFlags.herb and mounts:summon(mounts.herbalismMounts) then -- herbMount
+	if mounts.sFlags.herb and mounts:summon(mounts.herbalismMounts) then -- herbMount
 		return true
-	end
-
-	if (not mounts.config.waterWalkAll or flyable)
-	and mounts.config.useMagicBroom
-	and GetItemCount(37011) ~= 0 then
-		mounts.lastUseTime = GetTime()
-		return true -- magic broom
 	end
 
 	return mounts:summon(ids)
@@ -337,7 +326,9 @@ function mounts:setFlags()
 	local instance = select(8, GetInstanceInfo())
 	local isFlyableLocation = flySpellKnown and IsFlyableArea() and mounts:isFlyLocation(instance) and not (mounts.mapFlags and mounts.mapFlags.groundOnly)
 	
-	local flags = mounts.mFlags
+	local flags = mounts.sFlags
+	flags.inVehicle = UnitInVehicle("player")
+	flags.IsMounted = IsMounted()
 	flags.groundSpellKnown = groundSpellKnown
 	flags.swimming = isSubmerged
 						  and not modifier
@@ -346,12 +337,9 @@ function mounts:setFlags()
 					and (not modifier or isSubmerged)
 	flags.waterWalk = mounts.config.waterWalkAll
 							or isFloating
-							or not isFlyableLocation
-							and modifier
+							or not isFlyableLocation and modifier
 							or mounts:isWaterWalkLocation(instance)
 	flags.herb = mounts:herbMountsExists()
-
-	fprint(dump, flags)
 end
 
 
@@ -363,67 +351,30 @@ end
 function mounts:init()
 	SLASH_MOUNTSJOURNAL1 = "/mount"
 	SlashCmdList["MOUNTSJOURNAL"] = function()
-		if UnitInVehicle("player") then
+		local flags = mounts.sFlags
+		if flags.inVehicle then
 			VehicleExit()
-		elseif IsMounted() then
+		elseif flags.IsMounted then
 			if not mounts.lastUseTime or GetTime() - mounts.lastUseTime > 0.5 then
 				Dismount()
 			end
-		else
-
-			local flags = mounts.mFlags
-			if not flags.groundSpellKnown then
-				if not mounts:summon(mounts.lowLevel) then mounts:errorSummon() end
-			-- swimming
-			-- elseif (not flags.swimming
-			-- 	or not (mounts.mapVashjir[C_Map.GetBestMapForUnit("player")] and mounts:summon(mounts.swimmingVashjir))
-			-- 	and not mounts:summon(mounts.list.swimming))
-			elseif not (flags.swimming
-				and (mounts.mapVashjir[C_Map.GetBestMapForUnit("player")]
-					and mounts:summon(mounts.swimmingVashjir)
-					or mounts:summon(mounts.list.swimming)))
-			-- fly
-			and not (flags.fly and mounts:summonListOr(mounts.list.fly, true))
-			-- water walk
-			and not (flags.waterWalk and mounts:summon(mounts.waterWalk))
-			-- ground
-			and not mounts:summonListOr(mounts.list.ground)
-			and not mounts:summon(mounts.waterWalk)
-			and not mounts:summon(mounts.list.fly)
-			and not mounts:summon(mounts.lowLevel) then
-				mounts:errorSummon()
-			end
-
-			-- local isGroundSpell, isFlySpell = mounts:getSpellKnown()
-			-- if not isGroundSpell then
-			-- 	if not mounts:summon(mounts.lowLevel) then mounts:errorSummon() end
-			-- -- swimming
-			-- elseif mounts:isFloating()
-			-- 	or mounts.modifier()
-			-- 	or not IsSubmerged()
-			-- 	or not (mounts.mapVashjir[C_Map.GetBestMapForUnit("player")] and mounts:summon(mounts.swimmingVashjir))
-			-- 	and not mounts:summon(mounts.list.swimming) then
-			-- 	-- fly
-			-- 	local instance = select(8, GetInstanceInfo())
-			-- 	local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation(instance) and not (mounts.mapFlags and mounts.mapFlags.groundOnly)
-			-- 	if (not isFlyableLocation
-			-- 		or mounts.modifier() and not IsSubmerged()
-			-- 		or not mounts:summonListOr(mounts.list.fly, true))
-			-- 	-- water walk
-			-- 	and not ((mounts.config.waterWalkAll
-			-- 			or mounts:isFloating()
-			-- 			or not isFlyableLocation and mounts.modifier()
-			-- 			or mounts:isWaterWalkLocation(instance))
-			-- 		and mounts:summon(mounts.waterWalk))
-			-- 	-- ground
-			-- 	and not mounts:summonListOr(mounts.list.ground)
-			-- 	and not mounts:summon(mounts.waterWalk)
-			-- 	and not mounts:summon(mounts.list.fly)
-			-- 	and not mounts:summon(mounts.lowLevel) then
-			-- 		mounts:errorSummon()
-			-- 	end
-			-- end
-
+		elseif not flags.groundSpellKnown then
+			if not mounts:summon(mounts.lowLevel) then mounts:errorSummon() end
+		-- swimming
+		elseif not (flags.swimming
+			and (mounts.mapVashjir[C_Map.GetBestMapForUnit("player")]
+				and mounts:summon(mounts.swimmingVashjir)
+				or mounts:summon(mounts.list.swimming)))
+		-- fly
+		and not (flags.fly and mounts:summonListOr(mounts.list.fly, true))
+		-- water walk
+		and not (flags.waterWalk and mounts:summon(mounts.waterWalk))
+		-- ground
+		and not mounts:summonListOr(mounts.list.ground)
+		and not mounts:summon(mounts.list.fly)
+		and not mounts:summon(mounts.waterWalk)
+		and not mounts:summon(mounts.lowLevel) then
+			mounts:errorSummon()
 		end
 	end
 end
