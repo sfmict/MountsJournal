@@ -2,7 +2,7 @@ local _, L = ...
 
 L["author"] = "Author"
 L["%s Configuration"] = "%s Configuration"
-L["ConfigPanelTitle %s."] = "This panel can be used to configure %s."
+L["ConfigPanelTitle %s."] = "Global settings"
 L["Modifier"] = "Modifier"
 L["ModifierDescription"] = "If the modifier hold and you are in water then will be summoned non-waterfowl mount. If you are on land and you can fly then will be summoned ground mount."
 L["Handle a jump in water"] = "Handle a jump in water"
@@ -40,6 +40,11 @@ L["Map / Model"] = "Map / Model"
 L["Current Location"] = "Current Location"
 L["Ground Mounts Only"] = "Ground Mounts Only"
 L["Water Walk Mounts Only"] = "Water Walk Mounts Only"
+L["HELP_MACRO_MOVE_FALL"] = "This macro will be run, if you are indoors or are moving, and you do not have a magic broom or it is turned off."
+L["HELP_MACRO_COMBAT"] = "This macro will be run, if you are in combat."
+L["DEATHKNIGHT_USEPATHOFFROST"] = "Use the \"Path of Frost\" when summoning ground mount"
+L["SHAMAN_USEWATERWALKING"] = "Use the \"Water Walking\" when summoning ground mount"
+L["DRUID_USEMACROALWAYS"] = "Use this macros instead of mounts"
 
 setmetatable(L, {__index = function(self, key)
 	self[key] = key or ""

@@ -1,7 +1,7 @@
 local addon, L = ...
 local mounts = MountsJournal
 local binding = _G[addon.."Binding"]
-local config = CreateFrame("Frame", "MountsJournalConfig", InterfaceOptionsFramePanelContainer)
+local config = CreateFrame("FRAME", "MountsJournalConfig", InterfaceOptionsFramePanelContainer)
 config.name = addon
 
 
@@ -72,7 +72,7 @@ config:SetScript("OnShow", function()
 
 	-- ADDON INFO
 	local info = config:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	info:SetPoint("BOTTOMRIGHT", -16, 16)
+	info:SetPoint("TOPRIGHT", -16, 16)
 	info:SetTextColor(.5, .5, .5, 1)
 	info:SetText(format("%s %s: %s", GetAddOnMetadata(addon, "Version"), L["author"], GetAddOnMetadata(addon, "Author")))
 
@@ -84,16 +84,16 @@ config:SetScript("OnShow", function()
 	-- SUBTITLE
 	local subtitle = config:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	subtitle:SetHeight(30)
-	subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -8)
+	subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 1, -8)
 	subtitle:SetNonSpaceWrap(true)
 	subtitle:SetJustifyH("LEFT")
 	subtitle:SetJustifyV("TOP")
-	subtitle:SetText(format(L["ConfigPanelTitle %s."], addon))
+	subtitle:SetText(L["ConfigPanelTitle %s."])
 
 	-- LEFT PANEL
-	local leftPanel = CreateFrame("Frame", nil, config, "MJOptionsPanel")
+	local leftPanel = CreateFrame("FRAME", nil, config, "MJOptionsPanel")
 	leftPanel:SetPoint("TOPLEFT", config, 8, -67)
-	leftPanel:SetPoint("BOTTOMRIGHT", config, "BOTTOMLEFT", 300, 35)
+	leftPanel:SetPoint("BOTTOMRIGHT", config, "BOTTOMLEFT", 300, 8)
 
 	-- MODIFIER TEXT
 	local modifierText = config:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
@@ -101,7 +101,7 @@ config:SetScript("OnShow", function()
 	modifierText:SetText(L["Modifier"]..":")
 
 	-- MODIFIER COMBOBOX
-	local modifierCombobox = CreateFrame("Frame", "MountsJournalModifier", config, "UIDropDownMenuTemplate")
+	local modifierCombobox = CreateFrame("FRAME", "MountsJournalModifier", config, "UIDropDownMenuTemplate")
 	modifierCombobox:SetPoint("TOPLEFT", modifierText, "BOTTOMRIGHT", -8, 21)
 
 	config.modifierValue = mounts.config.modifier
@@ -174,22 +174,22 @@ config:SetScript("OnShow", function()
 	config.bindMount:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -20)
 
 	-- RIGHT PANEL
-	local rightPanel = CreateFrame("Frame", nil, config, "MJOptionsPanel")
+	local rightPanel = CreateFrame("FRAME", nil, config, "MJOptionsPanel")
 	rightPanel:SetPoint("TOPLEFT", leftPanel, "TOPRIGHT", 4, 0)
-	rightPanel:SetPoint("BOTTOMRIGHT", config, -8, 35)
+	rightPanel:SetPoint("BOTTOMRIGHT", config, -8, 8)
 
 	local rightPanelScroll = CreateFrame("ScrollFrame", nil, rightPanel, "UIPanelScrollFrameTemplate")
-	rightPanelScroll:SetPoint("TOPLEFT", rightPanel, 4, -4)
-	rightPanelScroll:SetPoint("BOTTOMRIGHT", rightPanel, -26, 3)
+	rightPanelScroll:SetPoint("TOPLEFT", rightPanel, 4, -6)
+	rightPanelScroll:SetPoint("BOTTOMRIGHT", rightPanel, -26, 5)
 	rightPanelScroll.ScrollBar:SetBackdrop({bgFile='interface/buttons/white8x8'})
 	rightPanelScroll.ScrollBar:SetBackdropColor(0,0,0,.2)
-	rightPanelScroll.child = CreateFrame("Frame")
+	rightPanelScroll.child = CreateFrame("FRAME")
 	rightPanelScroll.child:SetSize(1, 1)
 	rightPanelScroll:SetScrollChild(rightPanelScroll.child)
 
 	-- WATER WALKER ALWAYS
 	config.waterWalkAlways = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	config.waterWalkAlways:SetPoint("TOPLEFT", rightPanelScroll.child, 9, -11)
+	config.waterWalkAlways:SetPoint("TOPLEFT", rightPanelScroll.child, 9, -9)
 	config.waterWalkAlways.Text:SetText(L["Water Walking Always"])
 	config.waterWalkAlways.tooltipText = L["Water Walking"]
 	config.waterWalkAlways.tooltipRequirement = L["WaterWalkingDescription"]

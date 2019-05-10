@@ -11,30 +11,30 @@ end
 function MJMacroMixin:onLoad()
 	self.mounts = MountsJournal
 	self.sFlags = self.mounts.sFlags
-	self.macroTable = self.mounts.macroTable
+	self.macrosConfig = self.mounts.config.macrosConfig
 	self.class = select(2, UnitClass("player"))
-	self.broom = GetItemInfo(37011)
-	if not self.broom then
+	self.broomName = GetItemInfo(37011)
+	if not self.broomName then
 		self:RegisterEvent("GET_ITEM_INFO_RECEIVED")
 	end
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:refresh()
-
-	-- for i = 1, GetNumClasses() do
-	-- 	local localized, className = GetClassInfo(i)
-	-- 	fprint(dump, localized, className, i, C_ClassColor.GetClassColor(className))
-	-- end
 end
 
 
 function MJMacroMixin:refresh()
-	local classTable = self.macroTable[self.class]
-	if classTable and classTable.macroEnable then
-		self.classMacro = classTable.macro or self:getClassMacro()
-		self.macroAlways = classTable.macroAlways
-	else
-		self.classMacro = nil
-		self.macroAlways = nil
+	self.classConfig = self.macrosConfig[self.class]
+	self.macro = nil
+	self.combatMacro = nil
+	self.useMacroAlways = nil
+	if self.classConfig then
+		if self.classConfig.macroEnable then
+			self.macro = self.classConfig.macro or self:getClassMacro()
+			self.useMacroAlways = self.classConfig.useMacroAlways
+		end
+		if self.classConfig.combatMacroEnable then
+			self.combatMacro = self.classConfig.combatMacro or self:getClassMacro()
+		end
 	end
 end
 
@@ -48,8 +48,38 @@ function MJMacroMixin:addLine(text, line)
 end
 
 
+do
+	local spellIDtoName = {}
+	function MJMacroMixin:getSpellName(spellID)
+		if not spellIDtoName[spellID] then
+			spellIDtoName[spellID] = GetSpellInfo(spellID)
+		end
+
+		return spellIDtoName[spellID]
+	end
+end
+
+
 function MJMacroMixin:getDefMacro()
 	local macro
+
+	if self.class == "DEATHKNIGHT"
+	and self.classConfig.usePathOfFrost
+	and not self.sFlags.inVehicle
+	and not self.sFlags.isMounted
+	and not self.sFlags.swimming
+	and not self.sFlags.fly then
+		macro = self:addLine(macro, "/cast "..sefl:getSpellName(3714)) -- Path of Frost
+	end
+
+	if self.class == "SHAMAN"
+	and self.classConfig.useWaterWalking
+	and not self.sFlags.inVehicle
+	and not self.sFlags.isMounted
+	and not self.sFlags.swimming
+	and not self.sFlags.fly then
+		macro = self:addLine(macro, "/cast "..self:getSpellName(546)) -- Water Walking
+	end
 
 	if self.class == "DRUID" then
 		local shapeshiftIndex = GetShapeshiftForm()
@@ -62,17 +92,8 @@ function MJMacroMixin:getDefMacro()
 		end
 	end
 
-	-- MAGIC BROOM
-	if self.mounts.config.useMagicBroom
-	and GetItemCount(37011) > 0
-	and not self.sFlags.inVehicle
-	and not self.sFlags.isMounted
-	and self.sFlags.groundSpellKnown
-	and not self.sFlags.herb
-	and not self.sFlags.swimming
-	and (self.sFlags.fly or not self.sFlags.waterWalk)
-	and self.broom then
-		macro = self:addLine(macro, "/use "..self.broom)
+	if self.magicBroom then
+		macro = self:addLine(macro, "/use "..self.broomName) -- MAGIC BROOM
 		self.mounts.lastUseTime = GetTime()
 	else
 		macro = self:addLine(macro, "/mount")
@@ -83,9 +104,7 @@ end
 
 
 do
-	local function classDefFunc(spellID)
-		local spellName = GetSpellInfo(spellID)
-
+	local function classDefFunc(spellName)
 		if spellName then
 			return "/cast "..spellName
 		end
@@ -93,12 +112,13 @@ do
 
 
 	local classFunc = {
-		PRIEST = function() return classDefFunc(1706) end, -- Levitation
-		SHAMAN = function() return classDefFunc(2645) end, -- Ghost Wolf
-		MAGE = function() return classDefFunc(130) end, -- Slow Fall
-		DRUID = function()
-			local catForm = GetSpellInfo(768)
-			local travelForm = GetSpellInfo(783)
+		PRIEST = function(self) return classDefFunc(self:getSpellName(1706)) end, -- Levitation
+		SHAMAN = function(self) return classDefFunc(self:getSpellName(2645)) end, -- Ghost Wolf
+		MAGE = function(self) return classDefFunc(self:getSpellName(130)) end, -- Slow Fall
+		MONK = function(self) return classDefFunc(self:getSpellName(125883)) end, --Zen Flight
+		DRUID = function(self)
+			local catForm = self:getSpellName(768)
+			local travelForm = self:getSpellName(783)
 
 			if catForm and travelForm then
 				return "/cast [indoors,noswimming]"..catForm..";"..travelForm
@@ -113,7 +133,7 @@ do
 
 		local classFunc = classFunc[class or self.class]
 		if type(classFunc) == "function" then
-			local text = classFunc()
+			local text = classFunc(self)
 			if type(text) == "string" and strlen(text) > 0 then
 				macro = self:addLine(macro, text)
 			end
@@ -128,27 +148,43 @@ function MJMacroMixin:preClick()
 	if not InCombatLockdown() then
 		self.mounts:setFlags()
 		local macro
-		
-		if self.macroAlways or self.classMacro and (IsIndoors() or GetUnitSpeed("player") > 0 or IsFalling()) then
-			macro = self.classMacro
+
+		-- MAGIC BROOM IS USABLE
+		self.magicBroom = self.mounts.config.useMagicBroom
+								and GetItemCount(37011) > 0
+								and not self.classConfig.useMacroAlways
+								and not self.sFlags.inVehicle
+								and not self.sFlags.isMounted
+								and self.sFlags.groundSpellKnown
+								and not self.sFlags.herb
+								and not self.sFlags.swimming
+								and not IsIndoors()
+								and (self.sFlags.fly or not self.sFlags.waterWalk)
+								and self.broomName
+
+		if not self.magicBroom
+		and (self.classConfig.useMacroAlways 
+			or self.macro and (IsIndoors() or GetUnitSpeed("player") > 0 or IsFalling())) then
+			macro = self.macro
 		else
 			macro = self:getDefMacro()
 		end
 
-		fprint(macro)
 		self:SetAttribute("macrotext", macro or "")
 	end
 end
 
 
 function MJMacroMixin:PLAYER_REGEN_DISABLED()
-	self:SetAttribute("macrotext", self.classMacro or self:getDefMacro() or "")
+	if self.combatMacro then
+		self:SetAttribute("macrotext", self.combatMacro)
+	end
 end
 
 
 function MJMacroMixin:GET_ITEM_INFO_RECEIVED(itemID)
 	if itemID == 37011 then
 		self:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
-		self.broom = GetItemInfo(37011)
+		self.broomName = GetItemInfo(37011)
 	end
 end

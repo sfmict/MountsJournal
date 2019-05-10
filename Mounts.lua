@@ -38,25 +38,13 @@ function mounts:ADDON_LOADED(addonName)
 		if mounts.config.waterWalkExpeditionList == nil or type(mounts.config.waterWalkExpeditionList) ~= "table" then
 			mounts.config.waterWalkExpeditionList = {}
 		end
+		mounts.config.macrosConfig = mounts.config.macrosConfig or {}
 
 		MountsJournalChar = MountsJournalChar or {}
 		MountsJournalChar.fly =  MountsJournalChar.fly or {}
 		MountsJournalChar.ground = MountsJournalChar.ground or {}
 		MountsJournalChar.swimming = MountsJournalChar.swimming or {}
 		MountsJournalChar.zoneMounts = MountsJournalChar.zoneMounts or {}
-
-		mounts.macroTable = {
-			SHAMAN = {
-				macroEnable = true,
-				macroAlways = false,
-				-- macro = "/cast Призрачный волк",
-			},
-			DRUID = {
-				macroEnable = true,
-				macroAlways = false,
-				-- macro = "/cast [indoors,noswimming]Облик кошки(Смена облика);Походный облик(Смена облика)",
-			},
-		}
 
 		mounts.sFlags = {}
 		mounts.defMountsListID = MapUtil.GetMapParentInfo(MapUtil.GetDisplayableMapForPlayer(), Enum.UIMapType.Cosmic, true).mapID
@@ -328,7 +316,7 @@ function mounts:setFlags()
 	
 	local flags = mounts.sFlags
 	flags.inVehicle = UnitInVehicle("player")
-	flags.IsMounted = IsMounted()
+	flags.isMounted = IsMounted()
 	flags.groundSpellKnown = groundSpellKnown
 	flags.swimming = isSubmerged
 						  and not modifier
@@ -354,7 +342,7 @@ function mounts:init()
 		local flags = mounts.sFlags
 		if flags.inVehicle then
 			VehicleExit()
-		elseif flags.IsMounted then
+		elseif flags.isMounted then
 			if not mounts.lastUseTime or GetTime() - mounts.lastUseTime > 0.5 then
 				Dismount()
 			end
