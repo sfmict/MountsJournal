@@ -162,7 +162,21 @@
 		</Scripts>
 	</Frame>
 
-	<CheckButton name="MJCheckButtonTemplate" inherits="OptionsBaseCheckButtonTemplate" virtual="true">
+	<CheckButton name="MJBaseCheckButtonTemplate" inherits="OptionsBaseCheckButtonTemplate" virtual="true">
+		<HitRectInsets>
+			<AbsInset left="0" right="0" top="0" bottom="0"/>
+		</HitRectInsets>
+		<Scripts>
+			<OnClick>
+				PlaySound(self:GetChecked() and SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF);
+			</OnClick>
+		</Scripts>
+	</CheckButton>
+
+	<CheckButton name="MJCheckButtonTemplate" inherits="MJBaseCheckButtonTemplate" virtual="true">
+		<HitRectInsets>
+			<AbsInset left="0" right="-100" top="0" bottom="0"/>
+		</HitRectInsets>
 		<Layers>
 			<Layer level="ARTWORK">
 				<FontString name="$parentText" inherits="GameFontHighlightLeft" parentKey="Text">
@@ -177,13 +191,8 @@
 			</Layer>
 		</Layers>
 		<Scripts>
-			<OnClick>
-				if ( self:GetChecked() ) then
-					PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
-				else
-					PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF);
-				end
-			</OnClick>
+			<OnEnable>self.Text:SetTextColor(1,1,1,1)</OnEnable>
+			<OnDisable>self.Text:SetTextColor(.5,.5,.5,1)</OnDisable>
 		</Scripts>
 	</CheckButton>
 
@@ -212,11 +221,10 @@
 						<Anchor point="TOPLEFT" x="27" y="0" />
 						<Anchor point="BOTTOMRIGHT" x="0" y="0" />
 					</Anchors>
-					<TexCoords left="0.00390625" right="0.8203125" top="0.37890625" bottom="0.55859375"/>
 				</Texture>
 			</Layer>
 		</Layers>
-		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD" alpha="0.8">
+		<HighlightTexture parentKey="highlight" file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD" alpha="0.3">
 			<Anchors>
 				<Anchor point="TOPLEFT" x="27" y="0" />
 				<Anchor point="BOTTOMRIGHT" x="0" y="0" />

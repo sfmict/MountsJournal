@@ -12,6 +12,7 @@ function MJMacroMixin:onLoad()
 	self.mounts = MountsJournal
 	self.sFlags = self.mounts.sFlags
 	self.macrosConfig = self.mounts.config.macrosConfig
+	self.charMacrosConfig = MountsJournalChar.macrosConfig
 	self.class = select(2, UnitClass("player"))
 	self.broomName = GetItemInfo(37011)
 	if not self.broomName then
@@ -23,7 +24,7 @@ end
 
 
 function MJMacroMixin:refresh()
-	self.classConfig = self.macrosConfig[self.class]
+	self.classConfig = self.charMacrosConfig.enable and self.charMacrosConfig or self.macrosConfig[self.class]
 	self.macro = nil
 	self.combatMacro = nil
 	self.useMacroAlways = nil
@@ -152,7 +153,7 @@ function MJMacroMixin:preClick()
 		-- MAGIC BROOM IS USABLE
 		self.magicBroom = self.mounts.config.useMagicBroom
 								and GetItemCount(37011) > 0
-								and not self.classConfig.useMacroAlways
+								and not self.useMacroAlways
 								and not self.sFlags.inVehicle
 								and not self.sFlags.isMounted
 								and self.sFlags.groundSpellKnown
@@ -163,8 +164,11 @@ function MJMacroMixin:preClick()
 								and self.broomName
 
 		if not self.magicBroom
-		and (self.classConfig.useMacroAlways 
-			or self.macro and (IsIndoors() or GetUnitSpeed("player") > 0 or IsFalling())) then
+		and (self.useMacroAlways
+			  or self.macro
+			  and (IsIndoors()
+					 or GetUnitSpeed("player") > 0
+					 or IsFalling())) then
 			macro = self.macro
 		else
 			macro = self:getDefMacro()

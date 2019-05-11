@@ -14,13 +14,14 @@ function mounts:PLAYER_ENTERING_WORLD()
 
 
 	-- CONFIG OPEN
+	-- local classConfig = MountsJournalConfig
 	local classConfig = MountsJournalConfigClasses
 	if InterfaceOptionsFrameAddOns:IsVisible() and classConfig:IsVisible() then
 		InterfaceOptionsFrame:Hide()
 	else
-		InterfaceOptionsFrame_OpenToCategory(L["Class settings"])
+		InterfaceOptionsFrame_OpenToCategory(classConfig.name)
 		if not InterfaceOptionsFrameAddOns:IsVisible() then
-			InterfaceOptionsFrame_OpenToCategory(L["Class settings"])
+			InterfaceOptionsFrame_OpenToCategory(classConfig.name)
 		end
 	end
 end

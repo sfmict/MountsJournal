@@ -88,7 +88,7 @@ config:SetScript("OnShow", function()
 	subtitle:SetNonSpaceWrap(true)
 	subtitle:SetJustifyH("LEFT")
 	subtitle:SetJustifyV("TOP")
-	subtitle:SetText(L["ConfigPanelTitle %s."])
+	subtitle:SetText(L["ConfigPanelTitle"])
 
 	-- LEFT PANEL
 	local leftPanel = CreateFrame("FRAME", nil, config, "MJOptionsPanel")
@@ -134,7 +134,7 @@ config:SetScript("OnShow", function()
 	local createMacroBtn = CreateFrame("Button", nil, config, "UIPanelButtonTemplate")
 	createMacroBtn:SetSize(232, 40)
 	createMacroBtn:SetPoint("TOPLEFT", config.waterJump, "BOTTOMLEFT", 0, -25)
-	createMacroBtn:SetText(L["CreateMacroBtn"])
+	createMacroBtn:SetText(L["CreateMacro"])
 	createMacroBtn:SetScript("OnClick", function()
 		local macroName = "MJMacro"
 		DeleteMacro(macroName)
@@ -247,9 +247,15 @@ config:SetScript("OnShow", function()
 	-- USE MAGIC BROOM
 	config.useMagicBroom = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
 	config.useMagicBroom:SetPoint("TOPLEFT", config.useHerbMounts, "BOTTOMLEFT", 0, -26)
-	config.useMagicBroom.Text:SetText(L["UseMagicBroom"])
+	local magicBroomName = select(2, GetItemInfo(37011))
+	if magicBroomName then
+		config.useMagicBroom.Text:SetText(format(L["UseMagicBroom"], select(2, GetItemInfo(37011))))
+	else
+		config:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+	end
+	config:setHyperlinkTooltip(config.useMagicBroom)
 	config.useMagicBroom.tooltipText = L["UseMagicBroom"]
-	config.useMagicBroom.tooltipRequirement = format("%s\n\n|cffff0000%s|r", L["UseMagicBroomDescription"], L["NeedRecreateMacro"])
+	config.useMagicBroom.tooltipRequirement = L["UseMagicBroomDescription"]
 
 	-- REFRESH
 	local function refresh()
@@ -282,16 +288,40 @@ function config:setEnableCheckButtons(enable, tbl)
 	if enable then
 		for _, check in pairs(tbl) do
 			check:Enable()
-			check.Text:SetTextColor(1,1,1,1)
 		end
 	else
 		for _, check in pairs(tbl) do
 			check:Disable()
-			check.Text:SetTextColor(.5,.5,.5,1)
 		end
 	end
 end
 
+
+function config:GET_ITEM_INFO_RECEIVED(itemID)
+	if itemID == 37011 then
+		self:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
+		config.useMagicBroom.Text:SetText(format(L["UseMagicBroom"], select(2, GetItemInfo(37011))))
+	end
+end
+
+
+do
+	local function showTooltip(_,_,itemLink)
+		GameTooltip:SetOwner(UIParent, "ANCHOR_CURSOR")
+		GameTooltip:SetHyperlink(itemLink)
+		GameTooltip:Show()
+	end
+
+	local function hideTooltip(self)
+		GameTooltip:Hide()
+	end
+
+	function config:setHyperlinkTooltip(frame)
+		frame:SetHyperlinksEnabled(true)
+		frame:SetScript("OnHyperlinkEnter", showTooltip)
+		frame:SetScript("OnHyperlinkLeave", hideTooltip)
+	end
+end
 
 config.okay = function(self)
 	mounts:setModifier(self.modifierValue)

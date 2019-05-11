@@ -25,6 +25,7 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalDB.config = MountsJournalDB.config or {}
 		MountsJournalDB.filters = MountsJournalDB.filters or {}
 		mounts.config = MountsJournalDB.config
+		mounts.config.macrosConfig = mounts.config.macrosConfig or {}
 		mounts.filters = MountsJournalDB.filters
 		if mounts.config.waterWalkInstance == nil then
 			mounts.config.waterWalkInstance = true
@@ -38,13 +39,13 @@ function mounts:ADDON_LOADED(addonName)
 		if mounts.config.waterWalkExpeditionList == nil or type(mounts.config.waterWalkExpeditionList) ~= "table" then
 			mounts.config.waterWalkExpeditionList = {}
 		end
-		mounts.config.macrosConfig = mounts.config.macrosConfig or {}
 
 		MountsJournalChar = MountsJournalChar or {}
 		MountsJournalChar.fly =  MountsJournalChar.fly or {}
 		MountsJournalChar.ground = MountsJournalChar.ground or {}
 		MountsJournalChar.swimming = MountsJournalChar.swimming or {}
 		MountsJournalChar.zoneMounts = MountsJournalChar.zoneMounts or {}
+		MountsJournalChar.macrosConfig = MountsJournalChar.macrosConfig or {}
 
 		mounts.sFlags = {}
 		mounts.defMountsListID = MapUtil.GetMapParentInfo(MapUtil.GetDisplayableMapForPlayer(), Enum.UIMapType.Cosmic, true).mapID
@@ -312,7 +313,10 @@ function mounts:setFlags()
 	local isSubmerged = IsSubmerged()
 	local isFloating = mounts:isFloating()
 	local instance = select(8, GetInstanceInfo())
-	local isFlyableLocation = flySpellKnown and IsFlyableArea() and mounts:isFlyLocation(instance) and not (mounts.mapFlags and mounts.mapFlags.groundOnly)
+	local isFlyableLocation = flySpellKnown 
+									  and IsFlyableArea()
+									  and mounts:isFlyLocation(instance)
+									  and not (mounts.mapFlags and mounts.mapFlags.groundOnly)
 	
 	local flags = mounts.sFlags
 	flags.inVehicle = UnitInVehicle("player")
@@ -350,9 +354,9 @@ function mounts:init()
 			if not mounts:summon(mounts.lowLevel) then mounts:errorSummon() end
 		-- swimming
 		elseif not (flags.swimming
-			and (mounts.mapVashjir[C_Map.GetBestMapForUnit("player")]
-				and mounts:summon(mounts.swimmingVashjir)
-				or mounts:summon(mounts.list.swimming)))
+						and (mounts.mapVashjir[C_Map.GetBestMapForUnit("player")]
+							  and mounts:summon(mounts.swimmingVashjir)
+							  or mounts:summon(mounts.list.swimming)))
 		-- fly
 		and not (flags.fly and mounts:summonListOr(mounts.list.fly, true))
 		-- water walk

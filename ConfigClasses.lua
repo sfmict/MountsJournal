@@ -8,6 +8,7 @@ classConfig.parent = addon
 
 classConfig:SetScript("OnShow", function(self)
 	self.macrosConfig = mounts.config.macrosConfig
+	self.charMacrosConfig = MountsJournalChar.macrosConfig
 	self.secure = config.bindMount.secure
 
 	-- ADDON INFO
@@ -23,12 +24,12 @@ classConfig:SetScript("OnShow", function(self)
 
 	-- SUBTITLE
 	local subtitle = classConfig:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	self.subtitle = subtitle
 	subtitle:SetHeight(30)
 	subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 1, -8)
 	subtitle:SetNonSpaceWrap(true)
 	subtitle:SetJustifyH("LEFT")
 	subtitle:SetJustifyV("TOP")
-	subtitle:SetText(L["Setting class features"])
 
 	-- LEFT PANEL
 	local leftPanel = CreateFrame("FRAME", nil, classConfig, "MJOptionsPanel")
@@ -54,6 +55,7 @@ classConfig:SetScript("OnShow", function(self)
 		classFrame.name:SetText(localized)
 		classFrame.name:SetTextColor(classColor:GetRGB())
 		classFrame.check:SetVertexColor(classColor:GetRGB())
+		classFrame.highlight:SetVertexColor(classColor:GetRGB())
 		classFrame.icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[className]))
 		classFrame:SetScript("OnClick", function(btn) self:classClick(btn) end)
 		
@@ -61,6 +63,33 @@ classConfig:SetScript("OnShow", function(self)
 			firstClassFrame = classFrame
 		end
 	end
+
+	-- CURRENT CHARACTER
+	local _,className = UnitClass("player")
+	local classColor = C_ClassColor.GetClassColor(className)
+	local classFrame = CreateFrame("BUTTON", nil, classConfig, "MJClassButtonTemplate")
+	classFrame:SetPoint("TOPLEFT", lastClassFrame, "BOTTOMLEFT", 0, -20)
+	classFrame.key = className
+	classFrame.default = self.secure:getClassMacro(className)
+	classFrame.name:SetText(UnitName("player"))
+	classFrame.name:SetTextColor(classColor:GetRGB())
+	classFrame.description = L["CHARACTER_CLASS_DESCRIPTION"]
+	classFrame.check:SetVertexColor(classColor:GetRGB())
+	classFrame.highlight:SetVertexColor(classColor:GetRGB())
+	classFrame.icon:Hide()
+	classFrame:SetScript("OnClick", function(btn)
+		self.currentMacrosConfig = self.charMacrosConfig
+		self:showClassSettings(btn)
+	end)
+
+	-- CURRENT CHARACTER ENABLE
+	local charCheck = CreateFrame("CHECKBUTTON", nil, classFrame, "MJBaseCheckButtonTemplate")
+	charCheck:SetPoint("LEFT", 2, -1)
+	charCheck:SetChecked(self.charMacrosConfig.enable)
+	charCheck:HookScript("OnClick", function(btn)
+		self.charMacrosConfig.enable = btn:GetChecked()
+		self.secure:refresh()
+	end)
 
 	-- RIGHT PANEL
 	local rightPanel = CreateFrame("FRAME", nil, classConfig, "MJOptionsPanel")
@@ -84,7 +113,9 @@ classConfig:SetScript("OnShow", function(self)
 	self.classCheck.Text:SetSize(365, 30)
 	self.classCheck:HookScript("OnClick", function(btn)
 		self.currentMacrosConfig[btn.option] = btn:GetChecked()
+		self.secure:refresh()
 	end)
+	config:setHyperlinkTooltip(self.classCheck)
 
 	-- MOVE FALL MACRO
 	local moveFallMF = CreateFrame("FRAME", nil, rightPanelScroll.child, "MJMacroFrame")
@@ -93,11 +124,13 @@ classConfig:SetScript("OnShow", function(self)
 	moveFallMF.lable:SetText(L["HELP_MACRO_MOVE_FALL"])
 	moveFallMF.enable:HookScript("OnClick", function(btn)
 		self.currentMacrosConfig.macroEnable = btn:GetChecked()
+		self.secure:refresh()
 	end)
 	moveFallMF.defaultBtn:HookScript("OnClick", function()
 		self.macroEditBox:SetText(self.rightPanel.currentBtn.default)
 		self.macroEditBox:ClearFocus()
 		self.currentMacrosConfig.macro = nil
+		self.secure:refresh()
 	end)
 	moveFallMF.cancelBtn:HookScript("OnClick", function()
 		self.macroEditBox:SetText(self.currentMacrosConfig.macro or self.rightPanel.currentBtn.default)
@@ -116,11 +149,13 @@ classConfig:SetScript("OnShow", function(self)
 	combatMF.lable:SetText(L["HELP_MACRO_COMBAT"])
 	combatMF.enable:HookScript("OnClick", function(btn)
 		self.currentMacrosConfig.combatMacroEnable = btn:GetChecked()
+		self.secure:refresh()
 	end)
 	combatMF.defaultBtn:HookScript("OnClick", function()
 		self.combatMacroEditBox:SetText(self.rightPanel.currentBtn.default)
 		self.combatMacroEditBox:ClearFocus()
 		self.currentMacrosConfig.combatMacro = nil
+		self.secure:refresh()
 	end)
 	combatMF.cancelBtn:HookScript("OnClick", function()
 		self.combatMacroEditBox:SetText(self.currentMacrosConfig.combatMacro or self.rightPanel.currentBtn.default)
@@ -138,22 +173,26 @@ end)
 
 do
 	local classOptions = {
-		DEATHKNIGHT = "usePathOfFrost",
-		SHAMAN = "useWaterWalking",
-		DRUID = "useMacroAlways",
+		DEATHKNIGHT = {
+			key = "usePathOfFrost",
+			hlink = GetSpellLink(3714),
+		},
+		SHAMAN = {
+			key = "useWaterWalking",
+			hlink = GetSpellLink(546),
+		},
+		DRUID = {
+			key ="useMacroAlways",
+		},
 	}
 
-	function classConfig:classClick(btn)
+	function classConfig:showClassSettings(btn)
 		if self.rightPanel.currentBtn then
 			self.rightPanel.currentBtn.check:Hide()
 		end
+		self.subtitle:SetText(format("%s: %s %s", L["Settings"], btn.name:GetText(), btn.description or ""))
 		self.rightPanel.currentBtn = btn
 		btn.check:Show()
-
-		if not self.macrosConfig[btn.key] then
-			self.macrosConfig[btn.key] = {}
-		end
-		self.currentMacrosConfig = self.macrosConfig[btn.key]
 
 		self.moveFallMF.enable:SetChecked(self.currentMacrosConfig.macroEnable)
 		self.macroEditBox:SetText(self.currentMacrosConfig.macro or btn.default)
@@ -162,9 +201,9 @@ do
 
 		if classOptions[btn.key] then
 			local classOption = classOptions[btn.key]
-			self.classCheck.option = classOption
-			self.classCheck:SetChecked(self.currentMacrosConfig[classOption])
-			self.classCheck.Text:SetText(L[strupper(btn.key.."_"..classOption)])
+			self.classCheck.option = classOption.key
+			self.classCheck:SetChecked(self.currentMacrosConfig[classOption.key])
+			self.classCheck.Text:SetText(format(L[strupper(btn.key.."_"..classOption.key)], classOption.hlink))
 			self.classCheck:Show()
 			self.moveFallMF:SetPoint("TOPLEFT", self.classCheck, "BOTTOMLEFT", 0, -70)
 		else
@@ -173,6 +212,16 @@ do
 		end
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end
+end
+
+
+function classConfig:classClick(btn)
+	if not self.macrosConfig[btn.key] then
+		self.macrosConfig[btn.key] = {}
+	end
+	self.currentMacrosConfig = self.macrosConfig[btn.key]
+
+	self:showClassSettings(btn)
 end
 
 
