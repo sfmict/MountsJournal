@@ -1,4 +1,5 @@
 <Ui>
+	<Script file="MacroMixin.lua"/>
 	<Script file="NavBarMixin.lua"/>
 	<Script file="WorldMapMixin.lua"/>
 
@@ -161,7 +162,21 @@
 		</Scripts>
 	</Frame>
 
-	<CheckButton name="MJCheckButtonTemplate" inherits="OptionsBaseCheckButtonTemplate" virtual="true">
+	<CheckButton name="MJBaseCheckButtonTemplate" inherits="OptionsBaseCheckButtonTemplate" virtual="true">
+		<HitRectInsets>
+			<AbsInset left="0" right="0" top="0" bottom="0"/>
+		</HitRectInsets>
+		<Scripts>
+			<OnClick>
+				PlaySound(self:GetChecked() and SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF);
+			</OnClick>
+		</Scripts>
+	</CheckButton>
+
+	<CheckButton name="MJCheckButtonTemplate" inherits="MJBaseCheckButtonTemplate" virtual="true">
+		<HitRectInsets>
+			<AbsInset left="0" right="-100" top="0" bottom="0"/>
+		</HitRectInsets>
 		<Layers>
 			<Layer level="ARTWORK">
 				<FontString name="$parentText" inherits="GameFontHighlightLeft" parentKey="Text">
@@ -176,15 +191,160 @@
 			</Layer>
 		</Layers>
 		<Scripts>
-			<OnClick>
-				if ( self:GetChecked() ) then
-					PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
-				else
-					PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF);
-				end
-			</OnClick>
+			<OnEnable>self.Text:SetTextColor(1,1,1,1)</OnEnable>
+			<OnDisable>self.Text:SetTextColor(.5,.5,.5,1)</OnDisable>
 		</Scripts>
 	</CheckButton>
+
+	<Button name="MJClassButtonTemplate" virtual="true">
+		<Size x="167" y="28"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture parentKey="icon" file="Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes">
+					<Size x="26" y="26"/>
+					<Anchors>
+						<Anchor point="LEFT" x="1" y="0"/>
+					</Anchors>
+				</Texture>
+				<FontString parentKey="name" inherits="GameFontNormal" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="LEFT" relativeKey="$parent.icon" relativePoint="RIGHT" x="5" y="0"/>
+						<Anchor point="RIGHT" x="-5" y="0"/>
+						<Anchor point="TOP" x="0" y="-6"/>
+						<Anchor point="BOTTOM" x="0" y="6"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="check" file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD" alpha="0.6" hidden="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="27" y="0" />
+						<Anchor point="BOTTOMRIGHT" x="0" y="0" />
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<HighlightTexture parentKey="highlight" file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD" alpha="0.3">
+			<Anchors>
+				<Anchor point="TOPLEFT" x="27" y="0" />
+				<Anchor point="BOTTOMRIGHT" x="0" y="0" />
+			</Anchors>
+		</HighlightTexture>
+	</Button>
+
+	<Frame name="MJMacroFrame" virtual="true">
+		<Size x="395" y="150"/>
+		<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+			<EdgeSize>
+				<AbsValue val="16"/>
+			</EdgeSize>
+			<TileSize>
+				<AbsValue val="16"/>
+			</TileSize>
+			<BackgroundInsets>
+				<AbsInset left="5" right="5" top="5" bottom="5"/>
+			</BackgroundInsets>
+		</Backdrop>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString parentKey="lable" justifyH="LEFT" inherits="GameFontNormalSmall">
+					<Size x="330" y="20"/>
+					<Anchors>
+						<Anchor point="BOTTOM" relativePoint="TOP" x="0" y="30"/>
+					</Anchors>
+				</FontString>
+				<FontString parentKey="limitText" inherits="GameFontHighlightSmall">
+					<Size x="0" y="10"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" x="10" y="-10"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<CheckButton parentKey="enable" inherits="MJCheckButtonTemplate">
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="10" y="-3"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>self.Text:SetText(ENABLE)</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<ScrollFrame parentKey="scrollFrame" inherits="UIPanelScrollFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="5" y="-5"/>
+					<Anchor point="BOTTOMRIGHT" x="-28" y="5"/>
+				</Anchors>
+				<ScrollChild>
+					<EditBox parentKey="editBox" multiLine="true" letters="255" autoFocus="false" countInvisibleLetters="true">
+						<Size x="359"/>
+						<Scripts>
+							<OnLoad>
+								ScrollingEdit_OnCursorChanged(self, 0, 0, 0, 0);
+							</OnLoad>
+							<OnTextChanged>
+								self:GetParent():GetParent().limitText:SetFormattedText(MACROFRAME_CHAR_LIMIT, self:GetNumLetters())
+								ScrollingEdit_OnTextChanged(self, self:GetParent());
+							</OnTextChanged>
+							<OnCursorChanged function="ScrollingEdit_OnCursorChanged"/>
+							<OnUpdate>
+								ScrollingEdit_OnUpdate(self, elapsed, self:GetParent());
+							</OnUpdate>
+							<OnEscapePressed function="EditBox_ClearFocus"/>
+						</Scripts>
+						<FontString inherits="GameFontHighlightSmall"/>
+					</EditBox>
+				</ScrollChild>
+			</ScrollFrame>
+			<Button>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="5" y="-5"/>
+					<Anchor point="BOTTOMRIGHT" x="-28" y="5"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						self:GetParent().scrollFrame.editBox:SetFocus()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Button parentKey="defaultBtn" inherits="UIPanelButtonTemplate">
+				<Size x="105" y="22"/>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" x="0" y="0"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>self:SetText(DEFAULT)</OnLoad>
+					<OnClick>PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);</OnClick>
+				</Scripts>
+			</Button>
+			<Button parentKey="cancelBtn" inherits="UIPanelButtonTemplate">
+				<Size x="80" y="22"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" x="0" y="0"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>self:SetText(CANCEL)</OnLoad>
+					<OnClick>PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);</OnClick>
+				</Scripts>
+			</Button>
+			<Button parentKey="saveBtn" inherits="UIPanelButtonTemplate">
+				<Size x="80" y="22"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.cancelBtn" relativePoint="LEFT" x="0" y="0"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>self:SetText(SAVE)</OnLoad>
+					<OnClick>PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b);
+				self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b);
+			</OnLoad>
+		</Scripts>
+	</Frame>
 
 	<Button name="MJNavButtonTemplate" motionScriptsWhileDisabled="true" virtual="true">
 		<Size x="80" y="28"/>
@@ -385,11 +545,11 @@
 						self.xoffset = -15;
 						local newWidth = min(128, self.text:GetStringWidth()+50)
 						local texCoordoffsetX = (newWidth/128)*0.25;
-							
+
 						self:GetNormalTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.70312500, 0.00781250, 0.24218750);
 						self:GetPushedTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.70312500, 0.25781250, 0.49218750);
 						self:GetHighlightTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.71312500, 0.50781250, 0.74218750);
-						
+
 						self:SetWidth(newWidth);
 					</OnLoad>
 					<OnClick>
@@ -519,5 +679,13 @@
 				</Anchors>
 			</CheckButton>
 		</Frames>
+	</Frame>
+
+	<Frame name="MJSecureActionButtonTemplate" inherits="SecureActionButtonTemplate" mixin="MJMacroMixin" virtual="true">
+		<Scripts>
+			<OnEvent method="onEvent"/>
+			<OnLoad method="onLoad"/>
+			<PreClick method="preClick"/>
+		</Scripts>
 	</Frame>
 </Ui>

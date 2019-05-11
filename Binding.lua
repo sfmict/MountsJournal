@@ -14,7 +14,7 @@ binding:SetScript("OnEvent", function(self)
 end)
 
 
-function binding:createButtonBinding(parent, name, macro)
+function binding:createButtonBinding(parent, name, secureTemplate, macro)
 	local button = CreateFrame("Button", nil, parent, "UIMenuButtonStretchTemplate")
 	button.selectedHighlight = button:CreateTexture(nil, "OVERLAY")
 	button.selectedHighlight:SetTexture("Interface/Buttons/UI-Silver-Button-Select")
@@ -23,7 +23,7 @@ function binding:createButtonBinding(parent, name, macro)
 	button.selectedHighlight:SetBlendMode("ADD")
 	button.selectedHighlight:Hide()
 	button:RegisterForClicks("AnyUp")
-	button.secure = CreateFrame("Button", name, UIParent, "SecureActionButtonTemplate")
+	button.secure = CreateFrame("Button", name, UIParent, secureTemplate or "SecureActionButtonTemplate")
 	button.secure:SetAttribute("type", "macro")
 	if macro then button.secure:SetAttribute("macrotext", macro) end
 	button.command = "CLICK "..name..":LeftButton"

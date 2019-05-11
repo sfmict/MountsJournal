@@ -1,7 +1,7 @@
 local addon, L = ...
 local mounts = MountsJournal
 local binding = _G[addon.."Binding"]
-local config = CreateFrame("Frame", "MountsJournalConfig", InterfaceOptionsFramePanelContainer)
+local config = CreateFrame("FRAME", "MountsJournalConfig", InterfaceOptionsFramePanelContainer)
 config.name = addon
 
 
@@ -14,58 +14,28 @@ config:RegisterEvent("PLAYER_LOGIN")
 
 
 -- BIND MOUNT
-local function getMacroText()
-	local text = "/"
-	if not mounts.config.useMagicBroom or mounts:herbMountsExists() or mounts:waterWalkMountsExists() or not config.broom then
-		text = text.."mount"
-	else
-		local modifier = mounts.config.modifier
-		text = text.."use [nomounted,noswimming,nomod:"..modifier.."][nomounted,flyable,mod:"..modifier.."]"..config.broom.."\n/mount"
-	end
-	return text
-end
-
-local function setMacroText()
-	if not InCombatLockdown() then
-		local macrotext = getMacroText()
-		config.bindMount.secure:SetAttribute("macrotext", macrotext)
-
-		local texture = select(2, GetMacroInfo("MJMacro"))
-		if texture then
-			EditMacro("MJMacro", "MJMacro", texture, "/click MountsJournal_Mount")
+do
+	local function setMacroText()
+		if not InCombatLockdown() then
+			local texture = select(2, GetMacroInfo("MJMacro"))
+			if texture then
+				EditMacro("MJMacro", "MJMacro", texture, "/click MountsJournal_Mount")
+			end
+		else
+			config:RegisterEvent("PLAYER_REGEN_ENABLED")
 		end
-	else
-		config:RegisterEvent("PLAYER_REGEN_ENABLED")
 	end
-end
 
-function config:PLAYER_LOGIN()
-	self.bindMount = binding:createButtonBinding(config, "MountsJournal_Mount")
-	self.bindMount:SetSize(232, 22)
-	self.broom = GetItemInfo(37011)
-	if self.broom then
-		setMacroText()
-	else
-		self:RegisterEvent("GET_ITEM_INFO_RECEIVED")
-	end
-	self:RegisterEvent("PLAYER_ENTERING_WORLD")
-end
-
-function config:GET_ITEM_INFO_RECEIVED(itemID)
-	if itemID == 37011 then
-		self:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
-		self.broom = GetItemInfo(37011)
+	function config:PLAYER_REGEN_ENABLED()
+		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 		setMacroText()
 	end
-end
 
-function config:PLAYER_REGEN_ENABLED()
-	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-	setMacroText()
-end
-
-function config:PLAYER_ENTERING_WORLD()
-	setMacroText()
+	function config:PLAYER_LOGIN()
+		self.bindMount = binding:createButtonBinding(config, "MountsJournal_Mount", "MJSecureActionButtonTemplate")
+		self.bindMount:SetSize(232, 22)
+		setMacroText()
+	end
 end
 
 
@@ -102,7 +72,7 @@ config:SetScript("OnShow", function()
 
 	-- ADDON INFO
 	local info = config:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	info:SetPoint("BOTTOMRIGHT", -16, 16)
+	info:SetPoint("TOPRIGHT", -16, 16)
 	info:SetTextColor(.5, .5, .5, 1)
 	info:SetText(format("%s %s: %s", GetAddOnMetadata(addon, "Version"), L["author"], GetAddOnMetadata(addon, "Author")))
 
@@ -114,16 +84,16 @@ config:SetScript("OnShow", function()
 	-- SUBTITLE
 	local subtitle = config:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	subtitle:SetHeight(30)
-	subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -8)
+	subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 1, -8)
 	subtitle:SetNonSpaceWrap(true)
 	subtitle:SetJustifyH("LEFT")
 	subtitle:SetJustifyV("TOP")
-	subtitle:SetText(format(L["ConfigPanelTitle %s."], addon))
+	subtitle:SetText(L["ConfigPanelTitle"])
 
 	-- LEFT PANEL
-	local leftPanel = CreateFrame("Frame", nil, config, "MJOptionsPanel")
+	local leftPanel = CreateFrame("FRAME", nil, config, "MJOptionsPanel")
 	leftPanel:SetPoint("TOPLEFT", config, 8, -67)
-	leftPanel:SetPoint("BOTTOMRIGHT", config, "BOTTOMLEFT", 300, 35)
+	leftPanel:SetPoint("BOTTOMRIGHT", config, "BOTTOMLEFT", 300, 8)
 
 	-- MODIFIER TEXT
 	local modifierText = config:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
@@ -131,7 +101,7 @@ config:SetScript("OnShow", function()
 	modifierText:SetText(L["Modifier"]..":")
 
 	-- MODIFIER COMBOBOX
-	local modifierCombobox = CreateFrame("Frame", "MountsJournalModifier", config, "UIDropDownMenuTemplate")
+	local modifierCombobox = CreateFrame("FRAME", "MountsJournalModifier", config, "UIDropDownMenuTemplate")
 	modifierCombobox:SetPoint("TOPLEFT", modifierText, "BOTTOMRIGHT", -8, 21)
 
 	config.modifierValue = mounts.config.modifier
@@ -164,7 +134,7 @@ config:SetScript("OnShow", function()
 	local createMacroBtn = CreateFrame("Button", nil, config, "UIPanelButtonTemplate")
 	createMacroBtn:SetSize(232, 40)
 	createMacroBtn:SetPoint("TOPLEFT", config.waterJump, "BOTTOMLEFT", 0, -25)
-	createMacroBtn:SetText(L["CreateMacroBtn"])
+	createMacroBtn:SetText(L["CreateMacro"])
 	createMacroBtn:SetScript("OnClick", function()
 		local macroName = "MJMacro"
 		DeleteMacro(macroName)
@@ -204,22 +174,22 @@ config:SetScript("OnShow", function()
 	config.bindMount:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -20)
 
 	-- RIGHT PANEL
-	local rightPanel = CreateFrame("Frame", nil, config, "MJOptionsPanel")
+	local rightPanel = CreateFrame("FRAME", nil, config, "MJOptionsPanel")
 	rightPanel:SetPoint("TOPLEFT", leftPanel, "TOPRIGHT", 4, 0)
-	rightPanel:SetPoint("BOTTOMRIGHT", config, -8, 35)
+	rightPanel:SetPoint("BOTTOMRIGHT", config, -8, 8)
 
 	local rightPanelScroll = CreateFrame("ScrollFrame", nil, rightPanel, "UIPanelScrollFrameTemplate")
-	rightPanelScroll:SetPoint("TOPLEFT", rightPanel, 4, -4)
-	rightPanelScroll:SetPoint("BOTTOMRIGHT", rightPanel, -26, 3)
+	rightPanelScroll:SetPoint("TOPLEFT", rightPanel, 4, -6)
+	rightPanelScroll:SetPoint("BOTTOMRIGHT", rightPanel, -26, 5)
 	rightPanelScroll.ScrollBar:SetBackdrop({bgFile='interface/buttons/white8x8'})
 	rightPanelScroll.ScrollBar:SetBackdropColor(0,0,0,.2)
-	rightPanelScroll.child = CreateFrame("Frame")
+	rightPanelScroll.child = CreateFrame("FRAME")
 	rightPanelScroll.child:SetSize(1, 1)
 	rightPanelScroll:SetScrollChild(rightPanelScroll.child)
 
 	-- WATER WALKER ALWAYS
 	config.waterWalkAlways = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	config.waterWalkAlways:SetPoint("TOPLEFT", rightPanelScroll.child, 9, -11)
+	config.waterWalkAlways:SetPoint("TOPLEFT", rightPanelScroll.child, 9, -9)
 	config.waterWalkAlways.Text:SetText(L["Water Walking Always"])
 	config.waterWalkAlways.tooltipText = L["Water Walking"]
 	config.waterWalkAlways.tooltipRequirement = L["WaterWalkingDescription"]
@@ -277,9 +247,15 @@ config:SetScript("OnShow", function()
 	-- USE MAGIC BROOM
 	config.useMagicBroom = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
 	config.useMagicBroom:SetPoint("TOPLEFT", config.useHerbMounts, "BOTTOMLEFT", 0, -26)
-	config.useMagicBroom.Text:SetText(L["UseMagicBroom"])
+	local magicBroomName = select(2, GetItemInfo(37011))
+	if magicBroomName then
+		config.useMagicBroom.Text:SetText(format(L["UseMagicBroom"], select(2, GetItemInfo(37011))))
+	else
+		config:RegisterEvent("GET_ITEM_INFO_RECEIVED")
+	end
+	config:setHyperlinkTooltip(config.useMagicBroom)
 	config.useMagicBroom.tooltipText = L["UseMagicBroom"]
-	config.useMagicBroom.tooltipRequirement = format("%s\n\n|cffff0000%s|r", L["UseMagicBroomDescription"], L["NeedRecreateMacro"])
+	config.useMagicBroom.tooltipRequirement = L["UseMagicBroomDescription"]
 
 	-- REFRESH
 	local function refresh()
@@ -312,16 +288,40 @@ function config:setEnableCheckButtons(enable, tbl)
 	if enable then
 		for _, check in pairs(tbl) do
 			check:Enable()
-			check.Text:SetTextColor(1,1,1,1)
 		end
 	else
 		for _, check in pairs(tbl) do
 			check:Disable()
-			check.Text:SetTextColor(.5,.5,.5,1)
 		end
 	end
 end
 
+
+function config:GET_ITEM_INFO_RECEIVED(itemID)
+	if itemID == 37011 then
+		self:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
+		config.useMagicBroom.Text:SetText(format(L["UseMagicBroom"], select(2, GetItemInfo(37011))))
+	end
+end
+
+
+do
+	local function showTooltip(_,_,itemLink)
+		GameTooltip:SetOwner(UIParent, "ANCHOR_CURSOR")
+		GameTooltip:SetHyperlink(itemLink)
+		GameTooltip:Show()
+	end
+
+	local function hideTooltip(self)
+		GameTooltip:Hide()
+	end
+
+	function config:setHyperlinkTooltip(frame)
+		frame:SetHyperlinksEnabled(true)
+		frame:SetScript("OnHyperlinkEnter", showTooltip)
+		frame:SetScript("OnHyperlinkLeave", hideTooltip)
+	end
+end
 
 config.okay = function(self)
 	mounts:setModifier(self.modifierValue)
@@ -340,7 +340,6 @@ config.okay = function(self)
 	end
 	mounts.config.useHerbMounts = self.useHerbMounts:GetChecked()
 	mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
-	setMacroText()
 end
 
 

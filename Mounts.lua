@@ -11,7 +11,6 @@ mounts:SetScript("OnEvent", function(self, event, ...)
 	end
 end)
 mounts:RegisterEvent("ADDON_LOADED")
-if interface >= 80200 then mounts:RegisterEvent("MOUNT_EQUIPMENT_APPLY_RESULT") end
 
 
 function mounts:ADDON_LOADED(addonName)
@@ -26,6 +25,7 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalDB.config = MountsJournalDB.config or {}
 		MountsJournalDB.filters = MountsJournalDB.filters or {}
 		mounts.config = MountsJournalDB.config
+		mounts.config.macrosConfig = mounts.config.macrosConfig or {}
 		mounts.filters = MountsJournalDB.filters
 		if mounts.config.waterWalkInstance == nil then
 			mounts.config.waterWalkInstance = true
@@ -45,8 +45,10 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalChar.ground = MountsJournalChar.ground or {}
 		MountsJournalChar.swimming = MountsJournalChar.swimming or {}
 		MountsJournalChar.zoneMounts = MountsJournalChar.zoneMounts or {}
+		MountsJournalChar.macrosConfig = MountsJournalChar.macrosConfig or {}
 
-		mounts.defMountsListID = 946
+		mounts.sFlags = {}
+		mounts.defMountsListID = MapUtil.GetMapParentInfo(MapUtil.GetDisplayableMapForPlayer(), Enum.UIMapType.Cosmic, true).mapID
 		mounts:setMountsListPerChar()
 		mounts.swimmingVashjir = {
 			373, -- Вайш'ирский морской конек
@@ -99,16 +101,10 @@ function mounts:ADDON_LOADED(addonName)
 		self:RegisterEvent("ZONE_CHANGED_INDOORS")
 		self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
-		if interface >= 80200 then mounts:MOUNT_EQUIPMENT_APPLY_RESULT() end
 		mounts:setModifier(mounts.config.modifier)
 		mounts:setHandleWaterJump(mounts.config.waterJump)
 		mounts:init()
 	end
-end
-
-
-function mounts:MOUNT_EQUIPMENT_APPLY_RESULT()
-	mounts.waterWalkEquipment = C_MountJournal.GetAppliedMountEquipmentID() == 168416 -- Водные долгоноги рыболова
 end
 
 
@@ -136,11 +132,11 @@ end
 function mounts:setMountsList()
 	local mapInfo = C_Map.GetMapInfo(MapUtil.GetDisplayableMapForPlayer())
 	local zoneMounts = mounts.db.zoneMounts
-	mounts.flags = nil
+	mounts.mapFlags = nil
 	while mapInfo do
 		local list = zoneMounts[mapInfo.mapID]
 		if list then
-			if not mounts.flags then mounts.flags = list.flags end
+			if not mounts.mapFlags then mounts.mapFlags = list.flags end
 			if #list.fly + #list.ground + #list.swimming ~= 0 then
 				mounts.list = zoneMounts[mapInfo.mapID]
 				return
@@ -215,22 +211,20 @@ end
 
 
 function mounts:getSpellKnown()
-	local ground, fly = false, false
-
-	if IsSpellKnown(33388) -- Верховая езда (ученик)
-	or IsSpellKnown(33391) -- Верховая езда (подмастерье)
-	then
-		ground = true
-	end
-
-	if IsSpellKnown(34090) -- Верховая езда (умелец)
+	if IsSpellKnown(90265) -- Мастер верховой езды
 	or IsSpellKnown(34091) -- Верховая езда (искусник)
-	or IsSpellKnown(90265) -- Мастер верховой езды
+	or IsSpellKnown(34090) -- Верховая езда (умелец)
 	then
-		ground, fly = true, true
+		return true, true
 	end
 
-	return ground, fly
+	if IsSpellKnown(33391) -- Верховая езда (подмастерье)
+	or IsSpellKnown(33388) -- Верховая езда (ученик)
+	then
+		return true, false
+	end
+
+	return false, false
 end
 
 
@@ -262,22 +256,10 @@ end
 
 
 function mounts:summonListOr(ids, flyable)
-	if mounts.config.useHerbMounts then
-		local prof1, prof2 = GetProfessions()
-		if (prof1 and select(7, GetProfessionInfo(prof1)) == 182
-		or prof2 and select(7, GetProfessionInfo(prof2)) == 182)
-		and mounts:summon(mounts.herbalismMounts) then -- herbalism
-			return true
-		end
+	if mounts.sFlags.herb and mounts:summon(mounts.herbalismMounts) then -- herbMount
+		return true
 	end
 
-	if (not mounts.config.waterWalkAll or flyable)
-	and mounts.config.useMagicBroom
-	and GetItemCount(37011) ~= 0 then
-		mounts.lastUseTime = GetTime()
-		return true -- magic broom
-	end
-	
 	return mounts:summon(ids)
 end
 
@@ -317,11 +299,39 @@ end
 function mounts:isWaterWalkLocation(instance)
 	if mounts.config.waterWalkInstance and mounts.config.waterWalkList[instance]
 	or mounts.config.waterWalkExpedition and mounts.config.waterWalkExpeditionList[instance]
-	or mounts.flags and mounts.flags.waterWalkOnly then
+	or mounts.mapFlags and mounts.mapFlags.waterWalkOnly then
 		return true
 	end
 
 	return false
+end
+
+
+function mounts:setFlags()
+	local groundSpellKnown, flySpellKnown = mounts:getSpellKnown()
+	local modifier = mounts:modifier()
+	local isSubmerged = IsSubmerged()
+	local isFloating = mounts:isFloating()
+	local instance = select(8, GetInstanceInfo())
+	local isFlyableLocation = flySpellKnown 
+									  and IsFlyableArea()
+									  and mounts:isFlyLocation(instance)
+									  and not (mounts.mapFlags and mounts.mapFlags.groundOnly)
+	
+	local flags = mounts.sFlags
+	flags.inVehicle = UnitInVehicle("player")
+	flags.isMounted = IsMounted()
+	flags.groundSpellKnown = groundSpellKnown
+	flags.swimming = isSubmerged
+						  and not modifier
+						  and not isFloating
+	flags.fly = isFlyableLocation
+					and (not modifier or isSubmerged)
+	flags.waterWalk = mounts.config.waterWalkAll
+							or isFloating
+							or not isFlyableLocation and modifier
+							or mounts:isWaterWalkLocation(instance)
+	flags.herb = mounts:herbMountsExists()
 end
 
 
@@ -333,43 +343,30 @@ end
 function mounts:init()
 	SLASH_MOUNTSJOURNAL1 = "/mount"
 	SlashCmdList["MOUNTSJOURNAL"] = function()
-		if UnitInVehicle("player") then
+		local flags = mounts.sFlags
+		if flags.inVehicle then
 			VehicleExit()
-		elseif IsMounted() then
+		elseif flags.isMounted then
 			if not mounts.lastUseTime or GetTime() - mounts.lastUseTime > 0.5 then
 				Dismount()
 			end
-		else
-			local isGroundSpell, isFlySpell = mounts:getSpellKnown()
-			if not isGroundSpell then
-				if not mounts:summon(mounts.lowLevel) then mounts:errorSummon() end
-			-- swimming
-			elseif mounts:isFloating()
-				or mounts.modifier()
-				or not IsSubmerged()
-				or not (mounts.mapVashjir[C_Map.GetBestMapForUnit("player")] and mounts:summon(mounts.swimmingVashjir))
-				and not mounts:summon(mounts.list.swimming) then
-				-- fly
-				local instance = select(8, GetInstanceInfo())
-				local isFlyableLocation = isFlySpell and IsFlyableArea() and mounts:isFlyLocation(instance) and not (mounts.flags and mounts.flags.groundOnly)
-				if (not isFlyableLocation
-					or mounts.modifier() and not IsSubmerged()
-					or not mounts:summonListOr(mounts.list.fly, true))
-				-- water walk
-				and not ((mounts.config.waterWalkAll
-						or mounts:isFloating()
-						or not isFlyableLocation and mounts.modifier()
-						or mounts:isWaterWalkLocation(instance))
-					and not mounts.waterWalkEquipment
-					and mounts:summon(mounts.waterWalk))
-				-- ground
-				and not mounts:summonListOr(mounts.list.ground)
-				and not mounts:summon(mounts.waterWalk)
-				and not mounts:summon(mounts.list.fly)
-				and not mounts:summon(mounts.lowLevel) then
-					mounts:errorSummon()
-				end
-			end
+		elseif not flags.groundSpellKnown then
+			if not mounts:summon(mounts.lowLevel) then mounts:errorSummon() end
+		-- swimming
+		elseif not (flags.swimming
+						and (mounts.mapVashjir[C_Map.GetBestMapForUnit("player")]
+							  and mounts:summon(mounts.swimmingVashjir)
+							  or mounts:summon(mounts.list.swimming)))
+		-- fly
+		and not (flags.fly and mounts:summonListOr(mounts.list.fly, true))
+		-- water walk
+		and not (flags.waterWalk and mounts:summon(mounts.waterWalk))
+		-- ground
+		and not mounts:summonListOr(mounts.list.ground)
+		and not mounts:summon(mounts.list.fly)
+		and not mounts:summon(mounts.waterWalk)
+		and not mounts:summon(mounts.lowLevel) then
+			mounts:errorSummon()
 		end
 	end
 end

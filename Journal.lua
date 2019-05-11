@@ -604,16 +604,12 @@ function journal:updateMapSettings()
 	if journal.navBar.mapID == mounts.defMountsListID then
 		if groundCheck:IsEnabled() then
 			groundCheck:Disable()
-			groundCheck.Text:SetTextColor(.5,.5,.5,1)
 			waterWalkCheck:Disable()
-			waterWalkCheck.Text:SetTextColor(.5,.5,.5,1)
 		end
 	else
 		if not groundCheck:IsEnabled() then
 			groundCheck:Enable()
-			groundCheck.Text:SetTextColor(1,1,1,1)
 			waterWalkCheck:Enable()
-			waterWalkCheck.Text:SetTextColor(1,1,1,1)
 		end
 	end
 end
