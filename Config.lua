@@ -254,7 +254,7 @@ config:SetScript("OnShow", function()
 		config:RegisterEvent("GET_ITEM_INFO_RECEIVED")
 	end
 	config:setHyperlinkTooltip(config.useMagicBroom)
-	config.useMagicBroom.tooltipText = L["UseMagicBroom"]
+	config.useMagicBroom.tooltipText = L["UseMagicBroomTitle"]
 	config.useMagicBroom.tooltipRequirement = L["UseMagicBroomDescription"]
 
 	-- REFRESH
