@@ -71,18 +71,16 @@ function MJMacroMixin:getDefMacro()
 	and not self.sFlags.swimming
 	and not self.sFlags.fly then
 		macro = self:addLine(macro, "/cast "..sefl:getSpellName(3714)) -- Path of Frost
-	end
 
-	if self.class == "SHAMAN"
+	elseif self.class == "SHAMAN"
 	and self.classConfig.useWaterWalking
 	and not self.sFlags.inVehicle
 	and not self.sFlags.isMounted
 	and not self.sFlags.swimming
 	and not self.sFlags.fly then
 		macro = self:addLine(macro, "/cast "..self:getSpellName(546)) -- Water Walking
-	end
 
-	if self.class == "DRUID" then
+	elseif self.class == "DRUID" then
 		local shapeshiftIndex = GetShapeshiftForm()
 		if shapeshiftIndex > 0 then
 			local _,_,_,spellID = GetShapeshiftFormInfo(shapeshiftIndex)

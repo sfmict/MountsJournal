@@ -37,6 +37,7 @@ classConfig:SetScript("OnShow", function(self)
 	leftPanel:SetPoint("BOTTOMRIGHT", classConfig, "BOTTOMLEFT", 181, 8)
 
 	-- CLASS BUTTONS
+	local _,playerClassName = UnitClass("player")
 	local firstClassFrame
 	local lastClassFrame
 	for i = 1, GetNumClasses() do
@@ -59,24 +60,24 @@ classConfig:SetScript("OnShow", function(self)
 		classFrame.icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[className]))
 		classFrame:SetScript("OnClick", function(btn) self:classClick(btn) end)
 		
-		if not firstClassFrame then
+		if playerClassName == className then
 			firstClassFrame = classFrame
 		end
 	end
 
 	-- CURRENT CHARACTER
-	local _,className = UnitClass("player")
-	local classColor = C_ClassColor.GetClassColor(className)
+	local classColor = C_ClassColor.GetClassColor(playerClassName)
 	local classFrame = CreateFrame("BUTTON", nil, classConfig, "MJClassButtonTemplate")
 	classFrame:SetPoint("TOPLEFT", lastClassFrame, "BOTTOMLEFT", 0, -20)
-	classFrame.key = className
-	classFrame.default = self.secure:getClassMacro(className)
+	classFrame.key = playerClassName
+	classFrame.default = self.secure:getClassMacro(playerClassName)
+	classFrame.name:SetPoint("RIGHT", -30, 0)
 	classFrame.name:SetText(UnitName("player"))
 	classFrame.name:SetTextColor(classColor:GetRGB())
 	classFrame.description = L["CHARACTER_CLASS_DESCRIPTION"]
 	classFrame.check:SetVertexColor(classColor:GetRGB())
 	classFrame.highlight:SetVertexColor(classColor:GetRGB())
-	classFrame.icon:Hide()
+	classFrame.icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[playerClassName]))
 	classFrame:SetScript("OnClick", function(btn)
 		self.currentMacrosConfig = self.charMacrosConfig
 		self:showClassSettings(btn)
@@ -84,7 +85,7 @@ classConfig:SetScript("OnShow", function(self)
 
 	-- CURRENT CHARACTER ENABLE
 	local charCheck = CreateFrame("CHECKBUTTON", nil, classFrame, "MJBaseCheckButtonTemplate")
-	charCheck:SetPoint("LEFT", 2, -1)
+	charCheck:SetPoint("RIGHT", -5, -1)
 	charCheck:SetChecked(self.charMacrosConfig.enable)
 	charCheck:HookScript("OnClick", function(btn)
 		self.charMacrosConfig.enable = btn:GetChecked()
