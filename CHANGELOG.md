@@ -1,1 +1,2 @@
-* Added Class-Specific options.
+* Added dungeon and raid selection button.
+* Fixes.

@@ -306,9 +306,9 @@ end
 
 
 do
-	local function showTooltip(_,_,itemLink)
+	local function showTooltip(_,_,hyperLink)
 		GameTooltip:SetOwner(UIParent, "ANCHOR_CURSOR")
-		GameTooltip:SetHyperlink(itemLink)
+		GameTooltip:SetHyperlink(hyperLink)
 		GameTooltip:Show()
 	end
 
@@ -322,6 +322,7 @@ do
 		frame:SetScript("OnHyperlinkLeave", hideTooltip)
 	end
 end
+
 
 config.okay = function(self)
 	mounts:setModifier(self.modifierValue)

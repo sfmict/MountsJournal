@@ -45,7 +45,7 @@ local function setTabs(frame, ...)
 	local contents = {}
 
 	for i = 1, select("#", ...) do
-		local tab = CreateFrame("Button", nil, frame, "MJTabTemplate")
+		local tab = CreateFrame("BUTTON", nil, frame, "MJTabTemplate")
 		tab.id = select(i, ...)
 
 		if i == 1 then
@@ -162,6 +162,8 @@ function journal:ADDON_LOADED(addonName)
 		journal.mapSettings = mapSettings
 		mapSettings:SetPoint("TOPLEFT", worldMap, "BOTTOMLEFT", 0, -1)
 		mapSettings:SetPoint("BOTTOMRIGHT", journal.rightInset)
+		mapSettings.dungeonRaidBtn:SetText(L["Dungeons and Raids"])
+		mapSettings.dungeonRaidBtn.click = function(mapID) navBar:setMapID(mapID) end
 		mapSettings.CurrentMap:SetText(L["Current Location"])
 		mapSettings.CurrentMap:SetScript("OnClick", function()
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -182,7 +184,7 @@ function journal:ADDON_LOADED(addonName)
 		end)
 
 		-- SETTINGS BUTTON
-		local btnConfig = CreateFrame("Button", "MountsJournalBtnConfig", MountJournal, "UIPanelButtonTemplate")
+		local btnConfig = CreateFrame("BUTTON", "MountsJournalBtnConfig", MountJournal, "UIPanelButtonTemplate")
 		btnConfig:SetSize(80, 22)
 		btnConfig:SetPoint("BOTTOMRIGHT", -6, 4)
 		btnConfig:SetText(L["Settings"])
@@ -223,7 +225,7 @@ function journal:ADDON_LOADED(addonName)
 
 		-- SELECTED BUTTONS
 		local function CreateButton(name, parent, pointX, pointY, OnClick)
-			local btnFrame = CreateFrame("button", nil, parent)
+			local btnFrame = CreateFrame("BUTTON", nil, parent)
 			btnFrame:SetPoint("TOPRIGHT", pointX, pointY)
 			btnFrame:SetSize(24, 12)
 			btnFrame:SetScript("OnClick", OnClick)
@@ -294,7 +296,7 @@ function journal:ADDON_LOADED(addonName)
 		shownPanel.count = shownPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 		shownPanel.count:SetPoint("LEFT", shownPanel.text ,"RIGHT", 2, 0)
 
-		shownPanel.clear = CreateFrame("button", nil, shownPanel, "MJClearButtonTemplate")
+		shownPanel.clear = CreateFrame("BUTTON", nil, shownPanel, "MJClearButtonTemplate")
 		shownPanel.clear:SetPoint("RIGHT", -5, 0)
 		shownPanel.clear:SetScript("OnClick", journal.clearAllFilters)
 
@@ -316,7 +318,7 @@ function journal:ADDON_LOADED(addonName)
 		filtersBar.types, filtersBar.selected, filtersBar.sources = setTabs(filtersBar, "types", "selected", "sources")
 
 		-- FILTERS CLEAR
-		filtersBar.clear = CreateFrame("button", nil, filtersBar, "MJClearButtonTemplate")
+		filtersBar.clear = CreateFrame("BUTTON", nil, filtersBar, "MJClearButtonTemplate")
 		filtersBar.clear:SetPoint("BOTTOMRIGHT", filtersBar, "TOPRIGHT")
 		filtersBar.clear:SetScript("OnClick", journal.clearBtnFilters)
 
@@ -841,7 +843,7 @@ function journal:filterDropDown_Initialize(level)
 
 			info.notCheckable = false
 			local expansions = mounts.filters.expansions
-			for i = 1, 8 do
+			for i = 1, EJ_GetNumTiers() do
 				info.text = _G["EXPANSION_NAME"..(i - 1)]
 				info.func = function(_, _, _, value)
 					expansions[i] = value

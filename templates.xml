@@ -662,10 +662,38 @@
 
 	<Frame name="MJMapSettingsTemplate" hidden="true" inherits="InsetFrameTemplate" virtual="true">
 		<Frames>
+			<Button parentKey="dungeonRaidBtn" frameStrata="DIALOG" inherits="UIMenuButtonStretchTemplate" mixin="MJDungeonRaidMixin">
+				<Size x="130" y="22"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT" x="-3" y="-3"/>
+					</Anchors>
+					<Layers>
+						<Layer level="ARTWORK">
+							<Texture parentKey="Icon" file="Interface\ChatFrame\ChatFrameExpandArrow">
+								<Size x="10" y="12"/>
+								<Anchors>
+									<Anchor point="RIGHT" relativeKey="$parent.Right" relativePoint="RIGHT" x="-5"/>
+								</Anchors>
+							</Texture>
+						</Layer>
+					</Layers>
+					<Frames>
+						<Frame parentKey="optionsMenu" inherits="UIDropDownMenuTemplate" enableMouse="true"/>
+					</Frames>
+				<Scripts>
+					<OnLoad method="onLoad"/>
+					<OnClick method="onClick"/>
+				</Scripts>
+				<ButtonText parentKey="Text">
+					<Anchors>
+						<Anchor point="CENTER" x="-4" y="-1" /> 
+					</Anchors>
+				</ButtonText>
+			</Button>
 			<Button parentKey="CurrentMap" inherits="UIPanelButtonTemplate">
 				<Size x="250" y="35"/>
 				<Anchors>
-					<Anchor point="TOP" x="0" y="-10"/>
+					<Anchor point="TOP" x="0" y="-30"/>
 				</Anchors>
 			</Button>
 			<CheckButton parentKey="Ground" inherits="MJCheckButtonTemplate">

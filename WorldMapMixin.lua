@@ -167,3 +167,78 @@ function MJMapCanvasMixin:getCursorPosition()
 	x, y = x / effectiveScale, y / effectiveScale
 	return Saturate(self:normalizeHorizontalSize(x / self.currentScale - self.child:GetLeft())), Saturate(self:normalizeVerticalSize(self.child:GetTop() - y / self.currentScale))
 end
+
+
+-- DUNGEON AND RAID MIXIN
+MJDungeonRaidMixin = {}
+
+
+function MJDungeonRaidMixin:onLoad()
+	self.list = {
+		{
+			name = DUNGEONS,
+			list = {},
+		},
+		{
+			name = RAIDS,
+			list = {},
+		}
+	}
+
+	local currentTier = EJ_GetCurrentTier()
+	for i = 1, EJ_GetNumTiers() do
+		EJ_SelectTier(i)
+		for _,v in ipairs(self.list) do
+			v.list[i] = {
+				name = _G["EXPANSION_NAME"..(i - 1)],
+				list = {}
+			}
+			local showRaid = v.name == RAIDS
+			local index = 1
+			local instanceID, instanceName = EJ_GetInstanceByIndex(index, showRaid)
+			while instanceID do
+				EJ_SelectInstance(instanceID)
+				local _,_,_,_,_,_,mapID = EJ_GetInstanceInfo()
+				if mapID and mapID > 0 and mapID ~= 379 and mapID ~= 543 then
+					tinsert(v.list[i].list, {name = instanceName, mapID = mapID})
+				end
+				index = index + 1
+				instanceID, instanceName = EJ_GetInstanceByIndex(index, showRaid)
+			end
+		end
+	end
+	EJ_SelectTier(currentTier)
+
+	UIDropDownMenu_Initialize(self.optionsMenu, self.menuInit, "MENU")
+end
+
+
+function MJDungeonRaidMixin:menuInit(level)
+	btn = self:GetParent()
+	local info = UIDropDownMenu_CreateInfo()
+	local list = UIDROPDOWNMENU_MENU_VALUE or btn.list
+	info.isNotRadio = true
+	info.notCheckable = true
+	info.keepShownOnClick = true
+
+	for _,v in ipairs(list) do
+		info.text = v.name
+		if v.list then
+			info.hasArrow = true
+			info.value = v.list
+		else
+			info.func = function(_,mapID)
+				btn.click(mapID)
+				UIDropDownMenu_OnHide(self)
+			end
+			info.arg1 = v.mapID
+		end
+		UIDropDownMenu_AddButton(info, level)
+	end
+end
+
+
+function MJDungeonRaidMixin:onClick()
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	ToggleDropDownMenu(1, nil, self.optionsMenu, self, 111, 15)
+end
