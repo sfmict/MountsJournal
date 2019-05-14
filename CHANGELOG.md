@@ -1,2 +1,1 @@
-* Added dungeon and raid selection button.
-* Fixes.
+* Added floor navigation on map.
