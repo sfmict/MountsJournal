@@ -12,6 +12,8 @@ function mounts:PLAYER_ENTERING_WORLD()
 	CollectionsJournal:Show()
 	journal.navBarBtn:Click()
 
+	-- journal.navBar:setMapID(1148)
+
 
 	-- CONFIG OPEN
 	-- local classConfig = MountsJournalConfig

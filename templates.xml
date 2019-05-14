@@ -626,6 +626,11 @@
 	<Frame name="MJMapTemplate" hidden="true" inherits="InsetFrameTemplate" mixin="MJMapCanvasMixin" virtual="true">
 		<Size y="276"/>
 		<Frames>
+			<Frame parentKey="navigation" inherits="WorldMapFloorNavigationFrameTemplate" frameStrata="DIALOG">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="-13" y="-2"/>
+				</Anchors>
+			</Frame>
 			<ScrollFrame parentKey="ScrollContainer">
 				<Anchors>
 					<Anchor point="TOPLEFT" x="4" y="-4"/>
@@ -662,7 +667,7 @@
 
 	<Frame name="MJMapSettingsTemplate" hidden="true" inherits="InsetFrameTemplate" virtual="true">
 		<Frames>
-			<Button parentKey="dungeonRaidBtn" frameStrata="DIALOG" inherits="UIMenuButtonStretchTemplate" mixin="MJDungeonRaidMixin">
+			<Button parentKey="dungeonRaidBtn" inherits="UIMenuButtonStretchTemplate" mixin="MJDungeonRaidMixin">
 				<Size x="130" y="22"/>
 					<Anchors>
 						<Anchor point="TOPRIGHT" x="-3" y="-3"/>

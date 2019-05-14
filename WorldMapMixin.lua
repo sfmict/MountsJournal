@@ -43,16 +43,26 @@ function MJMapCanvasMixin:onUpdate()
 end
 
 
+function MJMapCanvasMixin:GetMapID()
+	return self.mapID
+end
+
+
+function MJMapCanvasMixin:SetMapID(mapID)
+	self.navBar:setMapID(mapID)
+end
+
+
 function MJMapCanvasMixin:onClick(btn)
 	if btn == "LeftButton" then
 		local mapInfo = C_Map.GetMapInfoAtPosition(self.mapID, self:getCursorPosition())
 		if mapInfo and mapInfo.mapID ~= self.mapID then
-			self.navBar:setMapID(mapInfo.mapID)
+			self:SetMapID(mapInfo.mapID)
 		end
 	else
 		local mapInfo = C_Map.GetMapInfo(self.mapID)
 		if mapInfo.parentMapID > 0 then
-			self.navBar:setMapID(mapInfo.parentMapID)
+			self:SetMapID(mapInfo.parentMapID)
 		end
 	end
 end
@@ -61,12 +71,13 @@ end
 function MJMapCanvasMixin:refresh()
 	if self:IsShown() then
 		self:refreshLayers()
+		self.navigation:Refresh()
 	end
 end
 
 
 function MJMapCanvasMixin:onShow()
-	self:refreshLayers()
+	self:refresh()
 end
 
 
@@ -169,6 +180,7 @@ function MJMapCanvasMixin:getCursorPosition()
 end
 
 
+-- =======================================================================
 -- DUNGEON AND RAID MIXIN
 MJDungeonRaidMixin = {}
 
@@ -191,7 +203,7 @@ function MJDungeonRaidMixin:onLoad()
 		for _,v in ipairs(self.list) do
 			v.list[i] = {
 				name = _G["EXPANSION_NAME"..(i - 1)],
-				list = {}
+				list = {},
 			}
 			local showRaid = v.name == RAIDS
 			local index = 1
@@ -227,11 +239,10 @@ function MJDungeonRaidMixin:menuInit(level)
 			info.hasArrow = true
 			info.value = v.list
 		else
-			info.func = function(_,mapID)
-				btn.click(mapID)
+			info.func = function()
+				btn.click(v.mapID)
 				UIDropDownMenu_OnHide(self)
 			end
-			info.arg1 = v.mapID
 		end
 		UIDropDownMenu_AddButton(info, level)
 	end
