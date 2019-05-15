@@ -45,7 +45,9 @@ L["CHARACTER_CLASS_DESCRIPTION"] = "(character settings override class settings)
 L["HELP_MACRO_MOVE_FALL"] = "This macro will be run, if you are indoors or are moving, and you do not have a magic broom or it is turned off."
 L["HELP_MACRO_COMBAT"] = "This macro will be run, if you are in combat."
 L["DEATHKNIGHT_USEPATHOFFROST"] = "Use the %s when summoning ground mount"
+L["DEATHKNIGHT_USEONLYINWATERWALKLOCATION"] = "Use only in water walk zones"
 L["SHAMAN_USEWATERWALKING"] = "Use the %s when summoning ground mount"
+L["SHAMAN_USEONLYINWATERWALKLOCATION"] = "Use only in water walk zones"
 L["DRUID_USEMACROALWAYS"] = "Use this macros instead of mounts"
 
 setmetatable(L, {__index = function(self, key)

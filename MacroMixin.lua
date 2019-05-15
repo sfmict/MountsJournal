@@ -66,6 +66,7 @@ function MJMacroMixin:getDefMacro()
 
 	if self.class == "DEATHKNIGHT"
 	and self.classConfig.usePathOfFrost
+	and (not self.classConfig.useOnlyInWaterWalkLocation or self.sFlags.waterWalk)
 	and not self.sFlags.inVehicle
 	and not self.sFlags.isMounted
 	and not self.sFlags.swimming
@@ -74,6 +75,7 @@ function MJMacroMixin:getDefMacro()
 
 	elseif self.class == "SHAMAN"
 	and self.classConfig.useWaterWalking
+	and (not self.classConfig.useOnlyInWaterWalkLocation or self.sFlags.waterWalk)
 	and not self.sFlags.inVehicle
 	and not self.sFlags.isMounted
 	and not self.sFlags.swimming

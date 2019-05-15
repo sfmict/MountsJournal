@@ -1,1 +1,1 @@
-* Added floor navigation on map.
+* Updated Shaman and Death Knight class options.

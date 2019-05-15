@@ -28,7 +28,7 @@ local function tabClick(self)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	local id = self.id
 
-	for _, tab in pairs(self:GetParent().tabs) do
+	for _,tab in pairs(self:GetParent().tabs) do
 		if tab.id == id then
 			tab.selected:Show()
 			tab.content:Show()
@@ -258,7 +258,7 @@ function journal:ADDON_LOADED(addonName)
 			end)
 		end
 
-		for _, child in pairs(journal.scrollButtons) do
+		for _,child in pairs(journal.scrollButtons) do
 			child:SetWidth(child:GetWidth() - 25)
 			child.name:SetWidth(child.name:GetWidth() - 18)
 			child.icon:SetPoint("LEFT", child, "LEFT", -41, 0)
@@ -502,7 +502,7 @@ function journal:configureJournal()
 		end
 	end
 
-	for _, btn in pairs(journal.scrollButtons) do
+	for _,btn in pairs(journal.scrollButtons) do
 		if btn.index then
 			if not btn.fly:IsShown() then
 				btn.fly:Show()
@@ -525,8 +525,8 @@ function journal:configureJournal()
 	end
 
 	local count, collected = 0, 0
-	for _, mountID in pairs(C_MountJournal.GetMountIDs()) do
-		local _, _, _, _, _, _, _, _, _, hideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+	for _,mountID in pairs(C_MountJournal.GetMountIDs()) do
+		local _,_,_,_,_,_,_,_,_,hideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 		if not hideOnChar then
 			count = count + 1
 			if isCollected then
@@ -657,7 +657,7 @@ function journal:filterDropDown_Initialize(level)
 
 	if level == 1 then
 		info.text = COLLECTED
-		info.func = function(_, _, _, value)
+		info.func = function(_,_,_,value)
 			C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, value)
 			journal:updateBtnFilters()
 		end
@@ -665,7 +665,7 @@ function journal:filterDropDown_Initialize(level)
 		UIDropDownMenu_AddButton(info, level)
 
 		info.text = NOT_COLLECTED
-		info.func = function(_, _, _, value)
+		info.func = function(_,_,_,value)
 			C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, value)
 			journal:updateBtnFilters()
 		end
@@ -673,7 +673,7 @@ function journal:filterDropDown_Initialize(level)
 		UIDropDownMenu_AddButton(info, level)
 
 		info.text = MOUNT_JOURNAL_FILTER_UNUSABLE
-		info.func = function(_, _, _, value)
+		info.func = function(_,_,_,value)
 			C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, value)
 			journal:updateBtnFilters()
 		end
@@ -729,7 +729,7 @@ function journal:filterDropDown_Initialize(level)
 			local types = mounts.filters.types
 			for i = 1, #types do
 				info.text = L["MOUNT_TYPE_"..i]
-				info.func = function(_, _, _, value)
+				info.func = function(_,_,_,value)
 					types[i] = value
 					journal:updateBtnFilters()
 					MountJournal_UpdateMountList()
@@ -758,7 +758,7 @@ function journal:filterDropDown_Initialize(level)
 			local selected = mounts.filters.selected
 			for i = 1, #selected do
 				info.text = L["MOUNT_TYPE_"..i]
-				info.func = function(_, _, _, value)
+				info.func = function(_,_,_,value)
 					selected[i] = value
 					journal:updateBtnFilters()
 					MountJournal_UpdateMountList()
@@ -787,7 +787,7 @@ function journal:filterDropDown_Initialize(level)
 			for i = 1, C_PetJournal.GetNumPetSources() do
 				if C_MountJournal.IsValidSourceFilter(i) then
 					info.text = _G["BATTLE_PET_SOURCE_"..i]
-					info.func = function(_, _, _, value)
+					info.func = function(_,_,_,value)
 						C_MountJournal.SetSourceFilter(i, value)
 						journal:updateBtnFilters()
 					end
@@ -816,7 +816,7 @@ function journal:filterDropDown_Initialize(level)
 			local factions = mounts.filters.factions
 			for i = 1, #factions do
 				info.text = L["MOUNT_FACTION_"..i]
-				info.func = function(_, _, _, value)
+				info.func = function(_,_,_,value)
 					factions[i] = value
 					journal:updateBtnFilters()
 					MountJournal_UpdateMountList()
@@ -845,7 +845,7 @@ function journal:filterDropDown_Initialize(level)
 			local expansions = mounts.filters.expansions
 			for i = 1, EJ_GetNumTiers() do
 				info.text = _G["EXPANSION_NAME"..(i - 1)]
-				info.func = function(_, _, _, value)
+				info.func = function(_,_,_,value)
 					expansions[i] = value
 					journal:updateBtnFilters()
 					MountJournal_UpdateMountList()
@@ -885,7 +885,7 @@ function journal:setBtnFilters(tab)
 		local default = tab == "types"
 		local filters = mounts.filters[tab]
 
-		for _, btn in pairs(children) do
+		for _,btn in pairs(children) do
 			local checked = btn:GetChecked()
 			filters[btn.id] = checked
 			if not checked and default then i = i + 1 end
@@ -897,7 +897,7 @@ function journal:setBtnFilters(tab)
 			end
 		end
 	else
-		for _, btn in pairs(children) do
+		for _,btn in pairs(children) do
 			local checked = btn:GetChecked()
 			C_MountJournal.SetSourceFilter(btn.id, checked)
 			if not checked then i = i + 1 end
@@ -930,14 +930,14 @@ function journal:updateBtnFilters()
 	for typeFilter, filter in pairs(mounts.filters) do
 		local default = typeFilter ~= "selected"
 		local i = 0
-		for _, v in pairs(filter) do
+		for _,v in pairs(filter) do
 			if v == default then i = i + 1 end
 		end
 
 		if i == #filter then
 			f[typeFilter] = true
 			if filtersBar[typeFilter] then
-				for _, btn in pairs({filtersBar[typeFilter]:GetChildren()}) do
+				for _,btn in pairs({filtersBar[typeFilter]:GetChildren()}) do
 					local color = default and journal.colors["mount"..btn.id] or journal.colors.dark
 					btn:SetChecked(false)
 					btn.icon:SetVertexColor(unpack(color))
@@ -945,7 +945,7 @@ function journal:updateBtnFilters()
 				filtersBar[typeFilter]:GetParent().filtred:Hide()
 			end
 		elseif filtersBar[typeFilter] then
-			for _, btn in pairs({filtersBar[typeFilter]:GetChildren()}) do
+			for _,btn in pairs({filtersBar[typeFilter]:GetChildren()}) do
 				local checked = filter[btn.id]
 				local color = checked and journal.colors["mount"..btn.id] or journal.colors.dark
 				btn:SetChecked(checked)
@@ -967,13 +967,13 @@ function journal:updateBtnFilters()
 	end
 
 	if n == #sources - 1 then
-		for _, btn in pairs({filtersBar.sources:GetChildren()}) do
+		for _,btn in pairs({filtersBar.sources:GetChildren()}) do
 			btn:SetChecked(false)
 			btn.icon:SetDesaturated(nil)
 		end
 		filtersBar.sources:GetParent().filtred:Hide()
 	else
-		for _, btn in pairs({filtersBar.sources:GetChildren()}) do
+		for _,btn in pairs({filtersBar.sources:GetChildren()}) do
 			btn:SetChecked(sources[btn.id])
 			btn.icon:SetDesaturated(not sources[btn.id])
 		end

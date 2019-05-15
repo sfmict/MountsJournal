@@ -113,7 +113,7 @@ config:SetScript("OnShow", function()
 			info.checked = modifier == config.modifierValue
 			info.text = modifier.." key"
 			info.arg1 = modifier
-			info.func = function(_, value)
+			info.func = function(_,value)
 				config.modifierValue = value
 				UIDropDownMenu_SetText(modifierCombobox, value.." key")
 			end
@@ -267,12 +267,12 @@ config:SetScript("OnShow", function()
 		config.waterWalkAlways:SetChecked(mounts.config.waterWalkAll)
 		config.waterWalkInstance:SetChecked(mounts.config.waterWalkInstance)
 		config:setEnableCheckButtons(mounts.config.waterWalkInstance, config.dungeons)
-		for _, dungeon in pairs(config.dungeons) do
+		for _,dungeon in pairs(config.dungeons) do
 			dungeon:SetChecked(mounts.config.waterWalkList[dungeon.id])
 		end
 		config.waterWalkExpedition:SetChecked(mounts.config.waterWalkExpedition)
 		config:setEnableCheckButtons(mounts.config.waterWalkExpedition, config.expeditions)
-		for _, expedition in pairs(config.expeditions) do
+		for _,expedition in pairs(config.expeditions) do
 			expedition:SetChecked(mounts.config.waterWalkExpeditionList[expedition.id])
 		end
 		config.useHerbMounts:SetChecked(mounts.config.useHerbMounts)
@@ -285,14 +285,8 @@ end)
 
 
 function config:setEnableCheckButtons(enable, tbl)
-	if enable then
-		for _, check in pairs(tbl) do
-			check:Enable()
-		end
-	else
-		for _, check in pairs(tbl) do
-			check:Disable()
-		end
+	for _,check in pairs(tbl) do
+		check:SetEnabled(enable)
 	end
 end
 
@@ -331,12 +325,12 @@ config.okay = function(self)
 	mounts.config.waterWalkAll = self.waterWalkAlways:GetChecked()
 	mounts.config.waterWalkInstance = self.waterWalkInstance:GetChecked()
 	wipe(mounts.config.waterWalkList)
-	for _, dungeon in pairs(self.dungeons) do
+	for _,dungeon in pairs(self.dungeons) do
 		mounts.config.waterWalkList[dungeon.id] = dungeon:GetChecked()
 	end
 	mounts.config.waterWalkExpedition = self.waterWalkExpedition:GetChecked()
 	wipe(mounts.config.waterWalkExpeditionList)
-	for _, expedition in pairs(self.expeditions) do
+	for _,expedition in pairs(self.expeditions) do
 		mounts.config.waterWalkExpeditionList[expedition.id] = expedition:GetChecked()
 	end
 	mounts.config.useHerbMounts = self.useHerbMounts:GetChecked()

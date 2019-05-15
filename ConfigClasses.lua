@@ -109,19 +109,20 @@ classConfig:SetScript("OnShow", function(self)
 	rightPanelScroll:SetScrollChild(rightPanelScroll.child)
 
 	-- CLASS FEATURE
-	self.classCheck = CreateFrame("CHECKBUTTON", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.classCheck:SetPoint("TOPLEFT", 9, -9)
-	self.classCheck.Text:SetSize(365, 30)
-	self.classCheck:HookScript("OnClick", function(btn)
-		self.currentMacrosConfig[btn.option] = btn:GetChecked()
-		self.secure:refresh()
+	self.checkPool = CreateFramePool("CHECKBUTTON", rightPanelScroll.child, "MJCheckButtonTemplate", function(_,frame)
+		frame:Hide()
+		frame:ClearAllPoints()
+		frame:Enable()
+		if frame.childs then
+			wipe(frame.childs)
+		end
 	end)
-	config:setHyperlinkTooltip(self.classCheck)
 
 	-- MOVE FALL MACRO
 	local moveFallMF = CreateFrame("FRAME", nil, rightPanelScroll.child, "MJMacroFrame")
 	self.moveFallMF = moveFallMF
 	self.macroEditBox = moveFallMF.scrollFrame.editBox
+	moveFallMF:SetPoint("LEFT", 9, 0)
 	moveFallMF.lable:SetText(L["HELP_MACRO_MOVE_FALL"])
 	moveFallMF.enable:HookScript("OnClick", function(btn)
 		self.currentMacrosConfig.macroEnable = btn:GetChecked()
@@ -175,17 +176,64 @@ end)
 do
 	local classOptions = {
 		DEATHKNIGHT = {
-			key = "usePathOfFrost",
-			hlink = GetSpellLink(3714),
+			{
+				key = "usePathOfFrost",
+				hlink = GetSpellLink(3714),
+				childs = {
+					{
+						key = "useOnlyInWaterWalkLocation"
+					},
+				},
+			},
 		},
 		SHAMAN = {
-			key = "useWaterWalking",
-			hlink = GetSpellLink(546),
+			{
+				key = "useWaterWalking",
+				hlink = GetSpellLink(546),
+				childs = {
+					{
+						key = "useOnlyInWaterWalkLocation"
+					},
+				},
+			},
 		},
 		DRUID = {
-			key ="useMacroAlways",
+			{
+				key ="useMacroAlways",
+			}
 		},
 	}
+
+
+	local function optionClick(self, btn)
+		local isEnabled = btn:GetChecked()
+		self.currentMacrosConfig[btn.key] = isEnabled
+		self.secure:refresh()
+
+		if type(btn.childs) == "table" then
+			for _,childOption in ipairs(btn.childs) do
+				childOption:SetEnabled(isEnabled)
+			end
+		end
+	end
+
+
+	local function createOption(self, option, className)
+		local optionFrame = self.checkPool:Acquire()
+		optionFrame:SetChecked(self.currentMacrosConfig[option.key])
+		optionFrame.Text:SetText(format(L[strupper(className.."_"..option.key)], option.hlink))
+		if not optionFrame.key then
+			optionFrame.Text:SetSize(365, 30)
+			optionFrame:HookScript("OnClick", function(btn) optionClick(self, btn) end)
+		end
+		optionFrame.key = option.key
+		if option.hlink and not optionFrame:GetHyperlinksEnabled() then
+			config:setHyperlinkTooltip(optionFrame)
+		end
+		optionFrame:Show()
+		return optionFrame
+	end
+
 
 	function classConfig:showClassSettings(btn)
 		if self.rightPanel.currentBtn then
@@ -200,16 +248,40 @@ do
 		self.combatMF.enable:SetChecked(self.currentMacrosConfig.combatMacroEnable)
 		self.combatMacroEditBox:SetText(self.currentMacrosConfig.combatMacro or btn.default)
 
+		self.checkPool:ReleaseAll()
 		if classOptions[btn.key] then
-			local classOption = classOptions[btn.key]
-			self.classCheck.option = classOption.key
-			self.classCheck:SetChecked(self.currentMacrosConfig[classOption.key])
-			self.classCheck.Text:SetText(format(L[strupper(btn.key.."_"..classOption.key)], classOption.hlink))
-			self.classCheck:Show()
-			self.moveFallMF:SetPoint("TOPLEFT", self.classCheck, "BOTTOMLEFT", 0, -70)
+			local lastOptionFrame
+			for _,option in ipairs(classOptions[btn.key]) do
+				local optionFrame = createOption(self, option, btn.key)
+				if lastOptionFrame then
+					optionFrame:SetPoint("TOP", lastOptionFrame, "BOTTOM", 0, 0)
+				else
+					optionFrame:SetPoint("TOPLEFT", 9, -9)
+				end
+
+				if option.childs then
+					optionFrame.childs = optionFrame.childs or {}
+					local isEnabled = optionFrame:GetChecked()
+					local lastSubOptionFrame
+					for _,subOption in ipairs(option.childs) do
+						local subOptionFrame = createOption(self, subOption, btn.key)
+						subOptionFrame:SetEnabled(isEnabled)
+						if lastSubOptionFrame then
+							subOptionFrame:SetPoint("TOPLEFT", lastOptionFrame, "BOTTOMLEFT", 0, 0)
+						else
+							subOptionFrame:SetPoint("TOPLEFT", optionFrame, "BOTTOMLEFT", 20, 0)
+						end
+						tinsert(optionFrame.childs, subOptionFrame)
+						lastSubOptionFrame = subOptionFrame
+					end
+					lastOptionFrame = lastSubOptionFrame
+				else
+					lastOptionFrame = optionFrame
+				end
+			end
+			self.moveFallMF:SetPoint("TOP", lastOptionFrame, "BOTTOM", 0, -70)
 		else
-			self.classCheck:Hide()
-			self.moveFallMF:SetPoint("TOPLEFT", 9, -60)
+			self.moveFallMF:SetPoint("TOP", 0, -60)
 		end
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end

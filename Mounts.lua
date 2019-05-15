@@ -196,7 +196,7 @@ end
 
 function mounts:summon(ids)
 	local usableIDs = {}
-	for _, mountID in pairs(ids) do
+	for _,mountID in pairs(ids) do
 		if select(5, C_MountJournal.GetMountInfoByID(mountID)) then
 			tinsert(usableIDs, mountID)
 		end
@@ -232,7 +232,7 @@ function mounts:herbMountsExists()
 	if mounts.config.useHerbMounts then
 		local prof1, prof2 = GetProfessions()
 		if (prof1 and select(7, GetProfessionInfo(prof1)) == 182 or prof2 and select(7, GetProfessionInfo(prof2)) == 182) then
-			for _, mountID in pairs(mounts.herbalismMounts) do
+			for _,mountID in pairs(mounts.herbalismMounts) do
 				if select(5, C_MountJournal.GetMountInfoByID(mountID)) then
 					return true
 				end
@@ -245,7 +245,7 @@ end
 
 function mounts:waterWalkMountsExists()
 	if mounts.config.waterWalkAll or mounts:isWaterWalkLocation(select(8, GetInstanceInfo())) then
-		for _, mountID in pairs(mounts.waterWalk) do
+		for _,mountID in pairs(mounts.waterWalk) do
 			if select(5, C_MountJournal.GetMountInfoByID(mountID)) then
 				return true
 			end
