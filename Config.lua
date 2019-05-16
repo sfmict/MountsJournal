@@ -147,7 +147,11 @@ config:SetScript("OnShow", function()
 		if MacroFrame:IsShown() then
 			MacroFrame_Update()
 		else
-			MacroFrame_Show()
+			config:okay()
+			local b_CanOpenPanels = CanOpenPanels
+			CanOpenPanels = function() return 1 end
+			ShowUIPanel(MacroFrame, 1)
+			CanOpenPanels = b_CanOpenPanels
 		end
 
 		if MacroFrame.selectedTab ~= 1 then
