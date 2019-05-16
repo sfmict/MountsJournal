@@ -319,6 +319,7 @@ function mounts:setFlags()
 									  and not (mounts.mapFlags and mounts.mapFlags.groundOnly)
 	
 	local flags = mounts.sFlags
+	flags.isIndoors = IsIndoors()
 	flags.inVehicle = UnitInVehicle("player")
 	flags.isMounted = IsMounted()
 	flags.groundSpellKnown = groundSpellKnown

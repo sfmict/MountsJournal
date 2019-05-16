@@ -154,7 +154,9 @@ do
 		self.mounts:setFlags()
 		local macro
 
-		-- DRUID FORM
+		-- DRUID LAST FORM
+		-- 31 - moonkin form
+		-- 783 - travel form
 		if self.classConfig.useLastDruidForm then
 			local spellID = getFormSpellID()
 
