@@ -48,6 +48,7 @@ L["DEATHKNIGHT_USEPATHOFFROST"] = "Use the %s when summoning ground mount"
 L["DEATHKNIGHT_USEONLYINWATERWALKLOCATION"] = "Use only in water walk zones"
 L["SHAMAN_USEWATERWALKING"] = "Use the %s when summoning ground mount"
 L["SHAMAN_USEONLYINWATERWALKLOCATION"] = "Use only in water walk zones"
+L["DRUID_USELASTDRUIDFORM"] = "Return last form when dismounting"
 L["DRUID_USEMACROALWAYS"] = "Use this macros instead of mounts"
 
 setmetatable(L, {__index = function(self, key)

@@ -719,6 +719,7 @@
 			<OnEvent method="onEvent"/>
 			<OnLoad method="onLoad"/>
 			<PreClick method="preClick"/>
+			<PostClick method="postClick"/>
 		</Scripts>
 	</Frame>
 </Ui>

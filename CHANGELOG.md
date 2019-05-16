@@ -1,1 +1,1 @@
-* Updated Shaman and Death Knight class options.
+* Updated Druid class options.

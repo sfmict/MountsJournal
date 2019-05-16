@@ -199,8 +199,11 @@ do
 		},
 		DRUID = {
 			{
-				key ="useMacroAlways",
-			}
+				key = "useLastDruidForm"
+			},
+			{
+				key = "useMacroAlways",
+			},
 		},
 	}
 

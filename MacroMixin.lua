@@ -27,11 +27,9 @@ function MJMacroMixin:refresh()
 	self.classConfig = self.charMacrosConfig.enable and self.charMacrosConfig or self.macrosConfig[self.class]
 	self.macro = nil
 	self.combatMacro = nil
-	self.useMacroAlways = nil
 	if self.classConfig then
 		if self.classConfig.macroEnable then
 			self.macro = self.classConfig.macro or self:getClassMacro()
-			self.useMacroAlways = self.classConfig.useMacroAlways
 		end
 		if self.classConfig.combatMacroEnable then
 			self.combatMacro = self.classConfig.combatMacro or self:getClassMacro()
@@ -61,14 +59,17 @@ do
 end
 
 
+function MJMacroMixin:getDismountMacro()
+	return self:addLine("/leavevehicle [vehicleui]", "/dismount [mounted]")
+end
+
+
 function MJMacroMixin:getDefMacro()
 	local macro
 
 	if self.class == "DEATHKNIGHT"
 	and self.classConfig.usePathOfFrost
 	and (not self.classConfig.useOnlyInWaterWalkLocation or self.sFlags.waterWalk)
-	and not self.sFlags.inVehicle
-	and not self.sFlags.isMounted
 	and not self.sFlags.swimming
 	and not self.sFlags.fly then
 		macro = self:addLine(macro, "/cast "..sefl:getSpellName(3714)) -- Path of Frost
@@ -76,26 +77,20 @@ function MJMacroMixin:getDefMacro()
 	elseif self.class == "SHAMAN"
 	and self.classConfig.useWaterWalking
 	and (not self.classConfig.useOnlyInWaterWalkLocation or self.sFlags.waterWalk)
-	and not self.sFlags.inVehicle
-	and not self.sFlags.isMounted
 	and not self.sFlags.swimming
 	and not self.sFlags.fly then
 		macro = self:addLine(macro, "/cast "..self:getSpellName(546)) -- Water Walking
 
 	elseif self.class == "DRUID" then
-		local shapeshiftIndex = GetShapeshiftForm()
-		if shapeshiftIndex > 0 then
-			local _,_,_,spellID = GetShapeshiftFormInfo(shapeshiftIndex)
-			if spellID == 768 -- Cat Form
-			or spellID == 5487 then -- Bear Form
-				macro = self:addLine(macro, "/cancelform")
-			end
+		local curFormID = GetShapeshiftFormID()
+		if curFormID == 1 or curFormID == 5 then
+			macro = self:addLine(macro, "/cancelform")
 		end
 	end
 
 	if self.magicBroom then
 		macro = self:addLine(macro, "/use "..self.broomName) -- MAGIC BROOM
-		self.mounts.lastUseTime = GetTime()
+		self.lastUseTime = GetTime()
 	else
 		macro = self:addLine(macro, "/mount")
 	end
@@ -129,8 +124,7 @@ do
 
 
 	function MJMacroMixin:getClassMacro(class)
-		local macro = "/leavevehicle [vehicleui]"
-		macro = self:addLine(macro, "/dismount [mounted]")
+		local macro = self:getDismountMacro()
 
 		local classFunc = classFunc[class or self.class]
 		if type(classFunc) == "function" then
@@ -145,37 +139,86 @@ do
 end
 
 
-function MJMacroMixin:preClick()
-	if not InCombatLockdown() then
+do
+	function getFormSpellID()
+		local shapeshiftIndex = GetShapeshiftForm()
+		if shapeshiftIndex > 0 then
+			local _,_,_,spellID = GetShapeshiftFormInfo(shapeshiftIndex)
+			return spellID
+		end
+	end
+
+
+	function MJMacroMixin:preClick()
+		if InCombatLockdown() then return end
 		self.mounts:setFlags()
 		local macro
+
+		-- DRUID FORM
+		if self.classConfig.useLastDruidForm then
+			local spellID = getFormSpellID()
+
+			if self.lastDruidForm
+			and GetShapeshiftFormID() ~= 31
+			and (self.sFlags.isMounted or self.sFlags.inVehicle or spellID == 783) then
+				macro = self:addLine(self:getDismountMacro(), "/cast "..self.lastDruidForm)
+				self:SetAttribute("macrotext", macro or "")
+				return
+			end
+
+			if spellID and spellID ~= 783 then
+				self.lastDruidForm = self:getSpellName(spellID)
+				self.lastDruidFormTime = GetTime()
+			elseif not spellID and (not self.lastDruidFormTime or GetTime() - self.lastDruidFormTime > 0.3) then
+				self.lastDruidForm = nil
+			end
+		end
 
 		-- MAGIC BROOM IS USABLE
 		self.magicBroom = self.mounts.config.useMagicBroom
 								and GetItemCount(37011) > 0
-								and not self.useMacroAlways
-								and not self.sFlags.inVehicle
-								and not self.sFlags.isMounted
 								and self.sFlags.groundSpellKnown
+								and not self.sFlags.isIndoors
 								and not self.sFlags.herb
 								and not self.sFlags.swimming
-								and not IsIndoors()
 								and (self.sFlags.fly or not self.sFlags.waterWalk)
 								and self.broomName
 
-		if not self.magicBroom
-		and (self.useMacroAlways
-			  or self.macro
-			  and (IsIndoors()
-					 or GetUnitSpeed("player") > 0
-					 or IsFalling())) then
+		-- CLASSMACRO
+		if self.macro
+			and (self.classConfig.useMacroAlways
+				  or not self.magicBroom
+				  and (self.sFlags.isIndoors or GetUnitSpeed("player") > 0 or IsFalling())) then
 			macro = self.macro
+		-- MOUNT
 		else
-			macro = self:getDefMacro()
+			if self.sFlags.inVehicle then
+				macro = "/leavevehicle"
+			elseif self.sFlags.isMounted then
+				if not self.lastUseTime or GetTime() - self.lastUseTime > 0.5 then
+					macro = "/dismount"
+				end
+			else
+				macro = self:getDefMacro()
+			end
 		end
 
 		self:SetAttribute("macrotext", macro or "")
 	end
+end
+
+
+function MJMacroMixin:postClick()
+	if InCombatLockdown() then return end
+	local macro
+
+	if self.macro and self.classConfig.useMacroAlways then
+		macro = self.macro
+	else
+		macro = self:addLine(self:getDismountMacro(), self:getDefMacro())
+	end
+
+	self:SetAttribute("macrotext", macro or "")
 end
 
 
