@@ -192,17 +192,17 @@ do
 				  or not self.magicBroom
 				  and (self.sFlags.isIndoors or GetUnitSpeed("player") > 0 or IsFalling())) then
 			macro = self.macro
+		-- EXIT VEHICLE
+		elseif self.sFlags.inVehicle then
+			macro = "/leavevehicle"
+		-- DISMOUNT
+		elseif self.sFlags.isMounted then
+			if not self.lastUseTime or GetTime() - self.lastUseTime > 0.5 then
+				macro = "/dismount"
+			end
 		-- MOUNT
 		else
-			if self.sFlags.inVehicle then
-				macro = "/leavevehicle"
-			elseif self.sFlags.isMounted then
-				if not self.lastUseTime or GetTime() - self.lastUseTime > 0.5 then
-					macro = "/dismount"
-				end
-			else
-				macro = self:getDefMacro()
-			end
+			macro = self:getDefMacro()
 		end
 
 		self:SetAttribute("macrotext", macro or "")
@@ -210,24 +210,16 @@ do
 end
 
 
-function MJMacroMixin:postClick()
-	if InCombatLockdown() then return end
+function MJMacroMixin:PLAYER_REGEN_DISABLED()
 	local macro
 
-	if self.macro and self.classConfig.useMacroAlways then
-		macro = self.macro
-	else
-		macro = "/mount"
-	end
-
-	self:SetAttribute("macrotext", macro or "")
-end
-
-
-function MJMacroMixin:PLAYER_REGEN_DISABLED()
 	if self.combatMacro then
-		self:SetAttribute("macrotext", self.combatMacro)
+		macro = self.combatMacro
+	elseif self.macro and self.classConfig.useMacroAlways then
+		macro = self.macro
 	end
+
+	self:SetAttribute("macrotext", macro or "/mount")
 end
 
 
