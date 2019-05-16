@@ -150,8 +150,8 @@ do
 
 
 	function MJMacroMixin:preClick()
-		if InCombatLockdown() then return end
 		self.mounts:setFlags()
+		if InCombatLockdown() then return end
 		local macro
 
 		-- DRUID LAST FORM
@@ -217,7 +217,7 @@ function MJMacroMixin:postClick()
 	if self.macro and self.classConfig.useMacroAlways then
 		macro = self.macro
 	else
-		macro = self:addLine(self:getDismountMacro(), self:getDefMacro())
+		macro = "/mount"
 	end
 
 	self:SetAttribute("macrotext", macro or "")

@@ -345,7 +345,11 @@ function mounts:init()
 	SLASH_MOUNTSJOURNAL1 = "/mount"
 	SlashCmdList["MOUNTSJOURNAL"] = function()
 		local flags = mounts.sFlags
-		if not flags.groundSpellKnown then
+		if flags.inVehicle then
+			VehicleExit()
+		elseif flags.isMounted then
+			Dismount()
+		elseif not flags.groundSpellKnown then
 			if not mounts:summon(mounts.lowLevel) then mounts:errorSummon() end
 		-- swimming
 		elseif not (flags.swimming
