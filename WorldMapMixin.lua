@@ -198,6 +198,11 @@ function MJDungeonRaidMixin:onLoad()
 	}
 
 	local currentTier = EJ_GetCurrentTier()
+	local mapExclude = {
+		[379] = true, -- Вершина Кун-Лай
+		[543] = true, -- Горгронд
+		[929] = true, -- Точка массированного вторжения: госпожа Фолнуна
+	}
 	for i = 1, EJ_GetNumTiers() do
 		EJ_SelectTier(i)
 		for _,v in ipairs(self.list) do
@@ -211,7 +216,7 @@ function MJDungeonRaidMixin:onLoad()
 			while instanceID do
 				EJ_SelectInstance(instanceID)
 				local _,_,_,_,_,_,mapID = EJ_GetInstanceInfo()
-				if mapID and mapID > 0 and mapID ~= 379 and mapID ~= 543 then
+				if mapID and mapID > 0 and not mapExclude[mapID] then
 					tinsert(v.list[i].list, {name = instanceName, mapID = mapID})
 				end
 				index = index + 1

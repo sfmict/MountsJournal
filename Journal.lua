@@ -28,7 +28,7 @@ local function tabClick(self)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	local id = self.id
 
-	for _,tab in pairs(self:GetParent().tabs) do
+	for _,tab in ipairs(self:GetParent().tabs) do
 		if tab.id == id then
 			tab.selected:Show()
 			tab.content:Show()
@@ -115,7 +115,7 @@ function journal:ADDON_LOADED(addonName)
 			slotButton:SetParent(MountJournal)
 			slotButton:SetPoint("TOPLEFT", journal.mountCount, "TOPRIGHT", 2, -2)
 			slotButton:SetSize(32, 32)
-			for _,region in pairs({slotButton:GetRegions()}) do
+			for _,region in ipairs({slotButton:GetRegions()}) do
 				region:SetSize(32, 32)
 			end
 			journal.leftInset:SetPoint("BOTTOMLEFT", MountJournal, "BOTTOMLEFT", 0, 26)
@@ -247,18 +247,18 @@ function journal:ADDON_LOADED(addonName)
 
 			btnFrame.icon = btnFrame:CreateTexture(nil, "OVERLAY")
 			btnFrame.icon:SetTexture(texPath..name)
-			btnFrame.icon:SetAllPoints()
+			btnFrame.icon:SetSize(24, 12)
+			btnFrame.icon:SetPoint("CENTER")
 
 			btnFrame:SetScript("OnMouseDown", function(self)
-				self.icon:SetPoint("TOPLEFT", 1, -1)
-				self.icon:SetPoint("BOTTOMRIGHT", -1, 1)
+				self.icon:SetScale(.8)
 			end)
 			btnFrame:SetScript("OnMouseUp", function(self)
-				self.icon:SetAllPoints()
+				self.icon:SetScale(1)
 			end)
 		end
 
-		for _,child in pairs(journal.scrollButtons) do
+		for _,child in ipairs(journal.scrollButtons) do
 			child:SetWidth(child:GetWidth() - 25)
 			child.name:SetWidth(child.name:GetWidth() - 18)
 			child.icon:SetPoint("LEFT", child, "LEFT", -41, 0)
@@ -365,14 +365,14 @@ function journal:ADDON_LOADED(addonName)
 			if texture.color then btn.icon:SetVertexColor(unpack(texture.color)) end
 			if texture.texCoord then btn.icon:SetTexCoord(unpack(texture.texCoord)) end
 
-			btn:SetScript("OnMouseDown", function()
-				btn.icon:SetSize(texture.width - 2, texture.height - 2)
+			btn:SetScript("OnMouseDown", function(self)
+				self.icon:SetScale(.9)
 			end)
-			btn:SetScript("OnMouseUp", function()
-				btn.icon:SetSize(texture.width, texture.height)
+			btn:SetScript("OnMouseUp", function(self)
+				self.icon:SetScale(1)
 			end)
-			btn:SetScript("OnEnter", function()
-				GameTooltip:SetOwner(btn, "ANCHOR_BOTTOM")
+			btn:SetScript("OnEnter", function(self)
+				GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
 				GameTooltip:SetText(tooltip)
 				GameTooltip:Show()
 			end)
@@ -502,7 +502,7 @@ function journal:configureJournal()
 		end
 	end
 
-	for _,btn in pairs(journal.scrollButtons) do
+	for _,btn in ipairs(journal.scrollButtons) do
 		if btn.index then
 			if not btn.fly:IsShown() then
 				btn.fly:Show()
@@ -525,7 +525,7 @@ function journal:configureJournal()
 	end
 
 	local count, collected = 0, 0
-	for _,mountID in pairs(C_MountJournal.GetMountIDs()) do
+	for _,mountID in ipairs(C_MountJournal.GetMountIDs()) do
 		local _,_,_,_,_,_,_,_,_,hideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 		if not hideOnChar then
 			count = count + 1
@@ -885,19 +885,19 @@ function journal:setBtnFilters(tab)
 		local default = tab == "types"
 		local filters = mounts.filters[tab]
 
-		for _,btn in pairs(children) do
+		for _,btn in ipairs(children) do
 			local checked = btn:GetChecked()
 			filters[btn.id] = checked
 			if not checked and default then i = i + 1 end
 		end
 
 		if i == #filters then
-			for k in pairs(filters) do
+			for k in ipairs(filters) do
 				filters[k] = default
 			end
 		end
 	else
-		for _,btn in pairs(children) do
+		for _,btn in ipairs(children) do
 			local checked = btn:GetChecked()
 			C_MountJournal.SetSourceFilter(btn.id, checked)
 			if not checked then i = i + 1 end
@@ -916,7 +916,7 @@ end
 
 function journal:setAllFilters(type, enabled)
 	local filters = mounts.filters[type]
-	for k in pairs(filters) do
+	for k in ipairs(filters) do
 		filters[k] = enabled
 	end
 	journal:updateBtnFilters()
@@ -930,14 +930,14 @@ function journal:updateBtnFilters()
 	for typeFilter, filter in pairs(mounts.filters) do
 		local default = typeFilter ~= "selected"
 		local i = 0
-		for _,v in pairs(filter) do
+		for _,v in ipairs(filter) do
 			if v == default then i = i + 1 end
 		end
 
 		if i == #filter then
 			f[typeFilter] = true
 			if filtersBar[typeFilter] then
-				for _,btn in pairs({filtersBar[typeFilter]:GetChildren()}) do
+				for _,btn in ipairs({filtersBar[typeFilter]:GetChildren()}) do
 					local color = default and journal.colors["mount"..btn.id] or journal.colors.dark
 					btn:SetChecked(false)
 					btn.icon:SetVertexColor(unpack(color))
@@ -945,7 +945,7 @@ function journal:updateBtnFilters()
 				filtersBar[typeFilter]:GetParent().filtred:Hide()
 			end
 		elseif filtersBar[typeFilter] then
-			for _,btn in pairs({filtersBar[typeFilter]:GetChildren()}) do
+			for _,btn in ipairs({filtersBar[typeFilter]:GetChildren()}) do
 				local checked = filter[btn.id]
 				local color = checked and journal.colors["mount"..btn.id] or journal.colors.dark
 				btn:SetChecked(checked)
@@ -967,13 +967,13 @@ function journal:updateBtnFilters()
 	end
 
 	if n == #sources - 1 then
-		for _,btn in pairs({filtersBar.sources:GetChildren()}) do
+		for _,btn in ipairs({filtersBar.sources:GetChildren()}) do
 			btn:SetChecked(false)
 			btn.icon:SetDesaturated(nil)
 		end
 		filtersBar.sources:GetParent().filtred:Hide()
 	else
-		for _,btn in pairs({filtersBar.sources:GetChildren()}) do
+		for _,btn in ipairs({filtersBar.sources:GetChildren()}) do
 			btn:SetChecked(sources[btn.id])
 			btn.icon:SetDesaturated(not sources[btn.id])
 		end
