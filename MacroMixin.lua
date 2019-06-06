@@ -92,7 +92,7 @@ function MJMacroMixin:getDefMacro()
 		macro = self:addLine(macro, "/use "..self.broomName) -- MAGIC BROOM
 		self.lastUseTime = GetTime()
 	else
-		macro = self:addLine(macro, "/mount")
+		macro = self:addLine(macro, "/mount doNotSetFlags")
 	end
 
 	return macro
@@ -150,8 +150,8 @@ do
 
 
 	function MJMacroMixin:preClick()
-		self.mounts:setFlags()
 		if InCombatLockdown() then return end
+		self.mounts:setFlags()
 		local macro
 
 		-- DRUID LAST FORM

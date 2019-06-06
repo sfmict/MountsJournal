@@ -236,11 +236,11 @@ function MJDungeonRaidMixin:menuInit(level)
 	local list = UIDROPDOWNMENU_MENU_VALUE or btn.list
 	info.isNotRadio = true
 	info.notCheckable = true
-	info.keepShownOnClick = true
 
 	for _,v in ipairs(list) do
 		info.text = v.name
 		if v.list then
+			info.keepShownOnClick = true
 			info.hasArrow = true
 			info.value = v.list
 		else

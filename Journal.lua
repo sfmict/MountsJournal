@@ -173,6 +173,19 @@ function journal:ADDON_LOADED(addonName)
 		mapSettings.Ground:HookScript("OnClick", function(self) journal:setFlag("groundOnly", self:GetChecked()) end)
 		mapSettings.WaterWalk.Text:SetText(L["Water Walk Mounts Only"])
 		mapSettings.WaterWalk:HookScript("OnClick", function(self) journal:setFlag("waterWalkOnly", self:GetChecked()) end)
+		mapSettings.listFromMap.Text:SetText(L["ListMountsFromZone"])
+		mapSettings.listFromMap.maps = {}
+		mapSettings.listFromMap:SetScript("OnClick", function(btn) journal:listFromMapClick(btn) end)
+		mapSettings.relationClear:SetScript("OnClick", function()
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+			journal.currentList.listFrom = nil
+			journal:getRemoveMountList(journal.navBar.mapID)
+			journal:setMountsList()
+			journal:updateMountsList()
+			MountJournal_UpdateMountList()
+			journal:updateMapSettings()
+		end)
+		UIDropDownMenu_Initialize(mapSettings.listFromMap.optionsMenu, journal.listFromMapInit, "MENU")
 		journal:updateMapSettings()
 
 		--MOUNTJOURNAL ONSHOW
@@ -475,13 +488,22 @@ end
 function journal:setMountsList()
 	local mapID = journal.navBar.mapID
 	if mapID == mounts.defMountsListID then
-		journal.list = {
+		journal.currentList = {
 			fly = mounts.db.fly,
 			ground = mounts.db.ground,
 			swimming = mounts.db.swimming,
 		}
+		journal.list = journal.currentList
 	else
-		journal.list = mounts.db.zoneMounts[mapID]
+		local function getRelationMountList(mapID)
+			local list = mounts.db.zoneMounts[mapID]
+			if list and list.listFrom then
+				return getRelationMountList(list.listFrom)
+			end
+			return list, mapID
+		end
+		journal.currentList = mounts.db.zoneMounts[mapID]
+		journal.list, journal.listMapID = getRelationMountList(mapID)
 	end
 end
 
@@ -539,31 +561,34 @@ function journal:configureJournal()
 end
 
 
-function journal:createMountList()
-	mounts.db.zoneMounts[journal.navBar.mapID] = {
+function journal:createMountList(mapID)
+	fprint("createMountList")
+	mounts.db.zoneMounts[mapID] = {
 		fly = {},
 		ground = {},
 		swimming = {},
 		flags = {},
 	}
-	journal.list = mounts.db.zoneMounts[journal.navBar.mapID]
+	journal:setMountsList()
 end
 
 
-function journal:getRemoveMountList()
-	if journal.navBar.mapID == mounts.defMountsListID then return end
+function journal:getRemoveMountList(mapID)
+	if mapID == mounts.defMountsListID then return end
+	local list = mounts.db.zoneMounts[mapID]
 
-	if #journal.list.fly + #journal.list.ground + #journal.list.swimming == 0
-	and not journal.list.flags.waterWalkOnly and not journal.list.flags.groundOnly then
-		mounts.db.zoneMounts[journal.navBar.mapID] = nil
-		journal.list = nil
+	if #list.fly + #list.ground + #list.swimming == 0
+	and not list.flags.waterWalkOnly
+	and not list.flags.groundOnly
+	and not list.listFrom then
+		mounts.db.zoneMounts[mapID] = nil
 	end
 end
 
 
 function journal:mountToggle(btn)
 	if not journal.list then
-		journal:createMountList()
+		journal:createMountList(journal.listMapID)
 	end
 	local tbl = journal.list[btn.type]
 
@@ -573,7 +598,7 @@ function journal:mountToggle(btn)
 		tremove(tbl, pos)
 		btn.icon:SetVertexColor(unpack(journal.colors.gray))
 		btn.check:Hide()
-		journal:getRemoveMountList()
+		journal:getRemoveMountList(journal.listMapID)
 	else
 		tinsert(tbl, btn.mountID)
 		btn.icon:SetVertexColor(unpack(journal.colors.gold))
@@ -586,33 +611,157 @@ end
 function journal:setFlag(flag, enable)
 	if journal.navBar.mapID == mounts.defMountsListID then return end
 
-	if enable and not (journal.list and journal.list.flags) then
-		journal:createMountList()
+	if enable and not (journal.currentList and journal.currentList.flags) then
+		journal:createMountList(journal.navBar.mapID)
 	end
-	mounts.db.zoneMounts[journal.navBar.mapID].flags[flag] = enable
+	journal.currentList.flags[flag] = enable
 	if not enable then
-		journal:getRemoveMountList()
+		journal:getRemoveMountList(journal.navBar.mapID)
 	end
 	mounts:setMountsList()
 end
 
 
+do
+	local mapLangTypes = {
+		[1] = WORLD,
+		[2] = CONTINENT,
+		[3] = ZONE,
+		[4] = INSTANCE,
+	}
+	function journal:listFromMapClick(btn)
+		wipe(btn.maps)
+		local assocMaps = {}
+		for mapID, config in pairs(mounts.db.zoneMounts) do
+			if not config.listFrom then 
+				local mapInfo = C_Map.GetMapInfo(mapID)
+				local name = mapInfo.name
+
+				if not assocMaps[mapInfo.mapType] then
+					assocMaps[mapInfo.mapType] = {
+						name = mapLangTypes[mapInfo.mapType] or OTHER,
+						list = {},
+					}
+					tinsert(btn.maps, assocMaps[mapInfo.mapType])
+				end
+
+				local mapGroupID = C_Map.GetMapGroupID(mapID)
+				if mapGroupID then
+					local mapGroupInfo = C_Map.GetMapGroupMembersInfo(mapGroupID)
+					if mapGroupInfo then
+						for _,mapGroupMemberInfo in ipairs(mapGroupInfo) do
+							if mapGroupMemberInfo.mapID == mapID then
+								name = format("%s(%s)", name, mapGroupMemberInfo.name)
+								break
+							end
+						end
+					end
+				end
+				tinsert(assocMaps[mapInfo.mapType].list, {name = name, mapID = mapID})
+			end
+		end
+
+		table.sort(btn.maps, function(a,b) return a.name < b.name end)
+		for _,mapInfo in ipairs(btn.maps) do
+			table.sort(mapInfo.list, function(a,b) return a.name < b.name end)
+		end
+
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		ToggleDropDownMenu(1, nil, btn.optionsMenu, btn, 115, 15)
+	end
+end
+
+
+function journal:listFromMapInit(level)
+	local btn = self:GetParent()
+	local info = UIDropDownMenu_CreateInfo()
+	info.isNotRadio = true
+	info.notCheckable = true
+
+	if next(btn.maps) == nil then
+		info.notClickable = true
+		info.text = EMPTY
+		UIDropDownMenu_AddButton(info, level)
+	else
+		local list = UIDROPDOWNMENU_MENU_VALUE or btn.maps
+
+		local function setListFrom(_,mapID)
+			if not journal.currentList then
+				journal:createMountList(journal.navBar.mapID)
+			end
+			journal.currentList.listFrom = mapID
+			journal:setMountsList()
+			journal:updateMountsList()
+			MountJournal_UpdateMountList()
+			journal:updateMapSettings()
+			UIDropDownMenu_OnHide(self)
+		end
+		
+		for _,mapInfo in ipairs(list) do
+			if mapInfo.mapID then
+				info.text = mapInfo.name
+				info.func = setListFrom
+				info.arg1 = mapInfo.mapID
+			else
+				info.keepShownOnClick = true
+				info.hasArrow = true
+				info.text = mapInfo.name
+				info.value = mapInfo.list
+			end
+			UIDropDownMenu_AddButton(info, level)
+		end
+	end
+end
+
+
 function journal:updateMapSettings()
-	local groundCheck = journal.mapSettings.Ground
-	local waterWalkCheck = journal.mapSettings.WaterWalk
-	groundCheck:SetChecked(journal.list and journal.list.flags and journal.list.flags.groundOnly)
-	waterWalkCheck:SetChecked(journal.list and journal.list.flags and journal.list.flags.waterWalkOnly)
+	local mapSettings = journal.mapSettings
+	local groundCheck = mapSettings.Ground
+	local waterWalkCheck = mapSettings.WaterWalk
+	local listFromMap = mapSettings.listFromMap
+	groundCheck:SetChecked(journal.currentList and journal.currentList.flags and journal.currentList.flags.groundOnly)
+	waterWalkCheck:SetChecked(journal.currentList and journal.currentList.flags and journal.currentList.flags.waterWalkOnly)
 
 	if journal.navBar.mapID == mounts.defMountsListID then
 		if groundCheck:IsEnabled() then
 			groundCheck:Disable()
 			waterWalkCheck:Disable()
+			listFromMap:Disable()
 		end
 	else
 		if not groundCheck:IsEnabled() then
 			groundCheck:Enable()
 			waterWalkCheck:Enable()
+			listFromMap:Enable()
 		end
+	end
+
+	local relationText = mapSettings.relationMap.text
+	local relationClear = mapSettings.relationClear
+	if journal.currentList and journal.currentList.listFrom then
+		local mapID = journal.currentList.listFrom
+		local name = C_Map.GetMapInfo(mapID).name
+
+		local mapGroupID = C_Map.GetMapGroupID(mapID)
+		if mapGroupID then
+			local mapGroupInfo = C_Map.GetMapGroupMembersInfo(mapGroupID)
+			if mapGroupInfo then
+				for _,mapGroupMemberInfo in ipairs(mapGroupInfo) do
+					if mapGroupMemberInfo.mapID == mapID then
+						name = format("%s(%s)", name, mapGroupMemberInfo.name)
+						break
+					end
+				end
+			end
+		end
+
+		relationText:SetText(name)
+		relationText:SetTextColor(unpack(journal.colors.gold))
+		relationClear:Show()
+	else
+		relationText:SetText(L["No relation"])
+		relationText:SetTextColor(unpack(journal.colors.gray))
+		relationClear:Hide()
 	end
 end
 

@@ -665,35 +665,41 @@
 		</Scripts>
 	</Frame>
 
+	<Button name="MJMenuButtonStreatchTemplate" inherits="UIMenuButtonStretchTemplate" virtual="true">
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture parentKey="Icon" file="Interface\ChatFrame\ChatFrameExpandArrow">
+					<Size x="10" y="12"/>
+					<Anchors>
+						<Anchor point="RIGHT" relativeKey="$parent.Right" relativePoint="RIGHT" x="-5"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Frame parentKey="optionsMenu" inherits="UIDropDownMenuTemplate" enableMouse="true"/>
+		</Frames>
+		<ButtonText parentKey="Text">
+			<Anchors>
+				<Anchor point="TOP" x="0" y="-4" />
+				<Anchor point="BOTTOM" x="0" y="4" />
+				<Anchor point="LEFT" x="4" y="0" />
+				<Anchor point="RIGHT" x="-15" y="0" />
+			</Anchors>
+		</ButtonText>
+	</Button>
+
 	<Frame name="MJMapSettingsTemplate" hidden="true" inherits="InsetFrameTemplate" virtual="true">
 		<Frames>
-			<Button parentKey="dungeonRaidBtn" inherits="UIMenuButtonStretchTemplate" mixin="MJDungeonRaidMixin">
+			<Button parentKey="dungeonRaidBtn" inherits="MJMenuButtonStreatchTemplate" mixin="MJDungeonRaidMixin">
 				<Size x="130" y="22"/>
-					<Anchors>
-						<Anchor point="TOPRIGHT" x="-3" y="-3"/>
-					</Anchors>
-					<Layers>
-						<Layer level="ARTWORK">
-							<Texture parentKey="Icon" file="Interface\ChatFrame\ChatFrameExpandArrow">
-								<Size x="10" y="12"/>
-								<Anchors>
-									<Anchor point="RIGHT" relativeKey="$parent.Right" relativePoint="RIGHT" x="-5"/>
-								</Anchors>
-							</Texture>
-						</Layer>
-					</Layers>
-					<Frames>
-						<Frame parentKey="optionsMenu" inherits="UIDropDownMenuTemplate" enableMouse="true"/>
-					</Frames>
+				<Anchors>
+					<Anchor point="TOPRIGHT" x="-3" y="-3"/>
+				</Anchors>
 				<Scripts>
 					<OnLoad method="onLoad"/>
 					<OnClick method="onClick"/>
 				</Scripts>
-				<ButtonText parentKey="Text">
-					<Anchors>
-						<Anchor point="CENTER" x="-4" y="-1" /> 
-					</Anchors>
-				</ButtonText>
 			</Button>
 			<Button parentKey="CurrentMap" inherits="UIPanelButtonTemplate">
 				<Size x="250" y="35"/>
@@ -703,14 +709,53 @@
 			</Button>
 			<CheckButton parentKey="Ground" inherits="MJCheckButtonTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.CurrentMap" relativePoint="BOTTOMLEFT" x="-20" y="-37"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.CurrentMap" relativePoint="BOTTOMLEFT" x="-60" y="-20"/>
 				</Anchors>
 			</CheckButton>
 			<CheckButton parentKey="WaterWalk" inherits="MJCheckButtonTemplate">
 				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.Ground" relativePoint="BOTTOM" x="0" y="-37"/>
+					<Anchor point="TOP" relativeKey="$parent.Ground" relativePoint="BOTTOM" x="0" y="-5"/>
 				</Anchors>
 			</CheckButton>
+			<Button parentKey="listFromMap" inherits="MJMenuButtonStreatchTemplate">
+				<Size x="134" y="30"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.WaterWalk" relativePoint="BOTTOMLEFT" x="0" y="-20"/>
+				</Anchors>
+			</Button>
+			<Frame parentKey="relationMap">
+				<Size x="210" y="30"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.listFromMap" relativePoint="RIGHT" x="5" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BaCKGROUND">
+						<Texture parentKey="icon" atlas="groupfinder-button-dungeons" scale=".7" useAtlasSize="true">
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+					<Layer level="ARTWORK">
+						<Texture parentKey="cover" atlas="groupfinder-button-cover" scale=".71" useAtlasSize="true">
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</Texture>
+						<FontString parentKey="text" inherits="GameFontHighlightSmall">
+							<Anchors>
+								<Anchor point="LEFT" x="5" y="0"/>
+								<Anchor point="RIGHT" x="-5" y="0"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</Frame>
+			<Button parentKey="relationClear" inherits="MJClearButtonTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.relationMap" relativePoint="RIGHT" x="0" y="0"/>
+				</Anchors>
+			</Button>
 		</Frames>
 	</Frame>
 

@@ -169,7 +169,7 @@ classConfig:SetScript("OnShow", function(self)
 	end)
 
 	firstClassFrame:Click()
-	classConfig:SetScript("OnShow", function() end)
+	classConfig:SetScript("OnShow", nil)
 end)
 
 

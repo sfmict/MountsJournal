@@ -343,7 +343,8 @@ end
 
 function mounts:init()
 	SLASH_MOUNTSJOURNAL1 = "/mount"
-	SlashCmdList["MOUNTSJOURNAL"] = function()
+	SlashCmdList["MOUNTSJOURNAL"] = function(msg)
+		if msg ~= "doNotSetFlags" then mounts:setFlags() end
 		local flags = mounts.sFlags
 		if flags.inVehicle then
 			VehicleExit()
