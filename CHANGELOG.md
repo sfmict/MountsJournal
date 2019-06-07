@@ -1,1 +1,1 @@
-* Updated Druid class options.
+* Added ability to link lists of mounts.

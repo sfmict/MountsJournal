@@ -97,6 +97,7 @@ function mounts:ADDON_LOADED(addonName)
 			[205] = true, -- Мерцающий простор
 		}
 
+		self:RegisterEvent("NEW_WMO_CHUNK")
 		self:RegisterEvent("ZONE_CHANGED")
 		self:RegisterEvent("ZONE_CHANGED_INDOORS")
 		self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
@@ -136,8 +137,8 @@ function mounts:setMountsList()
 
 	local function getMountsRelationList(mapID)
 		local list = zoneMounts[mapID]
-		if list and list.listFrom then
-			return getMountsRelationList(list.listFrom)
+		if list and list.listFromID then
+			return getMountsRelationList(list.listFromID)
 		end
 		return list
 	end

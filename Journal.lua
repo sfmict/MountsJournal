@@ -178,7 +178,7 @@ function journal:ADDON_LOADED(addonName)
 		mapSettings.listFromMap:SetScript("OnClick", function(btn) journal:listFromMapClick(btn) end)
 		mapSettings.relationClear:SetScript("OnClick", function()
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			journal.currentList.listFrom = nil
+			journal.currentList.listFromID = nil
 			journal:getRemoveMountList(journal.navBar.mapID)
 			mounts:setMountsList()
 			journal:setMountsList()
@@ -498,8 +498,8 @@ function journal:setMountsList()
 	else
 		local function getRelationMountList(mapID)
 			local list = mounts.db.zoneMounts[mapID]
-			if list and list.listFrom then
-				return getRelationMountList(list.listFrom)
+			if list and list.listFromID then
+				return getRelationMountList(list.listFromID)
 			end
 			return list, mapID
 		end
@@ -580,7 +580,7 @@ function journal:getRemoveMountList(mapID)
 	if #list.fly + #list.ground + #list.swimming == 0
 	and not list.flags.waterWalkOnly
 	and not list.flags.groundOnly
-	and not list.listFrom then
+	and not list.listFromID then
 		mounts.db.zoneMounts[mapID] = nil
 		journal:setMountsList()
 	end
@@ -633,10 +633,9 @@ do
 	function journal:listFromMapClick(btn)
 		wipe(btn.maps)
 		local assocMaps = {}
-		for mapID, config in pairs(mounts.db.zoneMounts) do
-			if not config.listFrom and mapID ~= journal.navBar.mapID then
+		for mapID, mapConfig in pairs(mounts.db.zoneMounts) do
+			if not mapConfig.listFromID and mapID ~= journal.navBar.mapID then
 				local mapInfo = C_Map.GetMapInfo(mapID)
-
 				local name = mapInfo.name
 
 				if not assocMaps[mapInfo.mapType] then
@@ -691,7 +690,7 @@ function journal:listFromMapInit(level)
 			if not journal.currentList then
 				journal:createMountList(journal.navBar.mapID)
 			end
-			journal.currentList.listFrom = mapID
+			journal.currentList.listFromID = mapID
 			mounts:setMountsList()
 			journal:setMountsList()
 			journal:updateMountsList()
@@ -741,8 +740,8 @@ function journal:updateMapSettings()
 
 	local relationText = mapSettings.relationMap.text
 	local relationClear = mapSettings.relationClear
-	if journal.currentList and journal.currentList.listFrom then
-		local mapID = journal.currentList.listFrom
+	if journal.currentList and journal.currentList.listFromID then
+		local mapID = journal.currentList.listFromID
 		local name = C_Map.GetMapInfo(mapID).name
 
 		local mapGroupID = C_Map.GetMapGroupID(mapID)
