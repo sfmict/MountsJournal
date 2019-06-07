@@ -180,6 +180,7 @@ function journal:ADDON_LOADED(addonName)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			journal.currentList.listFrom = nil
 			journal:getRemoveMountList(journal.navBar.mapID)
+			mounts:setMountsList()
 			journal:setMountsList()
 			journal:updateMountsList()
 			MountJournal_UpdateMountList()
@@ -562,7 +563,6 @@ end
 
 
 function journal:createMountList(mapID)
-	fprint("createMountList")
 	mounts.db.zoneMounts[mapID] = {
 		fly = {},
 		ground = {},
@@ -582,6 +582,7 @@ function journal:getRemoveMountList(mapID)
 	and not list.flags.groundOnly
 	and not list.listFrom then
 		mounts.db.zoneMounts[mapID] = nil
+		journal:setMountsList()
 	end
 end
 
@@ -633,8 +634,9 @@ do
 		wipe(btn.maps)
 		local assocMaps = {}
 		for mapID, config in pairs(mounts.db.zoneMounts) do
-			if not config.listFrom then 
+			if not config.listFrom and mapID ~= journal.navBar.mapID then
 				local mapInfo = C_Map.GetMapInfo(mapID)
+
 				local name = mapInfo.name
 
 				if not assocMaps[mapInfo.mapType] then
@@ -690,6 +692,7 @@ function journal:listFromMapInit(level)
 				journal:createMountList(journal.navBar.mapID)
 			end
 			journal.currentList.listFrom = mapID
+			mounts:setMountsList()
 			journal:setMountsList()
 			journal:updateMountsList()
 			MountJournal_UpdateMountList()

@@ -133,13 +133,25 @@ function mounts:setMountsList()
 	local mapInfo = C_Map.GetMapInfo(MapUtil.GetDisplayableMapForPlayer())
 	local zoneMounts = mounts.db.zoneMounts
 	mounts.mapFlags = nil
+
+	local function getMountsRelationList(mapID)
+		local list = zoneMounts[mapID]
+		if list and list.listFrom then
+			return getMountsRelationList(list.listFrom)
+		end
+		return list
+	end
+
 	while mapInfo do
 		local list = zoneMounts[mapInfo.mapID]
 		if list then
 			if not mounts.mapFlags then mounts.mapFlags = list.flags end
-			if #list.fly + #list.ground + #list.swimming ~= 0 then
-				mounts.list = zoneMounts[mapInfo.mapID]
-				return
+			local relationList = getMountsRelationList(mapInfo.mapID)
+			if relationList then
+				if #relationList.fly + #relationList.ground + #relationList.swimming ~= 0 then
+					mounts.list = relationList
+					return
+				end
 			end
 		end
 		mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
