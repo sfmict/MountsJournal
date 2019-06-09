@@ -495,6 +495,7 @@ function journal:setMountsList()
 			swimming = mounts.db.swimming,
 		}
 		journal.list = journal.currentList
+		journal.listMapID = nil
 	else
 		local function getRelationMountList(mapID)
 			local list = mounts.db.zoneMounts[mapID]
