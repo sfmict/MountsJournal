@@ -8,6 +8,7 @@
 ## SavedVariablesPerCharacter: MountsJournalChar
 locales.xml
 templates.xml
+Util.lua
 Mounts.lua
 db.lua
 Binding.lua
@@ -15,3 +16,4 @@ Config.lua
 ConfigClasses.lua
 journal.xml
 Journal.lua
+Atlas.lua

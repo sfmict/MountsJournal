@@ -1,4 +1,5 @@
 local addon = ...
+local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 local interface = select(4, GetBuildInfo())
 
@@ -109,18 +110,8 @@ function mounts:ADDON_LOADED(addonName)
 end
 
 
-function mounts:inTable(table, item)
-	for key, value in ipairs(table) do
-		if value == item then
-			return key
-		end
-	end
-	return false
-end
-
-
 function mounts:setModifier(modifier)
-	if mounts:inTable({"ALT", "CTRL", "SHIFT"}, modifier) then
+	if util:inTable({"ALT", "CTRL", "SHIFT"}, modifier) then
 		mounts.config.modifier = modifier
 		mounts.modifier = modifier == "ALT" and IsAltKeyDown or modifier == "CTRL" and IsControlKeyDown or IsShiftKeyDown
 		return

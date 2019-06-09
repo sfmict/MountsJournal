@@ -1,7 +1,8 @@
 <Ui>
-	<Script file="MacroMixin.lua"/>
-	<Script file="NavBarMixin.lua"/>
-	<Script file="WorldMapMixin.lua"/>
+	<Script file="mixins\MacroMixin.lua"/>
+	<Script file="mixins\NavBarMixin.lua"/>
+	<Script file="mixins\WorldMapMixin.lua"/>
+	<Script file="mixins\ExistingsListsMixin.lua"/>
 
 	<Button name="MJTabTemplate" virtual="true">
 		<Size x="75" y="24"/>
@@ -153,13 +154,9 @@
 			<EdgeSize val="14"/>
 			<TileSize val="14"/>
 			<BackgroundInsets left="4" right="4" top="4" bottom="4"/>
+			<Color r=".1" g=".1" b=".1" a=".3"/>
+			<BorderColor r=".5" g=".5" b=".5"/>
 		</Backdrop>
-		<Scripts>
-			<OnLoad>
-				self:SetBackdropColor(.1,.1,.1,.3);
-				self:SetBackdropBorderColor(.5,.5,.5);
-			</OnLoad>
-		</Scripts>
 	</Frame>
 
 	<CheckButton name="MJBaseCheckButtonTemplate" inherits="OptionsBaseCheckButtonTemplate" virtual="true">
@@ -179,7 +176,7 @@
 		</HitRectInsets>
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString name="$parentText" inherits="GameFontHighlightLeft" parentKey="Text">
+				<FontString inherits="GameFontHighlightLeft" parentKey="Text">
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="RIGHT">
 							<Offset>
@@ -235,15 +232,9 @@
 	<Frame name="MJMacroFrame" virtual="true">
 		<Size x="395" y="150"/>
 		<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
-			<EdgeSize>
-				<AbsValue val="16"/>
-			</EdgeSize>
-			<TileSize>
-				<AbsValue val="16"/>
-			</TileSize>
-			<BackgroundInsets>
-				<AbsInset left="5" right="5" top="5" bottom="5"/>
-			</BackgroundInsets>
+			<EdgeSize val="16"/>
+			<TileSize val="16"/>
+			<BackgroundInsets left="5" right="5" top="5" bottom="5"/>
 		</Backdrop>
 		<Layers>
 			<Layer level="ARTWORK">
@@ -340,8 +331,8 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR.r, TOOLTIP_DEFAULT_COLOR.g, TOOLTIP_DEFAULT_COLOR.b);
-				self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR.r, TOOLTIP_DEFAULT_BACKGROUND_COLOR.g, TOOLTIP_DEFAULT_BACKGROUND_COLOR.b);
+				self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR:GetRGB());
+				self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR:GetRGB());
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -462,7 +453,7 @@
 		<HighlightTexture file="Interface\HelpFrame\CS_HelpTextures" alphaMode="ADD">
 			<TexCoords left="0.00195313" right="0.25195313" top="0.65625000" bottom="0.92187500"/>
 		</HighlightTexture>
-		<ButtonText name="$parentText" inherits="GameFontNormal" justifyH="LEFT" parentKey="text">
+		<ButtonText inherits="GameFontNormal" justifyH="LEFT" parentKey="text">
 			<Size x="0" y="12"/>
 			<Anchors>
 				<Anchor point="LEFT" x="20" y="0"/>
@@ -508,7 +499,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button name="$parentOverflowButton" parentKey="overflow">
+			<Button parentKey="overflow">
 				<Size x="44" y="24"/>
 				<Scripts>
 					<OnLoad>
@@ -528,11 +519,11 @@
 					<TexCoords left="0.54296875" right="0.62890625" top="0.75781250" bottom="0.99218750"/>
 				</HighlightTexture>
 			</Button>
-			<Button name="$parentHomeButton" parentKey="home" text="HOME">
+			<Button parentKey="home" text="HOME">
 				<Size x="128" y="24"/>
 				<Layers>
 					<Layer level="OVERLAY">
-						<Texture name="$parentLeft" file="Interface\Common\ShadowOverlay-Left">
+						<Texture file="Interface\Common\ShadowOverlay-Left">
 							<Size x="30" y="30"/>
 							<Anchors>
 								<Anchor point="LEFT" x="0" y="0"/>
@@ -562,7 +553,7 @@
 				</PushedTexture>
 				<HighlightTexture file="Interface\HelpFrame\CS_HelpTextures" alphaMode="ADD">
 				</HighlightTexture>
-				<ButtonText name="$parentText" inherits="GameFontNormal" justifyH="LEFT" parentKey="text">
+				<ButtonText inherits="GameFontNormal" justifyH="LEFT" parentKey="text">
 					<Size x="0" y="12"/>
 					<Anchors>
 						<Anchor point="LEFT" x="10" y="0"/>
@@ -580,14 +571,14 @@
 		<Size x="48" y="32"/>
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture name="$parentShadow" inherits="UI-EJ-ShowMapBG">
+				<Texture inherits="UI-EJ-ShowMapBG">
 					<Anchors>
 						<Anchor point="LEFT" x="-3" y="5"/>
 					</Anchors>
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
-				<Texture name="$parentTexture" file="Interface\QuestFrame\UI-QuestMap_Button" parentKey="texture">
+				<Texture file="Interface\QuestFrame\UI-QuestMap_Button" parentKey="texture">
 					<Size x="48" y="32"/>
 					<Anchors>
 						<Anchor point="RIGHT"/>
@@ -596,7 +587,7 @@
 				</Texture>
 			</Layer>
 			<Layer level="HIGHLIGHT">
-				<Texture name="$parentHighlight" file="Interface\BUTTONS\ButtonHilight-Square" alphaMode="ADD">
+				<Texture file="Interface\BUTTONS\ButtonHilight-Square" alphaMode="ADD">
 					<Size x="36" y="25"/>
 					<Anchors>
 						<Anchor point="RIGHT" x="-7" y="0"/>
@@ -758,6 +749,88 @@
 			</Button>
 		</Frames>
 	</Frame>
+
+	<Frame name="MJExistingsListsPanelTemplate" enableMouse="true" mixin="MJExistingsListsMixin" virtual="true">
+		<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+			<EdgeSize val="16"/>
+			<TileSize val="16"/>
+			<BackgroundInsets left="4" right="4" top="4" bottom="4"/>
+		</Backdrop>
+		<Frames>
+			<ScrollFrame parentKey="scrollFrame" inherits="UIPanelScrollFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="5" y="-5"/>
+					<Anchor point="BOTTOMRIGHT" x="-28" y="5"/>
+				</Anchors>
+				<ScrollChild>
+					<Frame parentKey="child">
+						<Size x="1" y="1"/>
+						<Anchors>
+							<Anchor point="TOPLEFT"/>
+						</Anchors>
+					</Frame>
+				</ScrollChild>
+			</ScrollFrame>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR:GetRGB());
+				self:onLoad();
+			</OnLoad>
+			<OnShow method="refresh"/>
+		</Scripts>
+	</Frame>
+
+	<Button name="MJOptionButtonTemplate" virtual="true">
+		<Size y="18"/>
+		<ButtonText parentKey="text" justifyH="LEFT" wordwrap="false">
+			<Anchors>
+				<Anchor point="LEFT" x="30" y="0"/>
+			</Anchors>
+		</ButtonText>
+		<NormalFont style="GameFontHighlight"/>
+		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+			<Anchors>
+				<Anchor point="TOPLEFT" x="20" y="1"/>
+				<Anchor point="BOTTOMRIGHT" x="0" y="1"/>
+			</Anchors>
+			<Color r=".196" g=".388" b=".8"/>
+		</HighlightTexture>
+		<Scripts>
+			<OnEnable>self.text:SetTextColor(1,1,1,1)</OnEnable>
+			<OnDisable>self.text:SetTextColor(.5,.5,.5,1)</OnDisable>
+		</Scripts>
+	</Button>
+
+	<CheckButton name="MJCollapseButtonTemplate" virtual="true">
+		<Size y="18"/>
+		<Frames>
+			<Frame parentKey="toggle">
+				<Size x="14" y="14"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="4" y="-1"/>
+				</Anchors>
+				<layers>
+					<Layer level="ARTWORK">
+						<Texture parentKey="plusMinus" file="Interface\Buttons\UI-MinusButton-UP" setAllPoints="true"/>
+					</Layer>
+				</layers>
+			</Frame>
+		</Frames>
+		<ButtonText parentKey="text" justifyH="LEFT" wordwrap="false">
+			<Anchors>
+				<Anchor point="LEFT" x="20" y="0"/>
+			</Anchors>
+		</ButtonText>
+		<NormalFont style="GameFontNormal"/>
+		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+			<Anchors>
+				<Anchor point="TOPLEFT" x="0" y="1"/>
+				<Anchor point="BOTTOMRIGHT" x="0" y="1"/>
+			</Anchors>
+			<Color r=".196" g=".388" b=".8"/>
+		</HighlightTexture>
+	</CheckButton>
 
 	<Frame name="MJSecureActionButtonTemplate" inherits="SecureActionButtonTemplate" mixin="MJMacroMixin" virtual="true">
 		<Scripts>
