@@ -11,9 +11,27 @@ function mounts:PLAYER_ENTERING_WORLD()
 	end
 	CollectionsJournal:Show()
 	journal.navBarBtn:Click()
-
 	-- journal.navBar:setMapID(1148)
 
+	-- MOUNT ANIMATION
+	-- local modelScene = MountJournal.MountDisplay.ModelScene
+	-- local timer
+	-- modelScene:HookScript("OnMouseDown", function(self)
+	-- 	if self.needsFanFare then return end
+	-- 	local actor = self:GetActorByTag("unwrapped")
+	-- 	local mountDisplay = self:GetParent()
+	-- 	if actor then
+	-- 		actor:SetAnimation(94, 0)
+	-- 		if timer then timer:Cancel() end
+
+	-- 		local lastDisplayed = mountDisplay.lastDisplayed
+	-- 		timer = C_Timer.NewTimer(10, function()
+	-- 			if mountDisplay.lastDisplayed == lastDisplayed then
+	-- 				actor:SetAnimation(0)
+	-- 			end
+	-- 		end)
+	-- 	end
+	-- end)
 
 	-- CONFIG OPEN
 	-- local classConfig = MountsJournalConfig
@@ -27,3 +45,5 @@ function mounts:PLAYER_ENTERING_WORLD()
 	-- 	end
 	-- end
 end
+
+-- SetClampRectInsets

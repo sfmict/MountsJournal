@@ -1,5 +1,5 @@
 local addon, L = ...
-local mounts, config = MountsJournal, MountsJournalConfig
+local util, mounts, config = MountsJournalUtil, MountsJournal, MountsJournalConfig
 local journal = MountsJournalFrame
 local interface = select(4, GetBuildInfo())
 
@@ -135,8 +135,9 @@ function journal:ADDON_LOADED(addonName)
 		navBarBtn:HookScript("OnClick", function(self)
 			local checked = self:GetChecked()
 			MountJournal.MountDisplay:SetShown(not checked)
-			journal.mapSettings:SetShown(checked)
 			journal.worldMap:SetShown(checked)
+			journal.mapSettings:SetShown(checked)
+			journal:updateMapSettings()
 		end)
 		navBarBtn:SetScript("OnEnter", function()
 			GameTooltip:SetOwner(navBarBtn, "ANCHOR_RIGHT", -4, -32)
@@ -160,7 +161,7 @@ function journal:ADDON_LOADED(addonName)
 		-- MAP SETTINGS
 		local mapSettings = CreateFrame("FRAME", nil, MountJournal, "MJMapSettingsTemplate")
 		journal.mapSettings = mapSettings
-		mapSettings:SetPoint("TOPLEFT", worldMap, "BOTTOMLEFT", 0, -1)
+		mapSettings:SetPoint("TOPLEFT", worldMap, "BOTTOMLEFT", 0, -30)
 		mapSettings:SetPoint("BOTTOMRIGHT", journal.rightInset)
 		mapSettings.dungeonRaidBtn:SetText(L["Dungeons and Raids"])
 		mapSettings.dungeonRaidBtn.click = function(mapID) navBar:setMapID(mapID) end
@@ -187,7 +188,25 @@ function journal:ADDON_LOADED(addonName)
 			journal:updateMapSettings()
 		end)
 		UIDropDownMenu_Initialize(mapSettings.listFromMap.optionsMenu, journal.listFromMapInit, "MENU")
-		journal:updateMapSettings()
+
+		-- EXISTINGS LISTS TOGGLE
+		mapSettings.existingsListsToggle:SetScript("OnClick", function(self)
+			local checked = self:GetChecked()
+			if checked then
+				self.icon:SetTexCoord(1, 1, 1, 0, 0, 1, 0, 0)
+				self.icon:SetPoint("CENTER", -1, 0)
+			else
+				self.icon:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
+				self.icon:SetPoint("CENTER")
+			end
+			journal.existingsLists:SetShown(checked)
+		end)
+
+		-- EXISTINGS LISTS
+		local existingsLists = CreateFrame("FRAME", nil, mapSettings, "MJExistingsListsPanelTemplate")
+		journal.existingsLists = existingsLists
+		existingsLists:SetPoint("TOPLEFT", MountJournal, "TOPRIGHT")
+		existingsLists:SetPoint("BOTTOMLEFT", MountJournal, "BOTTOMRIGHT")
 
 		--MOUNTJOURNAL ONSHOW
 		MountJournal:HookScript("OnShow", function()
@@ -517,7 +536,7 @@ end
 
 function journal:configureJournal()
 	local function setColor(btn, mountsTbl)
-		if mountsTbl and mounts:inTable(mountsTbl, btn.mountID) then
+		if mountsTbl and util.inTable(mountsTbl, btn.mountID) then
 			btn.icon:SetVertexColor(unpack(journal.colors.gold))
 			if not btn.check:IsShown() then btn.check:Show() end
 		else
@@ -595,7 +614,7 @@ function journal:mountToggle(btn)
 	local tbl = journal.list[btn.type]
 
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	local pos = mounts:inTable(tbl, btn.mountID)
+	local pos = util.inTable(tbl, btn.mountID)
 	if pos then
 		tremove(tbl, pos)
 		btn.icon:SetVertexColor(unpack(journal.colors.gray))
@@ -607,6 +626,7 @@ function journal:mountToggle(btn)
 		btn.check:Show()
 	end
 	mounts:setMountsList()
+	journal.existingsLists:refresh()
 end
 
 
@@ -621,6 +641,7 @@ function journal:setFlag(flag, enable)
 		journal:getRemoveMountList(journal.navBar.mapID)
 	end
 	mounts:setMountsList()
+	journal.existingsLists:refresh()
 end
 
 
@@ -636,8 +657,7 @@ do
 		local assocMaps = {}
 		for mapID, mapConfig in pairs(mounts.db.zoneMounts) do
 			if not mapConfig.listFromID and mapID ~= journal.navBar.mapID then
-				local mapInfo = C_Map.GetMapInfo(mapID)
-				local name = mapInfo.name
+				local mapInfo = util.getMapFullNameInfo(mapID)
 
 				if not assocMaps[mapInfo.mapType] then
 					assocMaps[mapInfo.mapType] = {
@@ -647,25 +667,13 @@ do
 					tinsert(btn.maps, assocMaps[mapInfo.mapType])
 				end
 
-				local mapGroupID = C_Map.GetMapGroupID(mapID)
-				if mapGroupID then
-					local mapGroupInfo = C_Map.GetMapGroupMembersInfo(mapGroupID)
-					if mapGroupInfo then
-						for _,mapGroupMemberInfo in ipairs(mapGroupInfo) do
-							if mapGroupMemberInfo.mapID == mapID then
-								name = format("%s(%s)", name, mapGroupMemberInfo.name)
-								break
-							end
-						end
-					end
-				end
-				tinsert(assocMaps[mapInfo.mapType].list, {name = name, mapID = mapID})
+				tinsert(assocMaps[mapInfo.mapType].list, {name = mapInfo.name, mapID = mapID})
 			end
 		end
 
-		table.sort(btn.maps, function(a,b) return a.name < b.name end)
+		sort(btn.maps, function(a, b) return a.name < b.name end)
 		for _,mapInfo in ipairs(btn.maps) do
-			table.sort(mapInfo.list, function(a,b) return a.name < b.name end)
+			sort(mapInfo.list, function(a, b) return a.name < b.name end)
 		end
 
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -719,6 +727,8 @@ end
 
 function journal:updateMapSettings()
 	local mapSettings = journal.mapSettings
+	if not mapSettings:IsShown() then return end
+
 	local groundCheck = mapSettings.Ground
 	local waterWalkCheck = mapSettings.WaterWalk
 	local listFromMap = mapSettings.listFromMap
@@ -742,23 +752,7 @@ function journal:updateMapSettings()
 	local relationText = mapSettings.relationMap.text
 	local relationClear = mapSettings.relationClear
 	if journal.currentList and journal.currentList.listFromID then
-		local mapID = journal.currentList.listFromID
-		local name = C_Map.GetMapInfo(mapID).name
-
-		local mapGroupID = C_Map.GetMapGroupID(mapID)
-		if mapGroupID then
-			local mapGroupInfo = C_Map.GetMapGroupMembersInfo(mapGroupID)
-			if mapGroupInfo then
-				for _,mapGroupMemberInfo in ipairs(mapGroupInfo) do
-					if mapGroupMemberInfo.mapID == mapID then
-						name = format("%s(%s)", name, mapGroupMemberInfo.name)
-						break
-					end
-				end
-			end
-		end
-
-		relationText:SetText(name)
+		relationText:SetText(util.getMapFullNameInfo(journal.currentList.listFromID).name)
 		relationText:SetTextColor(unpack(journal.colors.gold))
 		relationClear:Show()
 	else
@@ -766,6 +760,8 @@ function journal:updateMapSettings()
 		relationText:SetTextColor(unpack(journal.colors.gray))
 		relationClear:Hide()
 	end
+
+	journal.existingsLists:refresh()
 end
 
 
@@ -1177,11 +1173,11 @@ do
 			-- SELECTED
 			and (not selected[1] and not selected[2] and not selected[3]
 				-- FLY
-				or selected[1] and list and mounts:inTable(list.fly, mountID)
+				or selected[1] and list and util.inTable(list.fly, mountID)
 				-- GROUND
-				or selected[2] and list and mounts:inTable(list.ground, mountID)
+				or selected[2] and list and util.inTable(list.ground, mountID)
 				-- SWIMMING
-				or selected[3] and list and mounts:inTable(list.swimming, mountID))
+				or selected[3] and list and util.inTable(list.swimming, mountID))
 			-- EXPANSIONS
 			and expansions[mounts.mountsDB[mountID]] then
 				tinsert(journal.displayedMounts, i)

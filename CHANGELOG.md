@@ -1,1 +1,1 @@
-* Fix error with remove from global list.
+* Lists added.

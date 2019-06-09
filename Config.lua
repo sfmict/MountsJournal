@@ -235,7 +235,7 @@ config:SetScript("OnShow", function()
 		local info = C_Map.GetMapInfo(mapID)
 		tinsert(expeditions, {instanceID, info.name})
 	end
-	table.sort(expeditions, function(a, b) return a[2] < b[2] end)
+	sort(expeditions, function(a, b) return a[2] < b[2] end)
 	config.expeditions = {}
 	for i = 1, #expeditions do
 		createCheckboxChild(expeditions[i][2], expeditions[i][1], config.expeditions, rightPanelScroll.child, config.waterWalkExpedition)
