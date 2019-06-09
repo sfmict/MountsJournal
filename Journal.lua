@@ -574,7 +574,7 @@ end
 
 
 function journal:getRemoveMountList(mapID)
-	if mapID == mounts.defMountsListID then return end
+	if not mapID then return end
 	local list = mounts.db.zoneMounts[mapID]
 
 	if #list.fly + #list.ground + #list.swimming == 0

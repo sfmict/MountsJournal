@@ -1,1 +1,1 @@
-* Added ability to link lists of mounts.
+* Fix error with remove from global list.
