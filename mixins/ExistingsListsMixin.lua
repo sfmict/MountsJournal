@@ -21,7 +21,7 @@ function MJExistingsListsMixin:onLoad()
 		L["Zones with flags"],
 	}
 
-	for i, name in pairs(listsInfo) do
+	for i, name in ipairs(listsInfo) do
 		local button = CreateFrame("CheckButton", nil, self.child, "MJCollapseButtonTemplate")
 		button:SetText(name)
 		button.childs = {}
@@ -38,15 +38,13 @@ function MJExistingsListsMixin:collapse(btn, i)
 	local checked = btn:GetChecked()
 	btn.toggle.plusMinus:SetTexture(checked and "Interface/Buttons/UI-PlusButton-UP" or "Interface/Buttons/UI-MinusButton-UP")
 
-	local lastChild
 	for _,child in ipairs(btn.childs) do
 		child:SetShown(not checked)
-		lastChild = child
 	end
 
 	local nextButton = self.lists[i + 1]
 	if nextButton then
-		local relativeFrame = checked and btn or lastChild
+		local relativeFrame = checked and btn or btn.childs[#btn.childs]
 		nextButton:SetPoint("TOPLEFT", relativeFrame,"BOTTOMLEFT")
 		nextButton:SetPoint("TOPRIGHT", relativeFrame,"BOTTOMRIGHT")
 	end
@@ -57,7 +55,7 @@ function MJExistingsListsMixin:refresh()
 	if not self:IsVisible() then return end
 	local lastWidth = 0
 
-	for _,withList in pairs(self.lists) do
+	for _,withList in ipairs(self.lists) do
 		local width = withList.text:GetStringWidth()
 		if width > lastWidth then
 			lastWidth = width
@@ -90,7 +88,7 @@ function MJExistingsListsMixin:refresh()
 		end
 	end
 
-	for i, withList in pairs(self.lists) do
+	for i, withList in ipairs(self.lists) do
 		sort(withList.childs, function(a, b) return a:GetText() < b:GetText() end)
 
 		if #withList.childs == 0 then
