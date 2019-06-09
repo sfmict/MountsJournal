@@ -1,1 +1,1 @@
-* Added ability to link lists of mounts.
+* Lists added.

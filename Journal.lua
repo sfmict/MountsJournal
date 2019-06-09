@@ -161,7 +161,7 @@ function journal:ADDON_LOADED(addonName)
 		-- MAP SETTINGS
 		local mapSettings = CreateFrame("FRAME", nil, MountJournal, "MJMapSettingsTemplate")
 		journal.mapSettings = mapSettings
-		mapSettings:SetPoint("TOPLEFT", worldMap, "BOTTOMLEFT", 0, -1)
+		mapSettings:SetPoint("TOPLEFT", worldMap, "BOTTOMLEFT", 0, -30)
 		mapSettings:SetPoint("BOTTOMRIGHT", journal.rightInset)
 		mapSettings.dungeonRaidBtn:SetText(L["Dungeons and Raids"])
 		mapSettings.dungeonRaidBtn.click = function(mapID) navBar:setMapID(mapID) end
@@ -188,6 +188,19 @@ function journal:ADDON_LOADED(addonName)
 			journal:updateMapSettings()
 		end)
 		UIDropDownMenu_Initialize(mapSettings.listFromMap.optionsMenu, journal.listFromMapInit, "MENU")
+
+		-- EXISTINGS LISTS TOGGLE
+		mapSettings.existingsListsToggle:SetScript("OnClick", function(self)
+			local checked = self:GetChecked()
+			if checked then
+				self.icon:SetTexCoord(1, 1, 1, 0, 0, 1, 0, 0)
+				self.icon:SetPoint("CENTER", -1, 0)
+			else
+				self.icon:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
+				self.icon:SetPoint("CENTER")
+			end
+			journal.existingsLists:SetShown(checked)
+		end)
 
 		-- EXISTINGS LISTS
 		local existingsLists = CreateFrame("FRAME", nil, mapSettings, "MJExistingsListsPanelTemplate")
@@ -501,6 +514,7 @@ function journal:setMountsList()
 			swimming = mounts.db.swimming,
 		}
 		journal.list = journal.currentList
+		journal.listMapID = nil
 	else
 		local function getRelationMountList(mapID)
 			local list = mounts.db.zoneMounts[mapID]
@@ -580,7 +594,7 @@ end
 
 
 function journal:getRemoveMountList(mapID)
-	if mapID == mounts.defMountsListID then return end
+	if not mapID then return end
 	local list = mounts.db.zoneMounts[mapID]
 
 	if #list.fly + #list.ground + #list.swimming == 0
@@ -612,7 +626,7 @@ function journal:mountToggle(btn)
 		btn.check:Show()
 	end
 	mounts:setMountsList()
-	-- journal.existingsLists:refresh()
+	journal.existingsLists:refresh()
 end
 
 
@@ -627,7 +641,7 @@ function journal:setFlag(flag, enable)
 		journal:getRemoveMountList(journal.navBar.mapID)
 	end
 	mounts:setMountsList()
-	-- journal.existingsLists:refresh()
+	journal.existingsLists:refresh()
 end
 
 
@@ -657,9 +671,9 @@ do
 			end
 		end
 
-		table.sort(btn.maps, function(a,b) return a.name < b.name end)
+		sort(btn.maps, function(a, b) return a.name < b.name end)
 		for _,mapInfo in ipairs(btn.maps) do
-			table.sort(mapInfo.list, function(a,b) return a.name < b.name end)
+			sort(mapInfo.list, function(a, b) return a.name < b.name end)
 		end
 
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -746,6 +760,8 @@ function journal:updateMapSettings()
 		relationText:SetTextColor(unpack(journal.colors.gray))
 		relationClear:Hide()
 	end
+
+	journal.existingsLists:refresh()
 end
 
 

@@ -61,7 +61,7 @@ function MJNavBarMixin:getDropDownList()
 					tinsert(list, data)
 				end
 			end
-			table.sort(list, function(a, b) return a.text < b.text end)
+			sort(list, function(a, b) return a.text < b.text end)
 		end
 	end
 	return list

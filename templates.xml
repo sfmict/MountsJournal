@@ -682,25 +682,50 @@
 
 	<Frame name="MJMapSettingsTemplate" hidden="true" inherits="InsetFrameTemplate" virtual="true">
 		<Frames>
-			<Button parentKey="dungeonRaidBtn" inherits="MJMenuButtonStreatchTemplate" mixin="MJDungeonRaidMixin">
-				<Size x="130" y="22"/>
+			<Frame parentKey="mapControl" inherits="InsetFrameTemplate">
+				<Size y="29"/>
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="-3" y="-3"/>
+					<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
+					<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT"/>
+				</Anchors>
+			</Frame>
+			<Button parentKey="dungeonRaidBtn" inherits="MJMenuButtonStreatchTemplate" mixin="MJDungeonRaidMixin">
+				<Size x="130" y="24"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.mapControl" relativePoint="TOPLEFT" x="3" y="-3"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad method="onLoad"/>
 					<OnClick method="onClick"/>
 				</Scripts>
 			</Button>
-			<Button parentKey="CurrentMap" inherits="UIPanelButtonTemplate">
-				<Size x="250" y="35"/>
+			<CheckButton parentKey="existingsListsToggle" inherits="UIMenuButtonStretchTemplate">
+				<Size x="24" y="24"/>
 				<Anchors>
-					<Anchor point="TOP" x="0" y="-30"/>
+					<Anchor point="TOPRIGHT" relativeKey="$parent.mapControl" relativePoint="TOPRIGHT" x="-3" y="-3"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture parentKey="icon" file="Interface/ChatFrame/ChatFrameExpandArrow">
+							<Size x="14" y="14"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+				<HighlightTexture file="Interface/Buttons/UI-Common-MouseHilight" alpha="0.75" alphaMode="ADD"/>
+			</CheckButton>
+			<Button parentKey="CurrentMap" inherits="UIPanelButtonTemplate">
+				<Size y="24"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.dungeonRaidBtn" relativePoint="RIGHT" x="-2"/>
+					<Anchor point="RIGHT" relativeKey="$parent.existingsListsToggle" relativePoint="LEFT" x="2"/>
 				</Anchors>
 			</Button>
 			<CheckButton parentKey="Ground" inherits="MJCheckButtonTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.CurrentMap" relativePoint="BOTTOMLEFT" x="-60" y="-20"/>
+					<Anchor point="TOPLEFT" x="33" y="-40"/>
 				</Anchors>
 			</CheckButton>
 			<CheckButton parentKey="WaterWalk" inherits="MJCheckButtonTemplate">
@@ -750,7 +775,7 @@
 		</Frames>
 	</Frame>
 
-	<Frame name="MJExistingsListsPanelTemplate" enableMouse="true" mixin="MJExistingsListsMixin" virtual="true">
+	<Frame name="MJExistingsListsPanelTemplate" enableMouse="true" mixin="MJExistingsListsMixin" hidden="true" virtual="true">
 		<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
 			<EdgeSize val="16"/>
 			<TileSize val="16"/>
@@ -764,7 +789,7 @@
 				</Anchors>
 				<ScrollChild>
 					<Frame parentKey="child">
-						<Size x="1" y="1"/>
+						<Size y="1"/>
 						<Anchors>
 							<Anchor point="TOPLEFT"/>
 						</Anchors>

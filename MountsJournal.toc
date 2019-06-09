@@ -16,4 +16,3 @@ Config.lua
 ConfigClasses.lua
 journal.xml
 Journal.lua
-Atlas.lua

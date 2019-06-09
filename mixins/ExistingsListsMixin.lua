@@ -16,33 +16,25 @@ function MJExistingsListsMixin:onLoad()
 	end)
 	self.lists = {}
 	local listsInfo = {
-		withList = {
-			name = L["Zones with list"],
-			nextKey = "withRelation",
-		},
-		withRelation = {
-			name = L["Zones with relation"],
-			nextKey = "withFlags",
-		},
-		withFlags = {
-			name = L["Zones with flags"],
-		},
+		L["Zones with list"],
+		L["Zones with relation"],
+		L["Zones with flags"],
 	}
 
-	for k, listInfo in pairs(listsInfo) do
-		self.lists[k] = CreateFrame("CheckButton", nil, self.child, "MJCollapseButtonTemplate")
-		self.lists[k]:SetText(listInfo.name)
-		self.lists[k].childs = {}
-		self.lists[k].nextKey = listInfo.nextKey
-		self.lists[k]:SetScript("OnClick", function(btn) self:collapse(btn) end)
+	for i, name in pairs(listsInfo) do
+		local button = CreateFrame("CheckButton", nil, self.child, "MJCollapseButtonTemplate")
+		button:SetText(name)
+		button.childs = {}
+		button:SetScript("OnClick", function(btn) self:collapse(btn, i) end)
+		tinsert(self.lists, button)
 	end
 
-	self.lists.withList:SetPoint("TOPLEFT", self.scrollFrame)
-	self.lists.withList:SetPoint("TOPRIGHT", self.scrollFrame)
+	self.lists[1]:SetPoint("TOPLEFT", self.child)
+	self.lists[1]:SetPoint("TOPRIGHT", self.child)
 end
 
 
-function MJExistingsListsMixin:collapse(btn)
+function MJExistingsListsMixin:collapse(btn, i)
 	local checked = btn:GetChecked()
 	btn.toggle.plusMinus:SetTexture(checked and "Interface/Buttons/UI-PlusButton-UP" or "Interface/Buttons/UI-MinusButton-UP")
 
@@ -52,21 +44,17 @@ function MJExistingsListsMixin:collapse(btn)
 		lastChild = child
 	end
 
-	if btn.nextKey then
-		self.lists[btn.nextKey]:SetPoint("TOPLEFT", checked and btn or lastChild,"BOTTOMLEFT")
-		self.lists[btn.nextKey]:SetPoint("TOPRIGHT", checked and btn or lastChild,"BOTTOMRIGHT")
+	local nextButton = self.lists[i + 1]
+	if nextButton then
+		local relativeFrame = checked and btn or lastChild
+		nextButton:SetPoint("TOPLEFT", relativeFrame,"BOTTOMLEFT")
+		nextButton:SetPoint("TOPRIGHT", relativeFrame,"BOTTOMRIGHT")
 	end
-end
-
-
-function MJExistingsListsMixin:optionClick(btn)
-	MountsJournalFrame.navBar:setMapID()
 end
 
 
 function MJExistingsListsMixin:refresh()
 	if not self:IsVisible() then return end
-	fprint("refresh")
 	local lastWidth = 0
 
 	for _,withList in pairs(self.lists) do
@@ -79,45 +67,32 @@ function MJExistingsListsMixin:refresh()
 	self.optionsButtonPool:ReleaseAll()
 	lastWidth = lastWidth + 10
 
-	for mapID, mapConfig in pairs(self.mounts.db.zoneMounts) do
-		if mapConfig.listFromID then
-			-- local optionButton = self.optionsButtonPool:Acquire()
-			-- optionButton:SetText(self.util.getMapFullNameInfo(mapID).name)
-			-- local width = optionButton.text:GetStringWidth()
-			-- if width > lastWidth then
-			-- 	lastWidth = width
-			-- end
-			tinsert(self.lists.withRelation.childs, optionButton)
-		elseif #mapConfig.fly + #mapConfig.ground + #mapConfig.swimming ~= 0 then
-			local optionButton = self.optionsButtonPool:Acquire()
-			optionButton:SetText(self.util.getMapFullNameInfo(mapID).name)
-			-- optionButton:SetScript("OnClick", function()
-				-- self.navBar:setMapID(mapID)
-				-- self.navBar:refresh()
-				-- fprint(mapID)
-				-- MountsJournalFrame.navBar:setMapID(mapID)
-				-- fprint(self)
-			-- end)
-			local width = optionButton.text:GetStringWidth()
-			if width > lastWidth then
-				lastWidth = width
-			end
-			tinsert(self.lists.withList.childs, optionButton)
+	local function createOptionButton(mapID)
+		local optionButton = self.optionsButtonPool:Acquire()
+		optionButton:SetText(self.util.getMapFullNameInfo(mapID).name)
+		optionButton:SetScript("OnClick", function() self.navBar:setMapID(mapID) end)
+		local width = optionButton.text:GetStringWidth()
+		if width > lastWidth then
+			lastWidth = width
 		end
-
-		-- if mapConfig.flags.groundOnly or mapConfig.flags.waterWalkOnly then
-		-- 	local optionButton = self.optionsButtonPool:Acquire()
-		-- 	optionButton:SetText(self.util.getMapFullNameInfo(mapID).name)
-		-- 	local width = optionButton.text:GetStringWidth()
-		-- 	if width > lastWidth then
-		-- 		lastWidth = width
-		-- 	end
-		-- 	tinsert(self.lists.withFlags.childs, optionButton)
-		-- end
+		return optionButton
 	end
 
-	for _,withList in pairs(self.lists) do
-		fprint(#withList.childs)
+	for mapID, mapConfig in pairs(self.mounts.db.zoneMounts) do
+		if mapConfig.listFromID then
+			tinsert(self.lists[2].childs, createOptionButton(mapID))
+		elseif #mapConfig.fly + #mapConfig.ground + #mapConfig.swimming ~= 0 then
+			tinsert(self.lists[1].childs, createOptionButton(mapID))
+		end
+
+		if mapConfig.flags.groundOnly or mapConfig.flags.waterWalkOnly then
+			tinsert(self.lists[3].childs, createOptionButton(mapID))
+		end
+	end
+
+	for i, withList in pairs(self.lists) do
+		sort(withList.childs, function(a, b) return a:GetText() < b:GetText() end)
+
 		if #withList.childs == 0 then
 			local optionButton = self.optionsButtonPool:Acquire()
 			optionButton:SetText(EMPTY)
@@ -127,12 +102,14 @@ function MJExistingsListsMixin:refresh()
 
 		local lastChild
 		for _,child in ipairs(withList.childs) do
-			child:SetPoint("TOPLEFT", lastChild or withList, "BOTTOMLEFT")
-			child:SetPoint("TOPRIGHT", lastChild or withList, "BOTTOMRIGHT")
+			local relativeFrame = lastChild or withList
+			child:SetPoint("TOPLEFT", relativeFrame, "BOTTOMLEFT")
+			child:SetPoint("TOPRIGHT", relativeFrame, "BOTTOMRIGHT")
 			lastChild = child
 		end
-		self:collapse(withList)
+		self:collapse(withList, i)
 	end
 
-	self:SetWidth(lastWidth + 62)
+	self.child:SetWidth(lastWidth + 35)
+	self:SetWidth(lastWidth + 65)
 end
