@@ -8,10 +8,11 @@ local function isMapValidForNavBarDropDown(mapType)
 end
 
 
-MJNavBarMixin = {}
+MJNavBarMixin = CreateFromMixins(MountsJournalEventsMixin)
 
 
 function MJNavBarMixin:onLoad()
+	self:init()
 	self.journal = MountsJournalFrame
 	local homeData = {
 		name = WORLD,
@@ -69,10 +70,10 @@ end
 
 
 function MJNavBarMixin:setMapID(mapID)
+	if mapID == self.mapID then return end
 	self.mapID = mapID
-	if self.journal.worldMap then self.journal.worldMap:refresh() end
-	if type(self.click) == "function" then self.click() end
 	self:refresh()
+	self:event("MAP_CHANGE")
 end
 
 

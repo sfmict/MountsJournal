@@ -72,7 +72,7 @@ function MJMacroMixin:getDefMacro()
 	and (not self.classConfig.useOnlyInWaterWalkLocation or self.sFlags.waterWalk)
 	and not self.sFlags.swimming
 	and not self.sFlags.fly then
-		macro = self:addLine(macro, "/cast "..sefl:getSpellName(3714)) -- Path of Frost
+		macro = self:addLine(macro, "/cast "..self:getSpellName(3714)) -- Path of Frost
 
 	elseif self.class == "SHAMAN"
 	and self.classConfig.useWaterWalking

@@ -7,6 +7,8 @@ function MJMapCanvasMixin:onLoad()
 	self.highlight = self.child.HighlightTexture
 	self.detailLayerPool = CreateFramePool("FRAME", self.child, "MapCanvasDetailLayerTemplate")
 	self.explorationLayerPool = CreateTexturePool(self.child.Exploration, "ARTWORK", 0)
+
+	self.navBar:on("MAP_CHANGE", function() self:refresh() end)
 end
 
 

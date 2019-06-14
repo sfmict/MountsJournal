@@ -7,8 +7,8 @@
 ## SavedVariables: MountsJournalDB
 ## SavedVariablesPerCharacter: MountsJournalChar
 locales.xml
-templates.xml
 Util.lua
+templates.xml
 Mounts.lua
 db.lua
 Binding.lua
