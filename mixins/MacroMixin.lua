@@ -14,10 +14,12 @@ function MJMacroMixin:onLoad()
 	self.macrosConfig = self.mounts.config.macrosConfig
 	self.charMacrosConfig = MountsJournalChar.macrosConfig
 	self.class = select(2, UnitClass("player"))
-	self.broomName = GetItemInfo(37011)
-	if not self.broomName then
-		self:RegisterEvent("GET_ITEM_INFO_RECEIVED")
-	end
+
+	local magicBroom = Item:CreateFromItemID(37011)
+	magicBroom:ContinueOnItemLoad(function()
+		self.broomName = magicBroom:GetItemName()
+	end)
+
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:refresh()
 end
@@ -29,10 +31,10 @@ function MJMacroMixin:refresh()
 	self.combatMacro = nil
 	if self.classConfig then
 		if self.classConfig.macroEnable then
-			self.macro = self.classConfig.macro or self:getClassMacro()
+			self.macro = self.classConfig.macro or self:getClassMacro(nil, function() self:refresh() end)
 		end
 		if self.classConfig.combatMacroEnable then
-			self.combatMacro = self.classConfig.combatMacro or self:getClassMacro()
+			self.combatMacro = self.classConfig.combatMacro or self:getClassMacro(nil, function() self:refresh() end)
 		end
 	end
 end
@@ -49,9 +51,19 @@ end
 
 do
 	local spellIDtoName = {}
-	function MJMacroMixin:getSpellName(spellID)
+	function MJMacroMixin:getSpellName(spellID, cb)
 		if not spellIDtoName[spellID] then
-			spellIDtoName[spellID] = GetSpellInfo(spellID)
+			local spell = Spell:CreateFromSpellID(spellID)
+			local name = spell:GetSpellName()
+			spellIDtoName[spellID] = name
+
+			spell:ContinueOnSpellLoad(function()
+				local subName = spell:GetSpellSubtext()
+				if strlen(subName) > 0 then
+					spellIDtoName[spellID] = format("%s(%s)", name, subName)
+					if type(cb) == "function" then cb() end
+				end
+			end)
 		end
 
 		return spellIDtoName[spellID]
@@ -108,13 +120,13 @@ do
 
 
 	local classFunc = {
-		PRIEST = function(self) return classDefFunc(self:getSpellName(1706)) end, -- Levitation
-		SHAMAN = function(self) return classDefFunc(self:getSpellName(2645)) end, -- Ghost Wolf
-		MAGE = function(self) return classDefFunc(self:getSpellName(130)) end, -- Slow Fall
-		MONK = function(self) return classDefFunc(self:getSpellName(125883)) end, --Zen Flight
-		DRUID = function(self)
-			local catForm = self:getSpellName(768)
-			local travelForm = self:getSpellName(783)
+		PRIEST = function(self, cb) return classDefFunc(self:getSpellName(1706, cb)) end, -- Levitation
+		SHAMAN = function(self, cb) return classDefFunc(self:getSpellName(2645, cb)) end, -- Ghost Wolf
+		MAGE = function(self, cb) return classDefFunc(self:getSpellName(130, cb)) end, -- Slow Fall
+		MONK = function(self, cb) return classDefFunc(self:getSpellName(125883, cb)) end, --Zen Flight
+		DRUID = function(self, cb)
+			local catForm = self:getSpellName(768, cb)
+			local travelForm = self:getSpellName(783, cb)
 
 			if catForm and travelForm then
 				return "/cast [indoors,noswimming]"..catForm..";"..travelForm
@@ -123,12 +135,12 @@ do
 	}
 
 
-	function MJMacroMixin:getClassMacro(class)
+	function MJMacroMixin:getClassMacro(class, cb)
 		local macro = self:getDismountMacro()
 
 		local classFunc = classFunc[class or self.class]
 		if type(classFunc) == "function" then
-			local text = classFunc(self)
+			local text = classFunc(self, cb)
 			if type(text) == "string" and strlen(text) > 0 then
 				macro = self:addLine(macro, text)
 			end
@@ -220,12 +232,4 @@ function MJMacroMixin:PLAYER_REGEN_DISABLED()
 	end
 
 	self:SetAttribute("macrotext", macro or "/mount")
-end
-
-
-function MJMacroMixin:GET_ITEM_INFO_RECEIVED(itemID)
-	if itemID == 37011 then
-		self:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
-		self.broomName = GetItemInfo(37011)
-	end
 end

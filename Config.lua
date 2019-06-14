@@ -251,12 +251,10 @@ config:SetScript("OnShow", function()
 	-- USE MAGIC BROOM
 	config.useMagicBroom = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
 	config.useMagicBroom:SetPoint("TOPLEFT", config.useHerbMounts, "BOTTOMLEFT", 0, -26)
-	local magicBroomName = select(2, GetItemInfo(37011))
-	if magicBroomName then
-		config.useMagicBroom.Text:SetText(format(L["UseMagicBroom"], select(2, GetItemInfo(37011))))
-	else
-		config:RegisterEvent("GET_ITEM_INFO_RECEIVED")
-	end
+	local magicBroom = Item:CreateFromItemID(37011)
+	magicBroom:ContinueOnItemLoad(function()
+		config.useMagicBroom.Text:SetText(format(L["UseMagicBroom"], magicBroom:GetItemLink()))
+	end)
 	config:setHyperlinkTooltip(config.useMagicBroom)
 	config.useMagicBroom.tooltipText = L["UseMagicBroomTitle"]
 	config.useMagicBroom.tooltipRequirement = L["UseMagicBroomDescription"]
@@ -291,14 +289,6 @@ end)
 function config:setEnableCheckButtons(enable, tbl)
 	for _,check in ipairs(tbl) do
 		check:SetEnabled(enable)
-	end
-end
-
-
-function config:GET_ITEM_INFO_RECEIVED(itemID)
-	if itemID == 37011 then
-		self:UnregisterEvent("GET_ITEM_INFO_RECEIVED")
-		config.useMagicBroom.Text:SetText(format(L["UseMagicBroom"], select(2, GetItemInfo(37011))))
 	end
 end
 
