@@ -52,13 +52,10 @@ classConfig:SetScript("OnShow", function(self)
 		end
 		lastClassFrame = classFrame
 		classFrame.key = className
-		classFrame.default = self.secure:getClassMacro(className, function()
+		classFrame.default = self.secure:getClassMacro(className, "config"..className, function()
 			classFrame.default = self.secure:getClassMacro(className)
-			if self.currentCharacterFrame and className == playerClassName then
-				self.currentCharacterFrame.default = classFrame.default
-			end
-			if self.rightPanel and self.rightPanel.currentBtn then
-				self.rightPanel.currentBtn:Click()
+			if self.rightPanel and self.rightPanel.currentBtn == classFrame then
+				classFrame:Click()
 			end
 		end)
 		classFrame.name:SetText(localized)
@@ -76,10 +73,14 @@ classConfig:SetScript("OnShow", function(self)
 	-- CURRENT CHARACTER
 	local classColor = C_ClassColor.GetClassColor(playerClassName)
 	local classFrame = CreateFrame("BUTTON", nil, classConfig, "MJClassButtonTemplate")
-	self.currentCharacterFrame = classFrame
 	classFrame:SetPoint("TOPLEFT", lastClassFrame, "BOTTOMLEFT", 0, -20)
 	classFrame.key = playerClassName
-	classFrame.default = self.secure:getClassMacro(playerClassName)
+	classFrame.default = self.secure:getClassMacro(playerClassName, "character", function()
+		classFrame.default = self.secure:getClassMacro(className)
+		if self.rightPanel and self.rightPanel.currentBtn == classFrame then
+			classFrame:Click()
+		end
+	end)
 	classFrame.name:SetPoint("RIGHT", -30, 0)
 	classFrame.name:SetText(UnitName("player"))
 	classFrame.name:SetTextColor(classColor:GetRGB())

@@ -6,11 +6,11 @@ mounts:RegisterEvent("PLAYER_ENTERING_WORLD")
 function mounts:PLAYER_ENTERING_WORLD()
 	fprint("PLAYER_ENTERING_WORLD")
 	-- JOURNAL OPEN
-	if not IsAddOnLoaded("Blizzard_Collections") then
-		LoadAddOn("Blizzard_Collections")
-	end
-	CollectionsJournal:Show()
-	journal.navBarBtn:Click()
+	-- if not IsAddOnLoaded("Blizzard_Collections") then
+	-- 	LoadAddOn("Blizzard_Collections")
+	-- end
+	-- CollectionsJournal:Show()
+	-- journal.navBarBtn:Click()
 	-- journal.navBar:setMapID(1148)
 
 	-- MOUNT ANIMATION
@@ -44,6 +44,7 @@ function mounts:PLAYER_ENTERING_WORLD()
 	-- 		InterfaceOptionsFrame_OpenToCategory(classConfig.name)
 	-- 	end
 	-- end
+	-- select(14,classConfig:GetChildren()):Click()
 end
 
 -- SetClampRectInsets

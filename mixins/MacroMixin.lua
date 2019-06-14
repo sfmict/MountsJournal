@@ -25,18 +25,25 @@ function MJMacroMixin:onLoad()
 end
 
 
+function MJMacroMixin:setMacro()
+	self.macro = nil
+	if self.classConfig and self.classConfig.macroEnable then
+		self.macro = self.classConfig.macro or self:getClassMacro(nil, "macro", function() self:setMacro() end)
+	end
+end
+
+
+function MJMacroMixin:setCombatMacro()
+	if self.classConfig and self.classConfig.combatMacroEnable then
+		self.combatMacro = self.classConfig.combatMacro or self:getClassMacro(nil, "combatMacro", function() self:setCombatMacro() end)
+	end
+end
+
+
 function MJMacroMixin:refresh()
 	self.classConfig = self.charMacrosConfig.enable and self.charMacrosConfig or self.macrosConfig[self.class]
-	self.macro = nil
-	self.combatMacro = nil
-	if self.classConfig then
-		if self.classConfig.macroEnable then
-			self.macro = self.classConfig.macro or self:getClassMacro(nil, function() self:refresh() end)
-		end
-		if self.classConfig.combatMacroEnable then
-			self.combatMacro = self.classConfig.combatMacro or self:getClassMacro(nil, function() self:refresh() end)
-		end
-	end
+	self:setMacro()
+	self:setCombatMacro()
 end
 
 
@@ -51,22 +58,30 @@ end
 
 do
 	local spellIDtoName = {}
-	function MJMacroMixin:getSpellName(spellID, cb)
+	function MJMacroMixin:getSpellName(spellID, cbName, cb)
 		if not spellIDtoName[spellID] then
 			local spell = Spell:CreateFromSpellID(spellID)
 			local name = spell:GetSpellName()
-			spellIDtoName[spellID] = name
+			spellIDtoName[spellID] = {
+				name = name,
+				callbacks = {},
+			}
 
 			spell:ContinueOnSpellLoad(function()
 				local subName = spell:GetSpellSubtext()
 				if strlen(subName) > 0 then
-					spellIDtoName[spellID] = format("%s(%s)", name, subName)
-					if type(cb) == "function" then cb() end
+					spellIDtoName[spellID].name = format("%s(%s)", name, subName)
+					for _,callback in pairs(spellIDtoName[spellID].callbacks) do
+						callback()
+					end
 				end
 			end)
 		end
 
-		return spellIDtoName[spellID]
+		if type(cbName) == "string" and type(cb) == "function" then
+			spellIDtoName[spellID].callbacks[cbName] = cb
+		end
+		return spellIDtoName[spellID].name
 	end
 end
 
@@ -120,13 +135,13 @@ do
 
 
 	local classFunc = {
-		PRIEST = function(self, cb) return classDefFunc(self:getSpellName(1706, cb)) end, -- Levitation
-		SHAMAN = function(self, cb) return classDefFunc(self:getSpellName(2645, cb)) end, -- Ghost Wolf
-		MAGE = function(self, cb) return classDefFunc(self:getSpellName(130, cb)) end, -- Slow Fall
-		MONK = function(self, cb) return classDefFunc(self:getSpellName(125883, cb)) end, --Zen Flight
-		DRUID = function(self, cb)
-			local catForm = self:getSpellName(768, cb)
-			local travelForm = self:getSpellName(783, cb)
+		PRIEST = function(self, ...) return classDefFunc(self:getSpellName(1706, ...)) end, -- Levitation
+		SHAMAN = function(self, ...) return classDefFunc(self:getSpellName(2645, ...)) end, -- Ghost Wolf
+		MAGE = function(self, ...) return classDefFunc(self:getSpellName(130, ...)) end, -- Slow Fall
+		MONK = function(self, ...) return classDefFunc(self:getSpellName(125883, ...)) end, --Zen Flight
+		DRUID = function(self, ...)
+			local catForm = self:getSpellName(768, ...)
+			local travelForm = self:getSpellName(783, ...)
 
 			if catForm and travelForm then
 				return "/cast [indoors,noswimming]"..catForm..";"..travelForm
@@ -135,12 +150,12 @@ do
 	}
 
 
-	function MJMacroMixin:getClassMacro(class, cb)
+	function MJMacroMixin:getClassMacro(class, ...)
 		local macro = self:getDismountMacro()
 
 		local classFunc = classFunc[class or self.class]
 		if type(classFunc) == "function" then
-			local text = classFunc(self, cb)
+			local text = classFunc(self, ...)
 			if type(text) == "string" and strlen(text) > 0 then
 				macro = self:addLine(macro, text)
 			end

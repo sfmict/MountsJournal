@@ -8,7 +8,7 @@ end
 
 function MountsJournalEventsMixin:on(event, func)
 	if type(event) ~= "string" or type(func) ~= "function" then return end
-	local event, name = strsplit(".", event)
+	local event, name = strsplit(".", event, 2)
 
 	if not self.events[event] then
 		self.events[event] = {}
@@ -30,7 +30,6 @@ function MountsJournalEventsMixin:off(event, func)
 			for i, handler in ipairs(handlerList) do
 				if (not name or handler.name == name) and (not func or handler.func == func) then
 					tremove(handlerList, i)
-					break
 				end
 			end
 			if #handlerList == 0 then
