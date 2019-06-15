@@ -5,10 +5,10 @@ local interface = select(4, GetBuildInfo())
 
 
 mounts:SetScript("OnEvent", function(self, event, ...)
-	if mounts[event] then
-		mounts[event](self, ...)
+	if self[event] then
+		self[event](self, ...)
 	else
-		mounts:setMountsList()
+		self:setMountsList()
 	end
 end)
 mounts:RegisterEvent("ADDON_LOADED")
@@ -25,24 +25,24 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalDB.zoneMounts = MountsJournalDB.zoneMounts or {}
 		MountsJournalDB.filters = MountsJournalDB.filters or {}
 		MountsJournalDB.config = MountsJournalDB.config or {}
-		mounts.filters = MountsJournalDB.filters
-		mounts.config = MountsJournalDB.config
-		mounts.config.macrosConfig = mounts.config.macrosConfig or {}
+		self.filters = MountsJournalDB.filters
+		self.config = MountsJournalDB.config
+		self.config.macrosConfig = self.config.macrosConfig or {}
 		for i = 1, GetNumClasses() do
 			local _,className = GetClassInfo(i)
-			mounts.config.macrosConfig[className] = mounts.config.macrosConfig[className] or {}
+			self.config.macrosConfig[className] = self.config.macrosConfig[className] or {}
 		end
-		if mounts.config.waterWalkInstance == nil then
-			mounts.config.waterWalkInstance = true
+		if self.config.waterWalkInstance == nil then
+			self.config.waterWalkInstance = true
 		end
-		if mounts.config.waterWalkList == nil or type(mounts.config.waterWalkList) ~= "table" then
-			mounts.config.waterWalkList = {
+		if type(self.config.waterWalkList) ~= "table" then
+			self.config.waterWalkList = {
 				[1456] = true, -- Око Азшары
 				[1771] = true, -- Тол Дагор
 			}
 		end
-		if mounts.config.waterWalkExpeditionList == nil or type(mounts.config.waterWalkExpeditionList) ~= "table" then
-			mounts.config.waterWalkExpeditionList = {}
+		if type(self.config.waterWalkExpeditionList) ~= "table" then
+			self.config.waterWalkExpeditionList = {}
 		end
 
 		MountsJournalChar = MountsJournalChar or {}
@@ -52,25 +52,25 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalChar.zoneMounts = MountsJournalChar.zoneMounts or {}
 		MountsJournalChar.macrosConfig = MountsJournalChar.macrosConfig or {}
 
-		mounts.sFlags = {}
-		mounts.defMountsListID = MapUtil.GetMapParentInfo(MapUtil.GetDisplayableMapForPlayer(), Enum.UIMapType.Cosmic, true).mapID
-		mounts:setMountsListPerChar()
-		mounts.swimmingVashjir = {
+		self.sFlags = {}
+		self.defMountsListID = MapUtil.GetMapParentInfo(MapUtil.GetDisplayableMapForPlayer(), Enum.UIMapType.Cosmic, true).mapID
+		self:setMountsListPerChar()
+		self.swimmingVashjir = {
 			373, -- Вайш'ирский морской конек
 		}
-		mounts.lowLevel = {
+		self.lowLevel = {
 			678, -- Механоцикл с шофером
 			679, -- Анжинерский чоппер с водителем
 		}
-		mounts.waterWalk = {
+		self.waterWalk = {
 			488, -- Багровый водный долгоног
 			449, -- Лазурный водный долгоног
 		}
-		mounts.herbalismMounts = {
+		self.herbalismMounts = {
 			522, -- Небесный голем
 		}
 
-		mounts.expeditions = {
+		self.expeditions = {
 			[1813] = 981, -- Экспедиция: Руины Ун'гола
 			[1814] = 1336, -- Экспедиция: Тихая Сень
 			[1879] = 1337, -- Экспедиция: Йорундалль
@@ -81,7 +81,7 @@ function mounts:ADDON_LOADED(addonName)
 			[1897] = 1035, -- Экспедиция: Раскаленный остров
 			[1898] = 1032, -- Экспедиция: Паучья лощина
 		}
-		mounts.continentsGround = {
+		self.continentsGround = {
 			[1107] = true, -- Разлом Зловещего Шрама
 			[1463] = true, -- Внешняя область Хельхейма
 			[1514] = true, -- Скитающийся остров
@@ -95,7 +95,7 @@ function mounts:ADDON_LOADED(addonName)
 		}
 		-- 1170, -- Горгронд - сценарий маг'харов
 
-		mounts.mapVashjir = {
+		self.mapVashjir = {
 			[201] = true, -- Лес Келп’тар
 			[203] = true, -- Вайш'ир
 			[204] = true, -- Бездонные глубины
@@ -107,28 +107,28 @@ function mounts:ADDON_LOADED(addonName)
 		self:RegisterEvent("ZONE_CHANGED_INDOORS")
 		self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
-		mounts:setModifier(mounts.config.modifier)
-		mounts:setHandleWaterJump(mounts.config.waterJump)
-		mounts:init()
+		self:setModifier(self.config.modifier)
+		self:setHandleWaterJump(self.config.waterJump)
+		self:init()
 	end
 end
 
 
 function mounts:setModifier(modifier)
-	if util:inTable({"ALT", "CTRL", "SHIFT"}, modifier) then
-		mounts.config.modifier = modifier
-		mounts.modifier = modifier == "ALT" and IsAltKeyDown or modifier == "CTRL" and IsControlKeyDown or IsShiftKeyDown
+	if util.inTable({"ALT", "CTRL", "SHIFT"}, modifier) then
+		self.config.modifier = modifier
+		self.modifier = modifier == "ALT" and IsAltKeyDown or modifier == "CTRL" and IsControlKeyDown or IsShiftKeyDown
 		return
 	end
-	mounts.config.modifier = "ALT"
-	mounts.modifier = IsAltKeyDown
+	self.config.modifier = "ALT"
+	self.modifier = IsAltKeyDown
 end
 
 
 function mounts:setMountsList()
 	local mapInfo = C_Map.GetMapInfo(MapUtil.GetDisplayableMapForPlayer())
-	local zoneMounts = mounts.db.zoneMounts
-	mounts.mapFlags = nil
+	local zoneMounts = self.db.zoneMounts
+	self.mapFlags = nil
 
 	local function getMountsRelationList(mapID)
 		local list = zoneMounts[mapID]
@@ -141,21 +141,21 @@ function mounts:setMountsList()
 	while mapInfo do
 		local list = zoneMounts[mapInfo.mapID]
 		if list then
-			if not mounts.mapFlags then mounts.mapFlags = list.flags end
+			if not self.mapFlags then self.mapFlags = list.flags end
 			local relationList = getMountsRelationList(mapInfo.mapID)
 			if relationList then
 				if #relationList.fly + #relationList.ground + #relationList.swimming ~= 0 then
-					mounts.list = relationList
+					self.list = relationList
 					return
 				end
 			end
 		end
 		mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
 	end
-	mounts.list = {
-		fly = mounts.db.fly,
-		ground = mounts.db.ground,
-		swimming = mounts.db.swimming,
+	self.list = {
+		fly = self.db.fly,
+		ground = self.db.ground,
+		swimming = self.db.swimming,
 	}
 end
 
@@ -163,13 +163,13 @@ end
 function mounts:setMountsListPerChar(perChar)
 	if perChar ~= nil then
 		MountsJournalChar.enable = perChar
-		mounts.perChar = perChar
+		self.perChar = perChar
 	elseif MountsJournalChar and MountsJournalChar.enable then
-		mounts.perChar = true
+		self.perChar = true
 	end
 
-	mounts.db = mounts.perChar and MountsJournalChar or MountsJournalDB
-	mounts:setMountsList()
+	self.db = self.perChar and MountsJournalChar or MountsJournalDB
+	self:setMountsList()
 end
 
 
@@ -237,10 +237,10 @@ end
 
 
 function mounts:herbMountsExists()
-	if mounts.config.useHerbMounts then
+	if self.config.useHerbMounts then
 		local prof1, prof2 = GetProfessions()
 		if (prof1 and select(7, GetProfessionInfo(prof1)) == 182 or prof2 and select(7, GetProfessionInfo(prof2)) == 182) then
-			for _,mountID in ipairs(mounts.herbalismMounts) do
+			for _,mountID in ipairs(self.herbalismMounts) do
 				if select(5, C_MountJournal.GetMountInfoByID(mountID)) then
 					return true
 				end
@@ -251,24 +251,12 @@ function mounts:herbMountsExists()
 end
 
 
-function mounts:waterWalkMountsExists()
-	if mounts.config.waterWalkAll or mounts:isWaterWalkLocation(select(8, GetInstanceInfo())) then
-		for _,mountID in ipairs(mounts.waterWalk) do
-			if select(5, C_MountJournal.GetMountInfoByID(mountID)) then
-				return true
-			end
-		end
-	end
-	return false
-end
-
-
 function mounts:summonListOr(ids)
-	if mounts.sFlags.herb and mounts:summon(mounts.herbalismMounts) then -- herbMount
+	if self.sFlags.herb and self:summon(self.herbalismMounts) then -- herbMount
 		return true
 	end
 
-	return mounts:summon(ids)
+	return self:summon(ids)
 end
 
 
@@ -289,8 +277,8 @@ do
 		[1643] = true, -- Кул-Тирас
 	}
 	function mounts:isFlyLocation(instance)
-		if mounts.continentsGround[instance]
-			or mounts.expeditions[instance]
+		if self.continentsGround[instance]
+			or self.expeditions[instance]
 			-- Дренор
 			or draenorLocations[instance] and not IsSpellKnown(191645)
 			-- Расколотые острова
@@ -305,9 +293,9 @@ end
 
 
 function mounts:isWaterWalkLocation(instance)
-	if mounts.config.waterWalkInstance and mounts.config.waterWalkList[instance]
-	or mounts.config.waterWalkExpedition and mounts.config.waterWalkExpeditionList[instance]
-	or mounts.mapFlags and mounts.mapFlags.waterWalkOnly then
+	if self.config.waterWalkInstance and self.config.waterWalkList[instance]
+	or self.config.waterWalkExpedition and self.config.waterWalkExpeditionList[instance]
+	or self.mapFlags and self.mapFlags.waterWalkOnly then
 		return true
 	end
 
@@ -316,17 +304,17 @@ end
 
 
 function mounts:setFlags()
-	local groundSpellKnown, flySpellKnown = mounts:getSpellKnown()
-	local modifier = mounts:modifier()
+	local groundSpellKnown, flySpellKnown = self:getSpellKnown()
+	local modifier = self.modifier()
 	local isSubmerged = IsSubmerged()
-	local isFloating = mounts:isFloating()
+	local isFloating = self:isFloating()
 	local instance = select(8, GetInstanceInfo())
 	local isFlyableLocation = flySpellKnown 
 									  and IsFlyableArea()
-									  and mounts:isFlyLocation(instance)
-									  and not (mounts.mapFlags and mounts.mapFlags.groundOnly)
+									  and self:isFlyLocation(instance)
+									  and not (self.mapFlags and self.mapFlags.groundOnly)
 	
-	local flags = mounts.sFlags
+	local flags = self.sFlags
 	flags.isIndoors = IsIndoors()
 	flags.inVehicle = UnitInVehicle("player")
 	flags.isMounted = IsMounted()
@@ -336,11 +324,11 @@ function mounts:setFlags()
 						  and not isFloating
 	flags.fly = isFlyableLocation
 					and (not modifier or isSubmerged)
-	flags.waterWalk = mounts.config.waterWalkAll
+	flags.waterWalk = self.config.waterWalkAll
 							or isFloating
 							or not isFlyableLocation and modifier
-							or mounts:isWaterWalkLocation(instance)
-	flags.herb = mounts:herbMountsExists()
+							or self:isWaterWalkLocation(instance)
+	flags.herb = self:herbMountsExists()
 end
 
 
@@ -352,29 +340,29 @@ end
 function mounts:init()
 	SLASH_MOUNTSJOURNAL1 = "/mount"
 	SlashCmdList["MOUNTSJOURNAL"] = function(msg)
-		if msg ~= "doNotSetFlags" then mounts:setFlags() end
-		local flags = mounts.sFlags
+		if msg ~= "doNotSetFlags" then self:setFlags() end
+		local flags = self.sFlags
 		if flags.inVehicle then
 			VehicleExit()
 		elseif flags.isMounted then
 			Dismount()
 		elseif not flags.groundSpellKnown then
-			if not mounts:summon(mounts.lowLevel) then mounts:errorSummon() end
+			if not self:summon(self.lowLevel) then self:errorSummon() end
 		-- swimming
 		elseif not (flags.swimming
-						and (mounts.mapVashjir[C_Map.GetBestMapForUnit("player")]
-							  and mounts:summon(mounts.swimmingVashjir)
-							  or mounts:summon(mounts.list.swimming)))
+						and (self.mapVashjir[C_Map.GetBestMapForUnit("player")]
+							  and self:summon(self.swimmingVashjir)
+							  or self:summon(self.list.swimming)))
 		-- fly
-		and not (flags.fly and mounts:summonListOr(mounts.list.fly))
+		and not (flags.fly and self:summonListOr(self.list.fly))
 		-- water walk
-		and not (flags.waterWalk and mounts:summon(mounts.waterWalk))
+		and not (flags.waterWalk and self:summon(self.waterWalk))
 		-- ground
-		and not mounts:summonListOr(mounts.list.ground)
-		and not mounts:summon(mounts.list.fly)
-		and not mounts:summon(mounts.waterWalk)
-		and not mounts:summon(mounts.lowLevel) then
-			mounts:errorSummon()
+		and not self:summonListOr(self.list.ground)
+		and not self:summon(self.list.fly)
+		and not self:summon(self.waterWalk)
+		and not self:summon(self.lowLevel) then
+			self:errorSummon()
 		end
 	end
 end

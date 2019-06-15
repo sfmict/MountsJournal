@@ -6,8 +6,8 @@ config.name = addon
 
 
 config:SetScript("OnEvent", function(self, event, ...)
-	if config[event] then
-		config[event](self, ...)
+	if self[event] then
+		self[event](self, ...)
 	end
 end)
 config:RegisterEvent("PLAYER_LOGIN")
@@ -15,32 +15,32 @@ config:RegisterEvent("PLAYER_LOGIN")
 
 -- BIND MOUNT
 do
-	local function setMacroText()
+	local function setMacroText(self)
 		if not InCombatLockdown() then
 			local texture = select(2, GetMacroInfo("MJMacro"))
 			if texture then
 				EditMacro("MJMacro", "MJMacro", texture, "/click MountsJournal_Mount")
 			end
 		else
-			config:RegisterEvent("PLAYER_REGEN_ENABLED")
+			self:RegisterEvent("PLAYER_REGEN_ENABLED")
 		end
 	end
 
 	function config:PLAYER_REGEN_ENABLED()
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-		setMacroText()
+		setMacroText(self)
 	end
 
 	function config:PLAYER_LOGIN()
-		self.bindMount = binding:createButtonBinding(config, "MountsJournal_Mount", "MJSecureActionButtonTemplate")
+		self.bindMount = binding:createButtonBinding(self, "MountsJournal_Mount", "MJSecureActionButtonTemplate")
 		self.bindMount:SetSize(232, 22)
-		setMacroText()
+		setMacroText(self)
 	end
 end
 
 
 -- SHOW CONFIG
-config:SetScript("OnShow", function()
+config:SetScript("OnShow", function(self)
 	-- TOOLTIP
 	local function setTooltip(frame, anchor, title, text)
 		frame:SetScript("OnEnter", function()
@@ -71,18 +71,18 @@ config:SetScript("OnShow", function()
 	end
 
 	-- ADDON INFO
-	local info = config:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	local info = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	info:SetPoint("TOPRIGHT", -16, 16)
 	info:SetTextColor(.5, .5, .5, 1)
 	info:SetText(format("%s %s: %s", GetAddOnMetadata(addon, "Version"), L["author"], GetAddOnMetadata(addon, "Author")))
 
 	-- TITLE
-	local title = config:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+	local title = self:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 	title:SetPoint("TOPLEFT", 16, -16)
 	title:SetText(format(L["%s Configuration"], addon))
 
 	-- SUBTITLE
-	local subtitle = config:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	local subtitle = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	subtitle:SetHeight(30)
 	subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 1, -8)
 	subtitle:SetNonSpaceWrap(true)
@@ -91,31 +91,28 @@ config:SetScript("OnShow", function()
 	subtitle:SetText(L["ConfigPanelTitle"])
 
 	-- LEFT PANEL
-	local leftPanel = CreateFrame("FRAME", nil, config, "MJOptionsPanel")
-	leftPanel:SetPoint("TOPLEFT", config, 8, -67)
-	leftPanel:SetPoint("BOTTOMRIGHT", config, "BOTTOMLEFT", 300, 8)
+	local leftPanel = CreateFrame("FRAME", nil, self, "MJOptionsPanel")
+	leftPanel:SetPoint("TOPLEFT", self, 8, -67)
+	leftPanel:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", 300, 8)
 
 	-- MODIFIER TEXT
-	local modifierText = config:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	local modifierText = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	modifierText:SetPoint("TOPLEFT", subtitle, "BOTTOMLEFT", 8, -20)
 	modifierText:SetText(L["Modifier"]..":")
 
 	-- MODIFIER COMBOBOX
-	local modifierCombobox = CreateFrame("FRAME", "MountsJournalModifier", config, "UIDropDownMenuTemplate")
+	local modifierCombobox = CreateFrame("FRAME", "MountsJournalModifier", self, "UIDropDownMenuTemplate")
+	self.modifierCombobox = modifierCombobox
 	modifierCombobox:SetPoint("TOPLEFT", modifierText, "BOTTOMRIGHT", -8, 21)
-
-	config.modifierValue = mounts.config.modifier
 
 	UIDropDownMenu_Initialize(modifierCombobox, function (self, level, menuList)
 		local info = UIDropDownMenu_CreateInfo()
 		for i, modifier in ipairs({"ALT", "CTRL", "SHIFT"}) do
-			info.menuList = i - 1
-			info.checked = modifier == config.modifierValue
+			info.checked = nil
 			info.text = modifier.." key"
-			info.arg1 = modifier
-			info.func = function(_,value)
-				config.modifierValue = value
-				UIDropDownMenu_SetText(modifierCombobox, value.." key")
+			info.value = modifier
+			info.func = function(self)
+				UIDropDownMenu_SetSelectedValue(modifierCombobox, self.value)
 			end
 			UIDropDownMenu_AddButton(info)
 		end
@@ -124,16 +121,16 @@ config:SetScript("OnShow", function()
 	setTooltip(modifierCombobox, "ANCHOR_TOPLEFT", L["Modifier"], L["ModifierDescription"])
 
 	-- WATER JUMP
-	config.waterJump = CreateFrame("CheckButton", nil, config, "MJCheckButtonTemplate")
-	config.waterJump:SetPoint("TOPLEFT", modifierText, "BOTTOMLEFT", 0, -10)
-	config.waterJump.Text:SetText(L["Handle a jump in water"])
-	config.waterJump.tooltipText = L["Handle a jump in water"]
-	config.waterJump.tooltipRequirement = L["WaterJumpDescription"]
+	self.waterJump = CreateFrame("CheckButton", nil, self, "MJCheckButtonTemplate")
+	self.waterJump:SetPoint("TOPLEFT", modifierText, "BOTTOMLEFT", 0, -10)
+	self.waterJump.Text:SetText(L["Handle a jump in water"])
+	self.waterJump.tooltipText = L["Handle a jump in water"]
+	self.waterJump.tooltipRequirement = L["WaterJumpDescription"]
 
 	-- CREATE MACRO
-	local createMacroBtn = CreateFrame("Button", nil, config, "UIPanelButtonTemplate")
+	local createMacroBtn = CreateFrame("Button", nil, self, "UIPanelButtonTemplate")
 	createMacroBtn:SetSize(232, 40)
-	createMacroBtn:SetPoint("TOPLEFT", config.waterJump, "BOTTOMLEFT", 0, -25)
+	createMacroBtn:SetPoint("TOPLEFT", self.waterJump, "BOTTOMLEFT", 0, -25)
 	createMacroBtn:SetText(L["CreateMacro"])
 	createMacroBtn:SetScript("OnClick", function()
 		local macroName = "MJMacro"
@@ -147,7 +144,7 @@ config:SetScript("OnShow", function()
 		if MacroFrame:IsShown() then
 			MacroFrame_Update()
 		else
-			config:okay()
+			self:okay()
 			local b_CanOpenPanels = CanOpenPanels
 			CanOpenPanels = function() return 1 end
 			ShowUIPanel(MacroFrame, 1)
@@ -170,17 +167,17 @@ config:SetScript("OnShow", function()
 	setTooltip(createMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
 
 	-- OR TEXT
-	local macroOrBind = config:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	local macroOrBind = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	macroOrBind:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -3)
 	macroOrBind:SetText(L["or key bind"])
 
 	-- BIND MOUNT
-	config.bindMount:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -20)
+	self.bindMount:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -20)
 
 	-- RIGHT PANEL
-	local rightPanel = CreateFrame("FRAME", nil, config, "MJOptionsPanel")
+	local rightPanel = CreateFrame("FRAME", nil, self, "MJOptionsPanel")
 	rightPanel:SetPoint("TOPLEFT", leftPanel, "TOPRIGHT", 4, 0)
-	rightPanel:SetPoint("BOTTOMRIGHT", config, -8, 8)
+	rightPanel:SetPoint("BOTTOMRIGHT", self, -8, 8)
 
 	local rightPanelScroll = CreateFrame("ScrollFrame", nil, rightPanel, "UIPanelScrollFrameTemplate")
 	rightPanelScroll:SetPoint("TOPLEFT", rightPanel, 4, -6)
@@ -192,41 +189,41 @@ config:SetScript("OnShow", function()
 	rightPanelScroll:SetScrollChild(rightPanelScroll.child)
 
 	-- WATER WALKER ALWAYS
-	config.waterWalkAlways = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	config.waterWalkAlways:SetPoint("TOPLEFT", rightPanelScroll.child, 9, -9)
-	config.waterWalkAlways.Text:SetText(L["Water Walking Always"])
-	config.waterWalkAlways.tooltipText = L["Water Walking"]
-	config.waterWalkAlways.tooltipRequirement = L["WaterWalkingDescription"]
+	self.waterWalkAlways = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.waterWalkAlways:SetPoint("TOPLEFT", rightPanelScroll.child, 9, -9)
+	self.waterWalkAlways.Text:SetText(L["Water Walking Always"])
+	self.waterWalkAlways.tooltipText = L["Water Walking"]
+	self.waterWalkAlways.tooltipRequirement = L["WaterWalkingDescription"]
 
 	-- WATER WALK INSTANCE
-	config.waterWalkInstance = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	config.waterWalkInstance:SetPoint("TOPLEFT", config.waterWalkAlways, "BOTTOMLEFT", 0, 0)
-	config.waterWalkInstance.Text:SetText(L["Water Walking in dungeons"])
-	config.waterWalkInstance.tooltipText = L["Water Walking"]
-	config.waterWalkInstance.tooltipRequirement = L["WaterWalkingDescription"]
-	config.waterWalkInstance:HookScript("OnClick", function(self)
-		config:setEnableCheckButtons(self:GetChecked(), config.dungeons)
+	self.waterWalkInstance = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.waterWalkInstance:SetPoint("TOPLEFT", self.waterWalkAlways, "BOTTOMLEFT", 0, 0)
+	self.waterWalkInstance.Text:SetText(L["Water Walking in dungeons"])
+	self.waterWalkInstance.tooltipText = L["Water Walking"]
+	self.waterWalkInstance.tooltipRequirement = L["WaterWalkingDescription"]
+	self.waterWalkInstance:HookScript("OnClick", function(checkBtn)
+		self:setEnableCheckButtons(checkBtn:GetChecked(), self.dungeons)
 	end)
 
 	-- WATER WALK DUNGEONS
-	config.dungeons = {}
+	self.dungeons = {}
 	local function createDungeonCheckbox(mapID, expansion, instanceID)
 		local info = C_Map.GetMapInfo(mapID)
 		if info and info.name then
-			createCheckboxChild(format("%s %s", info.name, expansion), instanceID, config.dungeons, rightPanelScroll.child, config.waterWalkInstance)
+			createCheckboxChild(format("%s %s", info.name, expansion), instanceID, self.dungeons, rightPanelScroll.child, self.waterWalkInstance)
 		end
 	end
 	createDungeonCheckbox(713, "(Legion)", 1456) -- Око Азшары
 	createDungeonCheckbox(974, "(BFA)", 1771) -- Тол Дагор
 
 	-- WATER WALK IN EXPEDITIONS
-	config.waterWalkExpedition = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	config.waterWalkExpedition:SetPoint("TOPLEFT", config.dungeons[#config.dungeons], "BOTTOMLEFT", -20, 0)
-	config.waterWalkExpedition.Text:SetText(L["Water Walking in expeditions"])
-	config.waterWalkExpedition.tooltipText = L["Water Walking"]
-	config.waterWalkExpedition.tooltipRequirement = L["WaterWalkingDescription"]
-	config.waterWalkExpedition:HookScript("OnClick", function(self)
-		config:setEnableCheckButtons(self:GetChecked(), config.expeditions)
+	self.waterWalkExpedition = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.waterWalkExpedition:SetPoint("TOPLEFT", self.dungeons[#self.dungeons], "BOTTOMLEFT", -20, 0)
+	self.waterWalkExpedition.Text:SetText(L["Water Walking in expeditions"])
+	self.waterWalkExpedition.tooltipText = L["Water Walking"]
+	self.waterWalkExpedition.tooltipRequirement = L["WaterWalkingDescription"]
+	self.waterWalkExpedition:HookScript("OnClick", function(checkBtn)
+		self:setEnableCheckButtons(checkBtn:GetChecked(), self.expeditions)
 	end)
 
 	-- WATER WALK EXPEDITIONS
@@ -236,53 +233,53 @@ config:SetScript("OnShow", function()
 		tinsert(expeditions, {instanceID, info.name})
 	end
 	sort(expeditions, function(a, b) return a[2] < b[2] end)
-	config.expeditions = {}
+	self.expeditions = {}
 	for i = 1, #expeditions do
-		createCheckboxChild(expeditions[i][2], expeditions[i][1], config.expeditions, rightPanelScroll.child, config.waterWalkExpedition)
+		createCheckboxChild(expeditions[i][2], expeditions[i][1], self.expeditions, rightPanelScroll.child, self.waterWalkExpedition)
 	end
 
 	-- USE HERBALISM MOUNTS
-	config.useHerbMounts = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	config.useHerbMounts:SetPoint("TOPLEFT", config.expeditions[#config.expeditions], "BOTTOMLEFT", -20, -26)
-	config.useHerbMounts.Text:SetText(L["UseHerbMounts"])
-	config.useHerbMounts.tooltipText = L["UseHerbMounts"]
-	config.useHerbMounts.tooltipRequirement = L["UseHerbMountsDescription"]
+	self.useHerbMounts = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.useHerbMounts:SetPoint("TOPLEFT", self.expeditions[#self.expeditions], "BOTTOMLEFT", -20, -26)
+	self.useHerbMounts.Text:SetText(L["UseHerbMounts"])
+	self.useHerbMounts.tooltipText = L["UseHerbMounts"]
+	self.useHerbMounts.tooltipRequirement = L["UseHerbMountsDescription"]
 
 	-- USE MAGIC BROOM
-	config.useMagicBroom = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	config.useMagicBroom:SetPoint("TOPLEFT", config.useHerbMounts, "BOTTOMLEFT", 0, -26)
+	self.useMagicBroom = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.useMagicBroom:SetPoint("TOPLEFT", self.useHerbMounts, "BOTTOMLEFT", 0, -26)
 	local magicBroom = Item:CreateFromItemID(37011)
 	magicBroom:ContinueOnItemLoad(function()
-		config.useMagicBroom.Text:SetText(format(L["UseMagicBroom"], magicBroom:GetItemLink()))
+		self.useMagicBroom.Text:SetText(format(L["UseMagicBroom"], magicBroom:GetItemLink()))
 	end)
-	config:setHyperlinkTooltip(config.useMagicBroom)
-	config.useMagicBroom.tooltipText = L["UseMagicBroomTitle"]
-	config.useMagicBroom.tooltipRequirement = L["UseMagicBroomDescription"]
+	self:setHyperlinkTooltip(self.useMagicBroom)
+	self.useMagicBroom.tooltipText = L["UseMagicBroomTitle"]
+	self.useMagicBroom.tooltipRequirement = L["UseMagicBroomDescription"]
 
 	-- REFRESH
-	local function refresh()
-		if not config:IsVisible() then return end
-		config.modifierValue = mounts.config.modifier
-		UIDropDownMenu_SetText(modifierCombobox, config.modifierValue.." key")
-		config.waterJump:SetChecked(mounts.config.waterJump)
-		binding:setButtonText(config.bindMount)
-		config.waterWalkAlways:SetChecked(mounts.config.waterWalkAll)
-		config.waterWalkInstance:SetChecked(mounts.config.waterWalkInstance)
-		config:setEnableCheckButtons(mounts.config.waterWalkInstance, config.dungeons)
-		for _,dungeon in ipairs(config.dungeons) do
+	local function refresh(self)
+		if not self:IsVisible() then return end
+		UIDropDownMenu_SetSelectedValue(modifierCombobox, mounts.config.modifier)
+		UIDropDownMenu_SetText(modifierCombobox, mounts.config.modifier.." key")
+		self.waterJump:SetChecked(mounts.config.waterJump)
+		binding:setButtonText(self.bindMount)
+		self.waterWalkAlways:SetChecked(mounts.config.waterWalkAll)
+		self.waterWalkInstance:SetChecked(mounts.config.waterWalkInstance)
+		self:setEnableCheckButtons(mounts.config.waterWalkInstance, self.dungeons)
+		for _,dungeon in ipairs(self.dungeons) do
 			dungeon:SetChecked(mounts.config.waterWalkList[dungeon.id])
 		end
-		config.waterWalkExpedition:SetChecked(mounts.config.waterWalkExpedition)
-		config:setEnableCheckButtons(mounts.config.waterWalkExpedition, config.expeditions)
-		for _,expedition in ipairs(config.expeditions) do
+		self.waterWalkExpedition:SetChecked(mounts.config.waterWalkExpedition)
+		self:setEnableCheckButtons(mounts.config.waterWalkExpedition, self.expeditions)
+		for _,expedition in ipairs(self.expeditions) do
 			expedition:SetChecked(mounts.config.waterWalkExpeditionList[expedition.id])
 		end
-		config.useHerbMounts:SetChecked(mounts.config.useHerbMounts)
-		config.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
+		self.useHerbMounts:SetChecked(mounts.config.useHerbMounts)
+		self.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
 	end
 
-	config:SetScript("OnShow", refresh)
-	refresh()
+	self:SetScript("OnShow", refresh)
+	refresh(self)
 end)
 
 
@@ -313,7 +310,7 @@ end
 
 
 config.okay = function(self)
-	mounts:setModifier(self.modifierValue)
+	mounts:setModifier(self.modifierCombobox.selectedValue)
 	binding:saveBinding()
 	mounts:setHandleWaterJump(self.waterJump:GetChecked())
 	mounts.config.waterWalkAll = self.waterWalkAlways:GetChecked()
