@@ -63,7 +63,10 @@ classConfig:SetScript("OnShow", function(self)
 		classFrame.check:SetVertexColor(classColor:GetRGB())
 		classFrame.highlight:SetVertexColor(classColor:GetRGB())
 		classFrame.icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[className]))
-		classFrame:SetScript("OnClick", function(btn) self:classClick(btn) end)
+		classFrame:SetScript("OnClick", function(btn)
+			self.currentMacrosConfig = self.macrosConfig[btn.key]
+			self:showClassSettings(btn)
+		end)
 		
 		if playerClassName == className then
 			firstClassFrame = classFrame
@@ -298,16 +301,6 @@ do
 		end
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end
-end
-
-
-function classConfig:classClick(btn)
-	if not self.macrosConfig[btn.key] then
-		self.macrosConfig[btn.key] = {}
-	end
-	self.currentMacrosConfig = self.macrosConfig[btn.key]
-
-	self:showClassSettings(btn)
 end
 
 

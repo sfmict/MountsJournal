@@ -23,11 +23,15 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalDB.ground = MountsJournalDB.ground or {}
 		MountsJournalDB.swimming = MountsJournalDB.swimming or {}
 		MountsJournalDB.zoneMounts = MountsJournalDB.zoneMounts or {}
-		MountsJournalDB.config = MountsJournalDB.config or {}
 		MountsJournalDB.filters = MountsJournalDB.filters or {}
+		MountsJournalDB.config = MountsJournalDB.config or {}
+		mounts.filters = MountsJournalDB.filters
 		mounts.config = MountsJournalDB.config
 		mounts.config.macrosConfig = mounts.config.macrosConfig or {}
-		mounts.filters = MountsJournalDB.filters
+		for i = 1, GetNumClasses() do
+			local _,className = GetClassInfo(i)
+			mounts.config.macrosConfig[className] = mounts.config.macrosConfig[className] or {}
+		end
 		if mounts.config.waterWalkInstance == nil then
 			mounts.config.waterWalkInstance = true
 		end

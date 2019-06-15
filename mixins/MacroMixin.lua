@@ -27,7 +27,7 @@ end
 
 function MJMacroMixin:setMacro()
 	self.macro = nil
-	if self.classConfig and self.classConfig.macroEnable then
+	if self.classConfig.macroEnable then
 		self.macro = self.classConfig.macro or self:getClassMacro(nil, "macro", function() self:setMacro() end)
 	end
 end
@@ -35,7 +35,7 @@ end
 
 function MJMacroMixin:setCombatMacro()
 	self.combatMacro = nil
-	if self.classConfig and self.classConfig.combatMacroEnable then
+	if self.classConfig.combatMacroEnable then
 		self.combatMacro = self.classConfig.combatMacro or self:getClassMacro(nil, "combatMacro", function() self:setCombatMacro() end)
 	end
 end
