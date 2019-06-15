@@ -1,2 +1,2 @@
-* Fix DK "Path of Frost" error.
-* Optimization.
+* Added spell subtext in macros.
+* Fixed existence of a class config.
