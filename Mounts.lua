@@ -18,11 +18,14 @@ function mounts:ADDON_LOADED(addonName)
 	if addonName == addon then
 		self:UnregisterEvent("ADDON_LOADED")
 
+		self.defMountsListID = 946 -- WORLD
+
 		MountsJournalDB = MountsJournalDB or {}
 		MountsJournalDB.fly = MountsJournalDB.fly or {}
 		MountsJournalDB.ground = MountsJournalDB.ground or {}
 		MountsJournalDB.swimming = MountsJournalDB.swimming or {}
 		MountsJournalDB.zoneMounts = MountsJournalDB.zoneMounts or {}
+		MountsJournalDB.zoneMounts[self.defMountsListID] = nil
 		MountsJournalDB.filters = MountsJournalDB.filters or {}
 		MountsJournalDB.config = MountsJournalDB.config or {}
 		self.filters = MountsJournalDB.filters
@@ -50,11 +53,10 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalChar.ground = MountsJournalChar.ground or {}
 		MountsJournalChar.swimming = MountsJournalChar.swimming or {}
 		MountsJournalChar.zoneMounts = MountsJournalChar.zoneMounts or {}
+		MountsJournalChar.zoneMounts[self.defMountsListID] = nil
 		MountsJournalChar.macrosConfig = MountsJournalChar.macrosConfig or {}
 
 		self.sFlags = {}
-		self.defMountsListID = MapUtil.GetMapParentInfo(MapUtil.GetDisplayableMapForPlayer(), Enum.UIMapType.Cosmic, true).mapID
-		self:setMountsListPerChar()
 		self.swimmingVashjir = {
 			373, -- Вайш'ирский морской конек
 		}
@@ -107,6 +109,7 @@ function mounts:ADDON_LOADED(addonName)
 		self:RegisterEvent("ZONE_CHANGED_INDOORS")
 		self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
+		self:setMountsListPerChar()
 		self:setModifier(self.config.modifier)
 		self:setHandleWaterJump(self.config.waterJump)
 		self:init()

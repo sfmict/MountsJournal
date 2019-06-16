@@ -65,6 +65,8 @@ function MJMapCanvasMixin:onClick(btn)
 		local mapInfo = C_Map.GetMapInfo(self.mapID)
 		if mapInfo.parentMapID > 0 then
 			self:SetMapID(mapInfo.parentMapID)
+		elseif mapInfo.mapID ~= self.navBar.defMapID then
+			self.navBar:setDefMap()
 		end
 	end
 end

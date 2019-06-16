@@ -3,8 +3,11 @@ local mapValidTypes = {
 	[Enum.UIMapType.Continent] = true,
 	[Enum.UIMapType.Zone] = true,
 }
-local function isMapValidForNavBarDropDown(mapType)
-	return mapValidTypes[mapType]
+local function isMapValidForNavBarDropDown(mapInfo)
+	if mapValidTypes[mapInfo.mapType] then
+		local children = C_Map.GetMapChildrenInfo(mapInfo.parentMapID)
+		return type(children) == "table" and #children > 1
+	end
 end
 
 
@@ -13,6 +16,7 @@ MJNavBarMixin = CreateFromMixins(MountsJournalEventsMixin)
 
 function MJNavBarMixin:onLoad()
 	self:init()
+	self.defMapID = MountsJournal.defMountsListID
 	self.journal = MountsJournalFrame
 	local homeData = {
 		name = WORLD,
@@ -26,13 +30,13 @@ end
 function MJNavBarMixin:refresh()
 	local hierarchy = {}
 	local mapInfo = C_Map.GetMapInfo(self.mapID)
-	while mapInfo and mapInfo.parentMapID > 0 do
+	while mapInfo and mapInfo.mapID ~= self.defMapID do
 		local btnData = {
 			name = mapInfo.name,
 			id = mapInfo.mapID,
 			OnClick = function(self) self:GetParent():setMapID(self.data.id) end,
 		}
-		if isMapValidForNavBarDropDown(mapInfo.mapType) then
+		if isMapValidForNavBarDropDown(mapInfo) then
 			btnData.listFunc = self.getDropDownList
 		end
 		tinsert(hierarchy, 1, btnData)
@@ -53,7 +57,7 @@ function MJNavBarMixin:getDropDownList()
 		local children = C_Map.GetMapChildrenInfo(mapInfo.parentMapID)
 		if children then
 			for i, childInfo in ipairs(children) do
-				if isMapValidForNavBarDropDown(childInfo.mapType) then
+				if isMapValidForNavBarDropDown(childInfo) then
 					local data = {
 						text = childInfo.name,
 						id = childInfo.mapID,
@@ -78,7 +82,7 @@ end
 
 
 function MJNavBarMixin:setDefMap()
-	self:setMapID(MapUtil.GetMapParentInfo(MapUtil.GetDisplayableMapForPlayer(), Enum.UIMapType.Cosmic, true).mapID)
+	self:setMapID(self.defMapID)
 end
 
 

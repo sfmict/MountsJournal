@@ -665,7 +665,9 @@ do
 		wipe(btn.maps)
 		local assocMaps = {}
 		for mapID, mapConfig in pairs(mounts.db.zoneMounts) do
-			if not mapConfig.listFromID and mapID ~= journal.navBar.mapID then
+			if not mapConfig.listFromID 
+			and mapID ~= journal.navBar.mapID
+			and #mapConfig.fly + #mapConfig.ground + #mapConfig.swimming > 0 then
 				local mapInfo = util.getMapFullNameInfo(mapID)
 
 				if not assocMaps[mapInfo.mapType] then
@@ -745,19 +747,10 @@ function journal:updateMapSettings()
 	groundCheck:SetChecked(journal.currentList and journal.currentList.flags and journal.currentList.flags.groundOnly)
 	waterWalkCheck:SetChecked(journal.currentList and journal.currentList.flags and journal.currentList.flags.waterWalkOnly)
 
-	if journal.navBar.mapID == mounts.defMountsListID then
-		if groundCheck:IsEnabled() then
-			groundCheck:Disable()
-			waterWalkCheck:Disable()
-			listFromMap:Disable()
-		end
-	else
-		if not groundCheck:IsEnabled() then
-			groundCheck:Enable()
-			waterWalkCheck:Enable()
-			listFromMap:Enable()
-		end
-	end
+	local optionsEnable = journal.navBar.mapID ~= mounts.defMountsListID
+	groundCheck:SetEnabled(optionsEnable)
+	waterWalkCheck:SetEnabled(optionsEnable)
+	listFromMap:SetEnabled(optionsEnable)
 
 	local relationText = mapSettings.relationMap.text
 	local relationClear = mapSettings.relationClear
