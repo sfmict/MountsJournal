@@ -199,7 +199,7 @@ do
 			if spellID and spellID ~= 783 then
 				self.lastDruidForm = self:getSpellName(spellID)
 				self.lastDruidFormTime = GetTime()
-			elseif not spellID and (not self.lastDruidFormTime or GetTime() - self.lastDruidFormTime > 0.3) then
+			elseif not spellID and (not self.lastDruidFormTime or GetTime() - self.lastDruidFormTime > 1) then
 				self.lastDruidForm = nil
 			end
 		end
@@ -214,20 +214,20 @@ do
 								and (self.sFlags.fly or not self.sFlags.waterWalk)
 								and self.broomName
 
-		-- CLASSMACRO
-		if self.macro
-			and (self.classConfig.useMacroAlways
-				  or not self.magicBroom
-				  and (self.sFlags.isIndoors or GetUnitSpeed("player") > 0 or IsFalling())) then
-			macro = self.macro
 		-- EXIT VEHICLE
-		elseif self.sFlags.inVehicle then
+		if self.sFlags.inVehicle then
 			macro = "/leavevehicle"
 		-- DISMOUNT
 		elseif self.sFlags.isMounted then
 			if not self.lastUseTime or GetTime() - self.lastUseTime > 0.5 then
 				macro = "/dismount"
 			end
+		-- CLASSMACRO
+		elseif self.macro
+			and (self.classConfig.useMacroAlways
+				  or not self.magicBroom
+				  and (self.sFlags.isIndoors or GetUnitSpeed("player") > 0 or IsFalling())) then
+			macro = self.macro
 		-- MOUNT
 		else
 			macro = self:getDefMacro()
