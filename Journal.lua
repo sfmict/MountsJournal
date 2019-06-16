@@ -72,8 +72,8 @@ end
 
 
 journal:SetScript("OnEvent", function(self, event, ...)
-	if journal[event] then
-		journal[event](self, ...)
+	if self[event] then
+		self[event](self, ...)
 	end
 end)
 journal:RegisterEvent("ADDON_LOADED")
@@ -85,9 +85,9 @@ function journal:ADDON_LOADED(addonName)
 
 		local texPath = "Interface/AddOns/MountsJournal/textures/"
 		local scrollFrame = MountJournal.ListScrollFrame
-		journal.scrollButtons = scrollFrame.buttons
-		journal.leftInset = MountJournal.LeftInset
-		journal.rightInset = MountJournal.RightInset
+		self.scrollButtons = scrollFrame.buttons
+		self.leftInset = MountJournal.LeftInset
+		self.rightInset = MountJournal.RightInset
 		mounts.filters.types = mounts.filters.types or {true, true, true}
 		mounts.filters.selected = mounts.filters.selected or {false, false, false}
 		mounts.filters.factions = mounts.filters.factions or {true, true, true}
@@ -95,7 +95,7 @@ function journal:ADDON_LOADED(addonName)
 
 		-- MOUNT COUNT
 		local mountCount = MountJournal.MountCount
-		journal.mountCount = mountCount
+		self.mountCount = mountCount
 		mountCount:SetPoint("TOPLEFT", 70, -25)
 		mountCount:SetHeight(34)
 		mountCount.Count:SetPoint("RIGHT", -10, 6)
@@ -113,25 +113,25 @@ function journal:ADDON_LOADED(addonName)
 			bottomLeftInset.SlotLabel:SetPoint("LEFT", bottomLeftInset, "LEFT", 0, 0)
 			bottomLeftInset:Hide()
 			slotButton:SetParent(MountJournal)
-			slotButton:SetPoint("TOPLEFT", journal.mountCount, "TOPRIGHT", 2, -2)
+			slotButton:SetPoint("TOPLEFT", self.mountCount, "TOPRIGHT", 2, -2)
 			slotButton:SetSize(32, 32)
 			for _,region in ipairs({slotButton:GetRegions()}) do
 				region:SetSize(32, 32)
 			end
-			journal.leftInset:SetPoint("BOTTOMLEFT", MountJournal, "BOTTOMLEFT", 0, 26)
+			self.leftInset:SetPoint("BOTTOMLEFT", MountJournal, "BOTTOMLEFT", 0, 26)
 			HybridScrollFrame_CreateButtons(scrollFrame, "MountListButtonTemplate", 44, 0);
-			journal.rightInset:SetPoint("BOTTOMLEFT", journal.leftInset, "BOTTOMRIGHT", 20, 0)
+			self.rightInset:SetPoint("BOTTOMLEFT", self.leftInset, "BOTTOMRIGHT", 20, 0)
 		end
 
 		-- NAVBAR BUTTON
 		local navBarBtn = CreateFrame("CheckButton", nil, MountJournal, "MJMiniMapBtnTemplate")
-		journal.navBarBtn = navBarBtn
+		self.navBarBtn = navBarBtn
 		navBarBtn:SetPoint("TOPRIGHT", -2, -60)
-		navBarBtn:HookScript("OnClick", function(self)
-			local checked = self:GetChecked()
+		navBarBtn:HookScript("OnClick", function(btn)
+			local checked = btn:GetChecked()
 			MountJournal.MountDisplay:SetShown(not checked)
-			journal.worldMap:SetShown(checked)
-			journal.mapSettings:SetShown(checked)
+			self.worldMap:SetShown(checked)
+			self.mapSettings:SetShown(checked)
 		end)
 		navBarBtn:SetScript("OnEnter", function()
 			GameTooltip:SetOwner(navBarBtn, "ANCHOR_RIGHT", -4, -32)
@@ -142,29 +142,29 @@ function journal:ADDON_LOADED(addonName)
 
 		-- NAVBAR
 		local navBar = CreateFrame("FRAME", nil, MountJournal, "MJNavBarTemplate")
-		journal.navBar = navBar
+		self.navBar = navBar
 		navBar:SetPoint("TOPLEFT", 8, -60)
 		navBar:SetPoint("TOPRIGHT", navBarBtn, "TOPLEFT", 0, 0)
 		navBar:on("MAP_CHANGE", function()
-			journal:setEditMountsList()
-			journal:updateMountsList()
+			self:setEditMountsList()
+			self:updateMountsList()
 			MountJournal_UpdateMountList()
-			journal:updateMapSettings()
+			self:updateMapSettings()
 		end)
-		journal.rightInset:SetPoint("TOPRIGHT", navBarBtn, "BOTTOMRIGHT", -4, 0)
+		self.rightInset:SetPoint("TOPRIGHT", navBarBtn, "BOTTOMRIGHT", -4, 0)
 
 		-- WORDL MAP
 		local worldMap = CreateFrame("FRAME", nil, MountJournal, "MJMapTemplate")
-		journal.worldMap = worldMap
-		worldMap:SetPoint("TOPLEFT", journal.rightInset)
-		worldMap:SetPoint("TOPRIGHT", journal.rightInset)
+		self.worldMap = worldMap
+		worldMap:SetPoint("TOPLEFT", self.rightInset)
+		worldMap:SetPoint("TOPRIGHT", self.rightInset)
 
 		-- MAP SETTINGS
 		local mapSettings = CreateFrame("FRAME", nil, MountJournal, "MJMapSettingsTemplate")
-		journal.mapSettings = mapSettings
+		self.mapSettings = mapSettings
 		mapSettings:SetPoint("TOPLEFT", worldMap, "BOTTOMLEFT", 0, -30)
-		mapSettings:SetPoint("BOTTOMRIGHT", journal.rightInset)
-		mapSettings:SetScript("OnShow", function() journal:updateMapSettings() end)
+		mapSettings:SetPoint("BOTTOMRIGHT", self.rightInset)
+		mapSettings:SetScript("OnShow", function() self:updateMapSettings() end)
 		mapSettings.dungeonRaidBtn:SetText(L["Dungeons and Raids"])
 		mapSettings.dungeonRaidBtn.click = function(mapID) navBar:setMapID(mapID) end
 		mapSettings.CurrentMap:SetText(L["Current Location"])
@@ -173,41 +173,41 @@ function journal:ADDON_LOADED(addonName)
 			navBar:setCurrentMap()
 		end)
 		mapSettings.Ground.Text:SetText(L["Ground Mounts Only"])
-		mapSettings.Ground:HookScript("OnClick", function(self) journal:setFlag("groundOnly", self:GetChecked()) end)
+		mapSettings.Ground:HookScript("OnClick", function(check) self:setFlag("groundOnly", check:GetChecked()) end)
 		mapSettings.WaterWalk.Text:SetText(L["Water Walk Mounts Only"])
-		mapSettings.WaterWalk:HookScript("OnClick", function(self) journal:setFlag("waterWalkOnly", self:GetChecked()) end)
+		mapSettings.WaterWalk:HookScript("OnClick", function(check) self:setFlag("waterWalkOnly", check:GetChecked()) end)
 		mapSettings.listFromMap.Text:SetText(L["ListMountsFromZone"])
 		mapSettings.listFromMap.maps = {}
-		mapSettings.listFromMap:SetScript("OnClick", function(btn) journal:listFromMapClick(btn) end)
+		mapSettings.listFromMap:SetScript("OnClick", function(btn) self:listFromMapClick(btn) end)
 		mapSettings.relationClear:SetScript("OnClick", function()
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			journal.currentList.listFromID = nil
-			journal:getRemoveMountList(journal.navBar.mapID)
-			journal:setEditMountsList()
-			journal:updateMountsList()
+			self.currentList.listFromID = nil
+			self:getRemoveMountList(self.navBar.mapID)
+			self:setEditMountsList()
+			self:updateMountsList()
 			MountJournal_UpdateMountList()
-			journal:updateMapSettings()
+			self:updateMapSettings()
 			mounts:setMountsList()
-			journal.existingsLists:refresh()
+			self.existingsLists:refresh()
 		end)
-		UIDropDownMenu_Initialize(mapSettings.listFromMap.optionsMenu, journal.listFromMapInit, "MENU")
+		UIDropDownMenu_Initialize(mapSettings.listFromMap.optionsMenu, self.listFromMapInit, "MENU")
 
 		-- EXISTINGS LISTS TOGGLE
-		mapSettings.existingsListsToggle:SetScript("OnClick", function(self)
-			local checked = self:GetChecked()
+		mapSettings.existingsListsToggle:SetScript("OnClick", function(btn)
+			local checked = btn:GetChecked()
 			if checked then
-				self.icon:SetTexCoord(1, 1, 1, 0, 0, 1, 0, 0)
-				self.icon:SetPoint("CENTER", -1, 0)
+				btn.icon:SetTexCoord(1, 1, 1, 0, 0, 1, 0, 0)
+				btn.icon:SetPoint("CENTER", -1, 0)
 			else
-				self.icon:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
-				self.icon:SetPoint("CENTER")
+				btn.icon:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
+				btn.icon:SetPoint("CENTER")
 			end
-			journal.existingsLists:SetShown(checked)
+			self.existingsLists:SetShown(checked)
 		end)
 
 		-- EXISTINGS LISTS
 		local existingsLists = CreateFrame("FRAME", nil, mapSettings, "MJExistingsListsPanelTemplate")
-		journal.existingsLists = existingsLists
+		self.existingsLists = existingsLists
 		existingsLists:SetPoint("TOPLEFT", MountJournal, "TOPRIGHT")
 		existingsLists:SetPoint("BOTTOMLEFT", MountJournal, "BOTTOMRIGHT")
 
@@ -215,8 +215,8 @@ function journal:ADDON_LOADED(addonName)
 		MountJournal:HookScript("OnShow", function()
 			navBarBtn:SetChecked(false)
 			MountJournal.MountDisplay:Show()
-			journal.mapSettings:Hide()
-			journal.worldMap:Hide()
+			self.mapSettings:Hide()
+			self.worldMap:Hide()
 		end)
 
 		-- SETTINGS BUTTON
@@ -224,13 +224,13 @@ function journal:ADDON_LOADED(addonName)
 		btnConfig:SetSize(80, 22)
 		btnConfig:SetPoint("BOTTOMRIGHT", -6, 4)
 		btnConfig:SetText(L["Settings"])
-		btnConfig:SetScript("OnClick", config.openConfig)
+		btnConfig:SetScript("OnClick", function() config:openConfig() end)
 
 		-- ACHIEVEMENT
-		journal.achiev:SetParent(MountJournal)
-		journal.achiev:SetPoint("TOP", 0, -21)
-		journal:ACHIEVEMENT_EARNED()
-		journal.achiev:SetScript("OnClick", function()
+		self.achiev:SetParent(MountJournal)
+		self.achiev:SetPoint("TOP", 0, -21)
+		self:ACHIEVEMENT_EARNED()
+		self.achiev:SetScript("OnClick", function()
 			ToggleAchievementFrame()
 			local i = 1
 			local button = _G["AchievementFrameCategoriesContainerButton"..i]
@@ -252,13 +252,13 @@ function journal:ADDON_LOADED(addonName)
 		perCharCheck:SetPoint("LEFT", MountJournal.MountButton, "RIGHT", 6, -2)
 		perCharCheck.Text:SetText(L["Character Specific Mount List"])
 		perCharCheck:SetChecked(mounts.perChar)
-		perCharCheck:HookScript("OnClick", function(self)
-			mounts:setMountsListPerChar(self:GetChecked())
-			journal:setEditMountsList()
-			journal:updateMountsList()
+		perCharCheck:HookScript("OnClick", function(check)
+			mounts:setMountsListPerChar(check:GetChecked())
+			self:setEditMountsList()
+			self:updateMountsList()
 			MountJournal_UpdateMountList()
-			journal:updateMapSettings()
-			journal.existingsLists:refresh()
+			self:updateMapSettings()
+			self.existingsLists:refresh()
 		end)
 
 		-- SELECTED BUTTONS
@@ -280,7 +280,7 @@ function journal:ADDON_LOADED(addonName)
 			btnFrame.check = btnFrame:CreateTexture(nil, "OVERLAY")
 			btnFrame.check:SetTexture(texPath.."button")
 			btnFrame.check:SetTexCoord(0.00390625, 0.8203125, 0.37890625, 0.55859375)
-			btnFrame.check:SetVertexColor(unpack(journal.colors.gold))
+			btnFrame.check:SetVertexColor(unpack(self.colors.gold))
 			btnFrame.check:SetAllPoints()
 
 			btnFrame.icon = btnFrame:CreateTexture(nil, "OVERLAY")
@@ -296,24 +296,24 @@ function journal:ADDON_LOADED(addonName)
 			end)
 		end
 
-		for _,child in ipairs(journal.scrollButtons) do
+		for _,child in ipairs(self.scrollButtons) do
 			child:SetWidth(child:GetWidth() - 25)
 			child.name:SetWidth(child.name:GetWidth() - 18)
 			child.icon:SetPoint("LEFT", child, "LEFT", -41, 0)
 			child.icon:SetSize(40, 40)
 
-			local function btnClick(self) journal:mountToggle(self) end
+			local function btnClick(btn) self:mountToggle(btn) end
 
 			CreateButton("fly", child, 25, -3, btnClick)
 			CreateButton("ground", child, 25, -17, btnClick)
 			CreateButton("swimming", child, 25, -31, btnClick)
 
-			child:HookScript("OnClick", function(self, btn) journal:mountDblClick(self.index, btn) end)
+			child:HookScript("OnClick", function(btn, mouseBtn) self:mountDblClick(btn.index, mouseBtn) end)
 		end
 
 		-- FILTERS PANEL
 		local filtersPanel = CreateFrame("FRAME", nil, MountJournal, "InsetFrameTemplate")
-		journal.filtersPanel = filtersPanel
+		self.filtersPanel = filtersPanel
 		filtersPanel:SetPoint("TOPLEFT", navBar, "BOTTOMLEFT", -4, -4)
 		filtersPanel:SetSize(280, 29)
 
@@ -323,7 +323,7 @@ function journal:ADDON_LOADED(addonName)
 
 		-- FILTERS SHOWN PANEL
 		local shownPanel = CreateFrame("FRAME", nil, MountJournal, "InsetFrameTemplate")
-		journal.shownPanel = shownPanel
+		self.shownPanel = shownPanel
 		shownPanel:SetPoint("TOPLEFT", filtersPanel, "BOTTOMLEFT", 0, -2)
 		shownPanel:SetSize(280, 26)
 		
@@ -336,15 +336,15 @@ function journal:ADDON_LOADED(addonName)
 
 		shownPanel.clear = CreateFrame("BUTTON", nil, shownPanel, "MJClearButtonTemplate")
 		shownPanel.clear:SetPoint("RIGHT", -5, 0)
-		shownPanel.clear:SetScript("OnClick", journal.clearAllFilters)
+		shownPanel.clear:SetScript("OnClick", function() self:clearAllFilters() end)
 
 		-- SCROLL FRAME
-		scrollFrame:SetPoint("TOPLEFT", journal.leftInset, "TOPLEFT", 3, -5)
+		scrollFrame:SetPoint("TOPLEFT", self.leftInset, "TOPLEFT", 3, -5)
 		scrollFrame.scrollBar:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", 1, -12)
 
 		-- FILTERS BAR
 		local filtersBar = CreateFrame("FRAME", nil, filtersPanel)
-		journal.filtersBar = filtersBar
+		self.filtersBar = filtersBar
 		filtersBar:SetSize(235, 35)
 		filtersBar:SetPoint("TOP", 0, -46)
 		filtersBar:SetBackdrop({
@@ -358,7 +358,7 @@ function journal:ADDON_LOADED(addonName)
 		-- FILTERS CLEAR
 		filtersBar.clear = CreateFrame("BUTTON", nil, filtersBar, "MJClearButtonTemplate")
 		filtersBar.clear:SetPoint("BOTTOMRIGHT", filtersBar, "TOPRIGHT")
-		filtersBar.clear:SetScript("OnClick", journal.clearBtnFilters)
+		filtersBar.clear:SetScript("OnClick", function() self:clearBtnFilters() end)
 
 		-- FILTERS BUTTONS
 		local function CreateButtonFilter(id, parent, width, height, texture, tooltip)
@@ -403,30 +403,30 @@ function journal:ADDON_LOADED(addonName)
 			if texture.color then btn.icon:SetVertexColor(unpack(texture.color)) end
 			if texture.texCoord then btn.icon:SetTexCoord(unpack(texture.texCoord)) end
 
-			btn:SetScript("OnMouseDown", function(self)
-				self.icon:SetScale(.9)
+			btn:SetScript("OnMouseDown", function(btn)
+				btn.icon:SetScale(.9)
 			end)
-			btn:SetScript("OnMouseUp", function(self)
-				self.icon:SetScale(1)
+			btn:SetScript("OnMouseUp", function(btn)
+				btn.icon:SetScale(1)
 			end)
-			btn:SetScript("OnEnter", function(self)
-				GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
+			btn:SetScript("OnEnter", function(btn)
+				GameTooltip:SetOwner(btn, "ANCHOR_BOTTOM")
 				GameTooltip:SetText(tooltip)
 				GameTooltip:Show()
 			end)
 			btn:SetScript("OnLeave", function()
 				GameTooltip_Hide()
 			end)
-			btn:SetScript("OnClick", function(self)
-				journal:setBtnFilters(self:GetParent():GetParent().id)
+			btn:SetScript("OnClick", function(btn)
+				self:setBtnFilters(btn:GetParent():GetParent().id)
 			end)
 		end
 
 		--  FILTERS TYPES BUTTONS
 		local typesTextures = {
-			{path = texPath.."fly", color = journal.colors.mount1, width = 32, height = 16},
-			{path = texPath.."ground", color = journal.colors.mount2, width = 32, height = 16},
-			{path = texPath.."swimming", color = journal.colors.mount3, width = 32, height = 16},
+			{path = texPath.."fly", color = self.colors.mount1, width = 32, height = 16},
+			{path = texPath.."ground", color = self.colors.mount2, width = 32, height = 16},
+			{path = texPath.."swimming", color = self.colors.mount3, width = 32, height = 16},
 		}
 
 		for i = 1, #typesTextures do
@@ -459,41 +459,41 @@ function journal:ADDON_LOADED(addonName)
 		end
 
 		-- FILTERS BTN TOGGLE
-		journal.btnToggle:SetParent(filtersPanel)
-		journal.btnToggle:SetPoint("TOPLEFT", 3, -3)
+		self.btnToggle:SetParent(filtersPanel)
+		self.btnToggle:SetPoint("TOPLEFT", 3, -3)
 
 		local function setBtnToggleCheck()
 			if mounts.config.filterToggle then
-				journal.btnToggle.icon:SetPoint("CENTER", 0, 1)
-				journal.btnToggle.icon:SetTexCoord(1, 0, 0, 0, 1, 1, 0, 1)
+				self.btnToggle.icon:SetPoint("CENTER", 0, 1)
+				self.btnToggle.icon:SetTexCoord(1, 0, 0, 0, 1, 1, 0, 1)
 				filtersPanel:SetHeight(84)
 				filtersBar:Show()
 			else
-				journal.btnToggle.icon:SetPoint("CENTER", 0, -1)
-				journal.btnToggle.icon:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
+				self.btnToggle.icon:SetPoint("CENTER", 0, -1)
+				self.btnToggle.icon:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
 				filtersPanel:SetHeight(29)
 				filtersBar:Hide()
 			end
 		end
 		setBtnToggleCheck()
 
-		journal.btnToggle:SetScript("OnClick", function()
+		self.btnToggle:SetScript("OnClick", function()
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			mounts.config.filterToggle = not mounts.config.filterToggle
 			setBtnToggleCheck()
 		end)
 
 		-- HOOKS
-		journal.func = {}
-		journal:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", function() return #journal.displayedMounts end)
-		journal:setSecureFunc(C_MountJournal, "GetDisplayedMountInfo")
-		journal:setSecureFunc(C_MountJournal, "Pickup")
-		journal:setSecureFunc(C_MountJournal, "SetIsFavorite")
-		journal:setSecureFunc(C_MountJournal, "GetIsFavorite")
-		journal:setSecureFunc(C_MountJournal, "GetDisplayedMountInfoExtra")
-		journal:setSecureFunc(C_MountJournal, "GetDisplayedMountAllCreatureDisplayInfo")
+		self.func = {}
+		self:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", function() return #self.displayedMounts end)
+		self:setSecureFunc(C_MountJournal, "GetDisplayedMountInfo")
+		self:setSecureFunc(C_MountJournal, "Pickup")
+		self:setSecureFunc(C_MountJournal, "SetIsFavorite")
+		self:setSecureFunc(C_MountJournal, "GetIsFavorite")
+		self:setSecureFunc(C_MountJournal, "GetDisplayedMountInfoExtra")
+		self:setSecureFunc(C_MountJournal, "GetDisplayedMountAllCreatureDisplayInfo")
 
-		hooksecurefunc("MountJournal_UpdateMountList", journal.configureJournal)
+		hooksecurefunc("MountJournal_UpdateMountList", function() self:configureJournal() end)
 		scrollFrame.update = MountJournal_UpdateMountList
 
 		local fullUpdate = MountJournal_FullUpdate
@@ -506,22 +506,22 @@ function journal:ADDON_LOADED(addonName)
 		end
 
 		-- FILTERS
-		MountJournalFilterDropDown.initialize = journal.filterDropDown_Initialize
-		journal:setEditMountsList()
+		MountJournalFilterDropDown.initialize = function(_,level) self:filterDropDown_Initialize(level) end
+		self:setEditMountsList()
 	end
 end
 
 
 function journal:setEditMountsList()
-	local mapID = journal.navBar.mapID
+	local mapID = self.navBar.mapID
 	if mapID == mounts.defMountsListID then
-		journal.currentList = {
+		self.currentList = {
 			fly = mounts.db.fly,
 			ground = mounts.db.ground,
 			swimming = mounts.db.swimming,
 		}
-		journal.list = journal.currentList
-		journal.listMapID = nil
+		self.list = self.currentList
+		self.listMapID = nil
 	else
 		local function getRelationMountList(mapID)
 			local list = mounts.db.zoneMounts[mapID]
@@ -530,29 +530,29 @@ function journal:setEditMountsList()
 			end
 			return list, mapID
 		end
-		journal.currentList = mounts.db.zoneMounts[mapID]
-		journal.list, journal.listMapID = getRelationMountList(mapID)
+		self.currentList = mounts.db.zoneMounts[mapID]
+		self.list, self.listMapID = getRelationMountList(mapID)
 	end
 end
 
 
 function journal:ACHIEVEMENT_EARNED()
-	journal.achiev.text:SetText(GetCategoryAchievementPoints(MOUNT_ACHIEVEMENT_CATEGORY, true))
+	self.achiev.text:SetText(GetCategoryAchievementPoints(MOUNT_ACHIEVEMENT_CATEGORY, true))
 end
 
 
 function journal:configureJournal()
 	local function setColor(btn, mountsTbl)
 		if mountsTbl and util.inTable(mountsTbl, btn.mountID) then
-			btn.icon:SetVertexColor(unpack(journal.colors.gold))
+			btn.icon:SetVertexColor(unpack(self.colors.gold))
 			if not btn.check:IsShown() then btn.check:Show() end
 		else
-			btn.icon:SetVertexColor(unpack(journal.colors.gray))
+			btn.icon:SetVertexColor(unpack(self.colors.gray))
 			if btn.check:IsShown() then btn.check:Hide() end
 		end
 	end
 
-	for _,btn in ipairs(journal.scrollButtons) do
+	for _,btn in ipairs(self.scrollButtons) do
 		if btn.index then
 			if not btn.fly:IsShown() then
 				btn.fly:Show()
@@ -562,9 +562,9 @@ function journal:configureJournal()
 			btn.fly.mountID = select(12, C_MountJournal.GetDisplayedMountInfo(btn.index))
 			btn.ground.mountID = btn.fly.mountID
 			btn.swimming.mountID = btn.fly.mountID
-			setColor(btn.fly, journal.list and journal.list.fly)
-			setColor(btn.ground, journal.list and  journal.list.ground)
-			setColor(btn.swimming, journal.list and  journal.list.swimming)
+			setColor(btn.fly, self.list and self.list.fly)
+			setColor(btn.ground, self.list and  self.list.ground)
+			setColor(btn.swimming, self.list and  self.list.swimming)
 		else
 			if btn.fly:IsShown() then
 				btn.fly:Hide()
@@ -584,8 +584,8 @@ function journal:configureJournal()
 			end
 		end
 	end
-	journal.mountCount.Count:SetText(count)
-	journal.mountCount.collected:SetText(collected)
+	self.mountCount.Count:SetText(count)
+	self.mountCount.collected:SetText(collected)
 end
 
 
@@ -596,7 +596,7 @@ function journal:createMountList(mapID)
 		swimming = {},
 		flags = {},
 	}
-	journal:setEditMountsList()
+	self:setEditMountsList()
 end
 
 
@@ -609,48 +609,48 @@ function journal:getRemoveMountList(mapID)
 	and not list.flags.groundOnly
 	and not list.listFromID then
 		mounts.db.zoneMounts[mapID] = nil
-		journal:setEditMountsList()
+		self:setEditMountsList()
 	end
 end
 
 
 function journal:mountToggle(btn)
-	if not journal.list then
-		journal:createMountList(journal.listMapID)
+	if not self.list then
+		self:createMountList(self.listMapID)
 	end
-	local tbl = journal.list[btn.type]
+	local tbl = self.list[btn.type]
 
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	local pos = util.inTable(tbl, btn.mountID)
 	if pos then
 		tremove(tbl, pos)
-		btn.icon:SetVertexColor(unpack(journal.colors.gray))
+		btn.icon:SetVertexColor(unpack(self.colors.gray))
 		btn.check:Hide()
-		journal:getRemoveMountList(journal.listMapID)
+		self:getRemoveMountList(self.listMapID)
 	else
 		tinsert(tbl, btn.mountID)
-		btn.icon:SetVertexColor(unpack(journal.colors.gold))
+		btn.icon:SetVertexColor(unpack(self.colors.gold))
 		btn.check:Show()
 	end
 
 	mounts:setMountsList()
-	journal.existingsLists:refresh()
+	self.existingsLists:refresh()
 end
 
 
 function journal:setFlag(flag, enable)
-	if journal.navBar.mapID == mounts.defMountsListID then return end
+	if self.navBar.mapID == mounts.defMountsListID then return end
 
-	if enable and not (journal.currentList and journal.currentList.flags) then
-		journal:createMountList(journal.navBar.mapID)
+	if enable and not (self.currentList and self.currentList.flags) then
+		self:createMountList(self.navBar.mapID)
 	end
-	journal.currentList.flags[flag] = enable
+	self.currentList.flags[flag] = enable
 	if not enable then
-		journal:getRemoveMountList(journal.navBar.mapID)
+		self:getRemoveMountList(self.navBar.mapID)
 	end
 
 	mounts:setMountsList()
-	journal.existingsLists:refresh()
+	self.existingsLists:refresh()
 end
 
 
@@ -666,7 +666,7 @@ do
 		local assocMaps = {}
 		for mapID, mapConfig in pairs(mounts.db.zoneMounts) do
 			if not mapConfig.listFromID 
-			and mapID ~= journal.navBar.mapID
+			and mapID ~= self.navBar.mapID
 			and #mapConfig.fly + #mapConfig.ground + #mapConfig.swimming > 0 then
 				local mapInfo = util.getMapFullNameInfo(mapID)
 
@@ -738,29 +738,29 @@ end
 
 
 function journal:updateMapSettings()
-	local mapSettings = journal.mapSettings
+	local mapSettings = self.mapSettings
 	if not mapSettings:IsShown() then return end
 
 	local groundCheck = mapSettings.Ground
 	local waterWalkCheck = mapSettings.WaterWalk
 	local listFromMap = mapSettings.listFromMap
-	groundCheck:SetChecked(journal.currentList and journal.currentList.flags and journal.currentList.flags.groundOnly)
-	waterWalkCheck:SetChecked(journal.currentList and journal.currentList.flags and journal.currentList.flags.waterWalkOnly)
+	groundCheck:SetChecked(self.currentList and self.currentList.flags and self.currentList.flags.groundOnly)
+	waterWalkCheck:SetChecked(self.currentList and self.currentList.flags and self.currentList.flags.waterWalkOnly)
 
-	local optionsEnable = journal.navBar.mapID ~= mounts.defMountsListID
+	local optionsEnable = self.navBar.mapID ~= mounts.defMountsListID
 	groundCheck:SetEnabled(optionsEnable)
 	waterWalkCheck:SetEnabled(optionsEnable)
 	listFromMap:SetEnabled(optionsEnable)
 
 	local relationText = mapSettings.relationMap.text
 	local relationClear = mapSettings.relationClear
-	if journal.currentList and journal.currentList.listFromID then
-		relationText:SetText(util.getMapFullNameInfo(journal.currentList.listFromID).name)
-		relationText:SetTextColor(unpack(journal.colors.gold))
+	if self.currentList and self.currentList.listFromID then
+		relationText:SetText(util.getMapFullNameInfo(self.currentList.listFromID).name)
+		relationText:SetTextColor(unpack(self.colors.gold))
 		relationClear:Show()
 	else
 		relationText:SetText(L["No relation"])
-		relationText:SetTextColor(unpack(journal.colors.gray))
+		relationText:SetTextColor(unpack(self.colors.gray))
 		relationClear:Hide()
 	end
 end
@@ -786,14 +786,14 @@ end
 
 
 function journal:setSecureFunc(obj, funcName, func)
-	if journal.func[funcName] ~= nil then return end
+	if self.func[funcName] ~= nil then return end
 
-	journal.func[funcName] = obj[funcName]
+	self.func[funcName] = obj[funcName]
 	if func then
 		obj[funcName] = func
 	else
 		obj[funcName] = function(index, ...)
-			return journal.func[funcName](journal.displayedMounts[index], ...)
+			return self.func[funcName](self.displayedMounts[index], ...)
 		end
 	end
 end
@@ -857,16 +857,16 @@ function journal:filterDropDown_Initialize(level)
 		if UIDROPDOWNMENU_MENU_VALUE == 1 then -- TYPES
 			info.text = CHECK_ALL
 			info.func = function()
-				journal:setAllFilters("types", true)
-				journal:mountsListFullUpdate()
+				self:setAllFilters("types", true)
+				self:mountsListFullUpdate()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
 
 			info.text = UNCHECK_ALL
 			info.func = function()
-				journal:setAllFilters("types", false)
-				journal:mountsListFullUpdate()
+				self:setAllFilters("types", false)
+				self:mountsListFullUpdate()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -877,7 +877,7 @@ function journal:filterDropDown_Initialize(level)
 				info.text = L["MOUNT_TYPE_"..i]
 				info.func = function(_,_,_,value)
 					types[i] = value
-					journal:mountsListFullUpdate()
+					self:mountsListFullUpdate()
 				end
 				info.checked = function() return types[i] end
 				UIDropDownMenu_AddButton(info, level)
@@ -885,16 +885,16 @@ function journal:filterDropDown_Initialize(level)
 		elseif UIDROPDOWNMENU_MENU_VALUE == 2 then -- SELECTED
 			info.text = CHECK_ALL
 			info.func = function()
-				journal:setAllFilters("selected", true)
-				journal:mountsListFullUpdate()
+				self:setAllFilters("selected", true)
+				self:mountsListFullUpdate()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
 
 			info.text = UNCHECK_ALL
 			info.func = function()
-				journal:setAllFilters("selected", false)
-				journal:mountsListFullUpdate()
+				self:setAllFilters("selected", false)
+				self:mountsListFullUpdate()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -905,7 +905,7 @@ function journal:filterDropDown_Initialize(level)
 				info.text = L["MOUNT_TYPE_"..i]
 				info.func = function(_,_,_,value)
 					selected[i] = value
-					journal:mountsListFullUpdate()
+					self:mountsListFullUpdate()
 				end
 				info.checked = function() return selected[i] end
 				UIDropDownMenu_AddButton(info, level)
@@ -939,16 +939,16 @@ function journal:filterDropDown_Initialize(level)
 		elseif UIDROPDOWNMENU_MENU_VALUE == 4 then -- FACTIONS
 			info.text = CHECK_ALL
 			info.func = function()
-				journal:setAllFilters("factions", true)
-				journal:mountsListFullUpdate()
+				self:setAllFilters("factions", true)
+				self:mountsListFullUpdate()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
 
 			info.text = UNCHECK_ALL
 			info.func = function()
-				journal:setAllFilters("factions", false)
-				journal:mountsListFullUpdate()
+				self:setAllFilters("factions", false)
+				self:mountsListFullUpdate()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -959,7 +959,7 @@ function journal:filterDropDown_Initialize(level)
 				info.text = L["MOUNT_FACTION_"..i]
 				info.func = function(_,_,_,value)
 					factions[i] = value
-					journal:mountsListFullUpdate()
+					self:mountsListFullUpdate()
 				end
 				info.checked = function() return factions[i] end
 				UIDropDownMenu_AddButton(info, level)
@@ -967,16 +967,16 @@ function journal:filterDropDown_Initialize(level)
 		else -- EXPANSIONS
 			info.text = CHECK_ALL
 			info.func = function()
-				journal:setAllFilters("expansions", true)
-				journal:mountsListFullUpdate()
+				self:setAllFilters("expansions", true)
+				self:mountsListFullUpdate()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
 
 			info.text = UNCHECK_ALL
 			info.func = function()
-				journal:setAllFilters("expansions", false)
-				journal:mountsListFullUpdate()
+				self:setAllFilters("expansions", false)
+				self:mountsListFullUpdate()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -987,7 +987,7 @@ function journal:filterDropDown_Initialize(level)
 				info.text = _G["EXPANSION_NAME"..(i - 1)]
 				info.func = function(_,_,_,value)
 					expansions[i] = value
-					journal:mountsListFullUpdate()
+					self:mountsListFullUpdate()
 				end
 				info.checked = function() return expansions[i] end
 				UIDropDownMenu_AddButton(info, level)
@@ -999,10 +999,10 @@ end
 
 function journal:clearBtnFilters()
 	C_MountJournal.SetAllSourceFilters(true)
-	journal:setAllFilters("types", true)
-	journal:setAllFilters("selected", false)
+	self:setAllFilters("types", true)
+	self:setAllFilters("selected", false)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	journal:mountsListFullUpdate()
+	self:mountsListFullUpdate()
 end
 
 
@@ -1010,15 +1010,15 @@ function journal:clearAllFilters()
 	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
 	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
 	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, true)
-	journal:setAllFilters("factions", true)
-	journal:setAllFilters("expansions", true)
-	journal:clearBtnFilters()
+	self:setAllFilters("factions", true)
+	self:setAllFilters("expansions", true)
+	self:clearBtnFilters()
 end
 
 
 function journal:setBtnFilters(tab)
 	local i = 0
-	local children = {journal.filtersBar[tab]:GetChildren()}
+	local children = {self.filtersBar[tab]:GetChildren()}
 
 	if tab ~= "sources" then
 		local default = tab == "types"
@@ -1050,7 +1050,7 @@ function journal:setBtnFilters(tab)
 	end
 
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	journal:mountsListFullUpdate()
+	self:mountsListFullUpdate()
 end
 
 
@@ -1063,7 +1063,7 @@ end
 
 
 function journal:updateBtnFilters()
-	local filtersBar, f = journal.filtersBar, {}
+	local filtersBar, f = self.filtersBar, {}
 
 	-- TYPES AND SELECTED
 	for typeFilter, filter in pairs(mounts.filters) do
@@ -1077,7 +1077,7 @@ function journal:updateBtnFilters()
 			f[typeFilter] = true
 			if filtersBar[typeFilter] then
 				for _,btn in ipairs({filtersBar[typeFilter]:GetChildren()}) do
-					local color = default and journal.colors["mount"..btn.id] or journal.colors.dark
+					local color = default and self.colors["mount"..btn.id] or self.colors.dark
 					btn:SetChecked(false)
 					btn.icon:SetVertexColor(unpack(color))
 				end
@@ -1086,7 +1086,7 @@ function journal:updateBtnFilters()
 		elseif filtersBar[typeFilter] then
 			for _,btn in ipairs({filtersBar[typeFilter]:GetChildren()}) do
 				local checked = filter[btn.id]
-				local color = checked and journal.colors["mount"..btn.id] or journal.colors.dark
+				local color = checked and self.colors["mount"..btn.id] or self.colors.dark
 				btn:SetChecked(checked)
 				btn.icon:SetVertexColor(unpack(color))
 			end
@@ -1122,20 +1122,20 @@ function journal:updateBtnFilters()
 	-- CLEAR BTN FILTERS
 	filtersBar.clear:SetShown(not f.types or not f.selected or n ~= #sources - 1)
 	if not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE) or not f.types or not f.selected or not f.factions or not f.expansions or n ~= #sources - 1 then
-		journal.shownPanel:Show()
-		journal.leftInset:SetPoint("TOPLEFT", journal.shownPanel, "BOTTOMLEFT", 0, -2)
+		self.shownPanel:Show()
+		self.leftInset:SetPoint("TOPLEFT", self.shownPanel, "BOTTOMLEFT", 0, -2)
 	else
-		journal.shownPanel:Hide()
-		journal.leftInset:SetPoint("TOPLEFT", journal.filtersPanel, "BOTTOMLEFT", 0, -2)
+		self.shownPanel:Hide()
+		self.leftInset:SetPoint("TOPLEFT", self.filtersPanel, "BOTTOMLEFT", 0, -2)
 	end
 
-	journal.leftInset:GetHeight()
+	self.leftInset:GetHeight()
 end
 
 
 function journal:mountsListFullUpdate()
-	journal:updateBtnFilters()
-	journal:updateMountsList()
+	self:updateBtnFilters()
+	self:updateMountsList()
 	MountJournal_UpdateMountList()
 end
 
@@ -1155,11 +1155,11 @@ do
 		[254] = 3,
 	}
 	function journal:updateMountsList()
-		local types, selected, factions, expansions, list = mounts.filters.types, mounts.filters.selected, mounts.filters.factions, mounts.filters.expansions, journal.list
-		wipe(journal.displayedMounts)
+		local types, selected, factions, expansions, list = mounts.filters.types, mounts.filters.selected, mounts.filters.factions, mounts.filters.expansions, self.list
+		wipe(self.displayedMounts)
 
-		for i = 1, journal.func.GetNumDisplayedMounts() do
-			local _,_,_,_,_,_,_,_,mountFaction,_,_,mountID = journal.func.GetDisplayedMountInfo(i)
+		for i = 1, self.func.GetNumDisplayedMounts() do
+			local _,_,_,_,_,_,_,_,mountFaction,_,_,mountID = self.func.GetDisplayedMountInfo(i)
 			local mountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
 			mountFaction = mountFaction or 2
 
@@ -1177,9 +1177,9 @@ do
 				or selected[3] and list and util.inTable(list.swimming, mountID))
 			-- EXPANSIONS
 			and expansions[mounts.mountsDB[mountID]] then
-				tinsert(journal.displayedMounts, i)
+				tinsert(self.displayedMounts, i)
 			end
 		end
-		journal.shownPanel.count:SetText(#journal.displayedMounts)
+		self.shownPanel.count:SetText(#self.displayedMounts)
 	end
 end
