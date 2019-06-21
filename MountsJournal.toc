@@ -1,4 +1,4 @@
-## Interface: 80100
+## Interface: 80200
 ## Title: MountsJournal
 ## Author: sfmict
 ## Version: @project-version@

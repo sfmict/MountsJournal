@@ -211,7 +211,6 @@ do
 								and not self.sFlags.isIndoors
 								and not self.sFlags.herb
 								and not self.sFlags.swimming
-								and (self.sFlags.fly or not self.sFlags.waterWalk)
 								and self.broomName
 
 		-- EXIT VEHICLE

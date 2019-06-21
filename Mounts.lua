@@ -1,7 +1,6 @@
 local addon = ...
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
-local interface = select(4, GetBuildInfo())
 
 
 mounts:SetScript("OnEvent", function(self, event, ...)
@@ -18,7 +17,8 @@ function mounts:ADDON_LOADED(addonName)
 	if addonName == addon then
 		self:UnregisterEvent("ADDON_LOADED")
 
-		self.defMountsListID = 946 -- WORLD
+		local mapInfo = MapUtil.GetMapParentInfo(C_Map.GetFallbackWorldMapID(), Enum.UIMapType.Cosmic, true)
+		self.defMountsListID = mapInfo and mapInfo.mapID or 946 -- WORLD
 
 		MountsJournalDB = MountsJournalDB or {}
 		MountsJournalDB.fly = MountsJournalDB.fly or {}
@@ -35,18 +35,6 @@ function mounts:ADDON_LOADED(addonName)
 			local _,className = GetClassInfo(i)
 			self.config.macrosConfig[className] = self.config.macrosConfig[className] or {}
 		end
-		if self.config.waterWalkInstance == nil then
-			self.config.waterWalkInstance = true
-		end
-		if type(self.config.waterWalkList) ~= "table" then
-			self.config.waterWalkList = {
-				[1456] = true, -- Око Азшары
-				[1771] = true, -- Тол Дагор
-			}
-		end
-		if type(self.config.waterWalkExpeditionList) ~= "table" then
-			self.config.waterWalkExpeditionList = {}
-		end
 
 		MountsJournalChar = MountsJournalChar or {}
 		MountsJournalChar.fly =  MountsJournalChar.fly or {}
@@ -56,7 +44,15 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalChar.zoneMounts[self.defMountsListID] = nil
 		MountsJournalChar.macrosConfig = MountsJournalChar.macrosConfig or {}
 
-		self.sFlags = {}
+		-- Рудименты
+		self.config.waterWalkAll = nil
+		self.config.waterWalkList = nil
+		self.config.waterWalkInstance = nil
+		self.config.waterWalkExpedition = nil
+		self.config.waterWalkExpeditionList = nil
+		self.waterWalk = nil
+
+		-- Списки
 		self.swimmingVashjir = {
 			373, -- Вайш'ирский морской конек
 		}
@@ -64,14 +60,11 @@ function mounts:ADDON_LOADED(addonName)
 			678, -- Механоцикл с шофером
 			679, -- Анжинерский чоппер с водителем
 		}
-		self.waterWalk = {
-			488, -- Багровый водный долгоног
-			449, -- Лазурный водный долгоног
-		}
 		self.herbalismMounts = {
 			522, -- Небесный голем
 		}
 
+		self.sFlags = {}
 		self.expeditions = {
 			[1813] = 981, -- Экспедиция: Руины Ун'гола
 			[1814] = 1336, -- Экспедиция: Тихая Сень
@@ -296,13 +289,7 @@ end
 
 
 function mounts:isWaterWalkLocation(instance)
-	if self.config.waterWalkInstance and self.config.waterWalkList[instance]
-	or self.config.waterWalkExpedition and self.config.waterWalkExpeditionList[instance]
-	or self.mapFlags and self.mapFlags.waterWalkOnly then
-		return true
-	end
-
-	return false
+	return self.mapFlags and self.mapFlags.waterWalkOnly or false
 end
 
 
@@ -327,8 +314,7 @@ function mounts:setFlags()
 						  and not isFloating
 	flags.fly = isFlyableLocation
 					and (not modifier or isSubmerged)
-	flags.waterWalk = self.config.waterWalkAll
-							or isFloating
+	flags.waterWalk = isFloating
 							or not isFlyableLocation and modifier
 							or self:isWaterWalkLocation(instance)
 	flags.herb = self:herbMountsExists()
@@ -358,12 +344,9 @@ function mounts:init()
 							  or self:summon(self.list.swimming)))
 		-- fly
 		and not (flags.fly and self:summonListOr(self.list.fly))
-		-- water walk
-		and not (flags.waterWalk and self:summon(self.waterWalk))
 		-- ground
 		and not self:summonListOr(self.list.ground)
 		and not self:summon(self.list.fly)
-		and not self:summon(self.waterWalk)
 		and not self:summon(self.lowLevel) then
 			self:errorSummon()
 		end

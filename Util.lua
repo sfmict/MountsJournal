@@ -55,6 +55,14 @@ end
 MountsJournalUtil = {}
 
 
+function MountsJournalUtil.setEventsMixin(frame)
+	for k, v in pairs(MountsJournalEventsMixin) do
+		frame[k] = v
+	end
+	frame:init()
+end
+
+
 function MountsJournalUtil.inTable(tbl, item)
 	for key, value in ipairs(tbl) do
 		if value == item then
@@ -85,9 +93,20 @@ function MountsJournalUtil.getMapFullNameInfo(mapID)
 end
 
 
-function MountsJournalUtil.setEventsMixin(frame)
-	for k, v in pairs(MountsJournalEventsMixin) do
-		frame[k] = v
+do
+	local function showTooltip(_,_,hyperLink)
+		GameTooltip:SetOwner(UIParent, "ANCHOR_CURSOR")
+		GameTooltip:SetHyperlink(hyperLink)
+		GameTooltip:Show()
 	end
-	frame:init()
+
+	local function hideTooltip(self)
+		GameTooltip:Hide()
+	end
+
+	function MountsJournalUtil.setHyperlinkTooltip(frame)
+		frame:SetHyperlinksEnabled(true)
+		frame:SetScript("OnHyperlinkEnter", showTooltip)
+		frame:SetScript("OnHyperlinkLeave", hideTooltip)
+	end
 end

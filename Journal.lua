@@ -1,7 +1,6 @@
 local addon, L = ...
 local util, mounts, config = MountsJournalUtil, MountsJournal, MountsJournalConfig
 local journal = MountsJournalFrame
-local interface = select(4, GetBuildInfo())
 
 
 local COLLECTION_ACHIEVEMENT_CATEGORY = 15246
@@ -107,21 +106,19 @@ function journal:ADDON_LOADED(addonName)
 		mountCount.collectedLabel:SetText(L["Collected:"])
 
 		-- MOUNT EQUIPMENT
-		if interface >= 80200 then
-			local bottomLeftInset = MountJournal.BottomLeftInset
-			local slotButton = bottomLeftInset.SlotButton
-			bottomLeftInset.SlotLabel:SetPoint("LEFT", bottomLeftInset, "LEFT", 0, 0)
-			bottomLeftInset:Hide()
-			slotButton:SetParent(MountJournal)
-			slotButton:SetPoint("TOPLEFT", self.mountCount, "TOPRIGHT", 2, -2)
-			slotButton:SetSize(32, 32)
-			for _,region in ipairs({slotButton:GetRegions()}) do
-				region:SetSize(32, 32)
-			end
-			self.leftInset:SetPoint("BOTTOMLEFT", MountJournal, "BOTTOMLEFT", 0, 26)
-			HybridScrollFrame_CreateButtons(scrollFrame, "MountListButtonTemplate", 44, 0);
-			self.rightInset:SetPoint("BOTTOMLEFT", self.leftInset, "BOTTOMRIGHT", 20, 0)
+		local bottomLeftInset = MountJournal.BottomLeftInset
+		local slotButton = bottomLeftInset.SlotButton
+		bottomLeftInset.SlotLabel:SetPoint("LEFT", bottomLeftInset, "LEFT", 0, 0)
+		bottomLeftInset:Hide()
+		slotButton:SetParent(MountJournal)
+		slotButton:SetPoint("TOPLEFT", self.mountCount, "TOPRIGHT", 2, -2)
+		slotButton:SetSize(32, 32)
+		for _,region in ipairs({slotButton:GetRegions()}) do
+			region:SetSize(32, 32)
 		end
+		self.leftInset:SetPoint("BOTTOMLEFT", MountJournal, "BOTTOMLEFT", 0, 26)
+		HybridScrollFrame_CreateButtons(scrollFrame, "MountListButtonTemplate", 44, 0);
+		self.rightInset:SetPoint("BOTTOMLEFT", self.leftInset, "BOTTOMRIGHT", 20, 0)
 
 		-- NAVBAR BUTTON
 		local navBarBtn = CreateFrame("CheckButton", nil, MountJournal, "MJMiniMapBtnTemplate")
@@ -174,7 +171,9 @@ function journal:ADDON_LOADED(addonName)
 		end)
 		mapSettings.Ground.Text:SetText(L["Ground Mounts Only"])
 		mapSettings.Ground:HookScript("OnClick", function(check) self:setFlag("groundOnly", check:GetChecked()) end)
-		mapSettings.WaterWalk.Text:SetText(L["Water Walk Mounts Only"])
+		mapSettings.WaterWalk.Text:SetText(L["Water Walking"])
+		mapSettings.WaterWalk.tooltipText = L["Water Walking"]
+		mapSettings.WaterWalk.tooltipRequirement = L["WaterWalkFlagDescription"]
 		mapSettings.WaterWalk:HookScript("OnClick", function(check) self:setFlag("waterWalkOnly", check:GetChecked()) end)
 		mapSettings.listFromMap.Text:SetText(L["ListMountsFromZone"])
 		mapSettings.listFromMap.maps = {}

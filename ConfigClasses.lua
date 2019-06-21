@@ -1,6 +1,5 @@
 local addon, L = ...
-local mounts = MountsJournal
-local config = MountsJournalConfig
+local util, mounts, config = MountsJournalUtil, MountsJournal, MountsJournalConfig
 local classConfig = CreateFrame("Frame", "MountsJournalConfigClasses", InterfaceOptionsFramePanelContainer)
 classConfig.name = L["Class settings"]
 classConfig.parent = addon
@@ -244,7 +243,7 @@ do
 		end
 		optionFrame.key = option.key
 		if option.hlink and not optionFrame:GetHyperlinksEnabled() then
-			config:setHyperlinkTooltip(optionFrame)
+			util.setHyperlinkTooltip(optionFrame)
 		end
 		optionFrame:Show()
 		return optionFrame

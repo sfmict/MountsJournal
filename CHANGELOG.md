@@ -1,2 +1,1 @@
-* Update DataBase.
-* Fixes.
+* Update to 8.2
