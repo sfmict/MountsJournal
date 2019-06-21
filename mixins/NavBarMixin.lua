@@ -17,7 +17,6 @@ MJNavBarMixin = CreateFromMixins(MountsJournalEventsMixin)
 function MJNavBarMixin:onLoad()
 	self:init()
 	self.defMapID = MountsJournal.defMountsListID
-	self.journal = MountsJournalFrame
 	local homeData = {
 		name = WORLD,
 		OnClick = function() self:setDefMap() end,
@@ -61,7 +60,7 @@ function MJNavBarMixin:getDropDownList()
 					local data = {
 						text = childInfo.name,
 						id = childInfo.mapID,
-						func = function(btn, mapID) self:GetParent():setMapID(mapID) end,
+						func = function(_,mapID) self:GetParent():setMapID(mapID) end,
 					}
 					tinsert(list, data)
 				end

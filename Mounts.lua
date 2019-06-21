@@ -310,8 +310,7 @@ function mounts:setFlags()
 	flags.isMounted = IsMounted()
 	flags.groundSpellKnown = groundSpellKnown
 	flags.swimming = isSubmerged
-						  and not modifier
-						  and not isFloating
+						  and not (modifier or isFloating)
 	flags.fly = isFlyableLocation
 					and (not modifier or isSubmerged)
 	flags.waterWalk = isFloating
