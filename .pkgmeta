@@ -5,7 +5,7 @@ manual-changelog:
 	markup-type: markdown
 
 ignore:
-	- Atlas.lua
+	- _test.lua
 	- README.md
 	- CHANGELOG.md
 	- _config.yml
