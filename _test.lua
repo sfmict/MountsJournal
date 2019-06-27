@@ -4,7 +4,7 @@ local journal = MountsJournalFrame
 
 mounts:RegisterEvent("PLAYER_ENTERING_WORLD")
 function mounts:PLAYER_ENTERING_WORLD()
-	fprint("PLAYER_ENTERING_WORLD")
+	-- fprint("PLAYER_ENTERING_WORLD")
 	-- JOURNAL OPEN
 	-- if not IsAddOnLoaded("Blizzard_Collections") then
 	-- 	LoadAddOn("Blizzard_Collections")
