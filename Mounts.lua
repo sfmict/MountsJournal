@@ -271,6 +271,7 @@ do
 	local bfaLocations = {
 		[1642] = true, -- Зандалар
 		[1643] = true, -- Кул-Тирас
+		[1718] = true, -- Назжатар
 	}
 	function mounts:isFlyLocation(instance)
 		if self.continentsGround[instance]

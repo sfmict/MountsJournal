@@ -1,1 +1,1 @@
-* Update to 8.2
+* Nazjatar added to BFA locations.
