@@ -2,6 +2,7 @@ local addon, L = ...
 local util, mounts, binding = MountsJournalUtil, MountsJournal, _G[addon.."Binding"]
 local config = CreateFrame("FRAME", "MountsJournalConfig", InterfaceOptionsFramePanelContainer)
 config.name = addon
+local secureButtonName = "MountsJournal_Mount"
 
 
 config:SetScript("OnEvent", function(self, event, ...)
@@ -18,7 +19,7 @@ do
 		if not InCombatLockdown() then
 			local texture = select(2, GetMacroInfo("MJMacro"))
 			if texture then
-				EditMacro("MJMacro", "MJMacro", texture, "/click MountsJournal_Mount")
+				EditMacro("MJMacro", "MJMacro", texture, "/click "..secureButtonName)
 			end
 		else
 			self:RegisterEvent("PLAYER_REGEN_ENABLED")
@@ -31,7 +32,7 @@ do
 	end
 
 	function config:PLAYER_LOGIN()
-		self.bindMount = binding:createButtonBinding(self, "MountsJournal_Mount", "MJSecureActionButtonTemplate")
+		self.bindMount = binding:createButtonBinding(self, secureButtonName, "MJSecureActionButtonTemplate")
 		self.bindMount:SetSize(232, 22)
 		setMacroText(self)
 	end
@@ -119,7 +120,7 @@ config:SetScript("OnShow", function(self)
 	createMacroBtn:SetScript("OnClick", function()
 		local macroName = "MJMacro"
 		DeleteMacro(macroName)
-		CreateMacro(macroName, select(3, GetSpellInfo(150544)), "/click MountsJournal_Mount")
+		CreateMacro(macroName, select(3, GetSpellInfo(150544)), "/click "..secureButtonName)
 
 		if not IsAddOnLoaded("Blizzard_MacroUI") then
 			LoadAddOn("Blizzard_MacroUI")
