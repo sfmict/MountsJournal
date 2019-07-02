@@ -50,7 +50,6 @@ function mounts:ADDON_LOADED(addonName)
 		self.config.waterWalkInstance = nil
 		self.config.waterWalkExpedition = nil
 		self.config.waterWalkExpeditionList = nil
-		self.waterWalk = nil
 
 		-- Списки
 		self.swimmingVashjir = {
@@ -97,14 +96,20 @@ function mounts:ADDON_LOADED(addonName)
 			[205] = true, -- Мерцающий простор
 		}
 
+		-- MAP CHANGED
 		self:RegisterEvent("NEW_WMO_CHUNK")
 		self:RegisterEvent("ZONE_CHANGED")
 		self:RegisterEvent("ZONE_CHANGED_INDOORS")
 		self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
+		-- PROFESSION CHANGED OR MOUNT LEARNED
+		mounts:RegisterEvent("SKILL_LINES_CHANGED")
+		mounts:RegisterEvent("COMPANION_LEARNED")
+
 		self:setMountsListPerChar()
 		self:setModifier(self.config.modifier)
 		self:setHandleWaterJump(self.config.waterJump)
+		self:setHerbFlag()
 		self:init()
 	end
 end
@@ -232,27 +237,26 @@ function mounts:getSpellKnown()
 end
 
 
-function mounts:herbMountsExists()
+function mounts:setHerbFlag()
 	if self.config.useHerbMounts then
 		local prof1, prof2 = GetProfessions()
 		if (prof1 and select(7, GetProfessionInfo(prof1)) == 182 or prof2 and select(7, GetProfessionInfo(prof2)) == 182) then
 			for _,mountID in ipairs(self.herbalismMounts) do
 				if select(5, C_MountJournal.GetMountInfoByID(mountID)) then
-					return true
+					self.sFlags.herb = true
+					return
 				end
 			end
 		end
 	end
-	return false
+	self.sFlags.herb = false
 end
+mounts.SKILL_LINES_CHANGED = mounts.setHerbFlag
+mounts.COMPANION_LEARNED = mounts.setHerbFlag
 
 
 function mounts:summonListOr(ids)
-	if self.sFlags.herb and self:summon(self.herbalismMounts) then -- herbMount
-		return true
-	end
-
-	return self:summon(ids)
+	return self.sFlags.herb and self:summon(self.herbalismMounts) or self:summon(ids)  -- herbMount
 end
 
 
@@ -317,7 +321,6 @@ function mounts:setFlags()
 	flags.waterWalk = isFloating
 							or not isFlyableLocation and modifier
 							or self:isWaterWalkLocation(instance)
-	flags.herb = self:herbMountsExists()
 end
 
 

@@ -1,9 +1,23 @@
 local addon, L = ...
 local mounts = MountsJournal
+local config = MountsJournalConfig
 local journal = MountsJournalFrame
+local test = CreateFrame("Frame")
+test:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-mounts:RegisterEvent("PLAYER_ENTERING_WORLD")
-function mounts:PLAYER_ENTERING_WORLD()
+
+test:SetScript("OnEvent", function(self, event, ...)
+	if self[event] then
+		fprint(event, ...)
+		self[event](self, ...)
+	else
+		fprint("None:", event, ...)
+	end
+end)
+
+
+function test:PLAYER_ENTERING_WORLD()
+	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	-- fprint("PLAYER_ENTERING_WORLD")
 	-- JOURNAL OPEN
 	-- if not IsAddOnLoaded("Blizzard_Collections") then

@@ -218,6 +218,7 @@ config.okay = function(self)
 	binding:saveBinding()
 	mounts:setHandleWaterJump(self.waterJump:GetChecked())
 	mounts.config.useHerbMounts = self.useHerbMounts:GetChecked()
+	mounts:setHerbFlag()
 	mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
 end
 
