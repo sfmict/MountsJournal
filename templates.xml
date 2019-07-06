@@ -570,13 +570,6 @@
 	<CheckButton name="MJMiniMapBtnTemplate" virtual="true">
 		<Size x="48" y="32"/>
 		<Layers>
-			<Layer level="BACKGROUND">
-				<Texture inherits="UI-EJ-ShowMapBG">
-					<Anchors>
-						<Anchor point="LEFT" x="-3" y="5"/>
-					</Anchors>
-				</Texture>
-			</Layer>
 			<Layer level="ARTWORK">
 				<Texture file="Interface\QuestFrame\UI-QuestMap_Button" parentKey="texture">
 					<Size x="48" y="32"/>
@@ -590,7 +583,7 @@
 				<Texture file="Interface\BUTTONS\ButtonHilight-Square" alphaMode="ADD">
 					<Size x="36" y="25"/>
 					<Anchors>
-						<Anchor point="RIGHT" x="-7" y="0"/>
+						<Anchor point="RIGHT" x="-6" y="0"/>
 					</Anchors>
 				</Texture>
 			</Layer>
