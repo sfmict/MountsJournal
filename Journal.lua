@@ -90,7 +90,11 @@ function journal:ADDON_LOADED(addonName)
 		mounts.filters.types = mounts.filters.types or {true, true, true}
 		mounts.filters.selected = mounts.filters.selected or {false, false, false}
 		mounts.filters.factions = mounts.filters.factions or {true, true, true}
-		mounts.filters.expansions = mounts.filters.expansions or {true, true, true, true, true, true, true, true}
+		mounts.filters.expansions = mounts.filters.expansions or {}
+		setmetatable(mounts.filters.expansions, {__index = function(self, key)
+			self[key] = true
+			return true
+		end})
 
 		-- MOUNT COUNT
 		local mountCount = MountJournal.MountCount

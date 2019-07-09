@@ -446,7 +446,7 @@
 		</Scripts>
 		<NormalTexture file="Interface\HelpFrame\CS_HelpTextures_Tile" horizTile="true">
 			<TexCoords left="0.00000000" right="1.00000000" top="0.06250000" bottom="0.12109375"/>
-		</NormalTexture>		
+		</NormalTexture>
 		<PushedTexture file="Interface\HelpFrame\CS_HelpTextures_Tile" horizTile="true">
 			<TexCoords left="0.00000000" right="1.00000000" top="0.12500000" bottom="0.18359375"/>
 		</PushedTexture>
@@ -511,7 +511,7 @@
 				</Scripts>
 				<NormalTexture file="Interface\HelpFrame\CS_HelpTextures">
 					<TexCoords left="0.54296875" right="0.62890625" top="0.75781250" bottom="0.99218750"/>
-				</NormalTexture>		
+				</NormalTexture>
 				<PushedTexture file="Interface\HelpFrame\CS_HelpTextures">
 					<TexCoords left="0.45312500" right="0.53906250" top="0.75781250" bottom="0.99218750"/>
 				</PushedTexture>
@@ -548,7 +548,7 @@
 					</OnClick>
 				</Scripts>
 				<NormalTexture file="Interface\HelpFrame\CS_HelpTextures">
-				</NormalTexture>		
+				</NormalTexture>
 				<PushedTexture file="Interface\HelpFrame\CS_HelpTextures">
 				</PushedTexture>
 				<HighlightTexture file="Interface\HelpFrame\CS_HelpTextures" alphaMode="ADD">
