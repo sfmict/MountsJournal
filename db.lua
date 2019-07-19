@@ -768,6 +768,6 @@ MountsJournal.mountsDB = {
 	[1272] = 8, -- 302797 Стремительный призрачный терродактиль
 }
 setmetatable(MountsJournal.mountsDB, {__index = function(self, key)
-	self[key] = 8
-	return 8
+	self[key] = EJ_GetNumTiers()
+	return self[key]
 end})

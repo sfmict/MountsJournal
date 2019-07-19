@@ -293,7 +293,7 @@ do
 end
 
 
-function mounts:isWaterWalkLocation(instance)
+function mounts:isWaterWalkLocation()
 	return self.mapFlags and self.mapFlags.waterWalkOnly or false
 end
 
@@ -320,7 +320,7 @@ function mounts:setFlags()
 					and (not modifier or isSubmerged)
 	flags.waterWalk = isFloating
 							or not isFlyableLocation and modifier
-							or self:isWaterWalkLocation(instance)
+							or self:isWaterWalkLocation()
 end
 
 

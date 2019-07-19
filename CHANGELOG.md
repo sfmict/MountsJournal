@@ -1,1 +1,1 @@
-* Nazjatar added to BFA locations.
+* Added animations combobox.

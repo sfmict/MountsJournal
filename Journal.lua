@@ -23,6 +23,21 @@ setmetatable(journal.displayedMounts, {__index = function(self, key)
 end})
 
 
+-- 1 FLY, 2 GROUND, 3 SWIMMING
+journal.mountTypes = {
+	[242] = 1,
+	[247] = 1,
+	[248] = 1,
+	[230] = 2,
+	[241] = 2,
+	[269] = 2,
+	[284] = 2,
+	[231] = 3,
+	[232] = 3,
+	[254] = 3,
+}
+
+
 local function tabClick(self)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	local id = self.id
@@ -486,6 +501,83 @@ function journal:ADDON_LOADED(addonName)
 			setBtnToggleCheck()
 		end)
 
+		-- MOUNT ANIMATIONS
+		local modelScene = MountJournal.MountDisplay.ModelScene
+		local animationsCombobox = CreateFrame("FRAME", "MountsJournalAnimations", modelScene, "UIDropDownMenuTemplate")
+		animationsCombobox:SetPoint("BOTTOMRIGHT", -128, 15)
+		local animationsList = {
+			{
+				name = L["Stand"],
+				animation = 0,
+			},
+			{
+				name = L["Mount special"],
+				animation = 94,
+			},
+			{
+				name = L["Walk"],
+				animation = 4,
+			},
+			{
+				name = L["Walk backwards"],
+				animation = 13,
+			},
+			{
+				name = L["Run"],
+				animation = 5,
+			},
+			{
+				name = L["Swim idle"],
+				animation = 41,
+			},
+			{
+				name = L["Swim"],
+				animation = 42,
+			},
+			{
+				name = L["Swim backwards"],
+				animation = 45,
+			},
+			{
+				name = L["Fly stand"],
+				animation = 548,
+				type = 1,
+			},
+			{
+				name = L["Fly"],
+				animation = 558,
+				type  = 1,
+			},
+			{
+				name = L["Fly backwards"],
+				animation = 562,
+				type = 1,
+			},
+		}
+
+		local currentMountType
+		UIDropDownMenu_Initialize(animationsCombobox, function(self, level, menuList)
+			local info = UIDropDownMenu_CreateInfo()
+			for _,v in ipairs(animationsList) do
+				if v.type == nil or v.type == currentMountType then
+					info.checked = nil
+					info.text = v.name
+					info.value = v.animation
+					info.func = function(self)
+						modelScene:GetActorByTag("unwrapped"):SetAnimation(self.value)
+						UIDropDownMenu_SetSelectedValue(animationsCombobox, self.value)
+					end
+					UIDropDownMenu_AddButton(info)
+				end
+			end
+		end)
+
+		hooksecurefunc("MountJournal_Select", function(index)
+			local mountID = select(12, C_MountJournal.GetDisplayedMountInfo(index))
+			currentMountType = self.mountTypes[select(5, C_MountJournal.GetMountInfoExtraByID(mountID))]
+			UIDropDownMenu_SetSelectedValue(animationsCombobox, 0)
+		end)
+
 		-- HOOKS
 		self.func = {}
 		self:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", function() return #self.displayedMounts end)
@@ -722,7 +814,7 @@ function journal:listFromMapInit(level)
 			journal.existingsLists:refresh()
 			UIDropDownMenu_OnHide(self)
 		end
-		
+
 		for _,mapInfo in ipairs(list) do
 			if mapInfo.mapID then
 				info.text = mapInfo.name
@@ -1143,46 +1235,31 @@ function journal:mountsListFullUpdate()
 end
 
 
-do
-	-- 1 FLY, 2 GROUND, 3 SWIMMING
-	local mountTypes = {
-		[242] = 1,
-		[247] = 1,
-		[248] = 1,
-		[230] = 2,
-		[241] = 2,
-		[269] = 2,
-		[284] = 2,
-		[231] = 3,
-		[232] = 3,
-		[254] = 3,
-	}
-	function journal:updateMountsList()
-		local types, selected, factions, expansions, list = mounts.filters.types, mounts.filters.selected, mounts.filters.factions, mounts.filters.expansions, self.list
-		wipe(self.displayedMounts)
+function journal:updateMountsList()
+	local types, selected, factions, expansions, list = mounts.filters.types, mounts.filters.selected, mounts.filters.factions, mounts.filters.expansions, self.list
+	wipe(self.displayedMounts)
 
-		for i = 1, self.func.GetNumDisplayedMounts() do
-			local _,_,_,_,_,_,_,_,mountFaction,_,_,mountID = self.func.GetDisplayedMountInfo(i)
-			local mountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
-			mountFaction = mountFaction or 2
+	for i = 1, self.func.GetNumDisplayedMounts() do
+		local _,_,_,_,_,_,_,_,mountFaction,_,_,mountID = self.func.GetDisplayedMountInfo(i)
+		local mountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
+		mountFaction = mountFaction or 2
 
-			-- TYPE
-			if types[mountTypes[mountType]]
-			-- FACTION
-			and factions[mountFaction + 1]
-			-- SELECTED
-			and (not selected[1] and not selected[2] and not selected[3]
-				-- FLY
-				or selected[1] and list and util.inTable(list.fly, mountID)
-				-- GROUND
-				or selected[2] and list and util.inTable(list.ground, mountID)
-				-- SWIMMING
-				or selected[3] and list and util.inTable(list.swimming, mountID))
-			-- EXPANSIONS
-			and expansions[mounts.mountsDB[mountID]] then
-				tinsert(self.displayedMounts, i)
-			end
+		-- TYPE
+		if types[self.mountTypes[mountType]]
+		-- FACTION
+		and factions[mountFaction + 1]
+		-- SELECTED
+		and (not selected[1] and not selected[2] and not selected[3]
+			-- FLY
+			or selected[1] and list and util.inTable(list.fly, mountID)
+			-- GROUND
+			or selected[2] and list and util.inTable(list.ground, mountID)
+			-- SWIMMING
+			or selected[3] and list and util.inTable(list.swimming, mountID))
+		-- EXPANSIONS
+		and expansions[mounts.mountsDB[mountID]] then
+			tinsert(self.displayedMounts, i)
 		end
-		self.shownPanel.count:SetText(#self.displayedMounts)
 	end
+	self.shownPanel.count:SetText(#self.displayedMounts)
 end

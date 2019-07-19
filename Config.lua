@@ -90,7 +90,7 @@ config:SetScript("OnShow", function(self)
 	self.modifierCombobox = modifierCombobox
 	modifierCombobox:SetPoint("TOPLEFT", modifierText, "BOTTOMRIGHT", -8, 21)
 
-	UIDropDownMenu_Initialize(modifierCombobox, function (self, level, menuList)
+	UIDropDownMenu_Initialize(modifierCombobox, function(self, level, menuList)
 		local info = UIDropDownMenu_CreateInfo()
 		for i, modifier in ipairs({"ALT", "CTRL", "SHIFT"}) do
 			info.checked = nil
