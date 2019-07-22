@@ -242,7 +242,7 @@ function mounts:setHerbFlag()
 		local prof1, prof2 = GetProfessions()
 		if (prof1 and select(7, GetProfessionInfo(prof1)) == 182 or prof2 and select(7, GetProfessionInfo(prof2)) == 182) then
 			for _,mountID in ipairs(self.herbalismMounts) do
-				if select(5, C_MountJournal.GetMountInfoByID(mountID)) then
+				if select(11, C_MountJournal.GetMountInfoByID(mountID)) then
 					self.sFlags.herb = true
 					return
 				end

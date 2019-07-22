@@ -52,7 +52,7 @@ L["SHAMAN_USEONLYINWATERWALKLOCATION"] = "Use only in water walk zones"
 L["DRUID_USELASTDRUIDFORM"] = "Return last form when dismounting"
 L["DRUID_USEMACROALWAYS"] = "Use this macros instead of mounts"
 -- ANIMATIONS
-L["Stand"] = "Stand"
+L["Default"] = "Default"
 L["Mount special"] = "Mount special"
 L["Walk"] = "Walk"
 L["Walk backwards"] = "Walk backwards"

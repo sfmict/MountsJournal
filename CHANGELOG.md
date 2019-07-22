@@ -1,1 +1,1 @@
-* Added animations combobox.
+* Fixes.

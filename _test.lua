@@ -33,7 +33,7 @@ function test:PLAYER_ENTERING_WORLD()
 	-- MOUNT ANIMATION
 	local modelScene = MountJournal.MountDisplay.ModelScene
 	-- local timer
-	local i = 0
+	local i = 530
 	modelScene:HookScript("OnMouseDown", function(self, btn)
 		-- if self.needsFanFare then return end
 		local actor = self:GetActorByTag("unwrapped")
@@ -41,8 +41,8 @@ function test:PLAYER_ENTERING_WORLD()
 		-- actor2:SetModelByUnit("player")
 		self.UnwrapAnim.UnwrappedAnim:SetTarget(actor)
 
-		local modelSceneType, cameraIDs, actorIDs = C_ModelInfo.GetModelSceneInfoByID(self.modelSceneID)
-		local actorInfo = C_ModelInfo.GetModelSceneActorInfoByID(actorIDs[3])
+		-- local modelSceneType, cameraIDs, actorIDs = C_ModelInfo.GetModelSceneInfoByID(self.modelSceneID)
+		-- local actorInfo = C_ModelInfo.GetModelSceneActorInfoByID(actorIDs[3])
 		-- fprint(dump, C_ModelInfo.GetModelSceneActorDisplayInfoByID(actorInfo.modelActorDisplayID))
 		-- fprint(dump, C_ModelInfo.GetModelSceneInfoByID(self.modelSceneID))
 		-- C_ModelInfo.GetModelSceneActorDisplayInfoByID()
@@ -51,19 +51,19 @@ function test:PLAYER_ENTERING_WORLD()
 		-- WALK            4 119
 		-- WALK BACK       13
 		-- RUN             5 143
-		-- IN WATTER       41
-		-- SWIMM           42
-		-- SWIMM BACK      45
+		-- IN WATTER       41 532
+		-- SWIMM           42 540
+		-- SWIMM BACK      45 534
 		-- FLIGHT          548
 		-- FLIGHT FORWARD  135 556 558
 		-- FLIGHT BACK     550 562
-		-- SPECIAL         94
+		-- SPECIAL         94 636
 
 		-- PLAYER 91
 		local mountDisplay = self:GetParent()
 		if actor then
 			if btn == "RightButton" then
-				i = i + 1
+				i = i + (IsShiftKeyDown() and -1 or 1)
 			end
 			fprint(i)
 			actor:SetAnimation(i)

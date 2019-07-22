@@ -56,7 +56,7 @@ L["SHAMAN_USEONLYINWATERWALKLOCATION"] = "Использовать только 
 L["DRUID_USELASTDRUIDFORM"] = "Вернуть последнюю форму при спешивании"
 L["DRUID_USEMACROALWAYS"] = "Использовать этот макрос вместо средств передвижения"
 -- ANIMATIONS
-L["Stand"] = "Стоять"
+L["Default"] = "По умолчанию"
 L["Mount special"] = "Особая"
 L["Walk"] = "Идти"
 L["Walk backwards"] = "Идти назад"

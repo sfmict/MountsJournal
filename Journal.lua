@@ -507,7 +507,7 @@ function journal:ADDON_LOADED(addonName)
 		animationsCombobox:SetPoint("BOTTOMRIGHT", -128, 15)
 		local animationsList = {
 			{
-				name = L["Stand"],
+				name = L["Default"],
 				animation = 0,
 			},
 			{
@@ -517,26 +517,32 @@ function journal:ADDON_LOADED(addonName)
 			{
 				name = L["Walk"],
 				animation = 4,
+				type = 2,
 			},
 			{
 				name = L["Walk backwards"],
 				animation = 13,
+				type = 2,
 			},
 			{
 				name = L["Run"],
 				animation = 5,
+				type = 2,
 			},
 			{
 				name = L["Swim idle"],
-				animation = 41,
+				animation = 532,
+				type = 3,
 			},
 			{
 				name = L["Swim"],
-				animation = 42,
+				animation = 540,
+				type = 3,
 			},
 			{
 				name = L["Swim backwards"],
-				animation = 45,
+				animation = 534,
+				type = 3,
 			},
 			{
 				name = L["Fly stand"],
@@ -556,10 +562,12 @@ function journal:ADDON_LOADED(addonName)
 		}
 
 		local currentMountType
-		UIDropDownMenu_Initialize(animationsCombobox, function(self, level, menuList)
+		UIDropDownMenu_Initialize(animationsCombobox, function()
 			local info = UIDropDownMenu_CreateInfo()
+			local mountType = self.mountTypes[currentMountType] or 1
+			if currentMountType == 231 then mountType = mountType - 1 end
 			for _,v in ipairs(animationsList) do
-				if v.type == nil or v.type == currentMountType then
+				if v.type == nil or v.type >= mountType then
 					info.checked = nil
 					info.text = v.name
 					info.value = v.animation
@@ -574,7 +582,7 @@ function journal:ADDON_LOADED(addonName)
 
 		hooksecurefunc("MountJournal_Select", function(index)
 			local mountID = select(12, C_MountJournal.GetDisplayedMountInfo(index))
-			currentMountType = self.mountTypes[select(5, C_MountJournal.GetMountInfoExtraByID(mountID))]
+			currentMountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
 			UIDropDownMenu_SetSelectedValue(animationsCombobox, 0)
 		end)
 
