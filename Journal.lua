@@ -522,7 +522,7 @@ function journal:ADDON_LOADED(addonName)
 			local buttonModes = activeCamera.buttonModes
 			buttonModes.leftY = ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION
 			buttonModes.rightX = ORBIT_CAMERA_MOUSE_MODE_TARGET_HORIZONTAL
-			buttonModes.right = ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL
+			buttonModes.rightY = ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL
 
 			activeCamera.OnUpdate = function(self, elapsed)
 				if self:IsLeftMouseButtonDown() then
@@ -534,7 +534,7 @@ function journal:ADDON_LOADED(addonName)
 				if self:IsRightMouseButtonDown() then
 					local deltaX, deltaY = GetScaledCursorDelta()
 					self:HandleMouseMovement(self.buttonModes.rightX, deltaX * .023, not self.buttonModes.rightXinterpolate)
-					self:HandleMouseMovement(self.buttonModes.right, -deltaY * .023, not self.buttonModes.rightYinterpolate)
+					self:HandleMouseMovement(self.buttonModes.rightY, -deltaY * .023, not self.buttonModes.rightYinterpolate)
 				end
 
 				self:UpdateInterpolationTargets(elapsed)
