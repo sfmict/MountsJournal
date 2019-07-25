@@ -20,7 +20,6 @@ test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 function test:PLAYER_ENTERING_WORLD()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	if true then return end
-	-- fprint("PLAYER_ENTERING_WORLD")
 	-- JOURNAL OPEN
 	if not IsAddOnLoaded("Blizzard_Collections") then
 		LoadAddOn("Blizzard_Collections")

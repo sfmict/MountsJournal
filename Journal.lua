@@ -99,6 +99,7 @@ function journal:ADDON_LOADED(addonName)
 
 		local texPath = "Interface/AddOns/MountsJournal/textures/"
 		local scrollFrame = MountJournal.ListScrollFrame
+		local modelScene = MountJournal.MountDisplay.ModelScene
 		self.scrollButtons = scrollFrame.buttons
 		self.leftInset = MountJournal.LeftInset
 		self.rightInset = MountJournal.RightInset
@@ -136,7 +137,7 @@ function journal:ADDON_LOADED(addonName)
 			region:SetSize(32, 32)
 		end
 		self.leftInset:SetPoint("BOTTOMLEFT", MountJournal, "BOTTOMLEFT", 0, 26)
-		HybridScrollFrame_CreateButtons(scrollFrame, "MountListButtonTemplate", 44, 0);
+		HybridScrollFrame_CreateButtons(scrollFrame, "MountListButtonTemplate", 44, 0)
 		self.rightInset:SetPoint("BOTTOMLEFT", self.leftInset, "BOTTOMRIGHT", 20, 0)
 
 		-- NAVBAR BUTTON
@@ -501,10 +502,85 @@ function journal:ADDON_LOADED(addonName)
 			setBtnToggleCheck()
 		end)
 
+		-- MODEL SCENE
+		modelScene.RotateLeftButton:Hide()
+		modelScene.RotateRightButton:Hide()
+		local modelControl = CreateFrame("FRAME", nil, modelScene, "MJControlFrameTemplate")
+		modelControl:SetPoint("BOTTOM", -70, 10)
+		modelControl.zoomIn.icon:SetTexCoord(0.57812500, 0.82812500, 0.14843750, 0.27343750)
+		modelControl.zoomOut.icon:SetTexCoord(0.29687500, 0.54687500, 0.00781250, 0.13281250)
+		modelControl.panButton.icon:SetTexCoord(0.29687500, 0.54687500, 0.28906250, 0.41406250)
+		modelControl.rotateLeftButton.icon:SetTexCoord(0.01562500, 0.26562500, 0.28906250, 0.41406250)
+		modelControl.rotateRightButton.icon:SetTexCoord(0.57812500, 0.82812500, 0.28906250, 0.41406250)
+		modelControl.rotateUpButton.icon:SetTexCoord(0.01562500, 0.26562500, 0.28906250, 0.41406250)
+		modelControl.rotateUpButton.icon:SetRotation(-math.pi / 1.6, .5, .43)
+		modelControl.rotateDownButton.icon:SetTexCoord(0.57812500, 0.82812500, 0.41406250, 0.28906250)
+		modelControl.rotateDownButton.icon:SetRotation(-math.pi / 1.6)
+
+		hooksecurefunc(modelScene, "SetActiveCamera", function(self)
+			local activeCamera = self.activeCamera
+			local buttonModes = activeCamera.buttonModes
+			buttonModes.leftY = ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION
+			buttonModes.rightX = ORBIT_CAMERA_MOUSE_MODE_TARGET_HORIZONTAL
+			buttonModes.right = ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL
+
+			activeCamera.OnUpdate = function(self, elapsed)
+				if self:IsLeftMouseButtonDown() then
+					local deltaX, deltaY = GetScaledCursorDelta()
+					self:HandleMouseMovement(self.buttonModes.leftX, deltaX * self:GetDeltaModifierForCameraMode(self.buttonModes.leftX), not self.buttonModes.leftXinterpolate)
+					self:HandleMouseMovement(self.buttonModes.leftY, deltaY * self:GetDeltaModifierForCameraMode(self.buttonModes.leftY), not self.buttonModes.leftYinterpolate)
+				end
+
+				if self:IsRightMouseButtonDown() then
+					local deltaX, deltaY = GetScaledCursorDelta()
+					self:HandleMouseMovement(self.buttonModes.rightX, deltaX * .023, not self.buttonModes.rightXinterpolate)
+					self:HandleMouseMovement(self.buttonModes.right, -deltaY * .023, not self.buttonModes.rightYinterpolate)
+				end
+
+				self:UpdateInterpolationTargets(elapsed)
+				self:SynchronizeCamera()
+			end
+		end)
+
+		modelControl.panButton:HookScript("OnMouseDown", function(self)
+			self:GetParent():GetParent().isRightButtonDown = true
+		end)
+		modelControl.panButton:HookScript("OnMouseUp", function(self)
+			self:GetParent():GetParent().isRightButtonDown = false
+		end)
+
+		local function modelSceneControlOnUpdate(self, elapsed)
+			self:GetParent():GetParent().activeCamera:HandleMouseMovement(self.cmd, elapsed * self.delta, self.snapToValue)
+		end
+		local function modelSceneControlOnMouseDown(self)
+			self:SetScript("OnUpdate", modelSceneControlOnUpdate)
+		end
+		local function modelSceneControlOnMouseUp(self)
+			self:SetScript("OnUpdate", nil)
+		end
+
+		modelControl.zoomIn:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
+		modelControl.zoomIn:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
+		modelControl.zoomOut:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
+		modelControl.zoomOut:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
+		modelControl.rotateLeftButton:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
+		modelControl.rotateLeftButton:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
+		modelControl.rotateRightButton:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
+		modelControl.rotateRightButton:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
+		modelControl.rotateUpButton:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
+		modelControl.rotateUpButton:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
+		modelControl.rotateDownButton:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
+		modelControl.rotateDownButton:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
+
+		modelControl.reset:SetScript("OnClick", function(self)
+			local modelScene = self:GetParent():GetParent()
+			local modelSceneCameraInfo = C_ModelInfo.GetModelSceneCameraInfoByID(modelScene.cameras[1].modelSceneCameraInfo.modelSceneCameraID)
+			modelScene.activeCamera:ApplyFromModelSceneCameraInfo(modelSceneCameraInfo, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD)
+		end)
+
 		-- MOUNT ANIMATIONS
-		local modelScene = MountJournal.MountDisplay.ModelScene
 		local animationsCombobox = CreateFrame("FRAME", "MountsJournalAnimations", modelScene, "UIDropDownMenuTemplate")
-		animationsCombobox:SetPoint("BOTTOMRIGHT", -128, 15)
+		animationsCombobox:SetPoint("LEFT", modelControl, "Right", -5, -2)
 		local animationsList = {
 			{
 				name = L["Default"],
@@ -552,7 +628,7 @@ function journal:ADDON_LOADED(addonName)
 			{
 				name = L["Fly"],
 				animation = 558,
-				type  = 1,
+				type = 1,
 			},
 			{
 				name = L["Fly backwards"],

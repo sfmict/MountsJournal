@@ -463,9 +463,6 @@
 
 	<Frame name="MJNavBarTemplate" inherits="NavBarTemplate" mixin="MJNavBarMixin" virtual="true">
 		<Size x="600" y="28"/>
-		<Anchors>
-			<Anchor point="TOPLEFT" relativeKey="$parent.BorderFrame" x="10" y="-23"/>
-		</Anchors>
 		<Layers>
 			<Layer level="BORDER" textureSubLevel="-5">
 				<Texture inherits="UI-Frame-InnerBotLeftCorner" parentKey="InsetBorderBottomLeft">
@@ -856,5 +853,153 @@
 			<OnLoad method="onLoad"/>
 			<PreClick method="preClick"/>
 		</Scripts>
+	</Frame>
+
+	<Button name="MJModelControlButtonTemplate" virtual="true">
+		<Size x="18" y="18"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture file="Interface\Common\UI-ModelControlPanel" parentKey="bg">
+					<Size x="16" y="16"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+					<TexCoords left="0.29687500" right="0.54687500" top="0.14843750" bottom="0.27343750"/>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture file="Interface\Common\UI-ModelControlPanel" parentKey="icon">
+					<Size x="16" y="16"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+					<TexCoords left="0.01562500" right="0.26562500" top="0.00781250" bottom="0.13281250"/>
+				</Texture>
+			</Layer>
+			<Layer level="HIGHLIGHT">
+				<Texture file="Interface\Common\UI-ModelControlPanel">
+					<Size x="16" y="16"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+					<TexCoords left="0.57812500" right="0.82812500" top="0.00781250" bottom="0.13281250"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnMouseDown>
+				self.bg:SetTexCoord(0.01562500, 0.26562500, 0.14843750, 0.27343750);
+				self.icon:SetPoint("CENTER", 1, -1);
+			</OnMouseDown>
+			<OnMouseUp>
+				self.bg:SetTexCoord(0.29687500, 0.54687500, 0.14843750, 0.27343750);
+				self.icon:SetPoint("CENTER", 0, 0);
+				PlaySound(SOUNDKIT.IG_INVENTORY_ROTATE_CHARACTER);
+			</OnMouseUp>
+			<OnEnter>self:GetParent():SetAlpha(1)</OnEnter>
+			<OnLeave>self:GetParent():SetAlpha(.5)</OnLeave>
+		</Scripts>
+	</Button>
+
+	<Frame name="MJControlFrameTemplate" alpha="0.5" virtual="true">
+		<Size x="149" y="23"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="left" file="Interface\Common\UI-ModelControlPanel">
+					<Size x="23" y="23"/>
+					<Anchors>
+						<Anchor point="LEFT" x="0" y="0"/>
+					</Anchors>
+					<TexCoords left="0.40625000" right="0.76562500" top="0.42968750" bottom="0.60937500"/>
+				</Texture>
+				<Texture parentKey="right" file="Interface\Common\UI-ModelControlPanel">
+					<Size x="23" y="23"/>
+					<Anchors>
+						<Anchor point="RIGHT" x="0" y="0"/>
+					</Anchors>
+					<TexCoords left="0.01562500" right="0.37500000" top="0.42968750" bottom="0.60937500"/>
+				</Texture>
+				<Texture file="Interface\Common\UI-ModelControlPanel">
+					<Size x="32" y="23"/>
+					<Anchors>
+						<Anchor point="LEFT" relativeKey="$parent.left" relativePoint="RIGHT" x="0" y="0"/>
+						<Anchor point="RIGHT" relativeKey="$parent.right" relativePoint="LEFT" x="0" y="0"/>
+					</Anchors>
+					<TexCoords left="0" right="1" top="0.62500000" bottom="0.80468750"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button inherits="MJModelControlButtonTemplate" parentKey="zoomIn">
+				<Anchors>
+					<Anchor point="LEFT" x="2" y="0"/>
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="cmd" value="ORBIT_CAMERA_MOUSE_MODE_ZOOM" type="global"/>
+					<KeyValue key="delta" value="1" type="number"/>
+					<KeyValue key="snapToValue" value="false" type="boolean"/>
+				</KeyValues>
+			</Button>
+			<Button inherits="MJModelControlButtonTemplate" parentKey="zoomOut">
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.zoomIn" relativePoint="RIGHT" x="0" y="0"/>
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="cmd" value="ORBIT_CAMERA_MOUSE_MODE_ZOOM" type="global"/>
+					<KeyValue key="delta" value="-1" type="number"/>
+					<KeyValue key="snapToValue" value="false" type="boolean"/>
+				</KeyValues>
+			</Button>
+			<Button inherits="MJModelControlButtonTemplate" parentKey="panButton">
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.zoomOut" relativePoint="RIGHT" x="0" y="0"/>
+				</Anchors>
+			</Button>
+			<Button inherits="MJModelControlButtonTemplate" parentKey="rotateLeftButton">
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.panButton" relativePoint="RIGHT" x="0" y="0"/>
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="cmd" value="ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION" type="global"/>
+					<KeyValue key="delta" value="-3" type="number"/>
+					<KeyValue key="snapToValue" value="false" type="boolean"/>
+				</KeyValues>
+			</Button>
+			<Button inherits="MJModelControlButtonTemplate" parentKey="rotateRightButton">
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.rotateLeftButton" relativePoint="RIGHT" x="0" y="0"/>
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="cmd" value="ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION" type="global"/>
+					<KeyValue key="delta" value="3" type="number"/>
+					<KeyValue key="snapToValue" value="false" type="boolean"/>
+				</KeyValues>
+			</Button>
+			<Button inherits="MJModelControlButtonTemplate" parentKey="rotateUpButton">
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.rotateRightButton" relativePoint="RIGHT" x="0" y="0"/>
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="cmd" value="ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION" type="global"/>
+					<KeyValue key="delta" value="3" type="number"/>
+					<KeyValue key="snapToValue" value="false" type="boolean"/>
+				</KeyValues>
+			</Button>
+			<Button inherits="MJModelControlButtonTemplate" parentKey="rotateDownButton">
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.rotateUpButton" relativePoint="RIGHT" x="0" y="0"/>
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="cmd" value="ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION" type="global"/>
+					<KeyValue key="delta" value="-3" type="number"/>
+					<KeyValue key="snapToValue" value="false" type="boolean"/>
+				</KeyValues>
+			</Button>
+			<Button inherits="MJModelControlButtonTemplate" parentKey="reset">
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.rotateDownButton" relativePoint="RIGHT" x="0" y="0"/>
+				</Anchors>
+			</Button>
+		</Frames>
 	</Frame>
 </Ui>
