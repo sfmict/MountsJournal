@@ -573,9 +573,8 @@ function journal:ADDON_LOADED(addonName)
 		modelControl.rotateDownButton:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
 
 		modelControl.reset:SetScript("OnClick", function(self)
-			local modelScene = self:GetParent():GetParent()
-			local modelSceneCameraInfo = C_ModelInfo.GetModelSceneCameraInfoByID(modelScene.cameras[1].modelSceneCameraInfo.modelSceneCameraID)
-			modelScene.activeCamera:ApplyFromModelSceneCameraInfo(modelSceneCameraInfo, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD)
+			local activeCamera = self:GetParent():GetParent().activeCamera
+			activeCamera:ApplyFromModelSceneCameraInfo(activeCamera.modelSceneCameraInfo, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD)
 		end)
 
 		-- MOUNT ANIMATIONS
