@@ -574,7 +574,7 @@ function journal:ADDON_LOADED(addonName)
 
 		modelControl.reset:SetScript("OnClick", function(self)
 			local activeCamera = self:GetParent():GetParent().activeCamera
-			activeCamera:ApplyFromModelSceneCameraInfo(activeCamera.modelSceneCameraInfo, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD)
+			activeCamera:ApplyFromModelSceneCameraInfo(activeCamera.modelSceneCameraInfo)
 		end)
 
 		-- MOUNT ANIMATIONS
