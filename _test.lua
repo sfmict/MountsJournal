@@ -19,12 +19,46 @@ test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 
 function test:PLAYER_ENTERING_WORLD()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-	if true then return end
 	-- JOURNAL OPEN
 	if not IsAddOnLoaded("Blizzard_Collections") then
 		LoadAddOn("Blizzard_Collections")
 	end
 	ShowUIPanel(CollectionsJournal)
+	if true then return end
+
+	activeCamera.UpdateCameraOrientationAndPosition = function(self)
+		local yaw, pitch, roll = self:GetInterpolatedOrientation();
+		-- fprint(yaw, pitch, roll)
+		-- yaw = 3
+		-- pitch = 0
+		-- roll = 0
+		local axisAngleX, axisAngleY, axisAngleZ = Vector3D_CalculateNormalFromYawPitch(yaw, pitch);
+
+		local targetX, targetY, targetZ = self:GetInterpolatedTarget();
+		-- targetX = 0
+		-- targetY = 0
+		-- targetZ = 0
+
+		local X, Y
+		if self:IsLeftMouseButtonDown() then
+			X = targetX * math.cos(yaw) + targetY * math.sin(yaw)
+			Y = targetX * math.sin(yaw) - targetY * math.cos(yaw)
+			Z = targetZ
+		else
+			X = targetX
+			Y = targetY
+			Z = targetZ
+		end
+		-- local X2 = X * math.cos(pitch) - targetZ * math.sin(pitch)
+		-- local Z = X * math.sin(pitch) + targetZ * math.cos(pitch)
+		-- fprint(targetX, targetY)
+		local zoomDistance = self:GetInterpolatedZoomDistance();
+		-- fprint(self:CalculatePositionByDistanceFromTarget(targetX, targetY, targetZ, zoomDistance, axisAngleX, axisAngleY, axisAngleZ))
+
+		self:SetPosition(self:CalculatePositionByDistanceFromTarget(X, Y, Z, zoomDistance, axisAngleX, axisAngleY, axisAngleZ));
+		self:GetOwningScene():SetCameraOrientationByYawPitchRoll(yaw, pitch, roll);
+	end
+
 	-- journal.navBarBtn:Click()
 	-- journal.mapSettings.existingsListsToggle:Click()
 	-- journal.navBar:setMapID(1033)

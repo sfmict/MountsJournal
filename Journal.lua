@@ -519,10 +519,9 @@ function journal:ADDON_LOADED(addonName)
 
 		hooksecurefunc(modelScene, "SetActiveCamera", function(self)
 			local activeCamera = self.activeCamera
-			local buttonModes = activeCamera.buttonModes
-			buttonModes.leftY = ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION
-			buttonModes.rightX = ORBIT_CAMERA_MOUSE_MODE_TARGET_HORIZONTAL
-			buttonModes.rightY = ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL
+			activeCamera:SetLeftMouseButtonYMode(ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION, true)
+			activeCamera:SetRightMouseButtonXMode(ORBIT_CAMERA_MOUSE_MODE_TARGET_HORIZONTAL, true)
+			activeCamera:SetRightMouseButtonYMode(ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL, true)
 
 			activeCamera.OnUpdate = function(self, elapsed)
 				if self:IsLeftMouseButtonDown() then
@@ -579,7 +578,7 @@ function journal:ADDON_LOADED(addonName)
 
 		-- MOUNT ANIMATIONS
 		local animationsCombobox = CreateFrame("FRAME", "MountsJournalAnimations", modelScene, "UIDropDownMenuTemplate")
-		animationsCombobox:SetPoint("LEFT", modelControl, "Right", -5, -2)
+		animationsCombobox:SetPoint("LEFT", modelControl, "RIGHT", -5, -2)
 		local animationsList = {
 			{
 				name = L["Default"],
