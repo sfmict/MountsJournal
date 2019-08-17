@@ -884,6 +884,7 @@ function journal:listFromMapInit(level)
 		local list = UIDROPDOWNMENU_MENU_VALUE or btn.maps
 
 		local function setListFrom(_,mapID)
+			if journal.navBar.mapID == mapID then return end
 			if not journal.currentList then
 				journal:createMountList(journal.navBar.mapID)
 			end

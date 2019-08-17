@@ -20,44 +20,50 @@ test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 function test:PLAYER_ENTERING_WORLD()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	-- JOURNAL OPEN
+	if true then return end
 	if not IsAddOnLoaded("Blizzard_Collections") then
 		LoadAddOn("Blizzard_Collections")
 	end
 	ShowUIPanel(CollectionsJournal)
-	if true then return end
+	hooksecurefunc("MountJournal_UpdateMountDisplay", function()
+		fprint("a")
+	end)
+	hooksecurefunc("DressUpMount", function()
+		fprint("b")
+	end)
 
-	activeCamera.UpdateCameraOrientationAndPosition = function(self)
-		local yaw, pitch, roll = self:GetInterpolatedOrientation();
-		-- fprint(yaw, pitch, roll)
-		-- yaw = 3
-		-- pitch = 0
-		-- roll = 0
-		local axisAngleX, axisAngleY, axisAngleZ = Vector3D_CalculateNormalFromYawPitch(yaw, pitch);
+	-- activeCamera.UpdateCameraOrientationAndPosition = function(self)
+	-- 	local yaw, pitch, roll = self:GetInterpolatedOrientation();
+	-- 	-- fprint(yaw, pitch, roll)
+	-- 	-- yaw = 3
+	-- 	-- pitch = 0
+	-- 	-- roll = 0
+	-- 	local axisAngleX, axisAngleY, axisAngleZ = Vector3D_CalculateNormalFromYawPitch(yaw, pitch);
 
-		local targetX, targetY, targetZ = self:GetInterpolatedTarget();
-		-- targetX = 0
-		-- targetY = 0
-		-- targetZ = 0
+	-- 	local targetX, targetY, targetZ = self:GetInterpolatedTarget();
+	-- 	-- targetX = 0
+	-- 	-- targetY = 0
+	-- 	-- targetZ = 0
 
-		local X, Y
-		if self:IsLeftMouseButtonDown() then
-			X = targetX * math.cos(yaw) + targetY * math.sin(yaw)
-			Y = targetX * math.sin(yaw) - targetY * math.cos(yaw)
-			Z = targetZ
-		else
-			X = targetX
-			Y = targetY
-			Z = targetZ
-		end
-		-- local X2 = X * math.cos(pitch) - targetZ * math.sin(pitch)
-		-- local Z = X * math.sin(pitch) + targetZ * math.cos(pitch)
-		-- fprint(targetX, targetY)
-		local zoomDistance = self:GetInterpolatedZoomDistance();
-		-- fprint(self:CalculatePositionByDistanceFromTarget(targetX, targetY, targetZ, zoomDistance, axisAngleX, axisAngleY, axisAngleZ))
+	-- 	local X, Y
+	-- 	if self:IsLeftMouseButtonDown() then
+	-- 		X = targetX * math.cos(yaw) + targetY * math.sin(yaw)
+	-- 		Y = targetX * math.sin(yaw) - targetY * math.cos(yaw)
+	-- 		Z = targetZ
+	-- 	else
+	-- 		X = targetX
+	-- 		Y = targetY
+	-- 		Z = targetZ
+	-- 	end
+	-- 	-- local X2 = X * math.cos(pitch) - targetZ * math.sin(pitch)
+	-- 	-- local Z = X * math.sin(pitch) + targetZ * math.cos(pitch)
+	-- 	-- fprint(targetX, targetY)
+	-- 	local zoomDistance = self:GetInterpolatedZoomDistance();
+	-- 	-- fprint(self:CalculatePositionByDistanceFromTarget(targetX, targetY, targetZ, zoomDistance, axisAngleX, axisAngleY, axisAngleZ))
 
-		self:SetPosition(self:CalculatePositionByDistanceFromTarget(X, Y, Z, zoomDistance, axisAngleX, axisAngleY, axisAngleZ));
-		self:GetOwningScene():SetCameraOrientationByYawPitchRoll(yaw, pitch, roll);
-	end
+	-- 	self:SetPosition(self:CalculatePositionByDistanceFromTarget(X, Y, Z, zoomDistance, axisAngleX, axisAngleY, axisAngleZ));
+	-- 	self:GetOwningScene():SetCameraOrientationByYawPitchRoll(yaw, pitch, roll);
+	-- end
 
 	-- journal.navBarBtn:Click()
 	-- journal.mapSettings.existingsListsToggle:Click()
@@ -70,9 +76,20 @@ function test:PLAYER_ENTERING_WORLD()
 	modelScene:HookScript("OnMouseDown", function(self, btn)
 		-- if self.needsFanFare then return end
 		local actor = self:GetActorByTag("unwrapped")
-		local actor2 = self:GetActorByTag("player")
+		-- local actor2 = self:GetActorByTag("player")
+		actor2 = self:GetPlayerActor()
 		-- actor2:SetModelByUnit("player")
-		self.UnwrapAnim.UnwrappedAnim:SetTarget(actor)
+		local creatureDisplayID, descriptionText, sourceText, isSelfMount, _, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = C_MountJournal.GetMountInfoExtraByID(MountJournal.selectedMountID)
+		-- actor2:SetModelByUnit("player", false)
+		-- actor2:ClearModel()
+		-- actor:Hide()
+		-- actor:SetAlpha(0)
+		-- actor:AttachToMount(actor2, animID, spellVisualKitID)
+		for k,v in pairs(actor) do
+			fprint(k)
+		end
+		fprint(C_MountJournal.GetMountInfoExtraByID(MountJournal.selectedMountID))
+		-- self.UnwrapAnim.UnwrappedAnim:SetTarget(actor)
 
 		-- local modelSceneType, cameraIDs, actorIDs = C_ModelInfo.GetModelSceneInfoByID(self.modelSceneID)
 		-- local actorInfo = C_ModelInfo.GetModelSceneActorInfoByID(actorIDs[3])
@@ -99,7 +116,7 @@ function test:PLAYER_ENTERING_WORLD()
 				i = i + (IsShiftKeyDown() and -1 or 1)
 			end
 			fprint(i)
-			actor:SetAnimation(i)
+			-- actor:SetAnimation(i)
 			-- actor2:SetAnimation(i)
 			-- if timer then timer:Cancel() end
 
