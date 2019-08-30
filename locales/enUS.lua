@@ -63,6 +63,14 @@ L["Swim backwards"] = "Swim backwards"
 L["Fly stand"] = "Fly stand"
 L["Fly"] = "Fly"
 L["Fly backwards"] = "Fly backwards"
+-- PROFILES
+L["Profiles"] = "Profiles"
+L["New profile"] = "New profile"
+L["Create"] = "Create"
+L["Copy current"] = "Copy current"
+L["Delete profile"] = "Delete profile"
+L["A profile with the same name exists."] = "A profile with the same name exists."
+
 
 setmetatable(L, {__index = function(self, key)
 	self[key] = key or ""

@@ -25,9 +25,9 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalDB.ground = MountsJournalDB.ground or {}
 		MountsJournalDB.swimming = MountsJournalDB.swimming or {}
 		MountsJournalDB.zoneMounts = MountsJournalDB.zoneMounts or {}
-		MountsJournalDB.zoneMounts[self.defMountsListID] = nil
 		MountsJournalDB.filters = MountsJournalDB.filters or {}
 		MountsJournalDB.config = MountsJournalDB.config or {}
+		MountsJournalDB.mountsProfiles = MountsJournalDB.mountsProfiles or {}
 		self.filters = MountsJournalDB.filters
 		self.config = MountsJournalDB.config
 		self.config.macrosConfig = self.config.macrosConfig or {}
@@ -35,14 +35,11 @@ function mounts:ADDON_LOADED(addonName)
 			local _,className = GetClassInfo(i)
 			self.config.macrosConfig[className] = self.config.macrosConfig[className] or {}
 		end
+		self.profiles = MountsJournalDB.mountsProfiles
 
 		MountsJournalChar = MountsJournalChar or {}
-		MountsJournalChar.fly =  MountsJournalChar.fly or {}
-		MountsJournalChar.ground = MountsJournalChar.ground or {}
-		MountsJournalChar.swimming = MountsJournalChar.swimming or {}
-		MountsJournalChar.zoneMounts = MountsJournalChar.zoneMounts or {}
-		MountsJournalChar.zoneMounts[self.defMountsListID] = nil
 		MountsJournalChar.macrosConfig = MountsJournalChar.macrosConfig or {}
+		self.charDB = MountsJournalChar
 
 		-- Рудименты
 		self.config.waterWalkAll = nil
@@ -50,6 +47,28 @@ function mounts:ADDON_LOADED(addonName)
 		self.config.waterWalkInstance = nil
 		self.config.waterWalkExpedition = nil
 		self.config.waterWalkExpeditionList = nil
+
+		if type(self.charDB.fly) == "table" and #self.charDB.fly > 0
+		or type(self.charDB.ground) == "table" and #self.charDB.ground > 0
+		or type(self.charDB.swimming) == "table" and #self.charDB.swimming > 0
+		or type(self.charDB.zoneMounts) == "table" and next(self.charDB.zoneMounts) ~= nil then
+			local name = UnitName("player").." - "..GetRealmName()
+			self.profiles[name] = {
+				fly = self.charDB.fly,
+				ground = self.charDB.ground,
+				swimming = self.charDB.swimming,
+				zoneMounts = self.charDB.zoneMounts,
+			}
+			if self.charDB.enable then
+				self.charDB.currentProfileName = name
+			end
+		end
+
+		self.charDB.fly = nil
+		self.charDB.ground = nil
+		self.charDB.swimming = nil
+		self.charDB.zoneMounts = nil
+		self.charDB.enable = nil
 
 		-- Списки
 		self.swimmingVashjir = {
@@ -106,7 +125,7 @@ function mounts:ADDON_LOADED(addonName)
 		mounts:RegisterEvent("SKILL_LINES_CHANGED")
 		mounts:RegisterEvent("COMPANION_LEARNED")
 
-		self:setMountsListPerChar()
+		self:setDB()
 		self:setModifier(self.config.modifier)
 		self:setHandleWaterJump(self.config.waterJump)
 		self:setHerbFlag()
@@ -161,15 +180,11 @@ function mounts:setMountsList()
 end
 
 
-function mounts:setMountsListPerChar(perChar)
-	if perChar ~= nil then
-		MountsJournalChar.enable = perChar
-		self.perChar = perChar
-	elseif MountsJournalChar and MountsJournalChar.enable then
-		self.perChar = true
+function mounts:setDB()
+	if self.charDB.currentProfileName and not self.profiles[self.charDB.currentProfileName] then
+		self.charDB.currentProfileName = nil
 	end
-
-	self.db = self.perChar and MountsJournalChar or MountsJournalDB
+	self.db = self.charDB.currentProfileName and self.profiles[self.charDB.currentProfileName] or MountsJournalDB
 	self:setMountsList()
 end
 

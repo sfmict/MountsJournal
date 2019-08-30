@@ -249,7 +249,7 @@ function MJDungeonRaidMixin:menuInit(level)
 		else
 			info.func = function()
 				btn.click(v.mapID)
-				UIDropDownMenu_OnHide(self)
+				CloseDropDownMenus()
 			end
 		end
 		UIDropDownMenu_AddButton(info, level)

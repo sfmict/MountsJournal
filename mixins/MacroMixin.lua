@@ -12,7 +12,7 @@ function MJMacroMixin:onLoad()
 	self.mounts = MountsJournal
 	self.sFlags = self.mounts.sFlags
 	self.macrosConfig = self.mounts.config.macrosConfig
-	self.charMacrosConfig = MountsJournalChar.macrosConfig
+	self.charMacrosConfig = self.mounts.charDB.macrosConfig
 	self.class = select(2, UnitClass("player"))
 
 	local magicBroom = Item:CreateFromItemID(37011)

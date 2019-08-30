@@ -3,6 +3,7 @@
 	<Script file="mixins\NavBarMixin.lua"/>
 	<Script file="mixins\WorldMapMixin.lua"/>
 	<Script file="mixins\ExistingsListsMixin.lua"/>
+	<Script file="mixins\ProfilesMixin.lua"/>
 
 	<Button name="MJTabTemplate" virtual="true">
 		<Size x="75" y="24"/>
@@ -1002,4 +1003,12 @@
 			</Button>
 		</Frames>
 	</Frame>
+
+	<Button name="MJMenuButtonProfiles" inherits="MJMenuButtonStreatchTemplate" mixin="MJProfilesMixin" virtual="true">
+		<Size x="130" y="22"/>
+		<Scripts>
+			<OnLoad method="onLoad"/>
+			<OnClick method="onClick"/>
+		</Scripts>
+	</Button>
 </Ui>

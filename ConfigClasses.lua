@@ -7,7 +7,7 @@ classConfig.parent = addon
 
 classConfig:SetScript("OnShow", function(self)
 	self.macrosConfig = mounts.config.macrosConfig
-	self.charMacrosConfig = MountsJournalChar.macrosConfig
+	self.charMacrosConfig = mounts.charDB.macrosConfig
 	self.secure = config.bindMount.secure
 
 	-- ADDON INFO

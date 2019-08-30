@@ -266,19 +266,9 @@ function journal:ADDON_LOADED(addonName)
 		end)
 		self:RegisterEvent("ACHIEVEMENT_EARNED")
 
-		-- PER CHARACTER CHECK
-		local perCharCheck = CreateFrame("CheckButton", nil, MountJournal, "MJCheckButtonTemplate")
-		perCharCheck:SetPoint("LEFT", MountJournal.MountButton, "RIGHT", 6, -2)
-		perCharCheck.Text:SetText(L["Character Specific Mount List"])
-		perCharCheck:SetChecked(mounts.perChar)
-		perCharCheck:HookScript("OnClick", function(check)
-			mounts:setMountsListPerChar(check:GetChecked())
-			self:setEditMountsList()
-			self:updateMountsList()
-			MountJournal_UpdateMountList()
-			self:updateMapSettings()
-			self.existingsLists:refresh()
-		end)
+		-- PROFILES
+		local profilesMenu = CreateFrame("BUTTON", nil, MountJournal, "MJMenuButtonProfiles")
+		profilesMenu:SetPoint("LEFT", MountJournal.MountButton, "RIGHT", 6, 0)
 
 		-- SELECTED BUTTONS
 		local function CreateButton(name, parent, pointX, pointY, OnClick)
@@ -895,7 +885,7 @@ function journal:listFromMapInit(level)
 			journal:updateMapSettings()
 			mounts:setMountsList()
 			journal.existingsLists:refresh()
-			UIDropDownMenu_OnHide(self)
+			CloseDropDownMenus()
 		end
 
 		for _,mapInfo in ipairs(list) do
