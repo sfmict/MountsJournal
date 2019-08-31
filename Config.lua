@@ -208,7 +208,7 @@ end)
 
 
 function config:setEnableCheckButtons(enable, tbl)
-	for _,check in ipairs(tbl) do
+	for _, check in ipairs(tbl) do
 		check:SetEnabled(enable)
 	end
 end

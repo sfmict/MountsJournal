@@ -32,13 +32,14 @@ function mounts:ADDON_LOADED(addonName)
 		self.config = MountsJournalDB.config
 		self.config.macrosConfig = self.config.macrosConfig or {}
 		for i = 1, GetNumClasses() do
-			local _,className = GetClassInfo(i)
+			local _, className = GetClassInfo(i)
 			self.config.macrosConfig[className] = self.config.macrosConfig[className] or {}
 		end
 		self.profiles = MountsJournalDB.mountsProfiles
 
 		MountsJournalChar = MountsJournalChar or {}
 		MountsJournalChar.macrosConfig = MountsJournalChar.macrosConfig or {}
+		MountsJournalChar.profileBySpecialization = MountsJournalChar.profileBySpecialization or {}
 		self.charDB = MountsJournalChar
 
 		-- Рудименты
@@ -122,8 +123,11 @@ function mounts:ADDON_LOADED(addonName)
 		self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
 		-- PROFESSION CHANGED OR MOUNT LEARNED
-		mounts:RegisterEvent("SKILL_LINES_CHANGED")
-		mounts:RegisterEvent("COMPANION_LEARNED")
+		self:RegisterEvent("SKILL_LINES_CHANGED")
+		self:RegisterEvent("COMPANION_LEARNED")
+
+		-- SPEC CHANGED
+		self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
 
 		self:setDB()
 		self:setModifier(self.config.modifier)
@@ -181,12 +185,23 @@ end
 
 
 function mounts:setDB()
+	for i = 1, GetNumSpecializations() do
+		local profileName = self.charDB.profileBySpecialization[i]
+		if profileName ~= nil and not self.profiles[profileName] then
+			self.charDB.profileBySpecialization[i] = nil
+		end
+	end
+
 	if self.charDB.currentProfileName and not self.profiles[self.charDB.currentProfileName] then
 		self.charDB.currentProfileName = nil
 	end
-	self.db = self.charDB.currentProfileName and self.profiles[self.charDB.currentProfileName] or MountsJournalDB
+
+	local currentProfileName = self.charDB.profileBySpecialization.enable and self.charDB.profileBySpecialization[GetSpecialization()] or self.charDB.currentProfileName
+
+	self.db = currentProfileName and self.profiles[currentProfileName] or MountsJournalDB
 	self:setMountsList()
 end
+mounts.PLAYER_SPECIALIZATION_CHANGED = mounts.setDB
 
 
 function mounts:setHandleWaterJump(enable)
@@ -220,7 +235,7 @@ end
 
 function mounts:summon(ids)
 	local usableIDs = {}
-	for _,mountID in ipairs(ids) do
+	for _, mountID in ipairs(ids) do
 		if select(5, C_MountJournal.GetMountInfoByID(mountID)) then
 			tinsert(usableIDs, mountID)
 		end
@@ -256,7 +271,7 @@ function mounts:setHerbFlag()
 	if self.config.useHerbMounts then
 		local prof1, prof2 = GetProfessions()
 		if (prof1 and select(7, GetProfessionInfo(prof1)) == 182 or prof2 and select(7, GetProfessionInfo(prof2)) == 182) then
-			for _,mountID in ipairs(self.herbalismMounts) do
+			for _, mountID in ipairs(self.herbalismMounts) do
 				if select(11, C_MountJournal.GetMountInfoByID(mountID)) then
 					self.sFlags.herb = true
 					return

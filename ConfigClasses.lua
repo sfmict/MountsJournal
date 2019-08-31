@@ -36,7 +36,7 @@ classConfig:SetScript("OnShow", function(self)
 	leftPanel:SetPoint("BOTTOMRIGHT", classConfig, "BOTTOMLEFT", 181, 8)
 
 	-- CLASS BUTTONS
-	local _,playerClassName = UnitClass("player")
+	local _, playerClassName = UnitClass("player")
 	local firstClassFrame
 	local lastClassFrame
 	for i = 1, GetNumClasses() do
@@ -121,7 +121,7 @@ classConfig:SetScript("OnShow", function(self)
 	rightPanelScroll:SetScrollChild(rightPanelScroll.child)
 
 	-- CLASS FEATURE
-	self.checkPool = CreateFramePool("CHECKBUTTON", rightPanelScroll.child, "MJCheckButtonTemplate", function(_,frame)
+	self.checkPool = CreateFramePool("CHECKBUTTON", rightPanelScroll.child, "MJCheckButtonTemplate", function(_, frame)
 		frame:Hide()
 		frame:ClearAllPoints()
 		frame:Enable()
@@ -226,7 +226,7 @@ do
 		self.secure:refresh()
 
 		if type(btn.childs) == "table" then
-			for _,childOption in ipairs(btn.childs) do
+			for _, childOption in ipairs(btn.childs) do
 				childOption:SetEnabled(isEnabled)
 			end
 		end
@@ -266,7 +266,7 @@ do
 		self.checkPool:ReleaseAll()
 		if classOptions[btn.key] then
 			local lastOptionFrame
-			for _,option in ipairs(classOptions[btn.key]) do
+			for _, option in ipairs(classOptions[btn.key]) do
 				local optionFrame = createOption(self, option, btn.key)
 				if lastOptionFrame then
 					optionFrame:SetPoint("TOP", lastOptionFrame, "BOTTOM", 0, 0)
@@ -278,7 +278,7 @@ do
 					optionFrame.childs = optionFrame.childs or {}
 					local isEnabled = optionFrame:GetChecked()
 					local lastSubOptionFrame
-					for _,subOption in ipairs(option.childs) do
+					for _, subOption in ipairs(option.childs) do
 						local subOptionFrame = createOption(self, subOption, btn.key)
 						subOptionFrame:SetEnabled(isEnabled)
 						if lastSubOptionFrame then

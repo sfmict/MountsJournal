@@ -5,8 +5,7 @@ MJExistingsListsMixin = {}
 
 
 function MJExistingsListsMixin:onLoad()
-	self.navBar = MountsJournalFrame.navBar
-	self.mounts = MountsJournal
+	self.journal = MountsJournalFrame
 	self.util = MountsJournalUtil
 	self.child = self.scrollFrame.child
 	self.optionsButtonPool = CreateFramePool("BUTTON", self.child, "MJOptionButtonTemplate", function(_,frame)
@@ -68,7 +67,7 @@ function MJExistingsListsMixin:refresh()
 	local function createOptionButton(mapID)
 		local optionButton = self.optionsButtonPool:Acquire()
 		optionButton:SetText(self.util.getMapFullNameInfo(mapID).name)
-		optionButton:SetScript("OnClick", function() self.navBar:setMapID(mapID) end)
+		optionButton:SetScript("OnClick", function() self.journal.navBar:setMapID(mapID) end)
 		local width = optionButton.text:GetStringWidth()
 		if width > lastWidth then
 			lastWidth = width
@@ -76,7 +75,7 @@ function MJExistingsListsMixin:refresh()
 		return optionButton
 	end
 
-	for mapID, mapConfig in pairs(self.mounts.db.zoneMounts) do
+	for mapID, mapConfig in pairs(self.journal.db.zoneMounts) do
 		if mapConfig.listFromID then
 			tinsert(self.lists[2].childs, createOptionButton(mapID))
 		elseif #mapConfig.fly + #mapConfig.ground + #mapConfig.swimming ~= 0 then

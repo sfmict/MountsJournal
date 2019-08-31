@@ -45,7 +45,7 @@ end
 function MountsJournalEventsMixin:event(event, ...)
 	local handlerList = self.events[event]
 	if handlerList then
-		for _,handler in ipairs(handlerList) do
+		for _, handler in ipairs(handlerList) do
 			handler.func(...)
 		end
 	end
@@ -80,7 +80,7 @@ function MountsJournalUtil.getMapFullNameInfo(mapID)
 	if mapGroupID then
 		local mapGroupInfo = C_Map.GetMapGroupMembersInfo(mapGroupID)
 		if mapGroupInfo then
-			for _,mapGroupMemberInfo in ipairs(mapGroupInfo) do
+			for _, mapGroupMemberInfo in ipairs(mapGroupInfo) do
 				if mapGroupMemberInfo.mapID == mapID then
 					mapInfo.name = format("%s(%s)", mapInfo.name, mapGroupMemberInfo.name)
 					break
@@ -94,7 +94,7 @@ end
 
 
 do
-	local function showTooltip(_,_,hyperLink)
+	local function showTooltip(_,_, hyperLink)
 		GameTooltip:SetOwner(UIParent, "ANCHOR_CURSOR")
 		GameTooltip:SetHyperlink(hyperLink)
 		GameTooltip:Show()

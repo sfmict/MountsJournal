@@ -1,1 +1,1 @@
-* Added profiles.
+* Specialization profile binding added.
