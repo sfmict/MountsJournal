@@ -20,6 +20,12 @@ test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 function test:PLAYER_ENTERING_WORLD()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	-- JOURNAL OPEN
+	-- for _, mountID in pairs(C_MountJournal.GetMountIDs()) do
+	-- 	local mountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
+	-- 	if journal.mountTypes[mountType] == nil then
+	-- 		fprint(mountID, mountType)
+	-- 	end
+	-- end
 	if true then return end
 	if not IsAddOnLoaded("Blizzard_Collections") then
 		LoadAddOn("Blizzard_Collections")

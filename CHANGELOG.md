@@ -1,1 +1,1 @@
-* Specialization profile binding added.
+* Fixed "Kua'fon", new type of mounts.
