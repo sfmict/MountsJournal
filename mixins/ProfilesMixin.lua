@@ -5,7 +5,8 @@ MJProfilesMixin = {}
 
 
 function MJProfilesMixin:onLoad()
-	StaticPopupDialogs["MJ_NEW_PROFILE"] = {
+	self.addonName = format("%s_ADDON_", strupper(addon))
+	StaticPopupDialogs[self.addonName.."NEW_PROFILE"] = {
 		text = addon..": "..L["New profile"],
 		button1 = ACCEPT,
 		button2 = CANCEL,
@@ -13,11 +14,12 @@ function MJProfilesMixin:onLoad()
 		maxLetters = 48,
 		editBoxWidth = 350,
 		hideOnEscape = 1,
+		whileDead = 1,
 		OnAccept = function(popup, data)
 			local text = popup.editBox:GetText()
 			if text and text ~= "" then
 				if self.profiles[text] ~= nil then
-					StaticPopup_Show("MJ_PROFILE_EXISTS")
+					StaticPopup_Show(self.addonName.."PROFILE_EXISTS")
 					return
 				end
 				self.profiles[text] = data and MountsJournalUtil.copyTable(data) or {
@@ -40,17 +42,17 @@ function MJProfilesMixin:onLoad()
 			self.editBox:HighlightText()
 		end,
 	}
-
-	StaticPopupDialogs["MJ_PROFILE_EXISTS"] = {
-		text = L["A profile with the same name exists."],
+	StaticPopupDialogs[self.addonName.."PROFILE_EXISTS"] = {
+		text = addon..": "..L["A profile with the same name exists."],
 		button1 = OKAY,
+		whileDead = 1,
 	}
-
-	StaticPopupDialogs["MJ_DELETE_PROFILE"] = {
+	StaticPopupDialogs[self.addonName.."DELETE_PROFILE"] = {
 		text = addon..": "..CONFIRM_COMPACT_UNIT_FRAME_PROFILE_DELETION,
 		button1 = DELETE,
 		button2 = CANCEL,
 		hideOnEscape = 1,
+		whileDead = 1,
 		OnAccept = function(popup)
 			self.profiles[popup.text.text_arg1] = nil
 			self.mounts:setDB()
@@ -82,13 +84,13 @@ function MJProfilesMixin:createProfile(copy)
 			}
 		end
 	end
-	StaticPopup_Show("MJ_NEW_PROFILE", nil, nil, currentProfile)
+	StaticPopup_Show(self.addonName.."NEW_PROFILE", nil, nil, currentProfile)
 end
 
 
 function MJProfilesMixin:deleteProfile(profileName)
 	CloseDropDownMenus()
-	StaticPopup_Show("MJ_DELETE_PROFILE", profileName)
+	StaticPopup_Show(self.addonName.."DELETE_PROFILE", profileName)
 end
 
 

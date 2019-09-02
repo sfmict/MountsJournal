@@ -127,7 +127,7 @@ function mounts:ADDON_LOADED(addonName)
 		self:RegisterEvent("COMPANION_LEARNED")
 
 		-- SPEC CHANGED
-		self:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+		self:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
 
 		self:setDB()
 		self:setModifier(self.config.modifier)
