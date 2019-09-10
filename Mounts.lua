@@ -28,14 +28,15 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalDB.filters = MountsJournalDB.filters or {}
 		MountsJournalDB.config = MountsJournalDB.config or {}
 		MountsJournalDB.mountsProfiles = MountsJournalDB.mountsProfiles or {}
-		self.filters = MountsJournalDB.filters
-		self.config = MountsJournalDB.config
+		self.globalDB = MountsJournalDB
+		self.filters = self.globalDB.filters
+		self.config = self.globalDB.config
 		self.config.macrosConfig = self.config.macrosConfig or {}
 		for i = 1, GetNumClasses() do
 			local _, className = GetClassInfo(i)
 			self.config.macrosConfig[className] = self.config.macrosConfig[className] or {}
 		end
-		self.profiles = MountsJournalDB.mountsProfiles
+		self.profiles = self.globalDB.mountsProfiles
 
 		MountsJournalChar = MountsJournalChar or {}
 		MountsJournalChar.macrosConfig = MountsJournalChar.macrosConfig or {}
@@ -198,7 +199,7 @@ function mounts:setDB()
 
 	local currentProfileName = self.charDB.profileBySpecialization.enable and self.charDB.profileBySpecialization[GetSpecialization()] or self.charDB.currentProfileName
 
-	self.db = currentProfileName and self.profiles[currentProfileName] or MountsJournalDB
+	self.db = currentProfileName and self.profiles[currentProfileName] or self.globalDB
 	self:setMountsList()
 end
 mounts.PLAYER_SPECIALIZATION_CHANGED = mounts.setDB
@@ -369,7 +370,10 @@ function mounts:init()
 		elseif flags.isMounted then
 			Dismount()
 		elseif not flags.groundSpellKnown then
-			if not self:summon(self.lowLevel) then self:errorSummon() end
+			if not (flags.swimming and self:summon(self.list.swimming)
+					  or self:summon(self.lowLevel)) then
+				self:errorSummon()
+			end
 		-- swimming
 		elseif not (flags.swimming
 						and (self.mapVashjir[C_Map.GetBestMapForUnit("player")]

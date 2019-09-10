@@ -77,10 +77,10 @@ function MJProfilesMixin:createProfile(copy)
 			currentProfile = self.profiles[self.charDB.currentProfileName]
 		else
 			currentProfile = {
-				fly = self.mounts.db.fly,
-				ground = self.mounts.db.ground,
-				swimming = self.mounts.db.swimming,
-				zoneMounts = self.mounts.db.zoneMounts,
+				fly = self.journal.db.fly,
+				ground = self.journal.db.ground,
+				swimming = self.journal.db.swimming,
+				zoneMounts = self.journal.db.zoneMounts,
 			}
 		end
 	end
@@ -180,7 +180,7 @@ function MJProfilesMixin:menuInit(level)
 			UIDropDownMenu_AddButton(info, level)
 		end
 
-	else
+	else -- MENU
 		info.isTitle = true
 		
 		info.text = L["Profiles"]

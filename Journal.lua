@@ -681,7 +681,7 @@ end
 
 
 function journal:setEditMountsList()
-	self.db = mounts.charDB.currentProfileName and mounts.profiles[mounts.charDB.currentProfileName] or MountsJournalDB
+	self.db = mounts.charDB.currentProfileName and mounts.profiles[mounts.charDB.currentProfileName] or mounts.globalDB
 	local mapID = self.navBar.mapID
 	if mapID == mounts.defMountsListID then
 		self.currentList = {
