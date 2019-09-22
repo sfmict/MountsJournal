@@ -1011,4 +1011,32 @@
 			<OnClick method="onClick"/>
 		</Scripts>
 	</Button>
+
+	<CheckButton name="MJPlayerShowToggle" mixin="PlayerPreviewToggle" scale=".5" virtual="true">
+		<Size x="77" y="77"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<Texture parentKey="border" atlas="mythicplus-popup-ring" useAtlasSize="true"/>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture parentKey="portrait">
+					<Size x="70" y="70"/>
+					<Anchors>
+						<Anchor point="CENTER" relativeKey="$parent.border"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<HighlightTexture alphaMode="ADD" file="Interface\Minimap\UI-Minimap-ZoomButton-Highlight"/>
+		<CheckedTexture file="Interface\Minimap\ping\ping4" alphaMode="ADD" alpha=".6">
+			<Size x="77" y="77"/>
+			<Anchors>
+				<Anchor point="center"/>
+			</Anchors>
+		</CheckedTexture>
+		<Scripts>
+			<OnShow method="OnShow"/>
+			<OnClick method="OnClick"/>
+		</Scripts>
+	</CheckButton>
 </Ui>
