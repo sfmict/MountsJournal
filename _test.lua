@@ -26,17 +26,21 @@ function test:PLAYER_ENTERING_WORLD()
 	end
 	ShowUIPanel(CollectionsJournal)
 
+	journal.navBarBtn:Click()
+	journal.mapSettings.existingsListsToggle:Click()
+	journal.navBar:setMapID(1033)
+
 	-- CONFIG OPEN
 	-- local classConfig = MountsJournalConfig
-	local classConfig = MountsJournalConfigClasses
-	if InterfaceOptionsFrameAddOns:IsVisible() and classConfig:IsVisible() then
-		InterfaceOptionsFrame:Hide()
-	else
-		InterfaceOptionsFrame_OpenToCategory(classConfig.name)
-		if not InterfaceOptionsFrameAddOns:IsVisible() then
-			InterfaceOptionsFrame_OpenToCategory(classConfig.name)
-		end
-	end
+	-- -- local classConfig = MountsJournalConfigClasses
+	-- if InterfaceOptionsFrameAddOns:IsVisible() and classConfig:IsVisible() then
+	-- 	InterfaceOptionsFrame:Hide()
+	-- else
+	-- 	InterfaceOptionsFrame_OpenToCategory(classConfig.name)
+	-- 	if not InterfaceOptionsFrameAddOns:IsVisible() then
+	-- 		InterfaceOptionsFrame_OpenToCategory(classConfig.name)
+	-- 	end
+	-- end
 	-- select(14,classConfig:GetChildren()):Click()
 
 	-- hooksecurefunc("MountJournal_UpdateMountDisplay", function()
@@ -78,10 +82,6 @@ function test:PLAYER_ENTERING_WORLD()
 	-- 	self:SetPosition(self:CalculatePositionByDistanceFromTarget(X, Y, Z, zoomDistance, axisAngleX, axisAngleY, axisAngleZ));
 	-- 	self:GetOwningScene():SetCameraOrientationByYawPitchRoll(yaw, pitch, roll);
 	-- end
-
-	-- journal.navBarBtn:Click()
-	-- journal.mapSettings.existingsListsToggle:Click()
-	-- journal.navBar:setMapID(1033)
 
 	-- MOUNT ANIMATION
 	local modelScene = MountJournal.MountDisplay.ModelScene

@@ -133,7 +133,7 @@ function mounts:ADDON_LOADED(addonName)
 		self:setDB()
 		self:setModifier(self.config.modifier)
 		self:setHandleWaterJump(self.config.waterJump)
-		self:setHerbFlag()
+		self:setHerbMount()
 		self:init()
 	end
 end
@@ -268,13 +268,13 @@ function mounts:getSpellKnown()
 end
 
 
-function mounts:setHerbFlag()
+function mounts:setHerbMount()
 	if self.config.useHerbMounts then
 		local prof1, prof2 = GetProfessions()
 		if (prof1 and select(7, GetProfessionInfo(prof1)) == 182 or prof2 and select(7, GetProfessionInfo(prof2)) == 182) then
 			for _, mountID in ipairs(self.herbalismMounts) do
 				if select(11, C_MountJournal.GetMountInfoByID(mountID)) then
-					self.sFlags.herb = true
+					self.herbMount = true
 					return
 				end
 			end
@@ -282,8 +282,8 @@ function mounts:setHerbFlag()
 	end
 	self.sFlags.herb = false
 end
-mounts.SKILL_LINES_CHANGED = mounts.setHerbFlag
-mounts.COMPANION_LEARNED = mounts.setHerbFlag
+mounts.SKILL_LINES_CHANGED = mounts.setHerbMount
+mounts.COMPANION_LEARNED = mounts.setHerbMount
 
 
 function mounts:summonListOr(ids)
@@ -352,6 +352,8 @@ function mounts:setFlags()
 	flags.waterWalk = isFloating
 							or not isFlyableLocation and modifier
 							or self:isWaterWalkLocation()
+	flags.herb = self.herbMount and (not self.config.herbMountsOnZones
+												or self.mapFlags and self.mapFlags.herbGathering)
 end
 
 

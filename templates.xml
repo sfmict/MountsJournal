@@ -716,7 +716,7 @@
 			</Button>
 			<CheckButton parentKey="Ground" inherits="MJCheckButtonTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="33" y="-40"/>
+					<Anchor point="TOPLEFT" x="33" y="-20"/>
 				</Anchors>
 			</CheckButton>
 			<CheckButton parentKey="WaterWalk" inherits="MJCheckButtonTemplate">
@@ -724,10 +724,15 @@
 					<Anchor point="TOP" relativeKey="$parent.Ground" relativePoint="BOTTOM" x="0" y="-5"/>
 				</Anchors>
 			</CheckButton>
+			<CheckButton parentKey="HerbGathering" inherits="MJCheckButtonTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeKey="$parent.WaterWalk" relativePoint="BOTTOM" x="0" y="-5"/>
+				</Anchors>
+			</CheckButton>
 			<Button parentKey="listFromMap" inherits="MJMenuButtonStreatchTemplate">
 				<Size x="134" y="30"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.WaterWalk" relativePoint="BOTTOMLEFT" x="0" y="-20"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.HerbGathering" relativePoint="BOTTOMLEFT" x="0" y="-20"/>
 				</Anchors>
 			</Button>
 			<Frame parentKey="relationMap">

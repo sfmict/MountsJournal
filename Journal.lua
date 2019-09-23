@@ -196,6 +196,10 @@ function journal:ADDON_LOADED(addonName)
 		mapSettings.WaterWalk.tooltipText = L["Water Walking"]
 		mapSettings.WaterWalk.tooltipRequirement = L["WaterWalkFlagDescription"]
 		mapSettings.WaterWalk:HookScript("OnClick", function(check) self:setFlag("waterWalkOnly", check:GetChecked()) end)
+		mapSettings.HerbGathering.Text:SetText(L["Herb Gathering"])
+		mapSettings.HerbGathering.tooltipText = L["Herb Gathering"]
+		mapSettings.HerbGathering.tooltipRequirement = L["HerbGatheringFlagDescription"]
+		mapSettings.HerbGathering:HookScript("OnClick", function(check) self:setFlag("herbGathering", check:GetChecked()) end)
 		mapSettings.listFromMap.Text:SetText(L["ListMountsFromZone"])
 		mapSettings.listFromMap.maps = {}
 		mapSettings.listFromMap:SetScript("OnClick", function(btn) self:listFromMapClick(btn) end)
@@ -787,8 +791,9 @@ function journal:getRemoveMountList(mapID)
 	local list = self.db.zoneMounts[mapID]
 
 	if #list.fly + #list.ground + #list.swimming == 0
-	and not list.flags.waterWalkOnly
 	and not list.flags.groundOnly
+	and not list.flags.waterWalkOnly
+	and not list.flags.herbGathering
 	and not list.listFromID then
 		self.db.zoneMounts[mapID] = nil
 		self:setEditMountsList()
@@ -926,13 +931,16 @@ function journal:updateMapSettings()
 
 	local groundCheck = mapSettings.Ground
 	local waterWalkCheck = mapSettings.WaterWalk
+	local herbGathering = mapSettings.HerbGathering
 	local listFromMap = mapSettings.listFromMap
 	groundCheck:SetChecked(self.currentList and self.currentList.flags and self.currentList.flags.groundOnly)
 	waterWalkCheck:SetChecked(self.currentList and self.currentList.flags and self.currentList.flags.waterWalkOnly)
+	herbGathering:SetChecked(self.currentList and self.currentList.flags and self.currentList.flags.herbGathering)
 
 	local optionsEnable = self.navBar.mapID ~= mounts.defMountsListID
 	groundCheck:SetEnabled(optionsEnable)
 	waterWalkCheck:SetEnabled(optionsEnable)
+	herbGathering:SetEnabled(optionsEnable)
 	listFromMap:SetEnabled(optionsEnable)
 
 	local relationText = mapSettings.relationMap.text
