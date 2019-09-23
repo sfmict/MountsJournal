@@ -280,7 +280,7 @@ function mounts:setHerbMount()
 			end
 		end
 	end
-	self.sFlags.herb = false
+	self.herbMount = false
 end
 mounts.SKILL_LINES_CHANGED = mounts.setHerbMount
 mounts.COMPANION_LEARNED = mounts.setHerbMount
