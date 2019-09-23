@@ -25,12 +25,26 @@ function test:PLAYER_ENTERING_WORLD()
 		LoadAddOn("Blizzard_Collections")
 	end
 	ShowUIPanel(CollectionsJournal)
-	hooksecurefunc("MountJournal_UpdateMountDisplay", function()
-		fprint("a")
-	end)
-	hooksecurefunc("DressUpMount", function()
-		fprint("b")
-	end)
+
+	-- CONFIG OPEN
+	-- local classConfig = MountsJournalConfig
+	local classConfig = MountsJournalConfigClasses
+	if InterfaceOptionsFrameAddOns:IsVisible() and classConfig:IsVisible() then
+		InterfaceOptionsFrame:Hide()
+	else
+		InterfaceOptionsFrame_OpenToCategory(classConfig.name)
+		if not InterfaceOptionsFrameAddOns:IsVisible() then
+			InterfaceOptionsFrame_OpenToCategory(classConfig.name)
+		end
+	end
+	-- select(14,classConfig:GetChildren()):Click()
+
+	-- hooksecurefunc("MountJournal_UpdateMountDisplay", function()
+	-- 	fprint("a")
+	-- end)
+	-- hooksecurefunc("DressUpMount", function()
+	-- 	fprint("b")
+	-- end)
 
 	-- activeCamera.UpdateCameraOrientationAndPosition = function(self)
 	-- 	local yaw, pitch, roll = self:GetInterpolatedOrientation();
@@ -128,19 +142,6 @@ function test:PLAYER_ENTERING_WORLD()
 			-- end)
 		end
 	end)
-
-	-- CONFIG OPEN
-	-- local classConfig = MountsJournalConfig
-	-- local classConfig = MountsJournalConfigClasses
-	-- if InterfaceOptionsFrameAddOns:IsVisible() and classConfig:IsVisible() then
-	-- 	InterfaceOptionsFrame:Hide()
-	-- else
-	-- 	InterfaceOptionsFrame_OpenToCategory(classConfig.name)
-	-- 	if not InterfaceOptionsFrameAddOns:IsVisible() then
-	-- 		InterfaceOptionsFrame_OpenToCategory(classConfig.name)
-	-- 	end
-	-- end
-	-- select(14,classConfig:GetChildren()):Click()
 end
 
 -- SetClampRectInsets

@@ -193,7 +193,7 @@ do
 				hlink = GetSpellLink(3714),
 				childs = {
 					{
-						key = "useOnlyInWaterWalkLocation"
+						key = "useOnlyInWaterWalkLocation",
 					},
 				},
 			},
@@ -204,14 +204,19 @@ do
 				hlink = GetSpellLink(546),
 				childs = {
 					{
-						key = "useOnlyInWaterWalkLocation"
+						key = "useOnlyInWaterWalkLocation",
 					},
 				},
 			},
 		},
 		DRUID = {
 			{
-				key = "useLastDruidForm"
+				key = "useLastDruidForm",
+				childs = {
+					{
+						key = "useDruidFormSpecialization",
+					},
+				},
 			},
 			{
 				key = "useMacroAlways",
@@ -269,6 +274,7 @@ do
 			for _, option in ipairs(classOptions[btn.key]) do
 				local optionFrame = createOption(self, option, btn.key)
 				if lastOptionFrame then
+					optionFrame:SetPoint("LEFT", 9, 0)
 					optionFrame:SetPoint("TOP", lastOptionFrame, "BOTTOM", 0, 0)
 				else
 					optionFrame:SetPoint("TOPLEFT", 9, -9)

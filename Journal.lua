@@ -651,14 +651,14 @@ function journal:ADDON_LOADED(addonName)
 			UIDropDownMenu_SetSelectedValue(animationsCombobox, 0)
 		end)
 
-		-- CHARACTER SHOW BUTTON
+		-- PLAYER SHOW BUTTON
 		modelScene.TogglePlayer:Hide()
 		local playerToggle = CreateFrame("CheckButton", nil, modelScene, "MJPlayerShowToggle")
 		playerToggle:SetPoint("LEFT", animationsCombobox, "RIGHT", 232, 5)
+		function playerToggle:setPortrait() SetPortraitTexture(self.portrait, "player") end
+		playerToggle:HookScript("OnShow", playerToggle.setPortrait)
+		playerToggle:SetScript("OnEvent", playerToggle.setPortrait)
 		playerToggle:RegisterUnitEvent("UNIT_PORTRAIT_UPDATE", "player")
-		playerToggle:SetScript("OnEvent", function(self)
-			SetPortraitTexture(self.portrait, "player")
-		end)
 		playerToggle:HookScript("OnClick", function(self)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			modelScene:GetActorByTag("unwrapped"):SetAnimation(animationsCombobox.selectedValue)

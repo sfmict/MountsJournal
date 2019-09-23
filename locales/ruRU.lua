@@ -54,6 +54,7 @@ L["DEATHKNIGHT_USEONLYINWATERWALKLOCATION"] = "Использовать толь
 L["SHAMAN_USEWATERWALKING"] = "Использовать %s при вызове наземного средства передвижения"
 L["SHAMAN_USEONLYINWATERWALKLOCATION"] = "Использовать только в зонах с хождением по воде"
 L["DRUID_USELASTDRUIDFORM"] = "Вернуть последнюю форму при спешивании"
+L["DRUID_USEDRUIDFORMSPECIALIZATION"] = "Вернуть форму специализации"
 L["DRUID_USEMACROALWAYS"] = "Использовать этот макрос вместо средств передвижения"
 -- ANIMATIONS
 L["Default"] = "По умолчанию"

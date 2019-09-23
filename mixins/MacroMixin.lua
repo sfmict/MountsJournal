@@ -177,30 +177,41 @@ do
 	end
 
 
+	specializationSpellID = {
+		24858, -- moonkin
+		768, -- cat
+		5487, -- bear
+	}
+
+
 	function MJMacroMixin:preClick()
 		if InCombatLockdown() then return end
 		self.mounts:setFlags()
 		local macro
 
 		-- DRUID LAST FORM
-		-- 31 - moonkin form
+		-- 768 - cat form
 		-- 783 - travel form
+		-- 24858 - moonkin form
 		if self.classConfig.useLastDruidForm then
 			local spellID = getFormSpellID()
 
-			if self.lastDruidForm
-			and GetShapeshiftFormID() ~= 31
-			and (self.sFlags.isMounted or self.sFlags.inVehicle or spellID == 783) then
-				macro = self:addLine(self:getDismountMacro(), "/cast "..self.lastDruidForm)
+			if self.lastDruidFormSpellID
+			and spellID ~= 24858
+			and (self.sFlags.isMounted
+				  or self.sFlags.inVehicle
+				  or spellID == 783
+				  or self.sFlags.isIndoors and spellID == 768) then
+				macro = self:addLine(self:getDismountMacro(), "/cast "..self:getSpellName(self.lastDruidFormSpellID))
 				self:SetAttribute("macrotext", macro or "")
 				return
 			end
 
-			if spellID and spellID ~= 783 then
-				self.lastDruidForm = self:getSpellName(spellID)
+			if spellID and spellID ~= 783 or self.classConfig.useDruidFormSpecialization then
+				self.lastDruidFormSpellID = self.classConfig.useDruidFormSpecialization and specializationSpellID[GetSpecialization()] or spellID
 				self.lastDruidFormTime = GetTime()
 			elseif not spellID and (not self.lastDruidFormTime or GetTime() - self.lastDruidFormTime > 1) then
-				self.lastDruidForm = nil
+				self.lastDruidFormSpellID = nil
 			end
 		end
 
