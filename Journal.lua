@@ -127,10 +127,8 @@ function journal:ADDON_LOADED(addonName)
 		mountCount.collectedLabel:SetText(L["Collected:"])
 
 		-- MOUNT EQUIPMENT
-		local bottomLeftInset = MountJournal.BottomLeftInset
-		local slotButton = bottomLeftInset.SlotButton
-		bottomLeftInset.SlotLabel:SetPoint("LEFT", bottomLeftInset, "LEFT", 0, 0)
-		bottomLeftInset:Hide()
+		MountJournal.BottomLeftInset:Hide()
+		local slotButton = MountJournal.BottomLeftInset.SlotButton
 		slotButton:SetParent(MountJournal)
 		slotButton:SetPoint("LEFT", self.mountCount, "RIGHT", 4, 0)
 		slotButton:SetScale(.65)
