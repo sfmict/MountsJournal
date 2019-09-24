@@ -82,9 +82,15 @@ function MJExistingsListsMixin:refresh()
 			tinsert(self.lists[1].childs, createOptionButton(mapID))
 		end
 
-		if mapConfig.flags.groundOnly
-		or mapConfig.flags.waterWalkOnly
-		or mapConfig.flags.herbGathering then
+		local flags
+		for _, value in pairs(mapConfig.flags) do
+			if value then
+				flags = true
+				break
+			end
+		end
+
+		if flags then
 			tinsert(self.lists[3].childs, createOptionButton(mapID))
 		end
 	end

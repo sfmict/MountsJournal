@@ -665,7 +665,9 @@ function journal:ADDON_LOADED(addonName)
 		playerToggle:RegisterUnitEvent("UNIT_PORTRAIT_UPDATE", "player")
 		playerToggle:HookScript("OnClick", function(self)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			modelScene:GetActorByTag("unwrapped"):SetAnimation(animationsCombobox.selectedValue)
+			C_Timer.After(0, function()
+				modelScene:GetActorByTag("unwrapped"):SetAnimation(animationsCombobox.selectedValue)
+			end)
 		end)
 
 		-- HOOKS
@@ -790,10 +792,16 @@ function journal:getRemoveMountList(mapID)
 	if not mapID then return end
 	local list = self.db.zoneMounts[mapID]
 
+	local flags
+	for _, value in pairs(list.flags) do
+		if value then
+			flags = true
+			break
+		end
+	end
+
 	if #list.fly + #list.ground + #list.swimming == 0
-	and not list.flags.groundOnly
-	and not list.flags.waterWalkOnly
-	and not list.flags.herbGathering
+	and not flags
 	and not list.listFromID then
 		self.db.zoneMounts[mapID] = nil
 		self:setEditMountsList()

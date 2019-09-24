@@ -335,7 +335,7 @@ function mounts:setFlags()
 	local isSubmerged = IsSubmerged()
 	local isFloating = self:isFloating()
 	local instance = select(8, GetInstanceInfo())
-	local isFlyableLocation = flySpellKnown 
+	local isFlyableLocation = flySpellKnown
 									  and IsFlyableArea()
 									  and self:isFlyLocation(instance)
 									  and not (self.mapFlags and self.mapFlags.groundOnly)
