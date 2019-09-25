@@ -168,7 +168,7 @@ end
 
 
 do
-	function getFormSpellID()
+	local function getFormSpellID()
 		local shapeshiftIndex = GetShapeshiftForm()
 		if shapeshiftIndex > 0 then
 			local _,_,_,spellID = GetShapeshiftFormInfo(shapeshiftIndex)
@@ -177,7 +177,7 @@ do
 	end
 
 
-	specializationSpellID = {
+	local specializationSpellID = {
 		24858, -- moonkin
 		768, -- cat
 		5487, -- bear
