@@ -1036,7 +1036,7 @@
 		<CheckedTexture file="Interface\Minimap\ping\ping4" alphaMode="ADD" alpha=".6">
 			<Size x="77" y="77"/>
 			<Anchors>
-				<Anchor point="center"/>
+				<Anchor point="CENTER"/>
 			</Anchors>
 		</CheckedTexture>
 		<Scripts>

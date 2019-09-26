@@ -381,10 +381,11 @@ function journal:ADDON_LOADED(addonName)
 			btn:SetSize(width, height)
 			if id == 1 then
 				btn:SetPoint("LEFT", 5, 0)
+				parent.childs = {}
 			else
-				local children = {parent:GetChildren()}
-				btn:SetPoint("LEFT", children[#children - 1], "RIGHT")
+				btn:SetPoint("LEFT", parent.childs[#parent.childs], "RIGHT")
 			end
+			tinsert(parent.childs, btn)
 
 			if width ~= height then
 				btn:SetHighlightTexture(texPath.."button")
@@ -648,6 +649,7 @@ function journal:ADDON_LOADED(addonName)
 				end
 			end
 		end)
+		UIDropDownMenu_SetText(animationsCombobox, L["Default"])
 
 		hooksecurefunc("MountJournal_Select", function(index)
 			local mountID = select(12, C_MountJournal.GetDisplayedMountInfo(index))
@@ -1217,7 +1219,7 @@ end
 
 function journal:setBtnFilters(tab)
 	local i = 0
-	local children = {self.filtersBar[tab]:GetChildren()}
+	local children = self.filtersBar[tab].childs
 
 	if tab ~= "sources" then
 		local default = tab == "types"
@@ -1275,7 +1277,7 @@ function journal:updateBtnFilters()
 		if i == #filter then
 			f[typeFilter] = true
 			if filtersBar[typeFilter] then
-				for _, btn in ipairs({filtersBar[typeFilter]:GetChildren()}) do
+				for _, btn in ipairs(filtersBar[typeFilter].childs) do
 					local color = default and self.colors["mount"..btn.id] or self.colors.dark
 					btn:SetChecked(false)
 					btn.icon:SetVertexColor(unpack(color))
@@ -1283,7 +1285,7 @@ function journal:updateBtnFilters()
 				filtersBar[typeFilter]:GetParent().filtred:Hide()
 			end
 		elseif filtersBar[typeFilter] then
-			for _, btn in ipairs({filtersBar[typeFilter]:GetChildren()}) do
+			for _, btn in ipairs(filtersBar[typeFilter].childs) do
 				local checked = filter[btn.id]
 				local color = checked and self.colors["mount"..btn.id] or self.colors.dark
 				btn:SetChecked(checked)
@@ -1305,13 +1307,13 @@ function journal:updateBtnFilters()
 	end
 
 	if n == #sources - 1 then
-		for _, btn in ipairs({filtersBar.sources:GetChildren()}) do
+		for _, btn in ipairs(filtersBar.sources.childs) do
 			btn:SetChecked(false)
 			btn.icon:SetDesaturated(nil)
 		end
 		filtersBar.sources:GetParent().filtred:Hide()
 	else
-		for _, btn in ipairs({filtersBar.sources:GetChildren()}) do
+		for _, btn in ipairs(filtersBar.sources.childs) do
 			btn:SetChecked(sources[btn.id])
 			btn.icon:SetDesaturated(not sources[btn.id])
 		end
