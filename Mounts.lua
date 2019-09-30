@@ -56,10 +56,10 @@ function mounts:ADDON_LOADED(addonName)
 		or type(self.charDB.zoneMounts) == "table" and next(self.charDB.zoneMounts) ~= nil then
 			local name = UnitName("player").." - "..GetRealmName()
 			self.profiles[name] = {
-				fly = self.charDB.fly,
-				ground = self.charDB.ground,
-				swimming = self.charDB.swimming,
-				zoneMounts = self.charDB.zoneMounts,
+				fly = self.charDB.fly or {},
+				ground = self.charDB.ground or {},
+				swimming = self.charDB.swimming or {},
+				zoneMounts = self.charDB.zoneMounts or {},
 			}
 			if self.charDB.enable then
 				self.charDB.currentProfileName = name
@@ -200,6 +200,8 @@ function mounts:setDB()
 	local currentProfileName = self.charDB.profileBySpecialization.enable and self.charDB.profileBySpecialization[GetSpecialization()] or self.charDB.currentProfileName
 
 	self.db = currentProfileName and self.profiles[currentProfileName] or self.globalDB
+	self.db.zoneMounts = self.db.zoneMounts or {}
+
 	self:setMountsList()
 end
 mounts.PLAYER_SPECIALIZATION_CHANGED = mounts.setDB
