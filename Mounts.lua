@@ -28,6 +28,12 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalDB.filters = MountsJournalDB.filters or {}
 		MountsJournalDB.config = MountsJournalDB.config or {}
 		MountsJournalDB.mountsProfiles = MountsJournalDB.mountsProfiles or {}
+		for _, profile in pairs(MountsJournalDB.mountsProfiles) do
+			profile.fly = profile.fly or {}
+			profile.ground = profile.ground or {}
+			profile.swimming = profile.swimming or {}
+			profile.zoneMounts = profile.zoneMounts or {}
+		end
 		self.globalDB = MountsJournalDB
 		self.filters = self.globalDB.filters
 		self.config = self.globalDB.config
@@ -200,7 +206,6 @@ function mounts:setDB()
 	local currentProfileName = self.charDB.profileBySpecialization.enable and self.charDB.profileBySpecialization[GetSpecialization()] or self.charDB.currentProfileName
 
 	self.db = currentProfileName and self.profiles[currentProfileName] or self.globalDB
-	self.db.zoneMounts = self.db.zoneMounts or {}
 
 	self:setMountsList()
 end
