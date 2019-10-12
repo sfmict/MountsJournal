@@ -72,7 +72,7 @@ do
 				local subName = spell:GetSpellSubtext()
 				if strlen(subName) > 0 then
 					spellIDtoName[spellID].name = format("%s(%s)", name, subName)
-					for _,callback in pairs(spellIDtoName[spellID].callbacks) do
+					for _, callback in pairs(spellIDtoName[spellID].callbacks) do
 						callback()
 					end
 				end
@@ -171,7 +171,7 @@ do
 	local function getFormSpellID()
 		local shapeshiftIndex = GetShapeshiftForm()
 		if shapeshiftIndex > 0 then
-			local _,_,_,spellID = GetShapeshiftFormInfo(shapeshiftIndex)
+			local _,_,_, spellID = GetShapeshiftFormInfo(shapeshiftIndex)
 			return spellID
 		end
 	end

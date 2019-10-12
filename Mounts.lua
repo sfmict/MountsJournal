@@ -346,7 +346,7 @@ function mounts:setFlags()
 									  and IsFlyableArea()
 									  and self:isFlyLocation(instance)
 									  and not (self.mapFlags and self.mapFlags.groundOnly)
-	
+
 	local flags = self.sFlags
 	flags.isIndoors = IsIndoors()
 	flags.inVehicle = UnitInVehicle("player")

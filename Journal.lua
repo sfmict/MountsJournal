@@ -655,6 +655,7 @@ function journal:ADDON_LOADED(addonName)
 			local mountID = select(12, C_MountJournal.GetDisplayedMountInfo(index))
 			currentMountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
 			UIDropDownMenu_SetSelectedValue(animationsCombobox, 0)
+			UIDropDownMenu_SetText(animationsCombobox, L["Default"])
 		end)
 
 		-- PLAYER SHOW BUTTON
