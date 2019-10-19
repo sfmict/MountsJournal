@@ -24,7 +24,10 @@ function MJExistingsListsMixin:onLoad()
 		local button = CreateFrame("CheckButton", nil, self.child, "MJCollapseButtonTemplate")
 		button:SetText(name)
 		button.childs = {}
-		button:SetScript("OnClick", function(btn) self:collapse(btn, i) end)
+		button:SetScript("OnClick", function(btn)
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+			self:collapse(btn, i)
+		end)
 		tinsert(self.lists, button)
 	end
 
@@ -67,7 +70,10 @@ function MJExistingsListsMixin:refresh()
 	local function createOptionButton(mapID)
 		local optionButton = self.optionsButtonPool:Acquire()
 		optionButton:SetText(self.util.getMapFullNameInfo(mapID).name)
-		optionButton:SetScript("OnClick", function() self.journal.navBar:setMapID(mapID) end)
+		optionButton:SetScript("OnClick", function()
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+			self.journal.navBar:setMapID(mapID)
+		end)
 		local width = optionButton.text:GetStringWidth()
 		if width > lastWidth then
 			lastWidth = width

@@ -21,20 +21,20 @@ function mounts:ADDON_LOADED(addonName)
 		self.defMountsListID = mapInfo and mapInfo.mapID or 946 -- WORLD
 
 		MountsJournalDB = MountsJournalDB or {}
-		MountsJournalDB.fly = MountsJournalDB.fly or {}
-		MountsJournalDB.ground = MountsJournalDB.ground or {}
-		MountsJournalDB.swimming = MountsJournalDB.swimming or {}
-		MountsJournalDB.zoneMounts = MountsJournalDB.zoneMounts or {}
-		MountsJournalDB.filters = MountsJournalDB.filters or {}
-		MountsJournalDB.config = MountsJournalDB.config or {}
-		MountsJournalDB.mountsProfiles = MountsJournalDB.mountsProfiles or {}
-		for _, profile in pairs(MountsJournalDB.mountsProfiles) do
+		self.globalDB = MountsJournalDB
+		self.globalDB.fly = self.globalDB.fly or {}
+		self.globalDB.ground = self.globalDB.ground or {}
+		self.globalDB.swimming = self.globalDB.swimming or {}
+		self.globalDB.zoneMounts = self.globalDB.zoneMounts or {}
+		self.globalDB.filters = self.globalDB.filters or {}
+		self.globalDB.config = self.globalDB.config or {}
+		self.globalDB.mountsProfiles = self.globalDB.mountsProfiles or {}
+		for _, profile in pairs(self.globalDB.mountsProfiles) do
 			profile.fly = profile.fly or {}
 			profile.ground = profile.ground or {}
 			profile.swimming = profile.swimming or {}
 			profile.zoneMounts = profile.zoneMounts or {}
 		end
-		self.globalDB = MountsJournalDB
 		self.filters = self.globalDB.filters
 		self.config = self.globalDB.config
 		self.config.macrosConfig = self.config.macrosConfig or {}
@@ -45,9 +45,9 @@ function mounts:ADDON_LOADED(addonName)
 		self.profiles = self.globalDB.mountsProfiles
 
 		MountsJournalChar = MountsJournalChar or {}
-		MountsJournalChar.macrosConfig = MountsJournalChar.macrosConfig or {}
-		MountsJournalChar.profileBySpecialization = MountsJournalChar.profileBySpecialization or {}
 		self.charDB = MountsJournalChar
+		self.charDB.macrosConfig = self.charDB.macrosConfig or {}
+		self.charDB.profileBySpecialization = self.charDB.profileBySpecialization or {}
 
 		-- Рудименты
 		self.config.waterWalkAll = nil
@@ -203,7 +203,12 @@ function mounts:setDB()
 		self.charDB.currentProfileName = nil
 	end
 
-	local currentProfileName = self.charDB.profileBySpecialization.enable and self.charDB.profileBySpecialization[GetSpecialization()] or self.charDB.currentProfileName
+	local currentProfileName
+	if self.charDB.profileBySpecialization.enable then
+		currentProfileName = self.charDB.profileBySpecialization[GetSpecialization()]
+	else
+		currentProfileName = self.charDB.currentProfileName
+	end
 
 	self.db = currentProfileName and self.profiles[currentProfileName] or self.globalDB
 

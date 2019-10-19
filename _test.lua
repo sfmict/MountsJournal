@@ -19,28 +19,28 @@ test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 
 function test:PLAYER_ENTERING_WORLD()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-	-- JOURNAL OPEN
 	if true then return end
-	if not IsAddOnLoaded("Blizzard_Collections") then
-		LoadAddOn("Blizzard_Collections")
-	end
-	ShowUIPanel(CollectionsJournal)
+	-- JOURNAL OPEN
+	-- if not IsAddOnLoaded("Blizzard_Collections") then
+	-- 	LoadAddOn("Blizzard_Collections")
+	-- end
+	-- ShowUIPanel(CollectionsJournal)
 
-	journal.navBarBtn:Click()
-	journal.mapSettings.existingsListsToggle:Click()
-	journal.navBar:setMapID(1033)
+	-- journal.navBarBtn:Click()
+	-- journal.mapSettings.existingsListsToggle:Click()
+	-- journal.navBar:setMapID(1033)
 
 	-- CONFIG OPEN
 	-- local classConfig = MountsJournalConfig
-	-- -- local classConfig = MountsJournalConfigClasses
-	-- if InterfaceOptionsFrameAddOns:IsVisible() and classConfig:IsVisible() then
-	-- 	InterfaceOptionsFrame:Hide()
-	-- else
-	-- 	InterfaceOptionsFrame_OpenToCategory(classConfig.name)
-	-- 	if not InterfaceOptionsFrameAddOns:IsVisible() then
-	-- 		InterfaceOptionsFrame_OpenToCategory(classConfig.name)
-	-- 	end
-	-- end
+	local classConfig = MountsJournalConfigClasses
+	if InterfaceOptionsFrameAddOns:IsVisible() and classConfig:IsVisible() then
+		InterfaceOptionsFrame:Hide()
+	else
+		InterfaceOptionsFrame_OpenToCategory(classConfig.name)
+		if not InterfaceOptionsFrameAddOns:IsVisible() then
+			InterfaceOptionsFrame_OpenToCategory(classConfig.name)
+		end
+	end
 	-- select(14,classConfig:GetChildren()):Click()
 
 	-- hooksecurefunc("MountJournal_UpdateMountDisplay", function()

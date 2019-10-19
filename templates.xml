@@ -680,7 +680,7 @@
 					<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT"/>
 				</Anchors>
 			</Frame>
-			<Button parentKey="dungeonRaidBtn" inherits="MJMenuButtonStreatchTemplate" mixin="MJDungeonRaidMixin">
+			<DropDownToggleButton parentKey="dungeonRaidBtn" inherits="MJMenuButtonStreatchTemplate" mixin="MJDungeonRaidMixin">
 				<Size x="130" y="24"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.mapControl" relativePoint="TOPLEFT" x="3" y="-3"/>
@@ -689,7 +689,7 @@
 					<OnLoad method="onLoad"/>
 					<OnClick method="onClick"/>
 				</Scripts>
-			</Button>
+			</DropDownToggleButton>
 			<CheckButton parentKey="existingsListsToggle" inherits="UIMenuButtonStretchTemplate">
 				<Size x="24" y="24"/>
 				<Anchors>
@@ -729,12 +729,12 @@
 					<Anchor point="TOP" relativeKey="$parent.WaterWalk" relativePoint="BOTTOM" x="0" y="-5"/>
 				</Anchors>
 			</CheckButton>
-			<Button parentKey="listFromMap" inherits="MJMenuButtonStreatchTemplate">
+			<DropDownToggleButton parentKey="listFromMap" inherits="MJMenuButtonStreatchTemplate">
 				<Size x="134" y="30"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.HerbGathering" relativePoint="BOTTOMLEFT" x="0" y="-20"/>
 				</Anchors>
-			</Button>
+			</DropDownToggleButton>
 			<Frame parentKey="relationMap">
 				<Size x="210" y="30"/>
 				<Anchors>
@@ -1009,13 +1009,13 @@
 		</Frames>
 	</Frame>
 
-	<Button name="MJMenuButtonProfiles" inherits="MJMenuButtonStreatchTemplate" mixin="MJProfilesMixin" virtual="true">
+	<DropDownToggleButton name="MJMenuButtonProfiles" inherits="MJMenuButtonStreatchTemplate" mixin="MJProfilesMixin" virtual="true">
 		<Size x="130" y="22"/>
 		<Scripts>
 			<OnLoad method="onLoad"/>
 			<OnClick method="onClick"/>
 		</Scripts>
-	</Button>
+	</DropDownToggleButton>
 
 	<CheckButton name="MJPlayerShowToggle" mixin="PlayerPreviewToggle" scale=".5" virtual="true">
 		<Size x="77" y="77"/>

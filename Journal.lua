@@ -227,6 +227,7 @@ function journal:ADDON_LOADED(addonName)
 				btn.icon:SetPoint("CENTER")
 			end
 			self.existingsLists:SetShown(checked)
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		end)
 
 		-- EXISTINGS LISTS
@@ -272,7 +273,7 @@ function journal:ADDON_LOADED(addonName)
 		self:RegisterEvent("ACHIEVEMENT_EARNED")
 
 		-- PROFILES
-		local profilesMenu = CreateFrame("BUTTON", nil, MountJournal, "MJMenuButtonProfiles")
+		local profilesMenu = CreateFrame("DropDownToggleButton", nil, MountJournal, "MJMenuButtonProfiles")
 		profilesMenu:SetPoint("LEFT", MountJournal.MountButton, "RIGHT", 6, 0)
 
 		-- SELECTED BUTTONS
