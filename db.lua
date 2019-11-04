@@ -788,6 +788,8 @@ MountsJournal.mountsDB = {
 	[1293] = 8, -- 308814 Прозреватель Ни'алоты
 	[1297] = 8, -- 312751 Пояс Ха-Ли
 	[1311] = 8, -- 315014 PH - Cloud Serpent
+	[1313] = 8, -- 315427 Rajani Warserpent
+	[1314] = 8, -- 315847 PH Storm Drake
 }
 setmetatable(MountsJournal.mountsDB, {__index = function(self, key)
 	self[key] = EJ_GetNumTiers()

@@ -100,7 +100,8 @@ function journal:ADDON_LOADED(addonName)
 
 		local texPath = "Interface/AddOns/MountsJournal/textures/"
 		local scrollFrame = MountJournal.ListScrollFrame
-		local modelScene = MountJournal.MountDisplay.ModelScene
+		local mountDisplay = MountJournal.MountDisplay
+		local modelScene = mountDisplay.ModelScene
 		self.scrollButtons = scrollFrame.buttons
 		self.leftInset = MountJournal.LeftInset
 		self.rightInset = MountJournal.RightInset
@@ -147,7 +148,7 @@ function journal:ADDON_LOADED(addonName)
 		navBarBtn:SetPoint("TOPRIGHT", -2, -60)
 		navBarBtn:HookScript("OnClick", function(btn)
 			local checked = btn:GetChecked()
-			MountJournal.MountDisplay:SetShown(not checked)
+			mountDisplay:SetShown(not checked)
 			self.worldMap:SetShown(checked)
 			self.mapSettings:SetShown(checked)
 		end)
@@ -218,16 +219,7 @@ function journal:ADDON_LOADED(addonName)
 
 		-- EXISTINGS LISTS TOGGLE
 		mapSettings.existingsListsToggle:SetScript("OnClick", function(btn)
-			local checked = btn:GetChecked()
-			if checked then
-				btn.icon:SetTexCoord(1, 1, 1, 0, 0, 1, 0, 0)
-				btn.icon:SetPoint("CENTER", -1, 0)
-			else
-				btn.icon:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
-				btn.icon:SetPoint("CENTER")
-			end
-			self.existingsLists:SetShown(checked)
-			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+			self.existingsLists:SetShown(btn:GetChecked())
 		end)
 
 		-- EXISTINGS LISTS
@@ -239,7 +231,7 @@ function journal:ADDON_LOADED(addonName)
 		--MOUNTJOURNAL ONSHOW
 		MountJournal:HookScript("OnShow", function()
 			navBarBtn:SetChecked(false)
-			MountJournal.MountDisplay:Show()
+			mountDisplay:Show()
 			self.mapSettings:Hide()
 			self.worldMap:Hide()
 		end)
@@ -475,29 +467,51 @@ function journal:ADDON_LOADED(addonName)
 		end
 
 		-- FILTERS BTN TOGGLE
-		self.btnToggle:SetParent(filtersPanel)
+		self.btnToggle = CreateFrame("CheckButton", nil, filtersPanel, "MJArrowToggle")
 		self.btnToggle:SetPoint("TOPLEFT", 3, -3)
+		self.btnToggle.vertical = true
+		self.btnToggle:SetChecked(mounts.config.filterToggle)
 
 		local function setBtnToggleCheck()
 			if mounts.config.filterToggle then
-				self.btnToggle.icon:SetPoint("CENTER", 0, 1)
-				self.btnToggle.icon:SetTexCoord(1, 0, 0, 0, 1, 1, 0, 1)
 				filtersPanel:SetHeight(84)
 				filtersBar:Show()
 			else
-				self.btnToggle.icon:SetPoint("CENTER", 0, -1)
-				self.btnToggle.icon:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
 				filtersPanel:SetHeight(29)
 				filtersBar:Hide()
 			end
 		end
 		setBtnToggleCheck()
 
-		self.btnToggle:SetScript("OnClick", function()
-			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			mounts.config.filterToggle = not mounts.config.filterToggle
+		self.btnToggle:SetScript("OnClick", function(self)
+			mounts.config.filterToggle = self:GetChecked()
 			setBtnToggleCheck()
 		end)
+
+		-- MOUNT DESCRIPTION
+		local infoButton = mountDisplay.InfoButton
+		infoButton.Name:SetPoint("LEFT", infoButton.Icon, "RIGHT", 20, 0)
+
+		local mountDescriptionToggle = CreateFrame("CheckButton", nil, infoButton, "MJArrowToggle")
+		mountDescriptionToggle:SetPoint("LEFT", infoButton.Icon, "RIGHT" , -2, 0)
+		mountDescriptionToggle:SetSize(20, 40)
+		mountDescriptionToggle.vertical = true
+		mountDescriptionToggle:SetChecked(mounts.config.mountDescriptionToggle)
+		
+		local function setShownDescription(self)
+			local checked = self:GetChecked()
+			infoButton.Lore:SetShown(checked)
+			infoButton.Source:SetShown(checked)
+			mounts.config.mountDescriptionToggle = checked
+
+			local activeCamera = modelScene.activeCamera
+			if activeCamera then
+				local _, cameraIDs = C_ModelInfo.GetModelSceneInfoByID(modelScene.modelSceneID)
+				activeCamera:ApplyFromModelSceneCameraInfo(C_ModelInfo.GetModelSceneCameraInfoByID(cameraIDs[1]), nil, modelScene.cameraModificationType)
+			end
+		end
+		setShownDescription(mountDescriptionToggle)
+		mountDescriptionToggle:SetScript("OnClick", setShownDescription)
 
 		-- MODEL SCENE
 		modelScene.RotateLeftButton:Hide()
@@ -516,6 +530,11 @@ function journal:ADDON_LOADED(addonName)
 
 		hooksecurefunc(modelScene, "SetActiveCamera", function(self)
 			local activeCamera = self.activeCamera
+			local ApplyFromModelSceneCameraInfo = activeCamera.ApplyFromModelSceneCameraInfo
+			function activeCamera:ApplyFromModelSceneCameraInfo(modelSceneCameraInfo, ...)
+				modelSceneCameraInfo.target.z = mountDescriptionToggle:GetChecked() and 2.2 or .2
+				ApplyFromModelSceneCameraInfo(self, modelSceneCameraInfo, ...)
+			end
 			activeCamera:SetLeftMouseButtonYMode(ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION, true)
 			activeCamera:SetRightMouseButtonXMode(ORBIT_CAMERA_MOUSE_MODE_TARGET_HORIZONTAL, true)
 			activeCamera:SetRightMouseButtonYMode(ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL, true)

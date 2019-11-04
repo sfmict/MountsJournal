@@ -21,10 +21,10 @@ function test:PLAYER_ENTERING_WORLD()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	if true then return end
 	-- JOURNAL OPEN
-	-- if not IsAddOnLoaded("Blizzard_Collections") then
-	-- 	LoadAddOn("Blizzard_Collections")
-	-- end
-	-- ShowUIPanel(CollectionsJournal)
+	if not IsAddOnLoaded("Blizzard_Collections") then
+		LoadAddOn("Blizzard_Collections")
+	end
+	ShowUIPanel(CollectionsJournal)
 
 	-- journal.navBarBtn:Click()
 	-- journal.mapSettings.existingsListsToggle:Click()
@@ -32,15 +32,15 @@ function test:PLAYER_ENTERING_WORLD()
 
 	-- CONFIG OPEN
 	-- local classConfig = MountsJournalConfig
-	local classConfig = MountsJournalConfigClasses
-	if InterfaceOptionsFrameAddOns:IsVisible() and classConfig:IsVisible() then
-		InterfaceOptionsFrame:Hide()
-	else
-		InterfaceOptionsFrame_OpenToCategory(classConfig.name)
-		if not InterfaceOptionsFrameAddOns:IsVisible() then
-			InterfaceOptionsFrame_OpenToCategory(classConfig.name)
-		end
-	end
+	-- local classConfig = MountsJournalConfigClasses
+	-- if InterfaceOptionsFrameAddOns:IsVisible() and classConfig:IsVisible() then
+	-- 	InterfaceOptionsFrame:Hide()
+	-- else
+	-- 	InterfaceOptionsFrame_OpenToCategory(classConfig.name)
+	-- 	if not InterfaceOptionsFrameAddOns:IsVisible() then
+	-- 		InterfaceOptionsFrame_OpenToCategory(classConfig.name)
+	-- 	end
+	-- end
 	-- select(14,classConfig:GetChildren()):Click()
 
 	-- hooksecurefunc("MountJournal_UpdateMountDisplay", function()
@@ -146,3 +146,6 @@ end
 
 -- SetClampRectInsets
 -- GetBuildInfo
+-- C_PetJournal.SummonRandomPet(true)
+-- C_PetJournal.SummonPetByGUID(PetJournalPetCard.petID)
+-- C_PetJournal.GetSummonedPetGUID()

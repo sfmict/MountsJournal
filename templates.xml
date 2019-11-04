@@ -671,6 +671,61 @@
 		</ButtonText>
 	</Button>
 
+	<CheckButton name="MJArrowToggle" inherits="UIMenuButtonStretchTemplate" virtual="true">
+		<Size x="24" y="24"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture parentKey="icon" file="Interface/ChatFrame/ChatFrameExpandArrow">
+					<Size x="14" y="14"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<HighlightTexture file="Interface/Buttons/UI-Common-MouseHilight" alpha="0.75" alphaMode="ADD"/>
+		<Scripts>
+			<OnLoad>
+				self.setPointArrow = function(self, checked)
+					if self.vertical then
+						if checked then
+							self.icon:SetPoint("CENTER", 0, 1)
+							self.icon:SetTexCoord(1, 0, 0, 0, 1, 1, 0, 1)
+						else
+							self.icon:SetPoint("CENTER", 0, -1)
+							self.icon:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
+						end
+					else
+						if checked then
+							self.icon:SetTexCoord(1, 1, 1, 0, 0, 1, 0, 0)
+							self.icon:SetPoint("CENTER", -1, 0)
+						else
+							self.icon:SetTexCoord(0, 0, 0, 1, 1, 0, 1, 1)
+							self.icon:SetPoint("CENTER")
+						end
+					end
+				end
+				hooksecurefunc(self, "SetChecked", function(self)
+					self:setPointArrow(self:GetChecked())
+				end)
+			</OnLoad>
+			<OnMouseDown>
+				if self:IsEnabled() then
+					self:SetTextures("Interface/Buttons/UI-Silver-Button-Down")
+					local point, _,_, x, y = self.icon:GetPoint(1)
+					self.icon:SetPoint(point, x - 1, y - 1)
+				end
+			</OnMouseDown>
+			<OnMouseUp>
+				if self:IsEnabled() then
+					self:SetTextures("Interface/Buttons/UI-Silver-Button-Up")
+					self:setPointArrow(not self:GetChecked())
+					PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+				end
+			</OnMouseUp>
+		</Scripts>
+	</CheckButton>
+
 	<Frame name="MJMapSettingsTemplate" hidden="true" inherits="InsetFrameTemplate" virtual="true">
 		<Frames>
 			<Frame parentKey="mapControl" inherits="InsetFrameTemplate">
@@ -690,22 +745,10 @@
 					<OnClick method="onClick"/>
 				</Scripts>
 			</DropDownToggleButton>
-			<CheckButton parentKey="existingsListsToggle" inherits="UIMenuButtonStretchTemplate">
-				<Size x="24" y="24"/>
+			<CheckButton parentKey="existingsListsToggle" inherits="MJArrowToggle">
 				<Anchors>
 					<Anchor point="TOPRIGHT" relativeKey="$parent.mapControl" relativePoint="TOPRIGHT" x="-3" y="-3"/>
 				</Anchors>
-				<Layers>
-					<Layer level="ARTWORK">
-						<Texture parentKey="icon" file="Interface/ChatFrame/ChatFrameExpandArrow">
-							<Size x="14" y="14"/>
-							<Anchors>
-								<Anchor point="CENTER"/>
-							</Anchors>
-						</Texture>
-					</Layer>
-				</Layers>
-				<HighlightTexture file="Interface/Buttons/UI-Common-MouseHilight" alpha="0.75" alphaMode="ADD"/>
 			</CheckButton>
 			<Button parentKey="CurrentMap" inherits="UIPanelButtonTemplate">
 				<Size y="24"/>

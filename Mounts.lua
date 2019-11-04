@@ -36,13 +36,16 @@ function mounts:ADDON_LOADED(addonName)
 			profile.zoneMounts = profile.zoneMounts or {}
 		end
 		self.filters = self.globalDB.filters
+		self.profiles = self.globalDB.mountsProfiles
 		self.config = self.globalDB.config
+		if self.config.mountDescriptionToggle == nil then
+			self.config.mountDescriptionToggle = true
+		end
 		self.config.macrosConfig = self.config.macrosConfig or {}
 		for i = 1, GetNumClasses() do
 			local _, className = GetClassInfo(i)
 			self.config.macrosConfig[className] = self.config.macrosConfig[className] or {}
 		end
-		self.profiles = self.globalDB.mountsProfiles
 
 		MountsJournalChar = MountsJournalChar or {}
 		self.charDB = MountsJournalChar
