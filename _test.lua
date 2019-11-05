@@ -149,3 +149,6 @@ end
 -- C_PetJournal.SummonRandomPet(true)
 -- C_PetJournal.SummonPetByGUID(PetJournalPetCard.petID)
 -- C_PetJournal.GetSummonedPetGUID()
+
+-- debugprofilestart() - starts a timer for profiling during debugging.
+-- debugprofilestop() - return the time in milliseconds since the last call to debugprofilestart()

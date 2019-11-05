@@ -218,7 +218,7 @@ function journal:ADDON_LOADED(addonName)
 		UIDropDownMenu_Initialize(mapSettings.listFromMap.optionsMenu, self.listFromMapInit, "MENU")
 
 		-- EXISTINGS LISTS TOGGLE
-		mapSettings.existingsListsToggle:SetScript("OnClick", function(btn)
+		mapSettings.existingsListsToggle:HookScript("OnClick", function(btn)
 			self.existingsLists:SetShown(btn:GetChecked())
 		end)
 
@@ -333,11 +333,11 @@ function journal:ADDON_LOADED(addonName)
 		self.shownPanel = shownPanel
 		shownPanel:SetPoint("TOPLEFT", filtersPanel, "BOTTOMLEFT", 0, -2)
 		shownPanel:SetSize(280, 26)
-		
+
 		shownPanel.text = shownPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 		shownPanel.text:SetPoint("LEFT", 8, -1)
 		shownPanel.text:SetText(L["Shown:"])
-		
+
 		shownPanel.count = shownPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 		shownPanel.count:SetPoint("LEFT", shownPanel.text ,"RIGHT", 2, 0)
 
@@ -483,12 +483,12 @@ function journal:ADDON_LOADED(addonName)
 		end
 		setBtnToggleCheck()
 
-		self.btnToggle:SetScript("OnClick", function(self)
+		self.btnToggle:HookScript("OnClick", function(self)
 			mounts.config.filterToggle = self:GetChecked()
 			setBtnToggleCheck()
 		end)
 
-		-- MOUNT DESCRIPTION
+		-- MOUNT DESCRIPTION TOGGLE
 		local infoButton = mountDisplay.InfoButton
 		infoButton.Name:SetPoint("LEFT", infoButton.Icon, "RIGHT", 20, 0)
 
@@ -497,7 +497,7 @@ function journal:ADDON_LOADED(addonName)
 		mountDescriptionToggle:SetSize(20, 40)
 		mountDescriptionToggle.vertical = true
 		mountDescriptionToggle:SetChecked(mounts.config.mountDescriptionToggle)
-		
+
 		local function setShownDescription(self)
 			local checked = self:GetChecked()
 			infoButton.Lore:SetShown(checked)
@@ -506,12 +506,11 @@ function journal:ADDON_LOADED(addonName)
 
 			local activeCamera = modelScene.activeCamera
 			if activeCamera then
-				local _, cameraIDs = C_ModelInfo.GetModelSceneInfoByID(modelScene.modelSceneID)
-				activeCamera:ApplyFromModelSceneCameraInfo(C_ModelInfo.GetModelSceneCameraInfoByID(cameraIDs[1]), nil, modelScene.cameraModificationType)
+				activeCamera:ApplyFromModelSceneCameraInfo(C_ModelInfo.GetModelSceneCameraInfoByID(activeCamera.modelSceneCameraInfo.modelSceneCameraID), nil, modelScene.cameraModificationType)
 			end
 		end
 		setShownDescription(mountDescriptionToggle)
-		mountDescriptionToggle:SetScript("OnClick", setShownDescription)
+		mountDescriptionToggle:HookScript("OnClick", setShownDescription)
 
 		-- MODEL SCENE
 		modelScene.RotateLeftButton:Hide()
@@ -530,11 +529,13 @@ function journal:ADDON_LOADED(addonName)
 
 		hooksecurefunc(modelScene, "SetActiveCamera", function(self)
 			local activeCamera = self.activeCamera
+
 			local ApplyFromModelSceneCameraInfo = activeCamera.ApplyFromModelSceneCameraInfo
 			function activeCamera:ApplyFromModelSceneCameraInfo(modelSceneCameraInfo, ...)
-				modelSceneCameraInfo.target.z = mountDescriptionToggle:GetChecked() and 2.2 or .2
+				modelSceneCameraInfo.target.z = mountDescriptionToggle:GetChecked() and 2.2 or 1
 				ApplyFromModelSceneCameraInfo(self, modelSceneCameraInfo, ...)
 			end
+
 			activeCamera:SetLeftMouseButtonYMode(ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION, true)
 			activeCamera:SetRightMouseButtonXMode(ORBIT_CAMERA_MOUSE_MODE_TARGET_HORIZONTAL, true)
 			activeCamera:SetRightMouseButtonYMode(ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL, true)
