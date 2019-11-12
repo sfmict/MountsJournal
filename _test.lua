@@ -86,7 +86,8 @@ function test:PLAYER_ENTERING_WORLD()
 	-- MOUNT ANIMATION
 	local modelScene = MountJournal.MountDisplay.ModelScene
 	-- local timer
-	local i = 530
+	-- local i = 530
+	local i = 1371
 	modelScene:HookScript("OnMouseDown", function(self, btn)
 		-- if self.needsFanFare then return end
 		local actor = self:GetActorByTag("unwrapped")
@@ -94,15 +95,19 @@ function test:PLAYER_ENTERING_WORLD()
 		actor2 = self:GetPlayerActor()
 		-- actor2:SetModelByUnit("player")
 		local creatureDisplayID, descriptionText, sourceText, isSelfMount, _, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = C_MountJournal.GetMountInfoExtraByID(MountJournal.selectedMountID)
+
+		local actorInfo = C_ModelInfo.GetModelSceneActorInfoByID(1)
+		fprint(dump, actorInfo)
+
 		-- actor2:SetModelByUnit("player", false)
 		-- actor2:ClearModel()
 		-- actor:Hide()
 		-- actor:SetAlpha(0)
 		-- actor:AttachToMount(actor2, animID, spellVisualKitID)
-		for k,v in pairs(actor) do
-			fprint(k)
-		end
-		fprint(C_MountJournal.GetMountInfoExtraByID(MountJournal.selectedMountID))
+		-- for k,v in pairs(actor) do
+		-- 	fprint(k)
+		-- end
+		-- fprint(C_MountJournal.GetMountInfoExtraByID(MountJournal.selectedMountID))
 		-- self.UnwrapAnim.UnwrappedAnim:SetTarget(actor)
 
 		-- local modelSceneType, cameraIDs, actorIDs = C_ModelInfo.GetModelSceneInfoByID(self.modelSceneID)
@@ -130,6 +135,9 @@ function test:PLAYER_ENTERING_WORLD()
 				i = i + (IsShiftKeyDown() and -1 or 1)
 			end
 			fprint(i)
+			actor:StopAnimationKit()
+			-- actor:SetAnimationBlendOperation(LE_MODEL_BLEND_OPERATION_ANIM)
+			actor:PlayAnimationKit(i)
 			-- actor:SetAnimation(i)
 			-- actor2:SetAnimation(i)
 			-- if timer then timer:Cancel() end
