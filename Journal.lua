@@ -603,7 +603,8 @@ function journal:ADDON_LOADED(addonName)
 			},
 			{
 				name = L["Mount special"],
-				animation = 94,
+				animation = 1371,
+				isKit = true,
 			},
 			{
 				name = L["Walk"],
@@ -652,6 +653,16 @@ function journal:ADDON_LOADED(addonName)
 			},
 		}
 
+		local function mountPlayAnimation(animation, isKit)
+			local actor = modelScene:GetActorByTag("unwrapped")
+			actor:StopAnimationKit()
+			if isKit then
+				actor:PlayAnimationKit(animation)
+			else
+				actor:SetAnimation(animation)
+			end
+		end
+
 		local currentMountType
 		UIDropDownMenu_Initialize(animationsCombobox, function()
 			local info = UIDropDownMenu_CreateInfo()
@@ -661,9 +672,9 @@ function journal:ADDON_LOADED(addonName)
 				if v.type == nil or v.type >= mountType then
 					info.checked = nil
 					info.text = v.name
-					info.value = v.animation
+					info.value = v
 					info.func = function(self)
-						modelScene:GetActorByTag("unwrapped"):SetAnimation(self.value)
+						mountPlayAnimation(self.value.animation, self.value.isKit)
 						UIDropDownMenu_SetSelectedValue(animationsCombobox, self.value)
 					end
 					UIDropDownMenu_AddButton(info)
@@ -673,6 +684,7 @@ function journal:ADDON_LOADED(addonName)
 		UIDropDownMenu_SetText(animationsCombobox, L["Default"])
 
 		hooksecurefunc("MountJournal_Select", function(index)
+			modelScene:GetActorByTag("unwrapped"):StopAnimationKit()
 			local mountID = select(12, C_MountJournal.GetDisplayedMountInfo(index))
 			currentMountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
 			UIDropDownMenu_SetSelectedValue(animationsCombobox, 0)
@@ -690,7 +702,8 @@ function journal:ADDON_LOADED(addonName)
 		playerToggle:HookScript("OnClick", function(self)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			C_Timer.After(0, function()
-				modelScene:GetActorByTag("unwrapped"):SetAnimation(animationsCombobox.selectedValue)
+				local value = animationsCombobox.selectedValue
+				mountPlayAnimation(value.animation, value.isKit)
 			end)
 		end)
 

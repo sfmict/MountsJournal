@@ -177,7 +177,7 @@ do
 	end
 
 
-	local specializationSpellID = {
+	local specializationSpellIDs = {
 		24858, -- moonkin
 		768, -- cat
 		5487, -- bear
@@ -207,10 +207,12 @@ do
 				return
 			end
 
-			if spellID and spellID ~= 783 or self.classConfig.useDruidFormSpecialization then
-				self.lastDruidFormSpellID = self.classConfig.useDruidFormSpecialization and specializationSpellID[GetSpecialization()] or spellID
+			if self.classConfig.useDruidFormSpecialization then
+				self.lastDruidFormSpellID = specializationSpellIDs[GetSpecialization()]
+			elseif spellID and spellID ~= 783 then
+				self.lastDruidFormSpellID = spellID
 				self.lastDruidFormTime = GetTime()
-			elseif not spellID and (not self.lastDruidFormTime or GetTime() - self.lastDruidFormTime > 1) then
+			elseif not spellID and GetTime() - (self.lastDruidFormTime or 0) > 1 then
 				self.lastDruidFormSpellID = nil
 			end
 		end
