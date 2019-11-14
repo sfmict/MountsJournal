@@ -683,9 +683,14 @@ function journal:ADDON_LOADED(addonName)
 		end)
 
 		hooksecurefunc("MountJournal_Select", function(index)
-			modelScene:GetActorByTag("unwrapped"):StopAnimationKit()
+			local actor = modelScene:GetActorByTag("unwrapped")
+			if actor then
+				actor:StopAnimationKit()
+			end
 			local mountID = select(12, C_MountJournal.GetDisplayedMountInfo(index))
-			currentMountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
+			if mountID then
+				currentMountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
+			end
 			UIDropDownMenu_SetSelectedValue(animationsCombobox, animationsList[1])
 			UIDropDownMenu_SetText(animationsCombobox, animationsList[1].name)
 		end)
