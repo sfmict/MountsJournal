@@ -681,14 +681,13 @@ function journal:ADDON_LOADED(addonName)
 				end
 			end
 		end)
-		UIDropDownMenu_SetText(animationsCombobox, L["Default"])
 
 		hooksecurefunc("MountJournal_Select", function(index)
 			modelScene:GetActorByTag("unwrapped"):StopAnimationKit()
 			local mountID = select(12, C_MountJournal.GetDisplayedMountInfo(index))
 			currentMountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
-			UIDropDownMenu_SetSelectedValue(animationsCombobox, 0)
-			UIDropDownMenu_SetText(animationsCombobox, L["Default"])
+			UIDropDownMenu_SetSelectedValue(animationsCombobox, animationsList[1])
+			UIDropDownMenu_SetText(animationsCombobox, animationsList[1].name)
 		end)
 
 		-- PLAYER SHOW BUTTON
@@ -1377,12 +1376,12 @@ end
 
 
 function journal:updateMountsList()
-	local types, selected, factions, expansions, list = mounts.filters.types, mounts.filters.selected, mounts.filters.factions, mounts.filters.expansions, self.list
+	local types, selected, factions, expansions, list, GetDisplayedMountInfo, GetMountInfoExtraByID = mounts.filters.types, mounts.filters.selected, mounts.filters.factions, mounts.filters.expansions, self.list, self.func.GetDisplayedMountInfo, C_MountJournal.GetMountInfoExtraByID
 	wipe(self.displayedMounts)
 
 	for i = 1, self.func.GetNumDisplayedMounts() do
-		local _,_,_,_,_,_,_,_, mountFaction,_,_, mountID = self.func.GetDisplayedMountInfo(i)
-		local mountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
+		local _,_,_,_,_,_,_,_, mountFaction ,_,_, mountID = GetDisplayedMountInfo(i)
+		local _,_,_,_, mountType = GetMountInfoExtraByID(mountID)
 		mountFaction = mountFaction or 2
 
 		-- TYPE
