@@ -133,11 +133,6 @@ function journal:ADDON_LOADED(addonName)
 		self:RegisterEvent("COMPANION_UNLEARNED")
 		self:RegisterEvent("COMPANION_UPDATE")
 
-		local mountCountSetText = mountCount.Count.SetText
-		function mountCount.Count:SetText()
-			mountCountSetText(self, self.num)
-		end
-
 		-- MOUNT EQUIPMENT
 		MountJournal.BottomLeftInset:Hide()
 		local slotButton = MountJournal.BottomLeftInset.SlotButton
@@ -363,7 +358,7 @@ function journal:ADDON_LOADED(addonName)
 		-- FILTERS BAR
 		local filtersBar = CreateFrame("FRAME", nil, filtersPanel)
 		self.filtersBar = filtersBar
-		filtersBar:SetSize(235, 35)
+		filtersBar:SetSize(259, 35)
 		filtersBar:SetPoint("TOP", 0, -46)
 		filtersBar:SetBackdrop({
 			edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
@@ -449,12 +444,12 @@ function journal:ADDON_LOADED(addonName)
 		}
 
 		for i = 1, #typesTextures do
-			CreateButtonFilter(i, filtersBar.types, 75, 25, typesTextures[i], L["MOUNT_TYPE_"..i])
+			CreateButtonFilter(i, filtersBar.types, 83, 25, typesTextures[i], L["MOUNT_TYPE_"..i])
 		end
 
 		-- FILTERS SELECTED BUTTONS
 		for i = 1, #typesTextures do
-			CreateButtonFilter(i, filtersBar.selected, 75, 25, typesTextures[i], L["MOUNT_TYPE_"..i])
+			CreateButtonFilter(i, filtersBar.selected, 83, 25, typesTextures[i], L["MOUNT_TYPE_"..i])
 		end
 
 		-- FILTERS SOURCES BUTTONS
@@ -469,6 +464,7 @@ function journal:ADDON_LOADED(addonName)
 			{path = texPath.."sources", texCoord = {0.75, 1, 0.25, 0.5}, width = 20, height = 20},
 			{path = texPath.."sources", texCoord = {0, 0.25, 0.5, 0.75}, width = 20, height = 20},
 			{path = texPath.."sources", texCoord = {0.25, 0.5, 0.5, 0.75}, width = 20, height = 20},
+			{path = texPath.."sources", texCoord = {0.5, 0.75, 0.5, 0.75}, width = 20, height = 20},
 		}
 
 		for i = 1, #sourcesTextures do
@@ -524,18 +520,30 @@ function journal:ADDON_LOADED(addonName)
 		mountDescriptionToggle:HookScript("OnClick", setShownDescription)
 
 		-- PET SELECTION BUTTON
-		local petSelectionBtn = CreateFrame("BUTTON", nil, infoButton, "MJCompanionIcon")
+		local petSelectionBtn = CreateFrame("BUTTON", nil, infoButton, "MJCompanionButton")
 		petSelectionBtn:SetPoint("LEFT", infoButton.Name, "RIGHT", 3, 0)
-		petSelectionBtn:SetScript("OnShow", function()
+		petSelectionBtn:SetScript("OnShow", function(self)
+			local infoFrame = self.infoFrame
 			local petID, speciesID, isOwned, customName, level, favorite, isRevoked, name, icon, petType, _, _, _, _, canBattle = C_PetJournal.GetPetInfoByIndex(2)
 			-- hooksecurefunc("PetJournal_UpdatePetList", function() fprint("a") end)
 			-- local speciesID, customName, level, xp, maxXp, displayID, isFavorite, petName, petIcon, petType = C_PetJournal.GetPetInfoByPetID(petID)
 			fprint(C_PetJournal.GetPetInfoByPetID("BattlePet-0-000001B3BB78"))
 			if isOwned then
 				local health, maxHealth, attack, speed, rarity = C_PetJournal.GetPetStats(petID)
-				petSelectionBtn.icon:SetTexture(icon)
-				petSelectionBtn.iconBorder:SetVertexColor(ITEM_QUALITY_COLORS[rarity - 1].color:GetRGB())
+				infoFrame.icon:SetTexture(icon)
+				infoFrame.qualityBorder:SetVertexColor(ITEM_QUALITY_COLORS[rarity - 1].color:GetRGB())
+				infoFrame.levelBG:SetShown(canBattle)
+				infoFrame.level:SetShown(canBattle)
+				infoFrame.level:SetText(level)
+				infoFrame.favorite:SetShown(favorite)
+				infoFrame.isDead:SetShown(health <= 0)
+				infoFrame:Show()
+			else
+				infoFrame:Hide()
 			end
+		end)
+		petSelectionBtn:SetScript("OnClick", function(self)
+			fprint("click")
 		end)
 
 		-- MODEL SCENE
@@ -818,8 +826,8 @@ function journal:configureJournal()
 			btn.ground.mountID = btn.fly.mountID
 			btn.swimming.mountID = btn.fly.mountID
 			setColor(btn.fly, self.list and self.list.fly)
-			setColor(btn.ground, self.list and  self.list.ground)
-			setColor(btn.swimming, self.list and  self.list.swimming)
+			setColor(btn.ground, self.list and self.list.ground)
+			setColor(btn.swimming, self.list and self.list.swimming)
 		else
 			if btn.fly:IsShown() then
 				btn.fly:Hide()
@@ -828,6 +836,8 @@ function journal:configureJournal()
 			end
 		end
 	end
+
+	self.mountCount.Count:SetText(self.mountCount.Count.num)
 end
 
 
