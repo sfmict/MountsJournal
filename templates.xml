@@ -1089,4 +1089,16 @@
 			<OnClick method="OnClick"/>
 		</Scripts>
 	</CheckButton>
+
+	<Button name="MJCompanionIcon" virtual="true">
+		<Size x="38" y="38"/>
+		<Layers>
+			<Layer level="BaCKGROUND">
+				<Texture parentKey="icon" setAllPoints="true"/>
+			</Layer>
+			<Layer level="BORDER">
+				<Texture parentKey="iconBorder" setAllPoints="true" file="Interface\Common\WhiteIconFrame" hidden="false"/>
+			</Layer>
+		</Layers>
+	</Button>
 </Ui>

@@ -127,6 +127,17 @@ function journal:ADDON_LOADED(addonName)
 		mountCount.collectedLabel:SetPoint("LEFT", 10, -6)
 		mountCount.collectedLabel:SetText(L["Collected:"])
 
+		self:setCountMounts()
+		self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
+		self:RegisterEvent("COMPANION_LEARNED")
+		self:RegisterEvent("COMPANION_UNLEARNED")
+		self:RegisterEvent("COMPANION_UPDATE")
+
+		local mountCountSetText = mountCount.Count.SetText
+		function mountCount.Count:SetText()
+			mountCountSetText(self, self.num)
+		end
+
 		-- MOUNT EQUIPMENT
 		MountJournal.BottomLeftInset:Hide()
 		local slotButton = MountJournal.BottomLeftInset.SlotButton
@@ -512,6 +523,21 @@ function journal:ADDON_LOADED(addonName)
 		setShownDescription(mountDescriptionToggle)
 		mountDescriptionToggle:HookScript("OnClick", setShownDescription)
 
+		-- PET SELECTION BUTTON
+		local petSelectionBtn = CreateFrame("BUTTON", nil, infoButton, "MJCompanionIcon")
+		petSelectionBtn:SetPoint("LEFT", infoButton.Name, "RIGHT", 3, 0)
+		petSelectionBtn:SetScript("OnShow", function()
+			local petID, speciesID, isOwned, customName, level, favorite, isRevoked, name, icon, petType, _, _, _, _, canBattle = C_PetJournal.GetPetInfoByIndex(2)
+			-- hooksecurefunc("PetJournal_UpdatePetList", function() fprint("a") end)
+			-- local speciesID, customName, level, xp, maxXp, displayID, isFavorite, petName, petIcon, petType = C_PetJournal.GetPetInfoByPetID(petID)
+			fprint(C_PetJournal.GetPetInfoByPetID("BattlePet-0-000001B3BB78"))
+			if isOwned then
+				local health, maxHealth, attack, speed, rarity = C_PetJournal.GetPetStats(petID)
+				petSelectionBtn.icon:SetTexture(icon)
+				petSelectionBtn.iconBorder:SetVertexColor(ITEM_QUALITY_COLORS[rarity - 1].color:GetRGB())
+			end
+		end)
+
 		-- MODEL SCENE
 		modelScene.RotateLeftButton:Hide()
 		modelScene.RotateRightButton:Hide()
@@ -802,20 +828,30 @@ function journal:configureJournal()
 			end
 		end
 	end
+end
 
-	local count, collected = 0, 0
-	for _, mountID in ipairs(C_MountJournal.GetMountIDs()) do
-		local _,_,_,_,_,_,_,_,_, hideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
-		if not hideOnChar then
-			count = count + 1
-			if isCollected then
-				collected = collected + 1
+
+function journal:setCountMounts(companionType)
+	if not companionType or companionType == "MOUNT" then
+		local count, collected = 0, 0
+		for _, mountID in ipairs(C_MountJournal.GetMountIDs()) do
+			local _,_,_,_,_,_,_,_,_, hideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+			if not hideOnChar then
+				count = count + 1
+				if isCollected then
+					collected = collected + 1
+				end
 			end
 		end
+		self.mountCount.Count.num = count
+		self.mountCount.Count:SetText(count)
+		self.mountCount.collected:SetText(collected)
 	end
-	self.mountCount.Count:SetText(count)
-	self.mountCount.collected:SetText(collected)
 end
+journal.MOUNT_JOURNAL_USABILITY_CHANGED = journal.setCountMounts
+journal.COMPANION_LEARNED = journal.setCountMounts
+journal.COMPANION_UNLEARNED = journal.setCountMounts
+journal.COMPANION_UPDATE = journal.setCountMounts
 
 
 function journal:createMountList(mapID)

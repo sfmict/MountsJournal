@@ -19,12 +19,12 @@ test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 
 function test:PLAYER_ENTERING_WORLD()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-	if true then return end
 	-- JOURNAL OPEN
 	if not IsAddOnLoaded("Blizzard_Collections") then
 		LoadAddOn("Blizzard_Collections")
 	end
 	ShowUIPanel(CollectionsJournal)
+	if true then return end
 
 	-- journal.navBarBtn:Click()
 	-- journal.mapSettings.existingsListsToggle:Click()
@@ -89,6 +89,8 @@ function test:PLAYER_ENTERING_WORLD()
 	-- local i = 530
 	local i = 1371
 	modelScene:HookScript("OnMouseDown", function(self, btn)
+		C_PetJournal.SummonPetByGUID("BattlePet-0-000001B3BB78")
+		if true then return end
 		-- if self.needsFanFare then return end
 		local actor = self:GetActorByTag("unwrapped")
 		-- local actor2 = self:GetActorByTag("player")
