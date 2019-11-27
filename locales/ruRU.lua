@@ -58,6 +58,7 @@ L["SHAMAN_USEONLYINWATERWALKLOCATION"] = "Использовать только 
 L["DRUID_USELASTDRUIDFORM"] = "Вернуть последнюю форму при спешивании"
 L["DRUID_USEDRUIDFORMSPECIALIZATION"] = "Вернуть форму специализации"
 L["DRUID_USEMACROALWAYS"] = "Использовать этот макрос вместо средств передвижения"
+L["Summon Random Battle Pet"] = "Призвать случайного питомца"
 -- ANIMATIONS
 L["Default"] = "По умолчанию"
 L["Mount special"] = "Особая"

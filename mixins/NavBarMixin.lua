@@ -15,7 +15,7 @@ MJNavBarMixin = CreateFromMixins(MountsJournalEventsMixin)
 
 
 function MJNavBarMixin:onLoad()
-	self:init()
+	self:initEvents()
 	self.defMapID = MountsJournal.defMountsListID
 	local homeData = {
 		name = WORLD,

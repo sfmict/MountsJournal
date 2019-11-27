@@ -54,6 +54,7 @@ L["SHAMAN_USEONLYINWATERWALKLOCATION"] = "Use only in water walk zones"
 L["DRUID_USELASTDRUIDFORM"] = "Return last form when dismounting"
 L["DRUID_USEDRUIDFORMSPECIALIZATION"] = "Return a specialization form"
 L["DRUID_USEMACROALWAYS"] = "Use this macros instead of mounts"
+L["Summon Random Battle Pet"] = "Summon Random Battle Pet"
 -- ANIMATIONS
 L["Default"] = "Default"
 L["Mount special"] = "Mount special"

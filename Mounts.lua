@@ -26,6 +26,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.globalDB.ground = self.globalDB.ground or {}
 		self.globalDB.swimming = self.globalDB.swimming or {}
 		self.globalDB.zoneMounts = self.globalDB.zoneMounts or {}
+		self.globalDB.petForMount = self.globalDB.petForMount or {}
 		self.globalDB.filters = self.globalDB.filters or {}
 		self.globalDB.config = self.globalDB.config or {}
 		self.globalDB.mountsProfiles = self.globalDB.mountsProfiles or {}
@@ -34,6 +35,7 @@ function mounts:ADDON_LOADED(addonName)
 			profile.ground = profile.ground or {}
 			profile.swimming = profile.swimming or {}
 			profile.zoneMounts = profile.zoneMounts or {}
+			profile.petForMount = profile.petForMount or {}
 		end
 		self.filters = self.globalDB.filters
 		self.profiles = self.globalDB.mountsProfiles
@@ -69,6 +71,7 @@ function mounts:ADDON_LOADED(addonName)
 				ground = self.charDB.ground or {},
 				swimming = self.charDB.swimming or {},
 				zoneMounts = self.charDB.zoneMounts or {},
+				petForMount = {},
 			}
 			if self.charDB.enable then
 				self.charDB.currentProfileName = name

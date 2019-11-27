@@ -1,7 +1,7 @@
 MountsJournalEventsMixin = {}
 
 
-function MountsJournalEventsMixin:init()
+function MountsJournalEventsMixin:initEvents()
 	self.events = {}
 end
 

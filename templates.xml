@@ -4,6 +4,7 @@
 	<Script file="mixins\WorldMapMixin.lua"/>
 	<Script file="mixins\ExistingsListsMixin.lua"/>
 	<Script file="mixins\ProfilesMixin.lua"/>
+	<Script file="mixins\CompanionMixin.lua"/>
 
 	<Button name="MJTabTemplate" virtual="true">
 		<Size x="83" y="24"/>
@@ -166,7 +167,7 @@
 		</HitRectInsets>
 		<Scripts>
 			<OnClick>
-				PlaySound(self:GetChecked() and SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF);
+				PlaySound(self:GetChecked() and SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
 			</OnClick>
 		</Scripts>
 	</CheckButton>
@@ -272,15 +273,15 @@
 						<Size x="359"/>
 						<Scripts>
 							<OnLoad>
-								ScrollingEdit_OnCursorChanged(self, 0, 0, 0, 0);
+								ScrollingEdit_OnCursorChanged(self, 0, 0, 0, 0)
 							</OnLoad>
 							<OnTextChanged>
 								self:GetParent():GetParent().limitText:SetFormattedText(MACROFRAME_CHAR_LIMIT, self:GetNumLetters())
-								ScrollingEdit_OnTextChanged(self, self:GetParent());
+								ScrollingEdit_OnTextChanged(self, self:GetParent())
 							</OnTextChanged>
 							<OnCursorChanged function="ScrollingEdit_OnCursorChanged"/>
 							<OnUpdate>
-								ScrollingEdit_OnUpdate(self, elapsed, self:GetParent());
+								ScrollingEdit_OnUpdate(self, elapsed, self:GetParent())
 							</OnUpdate>
 							<OnEscapePressed function="EditBox_ClearFocus"/>
 						</Scripts>
@@ -306,7 +307,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>self:SetText(DEFAULT)</OnLoad>
-					<OnClick>PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);</OnClick>
+					<OnClick>PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)</OnClick>
 				</Scripts>
 			</Button>
 			<Button parentKey="cancelBtn" inherits="UIPanelButtonTemplate">
@@ -316,7 +317,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>self:SetText(CANCEL)</OnLoad>
-					<OnClick>PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);</OnClick>
+					<OnClick>PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)</OnClick>
 				</Scripts>
 			</Button>
 			<Button parentKey="saveBtn" inherits="UIPanelButtonTemplate">
@@ -326,14 +327,14 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>self:SetText(SAVE)</OnLoad>
-					<OnClick>PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);</OnClick>
+					<OnClick>PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)</OnClick>
 				</Scripts>
 			</Button>
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR:GetRGB());
-				self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR:GetRGB());
+				self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR:GetRGB())
+				self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR:GetRGB())
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -402,22 +403,22 @@
 				</HighlightTexture>
 				<Scripts>
 					<OnMouseDown>
-						self.Art:SetPoint("CENTER", -1, -2);
+						self.Art:SetPoint("CENTER", -1, -2)
 					</OnMouseDown>
 					<OnMouseUp>
-						self.Art:SetPoint("CENTER", 0, -1);
+						self.Art:SetPoint("CENTER", 0, -1)
 					</OnMouseUp>
 					<OnEnter>
-						self.NormalTexture:SetAlpha(1);
-						self.PushedTexture:SetAlpha(1);
+						self.NormalTexture:SetAlpha(1)
+						self.PushedTexture:SetAlpha(1)
 					</OnEnter>
 					<OnLeave>
-						self.NormalTexture:SetAlpha(0);
-						self.PushedTexture:SetAlpha(0);
+						self.NormalTexture:SetAlpha(0)
+						self.PushedTexture:SetAlpha(0)
 					</OnLeave>
 					<OnClick>
-						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
-						NavBar_ToggleMenu(self:GetParent());
+						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+						NavBar_ToggleMenu(self:GetParent())
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -425,24 +426,24 @@
 		<Scripts>
 			<OnMouseDown>
 				if self:IsEnabled() then
-					self.arrowUp:Hide();
-					self.arrowDown:Show();
+					self.arrowUp:Hide()
+					self.arrowDown:Show()
 				end
 			</OnMouseDown>
 			<OnMouseUp>
-				self.arrowDown:Hide();
-				self.arrowUp:Show();
+				self.arrowDown:Hide()
+				self.arrowUp:Show()
 			</OnMouseUp>
 			<OnClick>
-				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			</OnClick>
 			<OnEnable>
-				self.arrowDown:Hide();
-				self.arrowUp:Show();
+				self.arrowDown:Hide()
+				self.arrowUp:Show()
 			</OnEnable>
 			<OnDisable>
-				self.arrowDown:Hide();
-				self.arrowUp:Show();
+				self.arrowDown:Hide()
+				self.arrowUp:Show()
 			</OnDisable>
 		</Scripts>
 		<NormalTexture file="Interface\HelpFrame\CS_HelpTextures_Tile" horizTile="true">
@@ -504,7 +505,7 @@
 						self.xoffset = -18
 					</OnLoad>
 					<OnClick>
-						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 					</OnClick>
 				</Scripts>
 				<NormalTexture file="Interface\HelpFrame\CS_HelpTextures">
@@ -531,18 +532,18 @@
 				</Layers>
 				<Scripts>
 					<OnLoad>
-						self.xoffset = -15;
+						self.xoffset = -15
 						local newWidth = min(128, self.text:GetStringWidth()+50)
-						local texCoordoffsetX = (newWidth/128)*0.25;
+						local texCoordoffsetX = (newWidth/128)*0.25
 
-						self:GetNormalTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.70312500, 0.00781250, 0.24218750);
-						self:GetPushedTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.70312500, 0.25781250, 0.49218750);
-						self:GetHighlightTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.71312500, 0.50781250, 0.74218750);
+						self:GetNormalTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.70312500, 0.00781250, 0.24218750)
+						self:GetPushedTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.70312500, 0.25781250, 0.49218750)
+						self:GetHighlightTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.71312500, 0.50781250, 0.74218750)
 
-						self:SetWidth(newWidth);
+						self:SetWidth(newWidth)
 					</OnLoad>
 					<OnClick>
-						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 					</OnClick>
 				</Scripts>
 				<NormalTexture file="Interface\HelpFrame\CS_HelpTextures">
@@ -588,13 +589,13 @@
 		</Layers>
 		<Scripts>
 			<OnMouseDown>
-				self.texture:SetTexCoord(0.125, 0.875, 0.5, 1.0);
+				self.texture:SetTexCoord(0.125, 0.875, 0.5, 1.0)
 			</OnMouseDown>
 			<OnMouseUp>
-				self.texture:SetTexCoord(0.125, 0.875, 0.0, 0.5);
+				self.texture:SetTexCoord(0.125, 0.875, 0.0, 0.5)
 			</OnMouseUp>
 			<OnClick>
-				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON);
+				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			</OnClick>
 		</Scripts>
 		<CheckedTexture file="Interface/Buttons/CheckButtonHilight" alphaMode="ADD" alpha=".5">
@@ -840,8 +841,8 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR:GetRGB());
-				self:onLoad();
+				self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR:GetRGB())
+				self:onLoad()
 			</OnLoad>
 			<OnShow method="refresh"/>
 		</Scripts>
@@ -939,13 +940,13 @@
 		</Layers>
 		<Scripts>
 			<OnMouseDown>
-				self.bg:SetTexCoord(0.01562500, 0.26562500, 0.14843750, 0.27343750);
-				self.icon:SetPoint("CENTER", 1, -1);
+				self.bg:SetTexCoord(0.01562500, 0.26562500, 0.14843750, 0.27343750)
+				self.icon:SetPoint("CENTER", 1, -1)
 			</OnMouseDown>
 			<OnMouseUp>
-				self.bg:SetTexCoord(0.29687500, 0.54687500, 0.14843750, 0.27343750);
-				self.icon:SetPoint("CENTER", 0, 0);
-				PlaySound(SOUNDKIT.IG_INVENTORY_ROTATE_CHARACTER);
+				self.bg:SetTexCoord(0.29687500, 0.54687500, 0.14843750, 0.27343750)
+				self.icon:SetPoint("CENTER", 0, 0)
+				PlaySound(SOUNDKIT.IG_INVENTORY_ROTATE_CHARACTER)
 			</OnMouseUp>
 			<OnEnter>self:GetParent():SetAlpha(1)</OnEnter>
 			<OnLeave>self:GetParent():SetAlpha(.5)</OnLeave>
@@ -1090,7 +1091,7 @@
 		</Scripts>
 	</CheckButton>
 
-	<Frame name="MJCompanionInfo" virtual="true">
+	<Frame name="MJPetInfo" virtual="true">
 		<Size x="38" y="38"/>
 		<Layers>
 			<Layer level="ARTWORK">
@@ -1102,19 +1103,19 @@
 			<Layer level="OVERLAY">
 				<Texture parentKey="isDead" file="Interface\PetBattles\DeadPetIcon" hidden="true" setAllPoints="true"/>
 			</Layer>
-			<Layer level="OVERLAY" textureSubLevel="1">
-				<Texture parentKey="levelBG" atlas="PetJournal-LevelBubble" useAtlasSize="true">
+			<Layer level="OVERLAY" textureSubLevel="2">
+				<Texture parentKey="levelBG" atlas="PetJournal-LevelBubble" useAtlasSize="true" hidden="true">
 					<Anchors>
 						<Anchor point="BOTTOMRIGHT" x="5" y="-6"/>
 					</Anchors>
 				</Texture>
-				<FontString inherits="GameFontNormalSmall" parentKey="level" justifyH="CENTER">
+				<FontString inherits="GameFontNormalSmall" parentKey="level" justifyH="CENTER" hidden="true">
 					<Size x="0" y="0"/>
 					<Anchors>
 						<Anchor point="CENTER" relativeKey="$parent.levelBG" x="1"/>
 					</Anchors>
 				</FontString>
-				<Texture atlas="PetJournal-FavoritesIcon" useAtlasSize="true" parentKey="favorite">
+				<Texture atlas="PetJournal-FavoritesIcon" useAtlasSize="true" parentKey="favorite" hidden="true">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="-8" y="8"/>
 					</Anchors>
@@ -1123,12 +1124,20 @@
 		</Layers>
 	</Frame>
 
-	<Button name="MJCompanionButton" virtual="true">
+	<Button name="MJSetPetButton" mixin="MJSetPetMixin" virtual="true">
 		<Size x="38" y="38"/>
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture file="Interface\PaperDoll\UI-Backpack-EmptySlot">
 					<Size x="36" y="36"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="BORDER">
+				<Texture parentKey="border" file="Interface\Buttons\UI-Quickslot2">
+					<Size x="65" y="65"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
@@ -1143,32 +1152,189 @@
 					<TexCoords left="0.42187500" right="0.23437500" top="0.01562500" bottom="0.20312500"/>
 				</Texture>
 			</Layer>
-			<Layer level="BORDER">
-				<Texture parentKey="border" file="Interface\Buttons\UI-Quickslot2">
-					<Size x="65" y="65"/>
+			<Layer level="OVERLAY" textureSubLevel="1">
+				<Texture parentKey="highlight" file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD" setAllPoints="true" hidden="true"/>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Frame inherits="MJPetInfo" parentKey="infoFrame" useParentLevel="true">
+				<Anchors>
+					<Anchor point="CENTER"/>
+				</Anchors>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad method="onLoad"/>
+			<OnClick method="onClick"/>
+			<OnShow method="onShow"/>
+			<OnEnter>self.highlight:Show()</OnEnter>
+			<OnLeave>self.highlight:Hide()</OnLeave>
+		</Scripts>
+	</Button>
+
+	<Button name="MJPetListButton" motionScriptsWhileDisabled="true" virtual="true">
+		<Size x="212" y="41"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="background" atlas="PetList-ButtonBackground">
 					<Anchors>
-						<Anchor point="CENTER"/>
+						<Anchor point="TOPLEFT" x="37"/>
+						<Anchor point="BOTTOMRIGHT"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="BORDER">
+				<Texture parentKey="petTypeIcon">
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" x="-1" y="1"/>
+					</Anchors>
+					<!-- <Size x="90" y="44"/> -->
+					<Size x="75" y="37"/>
+					<TexCoords left="0.00781250" right="0.71093750" top="0.74609375" bottom="0.91796875"/>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<FontString inherits="GameFontNormal" justifyH="LEFT" parentKey="name">
+					<Size x="147" y="25"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.background" x="5" y="-8"/>
+					</Anchors>
+				</FontString>
+				<FontString inherits="GameFontNormalSmall" justifyH="LEFT" parentKey="subName">
+					<Size x="147" y="12"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeKey="$parent.name" x="0" y="0"/>
+					</Anchors>
+					<Color r="1" g="1" b="1" a="1"/>
+				</FontString>
+			</Layer>
+			<Layer level="OVERLAY">
+				<Texture atlas="PetList-ButtonSelect" parentKey="selectedTexture" hidden="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="37"/>
+						<Anchor point="BOTTOMRIGHT"/>
 					</Anchors>
 				</Texture>
 			</Layer>
 		</Layers>
-		<!-- <HighlightTexture atlas="PetList-ButtonHighlight"/> -->
-		<HighlightTexture file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
+		<HighlightTexture atlas="PetList-ButtonHighlight">
+			<Anchors>
+				<Anchor point="TOPLEFT" x="37"/>
+				<Anchor point="BOTTOMRIGHT"/>
+			</Anchors>
+		</HighlightTexture>
 		<Frames>
-			<Frame inherits="MJCompanionInfo" parentKey="infoFrame">
+			<Frame parentKey="infoFrame" inherits="MJPetInfo">
+				<Size x="33" y="33"/>
 				<Anchors>
-					<Anchor point="CENTER"/>
+					<Anchor point="LEFT" x="3"/>
 				</Anchors>
-				<Layers>
-					<Layer level="OVERLAY">
-						<Texture parentKey="hightlight" file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD" setAllPoints="true" hidden="true"/>
-					</Layer>
-				</Layers>
 			</Frame>
 		</Frames>
 		<Scripts>
-			<OnEnter>self.infoFrame.hightlight:Show()</OnEnter>
-			<OnLeave>self.infoFrame.hightlight:Hide()</OnLeave>
+			<OnClick>
+				local frame = self:GetParent()
+				while not frame.selectButtonClick do
+					frame = frame:GetParent()
+				end
+				frame:selectButtonClick(self.id)
+			</OnClick>
 		</Scripts>
 	</Button>
+
+	<Frame name="MJCompanionsPanel" mixin="MJCompanionsPanelMixin" enableMouse="true" hidden="true" virtual="true">
+		<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+			<EdgeSize val="16"/>
+			<TileSize val="16"/>
+			<BackgroundInsets left="4" right="4" top="4" bottom="4"/>
+		</Backdrop>
+		<Frames>
+			<Frame parentKey="controlPanel" useParentLevel="false" inherits="InsetFrameTemplate">
+				<Size y="26"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="4" y="-4"/>
+					<Anchor point="TOPRIGHT" x="-4" y="-4"/>
+				</Anchors>
+			</Frame>
+			<Button parentKey="closeButton" inherits="UIPanelCloseButtonNoScripts">
+				<Anchors>
+					<Anchor point="TOPRIGHT" x="-2" y="-2"/>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+						<!-- PlaySound(SOUNDKIT.UI_TOYBOX_TABS) -->
+						self:GetParent():Hide()
+					</OnClick>
+				</Scripts>
+			</Button>
+			<EditBox inherits="SearchBoxTemplate" parentKey="searchBox" letters="40">
+				<Size y="20"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.controlPanel" x="9" y="-3"/>
+					<Anchor point="TOPRIGHT" relativeKey="$parent.closeButton" relativePoint="TOPLEFT" x="4"/>
+				</Anchors>
+			</EditBox>
+			<Frame parentKey="controlButtons" useParentLevel="false" inherits="InsetFrameTemplate">
+				<Size y="129"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" x="4" y="4"/>
+					<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
+				</Anchors>
+			</Frame>
+			<Button parentKey="randomFavoritePet" inherits="MJPetListButton">
+				<Size x="233" y="41"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.controlButtons" x="3" y="-3"/>
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="id" value="-1" type="number"/>
+				</KeyValues>
+			</Button>
+			<Button parentKey="randomPet" inherits="MJPetListButton">
+				<Size x="233" y="41"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.randomFavoritePet" relativePoint="BOTTOMLEFT"/>
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="id" value="-2" type="number"/>
+				</KeyValues>
+			</Button>
+			<Button parentKey="noPet" inherits="MJPetListButton">
+				<Size x="233" y="41"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.randomPet" relativePoint="BOTTOMLEFT"/>
+				</Anchors>
+			</Button>
+			<Frame parentKey="petListFrame"  useParentLevel="false" inherits="InsetFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.controlPanel" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.controlButtons" relativePoint="TOPRIGHT"/>
+				</Anchors>
+			</Frame>
+			<ScrollFrame parentKey="listScroll" inherits="HybridScrollFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.petListFrame" x="3" y="-3"/>
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.petListFrame" x="-28" y="3"/>
+				</Anchors>
+				<Frames>
+					<Slider parentKey="scrollBar" inherits="HybridScrollBarTrimTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="4" y="-18"/>
+							<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="4" y="15"/>
+						</Anchors>
+					</Slider>
+				</Frames>
+			</ScrollFrame>
+		</Frames>
+		<Scripts>
+			<OnLoad>
+				self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR:GetRGB())
+				self:onLoad()
+			</OnLoad>
+			<OnEvent method="onEvent"/>
+			<OnShow method="onShow"/>
+			<OnHide>self:Hide()</OnHide>
+		</Scripts>
+	</Frame>
 </Ui>

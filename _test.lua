@@ -14,7 +14,18 @@ test:SetScript("OnEvent", function(self, event, ...)
 		fprint("None:", event, ...)
 	end
 end)
+-- test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
+
+test:RegisterEvent("PET_JOURNAL_PET_DELETED")
+test:RegisterEvent("PET_JOURNAL_PETS_HEALED")
+test:RegisterEvent("PET_JOURNAL_CAGE_FAILED")
+test:RegisterEvent("BATTLE_PET_CURSOR_CLEAR")
+test:RegisterEvent("COMPANION_UPDATE")
+test:RegisterEvent("PET_BATTLE_LEVEL_CHANGED")
+test:RegisterEvent("PET_BATTLE_QUEUE_STATUS")
 test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
+test:RegisterEvent("COMPANION_LEARNED")
+test:RegisterEvent("COMPANION_UNLEARNED")
 
 
 function test:PLAYER_ENTERING_WORLD()
@@ -24,6 +35,7 @@ function test:PLAYER_ENTERING_WORLD()
 		LoadAddOn("Blizzard_Collections")
 	end
 	ShowUIPanel(CollectionsJournal)
+	MountJournal.MountDisplay.InfoButton.petSelectionBtn:Click()
 	if true then return end
 
 	-- journal.navBarBtn:Click()

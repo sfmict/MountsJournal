@@ -49,7 +49,7 @@ end
 
 
 function MJMacroMixin:addLine(text, line)
-	if type(text) == "string" and strlen(text) > 0 then
+	if type(text) == "string" and text:len() > 0 then
 		return strjoin("\n", text, line)
 	else
 		return line
@@ -70,7 +70,7 @@ do
 
 			spell:ContinueOnSpellLoad(function()
 				local subName = spell:GetSpellSubtext()
-				if strlen(subName) > 0 then
+				if subName:len() > 0 then
 					spellIDtoName[spellID].name = format("%s(%s)", name, subName)
 					for _, callback in pairs(spellIDtoName[spellID].callbacks) do
 						callback()
@@ -157,7 +157,7 @@ do
 		local classFunc = classFunc[class or self.class]
 		if type(classFunc) == "function" then
 			local text = classFunc(self, ...)
-			if type(text) == "string" and strlen(text) > 0 then
+			if type(text) == "string" and text:len() > 0 then
 				macro = self:addLine(macro, text)
 			end
 		end

@@ -1,10 +1,11 @@
 local addon, L = ...
 
 
-MJProfilesMixin = {}
+MJProfilesMixin = CreateFromMixins(MountsJournalEventsMixin)
 
 
 function MJProfilesMixin:onLoad()
+	self:initEvents()
 	self.addonName = format("%s_ADDON_", strupper(addon))
 	StaticPopupDialogs[self.addonName.."NEW_PROFILE"] = {
 		text = addon..": "..L["New profile"],
@@ -27,6 +28,7 @@ function MJProfilesMixin:onLoad()
 					ground = {},
 					swimming = {},
 					zoneMounts = {},
+					petForMount = {},
 				}
 				self:setProfile(text)
 			end
@@ -81,6 +83,7 @@ function MJProfilesMixin:createProfile(copy)
 				ground = self.journal.db.ground,
 				swimming = self.journal.db.swimming,
 				zoneMounts = self.journal.db.zoneMounts,
+				petForMount = self.journal.db.petForMount,
 			}
 		end
 	end
@@ -98,12 +101,7 @@ function MJProfilesMixin:setProfile(profileName)
 	if profileName == nil or self.profiles[profileName] then
 		self.charDB.currentProfileName = profileName
 		self:SetText(profileName or DEFAULT)
-		self.mounts:setDB()
-		self.journal:setEditMountsList()
-		self.journal:updateMountsList()
-		MountJournal_UpdateMountList()
-		self.journal:updateMapSettings()
-		self.journal.existingsLists:refresh()
+		self:event("SET_PROFILE")
 	end
 end
 
