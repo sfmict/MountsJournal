@@ -1,6 +1,18 @@
 local _, L = ...
 
 
+hooksecurefunc(C_MountJournal, "SummonByID", function(mountID)
+	local petID = MountsJournal.db.petForMount[mountID]
+	if petID then
+		if type(petID) == "number" then
+			C_PetJournal.SummonRandomPet(petID == -1)
+		elseif C_PetJournal.PetIsSummonable(petID) and C_PetJournal.GetSummonedPetGUID() ~= petID then
+			C_PetJournal.SummonPetByGUID(petID)
+		end
+	end
+end)
+
+
 MJSetPetMixin = {}
 
 
@@ -9,15 +21,26 @@ function MJSetPetMixin:onLoad()
 	self.journal.profilesMenu:on("SET_PROFILE", function() self:refresh() end)
 	_,_, self.randomIcon = GetSpellInfo(243819)
 
-	hooksecurefunc(C_MountJournal, "SummonByID", function(mountID)
-		local petID = self.journal.db.petForMount[mountID]
-		if petID then
-			if type(petID) == "number" then
-				C_PetJournal.SummonRandomPet(petID == -1)
-			elseif C_PetJournal.PetIsSummonable(petID) and C_PetJournal.GetSummonedPetGUID() ~= petID then
-				C_PetJournal.SummonPetByGUID(petID)
+	self:SetScript("OnEnter", function(self)
+		self.highlight:Show()
+		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+		GameTooltip:SetText(L["Summonable Battle Pet"])
+		local description
+		if self.id then
+			if type(self.id) == "number" then
+				description = self.id == -1 and PET_JOURNAL_SUMMON_RANDOM_FAVORITE_PET or L["Summon Random Battle Pet"]
+			else
+				description = self.name
 			end
+		else
+			description = L["No Battle Pet"]
 		end
+		GameTooltip:AddLine(description, 1, 1, 1)
+		GameTooltip:Show()
+	end)
+	self:SetScript("Onleave", function(self)
+		self.highlight:Hide()
+		GameTooltip:Hide()
 	end)
 
 	self.petSelectionList = CreateFrame("FRAME", nil, self, "MJCompanionsPanel")
@@ -35,7 +58,6 @@ end
 function MJSetPetMixin:onClick()
 	self.petSelectionList:SetShown(not self.petSelectionList:IsShown())
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	-- PlaySound(SOUNDKIT.UI_TOYBOX_TABS)
 end
 
 
@@ -44,7 +66,7 @@ function MJSetPetMixin:refresh()
 
 	local selectedMountID = MountJournal.selectedMountID
 	local petID = self.journal.db.petForMount[selectedMountID]
-	fprint("set button refresh", petID)
+	self.id = petID
 
 	if not petID then
 		self.infoFrame:Hide()
@@ -57,15 +79,16 @@ function MJSetPetMixin:refresh()
 		self.infoFrame.favorite:SetShown(petID == -1)
 		self.infoFrame:Show()
 	else
-		local speciesID, customName, level, xp, maxXp, displayID, favorite, name, icon, petType, creatureID, sourceText, description, isWild, canBattle, tradable, unique, obtainable = C_PetJournal.GetPetInfoByPetID(petID)
+		-- speciesID, customName, level, xp, maxXp, displayID, favorite, name, icon, petType, creatureID, sourceText, description, isWild, canBattle, tradable, unique, obtainable = C_PetJournal.GetPetInfoByPetID(petID)
+		local _,_, level, _,_,_, favorite, name, icon, _,_,_,_,_, canBattle = C_PetJournal.GetPetInfoByPetID(petID)
 
-		fprint("icon", icon, C_PetJournal.PetIsSummonable(petID))
 		if icon then
 			local health, _,_,_, rarity = C_PetJournal.GetPetStats(petID)
 
+			self.name = name
 			self.infoFrame.icon:SetTexture(icon)
 			self.infoFrame.qualityBorder:Show()
-			self.infoFrame.qualityBorder:SetVertexColor(ITEM_QUALITY_COLORS[rarity-1].color:GetRGB())
+			self.infoFrame.qualityBorder:SetVertexColor(ITEM_QUALITY_COLORS[rarity - 1].color:GetRGB())
 			self.infoFrame.isDead:SetShown(health <= 0)
 			self.infoFrame.levelBG:SetShown(canBattle)
 			self.infoFrame.level:SetShown(canBattle)
@@ -75,6 +98,7 @@ function MJSetPetMixin:refresh()
 		else
 			self.journal.db.petForMount[selectedMountID] = nil
 			self.infoFrame:Hide()
+			self.id = nil
 		end
 	end
 end
@@ -84,7 +108,6 @@ MJCompanionsPanelMixin = {}
 
 
 function MJCompanionsPanelMixin:onEvent(event, ...)
-	fprint(event)
 	if self[event] then
 		self[event](self, ...)
 	end
@@ -158,18 +181,17 @@ function MJCompanionsPanelMixin:refresh()
 	local numPets = #self.petFiltredList
 	local selectedPetID = self.journal.db.petForMount[MountJournal.selectedMountID]
 
-	fprint(#scrollFrame.buttons, numPets)
 	for i, btn in ipairs(scrollFrame.buttons) do
 		local index = i + offset
-		
+
 		if index <= numPets then
 			local petID = self.petFiltredList[index]
-			-- speciesID, customName, level, xp, maxXp, displayID, favorite, name, icon, petType, creatureID, sourceText, description, isWild, canBattle, tradable, unique, obtainable = C_PetJournal.GetPetInfoByPetID(petID)
-			local speciesID, customName, level, xp, maxXp, displayID, favorite, name, icon, petType, creatureID, sourceText, description, isWild, canBattle, tradable, unique, obtainable = C_PetJournal.GetPetInfoByPetID(petID)
+			local _, customName, level, _,_, displayID, favorite, name, icon, petType, _,_,_,_, canBattle = C_PetJournal.GetPetInfoByPetID(petID)
 			local health, _,_,_, rarity = C_PetJournal.GetPetStats(petID)
 			local petQualityColor = ITEM_QUALITY_COLORS[rarity - 1].color
 
 			btn.id = petID
+			btn.displayID = displayID
 			btn.petTypeIcon:SetTexture(GetPetTypeTexture(petType))
 			btn.name:SetTextColor(petQualityColor:GetRGB())
 			btn.selectedTexture:SetShown(petID == selectedPetID)
@@ -241,7 +263,6 @@ function MJCompanionsPanelMixin:petListUpdate(force)
 	if not force then
 		if self.owned == owned then return end
 		if not self:IsVisible() then
-			fprint("not IsVisible")
 			self:SetScript("OnShow", self.onShow)
 			return
 		end
@@ -251,17 +272,15 @@ function MJCompanionsPanelMixin:petListUpdate(force)
 	self:setPetJournalFiltersBackup()
 
 	wipe(self.petList)
-	for j = 1, 1 do
-		for i = 1, owned do
-			local petID = C_PetJournal.GetPetInfoByIndex(i)
-			if petID then
-				tinsert(self.petList, petID)
-			end
+	for i = 1, owned do
+		local petID = C_PetJournal.GetPetInfoByIndex(i)
+		if petID then
+			tinsert(self.petList, petID)
 		end
 	end
 
+
 	self:restorePetJournalFilters()
-	fprint("petListUpdate", force)
 	self:petListSort()
 	self:updateFilters()
 end

@@ -1091,6 +1091,39 @@
 		</Scripts>
 	</CheckButton>
 
+	<Frame name="MJTooltipModel" parent="UIParent" frameStrata="TOOLTIP" hidden="true">
+		<Size x="150" y="150"/>
+		<Anchors>
+			<Anchor point="TOPLEFT" relativeTo="GameTooltip" relativePoint="BOTTOMLEFT" y="3"/>
+		</Anchors>
+		<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+			<EdgeSize val="16" />
+			<TileSize val="16" />
+			<BackgroundInsets>
+				<AbsInset left="5" right="5" top="5" bottom="5"/>
+			</BackgroundInsets>
+		</Backdrop>
+		<Frames>
+			<PlayerModel parentKey="model">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="8" y="-8" />
+					<Anchor point="BOTTOMRIGHT" x="-8" y="8" />
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						 self:SetRotation(-MODELFRAME_DEFAULT_ROTATION)
+					</OnLoad>
+				</Scripts>
+			 </PlayerModel>
+		</Frames>
+		<Scripts>
+			<Onload>
+				self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR:GetRGB())
+				self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR:GetRGB())
+			</Onload>
+		</Scripts>
+	</Frame>
+
 	<Frame name="MJPetInfo" virtual="true">
 		<Size x="38" y="38"/>
 		<Layers>
@@ -1167,8 +1200,6 @@
 			<OnLoad method="onLoad"/>
 			<OnClick method="onClick"/>
 			<OnShow method="onShow"/>
-			<OnEnter>self.highlight:Show()</OnEnter>
-			<OnLeave>self.highlight:Hide()</OnLeave>
 		</Scripts>
 	</Button>
 
@@ -1188,7 +1219,6 @@
 					<Anchors>
 						<Anchor point="BOTTOMRIGHT" x="-1" y="1"/>
 					</Anchors>
-					<!-- <Size x="90" y="44"/> -->
 					<Size x="75" y="37"/>
 					<TexCoords left="0.00781250" right="0.71093750" top="0.74609375" bottom="0.91796875"/>
 				</Texture>
@@ -1239,6 +1269,21 @@
 				end
 				frame:selectButtonClick(self.id)
 			</OnClick>
+			<OnEnter>
+				if self.displayID then
+					GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+					GameTooltip:SetText(self.subName:IsShown() and self.subName:GetText() or self.name:GetText(), 1, 1, 1)
+					GameTooltip:Show()
+					MJTooltipModel.model:SetDisplayInfo(self.displayID)
+					MJTooltipModel.model:SetDoBlend(false)
+					MJTooltipModel.model:SetAnimation(742, 0)
+					MJTooltipModel:Show()
+				end
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide()
+				MJTooltipModel:Hide()
+			</OnLeave>
 		</Scripts>
 	</Button>
 
@@ -1263,7 +1308,6 @@
 				<Scripts>
 					<OnClick>
 						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-						<!-- PlaySound(SOUNDKIT.UI_TOYBOX_TABS) -->
 						self:GetParent():Hide()
 					</OnClick>
 				</Scripts>
