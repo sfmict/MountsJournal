@@ -240,7 +240,7 @@ function MJDungeonRaidMixin:menuInit(level)
 	info.isNotRadio = true
 	info.notCheckable = true
 
-	for _,v in ipairs(list) do
+	for _, v in ipairs(list) do
 		info.text = v.name
 		if v.list then
 			info.keepShownOnClick = true

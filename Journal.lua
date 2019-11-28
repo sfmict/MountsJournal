@@ -108,6 +108,7 @@ function journal:ADDON_LOADED(addonName)
 		mounts.filters.types = mounts.filters.types or {true, true, true}
 		mounts.filters.selected = mounts.filters.selected or {false, false, false}
 		mounts.filters.factions = mounts.filters.factions or {true, true, true}
+		mounts.filters.pet = mounts.filters.pet or {true, true, true, true}
 		mounts.filters.expansions = mounts.filters.expansions or {}
 		setmetatable(mounts.filters.expansions, {__index = function(self, key)
 			self[key] = true
@@ -1118,8 +1119,12 @@ function journal:filterDropDown_Initialize(level)
 		info.value = 4
 		UIDropDownMenu_AddButton(info, level)
 
-		info.text = L["expansions"]
+		info.text = PET
 		info.value = 5
+		UIDropDownMenu_AddButton(info, level)
+
+		info.text = L["expansions"]
+		info.value = 6
 		UIDropDownMenu_AddButton(info, level)
 	else
 		info.notCheckable = true
@@ -1234,6 +1239,34 @@ function journal:filterDropDown_Initialize(level)
 				info.checked = function() return factions[i] end
 				UIDropDownMenu_AddButton(info, level)
 			end
+		elseif UIDROPDOWNMENU_MENU_VALUE == 5 then -- PET
+			info.text = CHECK_ALL
+			info.func = function()
+				self:setAllFilters("pet", true)
+				self:mountsListFullUpdate()
+				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+			end
+			UIDropDownMenu_AddButton(info, level)
+
+			info.text = UNCHECK_ALL
+			info.func = function()
+				self:setAllFilters("pet", false)
+				self:mountsListFullUpdate()
+				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+			end
+			UIDropDownMenu_AddButton(info, level)
+
+			info.notCheckable = false
+			local pet = mounts.filters.pet
+			for i = 1, #pet do
+				info.text = L["PET_"..i]
+				info.func = function(_,_,_, value)
+					pet[i] = value
+					self:mountsListFullUpdate()
+				end
+				info.checked = function() return pet[i] end
+				UIDropDownMenu_AddButton(info, level)
+			end
 		else -- EXPANSIONS
 			info.text = CHECK_ALL
 			info.func = function()
@@ -1281,6 +1314,7 @@ function journal:clearAllFilters()
 	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
 	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, true)
 	self:setAllFilters("factions", true)
+	self:setAllFilters("pet", true)
 	self:setAllFilters("expansions", true)
 	self:clearBtnFilters()
 end
@@ -1391,7 +1425,7 @@ function journal:updateBtnFilters()
 
 	-- CLEAR BTN FILTERS
 	filtersBar.clear:SetShown(not f.types or not f.selected or n ~= #sources - 1)
-	if not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE) or not f.types or not f.selected or not f.factions or not f.expansions or n ~= #sources - 1 then
+	if not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE) or not f.types or not f.selected or not f.factions or not f.pet or not f.expansions or n ~= #sources - 1 then
 		self.shownPanel:Show()
 		self.leftInset:SetPoint("TOPLEFT", self.shownPanel, "BOTTOMLEFT", 0, -2)
 	else
@@ -1411,12 +1445,13 @@ end
 
 
 function journal:updateMountsList()
-	local types, selected, factions, expansions, list, GetDisplayedMountInfo, GetMountInfoExtraByID = mounts.filters.types, mounts.filters.selected, mounts.filters.factions, mounts.filters.expansions, self.list, self.func.GetDisplayedMountInfo, C_MountJournal.GetMountInfoExtraByID
+	local types, selected, factions, pet, expansions, list, GetDisplayedMountInfo, GetMountInfoExtraByID = mounts.filters.types, mounts.filters.selected, mounts.filters.factions, mounts.filters.pet, mounts.filters.expansions, self.list, self.func.GetDisplayedMountInfo, C_MountJournal.GetMountInfoExtraByID
 	wipe(self.displayedMounts)
 
 	for i = 1, self.func.GetNumDisplayedMounts() do
 		local _,_,_,_,_,_,_,_, mountFaction ,_,_, mountID = GetDisplayedMountInfo(i)
 		local _,_,_,_, mountType = GetMountInfoExtraByID(mountID)
+		local petID = self.db.petForMount[mountID]
 		mountFaction = mountFaction or 2
 
 		-- TYPE
@@ -1431,6 +1466,8 @@ function journal:updateMountsList()
 			or selected[2] and list and util.inTable(list.ground, mountID)
 			-- SWIMMING
 			or selected[3] and list and util.inTable(list.swimming, mountID))
+		-- PET
+		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
 		-- EXPANSIONS
 		and expansions[mounts.mountsDB[mountID]] then
 			tinsert(self.displayedMounts, i)

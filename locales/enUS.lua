@@ -32,6 +32,10 @@ L["factions"] = "Factions"
 L["MOUNT_FACTION_1"] = "Horde"
 L["MOUNT_FACTION_2"] = "Alliance"
 L["MOUNT_FACTION_3"] = "Both"
+L["PET_1"] = "With Random Favorite Pet"
+L["PET_2"] = "With Random Pet"
+L["PET_3"] = "With Pet"
+L["PET_4"] = "Without Pet"
 L["expansions"] = "Expansions"
 L["Map / Model"] = "Map / Model"
 L["Dungeons and Raids"] = "Dungeons and Raids"
@@ -77,7 +81,6 @@ L["Copy current"] = "Copy current"
 L["Delete profile"] = "Delete profile"
 L["A profile with the same name exists."] = "A profile with the same name exists."
 L["By Specialization"] = "By Specialization"
-
 
 setmetatable(L, {__index = function(self, key)
 	self[key] = key or ""

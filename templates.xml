@@ -1332,7 +1332,7 @@
 					<Anchor point="TOPLEFT" relativeKey="$parent.controlButtons" x="3" y="-3"/>
 				</Anchors>
 				<KeyValues>
-					<KeyValue key="id" value="-1" type="number"/>
+					<KeyValue key="id" value="1" type="number"/>
 				</KeyValues>
 			</Button>
 			<Button parentKey="randomPet" inherits="MJPetListButton">
@@ -1341,7 +1341,7 @@
 					<Anchor point="TOPLEFT" relativeKey="$parent.randomFavoritePet" relativePoint="BOTTOMLEFT"/>
 				</Anchors>
 				<KeyValues>
-					<KeyValue key="id" value="-2" type="number"/>
+					<KeyValue key="id" value="2" type="number"/>
 				</KeyValues>
 			</Button>
 			<Button parentKey="noPet" inherits="MJPetListButton">

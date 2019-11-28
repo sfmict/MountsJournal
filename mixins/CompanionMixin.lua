@@ -5,7 +5,7 @@ hooksecurefunc(C_MountJournal, "SummonByID", function(mountID)
 	local petID = MountsJournal.db.petForMount[mountID]
 	if petID then
 		if type(petID) == "number" then
-			C_PetJournal.SummonRandomPet(petID == -1)
+			C_PetJournal.SummonRandomPet(petID == 1)
 		elseif C_PetJournal.PetIsSummonable(petID) and C_PetJournal.GetSummonedPetGUID() ~= petID then
 			C_PetJournal.SummonPetByGUID(petID)
 		end
@@ -28,7 +28,7 @@ function MJSetPetMixin:onLoad()
 		local description
 		if self.id then
 			if type(self.id) == "number" then
-				description = self.id == -1 and PET_JOURNAL_SUMMON_RANDOM_FAVORITE_PET or L["Summon Random Battle Pet"]
+				description = self.id == 1 and PET_JOURNAL_SUMMON_RANDOM_FAVORITE_PET or L["Summon Random Battle Pet"]
 			else
 				description = self.name
 			end
@@ -76,7 +76,7 @@ function MJSetPetMixin:refresh()
 		self.infoFrame.isDead:Hide()
 		self.infoFrame.levelBG:Hide()
 		self.infoFrame.level:Hide()
-		self.infoFrame.favorite:SetShown(petID == -1)
+		self.infoFrame.favorite:SetShown(petID == 1)
 		self.infoFrame:Show()
 	else
 		-- speciesID, customName, level, xp, maxXp, displayID, favorite, name, icon, petType, creatureID, sourceText, description, isWild, canBattle, tradable, unique, obtainable = C_PetJournal.GetPetInfoByPetID(petID)
@@ -101,6 +101,8 @@ function MJSetPetMixin:refresh()
 			self.id = nil
 		end
 	end
+	self.journal:updateMountsList()
+	MountJournal_UpdateMountList()
 end
 
 
@@ -278,7 +280,6 @@ function MJCompanionsPanelMixin:petListUpdate(force)
 			tinsert(self.petList, petID)
 		end
 	end
-
 
 	self:restorePetJournalFilters()
 	self:petListSort()
