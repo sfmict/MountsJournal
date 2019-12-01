@@ -112,24 +112,12 @@ function MJCompanionsPanelMixin:onLoad()
 	self:SetPoint("TOPLEFT", MountJournal, "TOPRIGHT")
 	self:SetPoint("BOTTOMLEFT", MountJournal, "BOTTOMRIGHT")
 
-	local petTypesTextures = {
-		"Interface/Icons/Icon_PetFamily_Humanoid",
-		"Interface/Icons/Icon_PetFamily_Dragon",
-		"Interface/Icons/Icon_PetFamily_Flying",
-		"Interface/Icons/Icon_PetFamily_Undead",
-		"Interface/Icons/Icon_PetFamily_Critter",
-		"Interface/Icons/Icon_PetFamily_Magical",
-		"Interface/Icons/Icon_PetFamily_Elemental",
-		"Interface/Icons/Icon_PetFamily_Beast",
-		"Interface/Icons/Icon_PetFamily_Water",
-		"Interface/Icons/Icon_PetFamily_Mechanical",
-	}
 	self.filtersPanel.buttons = {}
 	self.typeFilter = {}
-	for i, texture in ipairs(petTypesTextures) do
+	for i = 1, C_PetJournal.GetNumPetTypes() do
 		local btn = CreateFrame("CheckButton", nil, self.filtersPanel, "MJFilterButtonSquareTemplate")
 		btn:SetSize(22, 22)
-		btn.icon:SetTexture(texture)
+		btn.icon:SetTexture("Interface/Icons/Icon_PetFamily_"..PET_TYPE_SUFFIX[i])
 		btn.icon:SetSize(20, 20)
 		if i == 1 then
 			btn:SetPoint("LEFT", 3, 0)
@@ -245,7 +233,7 @@ function MJCompanionsPanelMixin:refresh()
 		end
 	end
 
-	HybridScrollFrame_Update(scrollFrame, numPets * 41, scrollFrame:GetHeight())
+	HybridScrollFrame_Update(scrollFrame, scrollFrame.buttonHeight * numPets, scrollFrame:GetHeight())
 end
 
 
@@ -310,10 +298,10 @@ MJCompanionsPanelMixin.PET_JOURNAL_LIST_UPDATE = MJCompanionsPanelMixin.petListU
 
 
 function MJCompanionsPanelMixin:petListSort()
-	local C_PetJournal = C_PetJournal
+	local GetPetInfoByPetID = C_PetJournal.GetPetInfoByPetID
 	sort(self.petList, function(p1, p2)
-		local _,_, level1, _,_,_, favorite1, name1 = C_PetJournal.GetPetInfoByPetID(p1)
-		local _,_, level2, _,_,_, favorite2, name2 = C_PetJournal.GetPetInfoByPetID(p2)
+		local _,_, level1, _,_,_, favorite1, name1 = GetPetInfoByPetID(p1)
+		local _,_, level2, _,_,_, favorite2, name2 = GetPetInfoByPetID(p2)
 
 		if favorite1 and not favorite2
 		or favorite1 == favorite2 and (level1 > level2
