@@ -353,7 +353,7 @@ function journal:ADDON_LOADED(addonName)
 		shownPanel.text:SetText(L["Shown:"])
 
 		shownPanel.count = shownPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-		shownPanel.count:SetPoint("LEFT", shownPanel.text ,"RIGHT", 2, 0)
+		shownPanel.count:SetPoint("LEFT", shownPanel.text, "RIGHT", 2, 0)
 
 		shownPanel.clear = CreateFrame("BUTTON", nil, shownPanel, "MJClearButtonTemplate")
 		shownPanel.clear:SetPoint("RIGHT", -5, 0)
@@ -364,16 +364,10 @@ function journal:ADDON_LOADED(addonName)
 		scrollFrame.scrollBar:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", 1, -12)
 
 		-- FILTERS BAR
-		local filtersBar = CreateFrame("FRAME", nil, filtersPanel)
+		local filtersBar = CreateFrame("FRAME", nil, filtersPanel, "MJFilterPanelTemplate")
 		self.filtersBar = filtersBar
 		filtersBar:SetSize(259, 35)
 		filtersBar:SetPoint("TOP", 0, -46)
-		filtersBar:SetBackdrop({
-			edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
-			tile = true,
-			edgeSize = 16,
-		})
-		filtersBar:SetBackdropBorderColor(0.6, 0.6, 0.6)
 		filtersBar.types, filtersBar.selected, filtersBar.sources = setTabs(filtersBar, "types", "selected", "sources")
 
 		-- FILTERS CLEAR
@@ -383,7 +377,7 @@ function journal:ADDON_LOADED(addonName)
 
 		-- FILTERS BUTTONS
 		local function CreateButtonFilter(id, parent, width, height, texture, tooltip)
-			local btn = CreateFrame("CheckButton", nil, parent)
+			local btn = CreateFrame("CheckButton", nil, parent, width == height and "MJFilterButtonSquareTemplate" or "MJFilterButtonRectangleTemplate")
 			btn.id = id
 			btn:SetSize(width, height)
 			if id == 1 then
@@ -394,50 +388,18 @@ function journal:ADDON_LOADED(addonName)
 			end
 			tinsert(parent.childs, btn)
 
-			if width ~= height then
-				btn:SetHighlightTexture(texPath.."button")
-				btn:SetCheckedTexture("Interface/BUTTONS/ListButtons")
-				local hightlight, checked = btn:GetRegions()
-				hightlight:SetAlpha(0.8)
-				hightlight:SetTexCoord(0.00390625, 0.8203125, 0.19140625, 0.37109375)
-				checked:SetAlpha(0.8)
-				checked:SetTexCoord(0.00390625, 0.8203125, 0.37890625, 0.55859375)
-			else
-				btn:SetHighlightTexture("Interface/Buttons/ButtonHilight-Square")
-				btn:SetCheckedTexture("Interface/Buttons/CheckButtonHilight")
-				local hightlight, checked = btn:GetRegions()
-				hightlight:SetBlendMode("ADD")
-				checked:SetAlpha(0.6)
-				checked:SetBlendMode("ADD")
-			end
-
-			btn:SetBackdrop({
-				edgeFile = texPath.."border",
-				tile = true,
-				edgeSize = 8,
-			})
-			btn:SetBackdropBorderColor(0.4, 0.4, 0.4)
-
-			btn.icon = btn:CreateTexture(nil, "OVERLAY")
 			btn.icon:SetTexture(texture.path)
 			btn.icon:SetSize(texture.width, texture.height)
-			btn.icon:SetPoint("CENTER")
 			if texture.color then btn.icon:SetVertexColor(unpack(texture.color)) end
 			if texture.texCoord then btn.icon:SetTexCoord(unpack(texture.texCoord)) end
 
-			btn:SetScript("OnMouseDown", function(btn)
-				btn.icon:SetScale(.9)
-			end)
-			btn:SetScript("OnMouseUp", function(btn)
-				btn.icon:SetScale(1)
-			end)
 			btn:SetScript("OnEnter", function(btn)
 				GameTooltip:SetOwner(btn, "ANCHOR_BOTTOM")
 				GameTooltip:SetText(tooltip)
 				GameTooltip:Show()
 			end)
 			btn:SetScript("OnLeave", function()
-				GameTooltip_Hide()
+				GameTooltip:Hide()
 			end)
 			btn:SetScript("OnClick", function(btn)
 				self:setBtnFilters(btn:GetParent():GetParent().id)
@@ -508,7 +470,7 @@ function journal:ADDON_LOADED(addonName)
 		infoButton.Name:SetPoint("LEFT", infoButton.Icon, "RIGHT", 20, 0)
 
 		local mountDescriptionToggle = CreateFrame("CheckButton", nil, infoButton, "MJArrowToggle")
-		mountDescriptionToggle:SetPoint("LEFT", infoButton.Icon, "RIGHT" , -2, 0)
+		mountDescriptionToggle:SetPoint("LEFT", infoButton.Icon, "RIGHT", -2, 0)
 		mountDescriptionToggle:SetSize(20, 40)
 		mountDescriptionToggle.vertical = true
 		mountDescriptionToggle:SetChecked(mounts.config.mountDescriptionToggle)
@@ -1042,10 +1004,10 @@ do
 		if btn == "RightButton" then return end
 
 		if lastMountIndex == index and GetTime() - lastMountClick < 0.4 then
-			local _,_,_, active, _,_,_,_,_,_, isCollected, mountID = C_MountJournal.GetDisplayedMountInfo(index)
+			local _,_,_, active, isUsable, _,_,_,_,_,_, mountID = C_MountJournal.GetDisplayedMountInfo(index)
 			if active then
 				C_MountJournal.Dismiss()
-			elseif isCollected then
+			elseif isUsable then
 				C_MountJournal.SummonByID(mountID)
 			end
 		else
@@ -1410,6 +1372,7 @@ function journal:updateBtnFilters()
 	end
 
 	if n == #sources - 1 then
+		f.sources = true
 		for _, btn in ipairs(filtersBar.sources.childs) do
 			btn:SetChecked(false)
 			btn.icon:SetDesaturated(nil)
@@ -1424,8 +1387,8 @@ function journal:updateBtnFilters()
 	end
 
 	-- CLEAR BTN FILTERS
-	filtersBar.clear:SetShown(not f.types or not f.selected or n ~= #sources - 1)
-	if not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE) or not f.types or not f.selected or not f.factions or not f.pet or not f.expansions or n ~= #sources - 1 then
+	filtersBar.clear:SetShown(not f.types or not f.selected or not f.sources)
+	if not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE) or not f.types or not f.selected or not f.factions or not f.pet or not f.expansions or not f.sources then
 		self.shownPanel:Show()
 		self.leftInset:SetPoint("TOPLEFT", self.shownPanel, "BOTTOMLEFT", 0, -2)
 	else
@@ -1449,9 +1412,9 @@ function journal:updateMountsList()
 	wipe(self.displayedMounts)
 
 	for i = 1, self.func.GetNumDisplayedMounts() do
-		local _,_,_,_,_,_,_,_, mountFaction ,_,_, mountID = GetDisplayedMountInfo(i)
+		local _,spellID,_,_,_,_,_,_, mountFaction, _,_, mountID = GetDisplayedMountInfo(i)
 		local _,_,_,_, mountType = GetMountInfoExtraByID(mountID)
-		local petID = self.db.petForMount[mountID]
+		local petID = self.db.petForMount[spellID]
 		mountFaction = mountFaction or 2
 
 		-- TYPE

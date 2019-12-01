@@ -1,10 +1,17 @@
 <Ui>
-	<Script file="mixins\MacroMixin.lua"/>
-	<Script file="mixins\NavBarMixin.lua"/>
-	<Script file="mixins\WorldMapMixin.lua"/>
-	<Script file="mixins\ExistingsListsMixin.lua"/>
-	<Script file="mixins\ProfilesMixin.lua"/>
-	<Script file="mixins\CompanionMixin.lua"/>
+	<Script file="mixins/MacroMixin.lua"/>
+	<Script file="mixins/NavBarMixin.lua"/>
+	<Script file="mixins/WorldMapMixin.lua"/>
+	<Script file="mixins/ExistingsListsMixin.lua"/>
+	<Script file="mixins/ProfilesMixin.lua"/>
+	<Script file="mixins/CompanionMixin.lua"/>
+
+	<Frame name="MJFilterPanelTemplate" virtual="true">
+		<Backdrop edgeFile="Interface/Tooltips/UI-Tooltip-Border" tile="true">
+			<EdgeSize val="16"/>
+			<BorderColor r=".6" g=".6" b=".6"/>
+		</Backdrop>
+	</Frame>
 
 	<Button name="MJTabTemplate" virtual="true">
 		<Size x="83" y="24"/>
@@ -151,6 +158,40 @@
 		</Scripts>
 	</Button>
 
+	<Button name="MJFilterButtonTemplate" virtual="true">
+		<Backdrop edgeFile="Interface/AddOns/MountsJournal/textures/border" tile="true">
+			<EdgeSize val="8"/>
+			<BorderColor r=".4" g=".4" b=".4"/>
+		</Backdrop>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="icon">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnMouseDown>self.icon:SetScale(.9)</OnMouseDown>
+			<OnMouseUp>self.icon:SetScale(1)</OnMouseUp>
+		</Scripts>
+	</Button>
+
+	<CheckButton name="MJFilterButtonRectangleTemplate" inherits="MJFilterButtonTemplate" virtual="true">
+		<HighlightTexture parentKey="highlight" file="Interface/AddOns/MountsJournal/textures/button" alpha=".8">
+			<TexCoords left="0.00390625" right="0.8203125" top="0.19140625" bottom="0.37109375"/>
+		</HighlightTexture>
+		<CheckedTexture file="Interface/BUTTONS/ListButtons" alpha=".8">
+			<TexCoords left="0.00390625" right="0.8203125" top="0.37890625" bottom="0.55859375"/>
+		</CheckedTexture>
+	</CheckButton>
+
+	<CheckButton name="MJFilterButtonSquareTemplate" inherits="MJFilterButtonTemplate" virtual="true">
+		<HighlightTexture parentKey="highlight" file="Interface/Buttons/ButtonHilight-Square" alphaMode="ADD"/>
+		<CheckedTexture file="Interface/Buttons/CheckButtonHilight" alphaMode="ADD" alpha=".6"/>
+	</CheckButton>
+
 	<Frame name="MJOptionsPanel" virtual="true">
 		<Backdrop bgFile="Interface/ChatFrame/ChatFrameBackground" edgeFile="Interface/Tooltips/UI-Tooltip-border" tile="true">
 			<EdgeSize val="14"/>
@@ -199,7 +240,7 @@
 		<Size x="167" y="28"/>
 		<Layers>
 			<Layer level="ARTWORK">
-				<Texture parentKey="icon" file="Interface\Glues\CharacterCreate\UI-CharacterCreate-Classes">
+				<Texture parentKey="icon" file="Interface/Glues/CharacterCreate/UI-CharacterCreate-Classes">
 					<Size x="26" y="26"/>
 					<Anchors>
 						<Anchor point="LEFT" x="1" y="0"/>
@@ -215,7 +256,7 @@
 				</FontString>
 			</Layer>
 			<Layer level="BACKGROUND">
-				<Texture parentKey="check" file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD" alpha="0.6" hidden="true">
+				<Texture parentKey="check" file="Interface/QuestFrame/UI-QuestLogTitleHighlight" alphaMode="ADD" alpha="0.6" hidden="true">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="27" y="0" />
 						<Anchor point="BOTTOMRIGHT" x="0" y="0" />
@@ -223,7 +264,7 @@
 				</Texture>
 			</Layer>
 		</Layers>
-		<HighlightTexture parentKey="highlight" file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD" alpha="0.3">
+		<HighlightTexture parentKey="highlight" file="Interface/QuestFrame/UI-QuestLogTitleHighlight" alphaMode="ADD" alpha="0.3">
 			<Anchors>
 				<Anchor point="TOPLEFT" x="27" y="0" />
 				<Anchor point="BOTTOMRIGHT" x="0" y="0" />
@@ -233,7 +274,7 @@
 
 	<Frame name="MJMacroFrame" virtual="true">
 		<Size x="395" y="150"/>
-		<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+		<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background" edgeFile="Interface/Tooltips/UI-Tooltip-Border" tile="true">
 			<EdgeSize val="16"/>
 			<TileSize val="16"/>
 			<BackgroundInsets left="5" right="5" top="5" bottom="5"/>
@@ -343,21 +384,21 @@
 		<Size x="80" y="28"/>
 		<Layers>
 			<Layer level="OVERLAY" textureSubLevel="2">
-				<Texture file="Interface\HelpFrame\CS_HelpTextures" parentKey="arrowUp">
+				<Texture file="Interface/HelpFrame/CS_HelpTextures" parentKey="arrowUp">
 					<Size x="21" y="28"/>
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="0"/>
 					</Anchors>
 					<TexCoords left="0.88867188" right="0.92968750" top="0.29687500" bottom="0.53125000"/>
 				</Texture>
-				<Texture file="Interface\HelpFrame\CS_HelpTextures" parentKey="arrowDown">
+				<Texture file="Interface/HelpFrame/CS_HelpTextures" parentKey="arrowDown">
 					<Size x="21" y="28"/>
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="0"/>
 					</Anchors>
 					<TexCoords left="0.63281250" right="0.67382813" top="0.75781250" bottom="0.99218750"/>
 				</Texture>
-				<Texture file="Interface\HelpFrame\CS_HelpTextures" parentKey="selected" hidden="true">
+				<Texture file="Interface/HelpFrame/CS_HelpTextures" parentKey="selected" hidden="true">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="0" y="0"/>
 						<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
@@ -374,7 +415,7 @@
 				</Anchors>
 				<Layers>
 					<Layer level="OVERLAY">
-						<Texture parentKey="Art" file="Interface\Buttons\SquareButtonTextures">
+						<Texture parentKey="Art" file="Interface/Buttons/SquareButtonTextures">
 							<Size x="12" y="12"/>
 							<Anchors>
 								<Anchor point="CENTER" x="0" y="-1"/>
@@ -383,19 +424,19 @@
 						</Texture>
 					</Layer>
 				</Layers>
-				<NormalTexture file="Interface\Buttons\UI-SquareButton-Up" parentKey="NormalTexture" alpha="0">
+				<NormalTexture file="Interface/Buttons/UI-SquareButton-Up" parentKey="NormalTexture" alpha="0">
 					<Size x="30" y="30"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
 				</NormalTexture>
-				<PushedTexture file="Interface\Buttons\UI-SquareButton-Down" parentKey="PushedTexture" alpha="0">
+				<PushedTexture file="Interface/Buttons/UI-SquareButton-Down" parentKey="PushedTexture" alpha="0">
 					<Size x="30" y="30"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
 				</PushedTexture>
-				<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD">
+				<HighlightTexture file="Interface/Buttons/UI-Common-MouseHilight" alphaMode="ADD">
 					<Size x="30" y="30"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -446,13 +487,13 @@
 				self.arrowUp:Show()
 			</OnDisable>
 		</Scripts>
-		<NormalTexture file="Interface\HelpFrame\CS_HelpTextures_Tile" horizTile="true">
+		<NormalTexture file="Interface/HelpFrame/CS_HelpTextures_Tile" horizTile="true">
 			<TexCoords left="0.00000000" right="1.00000000" top="0.06250000" bottom="0.12109375"/>
 		</NormalTexture>
-		<PushedTexture file="Interface\HelpFrame\CS_HelpTextures_Tile" horizTile="true">
+		<PushedTexture file="Interface/HelpFrame/CS_HelpTextures_Tile" horizTile="true">
 			<TexCoords left="0.00000000" right="1.00000000" top="0.12500000" bottom="0.18359375"/>
 		</PushedTexture>
-		<HighlightTexture file="Interface\HelpFrame\CS_HelpTextures" alphaMode="ADD">
+		<HighlightTexture file="Interface/HelpFrame/CS_HelpTextures" alphaMode="ADD">
 			<TexCoords left="0.00195313" right="0.25195313" top="0.65625000" bottom="0.92187500"/>
 		</HighlightTexture>
 		<ButtonText inherits="GameFontNormal" justifyH="LEFT" parentKey="text">
@@ -508,13 +549,13 @@
 						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 					</OnClick>
 				</Scripts>
-				<NormalTexture file="Interface\HelpFrame\CS_HelpTextures">
+				<NormalTexture file="Interface/HelpFrame/CS_HelpTextures">
 					<TexCoords left="0.54296875" right="0.62890625" top="0.75781250" bottom="0.99218750"/>
 				</NormalTexture>
-				<PushedTexture file="Interface\HelpFrame\CS_HelpTextures">
+				<PushedTexture file="Interface/HelpFrame/CS_HelpTextures">
 					<TexCoords left="0.45312500" right="0.53906250" top="0.75781250" bottom="0.99218750"/>
 				</PushedTexture>
-				<HighlightTexture file="Interface\HelpFrame\CS_HelpTextures" alphaMode="ADD" alpha="0.4">
+				<HighlightTexture file="Interface/HelpFrame/CS_HelpTextures" alphaMode="ADD" alpha="0.4">
 					<TexCoords left="0.54296875" right="0.62890625" top="0.75781250" bottom="0.99218750"/>
 				</HighlightTexture>
 			</Button>
@@ -522,7 +563,7 @@
 				<Size x="128" y="24"/>
 				<Layers>
 					<Layer level="OVERLAY">
-						<Texture file="Interface\Common\ShadowOverlay-Left">
+						<Texture file="Interface/Common/ShadowOverlay-Left">
 							<Size x="30" y="30"/>
 							<Anchors>
 								<Anchor point="LEFT" x="0" y="0"/>
@@ -546,11 +587,11 @@
 						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 					</OnClick>
 				</Scripts>
-				<NormalTexture file="Interface\HelpFrame\CS_HelpTextures">
+				<NormalTexture file="Interface/HelpFrame/CS_HelpTextures">
 				</NormalTexture>
-				<PushedTexture file="Interface\HelpFrame\CS_HelpTextures">
+				<PushedTexture file="Interface/HelpFrame/CS_HelpTextures">
 				</PushedTexture>
-				<HighlightTexture file="Interface\HelpFrame\CS_HelpTextures" alphaMode="ADD">
+				<HighlightTexture file="Interface/HelpFrame/CS_HelpTextures" alphaMode="ADD">
 				</HighlightTexture>
 				<ButtonText inherits="GameFontNormal" justifyH="LEFT" parentKey="text">
 					<Size x="0" y="12"/>
@@ -570,7 +611,7 @@
 		<Size x="48" y="32"/>
 		<Layers>
 			<Layer level="ARTWORK">
-				<Texture file="Interface\QuestFrame\UI-QuestMap_Button" parentKey="texture">
+				<Texture file="Interface/QuestFrame/UI-QuestMap_Button" parentKey="texture">
 					<Size x="48" y="32"/>
 					<Anchors>
 						<Anchor point="RIGHT"/>
@@ -579,7 +620,7 @@
 				</Texture>
 			</Layer>
 			<Layer level="HIGHLIGHT">
-				<Texture file="Interface\BUTTONS\ButtonHilight-Square" alphaMode="ADD">
+				<Texture file="Interface/BUTTONS/ButtonHilight-Square" alphaMode="ADD">
 					<Size x="36" y="25"/>
 					<Anchors>
 						<Anchor point="RIGHT" x="-6" y="0"/>
@@ -651,7 +692,7 @@
 	<Button name="MJMenuButtonStreatchTemplate" inherits="UIMenuButtonStretchTemplate" virtual="true">
 		<Layers>
 			<Layer level="ARTWORK">
-				<Texture parentKey="Icon" file="Interface\ChatFrame\ChatFrameExpandArrow">
+				<Texture parentKey="Icon" file="Interface/ChatFrame/ChatFrameExpandArrow">
 					<Size x="10" y="12"/>
 					<Anchors>
 						<Anchor point="RIGHT" relativeKey="$parent.Right" relativePoint="RIGHT" x="-5"/>
@@ -818,7 +859,7 @@
 	</Frame>
 
 	<Frame name="MJExistingsListsPanelTemplate" enableMouse="true" mixin="MJExistingsListsMixin" hidden="true" virtual="true">
-		<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+		<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background" edgeFile="Interface/Tooltips/UI-Tooltip-Border" tile="true">
 			<EdgeSize val="16"/>
 			<TileSize val="16"/>
 			<BackgroundInsets left="4" right="4" top="4" bottom="4"/>
@@ -856,7 +897,7 @@
 			</Anchors>
 		</ButtonText>
 		<NormalFont style="GameFontHighlight"/>
-		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+		<HighlightTexture file="Interface/QuestFrame/UI-QuestLogTitleHighlight" alphaMode="ADD">
 			<Anchors>
 				<Anchor point="TOPLEFT" x="20" y="1"/>
 				<Anchor point="BOTTOMRIGHT" x="0" y="1"/>
@@ -879,7 +920,7 @@
 				</Anchors>
 				<layers>
 					<Layer level="ARTWORK">
-						<Texture parentKey="plusMinus" file="Interface\Buttons\UI-MinusButton-UP" setAllPoints="true"/>
+						<Texture parentKey="plusMinus" file="Interface/Buttons/UI-MinusButton-UP" setAllPoints="true"/>
 					</Layer>
 				</layers>
 			</Frame>
@@ -890,7 +931,7 @@
 			</Anchors>
 		</ButtonText>
 		<NormalFont style="GameFontNormal"/>
-		<HighlightTexture file="Interface\QuestFrame\UI-QuestLogTitleHighlight" alphaMode="ADD">
+		<HighlightTexture file="Interface/QuestFrame/UI-QuestLogTitleHighlight" alphaMode="ADD">
 			<Anchors>
 				<Anchor point="TOPLEFT" x="0" y="1"/>
 				<Anchor point="BOTTOMRIGHT" x="0" y="1"/>
@@ -911,7 +952,7 @@
 		<Size x="18" y="18"/>
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture file="Interface\Common\UI-ModelControlPanel" parentKey="bg">
+				<Texture file="Interface/Common/UI-ModelControlPanel" parentKey="bg">
 					<Size x="16" y="16"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -920,7 +961,7 @@
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
-				<Texture file="Interface\Common\UI-ModelControlPanel" parentKey="icon">
+				<Texture file="Interface/Common/UI-ModelControlPanel" parentKey="icon">
 					<Size x="16" y="16"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -929,7 +970,7 @@
 				</Texture>
 			</Layer>
 			<Layer level="HIGHLIGHT">
-				<Texture file="Interface\Common\UI-ModelControlPanel">
+				<Texture file="Interface/Common/UI-ModelControlPanel">
 					<Size x="16" y="16"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -957,21 +998,21 @@
 		<Size x="149" y="23"/>
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture parentKey="left" file="Interface\Common\UI-ModelControlPanel">
+				<Texture parentKey="left" file="Interface/Common/UI-ModelControlPanel">
 					<Size x="23" y="23"/>
 					<Anchors>
 						<Anchor point="LEFT" x="0" y="0"/>
 					</Anchors>
 					<TexCoords left="0.40625000" right="0.76562500" top="0.42968750" bottom="0.60937500"/>
 				</Texture>
-				<Texture parentKey="right" file="Interface\Common\UI-ModelControlPanel">
+				<Texture parentKey="right" file="Interface/Common/UI-ModelControlPanel">
 					<Size x="23" y="23"/>
 					<Anchors>
 						<Anchor point="RIGHT" x="0" y="0"/>
 					</Anchors>
 					<TexCoords left="0.01562500" right="0.37500000" top="0.42968750" bottom="0.60937500"/>
 				</Texture>
-				<Texture file="Interface\Common\UI-ModelControlPanel">
+				<Texture file="Interface/Common/UI-ModelControlPanel">
 					<Size x="32" y="23"/>
 					<Anchors>
 						<Anchor point="LEFT" relativeKey="$parent.left" relativePoint="RIGHT" x="0" y="0"/>
@@ -1078,8 +1119,8 @@
 				</Texture>
 			</Layer>
 		</Layers>
-		<HighlightTexture alphaMode="ADD" file="Interface\Minimap\UI-Minimap-ZoomButton-Highlight"/>
-		<CheckedTexture file="Interface\Minimap\ping\ping4" alphaMode="ADD" alpha=".6">
+		<HighlightTexture alphaMode="ADD" file="Interface/Minimap/UI-Minimap-ZoomButton-Highlight"/>
+		<CheckedTexture file="Interface/Minimap/ping/ping4" alphaMode="ADD" alpha=".6">
 			<Size x="77" y="77"/>
 			<Anchors>
 				<Anchor point="CENTER"/>
@@ -1096,7 +1137,7 @@
 		<Anchors>
 			<Anchor point="TOPLEFT" relativeTo="GameTooltip" relativePoint="BOTTOMLEFT" y="3"/>
 		</Anchors>
-		<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+		<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background" edgeFile="Interface/Tooltips/UI-Tooltip-Border" tile="true">
 			<EdgeSize val="16" />
 			<TileSize val="16" />
 			<BackgroundInsets>
@@ -1131,10 +1172,10 @@
 				<Texture parentKey="icon" setAllPoints="true"/>
 			</Layer>
 			<Layer level="ARTWORK" textureSubLevel="1">
-				<Texture parentKey="qualityBorder" setAllPoints="true" file="Interface\Common\WhiteIconFrame"/>
+				<Texture parentKey="qualityBorder" setAllPoints="true" file="Interface/Common/WhiteIconFrame"/>
 			</Layer>
 			<Layer level="OVERLAY">
-				<Texture parentKey="isDead" file="Interface\PetBattles\DeadPetIcon" hidden="true" setAllPoints="true"/>
+				<Texture parentKey="isDead" file="Interface/PetBattles/DeadPetIcon" hidden="true" setAllPoints="true"/>
 			</Layer>
 			<Layer level="OVERLAY" textureSubLevel="2">
 				<Texture parentKey="levelBG" atlas="PetJournal-LevelBubble" useAtlasSize="true" hidden="true">
@@ -1161,7 +1202,7 @@
 		<Size x="38" y="38"/>
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture file="Interface\PaperDoll\UI-Backpack-EmptySlot">
+				<Texture file="Interface/PaperDoll/UI-Backpack-EmptySlot">
 					<Size x="36" y="36"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -1169,7 +1210,7 @@
 				</Texture>
 			</Layer>
 			<Layer level="BORDER">
-				<Texture parentKey="border" file="Interface\Buttons\UI-Quickslot2">
+				<Texture parentKey="border" file="Interface/Buttons/UI-Quickslot2">
 					<Size x="65" y="65"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -1177,7 +1218,7 @@
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
-				<Texture file="Interface\Buttons\SquareButtonTextures" parentKey="arrow">
+				<Texture file="Interface/Buttons/SquareButtonTextures" parentKey="arrow">
 					<Size x="12" y="12" /> 
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="RIGHT" x="-3"/>
@@ -1186,7 +1227,7 @@
 				</Texture>
 			</Layer>
 			<Layer level="OVERLAY" textureSubLevel="1">
-				<Texture parentKey="highlight" file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD" setAllPoints="true" hidden="true"/>
+				<Texture parentKey="highlight" file="Interface/Buttons/ButtonHilight-Square" alphaMode="ADD" setAllPoints="true" hidden="true"/>
 			</Layer>
 		</Layers>
 		<Frames>
@@ -1288,7 +1329,7 @@
 	</Button>
 
 	<Frame name="MJCompanionsPanel" mixin="MJCompanionsPanelMixin" enableMouse="true" hidden="true" virtual="true">
-		<Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+		<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background" edgeFile="Interface/Tooltips/UI-Tooltip-Border" tile="true">
 			<EdgeSize val="16"/>
 			<TileSize val="16"/>
 			<BackgroundInsets left="4" right="4" top="4" bottom="4"/>
@@ -1319,6 +1360,18 @@
 					<Anchor point="TOPRIGHT" relativeKey="$parent.closeButton" relativePoint="TOPLEFT" x="4"/>
 				</Anchors>
 			</EditBox>
+			<Frame parentKey="filtersPanel" useParentLevel="false" inherits="InsetFrameTemplate">
+				<Size y="27"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.controlPanel" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPRIGHT" relativeKey="$parent.controlPanel" relativePoint="BOTTOMRIGHT"/>
+				</Anchors>
+			</Frame>
+			<Button parentKey="clearFilters" inherits="MJClearButtonTemplate" hidden="true">
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.filtersPanel" x="-2"/>
+				</Anchors>
+			</Button>
 			<Frame parentKey="controlButtons" useParentLevel="false" inherits="InsetFrameTemplate">
 				<Size y="129"/>
 				<Anchors>
@@ -1352,7 +1405,7 @@
 			</Button>
 			<Frame parentKey="petListFrame"  useParentLevel="false" inherits="InsetFrameTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.controlPanel" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.filtersPanel" relativePoint="BOTTOMLEFT"/>
 					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.controlButtons" relativePoint="TOPRIGHT"/>
 				</Anchors>
 			</Frame>

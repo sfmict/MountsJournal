@@ -142,11 +142,38 @@ function mounts:ADDON_LOADED(addonName)
 		-- SPEC CHANGED
 		self:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
 
+		-- PET USABLE
+		self:RegisterEvent("PLAYER_REGEN_ENABLED")
+		self:RegisterEvent("PLAYER_REGEN_DISABLED")
+		self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
+
 		self:setDB()
 		self:setModifier(self.config.modifier)
 		self:setHandleWaterJump(self.config.waterJump)
 		self:setHerbMount()
 		self:init()
+	end
+end
+
+
+function mounts:PLAYER_REGEN_DISABLED()
+	self:UnregisterEvent("UNIT_SPELLCAST_START")
+end
+
+
+function mounts:PLAYER_REGEN_ENABLED()
+	self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
+end
+
+
+function mounts:UNIT_SPELLCAST_START(_,_, spellID)
+	local petID = self.db.petForMount[spellID]
+	if petID then
+		if type(petID) == "number" then
+			C_PetJournal.SummonRandomPet(petID == 1)
+		elseif C_PetJournal.PetIsSummonable(petID) and C_PetJournal.GetSummonedPetGUID() ~= petID then
+			C_PetJournal.SummonPetByGUID(petID)
+		end
 	end
 end
 

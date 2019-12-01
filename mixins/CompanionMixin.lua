@@ -1,18 +1,6 @@
 local _, L = ...
 
 
-hooksecurefunc(C_MountJournal, "SummonByID", function(mountID)
-	local petID = MountsJournal.db.petForMount[mountID]
-	if petID then
-		if type(petID) == "number" then
-			C_PetJournal.SummonRandomPet(petID == 1)
-		elseif C_PetJournal.PetIsSummonable(petID) and C_PetJournal.GetSummonedPetGUID() ~= petID then
-			C_PetJournal.SummonPetByGUID(petID)
-		end
-	end
-end)
-
-
 MJSetPetMixin = {}
 
 
@@ -38,7 +26,7 @@ function MJSetPetMixin:onLoad()
 		GameTooltip:AddLine(description, 1, 1, 1)
 		GameTooltip:Show()
 	end)
-	self:SetScript("Onleave", function(self)
+	self:SetScript("OnLeave", function(self)
 		self.highlight:Hide()
 		GameTooltip:Hide()
 	end)
@@ -64,8 +52,8 @@ end
 function MJSetPetMixin:refresh()
 	if not self.refreshEnabled then return end
 
-	local selectedMountID = MountJournal.selectedMountID
-	local petID = self.journal.db.petForMount[selectedMountID]
+	local selectedSpellID = MountJournal.selectedSpellID
+	local petID = self.journal.db.petForMount[selectedSpellID]
 	self.id = petID
 
 	if not petID then
@@ -96,7 +84,7 @@ function MJSetPetMixin:refresh()
 			self.infoFrame.favorite:SetShown(favorite)
 			self.infoFrame:Show()
 		else
-			self.journal.db.petForMount[selectedMountID] = nil
+			self.journal.db.petForMount[selectedSpellID] = nil
 			self.infoFrame:Hide()
 			self.id = nil
 		end
@@ -124,6 +112,39 @@ function MJCompanionsPanelMixin:onLoad()
 	self:SetPoint("TOPLEFT", MountJournal, "TOPRIGHT")
 	self:SetPoint("BOTTOMLEFT", MountJournal, "BOTTOMRIGHT")
 
+	local petTypesTextures = {
+		"Interface/Icons/Icon_PetFamily_Humanoid",
+		"Interface/Icons/Icon_PetFamily_Dragon",
+		"Interface/Icons/Icon_PetFamily_Flying",
+		"Interface/Icons/Icon_PetFamily_Undead",
+		"Interface/Icons/Icon_PetFamily_Critter",
+		"Interface/Icons/Icon_PetFamily_Magical",
+		"Interface/Icons/Icon_PetFamily_Elemental",
+		"Interface/Icons/Icon_PetFamily_Beast",
+		"Interface/Icons/Icon_PetFamily_Water",
+		"Interface/Icons/Icon_PetFamily_Mechanical",
+	}
+	self.filtersPanel.buttons = {}
+	self.typeFilter = {}
+	for i, texture in ipairs(petTypesTextures) do
+		local btn = CreateFrame("CheckButton", nil, self.filtersPanel, "MJFilterButtonSquareTemplate")
+		btn:SetSize(22, 22)
+		btn.icon:SetTexture(texture)
+		btn.icon:SetSize(20, 20)
+		if i == 1 then
+			btn:SetPoint("LEFT", 3, 0)
+		else
+			btn:SetPoint("LEFT", self.filtersPanel.buttons[i - 1], "RIGHT")
+		end
+		btn:SetScript("OnClick", function()
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+			self:updateTypeFilter()
+		end)
+		self.filtersPanel.buttons[i] = btn
+		self.typeFilter[i] = true
+	end
+	self.clearFilters:SetScript("OnClick", function() self:ClearTypeFilter() end)
+
 	local _,_, spellIcon = GetSpellInfo(243819)
 	self.randomFavoritePet.infoFrame.favorite:Show()
 	self.randomFavoritePet.infoFrame.icon:SetTexture(spellIcon)
@@ -150,7 +171,6 @@ function MJCompanionsPanelMixin:onLoad()
 		SearchBoxTemplate_OnTextChanged(searchBox)
 		self:updateFilters()
 	end)
-	self.searchBox:SetScript("OnHide", function(self) self:SetText("") end)
 
 	self.listScroll.update = function() self:refresh() end
 	self.listScroll.scrollBar.doNotHide = true
@@ -163,14 +183,13 @@ end
 function MJCompanionsPanelMixin:onShow()
 	self:SetScript("OnShow", function(self)
 		self:petListSort()
-		self:updateFilters()
 	end)
 	C_Timer.After(0, function() self:petListUpdate(true) end)
 end
 
 
 function MJCompanionsPanelMixin:selectButtonClick(id)
-	self.journal.db.petForMount[MountJournal.selectedMountID] = id
+	self.journal.db.petForMount[MountJournal.selectedSpellID] = id
 	self:GetParent():refresh()
 	self:Hide()
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -181,7 +200,7 @@ function MJCompanionsPanelMixin:refresh()
 	local scrollFrame = self.listScroll
 	local offset = HybridScrollFrame_GetOffset(scrollFrame)
 	local numPets = #self.petFiltredList
-	local selectedPetID = self.journal.db.petForMount[MountJournal.selectedMountID]
+	local selectedPetID = self.journal.db.petForMount[MountJournal.selectedSpellID]
 
 	for i, btn in ipairs(scrollFrame.buttons) do
 		local index = i + offset
@@ -283,7 +302,6 @@ function MJCompanionsPanelMixin:petListUpdate(force)
 
 	self:restorePetJournalFilters()
 	self:petListSort()
-	self:updateFilters()
 end
 MJCompanionsPanelMixin.PET_JOURNAL_LIST_UPDATE = MJCompanionsPanelMixin.petListUpdate
 
@@ -299,27 +317,63 @@ function MJCompanionsPanelMixin:petListSort()
 			or level1 == level2 and name1 < name2)
 		then return true end
 	end)
+
+	self:updateFilters()
 end
 
 
 function MJCompanionsPanelMixin:updateFilters()
-	local text = self.searchBox:GetText()
+	local text = self.searchBox:GetText():lower():gsub("[%(%)%.%%%+%-%*%?%[%^%$]", function(char) return "%"..char end)
+	local GetPetInfoByPetID = C_PetJournal.GetPetInfoByPetID
 
 	wipe(self.petFiltredList)
-	if text:len() > 0 then
-		local C_PetJournal = C_PetJournal
-		text = text:lower():gsub("[%(%)%.%%%+%-%*%?%[%^%$]", function(char) return "%"..char end)
-		for _, petID in ipairs(self.petList) do
-			local _, customName, _,_,_,_,_, name = C_PetJournal.GetPetInfoByPetID(petID)
-			if name:lower():find(text) or customName and customName:lower():find(text) then
-				tinsert(self.petFiltredList, petID)
-			end
-		end
-	else
-		for k, v in ipairs(self.petList) do
-			self.petFiltredList[k] = v
+	for _, petID in ipairs(self.petList) do
+		local _, customName, _,_,_,_,_, name, _, petType = GetPetInfoByPetID(petID)
+		if self.typeFilter[petType]
+		and (text:len() == 0
+			  or (name:lower():find(text)
+					or customName and customName:lower():find(text))) then
+			tinsert(self.petFiltredList, petID)
 		end
 	end
 
 	self:refresh()
+end
+
+
+function MJCompanionsPanelMixin:ClearTypeFilter()
+	for _, btn in ipairs(self.filtersPanel.buttons) do
+		btn:SetChecked(false)
+	end
+	self:updateTypeFilter()
+end
+
+
+function MJCompanionsPanelMixin:updateTypeFilter()
+	local buttons = self.filtersPanel.buttons
+	local check, uncheck, btnCount = 0, 0, #buttons
+
+	for i, btn in ipairs(buttons) do
+		local checked = btn:GetChecked()
+		self.typeFilter[i] = checked
+		btn.icon:SetDesaturated(not checked)
+		if checked then
+			check = check + 1
+		else
+			uncheck = uncheck + 1
+		end
+	end
+
+	if check == btnCount or uncheck == btnCount then
+		for i, btn in ipairs(buttons) do
+			btn:SetChecked(false)
+			self.typeFilter[i] = true
+			btn.icon:SetDesaturated()
+		end
+		self.clearFilters:Hide()
+	else
+		self.clearFilters:Show()
+	end
+
+	self:updateFilters()
 end
