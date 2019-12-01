@@ -1412,7 +1412,7 @@ function journal:updateMountsList()
 	wipe(self.displayedMounts)
 
 	for i = 1, self.func.GetNumDisplayedMounts() do
-		local _,spellID,_,_,_,_,_,_, mountFaction, _,_, mountID = GetDisplayedMountInfo(i)
+		local _, spellID, _,_,_,_,_,_, mountFaction, _,_, mountID = GetDisplayedMountInfo(i)
 		local _,_,_,_, mountType = GetMountInfoExtraByID(mountID)
 		local petID = self.db.petForMount[spellID]
 		mountFaction = mountFaction or 2

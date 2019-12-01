@@ -137,13 +137,16 @@ function MJCompanionsPanelMixin:onLoad()
 			btn:SetPoint("LEFT", self.filtersPanel.buttons[i - 1], "RIGHT")
 		end
 		btn:SetScript("OnClick", function()
-			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			self:updateTypeFilter()
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		end)
 		self.filtersPanel.buttons[i] = btn
 		self.typeFilter[i] = true
 	end
-	self.clearFilters:SetScript("OnClick", function() self:ClearTypeFilter() end)
+	self.clearFilters:SetScript("OnClick", function()
+		self:ClearTypeFilter()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end)
 
 	local _,_, spellIcon = GetSpellInfo(243819)
 	self.randomFavoritePet.infoFrame.favorite:Show()
