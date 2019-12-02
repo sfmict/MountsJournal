@@ -169,6 +169,12 @@ end
 function mounts:UNIT_SPELLCAST_START(_,_, spellID)
 	local petID = self.db.petForMount[spellID]
 	if petID then
+		local groupType = util.getGroupType()
+		if self.config.noPetInRaid and groupType == "raid"
+		or self.config.noPetInGroup and groupType == "group" then
+			return
+		end
+
 		if type(petID) == "number" then
 			C_PetJournal.SummonRandomPet(petID == 1)
 		elseif C_PetJournal.PetIsSummonable(petID) and C_PetJournal.GetSummonedPetGUID() ~= petID then

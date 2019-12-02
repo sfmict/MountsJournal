@@ -921,6 +921,8 @@ end
 
 
 function journal:listFromMapInit(level)
+	if not level then return end
+
 	local btn = self:GetParent()
 	local info = UIDropDownMenu_CreateInfo()
 	info.isNotRadio = true
@@ -1375,7 +1377,7 @@ function journal:updateBtnFilters()
 		f.sources = true
 		for _, btn in ipairs(filtersBar.sources.childs) do
 			btn:SetChecked(false)
-			btn.icon:SetDesaturated(nil)
+			btn.icon:SetDesaturated()
 		end
 		filtersBar.sources:GetParent().filtred:Hide()
 	else

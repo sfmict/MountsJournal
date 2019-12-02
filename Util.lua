@@ -119,3 +119,8 @@ function MountsJournalUtil.copyTable(t)
 	end
 	return n
 end
+
+
+function MountsJournalUtil.getGroupType()
+	return IsInRaid() and "raid" or IsInGroup() and "group"
+end

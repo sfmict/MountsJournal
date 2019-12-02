@@ -65,6 +65,8 @@ L["DRUID_USEMACROALWAYS"] = "Использовать этот макрос вм
 L["Summonable Battle Pet"] = "Призываемый питомец"
 L["Summon Random Battle Pet"] = "Призвать случайного питомца"
 L["No Battle Pet"] = "Нет питомца"
+L["NoPetInRaid"] = "Не призывать питомца если вы находитесь в рейдовой группе"
+L["NoPetInGroup"] = "Не призывать питомца если вы находитесь в группе"
 -- ANIMATIONS
 L["Default"] = "По умолчанию"
 L["Mount special"] = "Особая"

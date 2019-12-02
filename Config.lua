@@ -219,6 +219,19 @@ config:SetScript("OnShow", function(self)
 	self.useMagicBroom.tooltipText = L["UseMagicBroomTitle"]
 	self.useMagicBroom.tooltipRequirement = L["UseMagicBroomDescription"]
 
+	-- NO PET IN RAID
+	self.noPetInRaid = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.noPetInRaid:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 0, -26)
+	self.noPetInRaid.Text:SetSize(245, 25)
+	self.noPetInRaid.Text:SetText(L["NoPetInRaid"])
+
+	-- NO PET IN GROUP
+	self.noPetInGroup = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.noPetInGroup:SetPoint("TOPLEFT", self.noPetInRaid, "BOTTOMLEFT", 0, -3)
+	self.noPetInGroup.Text:SetSize(245, 25)
+	self.noPetInGroup.Text:SetText(L["NoPetInGroup"])
+
+
 	-- REFRESH
 	local function refresh(self)
 		if not self:IsVisible() then return end
@@ -232,6 +245,8 @@ config:SetScript("OnShow", function(self)
 			child:SetChecked(child:checkFunc())
 		end
 		self.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
+		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
+		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
 	end
 
 	self:SetScript("OnShow", refresh)
@@ -254,6 +269,8 @@ config.okay = function(self)
 	mounts.config.herbMountsOnZones = self.herbMountsOnZones:GetChecked()
 	mounts:setHerbMount()
 	mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
+	mounts.config.noPetInRaid = self.noPetInRaid:GetChecked()
+	mounts.config.noPetInGroup = self.noPetInGroup:GetChecked()
 end
 
 

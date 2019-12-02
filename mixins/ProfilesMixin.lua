@@ -107,6 +107,8 @@ end
 
 
 function MJProfilesMixin:menuInit(level)
+	if not level then return end
+
 	local btn = self:GetParent()
 	local info = UIDropDownMenu_CreateInfo()
 	info.notCheckable = true

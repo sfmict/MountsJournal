@@ -61,6 +61,8 @@ L["DRUID_USEMACROALWAYS"] = "Use this macros instead of mounts"
 L["Summonable Battle Pet"] = "Summonable Battle Pet"
 L["Summon Random Battle Pet"] = "Summon Random Battle Pet"
 L["No Battle Pet"] = "No Battle Pet"
+L["NoPetInRaid"] = "Do not summon battle pet in raid group"
+L["NoPetInGroup"] = "Do not summon battle pet in group"
 -- ANIMATIONS
 L["Default"] = "Default"
 L["Mount special"] = "Mount special"

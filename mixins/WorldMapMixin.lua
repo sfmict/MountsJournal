@@ -234,9 +234,12 @@ end
 
 
 function MJDungeonRaidMixin:menuInit(level)
+	if not level then return end
+
 	local btn = self:GetParent()
 	local info = UIDropDownMenu_CreateInfo()
 	local list = UIDROPDOWNMENU_MENU_VALUE or btn.list
+
 	info.isNotRadio = true
 	info.notCheckable = true
 

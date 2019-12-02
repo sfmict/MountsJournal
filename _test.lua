@@ -30,13 +30,12 @@ end)
 
 function test:PLAYER_ENTERING_WORLD()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
-	if true then return end
 	-- JOURNAL OPEN
-	if not IsAddOnLoaded("Blizzard_Collections") then
-		LoadAddOn("Blizzard_Collections")
-	end
-	ShowUIPanel(CollectionsJournal)
-	MountJournal.MountDisplay.InfoButton.petSelectionBtn:Click()
+	-- if not IsAddOnLoaded("Blizzard_Collections") then
+	-- 	LoadAddOn("Blizzard_Collections")
+	-- end
+	-- ShowUIPanel(CollectionsJournal)
+	-- MountJournal.MountDisplay.InfoButton.petSelectionBtn:Click()
 
 	-- journal.navBarBtn:Click()
 	-- journal.mapSettings.existingsListsToggle:Click()
@@ -54,6 +53,7 @@ function test:PLAYER_ENTERING_WORLD()
 	-- 	end
 	-- end
 	-- select(14,classConfig:GetChildren()):Click()
+	if true then return end
 
 	-- hooksecurefunc("MountJournal_UpdateMountDisplay", function()
 	-- 	fprint("a")
