@@ -107,7 +107,7 @@ function MJMacroMixin:getDefMacro()
 	and (not self.classConfig.useOnlyInWaterWalkLocation or self.sFlags.waterWalk)
 	and not self.sFlags.swimming
 	and not self.sFlags.fly then
-		macro = self:addLine(macro, "/cast "..self:getSpellName(546)) -- Water Walking
+		macro = self:addLine(macro, "/cast [@player]"..self:getSpellName(546)) -- Water Walking
 
 	elseif self.class == "DRUID" then
 		local curFormID = GetShapeshiftFormID()
