@@ -23,7 +23,7 @@ function MJProfilesMixin:onLoad()
 					StaticPopup_Show(self.addonName.."PROFILE_EXISTS")
 					return
 				end
-				self.profiles[text] = data and MountsJournalUtil.copyTable(data) or {
+				self.profiles[text] = data and MountsJournalUtil:copyTable(data) or {
 					fly = {},
 					ground = {},
 					swimming = {},

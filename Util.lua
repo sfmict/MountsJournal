@@ -112,10 +112,10 @@ do
 end
 
 
-function MountsJournalUtil.copyTable(t)
+function MountsJournalUtil:copyTable(t)
 	local n = {}
 	for k, v in pairs(t) do
-		n[k] = type(v) == "table" and MountsJournalUtil.copyTable(v) or v
+		n[k] = type(v) == "table" and self:copyTable(v) or v
 	end
 	return n
 end
