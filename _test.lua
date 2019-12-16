@@ -30,6 +30,7 @@ end)
 
 function test:PLAYER_ENTERING_WORLD()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
+	fprint(GetBuildInfo())
 	-- JOURNAL OPEN
 	-- if not IsAddOnLoaded("Blizzard_Collections") then
 	-- 	LoadAddOn("Blizzard_Collections")

@@ -208,7 +208,7 @@ function MJDungeonRaidMixin:onLoad()
 	}
 	for i = 1, EJ_GetNumTiers() do
 		EJ_SelectTier(i)
-		for _,v in ipairs(self.list) do
+		for _, v in ipairs(self.list) do
 			v.list[i] = {
 				name = _G["EXPANSION_NAME"..(i - 1)],
 				list = {},
@@ -218,7 +218,7 @@ function MJDungeonRaidMixin:onLoad()
 			local instanceID, instanceName = EJ_GetInstanceByIndex(index, showRaid)
 			while instanceID do
 				EJ_SelectInstance(instanceID)
-				local _,_,_,_,_,_,mapID = EJ_GetInstanceInfo()
+				local _,_,_,_,_,_, mapID = EJ_GetInstanceInfo()
 				if mapID and mapID > 0 and not mapExclude[mapID] then
 					tinsert(v.list[i].list, {name = instanceName, mapID = mapID})
 				end
