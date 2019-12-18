@@ -299,4 +299,4 @@ end
 
 SLASH_MOUNTSCONFIG1 = "/mountconfig"
 SLASH_MOUNTSCONFIG2 = "/mco"
-SlashCmdList["MOUNTSCONFIG"] = config.openConfig
+SlashCmdList["MOUNTSCONFIG"] = function() config:openConfig() end
