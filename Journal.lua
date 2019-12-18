@@ -8,12 +8,12 @@ local MOUNT_ACHIEVEMENT_CATEGORY = 15248
 
 
 journal.colors = {
-	gold = {0.8, 0.6, 0},
-	gray = {0.5, 0.5, 0.5},
-	dark = {0.3, 0.3, 0.3},
-	mount1 = {0.824, 0.78, 0.235},
-	mount2 = {0.42, 0.302, 0.224},
-	mount3 = {0.031, 0.333, 0.388},
+	gold = CreateColor(0.8, 0.6, 0),
+	gray = CreateColor(0.5, 0.5, 0.5),
+	dark = CreateColor(0.3, 0.3, 0.3),
+	mount1 = CreateColor(0.824, 0.78, 0.235),
+	mount2 = CreateColor(0.42, 0.302, 0.224),
+	mount3 = CreateColor(0.031, 0.333, 0.388),
 }
 
 
@@ -301,7 +301,7 @@ function journal:ADDON_LOADED(addonName)
 			btnFrame.check = btnFrame:CreateTexture(nil, "OVERLAY")
 			btnFrame.check:SetTexture(texPath.."button")
 			btnFrame.check:SetTexCoord(0.00390625, 0.8203125, 0.37890625, 0.55859375)
-			btnFrame.check:SetVertexColor(unpack(self.colors.gold))
+			btnFrame.check:SetVertexColor(self.colors.gold:GetRGB())
 			btnFrame.check:SetAllPoints()
 
 			btnFrame.icon = btnFrame:CreateTexture(nil, "OVERLAY")
@@ -390,7 +390,6 @@ function journal:ADDON_LOADED(addonName)
 
 			btn.icon:SetTexture(texture.path)
 			btn.icon:SetSize(texture.width, texture.height)
-			if texture.color then btn.icon:SetVertexColor(unpack(texture.color)) end
 			if texture.texCoord then btn.icon:SetTexCoord(unpack(texture.texCoord)) end
 
 			btn:SetScript("OnEnter", function(btn)
@@ -408,9 +407,9 @@ function journal:ADDON_LOADED(addonName)
 
 		--  FILTERS TYPES BUTTONS
 		local typesTextures = {
-			{path = texPath.."fly", color = self.colors.mount1, width = 32, height = 16},
-			{path = texPath.."ground", color = self.colors.mount2, width = 32, height = 16},
-			{path = texPath.."swimming", color = self.colors.mount3, width = 32, height = 16},
+			{path = texPath.."fly", width = 32, height = 16},
+			{path = texPath.."ground", width = 32, height = 16},
+			{path = texPath.."swimming", width = 32, height = 16},
 		}
 
 		for i = 1, #typesTextures do
@@ -761,10 +760,10 @@ end
 function journal:configureJournal()
 	local function setColor(btn, mountsTbl)
 		if mountsTbl and util.inTable(mountsTbl, btn.mountID) then
-			btn.icon:SetVertexColor(unpack(self.colors.gold))
+			btn.icon:SetVertexColor(self.colors.gold:GetRGB())
 			if not btn.check:IsShown() then btn.check:Show() end
 		else
-			btn.icon:SetVertexColor(unpack(self.colors.gray))
+			btn.icon:SetVertexColor(self.colors.gray:GetRGB())
 			if btn.check:IsShown() then btn.check:Hide() end
 		end
 	end
@@ -856,12 +855,12 @@ function journal:mountToggle(btn)
 	local pos = util.inTable(tbl, btn.mountID)
 	if pos then
 		tremove(tbl, pos)
-		btn.icon:SetVertexColor(unpack(self.colors.gray))
+		btn.icon:SetVertexColor(self.colors.gray:GetRGB())
 		btn.check:Hide()
 		self:getRemoveMountList(self.listMapID)
 	else
 		tinsert(tbl, btn.mountID)
-		btn.icon:SetVertexColor(unpack(self.colors.gold))
+		btn.icon:SetVertexColor(self.colors.gold:GetRGB())
 		btn.check:Show()
 	end
 
@@ -994,11 +993,11 @@ function journal:updateMapSettings()
 	local relationClear = mapSettings.relationClear
 	if self.currentList and self.currentList.listFromID then
 		relationText:SetText(util.getMapFullNameInfo(self.currentList.listFromID).name)
-		relationText:SetTextColor(unpack(self.colors.gold))
+		relationText:SetTextColor(self.colors.gold:GetRGB())
 		relationClear:Show()
 	else
 		relationText:SetText(L["No relation"])
-		relationText:SetTextColor(unpack(self.colors.gray))
+		relationText:SetTextColor(self.colors.gray:GetRGB())
 		relationClear:Hide()
 	end
 end
@@ -1352,7 +1351,7 @@ function journal:updateBtnFilters()
 				for _, btn in ipairs(filtersBar[typeFilter].childs) do
 					local color = default and self.colors["mount"..btn.id] or self.colors.dark
 					btn:SetChecked(false)
-					btn.icon:SetVertexColor(unpack(color))
+					btn.icon:SetVertexColor(color:GetRGB())
 				end
 				filtersBar[typeFilter]:GetParent().filtred:Hide()
 			end
@@ -1361,7 +1360,7 @@ function journal:updateBtnFilters()
 				local checked = filter[btn.id]
 				local color = checked and self.colors["mount"..btn.id] or self.colors.dark
 				btn:SetChecked(checked)
-				btn.icon:SetVertexColor(unpack(color))
+				btn.icon:SetVertexColor(color:GetRGB())
 			end
 			filtersBar[typeFilter]:GetParent().filtred:Show()
 		end
