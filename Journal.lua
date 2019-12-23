@@ -517,24 +517,24 @@ function journal:ADDON_LOADED(addonName)
 			end
 
 			activeCamera:SetLeftMouseButtonYMode(ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION, true)
-			activeCamera:SetRightMouseButtonXMode(ORBIT_CAMERA_MOUSE_MODE_TARGET_HORIZONTAL, true)
-			activeCamera:SetRightMouseButtonYMode(ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL, true)
+			activeCamera:SetRightMouseButtonXMode(ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, true)
+			activeCamera:SetRightMouseButtonYMode(ORBIT_CAMERA_MOUSE_PAN_VERTICAL, true)
 
-			activeCamera.OnUpdate = function(self, elapsed)
-				if self:IsLeftMouseButtonDown() then
-					local deltaX, deltaY = GetScaledCursorDelta()
-					self:HandleMouseMovement(self.buttonModes.leftX, deltaX * self:GetDeltaModifierForCameraMode(self.buttonModes.leftX), not self.buttonModes.leftXinterpolate)
-					self:HandleMouseMovement(self.buttonModes.leftY, deltaY * self:GetDeltaModifierForCameraMode(self.buttonModes.leftY), not self.buttonModes.leftYinterpolate)
-				end
-
-				if self:IsRightMouseButtonDown() then
-					local deltaX, deltaY = GetScaledCursorDelta()
-					self:HandleMouseMovement(self.buttonModes.rightX, deltaX * .023, not self.buttonModes.rightXinterpolate)
-					self:HandleMouseMovement(self.buttonModes.rightY, -deltaY * .023, not self.buttonModes.rightYinterpolate)
-				end
-
-				self:UpdateInterpolationTargets(elapsed)
-				self:SynchronizeCamera()
+			activeCamera.deltaModifierForCameraMode = {
+				[ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION),
+				[ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION] = -activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION),
+				[ORBIT_CAMERA_MOUSE_MODE_ROLL_ROTATION] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_ROLL_ROTATION),
+				[ORBIT_CAMERA_MOUSE_MODE_ZOOM] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_ZOOM),
+				[ORBIT_CAMERA_MOUSE_MODE_TARGET_HORIZONTAL] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_TARGET_HORIZONTAL),
+				[ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL),
+				[ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL),
+				[ORBIT_CAMERA_MOUSE_PAN_VERTICAL] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_PAN_VERTICAL),
+			}
+			setmetatable(activeCamera.deltaModifierForCameraMode, {__index = function()
+				return 0
+			end})
+			function activeCamera:GetDeltaModifierForCameraMode(mode)
+				return self.deltaModifierForCameraMode[mode]
 			end
 		end)
 
