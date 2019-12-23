@@ -59,7 +59,7 @@ function MountsJournalUtil.setEventsMixin(frame)
 	for k, v in pairs(MountsJournalEventsMixin) do
 		frame[k] = v
 	end
-	frame:init()
+	frame:initEvents()
 end
 
 
