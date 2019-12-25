@@ -1309,6 +1309,7 @@ function journal:setBtnFilters(tab)
 		end
 	else
 		MountJournal:SetScript("OnEvent", nil)
+		C_MountJournal.SetAllSourceFilters(false)
 		for _, btn in ipairs(children) do
 			local checked = btn:GetChecked()
 			C_MountJournal.SetSourceFilter(btn.id, checked)
@@ -1346,7 +1347,6 @@ function journal:updateBtnFilters()
 		end
 
 		if i == #filter then
-			f[typeFilter] = true
 			if filtersBar[typeFilter] then
 				for _, btn in ipairs(filtersBar[typeFilter].childs) do
 					local color = default and self.colors["mount"..btn.id] or self.colors.dark
@@ -1356,6 +1356,8 @@ function journal:updateBtnFilters()
 				filtersBar[typeFilter]:GetParent().filtred:Hide()
 			end
 		elseif filtersBar[typeFilter] then
+			f[typeFilter] = true
+			f.checked = true
 			for _, btn in ipairs(filtersBar[typeFilter].childs) do
 				local checked = filter[btn.id]
 				local color = checked and self.colors["mount"..btn.id] or self.colors.dark
@@ -1378,13 +1380,15 @@ function journal:updateBtnFilters()
 	end
 
 	if n == #sources - 1 then
-		f.sources = true
+		C_MountJournal.SetAllSourceFilters(true)
 		for _, btn in ipairs(filtersBar.sources.childs) do
 			btn:SetChecked(false)
 			btn.icon:SetDesaturated()
 		end
 		filtersBar.sources:GetParent().filtred:Hide()
 	else
+		f.sources = true
+		f.checked = true
 		for _, btn in ipairs(filtersBar.sources.childs) do
 			btn:SetChecked(sources[btn.id])
 			btn.icon:SetDesaturated(not sources[btn.id])
@@ -1393,8 +1397,8 @@ function journal:updateBtnFilters()
 	end
 
 	-- CLEAR BTN FILTERS
-	filtersBar.clear:SetShown(not f.types or not f.selected or not f.sources)
-	if not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE) or not f.types or not f.selected or not f.factions or not f.pet or not f.expansions or not f.sources then
+	filtersBar.clear:SetShown(f.types or f.selected or f.sources)
+	if not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE) or f.checked then
 		self.shownPanel:Show()
 		self.leftInset:SetPoint("TOPLEFT", self.shownPanel, "BOTTOMLEFT", 0, -2)
 	else
