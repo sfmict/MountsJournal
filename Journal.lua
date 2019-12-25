@@ -1355,16 +1355,18 @@ function journal:updateBtnFilters()
 				end
 				filtersBar[typeFilter]:GetParent().filtred:Hide()
 			end
-		elseif filtersBar[typeFilter] then
+		else
 			f[typeFilter] = true
 			f.checked = true
-			for _, btn in ipairs(filtersBar[typeFilter].childs) do
-				local checked = filter[btn.id]
-				local color = checked and self.colors["mount"..btn.id] or self.colors.dark
-				btn:SetChecked(checked)
-				btn.icon:SetVertexColor(color:GetRGB())
+			if filtersBar[typeFilter] then
+				for _, btn in ipairs(filtersBar[typeFilter].childs) do
+					local checked = filter[btn.id]
+					local color = checked and self.colors["mount"..btn.id] or self.colors.dark
+					btn:SetChecked(checked)
+					btn.icon:SetVertexColor(color:GetRGB())
+				end
+				filtersBar[typeFilter]:GetParent().filtred:Show()
 			end
-			filtersBar[typeFilter]:GetParent().filtred:Show()
 		end
 	end
 
