@@ -317,13 +317,12 @@ function journal:ADDON_LOADED(addonName)
 			end)
 		end
 
+		local function btnClick(btn) self:mountToggle(btn) end
 		for _, child in ipairs(self.scrollButtons) do
 			child:SetWidth(child:GetWidth() - 25)
 			child.name:SetWidth(child.name:GetWidth() - 18)
 			child.icon:SetPoint("LEFT", child, "LEFT", -41, 0)
 			child.icon:SetSize(40, 40)
-
-			local function btnClick(btn) self:mountToggle(btn) end
 
 			CreateButton("fly", child, 25, -3, btnClick)
 			CreateButton("ground", child, 25, -17, btnClick)
