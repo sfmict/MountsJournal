@@ -111,6 +111,7 @@ config:SetScript("OnShow", function(self)
 	local modifierCombobox = CreateFrame("FRAME", "MountsJournalModifier", self, "UIDropDownMenuTemplate")
 	self.modifierCombobox = modifierCombobox
 	modifierCombobox:SetPoint("TOPLEFT", modifierText, "BOTTOMRIGHT", -8, 21)
+	UIDropDownMenu_SetWidth(modifierCombobox, 115)
 
 	UIDropDownMenu_Initialize(modifierCombobox, function(self, level, menuList)
 		local info = UIDropDownMenu_CreateInfo()

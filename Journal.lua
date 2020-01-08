@@ -115,6 +115,26 @@ function journal:ADDON_LOADED(addonName)
 			return true
 		end})
 
+		-- MOUNT LIST UPDATE ANIMATION
+		local updateListTex = self.leftInset:CreateTexture(nil, "BACKGROUND", nil, -4)
+		updateListTex:SetAllPoints()
+		updateListTex:SetColorTexture(.8, .6, 0, .1)
+		updateListTex:SetAlpha(0)
+
+		self.mountListAnim = self.leftInset:CreateAnimationGroup()
+		self.mountListAnim.parent = updateListTex
+		self.mountListAnim.alpha1 = self.mountListAnim:CreateAnimation("Alpha")
+		self.mountListAnim.alpha1:SetFromAlpha(1)
+		self.mountListAnim.alpha1:SetToAlpha(.5)
+		self.mountListAnim.alpha1:SetSmoothing("IN")
+		self.mountListAnim.alpha1:SetDuration(.2)
+		self.mountListAnim.alpha2 = self.mountListAnim:CreateAnimation("Alpha")
+		self.mountListAnim.alpha2:SetFromAlpha(.5)
+		self.mountListAnim.alpha2:SetToAlpha(1)
+		self.mountListAnim.alpha2:SetSmoothing("OUT_IN")
+		self.mountListAnim.alpha2:SetStartDelay(.2)
+		self.mountListAnim.alpha2:SetDuration(.5)
+
 		-- MOUNT COUNT
 		local mountCount = MountJournal.MountCount
 		self.mountCount = mountCount
@@ -174,6 +194,8 @@ function journal:ADDON_LOADED(addonName)
 			self:updateMountsList()
 			MountJournal_UpdateMountList()
 			self:updateMapSettings()
+			self.mountListAnim:Stop()
+			self.mountListAnim:Play()
 		end)
 		self.rightInset:SetPoint("TOPRIGHT", navBarBtn, "BOTTOMRIGHT", -4, 0)
 
