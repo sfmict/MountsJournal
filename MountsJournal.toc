@@ -14,7 +14,6 @@ db.lua
 Binding.lua
 Config.lua
 ConfigClasses.lua
-journal.xml
 Journal.lua
 #@do-not-package@
 _test.lua

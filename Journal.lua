@@ -1,6 +1,6 @@
 local addon, L = ...
 local util, mounts, config = MountsJournalUtil, MountsJournal, MountsJournalConfig
-local journal = MountsJournalFrame
+local journal = CreateFrame("FRAME", "MountsJournalFrame")
 
 
 local COLLECTION_ACHIEVEMENT_CATEGORY = 15246
@@ -116,24 +116,8 @@ function journal:ADDON_LOADED(addonName)
 		end})
 
 		-- MOUNT LIST UPDATE ANIMATION
-		local updateListTex = self.leftInset:CreateTexture(nil, "BACKGROUND", nil, -4)
-		updateListTex:SetAllPoints()
-		updateListTex:SetColorTexture(.8, .6, 0, .1)
-		updateListTex:SetAlpha(0)
-
-		self.mountListAnim = self.leftInset:CreateAnimationGroup()
-		self.mountListAnim.parent = updateListTex
-		self.mountListAnim.alpha1 = self.mountListAnim:CreateAnimation("Alpha")
-		self.mountListAnim.alpha1:SetFromAlpha(1)
-		self.mountListAnim.alpha1:SetToAlpha(.5)
-		self.mountListAnim.alpha1:SetSmoothing("IN")
-		self.mountListAnim.alpha1:SetDuration(.2)
-		self.mountListAnim.alpha2 = self.mountListAnim:CreateAnimation("Alpha")
-		self.mountListAnim.alpha2:SetFromAlpha(.5)
-		self.mountListAnim.alpha2:SetToAlpha(1)
-		self.mountListAnim.alpha2:SetSmoothing("OUT_IN")
-		self.mountListAnim.alpha2:SetStartDelay(.2)
-		self.mountListAnim.alpha2:SetDuration(.5)
+		self.leftInset.updateAnimFrame = CreateFrame("FRAME", nil, self.leftInset, "MJUpdateAnimFrame")
+		self.mountListUpdateAnim = self.leftInset.updateAnimFrame.anim
 
 		-- MOUNT COUNT
 		local mountCount = MountJournal.MountCount
@@ -194,8 +178,6 @@ function journal:ADDON_LOADED(addonName)
 			self:updateMountsList()
 			MountJournal_UpdateMountList()
 			self:updateMapSettings()
-			self.mountListAnim:Stop()
-			self.mountListAnim:Play()
 		end)
 		self.rightInset:SetPoint("TOPRIGHT", navBarBtn, "BOTTOMRIGHT", -4, 0)
 
@@ -271,7 +253,7 @@ function journal:ADDON_LOADED(addonName)
 		btnConfig:SetScript("OnClick", function() config:openConfig() end)
 
 		-- ACHIEVEMENT
-		self.achiev:SetParent(MountJournal)
+		self.achiev = CreateFrame("BUTTON", nil, MountJournal, "MJAchiev")
 		self.achiev:SetPoint("TOP", 0, -21)
 		self:ACHIEVEMENT_EARNED()
 		self.achiev:SetScript("OnClick", function()
@@ -770,6 +752,9 @@ function journal:setEditMountsList()
 		self.currentList = self.db.zoneMounts[mapID]
 		self.list, self.listMapID = getRelationMountList(mapID)
 	end
+
+	self.mountListUpdateAnim:Stop()
+	self.mountListUpdateAnim:Play()
 end
 
 
