@@ -159,7 +159,7 @@ function MJMapCanvasMixin:setCanvasSize(width, height)
 	local child = self.child
 	local scroll = self.ScrollContainer
 	child:SetSize(width, height)
-	
+
 	self.currentScale = min(scroll:GetWidth() / child:GetWidth(), scroll:GetHeight() / child:GetHeight())
 	child:SetScale(self.currentScale)
 end

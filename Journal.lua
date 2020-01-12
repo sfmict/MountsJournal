@@ -902,7 +902,7 @@ do
 		wipe(btn.maps)
 		local assocMaps = {}
 		for mapID, mapConfig in pairs(self.db.zoneMounts) do
-			if not mapConfig.listFromID 
+			if not mapConfig.listFromID
 			and mapID ~= self.navBar.mapID
 			and #mapConfig.fly + #mapConfig.ground + #mapConfig.swimming > 0 then
 				local mapInfo = util.getMapFullNameInfo(mapID)

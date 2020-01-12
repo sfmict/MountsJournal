@@ -1,0 +1,19 @@
+name: "Build"
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout
+      uses: actions/checkout@v1
+
+    - name: files
+      run: bash .release/release.sh
+      env:
+        GITHUB_OAUTH: ${{ secrets.GITHUB_OAUTH }}

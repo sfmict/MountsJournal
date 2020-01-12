@@ -1260,7 +1260,7 @@
 			</Layer>
 			<Layer level="ARTWORK">
 				<Texture file="Interface/Buttons/SquareButtonTextures" parentKey="arrow">
-					<Size x="12" y="12" /> 
+					<Size x="12" y="12" />
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="RIGHT" x="-3"/>
 					</Anchors>

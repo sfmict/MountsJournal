@@ -182,7 +182,7 @@ function MJProfilesMixin:menuInit(level)
 
 	else -- MENU
 		info.isTitle = true
-		
+
 		info.text = L["Profiles"]
 		UIDropDownMenu_AddButton(info, level)
 
@@ -191,7 +191,7 @@ function MJProfilesMixin:menuInit(level)
 		info.isTitle = nil
 		info.notCheckable = nil
 		info.disabled = nil
-		
+
 		info.text = DEFAULT
 		info.checked = function() return btn.charDB.currentProfileName == nil end
 		info.func = function() btn:setProfile() end

@@ -66,7 +66,7 @@ classConfig:SetScript("OnShow", function(self)
 			self.currentMacrosConfig = self.macrosConfig[btn.key]
 			self:showClassSettings(btn)
 		end)
-		
+
 		if playerClassName == className then
 			firstClassFrame = classFrame
 		end
