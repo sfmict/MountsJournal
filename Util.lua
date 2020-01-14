@@ -46,7 +46,7 @@ function MountsJournalEventsMixin:event(event, ...)
 	local handlerList = self.events[event]
 	if handlerList then
 		for _, handler in ipairs(handlerList) do
-			handler.func(...)
+			handler.func(self, ...)
 		end
 	end
 end

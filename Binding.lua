@@ -1,4 +1,5 @@
 local adddon = ...
+local util = MountsJournalUtil
 local binding = CreateFrame("Frame", adddon.."Binding")
 binding.mode = 1
 binding:Hide()
@@ -12,6 +13,9 @@ end)
 
 function binding:createButtonBinding(parent, name, secureTemplate, macro)
 	local button = CreateFrame("Button", nil, parent, "UIMenuButtonStretchTemplate")
+	util.setEventsMixin(button)
+	button.unboundMessage = button:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+	button.unboundMessage:Hide()
 	button.selectedHighlight = button:CreateTexture(nil, "OVERLAY")
 	button.selectedHighlight:SetTexture("Interface/Buttons/UI-Silver-Button-Select")
 	button.selectedHighlight:SetPoint("TOPLEFT", 0, -3)
@@ -23,7 +27,9 @@ function binding:createButtonBinding(parent, name, secureTemplate, macro)
 	button.secure:SetAttribute("type", "macro")
 	if macro then button.secure:SetAttribute("macrotext", macro) end
 	button.command = "CLICK "..name..":LeftButton"
-	button:SetScript("OnClick", function(self, button) binding:OnClick(self, button) end)
+	_G["BINDING_NAME_"..button.command] = name
+	button:SetScript("OnHide", function(self) self.unboundMessage:Hide() end)
+	button:SetScript("OnClick", function(self, key) binding:OnClick(self, key) end)
 	button:SetScript("OnMouseWheel", function(self, delta) binding:OnKeyDown(delta > 0 and "MOUSEWHEELUP" or "MOUSEWHEELDOWN") end)
 	self:setButtonText(button)
 	return button
@@ -49,6 +55,7 @@ function binding:setSelected(button)
 		self:Show()
 		button.selectedHighlight:Show()
 		button:GetHighlightTexture():SetAlpha(0)
+		button.unboundMessage:Hide()
 	else
 		if self.selected then
 			local button = self.selected
@@ -95,11 +102,18 @@ binding:SetScript("OnKeyDown", binding.OnKeyDown)
 
 function binding:setBinding(key, selectedBinding)
 	if not InCombatLockdown() then
-		local oldKey = GetBindingKey(selectedBinding, self.mode)
+		local oldAction = GetBindingAction(key, self.mode)
+		if oldAction ~= "" and oldAction ~= selectedBinding then
+			self.selected.unboundMessage:SetText(KEY_UNBOUND_ERROR:format(GetBindingName(oldAction)))
+			self.selected.unboundMessage:Show()
+		end
 
+		local oldKey = GetBindingKey(selectedBinding, self.mode)
 		if SetBinding(key, selectedBinding, self.mode) and oldKey then
 			SetBinding(oldKey, nil, self.mode)
 		end
+
+		self.selected:event("SET_BINDING")
 	end
 end
 

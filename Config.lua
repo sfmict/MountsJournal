@@ -100,7 +100,7 @@ config:SetScript("OnShow", function(self)
 	-- LEFT PANEL
 	local leftPanel = CreateFrame("FRAME", nil, self, "MJOptionsPanel")
 	leftPanel:SetPoint("TOPLEFT", self, 8, -67)
-	leftPanel:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", 300, 8)
+	leftPanel:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", 300, 32)
 
 	-- MODIFIER TEXT
 	local modifierText = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
@@ -121,6 +121,7 @@ config:SetScript("OnShow", function(self)
 			info.value = modifier
 			info.func = function(self)
 				UIDropDownMenu_SetSelectedValue(modifierCombobox, self.value)
+				config.applyBtn:Enable()
 			end
 			UIDropDownMenu_AddButton(info)
 		end
@@ -134,9 +135,10 @@ config:SetScript("OnShow", function(self)
 	self.waterJump.Text:SetText(L["Handle a jump in water"])
 	self.waterJump.tooltipText = L["Handle a jump in water"]
 	self.waterJump.tooltipRequirement = L["WaterJumpDescription"]
+	self.waterJump:HookScript("OnClick", function() self.applyBtn:Enable() end)
 
 	-- CREATE MACRO
-	local createMacroBtn = CreateFrame("Button", nil, self, "UIPanelButtonTemplate")
+	local createMacroBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
 	createMacroBtn:SetSize(232, 40)
 	createMacroBtn:SetPoint("TOPLEFT", self.waterJump, "BOTTOMLEFT", 0, -25)
 	createMacroBtn:SetText(L["CreateMacro"])
@@ -181,11 +183,14 @@ config:SetScript("OnShow", function(self)
 
 	-- BIND MOUNT
 	self.bindMount:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -20)
+	self.bindMount.unboundMessage:SetSize(500, 10)
+	self.bindMount.unboundMessage:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 14, 14)
+	self.bindMount:on("SET_BINDING", function() self.applyBtn:Enable() end)
 
 	-- RIGHT PANEL
 	local rightPanel = CreateFrame("FRAME", nil, self, "MJOptionsPanel")
 	rightPanel:SetPoint("TOPLEFT", leftPanel, "TOPRIGHT", 4, 0)
-	rightPanel:SetPoint("BOTTOMRIGHT", self, -8, 8)
+	rightPanel:SetPoint("BOTTOMRIGHT", self, -8, 32)
 
 	local rightPanelScroll = CreateFrame("ScrollFrame", nil, rightPanel, "UIPanelScrollFrameTemplate")
 	rightPanelScroll:SetPoint("TOPLEFT", rightPanel, 4, -6)
@@ -202,12 +207,14 @@ config:SetScript("OnShow", function(self)
 	self.useHerbMounts.Text:SetText(L["UseHerbMounts"])
 	self.useHerbMounts.tooltipText = L["UseHerbMounts"]
 	self.useHerbMounts.tooltipRequirement = L["UseHerbMountsDescription"]
+	self.useHerbMounts:HookScript("OnClick", function() self.applyBtn:Enable() end)
 
 	-- USE HERBALISM MOUNTS ON HERBALISM ZONES
 	self.herbMountsOnZones = createCheckboxChild(L["UseHerbMountsOnZones"], self.useHerbMounts)
 	self.herbMountsOnZones.tooltipText = L["UseHerbMountsOnZones"]
 	self.herbMountsOnZones.tooltipRequirement = L["UseHerbMountsDescription"]
 	self.herbMountsOnZones.checkFunc = function() return mounts.config.herbMountsOnZones end
+	self.herbMountsOnZones:HookScript("OnClick", function() self.applyBtn:Enable() end)
 
 	-- USE MAGIC BROOM
 	self.useMagicBroom = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
@@ -219,19 +226,33 @@ config:SetScript("OnShow", function(self)
 	util.setHyperlinkTooltip(self.useMagicBroom)
 	self.useMagicBroom.tooltipText = L["UseMagicBroomTitle"]
 	self.useMagicBroom.tooltipRequirement = L["UseMagicBroomDescription"]
+	self.useMagicBroom:HookScript("OnClick", function() self.applyBtn:Enable() end)
 
 	-- NO PET IN RAID
 	self.noPetInRaid = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.noPetInRaid:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 0, -26)
 	self.noPetInRaid.Text:SetSize(245, 25)
 	self.noPetInRaid.Text:SetText(L["NoPetInRaid"])
+	self.noPetInRaid:HookScript("OnClick", function() self.applyBtn:Enable() end)
 
 	-- NO PET IN GROUP
 	self.noPetInGroup = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.noPetInGroup:SetPoint("TOPLEFT", self.noPetInRaid, "BOTTOMLEFT", 0, -3)
 	self.noPetInGroup.Text:SetSize(245, 25)
 	self.noPetInGroup.Text:SetText(L["NoPetInGroup"])
+	self.noPetInGroup:HookScript("OnClick", function() self.applyBtn:Enable() end)
 
+	-- APPLY
+	self.applyBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
+	self.applyBtn:SetSize(96, 22)
+	self.applyBtn:Disable()
+	self.applyBtn:SetPoint("BOTTOMRIGHT", -8, 8)
+	self.applyBtn:SetText(APPLY)
+	self.applyBtn:SetScript("OnClick", function(btn)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		self:okay()
+		btn:Disable()
+	end)
 
 	-- REFRESH
 	local function refresh(self)
@@ -248,6 +269,7 @@ config:SetScript("OnShow", function(self)
 		self.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
 		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
+		self.applyBtn:Disable()
 	end
 
 	self:SetScript("OnShow", refresh)
