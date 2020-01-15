@@ -11,9 +11,13 @@ test:SetScript("OnEvent", function(self, event, ...)
 		fprint(event, ...)
 		self[event](self, ...)
 	else
-		fprint("None:", event, ...)
+		if event ~= "ARENA_SEASON_WORLD_STATE"
+		and event ~= "PVP_RATED_STATS_UPDATE" then
+			fprint("None:", event, ...)
+		end
 	end
 end)
+-- test:RegisterAllEvents()
 -- test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 
 -- test:RegisterEvent("PET_JOURNAL_PET_DELETED")
