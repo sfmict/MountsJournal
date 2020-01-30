@@ -123,23 +123,39 @@ function MJProfilesMixin:menuInit(level)
 		UIDropDownMenu_AddButton(info, level)
 
 	elseif UIDROPDOWNMENU_MENU_VALUE == "delete" then -- DELETE RPFOLE
-		local i = 0
-		for _, profileName in ipairs(btn.profilesNames) do
-			if profileName ~= btn.charDB.currentProfileName then
-				info.text = profileName
-				info.arg1 = profileName
-				info.func = function(_, arg1) btn:deleteProfile(arg1) end
+		if #btn.profilesNames > 20 then
+			btn.searchListFrame:reset()
+
+			for _, profileName in ipairs(btn.profilesNames) do
+				if profileName ~= btn.charDB.currentProfileName then
+					info.text = profileName
+					info.arg1 = profileName
+					info.func = function(_, arg1) btn:deleteProfile(arg1) end
+					btn.searchListFrame:addButton(info)
+				end
+			end
+
+			info.customFrame = btn.searchListFrame
+			UIDropDownMenu_AddButton(info, level)
+			info.customFrame = nil
+		else
+			local i = 0
+			for _, profileName in ipairs(btn.profilesNames) do
+				if profileName ~= btn.charDB.currentProfileName then
+					info.text = profileName
+					info.arg1 = profileName
+					info.func = function(_, arg1) btn:deleteProfile(arg1) end
+					UIDropDownMenu_AddButton(info, level)
+					i = i + 1
+				end
+			end
+
+			if i == 0 then
+				info.disabled = true
+				info.text = EMPTY
 				UIDropDownMenu_AddButton(info, level)
-				i = i + 1
 			end
 		end
-
-		if i == 0 then
-			info.disabled = true
-			info.text = EMPTY
-			UIDropDownMenu_AddButton(info, level)
-		end
-
 	elseif UIDROPDOWNMENU_MENU_VALUE == "specialization" then -- SPECS
 		info.hasArrow = true
 		info.keepShownOnClick = true
@@ -155,29 +171,60 @@ function MJProfilesMixin:menuInit(level)
 		info.keepShownOnClick = true
 		info.arg2 = UIDROPDOWNMENU_MENU_VALUE
 
-		info.text = DEFAULT
-		info.checked = function(self)
-			return btn.charDB.profileBySpecialization[self.arg2] == nil
-		end
-		info.func = function(_,_, arg2)
-			btn.charDB.profileBySpecialization[arg2] = nil
-			btn.mounts:setDB()
-			UIDropDownMenu_Refresh(btn.optionsMenu)
-		end
-		UIDropDownMenu_AddButton(info, level)
+		if #btn.profilesNames > 20 then
+			btn.searchListFrame:reset()
 
-		for _,profileName in ipairs(btn.profilesNames) do
-			info.text = profileName
-			info.arg1 = profileName
+			info.text = DEFAULT
 			info.checked = function(self)
-				return btn.charDB.profileBySpecialization[self.arg2] == self.arg1
+				return btn.charDB.profileBySpecialization[self.arg2] == nil
 			end
-			info.func = function(_, arg1, arg2)
-				btn.charDB.profileBySpecialization[arg2] = arg1
+			info.func = function(_,_, arg2)
+				btn.charDB.profileBySpecialization[arg2] = nil
+				btn.mounts:setDB()
+			end
+			btn.searchListFrame:addButton(info)
+
+			for _, profileName in ipairs(btn.profilesNames) do
+				info.text = profileName
+				info.arg1 = profileName
+				info.checked = function(self)
+					return btn.charDB.profileBySpecialization[self.arg2] == self.arg1
+				end
+				info.func = function(_, arg1, arg2)
+					btn.charDB.profileBySpecialization[arg2] = arg1
+					btn.mounts:setDB()
+				end
+				btn.searchListFrame:addButton(info)
+			end
+
+			info.customFrame = btn.searchListFrame
+			UIDropDownMenu_AddButton(info, level)
+			info.customFrame = nil
+		else
+			info.text = DEFAULT
+			info.checked = function(self)
+				return btn.charDB.profileBySpecialization[self.arg2] == nil
+			end
+			info.func = function(_,_, arg2)
+				btn.charDB.profileBySpecialization[arg2] = nil
 				btn.mounts:setDB()
 				UIDropDownMenu_Refresh(btn.optionsMenu)
 			end
 			UIDropDownMenu_AddButton(info, level)
+
+			for _, profileName in ipairs(btn.profilesNames) do
+				info.text = profileName
+				info.arg1 = profileName
+				info.checked = function(self)
+					return btn.charDB.profileBySpecialization[self.arg2] == self.arg1
+				end
+				info.func = function(_, arg1, arg2)
+					btn.charDB.profileBySpecialization[arg2] = arg1
+					btn.mounts:setDB()
+					UIDropDownMenu_Refresh(btn.optionsMenu)
+				end
+				UIDropDownMenu_AddButton(info, level)
+			end
 		end
 
 	else -- MENU
@@ -192,27 +239,49 @@ function MJProfilesMixin:menuInit(level)
 		info.notCheckable = nil
 		info.disabled = nil
 
-		info.text = DEFAULT
-		info.checked = function() return btn.charDB.currentProfileName == nil end
-		info.func = function() btn:setProfile() end
-		UIDropDownMenu_AddButton(info, level)
 
-		for _,profileName in ipairs(btn.profilesNames) do
-			info.text = profileName
-			info.arg1 = profileName
-			info.checked = function(self) return btn.charDB.currentProfileName == self.arg1 end
-			info.func = function(_, arg1) btn:setProfile(arg1) end
+		if #btn.profilesNames > 20 then
+			btn.searchMenuFrame:reset()
+
+			info.text = DEFAULT
+			info.checked = function() return btn.charDB.currentProfileName == nil end
+			info.func = function() btn:setProfile() end
+			btn.searchMenuFrame:addButton(info)
+
+			for _, profileName in ipairs(btn.profilesNames) do
+				info.text = profileName
+				info.arg1 = profileName
+				info.checked = function(self) return btn.charDB.currentProfileName == self.arg1 end
+				info.func = function(_, arg1) btn:setProfile(arg1) end
+				btn.searchMenuFrame:addButton(info)
+			end
+
+			info.customFrame = btn.searchMenuFrame
 			UIDropDownMenu_AddButton(info, level)
+			info.customFrame = nil
+		else
+			info.text = DEFAULT
+			info.checked = function() return btn.charDB.currentProfileName == nil end
+			info.func = function() btn:setProfile() end
+			UIDropDownMenu_AddButton(info, level)
+
+			for _, profileName in ipairs(btn.profilesNames) do
+				info.text = profileName
+				info.arg1 = profileName
+				info.checked = function(self) return btn.charDB.currentProfileName == self.arg1 end
+				info.func = function(_, arg1) btn:setProfile(arg1) end
+				UIDropDownMenu_AddButton(info, level)
+			end
 		end
 
 		UIDropDownMenu_AddSeparator(level)
 
-		info.notCheckable = true
-		info.hasArrow = true
-		info.keepShownOnClick = true
 		info.checked = nil
 		info.func = nil
 		info.arg1 = nil
+		info.keepShownOnClick = true
+		info.notCheckable = true
+		info.hasArrow = true
 
 		info.text = L["New profile"]
 		info.value = "new"

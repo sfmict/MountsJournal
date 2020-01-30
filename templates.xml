@@ -1,4 +1,5 @@
 <Ui>
+	<Script file="mixins/DropDownSearchMixin.lua"/>
 	<Script file="mixins/MacroMixin.lua"/>
 	<Script file="mixins/NavBarMixin.lua"/>
 	<Script file="mixins/WorldMapMixin.lua"/>
@@ -1137,8 +1138,99 @@
 		</Frames>
 	</Frame>
 
+	<Button name="MJDropDownMenuButtonTemplate" virtual="true">
+		<Size x="100" y="16"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="Highlight" file="Interface\QuestFrame\UI-QuestTitleHighlight" alphaMode="ADD" setAllPoints="true" hidden="true"/>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture parentKey="Check" file="Interface\Common\UI-DropDownRadioChecks">
+					<Size x="16" y="16"/>
+					<Anchors>
+						<Anchor point="LEFT">
+							<Offset x="0" y="0"/>
+						</Anchor>
+					</Anchors>
+					<TexCoords left="0" right="0.5" top="0.5" bottom="1.0"/>
+				</Texture>
+				<Texture parentKey="Uncheck" file="Interface\Common\UI-DropDownRadioChecks">
+					<Size x="16" y="16"/>
+					<Anchors>
+						<Anchor point="LEFT">
+							<Offset x="0" y="0"/>
+						</Anchor>
+					</Anchors>
+					<TexCoords left="0.5" right="1.0" top="0.5" bottom="1.0"/>
+				</Texture>
+				<Texture parentKey="Icon" hidden="true">
+					<Size>
+						<AbsDimension x="16" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="RIGHT">
+							<Offset x="0" y="0"/>
+						</Anchor>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnEnter>
+				self.Highlight:Show()
+			</OnEnter>
+			<OnLeave>
+				self.Highlight:Hide()
+			</OnLeave>
+		</Scripts>
+		<ButtonText parentKey="normalText">
+			<Anchors>
+				<Anchor point="LEFT">
+					<Offset x="-5" y="0"/>
+				</Anchor>
+			</Anchors>
+		</ButtonText>
+		<NormalFont style="GameFontHighlightSmallLeft"/>
+		<HighlightFont style="GameFontHighlightSmallLeft"/>
+		<DisabledFont style="GameFontDisableSmallLeft"/>
+	</Button>
+
+	<Frame name="MJMenuDropDownSearchTemplate" inherits="UIDropDownCustomMenuEntryTemplate" mixin="MJDropDownSearchMixin" virtual="true">
+		<Frames>
+			<EditBox inherits="SearchBoxTemplate" parentKey="searchBox" letters="40">
+				<Size y="20"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="5" y="-3"/>
+					<Anchor point="TOPRIGHT" x="3"/>
+				</Anchors>
+			</EditBox>
+			<ScrollFrame parentKey="listScroll" inherits="HybridScrollFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.searchBox" relativePoint="BOTTOMLEFT" x="-5" y="-3"/>
+					<Anchor point="BOTTOMRIGHT" x="-28" y="3"/>
+				</Anchors>
+				<Frames>
+					<Slider parentKey="scrollBar" inherits="HybridScrollBarTrimTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="10" y="-18"/>
+							<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="10" y="15"/>
+						</Anchors>
+					</Slider>
+				</Frames>
+			</ScrollFrame>
+		</Frames>
+		<Scripts>
+			<OnLoad method="onLoad"/>
+			<OnShow method="onShow"/>
+		</Scripts>
+	</Frame>
+
 	<DropDownToggleButton name="MJMenuButtonProfiles" inherits="MJMenuButtonStreatchTemplate" mixin="MJProfilesMixin" virtual="true">
 		<Size x="130" y="22"/>
+		<Frames>
+			<Frame parentKey="searchMenuFrame" inherits="MJMenuDropDownSearchTemplate"/>
+			<Frame parentKey="searchListFrame" inherits="MJMenuDropDownSearchTemplate"/>
+		</Frames>
 		<Scripts>
 			<OnLoad method="onLoad"/>
 			<OnClick method="onClick"/>
