@@ -117,6 +117,7 @@ function MJDropDownSearchMixin:refresh()
 			end
 
 			btn:SetScript("OnClick", function(btn)
+				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 				if type(info.func) == "function" then info.func(btn, btn.arg1, btn.arg2) end
 				if not btn.keepShownOnClick then
 					self:GetOwningDropdown():Hide()
