@@ -22,7 +22,7 @@ end
 
 function MJDropDownSearchMixin:OnSetOwningButton()
 	local listFrame = self:GetOwningDropdown()
-	self:SetFrameLevel(listFrame:GetFrameLevel() + 2)
+	self:SetFrameLevel(listFrame:GetFrameLevel() + 3)
 	local spaceInfo = {
 		notCheckable = true,
 		disabled = true,
@@ -31,10 +31,10 @@ function MJDropDownSearchMixin:OnSetOwningButton()
 	for i = 1, self.numButtons - 1 do
 		UIDropDownMenu_AddButton(spaceInfo, level)
 	end
-	if #self.listScroll.buttons > 1 then
+	if #self.listScroll.buttons ~= 0 then
+		local btn = self.listScroll.buttons[1]
 		for _, info in ipairs(self.buttons) do
 			if info.text then
-				local btn = self.listScroll.buttons[1]
 				btn:SetText(info.text)
 				local width = btn.normalText:GetWidth() + 50
 
@@ -42,7 +42,6 @@ function MJDropDownSearchMixin:OnSetOwningButton()
 					width = width - 20
 				end
 
-				local listFrame = self:GetOwningDropdown()
 				if listFrame.maxWidth < width then
 					listFrame.maxWidth = width
 					self:SetWidth(width)
@@ -52,7 +51,7 @@ function MJDropDownSearchMixin:OnSetOwningButton()
 	end
 	HybridScrollFrame_ScrollToIndex(self.listScroll, 1, function() return 0 end)
 	self.searchBox:SetText("")
-	self:refresh()
+	self:updateFilters()
 end
 
 
