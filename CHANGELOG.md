@@ -1,1 +1,1 @@
-* Added support for a large number of profiles.
+* Fixed refresh list profiles.
