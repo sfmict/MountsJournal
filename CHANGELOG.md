@@ -1,1 +1,1 @@
-* Fixed refresh list profiles.
+* Added auto scroll to selected profile.
