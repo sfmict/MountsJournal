@@ -27,35 +27,21 @@ function MJDropDownSearchMixin:OnSetOwningButton()
 		notCheckable = true,
 		disabled = true,
 	}
-	local level = (tonumber(listFrame:GetName():match("%d+")))
+	local level = tonumber(listFrame:GetName():match("%d+"))
 	for i = 1, self.numButtons - 1 do
 		UIDropDownMenu_AddButton(spaceInfo, level)
 	end
-	if #self.listScroll.buttons ~= 0 then
-		local btn = self.listScroll.buttons[1]
-		for _, info in ipairs(self.buttons) do
-			if info.text then
-				btn:SetText(info.text)
-				local width = btn.normalText:GetWidth() + 50
-
-				if info.notCheckable then
-					width = width - 20
-				end
-
-				if listFrame.maxWidth < width then
-					listFrame.maxWidth = width
-					self:SetWidth(width)
-				end
-			end
-		end
+	if listFrame.maxWidth < self.width then
+		listFrame.maxWidth = self.width
 	end
-	HybridScrollFrame_ScrollToIndex(self.listScroll, 1, function() return 0 end)
+	self:SetWidth(self.width)
 	self.searchBox:SetText("")
-	self:updateFilters()
 end
 
 
 function MJDropDownSearchMixin:reset()
+	self.index = 1
+	self.width = 0
 	wipe(self.buttons)
 end
 
@@ -63,7 +49,11 @@ end
 function MJDropDownSearchMixin:onShow()
 	self:SetPoint("TOPRIGHT", self.owningButton, "TOPRIGHT")
 	local listFrame = self:GetOwningDropdown()
-	listFrame:SetHeight((listFrame.numButtons * UIDROPDOWNMENU_BUTTON_HEIGHT) + (UIDROPDOWNMENU_BORDER_HEIGHT * 2))
+	listFrame:SetHeight(listFrame.numButtons * UIDROPDOWNMENU_BUTTON_HEIGHT + UIDROPDOWNMENU_BORDER_HEIGHT * 2)
+	self:updateFilters()
+	HybridScrollFrame_ScrollToIndex(self.listScroll, self.index, function()
+		return self.listScroll.buttonHeight
+	end)
 end
 
 
@@ -94,6 +84,7 @@ function MJDropDownSearchMixin:refresh()
 			btn.keepShownOnClick = info.keepShownOnClick
 			btn.arg1 = info.arg1
 			btn.arg2 = info.arg2
+			btn.func = info.func
 
 			if info.text then
 				btn:SetText(info.text)
@@ -118,7 +109,7 @@ function MJDropDownSearchMixin:refresh()
 
 			btn:SetScript("OnClick", function(btn)
 				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-				if type(info.func) == "function" then info.func(btn, btn.arg1, btn.arg2) end
+				if type(btn.func) == "function" then btn:func(btn.arg1, btn.arg2) end
 				if not btn.keepShownOnClick then
 					self:GetOwningDropdown():Hide()
 				else
@@ -147,4 +138,24 @@ function MJDropDownSearchMixin:addButton(info)
 		checked = info.checked,
 		func = info.func,
 	})
+
+	local btn = self.listScroll.buttons[1]
+	if btn then
+		if info.text then
+			btn:SetText(info.text)
+			local width = btn.normalText:GetWidth() + 50
+
+			if info.notCheckable then
+				width = width - 20
+			else
+				local checked = info.checked
+				if type(checked) == "function" then checked = checked(info) end
+				if checked then self.index = #self.buttons end
+			end
+
+			if self.width < width then
+				self.width = width
+			end
+		end
+	end
 end

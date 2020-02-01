@@ -178,6 +178,9 @@ function journal:ADDON_LOADED(addonName)
 			self:updateMountsList()
 			MountJournal_UpdateMountList()
 			self:updateMapSettings()
+
+			self.mountListUpdateAnim:Stop()
+			self.mountListUpdateAnim:Play()
 		end)
 		self.rightInset:SetPoint("TOPRIGHT", navBarBtn, "BOTTOMRIGHT", -4, 0)
 
@@ -223,6 +226,9 @@ function journal:ADDON_LOADED(addonName)
 			self:updateMapSettings()
 			mounts:setMountsList()
 			self.existingsLists:refresh()
+
+			self.mountListUpdateAnim:Stop()
+			self.mountListUpdateAnim:Play()
 		end)
 		UIDropDownMenu_Initialize(mapSettings.listFromMap.optionsMenu, self.listFromMapInit, "MENU")
 
@@ -284,6 +290,9 @@ function journal:ADDON_LOADED(addonName)
 			MountJournal_UpdateMountList()
 			self:updateMapSettings()
 			self.existingsLists:refresh()
+
+			self.mountListUpdateAnim:Stop()
+			self.mountListUpdateAnim:Play()
 		end)
 
 		-- SELECTED BUTTONS
@@ -752,9 +761,6 @@ function journal:setEditMountsList()
 		self.currentList = self.db.zoneMounts[mapID]
 		self.list, self.listMapID = getRelationMountList(mapID)
 	end
-
-	self.mountListUpdateAnim:Stop()
-	self.mountListUpdateAnim:Play()
 end
 
 
@@ -958,6 +964,9 @@ function journal:listFromMapInit(level)
 			mounts:setMountsList()
 			journal.existingsLists:refresh()
 			CloseDropDownMenus()
+
+			journal.mountListUpdateAnim:Stop()
+			journal.mountListUpdateAnim:Play()
 		end
 
 		for _, mapInfo in ipairs(list) do
