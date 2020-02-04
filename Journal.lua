@@ -1342,10 +1342,10 @@ function journal:setBtnFilters(tab)
 end
 
 
-function journal:setAllFilters(type, enabled)
-	local filters = mounts.filters[type]
-	for k in ipairs(filters) do
-		filters[k] = enabled
+function journal:setAllFilters(typeFilter, enabled)
+	local filter = mounts.filters[typeFilter]
+	for k in ipairs(filter) do
+		filter[k] = enabled
 	end
 end
 

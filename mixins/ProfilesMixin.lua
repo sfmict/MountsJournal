@@ -239,7 +239,6 @@ function MJProfilesMixin:menuInit(level)
 		info.notCheckable = nil
 		info.disabled = nil
 
-
 		if #btn.profilesNames > 20 then
 			btn.searchMenuFrame:reset()
 

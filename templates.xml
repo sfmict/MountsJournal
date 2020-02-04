@@ -244,6 +244,58 @@
 		</Backdrop>
 	</Frame>
 
+	<Frame name="MJHelpPlate" virtual="true">
+		<Size x="64" y="64"/>
+		<HitRectInsets>
+			<AbsInset left="20" right="20" top="20" bottom="20"/>
+		</HitRectInsets>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="I" file="Interface\common\help-i">
+					<Size x="46" y="46"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY">
+				<Texture parentKey="BigIPulse" file="Interface\common\help-i" alphaMode="ADD" hidden="true">
+					<Size x="46" y="46"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="RingPulse" file="Interface\TutorialFrame\minimap-glow" alphaMode="ADD" hidden="true">
+					<Size x="52" y="52"/>
+					<Anchors>
+						<Anchor point="CENTER" x="0" y="0"/>
+					</Anchors>
+				</Texture>
+				<Texture hidden="true" parentKey="highlight" alphaMode="ADD" file="Interface\Minimap\UI-Minimap-ZoomButton-Highlight">
+					<Size x="40" y="40"/>
+					<Anchors>
+						<Anchor point="CENTER" x="-1" y="0"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnEnter>
+				self.highlight:Show()
+				if self.tooltip then
+					GameTooltip:SetOwner(self, "ANCHOR_TOP", 0, -15)
+					GameTooltip:AddLine(self.tooltip, nil, nil, nil, true)
+					GameTooltip:AddLine(self.tooltipDescription, 1, 1, 1, 1, true)
+					GameTooltip:Show()
+				end
+			</OnEnter>
+			<OnLeave>
+				self.highlight:Hide()
+				GameTooltip:Hide()
+			</OnLeave>
+		</Scripts>
+	</Frame>
+
 	<CheckButton name="MJBaseCheckButtonTemplate" inherits="OptionsBaseCheckButtonTemplate" virtual="true">
 		<HitRectInsets>
 			<AbsInset left="0" right="0" top="0" bottom="0"/>

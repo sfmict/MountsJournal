@@ -1,14 +1,13 @@
-MJMacroMixin = {}
+local macroFrame = CreateFrame("FRAME")
 
 
-function MJMacroMixin:onEvent(event, ...)
-	if self[event] then
-		self[event](self, ...)
-	end
-end
+macroFrame:SetScript("OnEvent", function(self, event, ...)
+	self[event](self, ...)
+end)
+macroFrame:RegisterEvent("PLAYER_LOGIN")
 
 
-function MJMacroMixin:onLoad()
+function macroFrame:PLAYER_LOGIN()
 	self.mounts = MountsJournal
 	self.sFlags = self.mounts.sFlags
 	self.macrosConfig = self.mounts.config.macrosConfig
@@ -20,12 +19,11 @@ function MJMacroMixin:onLoad()
 		self.broomName = magicBroom:GetItemName()
 	end)
 
-	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:refresh()
 end
 
 
-function MJMacroMixin:setMacro()
+function macroFrame:setMacro()
 	self.macro = nil
 	if self.classConfig.macroEnable then
 		self.macro = self.classConfig.macro or self:getClassMacro(nil, "macro", function() self:setMacro() end)
@@ -33,7 +31,7 @@ function MJMacroMixin:setMacro()
 end
 
 
-function MJMacroMixin:setCombatMacro()
+function macroFrame:setCombatMacro()
 	self.combatMacro = nil
 	if self.classConfig.combatMacroEnable then
 		self.combatMacro = self.classConfig.combatMacro or self:getClassMacro(nil, "combatMacro", function() self:setCombatMacro() end)
@@ -41,14 +39,13 @@ function MJMacroMixin:setCombatMacro()
 end
 
 
-function MJMacroMixin:refresh()
+function macroFrame:refresh()
 	self.classConfig = self.charMacrosConfig.enable and self.charMacrosConfig or self.macrosConfig[self.class]
 	self:setMacro()
 	self:setCombatMacro()
 end
 
-
-function MJMacroMixin:addLine(text, line)
+function macroFrame:addLine(text, line)
 	if type(text) == "string" and text:len() > 0 then
 		return strjoin("\n", text, line)
 	else
@@ -59,7 +56,7 @@ end
 
 do
 	local spellIDtoName = {}
-	function MJMacroMixin:getSpellName(spellID, cbName, cb)
+	function macroFrame:getSpellName(spellID, cbName, cb)
 		if not spellIDtoName[spellID] then
 			local spell = Spell:CreateFromSpellID(spellID)
 			local name = spell:GetSpellName()
@@ -87,12 +84,12 @@ do
 end
 
 
-function MJMacroMixin:getDismountMacro()
+function macroFrame:getDismountMacro()
 	return self:addLine("/leavevehicle [vehicleui]", "/dismount [mounted]")
 end
 
 
-function MJMacroMixin:getDefMacro()
+function macroFrame:getDefMacro()
 	local macro
 
 	if self.class == "DEATHKNIGHT"
@@ -151,7 +148,7 @@ do
 	}
 
 
-	function MJMacroMixin:getClassMacro(class, ...)
+	function macroFrame:getClassMacro(class, ...)
 		local macro = self:getDismountMacro()
 
 		local classFunc = classFunc[class or self.class]
@@ -184,8 +181,7 @@ do
 	}
 
 
-	function MJMacroMixin:preClick()
-		if InCombatLockdown() then return end
+	function macroFrame:getMacro()
 		self.mounts:setFlags()
 		local macro
 
@@ -203,8 +199,7 @@ do
 				  or spellID == 783
 				  or self.sFlags.isIndoors and spellID == 768) then
 				macro = self:addLine(self:getDismountMacro(), "/cast "..self:getSpellName(self.lastDruidFormSpellID))
-				self:SetAttribute("macrotext", macro or "")
-				return
+				return macro or ""
 			end
 
 			if self.classConfig.useDruidFormSpecialization then
@@ -245,12 +240,12 @@ do
 			macro = self:getDefMacro()
 		end
 
-		self:SetAttribute("macrotext", macro or "")
+		return macro or ""
 	end
 end
 
 
-function MJMacroMixin:PLAYER_REGEN_DISABLED()
+function macroFrame:getCombatMacro()
 	local macro
 
 	if self.combatMacro then
@@ -259,5 +254,41 @@ function MJMacroMixin:PLAYER_REGEN_DISABLED()
 		macro = self.macro
 	end
 
-	self:SetAttribute("macrotext", macro or "/mount")
+	return macro or "/mount"
+end
+
+
+function MountsJournalUtil.getClassMacro(...)
+	return macroFrame:getClassMacro(...)
+end
+
+
+function MountsJournalUtil.refreshMacro()
+	macroFrame:refresh()
+end
+
+
+MJMacroMixin = {}
+
+
+function MJMacroMixin:onEvent(event, ...)
+	self[event](self, ...)
+end
+
+
+function MJMacroMixin:onLoad()
+	self.mounts = MountsJournal
+	self:RegisterEvent("PLAYER_REGEN_DISABLED")
+end
+
+
+function MJMacroMixin:preClick()
+	self.mounts.secondMount = self.secondMount
+	if InCombatLockdown() then return end
+	self:SetAttribute("macrotext", macroFrame:getMacro())
+end
+
+
+function MJMacroMixin:PLAYER_REGEN_DISABLED()
+	self:SetAttribute("macrotext", macroFrame:getCombatMacro())
 end

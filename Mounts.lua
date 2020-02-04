@@ -185,9 +185,17 @@ end
 
 
 function mounts:setModifier(modifier)
-	if util.inTable({"ALT", "CTRL", "SHIFT"}, modifier) then
+	if util.inTable({"ALT", "CTRL", "SHIFT", NONE}, modifier) then
 		self.config.modifier = modifier
-		self.modifier = modifier == "ALT" and IsAltKeyDown or modifier == "CTRL" and IsControlKeyDown or IsShiftKeyDown
+		if modifier == "ALT" then
+			self.modifier = IsAltKeyDown
+		elseif modifier == "CTRL" then
+			self.modifier = IsControlKeyDown
+		elseif modifier == "SHIFT" then
+			self.modifier = IsShiftKeyDown
+		else
+			self.modifier = function() return false end
+		end
 		return
 	end
 	self.config.modifier = "ALT"
@@ -381,7 +389,7 @@ end
 
 function mounts:setFlags()
 	local groundSpellKnown, flySpellKnown = self:getSpellKnown()
-	local modifier = self.modifier()
+	local modifier = self.modifier() or self.secondMount
 	local isSubmerged = IsSubmerged()
 	local isFloating = self:isFloating()
 	local instance = select(8, GetInstanceInfo())

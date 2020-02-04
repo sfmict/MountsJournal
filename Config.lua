@@ -2,7 +2,9 @@ local addon, L = ...
 local util, mounts, binding = MountsJournalUtil, MountsJournal, _G[addon.."Binding"]
 local config = CreateFrame("FRAME", "MountsJournalConfig", InterfaceOptionsFramePanelContainer)
 config.name = addon
-local secureButtonName = "MountsJournal_Mount"
+local macroName, secondMacroName = "MJMacro", "MJSecondMacro"
+local secureButtonNameMount = addon.."_Mount"
+local secureButtonNameSecondMount = addon.."_SecondMount"
 
 
 config:SetScript("OnEvent", function(self, event, ...)
@@ -17,9 +19,15 @@ config:RegisterEvent("PLAYER_LOGIN")
 do
 	local function setMacroText(self)
 		if not InCombatLockdown() then
-			local texture = select(2, GetMacroInfo("MJMacro"))
+			-- MACRO
+			local texture = select(2, GetMacroInfo(macroName))
 			if texture then
-				EditMacro("MJMacro", "MJMacro", texture, "/click "..secureButtonName)
+				EditMacro(macroName, macroName, texture, "/click "..secureButtonNameMount)
+			end
+			-- SECOND MACRO
+			texture = select(2, GetMacroInfo(secondMacroName))
+			if texture then
+				EditMacro(secondMacroName, secondMacroName, texture, "/click "..secureButtonNameSecondMount)
 			end
 		else
 			self:RegisterEvent("PLAYER_REGEN_ENABLED")
@@ -32,8 +40,9 @@ do
 	end
 
 	function config:PLAYER_LOGIN()
-		self.bindMount = binding:createButtonBinding(self, secureButtonName, "MJSecureActionButtonTemplate")
-		self.bindMount:SetSize(232, 22)
+		self.bindMount = binding:createButtonBinding(self, secureButtonNameMount, "MJSecureActionButtonTemplate")
+		self.bindSecondMount = binding:createButtonBinding(self, secureButtonNameSecondMount, "MJSecureActionButtonTemplate")
+		self.bindSecondMount.secure.secondMount = true
 		setMacroText(self)
 	end
 end
@@ -102,9 +111,50 @@ config:SetScript("OnShow", function(self)
 	leftPanel:SetPoint("TOPLEFT", self, 8, -67)
 	leftPanel:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", 300, 32)
 
+	-- WATER JUMP
+	self.waterJump = CreateFrame("CheckButton", nil, self, "MJCheckButtonTemplate")
+	self.waterJump:SetPoint("TOPLEFT", subtitle, "BOTTOMLEFT", 8, -20)
+	self.waterJump.Text:SetText(L["Handle a jump in water"])
+	self.waterJump.tooltipText = L["Handle a jump in water"]
+	self.waterJump.tooltipRequirement = L["WaterJumpDescription"]
+	self.waterJump:HookScript("OnClick", function() self.applyBtn:Enable() end)
+
+	-- SUMMON 1
+	local summon1 = self:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+	summon1:SetPoint("TOPLEFT", self.waterJump, "BOTTOMLEFT", 0, -20)
+	summon1:SetText(SUMMONS.." 1")
+
+	-- CREATE MACRO
+	local createMacroBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
+	createMacroBtn:SetSize(258, 30)
+	createMacroBtn:SetPoint("TOPLEFT", summon1, "BOTTOMLEFT", 0, -5)
+	createMacroBtn:SetText(L["CreateMacro"])
+	createMacroBtn:SetScript("OnClick", function() self:createMacro(macroName, secureButtonNameMount, 413588) end)
+
+	setTooltip(createMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
+
+	-- OR TEXT
+	local macroOrBind = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	macroOrBind:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -3)
+	macroOrBind:SetText(L["or key bind"])
+
+	-- BIND MOUNT
+	self.bindMount:SetSize(258, 22)
+	self.bindMount:SetPoint("TOPLEFT", createMacroBtn, "BOTTOMLEFT", 0, -20)
+	self.bindMount:on("SET_BINDING", function()
+		binding:setButtonText(self.bindSecondMount)
+		self.applyBtn:Enable()
+	end)
+
+	-- HELP PLATE
+	local helpPlate = CreateFrame("FRAME", nil, self, "MJHelpPlate")
+	helpPlate:SetPoint("TOP", self.bindMount, "BOTTOM", 0, -20)
+	helpPlate.tooltip = format(L["SecondMountTooltipTitle"], SUMMONS)
+	helpPlate.tooltipDescription = L["SecondMountTooltipDescription"]
+
 	-- MODIFIER TEXT
 	local modifierText = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	modifierText:SetPoint("TOPLEFT", subtitle, "BOTTOMLEFT", 8, -20)
+	modifierText:SetPoint("TOPLEFT", self.bindMount, "BOTTOMLEFT", 0, -80)
 	modifierText:SetText(L["Modifier"]..":")
 
 	-- MODIFIER COMBOBOX
@@ -115,9 +165,9 @@ config:SetScript("OnShow", function(self)
 
 	UIDropDownMenu_Initialize(modifierCombobox, function(self, level, menuList)
 		local info = UIDropDownMenu_CreateInfo()
-		for i, modifier in ipairs({"ALT", "CTRL", "SHIFT"}) do
+		for i, modifier in ipairs({"ALT", "CTRL", "SHIFT", NONE}) do
 			info.checked = nil
-			info.text = modifier.." key"
+			info.text = modifier
 			info.value = modifier
 			info.func = function(self)
 				UIDropDownMenu_SetSelectedValue(modifierCombobox, self.value)
@@ -127,65 +177,37 @@ config:SetScript("OnShow", function(self)
 		end
 	end)
 
-	setTooltip(modifierCombobox, "ANCHOR_TOPLEFT", L["Modifier"], L["ModifierDescription"])
+	-- SUMMON 2
+	local summon2 = self:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+	summon2:SetPoint("TOPLEFT", modifierText, "BOTTOMLEFT", 0, -20)
+	summon2:SetText(SUMMONS.." 2")
 
-	-- WATER JUMP
-	self.waterJump = CreateFrame("CheckButton", nil, self, "MJCheckButtonTemplate")
-	self.waterJump:SetPoint("TOPLEFT", modifierText, "BOTTOMLEFT", 0, -10)
-	self.waterJump.Text:SetText(L["Handle a jump in water"])
-	self.waterJump.tooltipText = L["Handle a jump in water"]
-	self.waterJump.tooltipRequirement = L["WaterJumpDescription"]
-	self.waterJump:HookScript("OnClick", function() self.applyBtn:Enable() end)
+	-- CREATE SECOND MACRO
+	local createSecondMacroBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
+	createSecondMacroBtn:SetSize(258, 30)
+	createSecondMacroBtn:SetPoint("TOPLEFT", summon2, "BOTTOMLEFT", 0, -5)
+	createSecondMacroBtn:SetText(L["CreateMacro"])
+	createSecondMacroBtn:SetScript("OnClick", function() self:createMacro(secondMacroName, secureButtonNameSecondMount, 631718) end)
 
-	-- CREATE MACRO
-	local createMacroBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
-	createMacroBtn:SetSize(232, 40)
-	createMacroBtn:SetPoint("TOPLEFT", self.waterJump, "BOTTOMLEFT", 0, -25)
-	createMacroBtn:SetText(L["CreateMacro"])
-	createMacroBtn:SetScript("OnClick", function()
-		local macroName = "MJMacro"
-		DeleteMacro(macroName)
-		CreateMacro(macroName, select(3, GetSpellInfo(150544)), "/click "..secureButtonName)
+	setTooltip(createSecondMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
 
-		if not IsAddOnLoaded("Blizzard_MacroUI") then
-			LoadAddOn("Blizzard_MacroUI")
-		end
+	-- OR TEXT SECOND
+	local macroOrBindSecond = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	macroOrBindSecond:SetPoint("TOP", createSecondMacroBtn, "BOTTOM", 0, -3)
+	macroOrBindSecond:SetText(L["or key bind"])
 
-		if MacroFrame:IsShown() then
-			MacroFrame_Update()
-		else
-			self:okay()
-			local b_CanOpenPanels = CanOpenPanels
-			CanOpenPanels = function() return 1 end
-			ShowUIPanel(MacroFrame, 1)
-			CanOpenPanels = b_CanOpenPanels
-		end
-
-		if MacroFrame.selectedTab ~= 1 then
-			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			PanelTemplates_SetTab(MacroFrame, MacroFrameTab1:GetID())
-			MacroFrame_SaveMacro()
-			MacroFrame_SetAccountMacros()
-		end
-
-		local index = GetMacroIndexByName(macroName)
-		local line = ceil(index / 6)
-		MacroButtonScrollFrame:SetVerticalScroll(line < 3 and 0 or 46 * (line - 2))
-		MacroButton_OnClick(_G["MacroButton"..index])
+	-- BIND SECOND MOUNT
+	self.bindSecondMount:SetSize(258, 22)
+	self.bindSecondMount:SetPoint("TOP", createSecondMacroBtn, "BOTTOM", 0, -20)
+	self.bindSecondMount:on("SET_BINDING", function()
+		binding:setButtonText(self.bindMount)
+		self.applyBtn:Enable()
 	end)
 
-	setTooltip(createMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
-
-	-- OR TEXT
-	local macroOrBind = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	macroOrBind:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -3)
-	macroOrBind:SetText(L["or key bind"])
-
-	-- BIND MOUNT
-	self.bindMount:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -20)
-	self.bindMount.unboundMessage:SetSize(500, 10)
-	self.bindMount.unboundMessage:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 14, 14)
-	self.bindMount:on("SET_BINDING", function() self.applyBtn:Enable() end)
+	-- UNBOUND MESSAGE
+	binding.unboundMessage:SetParent(self)
+	binding.unboundMessage:SetSize(500, 10)
+	binding.unboundMessage:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 14, 14)
 
 	-- RIGHT PANEL
 	local rightPanel = CreateFrame("FRAME", nil, self, "MJOptionsPanel")
@@ -258,9 +280,10 @@ config:SetScript("OnShow", function(self)
 	local function refresh(self)
 		if not self:IsVisible() then return end
 		UIDropDownMenu_SetSelectedValue(modifierCombobox, mounts.config.modifier)
-		UIDropDownMenu_SetText(modifierCombobox, mounts.config.modifier.." key")
+		UIDropDownMenu_SetText(modifierCombobox, mounts.config.modifier)
 		self.waterJump:SetChecked(mounts.config.waterJump)
 		binding:setButtonText(self.bindMount)
+		binding:setButtonText(self.bindSecondMount)
 		self.useHerbMounts:SetChecked(mounts.config.useHerbMounts)
 		for _, child in ipairs(self.useHerbMounts.childs) do
 			child:SetEnabled(mounts.config.useHerbMounts)
@@ -272,6 +295,10 @@ config:SetScript("OnShow", function(self)
 		self.applyBtn:Disable()
 	end
 
+	self:SetScript("OnHide", function(self)
+		self:cancel()
+		binding.unboundMessage:Hide()
+	end)
 	self:SetScript("OnShow", refresh)
 	refresh(self)
 end)
@@ -281,6 +308,37 @@ function config:setEnableCheckButtons(enable, tbl)
 	for _, check in ipairs(tbl) do
 		check:SetEnabled(enable)
 	end
+end
+
+function config:createMacro(macroName, buttonName, texture)
+	DeleteMacro(macroName)
+	CreateMacro(macroName, texture, "/click "..buttonName)
+
+	if not IsAddOnLoaded("Blizzard_MacroUI") then
+		LoadAddOn("Blizzard_MacroUI")
+	end
+
+	if MacroFrame:IsShown() then
+		MacroFrame_Update()
+	else
+		self:okay()
+		local b_CanOpenPanels = CanOpenPanels
+		CanOpenPanels = function() return 1 end
+		ShowUIPanel(MacroFrame, 1)
+		CanOpenPanels = b_CanOpenPanels
+	end
+
+	if MacroFrame.selectedTab ~= 1 then
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		PanelTemplates_SetTab(MacroFrame, MacroFrameTab1:GetID())
+		MacroFrame_SaveMacro()
+		MacroFrame_SetAccountMacros()
+	end
+
+	local index = GetMacroIndexByName(macroName)
+	local line = ceil(index / 6)
+	MacroButtonScrollFrame:SetVerticalScroll(line < 3 and 0 or 46 * (line - 2))
+	MacroButton_OnClick(_G["MacroButton"..index])
 end
 
 
