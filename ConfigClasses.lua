@@ -1,5 +1,5 @@
 local addon, L = ...
-local util, mounts, config = MountsJournalUtil, MountsJournal, MountsJournalConfig
+local util, mounts = MountsJournalUtil, MountsJournal
 local classConfig = CreateFrame("Frame", "MountsJournalConfigClasses", InterfaceOptionsFramePanelContainer)
 classConfig.name = L["Class settings"]
 classConfig.parent = addon
@@ -8,7 +8,6 @@ classConfig.parent = addon
 classConfig:SetScript("OnShow", function(self)
 	self.macrosConfig = mounts.config.macrosConfig
 	self.charMacrosConfig = mounts.charDB.macrosConfig
-	self.secure = config.bindMount.secure
 
 	-- ADDON INFO
 	local info = classConfig:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
@@ -51,8 +50,8 @@ classConfig:SetScript("OnShow", function(self)
 		end
 		lastClassFrame = classFrame
 		classFrame.key = className
-		classFrame.default = self.secure:getClassMacro(className, "config"..className, function()
-			classFrame.default = self.secure:getClassMacro(className)
+		classFrame.default = util.getClassMacro(className, "config"..className, function()
+			classFrame.default = util.getClassMacro(className)
 			if self.rightPanel and self.rightPanel.currentBtn == classFrame then
 				classFrame:Click()
 			end
@@ -77,8 +76,8 @@ classConfig:SetScript("OnShow", function(self)
 	local classFrame = CreateFrame("BUTTON", nil, classConfig, "MJClassButtonTemplate")
 	classFrame:SetPoint("TOPLEFT", lastClassFrame, "BOTTOMLEFT", 0, -20)
 	classFrame.key = playerClassName
-	classFrame.default = self.secure:getClassMacro(playerClassName, "character", function()
-		classFrame.default = self.secure:getClassMacro(className)
+	classFrame.default = util.getClassMacro(playerClassName, "character", function()
+		classFrame.default = util.getClassMacro(playerClassName)
 		if self.rightPanel and self.rightPanel.currentBtn == classFrame then
 			classFrame:Click()
 		end
@@ -94,6 +93,9 @@ classConfig:SetScript("OnShow", function(self)
 		self.currentMacrosConfig = self.charMacrosConfig
 		self:showClassSettings(btn)
 	end)
+	if self.charMacrosConfig.enable then
+		firstClassFrame = classFrame
+	end
 
 	-- CURRENT CHARACTER ENABLE
 	local charCheck = CreateFrame("CHECKBUTTON", nil, classFrame, "MJBaseCheckButtonTemplate")
@@ -101,7 +103,7 @@ classConfig:SetScript("OnShow", function(self)
 	charCheck:SetChecked(self.charMacrosConfig.enable)
 	charCheck:HookScript("OnClick", function(btn)
 		self.charMacrosConfig.enable = btn:GetChecked()
-		self.secure:refresh()
+		util.refreshMacro()
 	end)
 
 	-- RIGHT PANEL
@@ -138,13 +140,13 @@ classConfig:SetScript("OnShow", function(self)
 	moveFallMF.lable:SetText(L["HELP_MACRO_MOVE_FALL"])
 	moveFallMF.enable:HookScript("OnClick", function(btn)
 		self.currentMacrosConfig.macroEnable = btn:GetChecked()
-		self.secure:refresh()
+		util.refreshMacro()
 	end)
 	moveFallMF.defaultBtn:HookScript("OnClick", function()
 		self.macroEditBox:SetText(self.rightPanel.currentBtn.default)
 		self.macroEditBox:ClearFocus()
 		self.currentMacrosConfig.macro = nil
-		self.secure:refresh()
+		util.refreshMacro()
 	end)
 	moveFallMF.cancelBtn:HookScript("OnClick", function()
 		self.macroEditBox:SetText(self.currentMacrosConfig.macro or self.rightPanel.currentBtn.default)
@@ -152,7 +154,7 @@ classConfig:SetScript("OnShow", function(self)
 	end)
 	moveFallMF.saveBtn:HookScript("OnClick", function()
 		self:macroSave()
-		self.secure:refresh()
+		util.refreshMacro()
 	end)
 
 	-- COMBAT MACRO
@@ -163,13 +165,13 @@ classConfig:SetScript("OnShow", function(self)
 	combatMF.lable:SetText(L["HELP_MACRO_COMBAT"])
 	combatMF.enable:HookScript("OnClick", function(btn)
 		self.currentMacrosConfig.combatMacroEnable = btn:GetChecked()
-		self.secure:refresh()
+		util.refreshMacro()
 	end)
 	combatMF.defaultBtn:HookScript("OnClick", function()
 		self.combatMacroEditBox:SetText(self.rightPanel.currentBtn.default)
 		self.combatMacroEditBox:ClearFocus()
 		self.currentMacrosConfig.combatMacro = nil
-		self.secure:refresh()
+		util.refreshMacro()
 	end)
 	combatMF.cancelBtn:HookScript("OnClick", function()
 		self.combatMacroEditBox:SetText(self.currentMacrosConfig.combatMacro or self.rightPanel.currentBtn.default)
@@ -177,7 +179,7 @@ classConfig:SetScript("OnShow", function(self)
 	end)
 	combatMF.saveBtn:HookScript("OnClick", function()
 		self:combatMacroSave()
-		self.secure:refresh()
+		util.refreshMacro()
 	end)
 
 	firstClassFrame:Click()
@@ -228,7 +230,7 @@ do
 	local function optionClick(self, btn)
 		local isEnabled = btn:GetChecked()
 		self.currentMacrosConfig[btn.key] = isEnabled
-		self.secure:refresh()
+		util.refreshMacro()
 
 		if type(btn.childs) == "table" then
 			for _, childOption in ipairs(btn.childs) do
@@ -334,7 +336,7 @@ end
 classConfig.okay = function(self)
 	self:macroSave()
 	self:combatMacroSave()
-	self.secure:refresh()
+	util.refreshMacro()
 end
 
 

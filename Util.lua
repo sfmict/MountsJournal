@@ -2,7 +2,7 @@ MountsJournalEventsMixin = {}
 
 
 function MountsJournalEventsMixin:initEvents()
-	self.events = {}
+	self._events = {}
 end
 
 
@@ -10,10 +10,10 @@ function MountsJournalEventsMixin:on(event, func)
 	if type(event) ~= "string" or type(func) ~= "function" then return end
 	local event, name = strsplit(".", event, 2)
 
-	if not self.events[event] then
-		self.events[event] = {}
+	if not self._events[event] then
+		self._events[event] = {}
 	end
-	tinsert(self.events[event], {
+	tinsert(self._events[event], {
 		name = name,
 		func = func,
 	})
@@ -24,7 +24,7 @@ function MountsJournalEventsMixin:off(event, func)
 	if type(event) ~= "string" then return end
 	local event, name = strsplit(".", event)
 
-	local handlerList = self.events[event]
+	local handlerList = self._events[event]
 	if handlerList then
 		if name ~= nil or type(func) == "function" then
 			for i, handler in ipairs(handlerList) do
@@ -33,17 +33,17 @@ function MountsJournalEventsMixin:off(event, func)
 				end
 			end
 			if #handlerList == 0 then
-				self.events[event] = nil
+				self._events[event] = nil
 			end
 		else
-			self.events[event] = nil
+			self._events[event] = nil
 		end
 	end
 end
 
 
 function MountsJournalEventsMixin:event(event, ...)
-	local handlerList = self.events[event]
+	local handlerList = self._events[event]
 	if handlerList then
 		for _, handler in ipairs(handlerList) do
 			handler.func(self, ...)

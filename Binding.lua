@@ -5,6 +5,10 @@ binding.mode = 1
 binding:Hide()
 
 
+binding.unboundMessage = binding:CreateFontString(nil, "ARTWORK", "GameFontWhite")
+binding.unboundMessage:Hide()
+
+
 binding:SetScript("OnEvent", function(self)
 	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 	self.action(GetCurrentBindingSet())
@@ -14,8 +18,6 @@ end)
 function binding:createButtonBinding(parent, name, secureTemplate, macro)
 	local button = CreateFrame("Button", nil, parent, "UIMenuButtonStretchTemplate")
 	util.setEventsMixin(button)
-	button.unboundMessage = button:CreateFontString(nil, "ARTWORK", "GameFontWhite")
-	button.unboundMessage:Hide()
 	button.selectedHighlight = button:CreateTexture(nil, "OVERLAY")
 	button.selectedHighlight:SetTexture("Interface/Buttons/UI-Silver-Button-Select")
 	button.selectedHighlight:SetPoint("TOPLEFT", 0, -3)
@@ -28,7 +30,6 @@ function binding:createButtonBinding(parent, name, secureTemplate, macro)
 	if macro then button.secure:SetAttribute("macrotext", macro) end
 	button.command = "CLICK "..name..":LeftButton"
 	_G["BINDING_NAME_"..button.command] = name
-	button:SetScript("OnHide", function(self) self.unboundMessage:Hide() end)
 	button:SetScript("OnClick", function(self, key) binding:OnClick(self, key) end)
 	button:SetScript("OnMouseWheel", function(self, delta) binding:OnKeyDown(delta > 0 and "MOUSEWHEELUP" or "MOUSEWHEELDOWN") end)
 	self:setButtonText(button)
@@ -53,9 +54,9 @@ function binding:setSelected(button)
 	if button then
 		self.selected = button
 		self:Show()
+		self.unboundMessage:Hide()
 		button.selectedHighlight:Show()
 		button:GetHighlightTexture():SetAlpha(0)
-		button.unboundMessage:Hide()
 	else
 		if self.selected then
 			local button = self.selected
@@ -104,8 +105,8 @@ function binding:setBinding(key, selectedBinding)
 	if not InCombatLockdown() then
 		local oldAction = GetBindingAction(key, self.mode)
 		if oldAction ~= "" and oldAction ~= selectedBinding then
-			self.selected.unboundMessage:SetText(KEY_UNBOUND_ERROR:format(GetBindingName(oldAction)))
-			self.selected.unboundMessage:Show()
+			self.unboundMessage:SetText(KEY_UNBOUND_ERROR:format(GetBindingName(oldAction)))
+			self.unboundMessage:Show()
 		end
 
 		local oldKey = GetBindingKey(selectedBinding, self.mode)
