@@ -120,7 +120,7 @@ config:SetScript("OnShow", function(self)
 	self.waterJump:HookScript("OnClick", function() self.applyBtn:Enable() end)
 
 	-- SUMMON 1
-	local summon1 = self:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+	local summon1 = leftPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 	summon1:SetPoint("TOPLEFT", self.waterJump, "BOTTOMLEFT", 0, -20)
 	summon1:SetText(SUMMONS.." 1")
 
@@ -134,7 +134,7 @@ config:SetScript("OnShow", function(self)
 	setTooltip(createMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
 
 	-- OR TEXT
-	local macroOrBind = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	local macroOrBind = leftPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	macroOrBind:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -3)
 	macroOrBind:SetText(L["or key bind"])
 
@@ -153,7 +153,7 @@ config:SetScript("OnShow", function(self)
 	helpPlate.tooltipDescription = L["SecondMountTooltipDescription"]
 
 	-- MODIFIER TEXT
-	local modifierText = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	local modifierText = leftPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	modifierText:SetPoint("TOPLEFT", self.bindMount, "BOTTOMLEFT", 0, -80)
 	modifierText:SetText(L["Modifier"]..":")
 
@@ -165,9 +165,9 @@ config:SetScript("OnShow", function(self)
 
 	UIDropDownMenu_Initialize(modifierCombobox, function(self, level, menuList)
 		local info = UIDropDownMenu_CreateInfo()
-		for i, modifier in ipairs({"ALT", "CTRL", "SHIFT", NONE}) do
+		for i, modifier in ipairs({"ALT", "CTRL", "SHIFT", "NONE"}) do
 			info.checked = nil
-			info.text = modifier
+			info.text = _G[modifier.."_KEY"]
 			info.value = modifier
 			info.func = function(self)
 				UIDropDownMenu_SetSelectedValue(modifierCombobox, self.value)
@@ -178,7 +178,7 @@ config:SetScript("OnShow", function(self)
 	end)
 
 	-- SUMMON 2
-	local summon2 = self:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+	local summon2 = leftPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 	summon2:SetPoint("TOPLEFT", modifierText, "BOTTOMLEFT", 0, -20)
 	summon2:SetText(SUMMONS.." 2")
 
@@ -192,7 +192,7 @@ config:SetScript("OnShow", function(self)
 	setTooltip(createSecondMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
 
 	-- OR TEXT SECOND
-	local macroOrBindSecond = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	local macroOrBindSecond = leftPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	macroOrBindSecond:SetPoint("TOP", createSecondMacroBtn, "BOTTOM", 0, -3)
 	macroOrBindSecond:SetText(L["or key bind"])
 
@@ -277,10 +277,10 @@ config:SetScript("OnShow", function(self)
 	end)
 
 	-- REFRESH
-	local function refresh(self)
-		if not self:IsVisible() then return end
+	self.refresh = function(self)
+		binding.unboundMessage:Hide()
 		UIDropDownMenu_SetSelectedValue(modifierCombobox, mounts.config.modifier)
-		UIDropDownMenu_SetText(modifierCombobox, mounts.config.modifier)
+		UIDropDownMenu_SetText(modifierCombobox, _G[mounts.config.modifier.."_KEY"])
 		self.waterJump:SetChecked(mounts.config.waterJump)
 		binding:setButtonText(self.bindMount)
 		binding:setButtonText(self.bindSecondMount)
@@ -295,12 +295,7 @@ config:SetScript("OnShow", function(self)
 		self.applyBtn:Disable()
 	end
 
-	self:SetScript("OnHide", function(self)
-		self:cancel()
-		binding.unboundMessage:Hide()
-	end)
-	self:SetScript("OnShow", refresh)
-	refresh(self)
+	self:SetScript("OnShow", nil)
 end)
 
 
@@ -309,6 +304,7 @@ function config:setEnableCheckButtons(enable, tbl)
 		check:SetEnabled(enable)
 	end
 end
+
 
 function config:createMacro(macroName, buttonName, texture)
 	DeleteMacro(macroName)
@@ -343,6 +339,7 @@ end
 
 
 config.okay = function(self)
+	binding.unboundMessage:Hide()
 	mounts:setModifier(self.modifierCombobox.selectedValue)
 	binding:saveBinding()
 	mounts:setHandleWaterJump(self.waterJump:GetChecked())

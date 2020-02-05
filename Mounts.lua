@@ -185,7 +185,7 @@ end
 
 
 function mounts:setModifier(modifier)
-	if util.inTable({"ALT", "CTRL", "SHIFT", NONE}, modifier) then
+	if util.inTable({"ALT", "CTRL", "SHIFT", "NONE"}, modifier) then
 		self.config.modifier = modifier
 		if modifier == "ALT" then
 			self.modifier = IsAltKeyDown
