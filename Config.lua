@@ -165,9 +165,9 @@ config:SetScript("OnShow", function(self)
 
 	UIDropDownMenu_Initialize(modifierCombobox, function(self, level, menuList)
 		local info = UIDropDownMenu_CreateInfo()
-		for i, modifier in ipairs({"ALT", "CTRL", "SHIFT", NONE}) do
+		for i, modifier in ipairs({"ALT", "CTRL", "SHIFT", "NONE"}) do
 			info.checked = nil
-			info.text = modifier
+			info.text = _G[modifier.."_KEY"]
 			info.value = modifier
 			info.func = function(self)
 				UIDropDownMenu_SetSelectedValue(modifierCombobox, self.value)
@@ -280,7 +280,7 @@ config:SetScript("OnShow", function(self)
 	self.refresh = function(self)
 		binding.unboundMessage:Hide()
 		UIDropDownMenu_SetSelectedValue(modifierCombobox, mounts.config.modifier)
-		UIDropDownMenu_SetText(modifierCombobox, mounts.config.modifier)
+		UIDropDownMenu_SetText(modifierCombobox, _G[mounts.config.modifier.."_KEY"])
 		self.waterJump:SetChecked(mounts.config.waterJump)
 		binding:setButtonText(self.bindMount)
 		binding:setButtonText(self.bindSecondMount)
