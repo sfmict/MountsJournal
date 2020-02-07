@@ -296,50 +296,26 @@ function journal:ADDON_LOADED(addonName)
 		end)
 
 		-- SELECTED BUTTONS
-		local function CreateButton(name, parent, pointX, pointY, OnClick)
-			local btnFrame = CreateFrame("BUTTON", nil, parent)
+		local function btnClick(btn) self:mountToggle(btn) end
+
+		local function CreateButtonMountToggle(name, parent, pointX, pointY)
+			local btnFrame = CreateFrame("CheckButton", nil, parent, "MJSetMountToggleTemplate")
 			btnFrame:SetPoint("TOPRIGHT", pointX, pointY)
-			btnFrame:SetSize(24, 12)
-			btnFrame:SetScript("OnClick", OnClick)
+			btnFrame:SetScript("OnClick", btnClick)
 			btnFrame.type = name
 			parent[name] = btnFrame
-
-			btnFrame:SetNormalTexture(texPath.."button")
-			btnFrame:SetHighlightTexture(texPath.."button")
-			local background, hightlight = btnFrame:GetRegions()
-			background:SetTexCoord(0.00390625, 0.8203125, 0.00390625, 0.18359375)
-			background:SetVertexColor(0.2,0.18,0.01)
-			hightlight:SetTexCoord(0.00390625, 0.8203125, 0.19140625, 0.37109375)
-
-			btnFrame.check = btnFrame:CreateTexture(nil, "OVERLAY")
-			btnFrame.check:SetTexture(texPath.."button")
-			btnFrame.check:SetTexCoord(0.00390625, 0.8203125, 0.37890625, 0.55859375)
-			btnFrame.check:SetVertexColor(self.colors.gold:GetRGB())
-			btnFrame.check:SetAllPoints()
-
-			btnFrame.icon = btnFrame:CreateTexture(nil, "OVERLAY")
 			btnFrame.icon:SetTexture(texPath..name)
-			btnFrame.icon:SetSize(24, 12)
-			btnFrame.icon:SetPoint("CENTER")
-
-			btnFrame:SetScript("OnMouseDown", function(self)
-				self.icon:SetScale(.8)
-			end)
-			btnFrame:SetScript("OnMouseUp", function(self)
-				self.icon:SetScale(1)
-			end)
 		end
 
-		local function btnClick(btn) self:mountToggle(btn) end
 		for _, child in ipairs(self.scrollButtons) do
 			child:SetWidth(child:GetWidth() - 25)
 			child.name:SetWidth(child.name:GetWidth() - 18)
 			child.icon:SetPoint("LEFT", child, "LEFT", -41, 0)
 			child.icon:SetSize(40, 40)
 
-			CreateButton("fly", child, 25, -3, btnClick)
-			CreateButton("ground", child, 25, -17, btnClick)
-			CreateButton("swimming", child, 25, -31, btnClick)
+			CreateButtonMountToggle("fly", child, 25, -3)
+			CreateButtonMountToggle("ground", child, 25, -17)
+			CreateButtonMountToggle("swimming", child, 25, -31)
 
 			child:HookScript("OnClick", function(btn, mouseBtn) self:mountDblClick(btn.index, mouseBtn) end)
 		end
@@ -773,20 +749,18 @@ function journal:configureJournal()
 	local function setColor(btn, mountsTbl)
 		if mountsTbl and util.inTable(mountsTbl, btn.mountID) then
 			btn.icon:SetVertexColor(self.colors.gold:GetRGB())
-			if not btn.check:IsShown() then btn.check:Show() end
+			btn:SetChecked(true)
 		else
 			btn.icon:SetVertexColor(self.colors.gray:GetRGB())
-			if btn.check:IsShown() then btn.check:Hide() end
+			btn:SetChecked(false)
 		end
 	end
 
 	for _, btn in ipairs(self.scrollButtons) do
 		if btn.index then
-			if not btn.fly:IsShown() then
-				btn.fly:Show()
-				btn.ground:Show()
-				btn.swimming:Show()
-			end
+			btn.fly:Enable()
+			btn.ground:Enable()
+			btn.swimming:Enable()
 			btn.fly.mountID = select(12, C_MountJournal.GetDisplayedMountInfo(btn.index))
 			btn.ground.mountID = btn.fly.mountID
 			btn.swimming.mountID = btn.fly.mountID
@@ -794,11 +768,9 @@ function journal:configureJournal()
 			setColor(btn.ground, self.list and self.list.ground)
 			setColor(btn.swimming, self.list and self.list.swimming)
 		else
-			if btn.fly:IsShown() then
-				btn.fly:Hide()
-				btn.ground:Hide()
-				btn.swimming:Hide()
-			end
+			btn.fly:Disable()
+			btn.ground:Disable()
+			btn.swimming:Disable()
 		end
 	end
 
@@ -868,12 +840,10 @@ function journal:mountToggle(btn)
 	if pos then
 		tremove(tbl, pos)
 		btn.icon:SetVertexColor(self.colors.gray:GetRGB())
-		btn.check:Hide()
 		self:getRemoveMountList(self.listMapID)
 	else
 		tinsert(tbl, btn.mountID)
 		btn.icon:SetVertexColor(self.colors.gold:GetRGB())
-		btn.check:Show()
 	end
 
 	mounts:setMountsList()

@@ -234,6 +234,53 @@
 		<CheckedTexture file="Interface/Buttons/CheckButtonHilight" alphaMode="ADD" alpha=".6"/>
 	</CheckButton>
 
+	<CheckButton name="MJSetMountToggleTemplate" virtual="true">
+		<Size x="24" y="12"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<Texture parentKey="icon">
+					<Size x="24" y="12"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<NormalTexture parentKey="normalTexture" file="Interface/AddOns/MountsJournal/textures/button">
+			<TexCoords left="0.00390625" right="0.8203125" top="0.00390625" bottom="0.18359375"/>
+			<Color r=".2" g=".18" b=".01"/>
+		</NormalTexture>
+		<HighlightTexture parentKey="highlight" file="Interface/AddOns/MountsJournal/textures/button">
+			<TexCoords left="0.00390625" right="0.8203125" top="0.19140625" bottom="0.37109375"/>
+		</HighlightTexture>
+		<CheckedTexture parentKey="check" file="Interface/AddOns/MountsJournal/textures/button">
+			<TexCoords left="0.00390625" right="0.8203125" top="0.37890625" bottom="0.55859375"/>
+			<Color r=".8" g=".6" b="0"/>
+		</CheckedTexture>
+		<Scripts>
+			<OnMouseDown>
+				if self:IsEnabled() then
+					self.icon:SetScale(.8)
+				end
+			</OnMouseDown>
+			<OnMouseUp>
+				if self:IsEnabled() then
+					self.icon:SetScale(1)
+				end
+			</OnMouseUp>
+			<OnEnable>
+				self.icon:SetVertexColor(.8, .6, .0)
+				self.normalTexture:SetVertexColor(.2, .18, .01)
+				self.check:SetAlpha(1)
+			</OnEnable>
+			<OnDisable>
+				self.icon:SetVertexColor(.3, .3, .3)
+				self.normalTexture:SetVertexColor(.1, .1, .1)
+				self.check:SetAlpha(0)
+			</OnDisable>
+		</Scripts>
+	</CheckButton>
+
 	<Frame name="MJOptionsPanel" virtual="true">
 		<Backdrop bgFile="Interface/ChatFrame/ChatFrameBackground" edgeFile="Interface/Tooltips/UI-Tooltip-border" tile="true">
 			<EdgeSize val="14"/>
