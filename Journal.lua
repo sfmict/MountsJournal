@@ -99,10 +99,11 @@ function journal:ADDON_LOADED(addonName)
 		self:UnregisterEvent("ADDON_LOADED")
 
 		local texPath = "Interface/AddOns/MountsJournal/textures/"
-		local scrollFrame = MountJournal.ListScrollFrame
 		local mountDisplay = MountJournal.MountDisplay
 		local modelScene = mountDisplay.ModelScene
-		self.scrollButtons = scrollFrame.buttons
+		self.searchBox = MountJournal.searchBox
+		self.scrollFrame = MountJournal.ListScrollFrame
+		self.scrollButtons = self.scrollFrame.buttons
 		self.leftInset = MountJournal.LeftInset
 		self.rightInset = MountJournal.RightInset
 		mounts.filters.types = mounts.filters.types or {true, true, true}
@@ -148,7 +149,7 @@ function journal:ADDON_LOADED(addonName)
 			slotButton:DesaturateHierarchy((effectsSuppressed or locked) and 1 or 0)
 		end)
 		self.leftInset:SetPoint("BOTTOMLEFT", MountJournal, "BOTTOMLEFT", 0, 26)
-		HybridScrollFrame_CreateButtons(scrollFrame, "MountListButtonTemplate", 44, 0)
+		HybridScrollFrame_CreateButtons(self.scrollFrame, "MountListButtonTemplate", 44, 0)
 		self.rightInset:SetPoint("BOTTOMLEFT", self.leftInset, "BOTTOMRIGHT", 20, 0)
 
 		-- NAVBAR BUTTON
@@ -317,6 +318,16 @@ function journal:ADDON_LOADED(addonName)
 			CreateButtonMountToggle("ground", child, 25, -17)
 			CreateButtonMountToggle("swimming", child, 25, -31)
 
+			child.grid3list = CreateFrame("BUTTON", nil, child, "MJGrid3MountListButtonTemplate")
+			child.grid3list:SetPoint("LEFT", -41, 0)
+			for i = 1, 3 do
+				local btn = child.grid3list["mount"..i]
+				btn.fly:SetScript("OnClick", btnClick)
+				btn.ground:SetScript("OnClick", btnClick)
+				btn.swimming:SetScript("OnClick", btnClick)
+				btn.DragButton:HookScript("OnClick", function(btn, mouseBtn) self:mountDblClick(btn:GetParent().index, mouseBtn) end)
+			end
+
 			child:HookScript("OnClick", function(btn, mouseBtn) self:mountDblClick(btn.index, mouseBtn) end)
 		end
 
@@ -326,8 +337,8 @@ function journal:ADDON_LOADED(addonName)
 		filtersPanel:SetPoint("TOPLEFT", navBar, "BOTTOMLEFT", -4, -4)
 		filtersPanel:SetSize(280, 29)
 
-		MountJournal.searchBox:SetPoint("TOPLEFT", filtersPanel, "TOPLEFT", 33, -4)
-		MountJournal.searchBox:SetSize(151, 20)
+		self.searchBox:SetPoint("TOPLEFT", filtersPanel, "TOPLEFT", 54, -4)
+		self.searchBox:SetSize(131, 20)
 		MountJournalFilterButton:SetPoint("TOPRIGHT", filtersPanel, "TOPRIGHT", -3, -4)
 
 		-- FILTERS SHOWN PANEL
@@ -348,8 +359,8 @@ function journal:ADDON_LOADED(addonName)
 		shownPanel.clear:SetScript("OnClick", function() self:clearAllFilters() end)
 
 		-- SCROLL FRAME
-		scrollFrame:SetPoint("TOPLEFT", self.leftInset, "TOPLEFT", 3, -5)
-		scrollFrame.scrollBar:SetPoint("TOPLEFT", scrollFrame, "TOPRIGHT", 1, -12)
+		self.scrollFrame:SetPoint("TOPLEFT", self.leftInset, "TOPLEFT", 3, -5)
+		self.scrollFrame.scrollBar:SetPoint("TOPLEFT", self.scrollFrame, "TOPRIGHT", 1, -12)
 
 		-- FILTERS BAR
 		local filtersBar = CreateFrame("FRAME", nil, filtersPanel, "MJFilterPanelTemplate")
@@ -436,7 +447,7 @@ function journal:ADDON_LOADED(addonName)
 		self.btnToggle.vertical = true
 		self.btnToggle:SetChecked(mounts.config.filterToggle)
 
-		local function setBtnToggleCheck()
+		function self.btnToggle:setBtnToggleCheck()
 			if mounts.config.filterToggle then
 				filtersPanel:SetHeight(84)
 				filtersBar:Show()
@@ -445,11 +456,33 @@ function journal:ADDON_LOADED(addonName)
 				filtersBar:Hide()
 			end
 		end
-		setBtnToggleCheck()
+		self.btnToggle:setBtnToggleCheck()
 
-		self.btnToggle:HookScript("OnClick", function(self)
-			mounts.config.filterToggle = self:GetChecked()
-			setBtnToggleCheck()
+		self.btnToggle:HookScript("OnClick", function(btn)
+			mounts.config.filterToggle = btn:GetChecked()
+			btn:setBtnToggleCheck()
+		end)
+
+		-- GRID TOGGLE BUTTON
+		self.gridToggleButton = CreateFrame("CheckButton", nil, filtersPanel, "MJGridToggle")
+		self.gridToggleButton:SetPoint("LEFT", self.btnToggle, "RIGHT", -2, 0)
+		self.gridToggleButton:SetChecked(mounts.config.gridToggle)
+
+		function self.gridToggleButton:setCoordIcon()
+			if self:GetChecked() then
+				self.icon:SetTexCoord(0, .625, 0, .25)
+			else
+				self.icon:SetTexCoord(0, .625, .28125, .5325)
+			end
+		end
+		self.gridToggleButton:setCoordIcon()
+
+		self.gridToggleButton:SetScript("OnClick", function(btn)
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+			local checked = btn:GetChecked()
+			mounts.config.gridToggle = checked
+			btn:setCoordIcon()
+			self:setScrollGridMounts(checked)
 		end)
 
 		-- MOUNT DESCRIPTION TOGGLE
@@ -697,7 +730,8 @@ function journal:ADDON_LOADED(addonName)
 		self:setSecureFunc(C_MountJournal, "GetDisplayedMountAllCreatureDisplayInfo")
 
 		hooksecurefunc("MountJournal_UpdateMountList", function() self:configureJournal() end)
-		scrollFrame.update = MountJournal_UpdateMountList
+		self.MountJournal_UpdateMountList = MountJournal_UpdateMountList
+		self:setScrollGridMounts(mounts.config.gridToggle)
 
 		local fullUpdate = MountJournal_FullUpdate
 		function MountJournal_FullUpdate(self)
@@ -712,6 +746,122 @@ function journal:ADDON_LOADED(addonName)
 		MountJournalFilterDropDown.initialize = function(_, level) self:filterDropDown_Initialize(level) end
 		self:setEditMountsList()
 	end
+end
+
+
+function journal:setScrollGridMounts(grid)
+	local scrollFrame = self.scrollFrame
+	if grid then
+		local offset = math.ceil((HybridScrollFrame_GetOffset(scrollFrame) + 1) / 3) - 1
+		local updateList = function() self:grid3UpdateMountList() end
+		scrollFrame.update = updateList
+		MountJournal_UpdateMountList = updateList
+
+		for _, btn in ipairs(scrollFrame.buttons) do
+			btn.DragButton:Hide()
+			btn.background:Hide()
+			btn.factionIcon:Hide()
+			btn.favorite:Hide()
+			btn.fly:Hide()
+			btn.ground:Hide()
+			btn.swimming:Hide()
+			btn.icon:Hide()
+			btn.name:Hide()
+			btn.new:Hide()
+			btn.newGlow:Hide()
+			btn.selectedTexture:Hide()
+			btn:Disable()
+			btn.grid3list:Show()
+		end
+
+		scrollFrame.update()
+		scrollFrame.scrollBar:SetValue(offset * scrollFrame.buttonHeight)
+	else
+		local offset = HybridScrollFrame_GetOffset(scrollFrame) * 3
+		scrollFrame.update = self.MountJournal_UpdateMountList
+		MountJournal_UpdateMountList = self.MountJournal_UpdateMountList
+
+		for _, btn in ipairs(scrollFrame.buttons) do
+			btn.DragButton:Show()
+			btn.background:Show()
+			btn.fly:Show()
+			btn.ground:Show()
+			btn.swimming:Show()
+			btn.icon:Show()
+			btn.name:Show()
+			btn:Enable()
+			btn.grid3list:Hide()
+		end
+
+		scrollFrame.update()
+		scrollFrame.scrollBar:SetValue(offset * scrollFrame.buttonHeight)
+	end
+end
+
+
+function journal:grid3UpdateMountList()
+	local scrollFrame = self.scrollFrame
+	local offset = HybridScrollFrame_GetOffset(scrollFrame)
+	local numButtons = #scrollFrame.buttons
+	local numDisplayedMounts = C_MountJournal.GetNumDisplayedMounts()
+
+	for i, btn in ipairs(scrollFrame.buttons) do
+		for j = 1, 3 do
+			local index = (offset + i - 1) * 3 + j
+			local btnGrid = btn.grid3list["mount"..j]
+
+			btnGrid.icon:SetVertexColor(1, 1, 1)
+
+			if index <= numDisplayedMounts then
+				local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected, mountID = C_MountJournal.GetDisplayedMountInfo(index)
+				local needsFanfare = C_MountJournal.NeedsFanfare(mountID)
+
+				btnGrid.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
+				btnGrid.index = index
+				btnGrid.spellID = spellID
+				btnGrid.active = active
+				btnGrid.favorite:SetShown(isFavorite)
+				btnGrid.DragButton:Enable()
+				btnGrid:Enable()
+				btnGrid:Show()
+
+				if MountJournal.selectedSpellID == spellID then
+					btnGrid.selected = true
+					btnGrid.DragButton.selectedTexture:Show()
+				else
+					btnGrid.selected = false
+					btnGrid.DragButton.selectedTexture:Hide()
+				end
+
+				if isUsable or needsFanfare then
+					btnGrid.icon:SetDesaturated()
+					btnGrid.icon:SetAlpha(1)
+				elseif isCollected then
+					btnGrid.icon:SetDesaturated(true)
+					btnGrid.icon:SetVertexColor(.58823529411765, .19607843137255, .19607843137255)
+					btnGrid.icon:SetAlpha(.75)
+				else
+					btnGrid.icon:SetDesaturated(true)
+					btnGrid.icon:SetAlpha(0.25)
+				end
+			else
+				btnGrid.icon:SetTexture("Interface\\PetBattles\\MountJournalEmptyIcon")
+				btnGrid.icon:SetDesaturated(true)
+				btnGrid.icon:SetVertexColor(.4, .4, .4)
+				btnGrid.icon:SetAlpha(0.5)
+				btnGrid.index = nil
+				btnGrid.spellID = 0
+				btnGrid.selected = false
+				btnGrid:Disable()
+				btnGrid.DragButton:SetEnabled(false)
+				btnGrid.DragButton.selectedTexture:Hide()
+				btnGrid.favorite:Hide()
+			end
+		end
+	end
+
+	HybridScrollFrame_Update(scrollFrame, scrollFrame.buttonHeight * math.ceil(numDisplayedMounts / 3), scrollFrame:GetHeight())
+	self:configureJournal(true)
 end
 
 
@@ -745,7 +895,7 @@ function journal:ACHIEVEMENT_EARNED()
 end
 
 
-function journal:configureJournal()
+function journal:updateMountToggleButton(btn)
 	local function setColor(btn, mountsTbl)
 		if mountsTbl and util.inTable(mountsTbl, btn.mountID) then
 			btn.icon:SetVertexColor(self.colors.gold:GetRGB())
@@ -756,21 +906,32 @@ function journal:configureJournal()
 		end
 	end
 
+	if btn.index then
+		btn.fly:Enable()
+		btn.ground:Enable()
+		btn.swimming:Enable()
+		btn.fly.mountID = select(12, C_MountJournal.GetDisplayedMountInfo(btn.index))
+		btn.ground.mountID = btn.fly.mountID
+		btn.swimming.mountID = btn.fly.mountID
+		setColor(btn.fly, self.list and self.list.fly)
+		setColor(btn.ground, self.list and self.list.ground)
+		setColor(btn.swimming, self.list and self.list.swimming)
+	else
+		btn.fly:Disable()
+		btn.ground:Disable()
+		btn.swimming:Disable()
+	end
+end
+
+
+function journal:configureJournal(isGrid)
 	for _, btn in ipairs(self.scrollButtons) do
-		if btn.index then
-			btn.fly:Enable()
-			btn.ground:Enable()
-			btn.swimming:Enable()
-			btn.fly.mountID = select(12, C_MountJournal.GetDisplayedMountInfo(btn.index))
-			btn.ground.mountID = btn.fly.mountID
-			btn.swimming.mountID = btn.fly.mountID
-			setColor(btn.fly, self.list and self.list.fly)
-			setColor(btn.ground, self.list and self.list.ground)
-			setColor(btn.swimming, self.list and self.list.swimming)
+		if isGrid then
+			for i = 1, 3 do
+				self:updateMountToggleButton(btn.grid3list["mount"..i])
+			end
 		else
-			btn.fly:Disable()
-			btn.ground:Disable()
-			btn.swimming:Disable()
+			self:updateMountToggleButton(btn)
 		end
 	end
 

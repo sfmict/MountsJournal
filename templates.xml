@@ -281,6 +281,114 @@
 		</Scripts>
 	</CheckButton>
 
+	<Button name="MJMountButtonTemplate" virtual="true">
+		<Size x="40" y="40"/>
+		<Layers>
+			<Layer level="BORDER">
+				<Texture parentKey="icon" setAllPoints="true"/>
+			</Layer>
+			<Layer level="OVERLAY">
+				<Texture parentKey="favorite" atlas="PetJournal-FavoritesIcon" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.icon" x="-8" y="8"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button parentKey="DragButton" motionScriptsWhileDisabled="true">
+				<Size x="40" y="40"/>
+				<Anchors>
+					<Anchor point="CENTER" relativeKey="$parent.icon" x="0" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture file="Interface\Buttons\CheckButtonHilight" parentKey="selectedTexture" alphaMode="ADD"/>
+					</Layer>
+				</Layers>
+				<HighlightTexture name="$parentHighlight" file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
+				<Scripts>
+					<OnClick>
+						MountListItem_OnClick(self:GetParent(), button)
+					</OnClick>
+					<OnEnter>
+						GameTooltip:SetOwner(self, "ANCHOR_LEFT");
+						local spellID = self:GetParent().spellID;
+						if (spellID) then
+							MountJournalMountButton_UpdateTooltip(self:GetParent());
+							self.showingTooltip = true;
+						end
+					</OnEnter>
+					<OnLeave>
+						GameTooltip:Hide();
+						self.showingTooltip = false;
+					</OnLeave>
+					<OnLoad>
+						self:RegisterForClicks("LeftButtonUp", "RightButtonUp");
+						self:RegisterForDrag("LeftButton");
+					</OnLoad>
+					<OnDragStart>
+						C_MountJournal.Pickup(self:GetParent().index);
+					</OnDragStart>
+				</Scripts>
+			</Button>
+			<CheckButton parentKey="fly" inherits="MJSetMountToggleTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="0"/>
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="type" value="fly" type="string"/>
+				</KeyValues>
+				<Scripts>
+					<OnLoad>self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/fly")</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<CheckButton parentKey="ground" inherits="MJSetMountToggleTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="-14"/>
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="type" value="ground" type="string"/>
+				</KeyValues>
+				<Scripts>
+					<OnLoad>self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/ground")</OnLoad>
+				</Scripts>
+			</CheckButton>
+			<CheckButton parentKey="swimming" inherits="MJSetMountToggleTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="-28"/>
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="type" value="swimming" type="string"/>
+				</KeyValues>
+				<Scripts>
+					<OnLoad>self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/swimming")</OnLoad>
+				</Scripts>
+			</CheckButton>
+		</Frames>
+	</Button>
+
+	<Button name="MJGrid3MountListButtonTemplate" hidden="true" virtual="true">
+		<Size x="249" y="46"/>
+		<Frames>
+			<Button parentKey="mount1" inherits="MJMountButtonTemplate">
+				<Anchors>
+					<Anchor point="LEFT" x="10" y=""/>
+				</Anchors>
+			</Button>
+			<Button parentKey="mount2" inherits="MJMountButtonTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.mount1" relativePoint="RIGHT" x="42" y="0"/>
+				</Anchors>
+			</Button>
+			<Button parentKey="mount3" inherits="MJMountButtonTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.mount2" relativePoint="RIGHT" x="42" y="0"/>
+				</Anchors>
+			</Button>
+		</Frames>
+	</Button>
+
 	<Frame name="MJOptionsPanel" virtual="true">
 		<Backdrop bgFile="Interface/ChatFrame/ChatFrameBackground" edgeFile="Interface/Tooltips/UI-Tooltip-border" tile="true">
 			<EdgeSize val="14"/>
@@ -908,6 +1016,38 @@
 				self:setPointArrow(self:GetChecked())
 				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			</OnClick>
+		</Scripts>
+	</CheckButton>
+
+	<CheckButton name="MJGridToggle" inherits="UIMenuButtonStretchTemplate" virtual="true">
+		<Size x="24" y="24"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture parentKey="icon" file="Interface/AddOns/MountsJournal/textures/grid">
+					<Size x="10" y="8"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+					<Color r=".74117647058824" g=".61960784313725" b=".062745098039216"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<HighlightTexture file="Interface/Buttons/UI-Common-MouseHilight" alpha="0.75" alphaMode="ADD"/>
+		<Scripts>
+			<OnMouseDown>
+				if self:IsEnabled() then
+					self:SetTextures("Interface/Buttons/UI-Silver-Button-Down")
+					local point, _,_, x, y = self.icon:GetPoint(1)
+					self.icon:SetPoint(point, x - 1, y - 1)
+				end
+			</OnMouseDown>
+			<OnMouseUp>
+				if self:IsEnabled() then
+					self:SetTextures("Interface/Buttons/UI-Silver-Button-Up")
+					local point, _,_, x, y = self.icon:GetPoint(1)
+					self.icon:SetPoint(point, x + 1, y + 1)
+				end
+			</OnMouseUp>
 		</Scripts>
 	</CheckButton>
 
