@@ -702,8 +702,8 @@ function journal:ADDON_LOADED(addonName)
 		local fullUpdate = MountJournal_FullUpdate
 		function MountJournal_FullUpdate(self)
 			if self:IsVisible() then
-				journal:updateBtnFilters()
 				journal:updateMountsList()
+				journal:updateBtnFilters()
 			end
 			fullUpdate(self)
 		end
@@ -1266,6 +1266,7 @@ function journal:clearAllFilters()
 	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
 	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
 	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, true)
+	self.searchBox:SetText("")
 	self:setAllFilters("factions", true)
 	self:setAllFilters("pet", true)
 	self:setAllFilters("expansions", true)
@@ -1321,29 +1322,26 @@ end
 
 
 function journal:updateBtnFilters()
-	local filtersBar, f = self.filtersBar, {}
+	local filtersBar, clearShow = self.filtersBar, false
 
 	-- TYPES AND SELECTED
 	for typeFilter, filter in pairs(mounts.filters) do
-		local default = typeFilter ~= "selected"
-		local i = 0
-		for _, v in ipairs(filter) do
-			if v == default then i = i + 1 end
-		end
+		if filtersBar[typeFilter] then
+			local default = typeFilter ~= "selected"
+			local i = 0
+			for _, v in ipairs(filter) do
+				if v == default then i = i + 1 end
+			end
 
-		if i == #filter then
-			if filtersBar[typeFilter] then
+			if i == #filter then
 				for _, btn in ipairs(filtersBar[typeFilter].childs) do
 					local color = default and self.colors["mount"..btn.id] or self.colors.dark
 					btn:SetChecked(false)
 					btn.icon:SetVertexColor(color:GetRGB())
 				end
 				filtersBar[typeFilter]:GetParent().filtred:Hide()
-			end
-		else
-			f[typeFilter] = true
-			f.checked = true
-			if filtersBar[typeFilter] then
+			else
+				clearShow = true
 				for _, btn in ipairs(filtersBar[typeFilter].childs) do
 					local checked = filter[btn.id]
 					local color = checked and self.colors["mount"..btn.id] or self.colors.dark
@@ -1374,8 +1372,7 @@ function journal:updateBtnFilters()
 		end
 		filtersBar.sources:GetParent().filtred:Hide()
 	else
-		f.sources = true
-		f.checked = true
+		clearShow = true
 		for _, btn in ipairs(filtersBar.sources.childs) do
 			btn:SetChecked(sources[btn.id])
 			btn.icon:SetDesaturated(not sources[btn.id])
@@ -1384,8 +1381,8 @@ function journal:updateBtnFilters()
 	end
 
 	-- CLEAR BTN FILTERS
-	filtersBar.clear:SetShown(f.types or f.selected or f.sources)
-	if not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED) or not C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE) or f.checked then
+	filtersBar.clear:SetShown(clearShow)
+	if self.mountCount.Count.num ~= #self.displayedMounts then
 		self.shownPanel:Show()
 		self.leftInset:SetPoint("TOPLEFT", self.shownPanel, "BOTTOMLEFT", 0, -2)
 	else
@@ -1398,8 +1395,8 @@ end
 
 
 function journal:mountsListFullUpdate()
-	self:updateBtnFilters()
 	self:updateMountsList()
+	self:updateBtnFilters()
 	MountJournal_UpdateMountList()
 end
 
