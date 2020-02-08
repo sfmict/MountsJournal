@@ -31,7 +31,7 @@
 					<Anchors>
 						<Anchor point="RIGHT" x="1" y="-2"/>
 					</Anchors>
-					<TexCoords left="0" right="0.5" top="0" bottom="0.5"/>
+					<TexCoords left="0" right=".5" top="0" bottom=".5"/>
 				</Texture>
 				<FontString parentKey="text" inherits="GameFontNormalLarge">
 					<Anchors>
@@ -64,14 +64,14 @@
 					<Anchors>
 						<Anchor point="TOPLEFT" x="0" y="2"/>
 					</Anchors>
-					<TexCoords left="0" right="1" top="0.25" bottom="1"/>
+					<TexCoords left="0" right="1" top=".25" bottom="1"/>
 				</Texture>
 				<Texture file="Interface/ChatFrame/ChatFrameTab-BGRight">
 					<Size x="16" y="24"/>
 					<Anchors>
 						<Anchor point="TOPRIGHT" x="0" y="2"/>
 					</Anchors>
-					<TexCoords left="0" right="1" top="0.25" bottom="1"/>
+					<TexCoords left="0" right="1" top=".25" bottom="1"/>
 				</Texture>
 				<Texture file="Interface/ChatFrame/ChatFrameTab-BGMid" horizTile="true">
 					<Size x="3" y="24"/>
@@ -79,7 +79,7 @@
 						<Anchor point="TOPLEFT" x="16" y="2"/>
 						<Anchor point="TOPRIGHT" x="-16" y="2"/>
 					</Anchors>
-					<TexCoords left="0" right="1" top="0.25" bottom="1"/>
+					<TexCoords left="0" right="1" top=".25" bottom="1"/>
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
@@ -96,8 +96,8 @@
 						<Anchor point="TOPLEFT" x="3" y="-6"/>
 						<Anchor point="BOTTOMRIGHT" x="-3" y="2"/>
 					</Anchors>
-					<TexCoords left="0" right="1" top="0.40625" bottom="0.75"/>
-					<Color r="1" g="1" b="0.75"/>
+					<TexCoords left="0" right="1" top=".40625" bottom=".75"/>
+					<Color r="1" g="1" b=".75"/>
 				</Texture>
 			</Layer>
 			<Layer level="HIGHLIGHT">
@@ -106,16 +106,16 @@
 					<Anchors>
 						<Anchor point="TOPLEFT" x="0" y="2"/>
 					</Anchors>
-					<TexCoords left="0" right="1" top="0.25" bottom="1"/>
-					<Color r="0.1" g="0.25" b="0.5"/>
+					<TexCoords left="0" right="1" top=".25" bottom="1"/>
+					<Color r=".1" g=".25" b=".5"/>
 				</Texture>
 				<Texture file="Interface/ChatFrame/ChatFrameTab-HighlightRight" alphaMode="ADD">
 					<Size x="16" y="24"/>
 					<Anchors>
 						<Anchor point="TOPRIGHT" x="0" y="2"/>
 					</Anchors>
-					<TexCoords left="0" right="1" top="0.25" bottom="1"/>
-					<Color r="0.1" g="0.25" b="0.5"/>
+					<TexCoords left="0" right="1" top=".25" bottom="1"/>
+					<Color r=".1" g=".25" b=".5"/>
 				</Texture>
 				<Texture file="Interface/ChatFrame/ChatFrameTab-HighlightMid" horizTile="true" alphaMode="ADD">
 					<Size x="3" y="24"/>
@@ -123,8 +123,8 @@
 						<Anchor point="TOPLEFT" x="16" y="2"/>
 						<Anchor point="TOPRIGHT" x="-16" y="2"/>
 					</Anchors>
-					<TexCoords left="0" right="1" top="0.25" bottom="1"/>
-					<Color r="0.1" g="0.25" b="0.5"/>
+					<TexCoords left="0" right="1" top=".25" bottom="1"/>
+					<Color r=".1" g=".25" b=".5"/>
 				</Texture>
 			</Layer>
 		</Layers>
@@ -137,7 +137,7 @@
 								<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" x="6" y="2"/>
 								<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" x="-6" y="-2"/>
 							</Anchors>
-							<Color r="0.065" g="0.065" b="0.065"/>
+							<Color r=".065" g=".065" b=".065"/>
 						</Texture>
 					</Layer>
 					<Layer level="OVERLAY">
@@ -146,16 +146,16 @@
 							<Anchors>
 								<Anchor point="TOPLEFT" x="2" y="0"/>
 							</Anchors>
-							<TexCoords left="0" right="1" top="0.25" bottom="1"/>
-							<Color r="0.8" g="0.6" b="0"/>
+							<TexCoords left="0" right="1" top=".25" bottom="1"/>
+							<Color r=".8" g=".6" b="0"/>
 						</Texture>
 						<Texture file="Interface/ChatFrame/ChatFrameTab-SelectedRight" alphaMode="ADD">
 							<Size x="16" y="24"/>
 							<Anchors>
 								<Anchor point="TOPRIGHT" x="-2" y="0"/>
 							</Anchors>
-							<TexCoords left="0" right="1" top="0.25" bottom="1"/>
-							<Color r="0.8" g="0.6" b="0"/>
+							<TexCoords left="0" right="1" top=".25" bottom="1"/>
+							<Color r=".8" g=".6" b="0"/>
 						</Texture>
 						<Texture file="Interface/ChatFrame/ChatFrameTab-SelectedMid" horizTile="true" alphaMode="ADD">
 							<Size x="3" y="24"/>
@@ -163,8 +163,8 @@
 								<Anchor point="TOPLEFT" x="18" y="0"/>
 								<Anchor point="TOPRIGHT" x="-18" y="0"/>
 							</Anchors>
-							<TexCoords left="0" right="1" top="0.25" bottom="1"/>
-							<Color r="0.8" g="0.6" b="0"/>
+							<TexCoords left="0" right="1" top=".25" bottom="1"/>
+							<Color r=".8" g=".6" b="0"/>
 						</Texture>
 					</Layer>
 				</Layers>
@@ -184,7 +184,7 @@
 		</HitRectInsets>
 		<Layers>
 			<Layer level="ARTWORK">
-				<Texture file="Interface/FriendsFrame/ClearBroadcastIcon" alpha="0.5" parentKey="texture">
+				<Texture file="Interface/FriendsFrame/ClearBroadcastIcon" alpha=".5" parentKey="texture">
 					<Size x="18" y="18"/>
 					<Anchors>
 						<Anchor point="TOPLEFT"/>
@@ -194,7 +194,7 @@
 		</Layers>
 		<Scripts>
 			<OnEnter>self.texture:SetAlpha(1)</OnEnter>
-			<OnLeave>self.texture:SetAlpha(0.5)</OnLeave>
+			<OnLeave>self.texture:SetAlpha(.5)</OnLeave>
 			<OnMouseDown>self.texture:SetPoint("TOPLEFT", 1, -1)</OnMouseDown>
 			<OnMouseUp>self.texture:SetPoint("TOPLEFT")</OnMouseUp>
 		</Scripts>
@@ -222,10 +222,10 @@
 
 	<CheckButton name="MJFilterButtonRectangleTemplate" inherits="MJFilterButtonTemplate" virtual="true">
 		<HighlightTexture parentKey="highlight" file="Interface/AddOns/MountsJournal/textures/button" alpha=".8">
-			<TexCoords left="0.00390625" right="0.8203125" top="0.19140625" bottom="0.37109375"/>
+			<TexCoords left=".00390625" right=".8203125" top=".19140625" bottom=".37109375"/>
 		</HighlightTexture>
 		<CheckedTexture file="Interface/BUTTONS/ListButtons" alpha=".8">
-			<TexCoords left="0.00390625" right="0.8203125" top="0.37890625" bottom="0.55859375"/>
+			<TexCoords left=".00390625" right=".8203125" top=".37890625" bottom=".55859375"/>
 		</CheckedTexture>
 	</CheckButton>
 
@@ -247,14 +247,14 @@
 			</Layer>
 		</Layers>
 		<NormalTexture parentKey="normalTexture" file="Interface/AddOns/MountsJournal/textures/button">
-			<TexCoords left="0.00390625" right="0.8203125" top="0.00390625" bottom="0.18359375"/>
+			<TexCoords left=".00390625" right=".8203125" top=".00390625" bottom=".18359375"/>
 			<Color r=".2" g=".18" b=".01"/>
 		</NormalTexture>
 		<HighlightTexture parentKey="highlight" file="Interface/AddOns/MountsJournal/textures/button">
-			<TexCoords left="0.00390625" right="0.8203125" top="0.19140625" bottom="0.37109375"/>
+			<TexCoords left=".00390625" right=".8203125" top=".19140625" bottom=".37109375"/>
 		</HighlightTexture>
 		<CheckedTexture parentKey="check" file="Interface/AddOns/MountsJournal/textures/button">
-			<TexCoords left="0.00390625" right="0.8203125" top="0.37890625" bottom="0.55859375"/>
+			<TexCoords left=".00390625" right=".8203125" top=".37890625" bottom=".55859375"/>
 			<Color r=".8" g=".6" b="0"/>
 		</CheckedTexture>
 		<Scripts>
@@ -505,7 +505,7 @@
 				</FontString>
 			</Layer>
 			<Layer level="BACKGROUND">
-				<Texture parentKey="check" file="Interface/QuestFrame/UI-QuestLogTitleHighlight" alphaMode="ADD" alpha="0.6" hidden="true">
+				<Texture parentKey="check" file="Interface/QuestFrame/UI-QuestLogTitleHighlight" alphaMode="ADD" alpha=".6" hidden="true">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="27" y="0" />
 						<Anchor point="BOTTOMRIGHT" x="0" y="0" />
@@ -513,7 +513,7 @@
 				</Texture>
 			</Layer>
 		</Layers>
-		<HighlightTexture parentKey="highlight" file="Interface/QuestFrame/UI-QuestLogTitleHighlight" alphaMode="ADD" alpha="0.3">
+		<HighlightTexture parentKey="highlight" file="Interface/QuestFrame/UI-QuestLogTitleHighlight" alphaMode="ADD" alpha=".3">
 			<Anchors>
 				<Anchor point="TOPLEFT" x="27" y="0" />
 				<Anchor point="BOTTOMRIGHT" x="0" y="0" />
@@ -638,21 +638,21 @@
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="0"/>
 					</Anchors>
-					<TexCoords left="0.88867188" right="0.92968750" top="0.29687500" bottom="0.53125000"/>
+					<TexCoords left=".88867188" right=".92968750" top=".29687500" bottom=".53125000"/>
 				</Texture>
 				<Texture file="Interface/HelpFrame/CS_HelpTextures" parentKey="arrowDown">
 					<Size x="21" y="28"/>
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="0"/>
 					</Anchors>
-					<TexCoords left="0.63281250" right="0.67382813" top="0.75781250" bottom="0.99218750"/>
+					<TexCoords left=".63281250" right=".67382813" top=".75781250" bottom=".99218750"/>
 				</Texture>
 				<Texture file="Interface/HelpFrame/CS_HelpTextures" parentKey="selected" hidden="true">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="0" y="0"/>
 						<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
 					</Anchors>
-					<TexCoords left="0.00195313" right="0.25195313" top="0.37500000" bottom="0.64062500"/>
+					<TexCoords left=".00195313" right=".25195313" top=".37500000" bottom=".64062500"/>
 				</Texture>
 			</Layer>
 		</Layers>
@@ -669,7 +669,7 @@
 							<Anchors>
 								<Anchor point="CENTER" x="0" y="-1"/>
 							</Anchors>
-							<TexCoords left="0.45312500" right="0.64062500" bottom="0.01562500" top="0.20312500"/>
+							<TexCoords left=".45312500" right=".64062500" bottom=".01562500" top=".20312500"/>
 						</Texture>
 					</Layer>
 				</Layers>
@@ -737,13 +737,13 @@
 			</OnDisable>
 		</Scripts>
 		<NormalTexture file="Interface/HelpFrame/CS_HelpTextures_Tile" horizTile="true">
-			<TexCoords left="0.00000000" right="1.00000000" top="0.06250000" bottom="0.12109375"/>
+			<TexCoords left=".00000000" right="1.00000000" top=".06250000" bottom=".12109375"/>
 		</NormalTexture>
 		<PushedTexture file="Interface/HelpFrame/CS_HelpTextures_Tile" horizTile="true">
-			<TexCoords left="0.00000000" right="1.00000000" top="0.12500000" bottom="0.18359375"/>
+			<TexCoords left=".00000000" right="1.00000000" top=".12500000" bottom=".18359375"/>
 		</PushedTexture>
 		<HighlightTexture file="Interface/HelpFrame/CS_HelpTextures" alphaMode="ADD">
-			<TexCoords left="0.00195313" right="0.25195313" top="0.65625000" bottom="0.92187500"/>
+			<TexCoords left=".00195313" right=".25195313" top=".65625000" bottom=".92187500"/>
 		</HighlightTexture>
 		<ButtonText inherits="GameFontNormal" justifyH="LEFT" parentKey="text">
 			<Size x="0" y="12"/>
@@ -799,13 +799,13 @@
 					</OnClick>
 				</Scripts>
 				<NormalTexture file="Interface/HelpFrame/CS_HelpTextures">
-					<TexCoords left="0.54296875" right="0.62890625" top="0.75781250" bottom="0.99218750"/>
+					<TexCoords left=".54296875" right=".62890625" top=".75781250" bottom=".99218750"/>
 				</NormalTexture>
 				<PushedTexture file="Interface/HelpFrame/CS_HelpTextures">
-					<TexCoords left="0.45312500" right="0.53906250" top="0.75781250" bottom="0.99218750"/>
+					<TexCoords left=".45312500" right=".53906250" top=".75781250" bottom=".99218750"/>
 				</PushedTexture>
-				<HighlightTexture file="Interface/HelpFrame/CS_HelpTextures" alphaMode="ADD" alpha="0.4">
-					<TexCoords left="0.54296875" right="0.62890625" top="0.75781250" bottom="0.99218750"/>
+				<HighlightTexture file="Interface/HelpFrame/CS_HelpTextures" alphaMode="ADD" alpha=".4">
+					<TexCoords left=".54296875" right=".62890625" top=".75781250" bottom=".99218750"/>
 				</HighlightTexture>
 			</Button>
 			<Button parentKey="home" text="HOME">
@@ -824,11 +824,11 @@
 					<OnLoad>
 						self.xoffset = -15
 						local newWidth = min(128, self.text:GetStringWidth()+50)
-						local texCoordoffsetX = (newWidth/128)*0.25
+						local texCoordoffsetX = (newWidth/128)*.25
 
-						self:GetNormalTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.70312500, 0.00781250, 0.24218750)
-						self:GetPushedTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.70312500, 0.25781250, 0.49218750)
-						self:GetHighlightTexture():SetTexCoord(0.70312500-texCoordoffsetX, 0.71312500, 0.50781250, 0.74218750)
+						self:GetNormalTexture():SetTexCoord(.70312500-texCoordoffsetX, .70312500, .00781250, .24218750)
+						self:GetPushedTexture():SetTexCoord(.70312500-texCoordoffsetX, .70312500, .25781250, .49218750)
+						self:GetHighlightTexture():SetTexCoord(.70312500-texCoordoffsetX, .71312500, .50781250, .74218750)
 
 						self:SetWidth(newWidth)
 					</OnLoad>
@@ -865,7 +865,7 @@
 					<Anchors>
 						<Anchor point="RIGHT"/>
 					</Anchors>
-					<TexCoords left="0.125" right="0.875" top="0.0" bottom="0.5"/>
+					<TexCoords left=".125" right=".875" top=".0" bottom=".5"/>
 				</Texture>
 			</Layer>
 			<Layer level="HIGHLIGHT">
@@ -879,10 +879,10 @@
 		</Layers>
 		<Scripts>
 			<OnMouseDown>
-				self.texture:SetTexCoord(0.125, 0.875, 0.5, 1.0)
+				self.texture:SetTexCoord(.125, .875, .5, 1.0)
 			</OnMouseDown>
 			<OnMouseUp>
-				self.texture:SetTexCoord(0.125, 0.875, 0.0, 0.5)
+				self.texture:SetTexCoord(.125, .875, .0, .5)
 			</OnMouseUp>
 			<OnClick>
 				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -974,7 +974,7 @@
 				</Texture>
 			</Layer>
 		</Layers>
-		<HighlightTexture file="Interface/Buttons/UI-Common-MouseHilight" alpha="0.75" alphaMode="ADD"/>
+		<HighlightTexture file="Interface/Buttons/UI-Common-MouseHilight" alpha=".75" alphaMode="ADD"/>
 		<Scripts>
 			<OnLoad>
 				self.setPointArrow = function(self, checked)
@@ -1032,7 +1032,7 @@
 				</Texture>
 			</Layer>
 		</Layers>
-		<HighlightTexture file="Interface/Buttons/UI-Common-MouseHilight" alpha="0.75" alphaMode="ADD"/>
+		<HighlightTexture file="Interface/Buttons/UI-Common-MouseHilight" alpha=".75" alphaMode="ADD"/>
 		<Scripts>
 			<OnMouseDown>
 				if self:IsEnabled() then
@@ -1238,7 +1238,7 @@
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
-					<TexCoords left="0.29687500" right="0.54687500" top="0.14843750" bottom="0.27343750"/>
+					<TexCoords left=".29687500" right=".54687500" top=".14843750" bottom=".27343750"/>
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
@@ -1247,7 +1247,7 @@
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
-					<TexCoords left="0.01562500" right="0.26562500" top="0.00781250" bottom="0.13281250"/>
+					<TexCoords left=".01562500" right=".26562500" top=".00781250" bottom=".13281250"/>
 				</Texture>
 			</Layer>
 			<Layer level="HIGHLIGHT">
@@ -1256,17 +1256,17 @@
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
-					<TexCoords left="0.57812500" right="0.82812500" top="0.00781250" bottom="0.13281250"/>
+					<TexCoords left=".57812500" right=".82812500" top=".00781250" bottom=".13281250"/>
 				</Texture>
 			</Layer>
 		</Layers>
 		<Scripts>
 			<OnMouseDown>
-				self.bg:SetTexCoord(0.01562500, 0.26562500, 0.14843750, 0.27343750)
+				self.bg:SetTexCoord(.01562500, .26562500, .14843750, .27343750)
 				self.icon:SetPoint("CENTER", 1, -1)
 			</OnMouseDown>
 			<OnMouseUp>
-				self.bg:SetTexCoord(0.29687500, 0.54687500, 0.14843750, 0.27343750)
+				self.bg:SetTexCoord(.29687500, .54687500, .14843750, .27343750)
 				self.icon:SetPoint("CENTER", 0, 0)
 				PlaySound(SOUNDKIT.IG_INVENTORY_ROTATE_CHARACTER)
 			</OnMouseUp>
@@ -1275,7 +1275,7 @@
 		</Scripts>
 	</Button>
 
-	<Frame name="MJControlFrameTemplate" alpha="0.5" virtual="true">
+	<Frame name="MJControlFrameTemplate" alpha=".5" virtual="true">
 		<Size x="149" y="23"/>
 		<Layers>
 			<Layer level="BACKGROUND">
@@ -1284,14 +1284,14 @@
 					<Anchors>
 						<Anchor point="LEFT" x="0" y="0"/>
 					</Anchors>
-					<TexCoords left="0.40625000" right="0.76562500" top="0.42968750" bottom="0.60937500"/>
+					<TexCoords left=".40625000" right=".76562500" top=".42968750" bottom=".60937500"/>
 				</Texture>
 				<Texture parentKey="right" file="Interface/Common/UI-ModelControlPanel">
 					<Size x="23" y="23"/>
 					<Anchors>
 						<Anchor point="RIGHT" x="0" y="0"/>
 					</Anchors>
-					<TexCoords left="0.01562500" right="0.37500000" top="0.42968750" bottom="0.60937500"/>
+					<TexCoords left=".01562500" right=".37500000" top=".42968750" bottom=".60937500"/>
 				</Texture>
 				<Texture file="Interface/Common/UI-ModelControlPanel">
 					<Size x="32" y="23"/>
@@ -1299,7 +1299,7 @@
 						<Anchor point="LEFT" relativeKey="$parent.left" relativePoint="RIGHT" x="0" y="0"/>
 						<Anchor point="RIGHT" relativeKey="$parent.right" relativePoint="LEFT" x="0" y="0"/>
 					</Anchors>
-					<TexCoords left="0" right="1" top="0.62500000" bottom="0.80468750"/>
+					<TexCoords left="0" right="1" top=".62500000" bottom=".80468750"/>
 				</Texture>
 			</Layer>
 		</Layers>
@@ -1391,7 +1391,7 @@
 							<Offset x="0" y="0"/>
 						</Anchor>
 					</Anchors>
-					<TexCoords left="0" right="0.5" top="0.5" bottom="1.0"/>
+					<TexCoords left="0" right=".5" top=".5" bottom="1.0"/>
 				</Texture>
 				<Texture parentKey="Uncheck" file="Interface\Common\UI-DropDownRadioChecks">
 					<Size x="16" y="16"/>
@@ -1400,7 +1400,7 @@
 							<Offset x="0" y="0"/>
 						</Anchor>
 					</Anchors>
-					<TexCoords left="0.5" right="1.0" top="0.5" bottom="1.0"/>
+					<TexCoords left=".5" right="1.0" top=".5" bottom="1.0"/>
 				</Texture>
 				<Texture parentKey="Icon" hidden="true">
 					<Size>
@@ -1595,7 +1595,7 @@
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="RIGHT" x="-3"/>
 					</Anchors>
-					<TexCoords left="0.42187500" right="0.23437500" top="0.01562500" bottom="0.20312500"/>
+					<TexCoords left=".42187500" right=".23437500" top=".01562500" bottom=".20312500"/>
 				</Texture>
 			</Layer>
 			<Layer level="OVERLAY" textureSubLevel="1">
@@ -1633,7 +1633,7 @@
 						<Anchor point="BOTTOMRIGHT" x="-1" y="1"/>
 					</Anchors>
 					<Size x="75" y="37"/>
-					<TexCoords left="0.00781250" right="0.71093750" top="0.74609375" bottom="0.91796875"/>
+					<TexCoords left=".00781250" right=".71093750" top=".74609375" bottom=".91796875"/>
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">

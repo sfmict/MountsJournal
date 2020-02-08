@@ -8,12 +8,12 @@ local MOUNT_ACHIEVEMENT_CATEGORY = 15248
 
 
 journal.colors = {
-	gold = CreateColor(0.8, 0.6, 0),
-	gray = CreateColor(0.5, 0.5, 0.5),
-	dark = CreateColor(0.3, 0.3, 0.3),
-	mount1 = CreateColor(0.824, 0.78, 0.235),
-	mount2 = CreateColor(0.42, 0.302, 0.224),
-	mount3 = CreateColor(0.031, 0.333, 0.388),
+	gold = CreateColor(.8, .6, 0),
+	gray = CreateColor(.5, .5, .5),
+	dark = CreateColor(.3, .3, .3),
+	mount1 = CreateColor(.824, .78, .235),
+	mount2 = CreateColor(.42, .302, .224),
+	mount3 = CreateColor(.031, .333, .388),
 }
 
 
@@ -422,17 +422,17 @@ function journal:ADDON_LOADED(addonName)
 
 		-- FILTERS SOURCES BUTTONS
 		local sourcesTextures = {
-			{path = texPath.."sources", texCoord = {0, 0.25, 0, 0.25}, width = 20, height = 20},
-			{path = texPath.."sources", texCoord = {0.25, 0.5, 0, 0.25}, width = 20, height = 20},
-			{path = texPath.."sources", texCoord = {0.5, 0.75, 0, 0.25}, width = 20, height = 20},
-			{path = texPath.."sources", texCoord = {0.75, 1, 0, 0.25}, width = 20, height = 20},
+			{path = texPath.."sources", texCoord = {0, .25, 0, .25}, width = 20, height = 20},
+			{path = texPath.."sources", texCoord = {.25, .5, 0, .25}, width = 20, height = 20},
+			{path = texPath.."sources", texCoord = {.5, .75, 0, .25}, width = 20, height = 20},
+			{path = texPath.."sources", texCoord = {.75, 1, 0, .25}, width = 20, height = 20},
 			nil,
-			{path = texPath.."sources", texCoord = {0.25, 0.5, 0.25, 0.5}, width = 20, height = 20},
-			{path = texPath.."sources", texCoord = {0.5, 0.75, 0.25, 0.5}, width = 20, height = 20},
-			{path = texPath.."sources", texCoord = {0.75, 1, 0.25, 0.5}, width = 20, height = 20},
-			{path = texPath.."sources", texCoord = {0, 0.25, 0.5, 0.75}, width = 20, height = 20},
-			{path = texPath.."sources", texCoord = {0.25, 0.5, 0.5, 0.75}, width = 20, height = 20},
-			{path = texPath.."sources", texCoord = {0.5, 0.75, 0.5, 0.75}, width = 20, height = 20},
+			{path = texPath.."sources", texCoord = {.25, .5, .25, .5}, width = 20, height = 20},
+			{path = texPath.."sources", texCoord = {.5, .75, .25, .5}, width = 20, height = 20},
+			{path = texPath.."sources", texCoord = {.75, 1, .25, .5}, width = 20, height = 20},
+			{path = texPath.."sources", texCoord = {0, .25, .5, .75}, width = 20, height = 20},
+			{path = texPath.."sources", texCoord = {.25, .5, .5, .75}, width = 20, height = 20},
+			{path = texPath.."sources", texCoord = {.5, .75, .5, .75}, width = 20, height = 20},
 		}
 
 		for i = 1, #sourcesTextures do
@@ -518,14 +518,14 @@ function journal:ADDON_LOADED(addonName)
 		modelScene.RotateRightButton:Hide()
 		local modelControl = CreateFrame("FRAME", nil, modelScene, "MJControlFrameTemplate")
 		modelControl:SetPoint("BOTTOM", -70, 10)
-		modelControl.zoomIn.icon:SetTexCoord(0.57812500, 0.82812500, 0.14843750, 0.27343750)
-		modelControl.zoomOut.icon:SetTexCoord(0.29687500, 0.54687500, 0.00781250, 0.13281250)
-		modelControl.panButton.icon:SetTexCoord(0.29687500, 0.54687500, 0.28906250, 0.41406250)
-		modelControl.rotateLeftButton.icon:SetTexCoord(0.01562500, 0.26562500, 0.28906250, 0.41406250)
-		modelControl.rotateRightButton.icon:SetTexCoord(0.57812500, 0.82812500, 0.28906250, 0.41406250)
-		modelControl.rotateUpButton.icon:SetTexCoord(0.01562500, 0.26562500, 0.28906250, 0.41406250)
+		modelControl.zoomIn.icon:SetTexCoord(.57812500, .82812500, .14843750, .27343750)
+		modelControl.zoomOut.icon:SetTexCoord(.29687500, .54687500, .00781250, .13281250)
+		modelControl.panButton.icon:SetTexCoord(.29687500, .54687500, .28906250, .41406250)
+		modelControl.rotateLeftButton.icon:SetTexCoord(.01562500, .26562500, .28906250, .41406250)
+		modelControl.rotateRightButton.icon:SetTexCoord(.57812500, .82812500, .28906250, .41406250)
+		modelControl.rotateUpButton.icon:SetTexCoord(.01562500, .26562500, .28906250, .41406250)
 		modelControl.rotateUpButton.icon:SetRotation(-math.pi / 1.6, .5, .43)
-		modelControl.rotateDownButton.icon:SetTexCoord(0.57812500, 0.82812500, 0.41406250, 0.28906250)
+		modelControl.rotateDownButton.icon:SetTexCoord(.57812500, .82812500, .41406250, .28906250)
 		modelControl.rotateDownButton.icon:SetRotation(-math.pi / 1.6)
 
 		hooksecurefunc(modelScene, "SetActiveCamera", function(self)
@@ -683,12 +683,11 @@ function journal:ADDON_LOADED(addonName)
 			end
 		end)
 
-		hooksecurefunc("MountJournal_Select", function(index)
+		hooksecurefunc("MountJournal_SetSelected", function(mountID)
 			local actor = modelScene:GetActorByTag("unwrapped")
 			if actor then
 				actor:StopAnimationKit()
 			end
-			local mountID = select(12, C_MountJournal.GetDisplayedMountInfo(index))
 			if mountID then
 				currentMountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
 			end
@@ -789,7 +788,6 @@ function journal:setScrollGridMounts(grid)
 			btn.swimming:Show()
 			btn.icon:Show()
 			btn.name:Show()
-			btn:Enable()
 			btn.grid3list:Hide()
 		end
 
@@ -842,18 +840,18 @@ function journal:grid3UpdateMountList()
 					btnGrid.icon:SetAlpha(.75)
 				else
 					btnGrid.icon:SetDesaturated(true)
-					btnGrid.icon:SetAlpha(0.25)
+					btnGrid.icon:SetAlpha(.25)
 				end
 			else
 				btnGrid.icon:SetTexture("Interface\\PetBattles\\MountJournalEmptyIcon")
 				btnGrid.icon:SetDesaturated(true)
 				btnGrid.icon:SetVertexColor(.4, .4, .4)
-				btnGrid.icon:SetAlpha(0.5)
+				btnGrid.icon:SetAlpha(.5)
 				btnGrid.index = nil
 				btnGrid.spellID = 0
 				btnGrid.selected = false
 				btnGrid:Disable()
-				btnGrid.DragButton:SetEnabled(false)
+				btnGrid.DragButton:Disable()
 				btnGrid.DragButton.selectedTexture:Hide()
 				btnGrid.favorite:Hide()
 			end
@@ -1155,7 +1153,7 @@ do
 	function journal:mountDblClick(index, btn)
 		if btn == "RightButton" then return end
 
-		if lastMountIndex == index and GetTime() - lastMountClick < 0.4 then
+		if lastMountIndex == index and GetTime() - lastMountClick < .4 then
 			local _,_,_, active, isUsable, _,_,_,_,_,_, mountID = C_MountJournal.GetDisplayedMountInfo(index)
 			if active then
 				C_MountJournal.Dismiss()
