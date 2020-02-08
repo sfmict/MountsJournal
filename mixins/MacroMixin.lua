@@ -226,7 +226,7 @@ do
 			macro = "/leavevehicle"
 		-- DISMOUNT
 		elseif self.sFlags.isMounted then
-			if not self.lastUseTime or GetTime() - self.lastUseTime > 0.5 then
+			if not self.lastUseTime or GetTime() - self.lastUseTime > .5 then
 				macro = "/dismount"
 			end
 		-- CLASSMACRO

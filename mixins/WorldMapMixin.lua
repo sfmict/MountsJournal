@@ -22,8 +22,8 @@ function MJMapCanvasMixin:onUpdate()
 		self.highlight:ClearAllPoints()
 		if atlasID then
 			self.highlight:SetAtlas(atlasID, true, "TRILINEAR")
-			scrollChildX = (scrollChildX + 0.5 * textureX - 0.5) * width
-			scrollChildY = -(scrollChildY + 0.5 * textureY - 0.5) * height
+			scrollChildX = (scrollChildX + .5 * textureX - .5) * width
+			scrollChildY = -(scrollChildY + .5 * textureY - .5) * height
 			self.highlight:SetPoint("CENTER", scrollChildX, scrollChildY)
 		else
 			self.highlight:SetTexture(fileDataID, nil, nil, "TRILINEAR")
