@@ -750,8 +750,10 @@ end
 
 function journal:setScrollGridMounts(grid)
 	local scrollFrame = self.scrollFrame
+	local offset = HybridScrollFrame_GetOffset(scrollFrame)
+
 	if grid then
-		local offset = math.ceil((HybridScrollFrame_GetOffset(scrollFrame) + 1) / 3) - 1
+		offset = math.ceil((offset + 1) / 3) - 1
 		local updateList = function() self:grid3UpdateMountList() end
 		scrollFrame.update = updateList
 		MountJournal_UpdateMountList = updateList
@@ -772,11 +774,8 @@ function journal:setScrollGridMounts(grid)
 			btn:Disable()
 			btn.grid3list:Show()
 		end
-
-		scrollFrame.update()
-		scrollFrame.scrollBar:SetValue(offset * scrollFrame.buttonHeight)
 	else
-		local offset = HybridScrollFrame_GetOffset(scrollFrame) * 3
+		offset = offset * 3
 		scrollFrame.update = self.MountJournal_UpdateMountList
 		MountJournal_UpdateMountList = self.MountJournal_UpdateMountList
 
@@ -790,10 +789,10 @@ function journal:setScrollGridMounts(grid)
 			btn.name:Show()
 			btn.grid3list:Hide()
 		end
-
-		scrollFrame.update()
-		scrollFrame.scrollBar:SetValue(offset * scrollFrame.buttonHeight)
 	end
+
+	scrollFrame.update()
+	scrollFrame.scrollBar:SetValue(offset * scrollFrame.buttonHeight)
 end
 
 

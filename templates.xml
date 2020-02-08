@@ -312,23 +312,23 @@
 						MountListItem_OnClick(self:GetParent(), button)
 					</OnClick>
 					<OnEnter>
-						GameTooltip:SetOwner(self, "ANCHOR_LEFT");
-						local spellID = self:GetParent().spellID;
+						GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+						local spellID = self:GetParent().spellID
 						if (spellID) then
-							MountJournalMountButton_UpdateTooltip(self:GetParent());
-							self.showingTooltip = true;
+							MountJournalMountButton_UpdateTooltip(self:GetParent())
+							self.showingTooltip = true
 						end
 					</OnEnter>
 					<OnLeave>
-						GameTooltip:Hide();
-						self.showingTooltip = false;
+						GameTooltip:Hide()
+						self.showingTooltip = false
 					</OnLeave>
 					<OnLoad>
-						self:RegisterForClicks("LeftButtonUp", "RightButtonUp");
-						self:RegisterForDrag("LeftButton");
+						self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+						self:RegisterForDrag("LeftButton")
 					</OnLoad>
 					<OnDragStart>
-						C_MountJournal.Pickup(self:GetParent().index);
+						C_MountJournal.Pickup(self:GetParent().index)
 					</OnDragStart>
 				</Scripts>
 			</Button>
@@ -373,7 +373,7 @@
 		<Frames>
 			<Button parentKey="mount1" inherits="MJMountButtonTemplate">
 				<Anchors>
-					<Anchor point="LEFT" x="10" y=""/>
+					<Anchor point="LEFT" x="10" y="0"/>
 				</Anchors>
 			</Button>
 			<Button parentKey="mount2" inherits="MJMountButtonTemplate">
