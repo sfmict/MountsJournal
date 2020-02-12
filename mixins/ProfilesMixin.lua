@@ -1,4 +1,5 @@
 local addon, L = ...
+local util = MountsJournalUtil
 
 
 MJProfilesMixin = CreateFromMixins(MountsJournalEventsMixin)
@@ -124,20 +125,18 @@ function MJProfilesMixin:menuInit(level)
 
 	elseif UIDROPDOWNMENU_MENU_VALUE == "delete" then -- DELETE RPFOLE
 		if #btn.profilesNames > 20 then
-			btn.searchListFrame:reset()
+			local searchFrame = util.getDropDownSearchFrame()
 
 			for _, profileName in ipairs(btn.profilesNames) do
 				if profileName ~= btn.charDB.currentProfileName then
 					info.text = profileName
 					info.arg1 = profileName
 					info.func = function(_, arg1) btn:deleteProfile(arg1) end
-					btn.searchListFrame:addButton(info)
+					searchFrame:addButton(info)
 				end
 			end
 
-			info.customFrame = btn.searchListFrame
-			UIDropDownMenu_AddButton(info, level)
-			info.customFrame = nil
+			UIDropDownMenu_AddButton({customFrame = searchFrame}, level)
 		else
 			local i = 0
 			for _, profileName in ipairs(btn.profilesNames) do
@@ -172,7 +171,7 @@ function MJProfilesMixin:menuInit(level)
 		info.arg2 = UIDROPDOWNMENU_MENU_VALUE
 
 		if #btn.profilesNames > 20 then
-			btn.searchListFrame:reset()
+			local searchFrame = util.getDropDownSearchFrame()
 
 			info.text = DEFAULT
 			info.checked = function(self)
@@ -182,7 +181,7 @@ function MJProfilesMixin:menuInit(level)
 				btn.charDB.profileBySpecialization[arg2] = nil
 				btn.mounts:setDB()
 			end
-			btn.searchListFrame:addButton(info)
+			searchFrame:addButton(info)
 
 			for _, profileName in ipairs(btn.profilesNames) do
 				info.text = profileName
@@ -194,12 +193,10 @@ function MJProfilesMixin:menuInit(level)
 					btn.charDB.profileBySpecialization[arg2] = arg1
 					btn.mounts:setDB()
 				end
-				btn.searchListFrame:addButton(info)
+				searchFrame:addButton(info)
 			end
 
-			info.customFrame = btn.searchListFrame
-			UIDropDownMenu_AddButton(info, level)
-			info.customFrame = nil
+			UIDropDownMenu_AddButton({customFrame = searchFrame}, level)
 		else
 			info.text = DEFAULT
 			info.checked = function(self)
@@ -240,24 +237,22 @@ function MJProfilesMixin:menuInit(level)
 		info.disabled = nil
 
 		if #btn.profilesNames > 20 then
-			btn.searchMenuFrame:reset()
+			local searchFrame = util.getDropDownSearchFrame()
 
 			info.text = DEFAULT
 			info.checked = function() return btn.charDB.currentProfileName == nil end
 			info.func = function() btn:setProfile() end
-			btn.searchMenuFrame:addButton(info)
+			searchFrame:addButton(info)
 
 			for _, profileName in ipairs(btn.profilesNames) do
 				info.text = profileName
 				info.arg1 = profileName
 				info.checked = function(self) return btn.charDB.currentProfileName == self.arg1 end
 				info.func = function(_, arg1) btn:setProfile(arg1) end
-				btn.searchMenuFrame:addButton(info)
+				searchFrame:addButton(info)
 			end
 
-			info.customFrame = btn.searchMenuFrame
-			UIDropDownMenu_AddButton(info, level)
-			info.customFrame = nil
+			UIDropDownMenu_AddButton({customFrame = searchFrame}, level)
 		else
 			info.text = DEFAULT
 			info.checked = function() return btn.charDB.currentProfileName == nil end

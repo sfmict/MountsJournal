@@ -189,6 +189,8 @@ MJDungeonRaidMixin = {}
 
 
 function MJDungeonRaidMixin:onLoad()
+	self.journal = MountsJournalFrame
+
 	self.list = {
 		{
 			name = DUNGEONS,
@@ -251,7 +253,7 @@ function MJDungeonRaidMixin:menuInit(level)
 			info.value = v.list
 		else
 			info.func = function()
-				btn.click(v.mapID)
+				btn.journal.navBar:setMapID(v.mapID)
 				CloseDropDownMenus()
 			end
 		end

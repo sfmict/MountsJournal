@@ -15,6 +15,7 @@ Binding.lua
 Config.lua
 ConfigClasses.lua
 Journal.lua
+Tags.lua
 #@do-not-package@
 _test.lua
 #@end-do-not-package@

@@ -313,15 +313,15 @@
 					</OnClick>
 					<OnEnter>
 						GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-						local spellID = self:GetParent().spellID
-						if (spellID) then
-							MountJournalMountButton_UpdateTooltip(self:GetParent())
-							self.showingTooltip = true
+						local parent = self:GetParent()
+						if parent.spellID then
+							MountJournalMountButton_UpdateTooltip(parent)
+							parent.showingTooltip = true
 						end
 					</OnEnter>
 					<OnLeave>
 						GameTooltip:Hide()
-						self.showingTooltip = false
+						self:GetParent().showingTooltip = false
 					</OnLeave>
 					<OnLoad>
 						self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
@@ -638,21 +638,21 @@
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="0"/>
 					</Anchors>
-					<TexCoords left=".88867188" right=".92968750" top=".29687500" bottom=".53125000"/>
+					<TexCoords left=".88867188" right=".9296875" top=".296875" bottom=".53125"/>
 				</Texture>
 				<Texture file="Interface/HelpFrame/CS_HelpTextures" parentKey="arrowDown">
 					<Size x="21" y="28"/>
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="0"/>
 					</Anchors>
-					<TexCoords left=".63281250" right=".67382813" top=".75781250" bottom=".99218750"/>
+					<TexCoords left=".6328125" right=".67382813" top=".7578125" bottom=".9921875"/>
 				</Texture>
 				<Texture file="Interface/HelpFrame/CS_HelpTextures" parentKey="selected" hidden="true">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="0" y="0"/>
 						<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
 					</Anchors>
-					<TexCoords left=".00195313" right=".25195313" top=".37500000" bottom=".64062500"/>
+					<TexCoords left=".00195313" right=".25195313" top=".375" bottom=".640625"/>
 				</Texture>
 			</Layer>
 		</Layers>
@@ -669,7 +669,7 @@
 							<Anchors>
 								<Anchor point="CENTER" x="0" y="-1"/>
 							</Anchors>
-							<TexCoords left=".45312500" right=".64062500" bottom=".01562500" top=".20312500"/>
+							<TexCoords left=".453125" right=".640625" bottom=".015625" top=".203125"/>
 						</Texture>
 					</Layer>
 				</Layers>
@@ -737,13 +737,13 @@
 			</OnDisable>
 		</Scripts>
 		<NormalTexture file="Interface/HelpFrame/CS_HelpTextures_Tile" horizTile="true">
-			<TexCoords left=".00000000" right="1.00000000" top=".06250000" bottom=".12109375"/>
+			<TexCoords left="0" right="1" top=".0625" bottom=".12109375"/>
 		</NormalTexture>
 		<PushedTexture file="Interface/HelpFrame/CS_HelpTextures_Tile" horizTile="true">
-			<TexCoords left=".00000000" right="1.00000000" top=".12500000" bottom=".18359375"/>
+			<TexCoords left="0" right="1" top=".125" bottom=".18359375"/>
 		</PushedTexture>
 		<HighlightTexture file="Interface/HelpFrame/CS_HelpTextures" alphaMode="ADD">
-			<TexCoords left=".00195313" right=".25195313" top=".65625000" bottom=".92187500"/>
+			<TexCoords left=".00195313" right=".25195313" top=".65625" bottom=".921875"/>
 		</HighlightTexture>
 		<ButtonText inherits="GameFontNormal" justifyH="LEFT" parentKey="text">
 			<Size x="0" y="12"/>
@@ -799,13 +799,13 @@
 					</OnClick>
 				</Scripts>
 				<NormalTexture file="Interface/HelpFrame/CS_HelpTextures">
-					<TexCoords left=".54296875" right=".62890625" top=".75781250" bottom=".99218750"/>
+					<TexCoords left=".54296875" right=".62890625" top=".7578125" bottom=".9921875"/>
 				</NormalTexture>
 				<PushedTexture file="Interface/HelpFrame/CS_HelpTextures">
-					<TexCoords left=".45312500" right=".53906250" top=".75781250" bottom=".99218750"/>
+					<TexCoords left=".453125" right=".5390625" top=".7578125" bottom=".9921875"/>
 				</PushedTexture>
 				<HighlightTexture file="Interface/HelpFrame/CS_HelpTextures" alphaMode="ADD" alpha=".4">
-					<TexCoords left=".54296875" right=".62890625" top=".75781250" bottom=".99218750"/>
+					<TexCoords left=".54296875" right=".62890625" top=".7578125" bottom=".9921875"/>
 				</HighlightTexture>
 			</Button>
 			<Button parentKey="home" text="HOME">
@@ -826,9 +826,9 @@
 						local newWidth = min(128, self.text:GetStringWidth()+50)
 						local texCoordoffsetX = (newWidth/128)*.25
 
-						self:GetNormalTexture():SetTexCoord(.70312500-texCoordoffsetX, .70312500, .00781250, .24218750)
-						self:GetPushedTexture():SetTexCoord(.70312500-texCoordoffsetX, .70312500, .25781250, .49218750)
-						self:GetHighlightTexture():SetTexCoord(.70312500-texCoordoffsetX, .71312500, .50781250, .74218750)
+						self:GetNormalTexture():SetTexCoord(.70312500-texCoordoffsetX, .703125, .0078125, .2421875)
+						self:GetPushedTexture():SetTexCoord(.70312500-texCoordoffsetX, .703125, .2578125, .4921875)
+						self:GetHighlightTexture():SetTexCoord(.70312500-texCoordoffsetX, .713125, .5078125, .7421875)
 
 						self:SetWidth(newWidth)
 					</OnLoad>
@@ -865,7 +865,7 @@
 					<Anchors>
 						<Anchor point="RIGHT"/>
 					</Anchors>
-					<TexCoords left=".125" right=".875" top=".0" bottom=".5"/>
+					<TexCoords left=".125" right=".875" top="0" bottom=".5"/>
 				</Texture>
 			</Layer>
 			<Layer level="HIGHLIGHT">
@@ -879,7 +879,7 @@
 		</Layers>
 		<Scripts>
 			<OnMouseDown>
-				self.texture:SetTexCoord(.125, .875, .5, 1.0)
+				self.texture:SetTexCoord(.125, .875, .5, 1)
 			</OnMouseDown>
 			<OnMouseUp>
 				self.texture:SetTexCoord(.125, .875, .0, .5)
@@ -1238,7 +1238,7 @@
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
-					<TexCoords left=".29687500" right=".54687500" top=".14843750" bottom=".27343750"/>
+					<TexCoords left=".296875" right=".546875" top=".1484375" bottom=".2734375"/>
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
@@ -1247,7 +1247,7 @@
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
-					<TexCoords left=".01562500" right=".26562500" top=".00781250" bottom=".13281250"/>
+					<TexCoords left=".015625" right=".265625" top=".0078125" bottom=".1328125"/>
 				</Texture>
 			</Layer>
 			<Layer level="HIGHLIGHT">
@@ -1256,17 +1256,17 @@
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
-					<TexCoords left=".57812500" right=".82812500" top=".00781250" bottom=".13281250"/>
+					<TexCoords left=".578125" right=".828125" top=".0078125" bottom=".1328125"/>
 				</Texture>
 			</Layer>
 		</Layers>
 		<Scripts>
 			<OnMouseDown>
-				self.bg:SetTexCoord(.01562500, .26562500, .14843750, .27343750)
+				self.bg:SetTexCoord(.015625, .265625, .1484375, .2734375)
 				self.icon:SetPoint("CENTER", 1, -1)
 			</OnMouseDown>
 			<OnMouseUp>
-				self.bg:SetTexCoord(.29687500, .54687500, .14843750, .27343750)
+				self.bg:SetTexCoord(.296875, .546875, .1484375, .2734375)
 				self.icon:SetPoint("CENTER", 0, 0)
 				PlaySound(SOUNDKIT.IG_INVENTORY_ROTATE_CHARACTER)
 			</OnMouseUp>
@@ -1284,14 +1284,14 @@
 					<Anchors>
 						<Anchor point="LEFT" x="0" y="0"/>
 					</Anchors>
-					<TexCoords left=".40625000" right=".76562500" top=".42968750" bottom=".60937500"/>
+					<TexCoords left=".40625" right=".765625" top=".4296875" bottom=".609375"/>
 				</Texture>
 				<Texture parentKey="right" file="Interface/Common/UI-ModelControlPanel">
 					<Size x="23" y="23"/>
 					<Anchors>
 						<Anchor point="RIGHT" x="0" y="0"/>
 					</Anchors>
-					<TexCoords left=".01562500" right=".37500000" top=".42968750" bottom=".60937500"/>
+					<TexCoords left=".015625" right=".375" top=".4296875" bottom=".609375"/>
 				</Texture>
 				<Texture file="Interface/Common/UI-ModelControlPanel">
 					<Size x="32" y="23"/>
@@ -1299,7 +1299,7 @@
 						<Anchor point="LEFT" relativeKey="$parent.left" relativePoint="RIGHT" x="0" y="0"/>
 						<Anchor point="RIGHT" relativeKey="$parent.right" relativePoint="LEFT" x="0" y="0"/>
 					</Anchors>
-					<TexCoords left="0" right="1" top=".62500000" bottom=".80468750"/>
+					<TexCoords left="0" right="1" top=".625" bottom=".8046875"/>
 				</Texture>
 			</Layer>
 		</Layers>
@@ -1377,7 +1377,7 @@
 		</Frames>
 	</Frame>
 
-	<Button name="MJDropDownMenuButtonTemplate" virtual="true">
+	<Button name="MJDropDownMenuButtonTemplate" inherits="UIDropDownCustomMenuEntryTemplate" mixin="MJDropDownMenuButtonMixin" virtual="true">
 		<Size x="100" y="16"/>
 		<Layers>
 			<Layer level="BACKGROUND">
@@ -1391,7 +1391,7 @@
 							<Offset x="0" y="0"/>
 						</Anchor>
 					</Anchors>
-					<TexCoords left="0" right=".5" top=".5" bottom="1.0"/>
+					<TexCoords left="0" right=".5" top=".5" bottom="1"/>
 				</Texture>
 				<Texture parentKey="Uncheck" file="Interface\Common\UI-DropDownRadioChecks">
 					<Size x="16" y="16"/>
@@ -1400,7 +1400,7 @@
 							<Offset x="0" y="0"/>
 						</Anchor>
 					</Anchors>
-					<TexCoords left=".5" right="1.0" top=".5" bottom="1.0"/>
+					<TexCoords left=".5" right="1" top=".5" bottom="1"/>
 				</Texture>
 				<Texture parentKey="Icon" hidden="true">
 					<Size>
@@ -1414,12 +1414,123 @@
 				</Texture>
 			</Layer>
 		</Layers>
+		<Frames>
+			<Button parentKey="removeButton" alpha="0">
+				<Size x="16" y="16"/>
+				<Anchors>
+					<Anchor point="RIGHT" x="-5" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="icon" file="Interface\BUTTONS\UI-GroupLoot-Pass-Up">
+							<Size x="16" y="16"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+							<Color r=".5" g=".5" b=".5"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnEnter>
+						self.icon:SetVertexColor(1, 1, 1)
+						local parent = self:GetParent()
+						parent:GetScript("OnEnter")(parent)
+					</OnEnter>
+					<OnLeave>
+						self.icon:SetVertexColor(.7, .7, .7)
+						local parent = self:GetParent()
+						parent:GetScript("OnLeave")(parent)
+					</OnLeave>
+					<OnMouseDown>self.icon:SetScale(.9)</OnMouseDown>
+					<OnMouseUp>self.icon:SetScale(1)</OnMouseUp>
+				</Scripts>
+			</Button>
+			<Button parentKey="arrowDownButton" alpha="0">
+				<Size x="12" y="16"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.removeButton" relativePoint="LEFT" x="0" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="icon" file="Interface\BUTTONS\UI-MicroStream-Yellow">
+							<Size x="8" y="14"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+							<TexCoords left=".25" right=".75" top="0" bottom=".875"/>
+							<Color r=".5" g=".5" b=".5"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnEnter>
+						self.icon:SetVertexColor(1, 1, 1)
+						local parent = self:GetParent()
+						parent:GetScript("OnEnter")(parent)
+					</OnEnter>
+					<OnLeave>
+						self.icon:SetVertexColor(.7, .7, .7)
+						local parent = self:GetParent()
+						parent:GetScript("OnLeave")(parent)
+					</OnLeave>
+					<OnMouseDown>self.icon:SetScale(.88)</OnMouseDown>
+					<OnMouseUp>self.icon:SetScale(1)</OnMouseUp>
+				</Scripts>
+			</Button>
+			<Button parentKey="arrowUpButton" alpha="0">
+				<Size x="12" y="16"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.arrowDownButton" relativePoint="LEFT" x="0" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="icon" file="Interface\BUTTONS\UI-MicroStream-Yellow">
+							<Size x="8" y="14"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+							<Color r=".5" g=".5" b=".5"/>
+							<TexCoords left=".25" right=".75" top=".875" bottom="0"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnEnter>
+						self.icon:SetVertexColor(1, 1, 1)
+						local parent = self:GetParent()
+						parent:GetScript("OnEnter")(parent)
+					</OnEnter>
+					<OnLeave>
+						self.icon:SetVertexColor(.7, .7, .7)
+						local parent = self:GetParent()
+						parent:GetScript("OnLeave")(parent)
+					</OnLeave>
+					<OnMouseDown>self.icon:SetScale(.88)</OnMouseDown>
+					<OnMouseUp>self.icon:SetScale(1)</OnMouseUp>
+				</Scripts>
+			</Button>
+		</Frames>
 		<Scripts>
 			<OnEnter>
+				if self.remove then
+					self.removeButton:SetAlpha(1)
+				end
+				if self.order then
+					self.arrowDownButton:SetAlpha(1)
+					self.arrowUpButton:SetAlpha(1)
+				end
 				self.Highlight:Show()
 			</OnEnter>
 			<OnLeave>
 				self.Highlight:Hide()
+				if self.remove then
+					self.removeButton:SetAlpha(0)
+				end
+				if self.order then
+					self.arrowDownButton:SetAlpha(0)
+					self.arrowUpButton:SetAlpha(0)
+				end
 			</OnLeave>
 		</Scripts>
 		<ButtonText parentKey="normalText">
@@ -1466,10 +1577,6 @@
 
 	<DropDownToggleButton name="MJMenuButtonProfiles" inherits="MJMenuButtonStreatchTemplate" mixin="MJProfilesMixin" virtual="true">
 		<Size x="130" y="22"/>
-		<Frames>
-			<Frame parentKey="searchMenuFrame" inherits="MJMenuDropDownSearchTemplate"/>
-			<Frame parentKey="searchListFrame" inherits="MJMenuDropDownSearchTemplate"/>
-		</Frames>
 		<Scripts>
 			<OnLoad method="onLoad"/>
 			<OnClick method="onClick"/>
@@ -1595,7 +1702,7 @@
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="RIGHT" x="-3"/>
 					</Anchors>
-					<TexCoords left=".42187500" right=".23437500" top=".01562500" bottom=".20312500"/>
+					<TexCoords left=".421875" right=".234375" top=".015625" bottom=".203125"/>
 				</Texture>
 			</Layer>
 			<Layer level="OVERLAY" textureSubLevel="1">
@@ -1633,7 +1740,7 @@
 						<Anchor point="BOTTOMRIGHT" x="-1" y="1"/>
 					</Anchors>
 					<Size x="75" y="37"/>
-					<TexCoords left=".00781250" right=".71093750" top=".74609375" bottom=".91796875"/>
+					<TexCoords left=".0078125" right=".7109375" top=".74609375" bottom=".91796875"/>
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
@@ -1691,11 +1798,13 @@
 					MJTooltipModel.model:SetDoBlend(false)
 					MJTooltipModel.model:SetAnimation(742, 0)
 					MJTooltipModel:Show()
+					self.showingTooltip = true
 				end
 			</OnEnter>
 			<OnLeave>
 				GameTooltip:Hide()
 				MJTooltipModel:Hide()
+				self.showingTooltip = false
 			</OnLeave>
 		</Scripts>
 	</Button>

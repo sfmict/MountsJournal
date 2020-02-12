@@ -227,6 +227,10 @@ function MJCompanionsPanelMixin:refresh()
 			btn.infoFrame.level:SetText(level)
 			btn.infoFrame.favorite:SetShown(favorite)
 
+			if btn.showingTooltip then
+				btn:GetScript("OnEnter")(btn)
+			end
+
 			btn:Show()
 		else
 			btn:Hide()
