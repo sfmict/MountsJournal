@@ -14,11 +14,9 @@ function tags:init()
 		editBoxWidth = 200,
 		hideOnEscape = 1,
 		whileDead = 1,
-		OnAccept = function(popup, data)
+		OnAccept = function(popup, cb)
 			local text = popup.editBox:GetText()
-			if text and text ~= "" then
-				data(text)
-			end
+			if text and text ~= "" then cb(text) end
 		end,
 		EditBoxOnEnterPressed = function(self)
 			StaticPopup_OnClick(self:GetParent(), 1)
@@ -41,7 +39,7 @@ function tags:init()
 		button2 = CANCEL,
 		hideOnEscape = 1,
 		whileDead = 1,
-		OnAccept = function(_, data) data() end,
+		OnAccept = function(_, cb) cb() end,
 	}
 
 	self.filter = mounts.filters.tags
@@ -194,8 +192,11 @@ function tags:addTag()
 			StaticPopup_Show(self.addonName.."TAG_EXISTS")
 			return
 		end
+		for i, tag in pairs(self.sortedTags) do
+			self.filter.tags[tag][1] = i
+		end
 		self.filter.tags[text] = {#self.sortedTags + 1, true}
-		self:setSortedTags()
+		tinsert(self.sortedTags, text)
 		journal:mountsListFullUpdate()
 	end)
 end

@@ -268,10 +268,12 @@ function MJDropDownSearchMixin:refresh()
 				end
 			end)
 
-			btn.removeButton:SetScript("OnClick", function()
-				btn:remove(btn.arg1, btn.arg2)
-				self:GetOwningDropdown():Hide()
-			end)
+			if btn.remove then
+				btn.removeButton:SetScript("OnClick", function()
+					btn:remove(btn.arg1, btn.arg2)
+					self:GetOwningDropdown():Hide()
+				end)
+			end
 
 			if btn.order then
 				btn.arrowUpButton:SetScript("OnClick", function()
