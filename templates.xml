@@ -1546,6 +1546,7 @@
 	</Button>
 
 	<Frame name="MJMenuDropDownSearchTemplate" inherits="UIDropDownCustomMenuEntryTemplate" mixin="MJDropDownSearchMixin" virtual="true">
+		<Size x="100"/>
 		<Frames>
 			<EditBox inherits="SearchBoxTemplate" parentKey="searchBox" letters="40">
 				<Size y="20"/>

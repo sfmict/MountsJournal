@@ -1678,7 +1678,7 @@ end
 
 
 function journal:updateMountsList()
-	local types, selected, factions, pet, expansions, list, GetDisplayedMountInfo, GetMountInfoExtraByID = mounts.filters.types, mounts.filters.selected, mounts.filters.factions, mounts.filters.pet, mounts.filters.expansions, self.list, self.func.GetDisplayedMountInfo, C_MountJournal.GetMountInfoExtraByID
+	local types, selected, factions, pet, expansions, list, tags, GetDisplayedMountInfo, GetMountInfoExtraByID = mounts.filters.types, mounts.filters.selected, mounts.filters.factions, mounts.filters.pet, mounts.filters.expansions, self.list, self.tags, self.func.GetDisplayedMountInfo, C_MountJournal.GetMountInfoExtraByID
 	wipe(self.displayedMounts)
 
 	for i = 1, self.func.GetNumDisplayedMounts() do
@@ -1704,7 +1704,7 @@ function journal:updateMountsList()
 		-- EXPANSIONS
 		and expansions[mounts.mountsDB[mountID]]
 		-- TAGS
-		and self.tags:getFilterMount(mountID) then
+		and tags:getFilterMount(mountID) then
 			tinsert(self.displayedMounts, i)
 		end
 	end
