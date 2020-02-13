@@ -195,16 +195,18 @@ function MJDropDownSearchMixin:OnSetOwningButton()
 	if listFrame.maxWidth < self.width then
 		listFrame.maxWidth = self.width
 	end
-	self:SetWidth(self.width)
 	self.searchBox:SetText("")
 
 	self.owningButton.checked = function() self:refresh() end
 	self.b_IsShown = self.owningButton.IsShown
 	self.owningButton.IsShown = function() return self:IsShown() end
+	self.b_SetWidth = self.owningButton.SetWidth
+	self.owningButton.SetWidth = function(btn, width) self:SetWidth(width) end
 
 	self:SetScript("OnHide", function(self)
 		self.owningButton.checked = nil
 		self.owningButton.IsShown = self.b_IsShown
+		self.owningButton.SetWidth = self.b_SetWidth
 	end)
 end
 
@@ -215,7 +217,7 @@ end
 
 
 function MJDropDownSearchMixin:onShow()
-	self:SetPoint("TOPRIGHT", self.owningButton, "TOPRIGHT")
+	self:SetPoint(self.owningButton:GetPoint())
 	local listFrame = self:GetOwningDropdown()
 	listFrame:SetHeight(listFrame.numButtons * UIDROPDOWNMENU_BUTTON_HEIGHT + UIDROPDOWNMENU_BORDER_HEIGHT * 2)
 	self:updateFilters()
@@ -284,7 +286,7 @@ function MJDropDownSearchMixin:refresh()
 				end)
 			end
 
-			btn:SetWidth(self:GetOwningDropdown().maxWidth - 25)
+			btn:SetWidth(self:GetWidth() - 25)
 			btn:Show()
 		else
 			btn:Hide()

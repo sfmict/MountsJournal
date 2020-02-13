@@ -1,1 +1,1 @@
-* Added tags system for mounts.
+* Fixed rendering tags with scroll.
