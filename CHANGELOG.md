@@ -1,1 +1,1 @@
-* Added grid display for mounts.
+* Added tags system for mounts.

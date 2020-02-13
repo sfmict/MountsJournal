@@ -1,4 +1,5 @@
 local addon, L = ...
+local util = MountsJournalUtil
 
 
 MJProfilesMixin = CreateFromMixins(MountsJournalEventsMixin)
@@ -55,10 +56,7 @@ function MJProfilesMixin:onLoad()
 		button2 = CANCEL,
 		hideOnEscape = 1,
 		whileDead = 1,
-		OnAccept = function(popup)
-			self.profiles[popup.text.text_arg1] = nil
-			self.mounts:setDB()
-		end,
+		OnAccept = function(_, cb) cb() end,
 	}
 
 	self.mounts = MountsJournal
@@ -92,8 +90,13 @@ end
 
 
 function MJProfilesMixin:deleteProfile(profileName)
-	CloseDropDownMenus()
-	StaticPopup_Show(self.addonName.."DELETE_PROFILE", profileName)
+	StaticPopup_Show(self.addonName.."DELETE_PROFILE", NORMAL_FONT_COLOR_CODE..profileName..FONT_COLOR_CODE_CLOSE, nil, function()
+		if self.charDB.currentProfileName == profileName then
+			self:setProfile()
+		end
+		self.profiles[profileName] = nil
+		self.mounts:setDB()
+	end)
 end
 
 
@@ -122,40 +125,6 @@ function MJProfilesMixin:menuInit(level)
 		info.func = function() btn:createProfile(true) end
 		UIDropDownMenu_AddButton(info, level)
 
-	elseif UIDROPDOWNMENU_MENU_VALUE == "delete" then -- DELETE RPFOLE
-		if #btn.profilesNames > 20 then
-			btn.searchListFrame:reset()
-
-			for _, profileName in ipairs(btn.profilesNames) do
-				if profileName ~= btn.charDB.currentProfileName then
-					info.text = profileName
-					info.arg1 = profileName
-					info.func = function(_, arg1) btn:deleteProfile(arg1) end
-					btn.searchListFrame:addButton(info)
-				end
-			end
-
-			info.customFrame = btn.searchListFrame
-			UIDropDownMenu_AddButton(info, level)
-			info.customFrame = nil
-		else
-			local i = 0
-			for _, profileName in ipairs(btn.profilesNames) do
-				if profileName ~= btn.charDB.currentProfileName then
-					info.text = profileName
-					info.arg1 = profileName
-					info.func = function(_, arg1) btn:deleteProfile(arg1) end
-					UIDropDownMenu_AddButton(info, level)
-					i = i + 1
-				end
-			end
-
-			if i == 0 then
-				info.disabled = true
-				info.text = EMPTY
-				UIDropDownMenu_AddButton(info, level)
-			end
-		end
 	elseif UIDROPDOWNMENU_MENU_VALUE == "specialization" then -- SPECS
 		info.hasArrow = true
 		info.keepShownOnClick = true
@@ -172,7 +141,7 @@ function MJProfilesMixin:menuInit(level)
 		info.arg2 = UIDROPDOWNMENU_MENU_VALUE
 
 		if #btn.profilesNames > 20 then
-			btn.searchListFrame:reset()
+			local searchFrame = util.getDropDownSearchFrame()
 
 			info.text = DEFAULT
 			info.checked = function(self)
@@ -182,7 +151,7 @@ function MJProfilesMixin:menuInit(level)
 				btn.charDB.profileBySpecialization[arg2] = nil
 				btn.mounts:setDB()
 			end
-			btn.searchListFrame:addButton(info)
+			searchFrame:addButton(info)
 
 			for _, profileName in ipairs(btn.profilesNames) do
 				info.text = profileName
@@ -194,12 +163,10 @@ function MJProfilesMixin:menuInit(level)
 					btn.charDB.profileBySpecialization[arg2] = arg1
 					btn.mounts:setDB()
 				end
-				btn.searchListFrame:addButton(info)
+				searchFrame:addButton(info)
 			end
 
-			info.customFrame = btn.searchListFrame
-			UIDropDownMenu_AddButton(info, level)
-			info.customFrame = nil
+			UIDropDownMenu_AddButton({customFrame = searchFrame}, level)
 		else
 			info.text = DEFAULT
 			info.checked = function(self)
@@ -240,24 +207,23 @@ function MJProfilesMixin:menuInit(level)
 		info.disabled = nil
 
 		if #btn.profilesNames > 20 then
-			btn.searchMenuFrame:reset()
+			local searchFrame = util.getDropDownSearchFrame()
 
 			info.text = DEFAULT
 			info.checked = function() return btn.charDB.currentProfileName == nil end
 			info.func = function() btn:setProfile() end
-			btn.searchMenuFrame:addButton(info)
+			searchFrame:addButton(info)
 
 			for _, profileName in ipairs(btn.profilesNames) do
 				info.text = profileName
 				info.arg1 = profileName
 				info.checked = function(self) return btn.charDB.currentProfileName == self.arg1 end
 				info.func = function(_, arg1) btn:setProfile(arg1) end
-				btn.searchMenuFrame:addButton(info)
+				info.remove = function(_, arg1) btn:deleteProfile(arg1) end
+				searchFrame:addButton(info)
 			end
 
-			info.customFrame = btn.searchMenuFrame
-			UIDropDownMenu_AddButton(info, level)
-			info.customFrame = nil
+			UIDropDownMenu_AddButton({customFrame = searchFrame}, level)
 		else
 			info.text = DEFAULT
 			info.checked = function() return btn.charDB.currentProfileName == nil end
@@ -265,12 +231,18 @@ function MJProfilesMixin:menuInit(level)
 			UIDropDownMenu_AddButton(info, level)
 
 			for _, profileName in ipairs(btn.profilesNames) do
-				info.text = profileName
-				info.arg1 = profileName
-				info.checked = function(self) return btn.charDB.currentProfileName == self.arg1 end
-				info.func = function(_, arg1) btn:setProfile(arg1) end
+				local buttonFrame = util.getDropDownMenuButtonFrame()
+				buttonFrame.text = profileName
+				buttonFrame.arg1 = profileName
+				buttonFrame.checked = function(self) return btn.charDB.currentProfileName == self.arg1 end
+				buttonFrame.func = function(_, arg1) btn:setProfile(arg1) end
+				buttonFrame.remove = function(_, arg1) btn:deleteProfile(arg1) end
+
+				info.customFrame = buttonFrame
 				UIDropDownMenu_AddButton(info, level)
 			end
+
+			info.customFrame = nil
 		end
 
 		UIDropDownMenu_AddSeparator(level)
@@ -284,10 +256,6 @@ function MJProfilesMixin:menuInit(level)
 
 		info.text = L["New profile"]
 		info.value = "new"
-		UIDropDownMenu_AddButton(info, level)
-
-		info.text = L["Delete profile"]
-		info.value = "delete"
 		UIDropDownMenu_AddButton(info, level)
 
 		UIDropDownMenu_AddSeparator(level)

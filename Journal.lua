@@ -115,6 +115,12 @@ function journal:ADDON_LOADED(addonName)
 			self[key] = true
 			return true
 		end})
+		mounts.filters.tags = mounts.filters.tags or {
+			noTag = true,
+			withAllTags = false,
+			tags = {},
+		}
+		self.tags:init()
 
 		-- MOUNT LIST UPDATE ANIMATION
 		self.leftInset.updateAnimFrame = CreateFrame("FRAME", nil, self.leftInset, "MJUpdateAnimFrame")
@@ -198,7 +204,6 @@ function journal:ADDON_LOADED(addonName)
 		mapSettings:SetPoint("BOTTOMRIGHT", self.rightInset)
 		mapSettings:SetScript("OnShow", function() self:updateMapSettings() end)
 		mapSettings.dungeonRaidBtn:SetText(L["Dungeons and Raids"])
-		mapSettings.dungeonRaidBtn.click = function(mapID) navBar:setMapID(mapID) end
 		mapSettings.CurrentMap:SetText(L["Current Location"])
 		mapSettings.CurrentMap:SetScript("OnClick", function()
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -813,22 +818,16 @@ function journal:grid3UpdateMountList()
 				local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected, mountID = C_MountJournal.GetDisplayedMountInfo(index)
 				local needsFanfare = C_MountJournal.NeedsFanfare(mountID)
 
-				btnGrid.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
 				btnGrid.index = index
 				btnGrid.spellID = spellID
 				btnGrid.active = active
+				btnGrid.selected = MountJournal.selectedSpellID == spellID
+				btnGrid.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
 				btnGrid.favorite:SetShown(isFavorite)
 				btnGrid.DragButton:Enable()
-				btnGrid:Enable()
+				btnGrid.DragButton.selectedTexture:SetShown(btnGrid.selected)
 				btnGrid:Show()
-
-				if MountJournal.selectedSpellID == spellID then
-					btnGrid.selected = true
-					btnGrid.DragButton.selectedTexture:Show()
-				else
-					btnGrid.selected = false
-					btnGrid.DragButton.selectedTexture:Hide()
-				end
+				btnGrid:Enable()
 
 				if isUsable or needsFanfare then
 					btnGrid.icon:SetDesaturated()
@@ -839,10 +838,14 @@ function journal:grid3UpdateMountList()
 					btnGrid.icon:SetAlpha(.75)
 				else
 					btnGrid.icon:SetDesaturated(true)
-					btnGrid.icon:SetAlpha(.25)
+					btnGrid.icon:SetAlpha(.5)
+				end
+
+				if btnGrid.showingTooltip then
+					MountJournalMountButton_UpdateTooltip(btnGrid)
 				end
 			else
-				btnGrid.icon:SetTexture("Interface\\PetBattles\\MountJournalEmptyIcon")
+				btnGrid.icon:SetTexture("Interface/PetBattles/MountJournalEmptyIcon")
 				btnGrid.icon:SetDesaturated(true)
 				btnGrid.icon:SetVertexColor(.4, .4, .4)
 				btnGrid.icon:SetAlpha(.5)
@@ -904,12 +907,14 @@ function journal:updateMountToggleButton(btn)
 	end
 
 	if btn.index then
+		local mountID = select(12, C_MountJournal.GetDisplayedMountInfo(btn.index))
+
 		btn.fly:Enable()
 		btn.ground:Enable()
 		btn.swimming:Enable()
-		btn.fly.mountID = select(12, C_MountJournal.GetDisplayedMountInfo(btn.index))
-		btn.ground.mountID = btn.fly.mountID
-		btn.swimming.mountID = btn.fly.mountID
+		btn.fly.mountID = mountID
+		btn.ground.mountID = mountID
+		btn.swimming.mountID = mountID
 		setColor(btn.fly, self.list and self.list.fly)
 		setColor(btn.ground, self.list and self.list.ground)
 		setColor(btn.swimming, self.list and self.list.swimming)
@@ -1237,6 +1242,10 @@ function journal:filterDropDown_Initialize(level)
 		info.text = L["expansions"]
 		info.value = 6
 		UIDropDownMenu_AddButton(info, level)
+
+		info.text = L["tags"]
+		info.value = 7
+		UIDropDownMenu_AddButton(info, level)
 	else
 		info.notCheckable = true
 
@@ -1378,7 +1387,7 @@ function journal:filterDropDown_Initialize(level)
 				info.checked = function() return pet[i] end
 				UIDropDownMenu_AddButton(info, level)
 			end
-		else -- EXPANSIONS
+		elseif UIDROPDOWNMENU_MENU_VALUE == 6 then -- EXPANSIONS
 			info.text = CHECK_ALL
 			info.func = function()
 				self:setAllFilters("expansions", true)
@@ -1406,6 +1415,114 @@ function journal:filterDropDown_Initialize(level)
 				info.checked = function() return expansions[i] end
 				UIDropDownMenu_AddButton(info, level)
 			end
+		else -- TAGS
+			local filterTags = self.tags.filter
+
+			info.notCheckable = false
+			info.text = L["No tag"]
+			info.func = function(_,_,_, value)
+				filterTags.noTag = value
+				self:mountsListFullUpdate()
+			end
+			info.checked = function() return filterTags.noTag end
+			UIDropDownMenu_AddButton(info, level)
+
+			info.text = L["With all tags"]
+			info.func = function(_,_,_, value)
+				filterTags.withAllTags = value
+				self:mountsListFullUpdate()
+			end
+			info.checked = function() return filterTags.withAllTags end
+			UIDropDownMenu_AddButton(info, level)
+
+			UIDropDownMenu_AddSeparator(level)
+
+			info.notCheckable = true
+			info.text = CHECK_ALL
+			info.func = function()
+				self.tags:setAllFilterTags(true)
+				self:mountsListFullUpdate()
+				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+			end
+			UIDropDownMenu_AddButton(info, level)
+
+			info.text = UNCHECK_ALL
+			info.func = function()
+				self.tags:setAllFilterTags(false)
+				self:mountsListFullUpdate()
+				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+			end
+			UIDropDownMenu_AddButton(info, level)
+
+			if #self.tags.sortedTags > 20 then
+				local searchFrame = util.getDropDownSearchFrame()
+				info.notCheckable = nil
+
+				for i, tag in ipairs(self.tags.sortedTags) do
+					info.text = function() return self.tags.sortedTags[i] end
+					info.func = function(btn, _,_, value)
+						filterTags.tags[btn._text][2] = value
+						self:mountsListFullUpdate()
+					end
+					info.checked = function(btn) return filterTags.tags[btn._text][2] end
+					info.remove = function(btn)
+						self.tags:deleteTag(btn._text)
+						CloseDropDownMenus()
+					end
+					info.order = function(btn, step)
+						self.tags:setOrderTag(btn._text, step)
+					end
+					searchFrame:addButton(info)
+				end
+
+				info.remove = nil
+				info.order = nil
+				UIDropDownMenu_AddButton({customFrame = searchFrame}, level)
+			else
+				for i, tag in ipairs(self.tags.sortedTags) do
+					local buttonFrame = util.getDropDownMenuButtonFrame()
+					buttonFrame.keepShownOnClick = true
+					buttonFrame.isNotRadio = true
+					buttonFrame.text = function() return self.tags.sortedTags[i] end
+					buttonFrame.func = function(btn, _,_, value)
+						filterTags.tags[btn._text][2] = value
+						self:mountsListFullUpdate()
+					end
+					buttonFrame.checked = function(btn) return filterTags.tags[btn._text][2] end
+					buttonFrame.remove = function(btn)
+						self.tags:deleteTag(btn._text)
+						CloseDropDownMenus()
+					end
+					buttonFrame.order = function(btn, step)
+						self.tags:setOrderTag(btn._text, step)
+						UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+					end
+
+					info.customFrame = buttonFrame
+					UIDropDownMenu_AddButton(info, level)
+				end
+
+				info.customFrame = nil
+				if #self.tags.sortedTags == 0 then
+					info.text = EMPTY
+					info.disabled = true
+					UIDropDownMenu_AddButton(info, level)
+				end
+			end
+
+			UIDropDownMenu_AddSeparator(level)
+
+			info.disabled = nil
+			info.keepShownOnClick = nil
+			info.notCheckable = true
+			info.checked = nil
+
+			info.text = L["Add tag"]
+			info.func = function()
+				self.tags:addTag()
+				CloseDropDownMenus()
+			end
+			UIDropDownMenu_AddButton(info, level)
 		end
 	end
 end
@@ -1428,6 +1545,7 @@ function journal:clearAllFilters()
 	self:setAllFilters("factions", true)
 	self:setAllFilters("pet", true)
 	self:setAllFilters("expansions", true)
+	self.tags:resetFilter()
 	self:clearBtnFilters()
 end
 
@@ -1584,7 +1702,9 @@ function journal:updateMountsList()
 		-- PET
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
 		-- EXPANSIONS
-		and expansions[mounts.mountsDB[mountID]] then
+		and expansions[mounts.mountsDB[mountID]]
+		-- TAGS
+		and self.tags:getFilterMount(mountID) then
 			tinsert(self.displayedMounts, i)
 		end
 	end
