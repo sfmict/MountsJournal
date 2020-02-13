@@ -11,12 +11,12 @@ function tags:init()
 		button2 = CANCEL,
 		hasEditBox = 1,
 		maxLetters = 48,
-		editBoxWidth = 350,
+		editBoxWidth = 200,
 		hideOnEscape = 1,
 		whileDead = 1,
 		OnAccept = function(popup, data)
 			local text = popup.editBox:GetText()
-			if text and text ~= "" and type(data) == "function" then
+			if text and text ~= "" then
 				data(text)
 			end
 		end,
@@ -28,8 +28,6 @@ function tags:init()
 		end,
 		OnShow = function(self)
 			self.editBox:SetFocus()
-			-- self.editBox:SetText(UnitName("player").." - "..GetRealmName())
-			-- self.editBox:HighlightText()
 		end,
 	}
 	StaticPopupDialogs[self.addonName.."TAG_EXISTS"] = {
@@ -38,7 +36,7 @@ function tags:init()
 		whileDead = 1,
 	}
 	StaticPopupDialogs[self.addonName.."DELETE_TAG"] = {
-		text = addon..": "..CONFIRM_COMPACT_UNIT_FRAME_PROFILE_DELETION,
+		text = addon..": "..L["Are you sure you want to delete tag %s?"],
 		button1 = DELETE,
 		button2 = CANCEL,
 		hideOnEscape = 1,
@@ -46,32 +44,8 @@ function tags:init()
 		OnAccept = function(_, data) data() end,
 	}
 
-	self.filter = {
-		noTag = false,
-		withAllTags = false,
-		tags = {
-			tag1 = {2, true},
-			tag2 = {1, false},
-			tag3 = {3, true},
-			aaaaaaaaaaaaaaaaaaaaaaaaaaa = {4, false}
-		},
-	}
-	self.mountTags = {
-		[6] = {
-			"tag1",
-		},
-		[19] = {
-			"tag2",
-		},
-		[1217] = {
-			"tag3",
-		},
-		[1232] = {
-			"tag1",
-			"tag3",
-		},
-	}
-
+	self.filter = mounts.filters.tags
+	self.mountTags = mounts.globalDB.mountTags
 	self.sortedTags = {}
 	self:setSortedTags()
 
@@ -171,7 +145,7 @@ function tags:mountOptionsMenu_Init(level)
 		info.isNotRadio = true
 		info.keepShownOnClick = true
 
-		if #self.sortedTags > 2 then
+		if #self.sortedTags > 20 then
 			local searchFrame = util.getDropDownSearchFrame()
 
 			for _, tag in ipairs(self.sortedTags) do
@@ -228,7 +202,7 @@ end
 
 
 function tags:deleteTag(tag)
-	StaticPopup_Show(self.addonName.."DELETE_TAG", tag, nil, function()
+	StaticPopup_Show(self.addonName.."DELETE_TAG", NORMAL_FONT_COLOR_CODE..tag..FONT_COLOR_CODE_CLOSE, nil, function()
 		for mountID in pairs(self.mountTags) do
 			self:removeMountTag(mountID, tag)
 		end
@@ -252,9 +226,7 @@ end
 
 function tags:getTagInMount(mountID, tag)
 	local mountTags = self.mountTags[mountID]
-	if mountTags then
-		return util.inTable(mountTags, tag)
-	end
+	if mountTags then return mountTags[tag] end
 end
 
 
@@ -262,16 +234,15 @@ function tags:addMountTag(mountID, tag)
 	if not self.mountTags[mountID] then
 		self.mountTags[mountID] = {}
 	end
-	tinsert(self.mountTags[mountID], tag)
+	self.mountTags[mountID][tag] = true
 end
 
 
 function tags:removeMountTag(mountID, tag)
 	local mountTags = self.mountTags[mountID]
 	if mountTags then
-		local pos = util.inTable(mountTags, tag)
-		if pos then tremove(mountTags, pos) end
-		if #mountTags == 0 then self.mountTags[mountID] = nil end
+		mountTags[tag] = nil
+		if next(mountTags) == nil then self.mountTags[mountID] = nil end
 	end
 end
 
@@ -286,12 +257,12 @@ function tags:getFilterMount(mountID)
 		for tag, value in pairs(filterTags) do
 			if value[2] then
 				i = i + 1
-				if not util.inTable(mountTags, tag) then return false end
+				if not mountTags[tag] then return false end
 			end
 		end
 		return i > 0
 	else
-		for _, tag in ipairs(mountTags) do
+		for tag in pairs(mountTags) do
 			if filterTags[tag][2] then return true end
 		end
 		return false

@@ -115,6 +115,11 @@ function journal:ADDON_LOADED(addonName)
 			self[key] = true
 			return true
 		end})
+		mounts.filters.tags = mounts.filters.tags or {
+			noTag = true,
+			withAllTags = false,
+			tags = {},
+		}
 		self.tags:init()
 
 		-- MOUNT LIST UPDATE ANIMATION
@@ -1449,42 +1454,69 @@ function journal:filterDropDown_Initialize(level)
 			end
 			UIDropDownMenu_AddButton(info, level)
 
-			info.notCheckable = false
-			for i, tag in ipairs(self.tags.sortedTags) do
-				local buttonFrame = util.getDropDownMenuButtonFrame()
-				buttonFrame.keepShownOnClick = true
-				buttonFrame.isNotRadio = true
-				buttonFrame.text = function() return self.tags.sortedTags[i] end
-				buttonFrame.func = function(_,_,_, value)
-					filterTags.tags[tag][2] = value
-					self:mountsListFullUpdate()
-				end
-				buttonFrame.checked = function(btn) return filterTags.tags[btn.text][2] end
-				buttonFrame.remove = function(_, tag)
-					self.tags:deleteTag(tag)
-					CloseDropDownMenus()
-				end
-				buttonFrame.order = function(btn, step)
-					self.tags:setOrderTag(btn.text, step)
-					UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+			if #self.tags.sortedTags > 20 then
+				local searchFrame = util.getDropDownSearchFrame()
+				info.notCheckable = nil
+
+				for i, tag in ipairs(self.tags.sortedTags) do
+					info.text = function() return self.tags.sortedTags[i] end
+					info.func = function(btn, _,_, value)
+						filterTags.tags[btn._text][2] = value
+						self:mountsListFullUpdate()
+					end
+					info.checked = function(btn) return filterTags.tags[btn._text][2] end
+					info.remove = function(btn)
+						self.tags:deleteTag(btn._text)
+						CloseDropDownMenus()
+					end
+					info.order = function(btn, step)
+						self.tags:setOrderTag(btn._text, step)
+					end
+					searchFrame:addButton(info)
 				end
 
-				info.customFrame = buttonFrame
-				UIDropDownMenu_AddButton(info, level)
-			end
+				info.remove = nil
+				info.order = nil
+				UIDropDownMenu_AddButton({customFrame = searchFrame}, level)
+			else
+				for i, tag in ipairs(self.tags.sortedTags) do
+					local buttonFrame = util.getDropDownMenuButtonFrame()
+					buttonFrame.keepShownOnClick = true
+					buttonFrame.isNotRadio = true
+					buttonFrame.text = function() return self.tags.sortedTags[i] end
+					buttonFrame.func = function(btn, _,_, value)
+						filterTags.tags[btn._text][2] = value
+						self:mountsListFullUpdate()
+					end
+					buttonFrame.checked = function(btn) return filterTags.tags[btn._text][2] end
+					buttonFrame.remove = function(btn)
+						self.tags:deleteTag(btn._text)
+						CloseDropDownMenus()
+					end
+					buttonFrame.order = function(btn, step)
+						self.tags:setOrderTag(btn._text, step)
+						UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+					end
 
-			info.customFrame = nil
-			info.notCheckable = true
-			if #self.tags.sortedTags == 0 then
-				info.text = EMPTY
-				info.disabled = true
-				UIDropDownMenu_AddButton(info, level)
+					info.customFrame = buttonFrame
+					UIDropDownMenu_AddButton(info, level)
+				end
+
+				info.customFrame = nil
+				if #self.tags.sortedTags == 0 then
+					info.text = EMPTY
+					info.disabled = true
+					UIDropDownMenu_AddButton(info, level)
+				end
 			end
 
 			UIDropDownMenu_AddSeparator(level)
 
 			info.disabled = nil
 			info.keepShownOnClick = nil
+			info.notCheckable = true
+			info.checked = nil
+
 			info.text = L["Add tag"]
 			info.func = function()
 				self.tags:addTag()

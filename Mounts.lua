@@ -27,6 +27,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.globalDB.swimming = self.globalDB.swimming or {}
 		self.globalDB.zoneMounts = self.globalDB.zoneMounts or {}
 		self.globalDB.petForMount = self.globalDB.petForMount or {}
+		self.globalDB.mountTags = self.globalDB.mountTags or {}
 		self.globalDB.filters = self.globalDB.filters or {}
 		self.globalDB.config = self.globalDB.config or {}
 		self.globalDB.mountsProfiles = self.globalDB.mountsProfiles or {}

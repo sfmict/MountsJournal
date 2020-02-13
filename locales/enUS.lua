@@ -84,6 +84,13 @@ L["Copy current"] = "Copy current"
 L["Delete profile"] = "Delete profile"
 L["A profile with the same name exists."] = "A profile with the same name exists."
 L["By Specialization"] = "By Specialization"
+-- TAGS
+L["tags"] = "Tags"
+L["No tag"] = "No tag"
+L["With all tags"] = "With all tags"
+L["Add tag"] = "Add tag"
+L["Tag already exists."] = "Tag already exists."
+L["Are you sure you want to delete tag %s?"] = "Are you sure you want to delete tag %s?"
 
 setmetatable(L, {__index = function(self, key)
 	self[key] = key or ""

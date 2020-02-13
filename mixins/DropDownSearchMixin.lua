@@ -31,26 +31,23 @@ function MJDropDownMenuButtonMixin:reset()
 	for _, opt in ipairs(dropDownOptions) do
 		self[opt] = nil
 	end
-	self._checked = nil
-	self._text = nil
 	return self
 end
 
 
 function MJDropDownMenuButtonMixin:refresh()
 	self._checked = self.checked
-	if type(self.text) == "function" then
-		self._text = self.text
-	end
-	if self._text then self.text = self._text() end
-	if self.text then
-		self:SetText(self.text)
+	self._text = self.text
+
+	if self._text then
+		if type(self._text) == "function" then self._text = self._text() end
+		self:SetText(self._text)
 	end
 	self.width = self.normalText:GetWidth() + 40
 
 	if self.remove then
 		self.removeButton:Show()
-		self.width = self.width + 5
+		self.width = self.width + 16
 	else
 		self.removeButton:Hide()
 	end
@@ -106,6 +103,13 @@ function MJDropDownMenuButtonMixin:OnSetOwningButton()
 		end
 	end)
 
+	if self.remove then
+		self.removeButton:SetScript("OnClick", function()
+			self:remove(self.arg1, self.arg2)
+			self:GetOwningDropdown():Hide()
+		end)
+	end
+
 	if self.order then
 		self.arrowUpButton:SetScript("OnClick", function()
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -117,13 +121,6 @@ function MJDropDownMenuButtonMixin:OnSetOwningButton()
 		end)
 	end
 
-	if self.remove then
-		self.removeButton:SetScript("OnClick", function()
-			self:remove(self.text)
-			self:GetOwningDropdown():Hide()
-		end)
-	end
-
 	self.owningButton.checked = function() self:refresh() end
 	self.b_IsShown = self.owningButton.IsShown
 	self.owningButton.IsShown = function() return self:IsShown() end
@@ -131,6 +128,7 @@ function MJDropDownMenuButtonMixin:OnSetOwningButton()
 	self.owningButton.SetWidth = function(_, width) self:SetWidth(width) end
 
 	self:SetScript("OnHide", function(self)
+		self.owningButton.checked = nil
 		self.owningButton.IsShown = self.b_IsShown
 		self.owningButton.SetWidth = self.b_SetWidth
 	end)
@@ -199,6 +197,20 @@ function MJDropDownSearchMixin:OnSetOwningButton()
 	end
 	self:SetWidth(self.width)
 	self.searchBox:SetText("")
+
+	self.owningButton.checked = function() self:refresh() end
+	self.b_IsShown = self.owningButton.IsShown
+	self.owningButton.IsShown = function() return self:IsShown() end
+
+	self:SetScript("OnHide", function(self)
+		self.owningButton.checked = nil
+		self.owningButton.IsShown = self.b_IsShown
+	end)
+end
+
+
+function MJDropDownSearchMixin:GetPreferredEntryWidth()
+	return self.width
 end
 
 
@@ -218,7 +230,8 @@ function MJDropDownSearchMixin:updateFilters()
 
 	wipe(self.filtredButtons)
 	for _, btn in ipairs(self.buttons) do
-		if text:len() == 0 or btn.text:lower():find(text) then
+		local btnText = type(btn.text) == "function" and btn.text() or btn.text
+		if text:len() == 0 or btnText:lower():find(text) then
 			tinsert(self.filtredButtons, btn)
 		end
 	end
@@ -240,7 +253,6 @@ function MJDropDownSearchMixin:refresh()
 			for _, opt in ipairs(dropDownOptions) do
 				btn[opt] = info[opt]
 			end
-
 			btn:refresh()
 
 			btn:SetScript("OnClick", function(btn)
@@ -253,6 +265,24 @@ function MJDropDownSearchMixin:refresh()
 					self:refresh()
 				end
 			end)
+
+			btn.removeButton:SetScript("OnClick", function()
+				btn:remove(btn.arg1, btn.arg2)
+				self:GetOwningDropdown():Hide()
+			end)
+
+			if btn.order then
+				btn.arrowUpButton:SetScript("OnClick", function()
+					PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+					btn:order(-1)
+					self:refresh()
+				end)
+				btn.arrowDownButton:SetScript("OnClick", function()
+					PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+					btn:order(1)
+					self:refresh()
+				end)
+			end
 
 			btn:SetWidth(self:GetOwningDropdown().maxWidth - 25)
 			btn:Show()
@@ -271,15 +301,23 @@ function MJDropDownSearchMixin:addButton(info)
 	local btn = self.listScroll.buttons[1]
 	if btn then
 		if info.text then
-			btn:SetText(info.text)
+			btn:SetText(type(info.text) == "function" and info.text() or info.text)
 			local width = btn.normalText:GetWidth() + 50
 
 			if info.notCheckable then
 				width = width - 20
-			else
+			elseif not info.isNotRadio then
 				local checked = info.checked
 				if type(checked) == "function" then checked = checked(info) end
 				if checked then self.index = #self.buttons end
+			end
+
+			if info.remove then
+				width = width + 16
+			end
+
+			if info.order then
+				width = width + 24
 			end
 
 			if self.width < width then
