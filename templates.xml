@@ -1427,7 +1427,7 @@
 							<Anchors>
 								<Anchor point="CENTER"/>
 							</Anchors>
-							<Color r=".5" g=".5" b=".5"/>
+							<Color r=".7" g=".7" b=".7"/>
 						</Texture>
 					</Layer>
 				</Layers>
@@ -1459,7 +1459,7 @@
 								<Anchor point="CENTER"/>
 							</Anchors>
 							<TexCoords left=".25" right=".75" top="0" bottom=".875"/>
-							<Color r=".5" g=".5" b=".5"/>
+							<Color r=".7" g=".7" b=".7"/>
 						</Texture>
 					</Layer>
 				</Layers>
@@ -1490,7 +1490,7 @@
 							<Anchors>
 								<Anchor point="CENTER"/>
 							</Anchors>
-							<Color r=".5" g=".5" b=".5"/>
+							<Color r=".7" g=".7" b=".7"/>
 							<TexCoords left=".25" right=".75" top=".875" bottom="0"/>
 						</Texture>
 					</Layer>

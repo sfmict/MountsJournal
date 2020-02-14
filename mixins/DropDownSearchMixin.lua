@@ -192,16 +192,13 @@ function MJDropDownSearchMixin:OnSetOwningButton()
 	for i = 1, self.numButtons - 1 do
 		UIDropDownMenu_AddButton(spaceInfo, level)
 	end
-	if listFrame.maxWidth < self.width then
-		listFrame.maxWidth = self.width
-	end
 	self.searchBox:SetText("")
 
 	self.owningButton.checked = function() self:refresh() end
 	self.b_IsShown = self.owningButton.IsShown
 	self.owningButton.IsShown = function() return self:IsShown() end
 	self.b_SetWidth = self.owningButton.SetWidth
-	self.owningButton.SetWidth = function(btn, width) self:SetWidth(width) end
+	self.owningButton.SetWidth = function(_, width) self:SetWidth(width) end
 
 	self:SetScript("OnHide", function(self)
 		self.owningButton.checked = nil
