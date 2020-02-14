@@ -172,7 +172,6 @@ function tags:mountOptionsMenu_Init(level)
 					else
 						self:removeMountTag(mountID, tag)
 					end
-					UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 				end
 				info.checked = function() return self:getTagInMount(mountID, tag) end
 				UIDropDownMenu_AddButton(info, level)

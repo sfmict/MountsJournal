@@ -192,6 +192,10 @@ do
 		if self.classConfig.useLastDruidForm then
 			local spellID = getFormSpellID()
 
+			if self.classConfig.useDruidFormSpecialization then
+				self.lastDruidFormSpellID = specializationSpellIDs[GetSpecialization()]
+			end
+
 			if self.lastDruidFormSpellID
 			and spellID ~= 24858
 			and (self.sFlags.isMounted
@@ -202,13 +206,13 @@ do
 				return macro or ""
 			end
 
-			if self.classConfig.useDruidFormSpecialization then
-				self.lastDruidFormSpellID = specializationSpellIDs[GetSpecialization()]
-			elseif spellID and spellID ~= 783 then
-				self.lastDruidFormSpellID = spellID
-				self.lastDruidFormTime = GetTime()
-			elseif not spellID and GetTime() - (self.lastDruidFormTime or 0) > 1 then
-				self.lastDruidFormSpellID = nil
+			if not self.classConfig.useDruidFormSpecialization then
+				if spellID and spellID ~= 783 then
+					self.lastDruidFormSpellID = spellID
+					self.lastDruidFormTime = GetTime()
+				elseif not spellID and GetTime() - (self.lastDruidFormTime or 0) > 1 then
+					self.lastDruidFormSpellID = nil
+				end
 			end
 		end
 
