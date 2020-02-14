@@ -14,11 +14,9 @@ function tags:init()
 		editBoxWidth = 200,
 		hideOnEscape = 1,
 		whileDead = 1,
-		OnAccept = function(popup, data)
+		OnAccept = function(popup, cb)
 			local text = popup.editBox:GetText()
-			if text and text ~= "" then
-				data(text)
-			end
+			if text and text ~= "" then cb(text) end
 		end,
 		EditBoxOnEnterPressed = function(self)
 			StaticPopup_OnClick(self:GetParent(), 1)
@@ -41,7 +39,7 @@ function tags:init()
 		button2 = CANCEL,
 		hideOnEscape = 1,
 		whileDead = 1,
-		OnAccept = function(_, data) data() end,
+		OnAccept = function(_, cb) cb() end,
 	}
 
 	self.filter = mounts.filters.tags
@@ -54,12 +52,15 @@ end
 
 
 function tags:setSortedTags()
-	wipe(self.sortedTags)
 	local filterTags = self.filter.tags
+	wipe(self.sortedTags)
 	for tag in pairs(filterTags) do
 		tinsert(self.sortedTags, tag)
 	end
 	sort(self.sortedTags, function(tag1, tag2) return filterTags[tag1][1] < filterTags[tag2][1] end)
+	for i, tag in pairs(self.sortedTags) do
+		filterTags[tag][1] = i
+	end
 end
 
 
@@ -194,7 +195,7 @@ function tags:addTag()
 			return
 		end
 		self.filter.tags[text] = {#self.sortedTags + 1, true}
-		self:setSortedTags()
+		tinsert(self.sortedTags, text)
 		journal:mountsListFullUpdate()
 	end)
 end
@@ -216,9 +217,11 @@ function tags:setOrderTag(tag, step)
 	local pos = util.inTable(self.sortedTags, tag)
 	local nextPos = pos + step
 	if nextPos > 0 and nextPos <= #self.sortedTags then
+		local secondTag = self.sortedTags[nextPos]
 		self.filter.tags[tag][1] = nextPos
-		self.filter.tags[self.sortedTags[nextPos]][1] = pos
-		self:setSortedTags()
+		self.filter.tags[secondTag][1] = pos
+		self.sortedTags[pos] = secondTag
+		self.sortedTags[nextPos] = tag
 	end
 end
 

@@ -1,1 +1,1 @@
-* Fixed rendering tags with scroll.
+* Fixed tag sorting.
