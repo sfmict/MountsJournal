@@ -52,12 +52,15 @@ end
 
 
 function tags:setSortedTags()
-	wipe(self.sortedTags)
 	local filterTags = self.filter.tags
+	wipe(self.sortedTags)
 	for tag in pairs(filterTags) do
 		tinsert(self.sortedTags, tag)
 	end
 	sort(self.sortedTags, function(tag1, tag2) return filterTags[tag1][1] < filterTags[tag2][1] end)
+	for i, tag in pairs(self.sortedTags) do
+		filterTags[tag][1] = i
+	end
 end
 
 
@@ -192,9 +195,6 @@ function tags:addTag()
 			StaticPopup_Show(self.addonName.."TAG_EXISTS")
 			return
 		end
-		for i, tag in pairs(self.sortedTags) do
-			self.filter.tags[tag][1] = i
-		end
 		self.filter.tags[text] = {#self.sortedTags + 1, true}
 		tinsert(self.sortedTags, text)
 		journal:mountsListFullUpdate()
@@ -218,9 +218,11 @@ function tags:setOrderTag(tag, step)
 	local pos = util.inTable(self.sortedTags, tag)
 	local nextPos = pos + step
 	if nextPos > 0 and nextPos <= #self.sortedTags then
+		local secondTag = self.sortedTags[nextPos]
 		self.filter.tags[tag][1] = nextPos
-		self.filter.tags[self.sortedTags[nextPos]][1] = pos
-		self:setSortedTags()
+		self.filter.tags[secondTag][1] = pos
+		self.sortedTags[pos] = secondTag
+		self.sortedTags[nextPos] = tag
 	end
 end
 
