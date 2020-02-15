@@ -181,8 +181,8 @@ do
 	}
 
 
-	function macroFrame:getMacro()
-		self.mounts:setFlags()
+	function macroFrame:getMacro(forceModifier)
+		self.mounts:setFlags(forceModifier)
 		local macro
 
 		-- DRUID LAST FORM
@@ -281,15 +281,13 @@ end
 
 
 function MJMacroMixin:onLoad()
-	self.mounts = MountsJournal
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 end
 
 
 function MJMacroMixin:preClick()
-	self.mounts.secondMount = self.secondMount
 	if InCombatLockdown() then return end
-	self:SetAttribute("macrotext", macroFrame:getMacro())
+	self:SetAttribute("macrotext", macroFrame:getMacro(self.forceModifier))
 end
 
 

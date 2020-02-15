@@ -42,7 +42,7 @@ do
 	function config:PLAYER_LOGIN()
 		self.bindMount = binding:createButtonBinding(self, secureButtonNameMount, "MJSecureActionButtonTemplate")
 		self.bindSecondMount = binding:createButtonBinding(self, secureButtonNameSecondMount, "MJSecureActionButtonTemplate")
-		self.bindSecondMount.secure.secondMount = true
+		self.bindSecondMount.secure.forceModifier = true
 		setMacroText(self)
 	end
 end
