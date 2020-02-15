@@ -388,9 +388,9 @@ function mounts:isWaterWalkLocation()
 end
 
 
-function mounts:setFlags()
+function mounts:setFlags(forceModifier)
 	local groundSpellKnown, flySpellKnown = self:getSpellKnown()
-	local modifier = self.modifier() or self.secondMount
+	local modifier = forceModifier or self.modifier()
 	local isSubmerged = IsSubmerged()
 	local isFloating = self:isFloating()
 	local instance = select(8, GetInstanceInfo())

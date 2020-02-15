@@ -181,8 +181,8 @@ do
 	}
 
 
-	function macroFrame:getMacro()
-		self.mounts:setFlags()
+	function macroFrame:getMacro(forceModifier)
+		self.mounts:setFlags(forceModifier)
 		local macro
 
 		-- DRUID LAST FORM
@@ -191,6 +191,11 @@ do
 		-- 24858 - moonkin form
 		if self.classConfig.useLastDruidForm then
 			local spellID = getFormSpellID()
+
+			if GetShapeshiftFormID() == 3 and (GetUnitSpeed("player") > 0 or IsFalling()) then
+				macro = "/cancelform"
+				return macro or ""
+			end
 
 			if self.classConfig.useDruidFormSpecialization then
 				self.lastDruidFormSpellID = specializationSpellIDs[GetSpecialization()]
@@ -281,15 +286,13 @@ end
 
 
 function MJMacroMixin:onLoad()
-	self.mounts = MountsJournal
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 end
 
 
 function MJMacroMixin:preClick()
-	self.mounts.secondMount = self.secondMount
 	if InCombatLockdown() then return end
-	self:SetAttribute("macrotext", macroFrame:getMacro())
+	self:SetAttribute("macrotext", macroFrame:getMacro(self.forceModifier))
 end
 
 
