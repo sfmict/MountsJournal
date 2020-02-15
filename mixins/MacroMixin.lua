@@ -192,6 +192,11 @@ do
 		if self.classConfig.useLastDruidForm then
 			local spellID = getFormSpellID()
 
+			if GetShapeshiftFormID() == 3 and (GetUnitSpeed("player") > 0 or IsFalling()) then
+				macro = "/cancelform"
+				return macro or ""
+			end
+
 			if self.classConfig.useDruidFormSpecialization then
 				self.lastDruidFormSpellID = specializationSpellIDs[GetSpecialization()]
 			end
