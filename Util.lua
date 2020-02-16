@@ -1,5 +1,4 @@
-MountsJournalEventsMixin = {}
-local eventsMeta = {
+local eventsMixin, eventsMeta = {}, {
 	__newindex = function(self, key, value)
 		if key == "onLoad" and type(value) == "function" then
 			rawset(self, key, function(self)
@@ -13,12 +12,12 @@ local eventsMeta = {
 }
 
 
-function MountsJournalEventsMixin:initEvents()
+function eventsMixin:initEvents()
 	self._events = {}
 end
 
 
-function MountsJournalEventsMixin:on(event, func)
+function eventsMixin:on(event, func)
 	if type(event) ~= "string" or type(func) ~= "function" then return end
 	local event, name = strsplit(".", event, 2)
 
@@ -32,7 +31,7 @@ function MountsJournalEventsMixin:on(event, func)
 end
 
 
-function MountsJournalEventsMixin:off(event, func)
+function eventsMixin:off(event, func)
 	if type(event) ~= "string" then return end
 	local event, name = strsplit(".", event)
 
@@ -54,7 +53,7 @@ function MountsJournalEventsMixin:off(event, func)
 end
 
 
-function MountsJournalEventsMixin:event(event, ...)
+function eventsMixin:event(event, ...)
 	local handlerList = self._events[event]
 	if handlerList then
 		for _, handler in ipairs(handlerList) do
@@ -68,14 +67,14 @@ MountsJournalUtil = {}
 
 
 function MountsJournalUtil.createFromEventsMixin(...)
-	local mixin = CreateFromMixins(MountsJournalEventsMixin, ...)
+	local mixin = CreateFromMixins(eventsMixin, ...)
 	setmetatable(mixin, eventsMeta)
 	return mixin
 end
 
 
 function MountsJournalUtil.setEventsMixin(frame)
-	for k, v in pairs(MountsJournalEventsMixin) do
+	for k, v in pairs(eventsMixin) do
 		frame[k] = v
 	end
 	frame:initEvents()
