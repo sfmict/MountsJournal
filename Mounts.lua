@@ -388,9 +388,10 @@ function mounts:isWaterWalkLocation()
 end
 
 
-function mounts:setFlags(forceModifier)
+function mounts:setFlags()
+	local flags = self.sFlags
 	local groundSpellKnown, flySpellKnown = self:getSpellKnown()
-	local modifier = forceModifier or self.modifier()
+	local modifier = self.modifier() or flags.forceModifier
 	local isSubmerged = IsSubmerged()
 	local isFloating = self:isFloating()
 	local instance = select(8, GetInstanceInfo())
@@ -399,7 +400,6 @@ function mounts:setFlags(forceModifier)
 									  and self:isFlyLocation(instance)
 									  and not (self.mapFlags and self.mapFlags.groundOnly)
 
-	local flags = self.sFlags
 	flags.isIndoors = IsIndoors()
 	flags.inVehicle = UnitInVehicle("player")
 	flags.isMounted = IsMounted()
@@ -424,7 +424,10 @@ end
 function mounts:init()
 	SLASH_MOUNTSJOURNAL1 = "/mount"
 	SlashCmdList["MOUNTSJOURNAL"] = function(msg)
-		if msg ~= "doNotSetFlags" then self:setFlags() end
+		if msg ~= "doNotSetFlags" then
+			self.sFlags.forceModifier = nil
+			self:setFlags()
+		end
 		local flags = self.sFlags
 		if flags.inVehicle then
 			VehicleExit()

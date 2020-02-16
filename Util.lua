@@ -1,4 +1,16 @@
 MountsJournalEventsMixin = {}
+local eventsMeta = {
+	__newindex = function(self, key, value)
+		if key == "onLoad" and type(value) == "function" then
+			rawset(self, key, function(self)
+				self:initEvents()
+				value(self)
+			end)
+		else
+			rawset(self, key, value)
+		end
+	end
+}
 
 
 function MountsJournalEventsMixin:initEvents()
@@ -53,6 +65,13 @@ end
 
 
 MountsJournalUtil = {}
+
+
+function MountsJournalUtil.createFromEventsMixin(...)
+	local mixin = CreateFromMixins(MountsJournalEventsMixin, ...)
+	setmetatable(mixin, eventsMeta)
+	return mixin
+end
 
 
 function MountsJournalUtil.setEventsMixin(frame)
