@@ -85,7 +85,6 @@ L["Profiles"] = "Профили"
 L["New profile"] = "Новый профиль"
 L["Create"] = "Создать"
 L["Copy current"] = "Копировать текущий"
-L["Delete profile"] = "Удалить профиль"
 L["A profile with the same name exists."] = "Профиль с таким именем уже существует."
 L["By Specialization"] = "По специализации"
 -- TAGS

@@ -424,11 +424,11 @@ end
 function mounts:init()
 	SLASH_MOUNTSJOURNAL1 = "/mount"
 	SlashCmdList["MOUNTSJOURNAL"] = function(msg)
+		local flags = self.sFlags
 		if msg ~= "doNotSetFlags" then
-			self.sFlags.forceModifier = nil
+			flags.forceModifier = nil
 			self:setFlags()
 		end
-		local flags = self.sFlags
 		if flags.inVehicle then
 			VehicleExit()
 		elseif flags.isMounted then

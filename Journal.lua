@@ -804,15 +804,13 @@ end
 function journal:grid3UpdateMountList()
 	local scrollFrame = self.scrollFrame
 	local offset = HybridScrollFrame_GetOffset(scrollFrame)
-	local numButtons = #scrollFrame.buttons
 	local numDisplayedMounts = C_MountJournal.GetNumDisplayedMounts()
+	local selectedSpellID = MountJournal.selectedSpellID
 
 	for i, btn in ipairs(scrollFrame.buttons) do
 		for j = 1, 3 do
 			local index = (offset + i - 1) * 3 + j
 			local btnGrid = btn.grid3list["mount"..j]
-
-			btnGrid.icon:SetVertexColor(1, 1, 1)
 
 			if index <= numDisplayedMounts then
 				local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected, mountID = C_MountJournal.GetDisplayedMountInfo(index)
@@ -821,8 +819,9 @@ function journal:grid3UpdateMountList()
 				btnGrid.index = index
 				btnGrid.spellID = spellID
 				btnGrid.active = active
-				btnGrid.selected = MountJournal.selectedSpellID == spellID
+				btnGrid.selected = selectedSpellID == spellID
 				btnGrid.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
+				btnGrid.icon:SetVertexColor(1, 1, 1)
 				btnGrid.favorite:SetShown(isFavorite)
 				btnGrid.DragButton:Enable()
 				btnGrid.DragButton.selectedTexture:SetShown(btnGrid.selected)

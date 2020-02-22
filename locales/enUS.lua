@@ -81,7 +81,6 @@ L["Profiles"] = "Profiles"
 L["New profile"] = "New profile"
 L["Create"] = "Create"
 L["Copy current"] = "Copy current"
-L["Delete profile"] = "Delete profile"
 L["A profile with the same name exists."] = "A profile with the same name exists."
 L["By Specialization"] = "By Specialization"
 -- TAGS

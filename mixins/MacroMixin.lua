@@ -45,6 +45,7 @@ function macroFrame:refresh()
 	self:setCombatMacro()
 end
 
+
 function macroFrame:addLine(text, line)
 	if type(text) == "string" and text:len() > 0 then
 		return strjoin("\n", text, line)
