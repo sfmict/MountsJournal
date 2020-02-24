@@ -3,7 +3,7 @@
 	<Script file="mixins/MacroMixin.lua"/>
 	<Script file="mixins/NavBarMixin.lua"/>
 	<Script file="mixins/WorldMapMixin.lua"/>
-	<Script file="mixins/ExistingsListsMixin.lua"/>
+	<Script file="mixins/ExistingListsMixin.lua"/>
 	<Script file="mixins/ProfilesMixin.lua"/>
 	<Script file="mixins/CompanionMixin.lua"/>
 
@@ -826,9 +826,9 @@
 						local newWidth = min(128, self.text:GetStringWidth()+50)
 						local texCoordoffsetX = (newWidth/128)*.25
 
-						self:GetNormalTexture():SetTexCoord(.70312500-texCoordoffsetX, .703125, .0078125, .2421875)
-						self:GetPushedTexture():SetTexCoord(.70312500-texCoordoffsetX, .703125, .2578125, .4921875)
-						self:GetHighlightTexture():SetTexCoord(.70312500-texCoordoffsetX, .713125, .5078125, .7421875)
+						self:GetNormalTexture():SetTexCoord(.703125-texCoordoffsetX, .703125, .0078125, .2421875)
+						self:GetPushedTexture():SetTexCoord(.703125-texCoordoffsetX, .703125, .2578125, .4921875)
+						self:GetHighlightTexture():SetTexCoord(.703125-texCoordoffsetX, .713125, .5078125, .7421875)
 
 						self:SetWidth(newWidth)
 					</OnLoad>
@@ -1070,7 +1070,7 @@
 					<OnClick method="onClick"/>
 				</Scripts>
 			</DropDownToggleButton>
-			<CheckButton parentKey="existingsListsToggle" inherits="MJArrowToggle">
+			<CheckButton parentKey="existingListsToggle" inherits="MJArrowToggle">
 				<Anchors>
 					<Anchor point="TOPRIGHT" relativeKey="$parent.mapControl" relativePoint="TOPRIGHT" x="-3" y="-3"/>
 				</Anchors>
@@ -1079,7 +1079,7 @@
 				<Size y="24"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.dungeonRaidBtn" relativePoint="RIGHT" x="-2"/>
-					<Anchor point="RIGHT" relativeKey="$parent.existingsListsToggle" relativePoint="LEFT" x="2"/>
+					<Anchor point="RIGHT" relativeKey="$parent.existingListsToggle" relativePoint="LEFT" x="2"/>
 				</Anchors>
 			</Button>
 			<CheckButton parentKey="Ground" inherits="MJCheckButtonTemplate">
@@ -1139,16 +1139,23 @@
 		</Frames>
 	</Frame>
 
-	<Frame name="MJExistingsListsPanelTemplate" enableMouse="true" mixin="MJExistingsListsMixin" hidden="true" virtual="true">
+	<Frame name="MJExistingListsPanelTemplate" enableMouse="true" mixin="MJExistingListsMixin" hidden="true" virtual="true">
 		<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background" edgeFile="Interface/Tooltips/UI-Tooltip-Border" tile="true">
 			<EdgeSize val="16"/>
 			<TileSize val="16"/>
 			<BackgroundInsets left="4" right="4" top="4" bottom="4"/>
 		</Backdrop>
 		<Frames>
+			<EditBox inherits="SearchBoxTemplate" parentKey="searchBox" letters="40">
+				<Size y="20"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="10" y="-4"/>
+					<Anchor point="TOPRIGHT" x="-5"/>
+				</Anchors>
+			</EditBox>
 			<ScrollFrame parentKey="scrollFrame" inherits="UIPanelScrollFrameTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="5" y="-5"/>
+					<Anchor point="TOPLEFT" x="5" y="-26"/>
 					<Anchor point="BOTTOMRIGHT" x="-28" y="5"/>
 				</Anchors>
 				<ScrollChild>

@@ -142,3 +142,8 @@ end
 function MountsJournalUtil.getGroupType()
 	return IsInRaid() and "raid" or IsInGroup() and "group"
 end
+
+
+function MountsJournalUtil.cleanText(text)
+	return text:lower():gsub("^%s*(.-)%s*$", "%1"):gsub("[%(%)%.%%%+%-%*%?%[%^%$]", "%%%1")
+end

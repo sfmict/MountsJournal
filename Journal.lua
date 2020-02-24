@@ -231,23 +231,23 @@ function journal:ADDON_LOADED(addonName)
 			MountJournal_UpdateMountList()
 			self:updateMapSettings()
 			mounts:setMountsList()
-			self.existingsLists:refresh()
+			self.existingLists:refresh()
 
 			self.mountListUpdateAnim:Stop()
 			self.mountListUpdateAnim:Play()
 		end)
 		UIDropDownMenu_Initialize(mapSettings.listFromMap.optionsMenu, self.listFromMapInit, "MENU")
 
-		-- EXISTINGS LISTS TOGGLE
-		mapSettings.existingsListsToggle:HookScript("OnClick", function(btn)
-			self.existingsLists:SetShown(btn:GetChecked())
+		-- EXISTING LISTS TOGGLE
+		mapSettings.existingListsToggle:HookScript("OnClick", function(btn)
+			self.existingLists:SetShown(btn:GetChecked())
 		end)
 
-		-- EXISTINGS LISTS
-		local existingsLists = CreateFrame("FRAME", nil, mapSettings, "MJExistingsListsPanelTemplate")
-		self.existingsLists = existingsLists
-		existingsLists:SetPoint("TOPLEFT", MountJournal, "TOPRIGHT")
-		existingsLists:SetPoint("BOTTOMLEFT", MountJournal, "BOTTOMRIGHT")
+		-- EXISTING LISTS
+		local existingLists = CreateFrame("FRAME", nil, mapSettings, "MJExistingListsPanelTemplate")
+		self.existingLists = existingLists
+		existingLists:SetPoint("TOPLEFT", MountJournal, "TOPRIGHT")
+		existingLists:SetPoint("BOTTOMLEFT", MountJournal, "BOTTOMRIGHT")
 
 		--MOUNTJOURNAL ONSHOW
 		MountJournal:HookScript("OnShow", function()
@@ -295,7 +295,7 @@ function journal:ADDON_LOADED(addonName)
 			self:updateMountsList()
 			MountJournal_UpdateMountList()
 			self:updateMapSettings()
-			self.existingsLists:refresh()
+			self.existingLists:refresh()
 
 			self.mountListUpdateAnim:Stop()
 			self.mountListUpdateAnim:Play()
@@ -1009,7 +1009,7 @@ function journal:mountToggle(btn)
 	end
 
 	mounts:setMountsList()
-	self.existingsLists:refresh()
+	self.existingLists:refresh()
 end
 
 
@@ -1025,7 +1025,7 @@ function journal:setFlag(flag, enable)
 	end
 
 	mounts:setMountsList()
-	self.existingsLists:refresh()
+	self.existingLists:refresh()
 end
 
 
@@ -1094,7 +1094,7 @@ function journal:listFromMapInit(level)
 			MountJournal_UpdateMountList()
 			journal:updateMapSettings()
 			mounts:setMountsList()
-			journal.existingsLists:refresh()
+			journal.existingLists:refresh()
 			CloseDropDownMenus()
 
 			journal.mountListUpdateAnim:Stop()

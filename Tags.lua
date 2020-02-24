@@ -214,7 +214,7 @@ end
 
 
 function tags:setOrderTag(tag, step)
-	local pos = util.inTable(self.sortedTags, tag)
+	local pos = self.filter.tags[tag][1]
 	local nextPos = pos + step
 	if nextPos > 0 and nextPos <= #self.sortedTags then
 		local secondTag = self.sortedTags[nextPos]

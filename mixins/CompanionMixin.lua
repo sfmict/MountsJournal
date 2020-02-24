@@ -105,6 +105,7 @@ end
 
 
 function MJCompanionsPanelMixin:onLoad()
+	self.util = MountsJournalUtil
 	self.journal = MountsJournalFrame
 	self.journal.profilesMenu:on("SET_PROFILE", function() self:refresh() end)
 
@@ -318,7 +319,7 @@ end
 
 
 function MJCompanionsPanelMixin:updateFilters()
-	local text = self.searchBox:GetText():lower():gsub("[%(%)%.%%%+%-%*%?%[%^%$]", function(char) return "%"..char end)
+	local text = self.util.cleanText(self.searchBox:GetText())
 	local GetPetInfoByPetID = C_PetJournal.GetPetInfoByPetID
 
 	wipe(self.petFiltredList)

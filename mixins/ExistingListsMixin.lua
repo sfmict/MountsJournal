@@ -1,12 +1,18 @@
 local _,L = ...
 
 
-MJExistingsListsMixin = {}
+MJExistingListsMixin = {}
 
 
-function MJExistingsListsMixin:onLoad()
-	self.journal = MountsJournalFrame
+function MJExistingListsMixin:onLoad()
 	self.util = MountsJournalUtil
+	self.journal = MountsJournalFrame
+
+	self.searchBox:SetScript("OnTextChanged", function(searchBox)
+		SearchBoxTemplate_OnTextChanged(searchBox)
+		self:refresh()
+	end)
+
 	self.child = self.scrollFrame.child
 	self.optionsButtonPool = CreateFramePool("BUTTON", self.child, "MJOptionButtonTemplate", function(_,frame)
 		frame:Hide()
@@ -36,7 +42,7 @@ function MJExistingsListsMixin:onLoad()
 end
 
 
-function MJExistingsListsMixin:collapse(btn, i)
+function MJExistingListsMixin:collapse(btn, i)
 	local checked = btn:GetChecked()
 	btn.toggle.plusMinus:SetTexture(checked and "Interface/Buttons/UI-PlusButton-UP" or "Interface/Buttons/UI-MinusButton-UP")
 
@@ -53,9 +59,10 @@ function MJExistingsListsMixin:collapse(btn, i)
 end
 
 
-function MJExistingsListsMixin:refresh()
+function MJExistingListsMixin:refresh()
 	if not self:IsVisible() then return end
 	local lastWidth = 0
+	local text = self.util.cleanText(self.searchBox:GetText())
 
 	for _,withList in ipairs(self.lists) do
 		local width = withList.text:GetStringWidth()
@@ -67,25 +74,28 @@ function MJExistingsListsMixin:refresh()
 	self.optionsButtonPool:ReleaseAll()
 	lastWidth = lastWidth + 10
 
-	local function createOptionButton(mapID)
-		local optionButton = self.optionsButtonPool:Acquire()
-		optionButton:SetText(self.util.getMapFullNameInfo(mapID).name)
-		optionButton:SetScript("OnClick", function()
-			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			self.journal.navBar:setMapID(mapID)
-		end)
-		local width = optionButton.text:GetStringWidth()
-		if width > lastWidth then
-			lastWidth = width
+	local function createOptionButton(tbl, mapID)
+		local btnText = self.util.getMapFullNameInfo(mapID).name
+		if text:len() == 0 or btnText:lower():find(text) then
+			local optionButton = self.optionsButtonPool:Acquire()
+			optionButton:SetText(btnText)
+			optionButton:SetScript("OnClick", function()
+				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+				self.journal.navBar:setMapID(mapID)
+			end)
+			local width = optionButton.text:GetStringWidth()
+			if width > lastWidth then
+				lastWidth = width
+			end
+			tinsert(tbl, optionButton)
 		end
-		return optionButton
 	end
 
 	for mapID, mapConfig in pairs(self.journal.db.zoneMounts) do
 		if mapConfig.listFromID then
-			tinsert(self.lists[2].childs, createOptionButton(mapID))
+			createOptionButton(self.lists[2].childs, mapID)
 		elseif #mapConfig.fly + #mapConfig.ground + #mapConfig.swimming ~= 0 then
-			tinsert(self.lists[1].childs, createOptionButton(mapID))
+			createOptionButton(self.lists[1].childs, mapID)
 		end
 
 		local flags
@@ -97,7 +107,7 @@ function MJExistingsListsMixin:refresh()
 		end
 
 		if flags then
-			tinsert(self.lists[3].childs, createOptionButton(mapID))
+			createOptionButton(self.lists[3].childs, mapID)
 		end
 	end
 

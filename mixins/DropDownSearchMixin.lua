@@ -85,7 +85,6 @@ function MJDropDownMenuButtonMixin:refresh()
 			self.Uncheck:SetTexCoord(.5, 1, .5, 1)
 		end
 	end
-
 end
 
 
@@ -122,15 +121,13 @@ function MJDropDownMenuButtonMixin:OnSetOwningButton()
 	end
 
 	self.owningButton.checked = function() self:refresh() end
-	self.b_IsShown = self.owningButton.IsShown
 	self.owningButton.IsShown = function() return self:IsShown() end
-	self.b_SetWidth = self.owningButton.SetWidth
 	self.owningButton.SetWidth = function(_, width) self:SetWidth(width) end
 
 	self:SetScript("OnHide", function(self)
 		self.owningButton.checked = nil
-		self.owningButton.IsShown = self.b_IsShown
-		self.owningButton.SetWidth = self.b_SetWidth
+		self.owningButton.IsShown = nil
+		self.owningButton.SetWidth = nil
 	end)
 end
 
@@ -195,15 +192,13 @@ function MJDropDownSearchMixin:OnSetOwningButton()
 	self.searchBox:SetText("")
 
 	self.owningButton.checked = function() self:refresh() end
-	self.b_IsShown = self.owningButton.IsShown
 	self.owningButton.IsShown = function() return self:IsShown() end
-	self.b_SetWidth = self.owningButton.SetWidth
 	self.owningButton.SetWidth = function(_, width) self:SetWidth(width) end
 
 	self:SetScript("OnHide", function(self)
 		self.owningButton.checked = nil
-		self.owningButton.IsShown = self.b_IsShown
-		self.owningButton.SetWidth = self.b_SetWidth
+		self.owningButton.IsShown = nil
+		self.owningButton.SetWidth = nil
 	end)
 end
 
@@ -225,12 +220,11 @@ end
 
 
 function MJDropDownSearchMixin:updateFilters()
-	local text = self.searchBox:GetText():lower():gsub("[%(%)%.%%%+%-%*%?%[%^%$]", function(char) return "%"..char end)
+	local text = util.cleanText(self.searchBox:GetText())
 
 	wipe(self.filtredButtons)
 	for _, btn in ipairs(self.buttons) do
-		local btnText = type(btn.text) == "function" and btn.text() or btn.text
-		if text:len() == 0 or btnText:lower():find(text) then
+		if text:len() == 0 or (type(btn.text) == "function" and btn.text() or btn.text):lower():find(text) then
 			tinsert(self.filtredButtons, btn)
 		end
 	end
