@@ -1,12 +1,23 @@
-MountsJournalEventsMixin = {}
+local eventsMixin, eventsMeta = {}, {
+	__newindex = function(self, key, value)
+		if key == "onLoad" and type(value) == "function" then
+			rawset(self, key, function(self)
+				self:initEvents()
+				value(self)
+			end)
+		else
+			rawset(self, key, value)
+		end
+	end
+}
 
 
-function MountsJournalEventsMixin:initEvents()
+function eventsMixin:initEvents()
 	self._events = {}
 end
 
 
-function MountsJournalEventsMixin:on(event, func)
+function eventsMixin:on(event, func)
 	if type(event) ~= "string" or type(func) ~= "function" then return end
 	local event, name = strsplit(".", event, 2)
 
@@ -20,17 +31,22 @@ function MountsJournalEventsMixin:on(event, func)
 end
 
 
-function MountsJournalEventsMixin:off(event, func)
+function eventsMixin:off(event, func)
 	if type(event) ~= "string" then return end
-	local event, name = strsplit(".", event)
+	local event, name = strsplit(".", event, 2)
 
 	local handlerList = self._events[event]
 	if handlerList then
 		if name ~= nil or type(func) == "function" then
-			for i, handler in ipairs(handlerList) do
+			local i = 1
+			local handler = handlerList[i]
+			while handler do
 				if (not name or handler.name == name) and (not func or handler.func == func) then
 					tremove(handlerList, i)
+				else
+					i = i + 1
 				end
+				handler = handlerList[i]
 			end
 			if #handlerList == 0 then
 				self._events[event] = nil
@@ -42,7 +58,7 @@ function MountsJournalEventsMixin:off(event, func)
 end
 
 
-function MountsJournalEventsMixin:event(event, ...)
+function eventsMixin:event(event, ...)
 	local handlerList = self._events[event]
 	if handlerList then
 		for _, handler in ipairs(handlerList) do
@@ -55,8 +71,15 @@ end
 MountsJournalUtil = {}
 
 
+function MountsJournalUtil.createFromEventsMixin(...)
+	local mixin = CreateFromMixins(eventsMixin, ...)
+	setmetatable(mixin, eventsMeta)
+	return mixin
+end
+
+
 function MountsJournalUtil.setEventsMixin(frame)
-	for k, v in pairs(MountsJournalEventsMixin) do
+	for k, v in pairs(eventsMixin) do
 		frame[k] = v
 	end
 	frame:initEvents()
@@ -64,9 +87,9 @@ end
 
 
 function MountsJournalUtil.inTable(tbl, item)
-	for key, value in ipairs(tbl) do
-		if value == item then
-			return key
+	for i = 1, #tbl do
+		if tbl[i] == item then
+			return i
 		end
 	end
 	return false
@@ -123,4 +146,9 @@ end
 
 function MountsJournalUtil.getGroupType()
 	return IsInRaid() and "raid" or IsInGroup() and "group"
+end
+
+
+function MountsJournalUtil.cleanText(text)
+	return text:lower():gsub("^%s*(.-)%s*$", "%1"):gsub("[%(%)%.%%%+%-%*%?%[%^%$]", "%%%1")
 end

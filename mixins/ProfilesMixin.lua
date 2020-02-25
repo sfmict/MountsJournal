@@ -2,11 +2,10 @@ local addon, L = ...
 local util = MountsJournalUtil
 
 
-MJProfilesMixin = CreateFromMixins(MountsJournalEventsMixin)
+MJProfilesMixin = util.createFromEventsMixin()
 
 
 function MJProfilesMixin:onLoad()
-	self:initEvents()
 	self.addonName = format("%s_ADDON_", strupper(addon))
 	StaticPopupDialogs[self.addonName.."NEW_PROFILE"] = {
 		text = addon..": "..L["New profile"],

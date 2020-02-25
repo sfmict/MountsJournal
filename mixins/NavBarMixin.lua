@@ -1,3 +1,4 @@
+local util = MountsJournalUtil
 local mapValidTypes = {
 	[Enum.UIMapType.World] = true,
 	[Enum.UIMapType.Continent] = true,
@@ -11,11 +12,10 @@ local function isMapValidForNavBarDropDown(mapInfo)
 end
 
 
-MJNavBarMixin = CreateFromMixins(MountsJournalEventsMixin)
+MJNavBarMixin = util.createFromEventsMixin()
 
 
 function MJNavBarMixin:onLoad()
-	self:initEvents()
 	self.defMapID = MountsJournal.defMountsListID
 	local homeData = {
 		name = WORLD,

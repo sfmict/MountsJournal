@@ -85,7 +85,6 @@ end
 
 
 function MJMapCanvasMixin:refreshLayers()
-	if self.mapID == self.navBar.mapID then return end
 	self.mapID = self.navBar.mapID
 	self.detailLayerPool:ReleaseAll()
 
@@ -177,9 +176,9 @@ end
 
 function MJMapCanvasMixin:getCursorPosition()
 	local x, y = GetCursorPosition()
-	local effectiveScale = UIParent:GetEffectiveScale()
-	x, y = x / effectiveScale, y / effectiveScale
-	return Saturate(self:normalizeHorizontalSize(x / self.currentScale - self.child:GetLeft())), Saturate(self:normalizeVerticalSize(self.child:GetTop() - y / self.currentScale))
+	local scale = UIParent:GetEffectiveScale() * self.currentScale
+	x, y = x / scale, y / scale
+	return Saturate(self:normalizeHorizontalSize(x - self.child:GetLeft())), Saturate(self:normalizeVerticalSize(self.child:GetTop() - y))
 end
 
 

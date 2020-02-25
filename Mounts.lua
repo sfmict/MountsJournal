@@ -1,4 +1,5 @@
 local addon = ...
+local C_MountJournal, C_Map, MapUtil, tinsert, random, C_PetJournal = C_MountJournal, C_Map, MapUtil, tinsert, random, C_PetJournal
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 
@@ -209,25 +210,15 @@ function mounts:setMountsList()
 	local zoneMounts = self.db.zoneMounts
 	self.mapFlags = nil
 
-	local function getMountsRelationList(mapID)
-		local list = zoneMounts[mapID]
-		if list and list.listFromID then
-			return getMountsRelationList(list.listFromID)
-		end
-		return list
-	end
-
 	while mapInfo do
 		local list = zoneMounts[mapInfo.mapID]
-		if list then
-			if not self.mapFlags then self.mapFlags = list.flags end
-			local relationList = getMountsRelationList(mapInfo.mapID)
-			if relationList then
-				if #relationList.fly + #relationList.ground + #relationList.swimming ~= 0 then
-					self.list = relationList
-					return
-				end
-			end
+		if list and not self.mapFlags then self.mapFlags = list.flags end
+		while list and list.listFromID do
+			list = zoneMounts[list.listFromID]
+		end
+		if list and #list.fly + #list.ground + #list.swimming ~= 0 then
+			self.list = list
+			return
 		end
 		mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
 	end
@@ -296,10 +287,10 @@ end
 
 function mounts:summon(ids)
 	local usableIDs = {}
-	for _, mountID in ipairs(ids) do
-		if select(5, C_MountJournal.GetMountInfoByID(mountID)) then
-			tinsert(usableIDs, mountID)
-		end
+	for i = 1, #ids do
+		local mountID = ids[i]
+		local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
+		if isUsable then tinsert(usableIDs, mountID) end
 	end
 	if #usableIDs ~= 0 then
 		C_MountJournal.SummonByID(usableIDs[random(#usableIDs)])
@@ -388,9 +379,10 @@ function mounts:isWaterWalkLocation()
 end
 
 
-function mounts:setFlags(forceModifier)
+function mounts:setFlags()
+	local flags = self.sFlags
 	local groundSpellKnown, flySpellKnown = self:getSpellKnown()
-	local modifier = forceModifier or self.modifier()
+	local modifier = self.modifier() or flags.forceModifier
 	local isSubmerged = IsSubmerged()
 	local isFloating = self:isFloating()
 	local instance = select(8, GetInstanceInfo())
@@ -399,7 +391,6 @@ function mounts:setFlags(forceModifier)
 									  and self:isFlyLocation(instance)
 									  and not (self.mapFlags and self.mapFlags.groundOnly)
 
-	local flags = self.sFlags
 	flags.isIndoors = IsIndoors()
 	flags.inVehicle = UnitInVehicle("player")
 	flags.isMounted = IsMounted()
@@ -424,8 +415,11 @@ end
 function mounts:init()
 	SLASH_MOUNTSJOURNAL1 = "/mount"
 	SlashCmdList["MOUNTSJOURNAL"] = function(msg)
-		if msg ~= "doNotSetFlags" then self:setFlags() end
 		local flags = self.sFlags
+		if msg ~= "doNotSetFlags" then
+			flags.forceModifier = nil
+			self:setFlags()
+		end
 		if flags.inVehicle then
 			VehicleExit()
 		elseif flags.isMounted then
