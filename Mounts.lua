@@ -1,4 +1,5 @@
 local addon = ...
+local C_MountJournal, C_Map, MapUtil, tinsert, random, C_PetJournal = C_MountJournal, C_Map, MapUtil, tinsert, random, C_PetJournal
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 
@@ -286,10 +287,10 @@ end
 
 function mounts:summon(ids)
 	local usableIDs = {}
-	for _, mountID in ipairs(ids) do
-		if select(5, C_MountJournal.GetMountInfoByID(mountID)) then
-			tinsert(usableIDs, mountID)
-		end
+	for i = 1, #ids do
+		local mountID = ids[i]
+		local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
+		if isUsable then tinsert(usableIDs, mountID) end
 	end
 	if #usableIDs ~= 0 then
 		C_MountJournal.SummonByID(usableIDs[random(#usableIDs)])
