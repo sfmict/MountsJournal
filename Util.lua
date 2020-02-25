@@ -33,15 +33,20 @@ end
 
 function eventsMixin:off(event, func)
 	if type(event) ~= "string" then return end
-	local event, name = strsplit(".", event)
+	local event, name = strsplit(".", event, 2)
 
 	local handlerList = self._events[event]
 	if handlerList then
 		if name ~= nil or type(func) == "function" then
-			for i, handler in ipairs(handlerList) do
+			local i = 1
+			local handler = handlerList[i]
+			while handler do
 				if (not name or handler.name == name) and (not func or handler.func == func) then
 					tremove(handlerList, i)
+				else
+					i = i + 1
 				end
+				handler = handlerList[i]
 			end
 			if #handlerList == 0 then
 				self._events[event] = nil
