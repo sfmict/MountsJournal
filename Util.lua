@@ -87,9 +87,9 @@ end
 
 
 function MountsJournalUtil.inTable(tbl, item)
-	for key, value in ipairs(tbl) do
-		if value == item then
-			return key
+	for i = 1, #tbl do
+		if tbl[i] == item then
+			return i
 		end
 	end
 	return false

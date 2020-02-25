@@ -209,25 +209,15 @@ function mounts:setMountsList()
 	local zoneMounts = self.db.zoneMounts
 	self.mapFlags = nil
 
-	local function getMountsRelationList(mapID)
-		local list = zoneMounts[mapID]
-		if list and list.listFromID then
-			return getMountsRelationList(list.listFromID)
-		end
-		return list
-	end
-
 	while mapInfo do
 		local list = zoneMounts[mapInfo.mapID]
-		if list then
-			if not self.mapFlags then self.mapFlags = list.flags end
-			local relationList = getMountsRelationList(mapInfo.mapID)
-			if relationList then
-				if #relationList.fly + #relationList.ground + #relationList.swimming ~= 0 then
-					self.list = relationList
-					return
-				end
-			end
+		if list and not self.mapFlags then self.mapFlags = list.flags end
+		while list and list.listFromID do
+			list = zoneMounts[list.listFromID]
+		end
+		if list and #list.fly + #list.ground + #list.swimming ~= 0 then
+			self.list = list
+			return
 		end
 		mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
 	end

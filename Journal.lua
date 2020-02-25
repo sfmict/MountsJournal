@@ -873,18 +873,16 @@ function journal:setEditMountsList()
 			ground = self.db.ground,
 			swimming = self.db.swimming,
 		}
-		self.list = self.currentList
 		self.listMapID = nil
+		self.list = self.currentList
 	else
-		local function getRelationMountList(mapID)
-			local list = self.db.zoneMounts[mapID]
-			if list and list.listFromID then
-				return getRelationMountList(list.listFromID)
-			end
-			return list, mapID
-		end
 		self.currentList = self.db.zoneMounts[mapID]
-		self.list, self.listMapID = getRelationMountList(mapID)
+		self.listMapID = mapID
+		self.list = self.currentList
+		while self.list and self.list.listFromID do
+			self.listMapID = self.list.listFromID
+			self.list = self.db.zoneMounts[self.listMapID]
+		end
 	end
 end
 
@@ -1677,7 +1675,7 @@ end
 
 
 function journal:updateMountsList()
-	local types, selected, factions, pet, expansions, list, tags, GetDisplayedMountInfo, GetMountInfoExtraByID = mounts.filters.types, mounts.filters.selected, mounts.filters.factions, mounts.filters.pet, mounts.filters.expansions, self.list, self.tags, self.func.GetDisplayedMountInfo, C_MountJournal.GetMountInfoExtraByID
+	local types, selected, factions, pet, expansions, mountTypes, list, tags, inTable, GetDisplayedMountInfo, GetMountInfoExtraByID = mounts.filters.types, mounts.filters.selected, mounts.filters.factions, mounts.filters.pet, mounts.filters.expansions, self.mountTypes, self.list, self.tags, util.inTable, self.func.GetDisplayedMountInfo, C_MountJournal.GetMountInfoExtraByID
 	wipe(self.displayedMounts)
 
 	for i = 1, self.func.GetNumDisplayedMounts() do
@@ -1687,17 +1685,17 @@ function journal:updateMountsList()
 		mountFaction = mountFaction or 2
 
 		-- TYPE
-		if types[self.mountTypes[mountType]]
+		if types[mountTypes[mountType]]
 		-- FACTION
 		and factions[mountFaction + 1]
 		-- SELECTED
 		and (not selected[1] and not selected[2] and not selected[3]
 			-- FLY
-			or selected[1] and list and util.inTable(list.fly, mountID)
+			or selected[1] and list and inTable(list.fly, mountID)
 			-- GROUND
-			or selected[2] and list and util.inTable(list.ground, mountID)
+			or selected[2] and list and inTable(list.ground, mountID)
 			-- SWIMMING
-			or selected[3] and list and util.inTable(list.swimming, mountID))
+			or selected[3] and list and inTable(list.swimming, mountID))
 		-- PET
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
 		-- EXPANSIONS

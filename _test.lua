@@ -178,5 +178,8 @@ end
 -- C_PetJournal.SummonPetByGUID(PetJournalPetCard.petID)
 -- C_PetJournal.GetSummonedPetGUID()
 
--- debugprofilestart() -- starts a timer for profiling during debugging.
--- fprint(debugprofilestop()) -- return the time in milliseconds since the last call to debugprofilestart()
+-- DEBUG IN MILLISECONDS
+-- debugprofilestart()
+-- for i = 1, 10000 do
+-- end
+-- fprint(debugprofilestop())

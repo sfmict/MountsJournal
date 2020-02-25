@@ -256,7 +256,7 @@ function tags:getFilterMount(mountID)
 
 	if self.filter.withAllTags then
 		local i = 0
-		for tag, value in pairs(filterTags) do
+		for tag, value in next, filterTags do
 			if value[2] then
 				i = i + 1
 				if not mountTags[tag] then return false end
@@ -264,7 +264,7 @@ function tags:getFilterMount(mountID)
 		end
 		return i > 0
 	else
-		for tag in pairs(mountTags) do
+		for tag in next, mountTags do
 			if filterTags[tag][2] then return true end
 		end
 		return false
