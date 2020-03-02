@@ -62,7 +62,7 @@ function MJProfilesMixin:onLoad()
 	self.journal = MountsJournalFrame
 	self.profiles = self.mounts.profiles
 	self.charDB = self.mounts.charDB
-	self.profilesNames = {}
+	self.profileNames = {}
 	self:SetText(self.charDB.currentProfileName or DEFAULT)
 	UIDropDownMenu_Initialize(self.optionsMenu, self.menuInit, "MENU")
 end
@@ -139,7 +139,7 @@ function MJProfilesMixin:menuInit(level)
 		info.keepShownOnClick = true
 		info.arg2 = UIDROPDOWNMENU_MENU_VALUE
 
-		if #btn.profilesNames > 20 then
+		if #btn.profileNames > 20 then
 			local searchFrame = util.getDropDownSearchFrame()
 
 			info.text = DEFAULT
@@ -152,7 +152,7 @@ function MJProfilesMixin:menuInit(level)
 			end
 			searchFrame:addButton(info)
 
-			for _, profileName in ipairs(btn.profilesNames) do
+			for _, profileName in ipairs(btn.profileNames) do
 				info.text = profileName
 				info.arg1 = profileName
 				info.checked = function(self)
@@ -178,7 +178,7 @@ function MJProfilesMixin:menuInit(level)
 			end
 			UIDropDownMenu_AddButton(info, level)
 
-			for _, profileName in ipairs(btn.profilesNames) do
+			for _, profileName in ipairs(btn.profileNames) do
 				info.text = profileName
 				info.arg1 = profileName
 				info.checked = function(self)
@@ -205,7 +205,7 @@ function MJProfilesMixin:menuInit(level)
 		info.notCheckable = nil
 		info.disabled = nil
 
-		if #btn.profilesNames > 20 then
+		if #btn.profileNames > 20 then
 			local searchFrame = util.getDropDownSearchFrame()
 
 			info.text = DEFAULT
@@ -213,7 +213,7 @@ function MJProfilesMixin:menuInit(level)
 			info.func = function() btn:setProfile() end
 			searchFrame:addButton(info)
 
-			for _, profileName in ipairs(btn.profilesNames) do
+			for _, profileName in ipairs(btn.profileNames) do
 				info.text = profileName
 				info.arg1 = profileName
 				info.checked = function(self) return btn.charDB.currentProfileName == self.arg1 end
@@ -229,7 +229,7 @@ function MJProfilesMixin:menuInit(level)
 			info.func = function() btn:setProfile() end
 			UIDropDownMenu_AddButton(info, level)
 
-			for _, profileName in ipairs(btn.profilesNames) do
+			for _, profileName in ipairs(btn.profileNames) do
 				local buttonFrame = util.getDropDownMenuButtonFrame()
 				buttonFrame.text = profileName
 				buttonFrame.arg1 = profileName
@@ -275,8 +275,8 @@ end
 
 function MJProfilesMixin:onClick()
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	wipe(self.profilesNames)
-	for k in pairs(self.profiles) do tinsert(self.profilesNames, k) end
-	sort(self.profilesNames, function(a, b) return a < b end)
+	wipe(self.profileNames)
+	for k in pairs(self.profiles) do tinsert(self.profileNames, k) end
+	sort(self.profileNames, function(a, b) return a < b end)
 	ToggleDropDownMenu(1, nil, self.optionsMenu, self, 111, 15)
 end

@@ -439,7 +439,7 @@
 				self.highlight:Show()
 				if self.tooltip then
 					GameTooltip:SetOwner(self, "ANCHOR_TOP", 0, -15)
-					GameTooltip:AddLine(self.tooltip, nil, nil, nil, true)
+					GameTooltip:SetText(self.tooltip, nil, nil, nil, nil, true)
 					GameTooltip:AddLine(self.tooltipDescription, 1, 1, 1, 1, true)
 					GameTooltip:Show()
 				end
