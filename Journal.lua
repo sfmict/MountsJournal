@@ -1042,10 +1042,15 @@ do
 			and mapID ~= self.navBar.mapID
 			and #mapConfig.fly + #mapConfig.ground + #mapConfig.swimming > 0 then
 				local mapInfo = util.getMapFullNameInfo(mapID)
+				local mapLangType = mapLangTypes[mapInfo.mapType]
+				if not mapLangType then
+					mapInfo.mapType = 5
+					mapLangType = OTHER
+				end
 
 				if not assocMaps[mapInfo.mapType] then
 					assocMaps[mapInfo.mapType] = {
-						name = mapLangTypes[mapInfo.mapType] or OTHER,
+						name = mapLangType,
 						list = {},
 					}
 					tinsert(btn.maps, assocMaps[mapInfo.mapType])
