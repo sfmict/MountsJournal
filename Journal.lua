@@ -1071,16 +1071,15 @@ function journal:listFromMapInit(level)
 
 	local btn = self:GetParent()
 	local info = UIDropDownMenu_CreateInfo()
+	local list = UIDROPDOWNMENU_MENU_VALUE or btn.maps
 	info.isNotRadio = true
 	info.notCheckable = true
 
-	if next(btn.maps) == nil then
+	if next(list) == nil then
 		info.notClickable = true
 		info.text = EMPTY
 		UIDropDownMenu_AddButton(info, level)
-	else
-		local list = UIDROPDOWNMENU_MENU_VALUE or btn.maps
-
+	elseif level == 2 then
 		local function setListFrom(_, mapID)
 			if journal.navBar.mapID == mapID then return end
 			if not journal.currentList then
@@ -1099,17 +1098,31 @@ function journal:listFromMapInit(level)
 			journal.mountListUpdateAnim:Play()
 		end
 
-		for _, mapInfo in ipairs(list) do
-			if mapInfo.mapID then
+		if #list > 20 then
+			local searchFrame = util.getDropDownSearchFrame()
+
+			for _, mapInfo in ipairs(list) do
 				info.text = mapInfo.name
 				info.func = setListFrom
 				info.arg1 = mapInfo.mapID
-			else
-				info.keepShownOnClick = true
-				info.hasArrow = true
-				info.text = mapInfo.name
-				info.value = mapInfo.list
+				searchFrame:addButton(info)
 			end
+
+			UIDropDownMenu_AddButton({customFrame = searchFrame}, level)
+		else
+			for _, mapInfo in ipairs(list) do
+				info.text = mapInfo.name
+				info.func = setListFrom
+				info.arg1 = mapInfo.mapID
+				UIDropDownMenu_AddButton(info, level)
+			end
+		end
+	else
+		for _, mapInfo in ipairs(list) do
+			info.keepShownOnClick = true
+			info.hasArrow = true
+			info.text = mapInfo.name
+			info.value = mapInfo.list
 			UIDropDownMenu_AddButton(info, level)
 		end
 	end
