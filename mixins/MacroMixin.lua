@@ -1,3 +1,4 @@
+local type, pairs, GetShapeshiftFormID, GetShapeshiftForm, GetShapeshiftFormInfo = type, pairs, GetShapeshiftFormID, GetShapeshiftForm, GetShapeshiftFormInfo
 local macroFrame = CreateFrame("FRAME")
 
 
@@ -109,7 +110,8 @@ function macroFrame:getDefMacro()
 
 	elseif self.class == "DRUID" then
 		local curFormID = GetShapeshiftFormID()
-		if curFormID == 1 or curFormID == 5 then
+		-- 1:CAT, 3:STAG, 5:BEAR, 36:TREANT
+		if curFormID == 1 or curFormID == 3 or curFormID == 5 or curFormID == 36 then
 			macro = self:addLine(macro, "/cancelform")
 		end
 	end
