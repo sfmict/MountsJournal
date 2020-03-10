@@ -20,7 +20,8 @@ function MJProfilesMixin:onLoad()
 			local text = popup.editBox:GetText()
 			if text and text ~= "" then
 				if self.profiles[text] ~= nil then
-					StaticPopup_Show(self.addonName.."PROFILE_EXISTS")
+					local dialog = StaticPopup_Show(self.addonName.."PROFILE_EXISTS", nil, nil, data)
+					if dialog then dialog.profileName = text end
 					return
 				end
 				self.profiles[text] = data and MountsJournalUtil:copyTable(data) or {
@@ -44,10 +45,22 @@ function MJProfilesMixin:onLoad()
 			self.editBox:HighlightText()
 		end,
 	}
+	local function profileExistsAccept(popup, data)
+		if not popup then return end
+		local dialog = StaticPopup_Show(self.addonName.."NEW_PROFILE", nil, nil, data)
+		if dialog then
+			dialog.editBox:SetText(popup.profileName)
+			dialog.editBox:HighlightText()
+			popup.profileName = nil
+		end
+	end
 	StaticPopupDialogs[self.addonName.."PROFILE_EXISTS"] = {
 		text = addon..": "..L["A profile with the same name exists."],
 		button1 = OKAY,
 		whileDead = 1,
+		hideOnEscape = 1,
+		OnAccept = profileExistsAccept,
+		OnCancel = profileExistsAccept,
 	}
 	StaticPopupDialogs[self.addonName.."DELETE_PROFILE"] = {
 		text = addon..": "..CONFIRM_COMPACT_UNIT_FRAME_PROFILE_DELETION,
@@ -90,11 +103,12 @@ end
 
 function MJProfilesMixin:deleteProfile(profileName)
 	StaticPopup_Show(self.addonName.."DELETE_PROFILE", NORMAL_FONT_COLOR_CODE..profileName..FONT_COLOR_CODE_CLOSE, nil, function()
+		self.profiles[profileName] = nil
 		if self.charDB.currentProfileName == profileName then
 			self:setProfile()
+		else
+			self.mounts:setDB()
 		end
-		self.profiles[profileName] = nil
-		self.mounts:setDB()
 	end)
 end
 

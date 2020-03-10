@@ -1,4 +1,4 @@
-local type, pairs, GetShapeshiftFormID, GetShapeshiftForm, GetShapeshiftFormInfo = type, pairs, GetShapeshiftFormID, GetShapeshiftForm, GetShapeshiftFormInfo
+local type, pairs, GetShapeshiftFormID, GetShapeshiftForm, GetShapeshiftFormInfo, GetSpecialization = type, pairs, GetShapeshiftFormID, GetShapeshiftForm, GetShapeshiftFormInfo, GetSpecialization
 local macroFrame = CreateFrame("FRAME")
 
 
