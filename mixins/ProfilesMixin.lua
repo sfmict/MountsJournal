@@ -20,8 +20,8 @@ function MJProfilesMixin:onLoad()
 			local text = popup.editBox:GetText()
 			if text and text ~= "" then
 				if self.profiles[text] ~= nil then
-					local dialog = StaticPopup_Show(self.addonName.."PROFILE_EXISTS", nil, nil, data)
-					if dialog then dialog.profileName = text end
+					self.lastProfileName = text
+					StaticPopup_Show(self.addonName.."PROFILE_EXISTS", nil, nil, data)
 					return
 				end
 				self.profiles[text] = data and util:copyTable(data) or {
@@ -48,17 +48,17 @@ function MJProfilesMixin:onLoad()
 	local function profileExistsAccept(popup, data)
 		if not popup then return end
 		local dialog = StaticPopup_Show(self.addonName.."NEW_PROFILE", nil, nil, data)
-		if dialog then
-			dialog.editBox:SetText(popup.profileName)
+		if dialog and self.lastProfileName then
+			dialog.editBox:SetText(self.lastProfileName)
 			dialog.editBox:HighlightText()
-			popup.profileName = nil
+			self.lastProfileName = nil
 		end
 	end
 	StaticPopupDialogs[self.addonName.."PROFILE_EXISTS"] = {
 		text = addon..": "..L["A profile with the same name exists."],
 		button1 = OKAY,
-		whileDead = 1,
 		hideOnEscape = 1,
+		whileDead = 1,
 		OnAccept = profileExistsAccept,
 		OnCancel = profileExistsAccept,
 	}
