@@ -933,6 +933,7 @@
 		<Scripts>
 			<OnLoad method="onLoad"/>
 			<OnShow method="onShow"/>
+			<OnHide method="onHide"/>
 			<OnUpdate method="onUpdate"/>
 			<OnMouseUp method="onClick"/>
 		</Scripts>

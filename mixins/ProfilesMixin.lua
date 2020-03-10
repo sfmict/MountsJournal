@@ -24,7 +24,7 @@ function MJProfilesMixin:onLoad()
 					if dialog then dialog.profileName = text end
 					return
 				end
-				self.profiles[text] = data and MountsJournalUtil:copyTable(data) or {
+				self.profiles[text] = data and util:copyTable(data) or {
 					fly = {},
 					ground = {},
 					swimming = {},
