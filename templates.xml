@@ -1237,6 +1237,22 @@
 		</Scripts>
 	</Frame>
 
+	<Frame name="MJModelPanningFrame" parent="UIParent" hidden="true" frameStrata="DIALOG" clampedToScreen="true">
+		<Size x="32" y="32"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture file="Interface/Cursor/UI-Cursor-Move" setAllPoints="true" /> 
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnUpdate>
+				local x, y = GetCursorPosition()
+				local scale = UIParent:GetScale()
+				self:SetPoint("BOTTOMLEFT", x / scale - 16, y / scale - 16)
+			</OnUpdate>
+		</Scripts>
+	</Frame>
+
 	<Button name="MJModelControlButtonTemplate" virtual="true">
 		<Size x="18" y="18"/>
 		<Layers>

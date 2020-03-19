@@ -566,9 +566,11 @@ function journal:ADDON_LOADED(addonName)
 
 		modelControl.panButton:HookScript("OnMouseDown", function(self)
 			self:GetParent():GetParent().isRightButtonDown = true
+			MJModelPanningFrame:Show()
 		end)
 		modelControl.panButton:HookScript("OnMouseUp", function(self)
 			self:GetParent():GetParent().isRightButtonDown = false
+			MJModelPanningFrame:Hide()
 		end)
 
 		local function modelSceneControlOnUpdate(self, elapsed)
