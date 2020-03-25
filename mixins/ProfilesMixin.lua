@@ -6,7 +6,7 @@ MJProfilesMixin = util.createFromEventsMixin()
 
 
 function MJProfilesMixin:onLoad()
-	self.addonName = format("%s_ADDON_", strupper(addon))
+	self.addonName = ("%s_ADDON_"):format(addon:upper())
 	StaticPopupDialogs[self.addonName.."NEW_PROFILE"] = {
 		text = addon..": "..L["New profile"],
 		button1 = ACCEPT,

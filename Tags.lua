@@ -4,7 +4,7 @@ journal.tags = tags
 
 
 function tags:init()
-	self.addonName = format("%s_ADDON_", strupper(addon))
+	self.addonName = ("%s_ADDON_"):format(addon:upper())
 	StaticPopupDialogs[self.addonName.."ADD_TAG"] = {
 		text = addon..": "..L["Add tag"],
 		button1 = ACCEPT,

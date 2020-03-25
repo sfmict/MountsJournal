@@ -70,7 +70,7 @@ do
 			spell:ContinueOnSpellLoad(function()
 				local subName = spell:GetSpellSubtext()
 				if subName:len() > 0 then
-					spellIDtoName[spellID].name = format("%s(%s)", name, subName)
+					spellIDtoName[spellID].name = ("%s(%s)"):format(name, subName)
 					for _, callback in pairs(spellIDtoName[spellID].callbacks) do
 						callback()
 					end

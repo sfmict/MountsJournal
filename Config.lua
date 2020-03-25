@@ -90,12 +90,12 @@ config:SetScript("OnShow", function(self)
 	local info = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	info:SetPoint("TOPRIGHT", -16, 16)
 	info:SetTextColor(.5, .5, .5, 1)
-	info:SetText(format("%s %s: %s", GetAddOnMetadata(addon, "Version"), L["author"], GetAddOnMetadata(addon, "Author")))
+	info:SetText(("%s %s: %s"):format(GetAddOnMetadata(addon, "Version"), L["author"], GetAddOnMetadata(addon, "Author")))
 
 	-- TITLE
 	local title = self:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 	title:SetPoint("TOPLEFT", 16, -16)
-	title:SetText(format(L["%s Configuration"], addon))
+	title:SetText(L["%s Configuration"]:format(addon))
 
 	-- SUBTITLE
 	local subtitle = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
@@ -149,7 +149,7 @@ config:SetScript("OnShow", function(self)
 	-- HELP PLATE
 	local helpPlate = CreateFrame("FRAME", nil, self, "MJHelpPlate")
 	helpPlate:SetPoint("TOP", self.bindMount, "BOTTOM", 0, -20)
-	helpPlate.tooltip = format(L["SecondMountTooltipTitle"], SUMMONS)
+	helpPlate.tooltip = L["SecondMountTooltipTitle"]:format(SUMMONS)
 	helpPlate.tooltipDescription = L["SecondMountTooltipDescription"]
 
 	-- MODIFIER TEXT
@@ -243,7 +243,7 @@ config:SetScript("OnShow", function(self)
 	self.useMagicBroom:SetPoint("TOPLEFT", self.herbMountsOnZones, "BOTTOMLEFT", -20, -26)
 	local magicBroom = Item:CreateFromItemID(37011)
 	magicBroom:ContinueOnItemLoad(function()
-		self.useMagicBroom.Text:SetText(format(L["UseMagicBroom"], magicBroom:GetItemLink()))
+		self.useMagicBroom.Text:SetText(L["UseMagicBroom"]:format(magicBroom:GetItemLink()))
 	end)
 	util.setHyperlinkTooltip(self.useMagicBroom)
 	self.useMagicBroom.tooltipText = L["UseMagicBroomTitle"]

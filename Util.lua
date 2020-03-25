@@ -105,7 +105,7 @@ function MountsJournalUtil.getMapFullNameInfo(mapID)
 		if mapGroupInfo then
 			for _, mapGroupMemberInfo in ipairs(mapGroupInfo) do
 				if mapGroupMemberInfo.mapID == mapID then
-					mapInfo.name = format("%s(%s)", mapInfo.name, mapGroupMemberInfo.name)
+					mapInfo.name = ("%s(%s)"):format(mapInfo.name, mapGroupMemberInfo.name)
 					break
 				end
 			end

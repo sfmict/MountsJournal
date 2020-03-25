@@ -114,7 +114,7 @@ function MJExistingListsMixin:refresh()
 			optionButton:Disable()
 			tinsert(withList.childs, optionButton)
 		else
-			withList:SetText(format("%s [%s]", withList.name, childsCount))
+			withList:SetText(("%s [%s]"):format(withList.name, childsCount))
 			sort(withList.childs, function(a, b) return a:GetText() < b:GetText() end)
 		end
 
