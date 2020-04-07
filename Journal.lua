@@ -887,7 +887,7 @@ function journal:setEditMountsList()
 			self.list = self.db.zoneMounts[self.listMapID]
 		end
 	end
-	self.petForMount = self.db.petListFromDefault and mounts.globalDB.petForMount or self.db.petForMount
+	self.petForMount = self.db.petListFromProfile and mounts.globalDB.petForMount or self.db.petForMount
 end
 
 

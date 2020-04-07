@@ -6,7 +6,7 @@ MJSetPetMixin = {}
 
 function MJSetPetMixin:onLoad()
 	self.journal = MountsJournalFrame
-	self.journal.profilesMenu:on("SET_PROFILE", function() self:refresh() end)
+	self.journal.profilesMenu:on("UPDATE_PROFILE", function() self:refresh() end)
 	_,_, self.randomIcon = GetSpellInfo(243819)
 
 	self:SetScript("OnEnter", function(self)
@@ -107,7 +107,7 @@ end
 function MJCompanionsPanelMixin:onLoad()
 	self.util = MountsJournalUtil
 	self.journal = MountsJournalFrame
-	self.journal.profilesMenu:on("SET_PROFILE", function() self:refresh() end)
+	self.journal.profilesMenu:on("UPDATE_PROFILE", function() self:refresh() end)
 
 	self:SetWidth(250)
 	self:SetPoint("TOPLEFT", MountJournal, "TOPRIGHT")

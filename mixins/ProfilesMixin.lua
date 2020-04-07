@@ -134,17 +134,18 @@ function MJProfilesMixin:menuInit(level)
 		info.keepShownOnClick = true
 
 		info.text = L["Pet binding from default profile"]
-		info.checked = function() return btn.journal.db.petListFromDefault end
+		info.checked = function() return btn.journal.db.petListFromProfile end
 		info.func = function(_,_,_, checked)
-			btn.journal.db.petListFromDefault = checked and true or nil
+			btn.journal.db.petListFromProfile = checked and true or nil
 			btn:event("UPDATE_PROFILE")
 		end
 		UIDropDownMenu_AddButton(info, level)
 
 		info.text = L["Maps settings from default profile"]
-		info.checked = function() return btn.journal.db.zoneMountsFromDefault end
-		info.func = function()
-
+		info.checked = function() return btn.journal.db.zoneMountsFromProfile end
+		info.func = function(_,_,_, checked)
+			btn.journal.db.zoneMountsFromProfile = checked and true or nil
+			btn:event("UPDATE_PROFILE")
 		end
 		UIDropDownMenu_AddButton(info, level)
 

@@ -250,7 +250,7 @@ function mounts:setDB()
 		ground = self.db.ground,
 		swimming = self.db.swimming,
 	}
-	self.petForMount = self.db.petListFromDefault and self.globalDB.petForMount or self.db.petForMount
+	self.petForMount = self.db.petListFromProfile and self.globalDB.petForMount or self.db.petForMount
 
 	self:setMountsList()
 end
