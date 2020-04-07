@@ -77,9 +77,9 @@ config:SetScript("OnShow", function(self)
 
 		local check = CreateFrame("CheckButton", nil, parent:GetParent(), "MJCheckButtonTemplate")
 		if #parent.childs == 0 then
-			check:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 20, 0)
+			check:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 20, -3)
 		else
-			check:SetPoint("TOPLEFT", parent.childs[#parent.childs], "BOTTOMLEFT", 0, 0)
+			check:SetPoint("TOPLEFT", parent.childs[#parent.childs], "BOTTOMLEFT", 0, -3)
 		end
 		check.Text:SetText(text)
 		tinsert(parent.childs, check)
@@ -90,11 +90,13 @@ config:SetScript("OnShow", function(self)
 	local info = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	info:SetPoint("TOPRIGHT", -16, 16)
 	info:SetTextColor(.5, .5, .5, 1)
+	info:SetJustifyH("RIGHT")
 	info:SetText(("%s %s: %s"):format(GetAddOnMetadata(addon, "Version"), L["author"], GetAddOnMetadata(addon, "Author")))
 
 	-- TITLE
 	local title = self:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 	title:SetPoint("TOPLEFT", 16, -16)
+	title:SetJustifyH("LEFT")
 	title:SetText(L["%s Configuration"]:format(addon))
 
 	-- SUBTITLE

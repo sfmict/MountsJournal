@@ -110,8 +110,7 @@ function journal:ADDON_LOADED(addonName)
 		mounts.filters.selected = mounts.filters.selected or {false, false, false}
 		mounts.filters.factions = mounts.filters.factions or {true, true, true}
 		mounts.filters.pet = mounts.filters.pet or {true, true, true, true}
-		mounts.filters.expansions = mounts.filters.expansions or {}
-		setmetatable(mounts.filters.expansions, {__index = function(self, key)
+		mounts.filters.expansions = setmetatable(mounts.filters.expansions or {}, {__index = function(self, key)
 			self[key] = true
 			return true
 		end})
@@ -289,7 +288,7 @@ function journal:ADDON_LOADED(addonName)
 		local profilesMenu = CreateFrame("DropDownToggleButton", nil, MountJournal, "MJMenuButtonProfiles")
 		self.profilesMenu = profilesMenu
 		profilesMenu:SetPoint("LEFT", MountJournal.MountButton, "RIGHT", 6, 0)
-		profilesMenu:on("SET_PROFILE", function()
+		profilesMenu:on("UPDATE_PROFILE", function(_, changeProfile)
 			mounts:setDB()
 			self:setEditMountsList()
 			self:updateMountsList()
@@ -297,8 +296,10 @@ function journal:ADDON_LOADED(addonName)
 			self:updateMapSettings()
 			self.existingLists:refresh()
 
-			self.mountListUpdateAnim:Stop()
-			self.mountListUpdateAnim:Play()
+			if changeProfile then
+				self.mountListUpdateAnim:Stop()
+				self.mountListUpdateAnim:Play()
+			end
 		end)
 
 		-- SELECTED BUTTONS
@@ -886,6 +887,7 @@ function journal:setEditMountsList()
 			self.list = self.db.zoneMounts[self.listMapID]
 		end
 	end
+	self.petForMount = self.db.petListFromDefault and mounts.globalDB.petForMount or self.db.petForMount
 end
 
 
@@ -1701,7 +1703,7 @@ function journal:updateMountsList()
 	for i = 1, self.func.GetNumDisplayedMounts() do
 		local _, spellID, _,_,_,_,_,_, mountFaction, _,_, mountID = GetDisplayedMountInfo(i)
 		local _,_,_,_, mountType = GetMountInfoExtraByID(mountID)
-		local petID = self.db.petForMount[spellID]
+		local petID = self.petForMount[spellID]
 		mountFaction = mountFaction or 2
 
 		-- TYPE

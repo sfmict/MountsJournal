@@ -117,7 +117,7 @@ function MJProfilesMixin:setProfile(profileName)
 	if profileName == nil or self.profiles[profileName] then
 		self.charDB.currentProfileName = profileName
 		self:SetText(profileName or DEFAULT)
-		self:event("SET_PROFILE")
+		self:event("UPDATE_PROFILE", true)
 	end
 end
 
@@ -127,9 +127,30 @@ function MJProfilesMixin:menuInit(level)
 
 	local btn = self:GetParent()
 	local info = UIDropDownMenu_CreateInfo()
-	info.notCheckable = true
 
-	if UIDROPDOWNMENU_MENU_VALUE == "new" then -- NEW PROFLE
+	if UIDROPDOWNMENU_MENU_VALUE == "settings" then
+		if btn.charDB.currentProfileName == nil then return end
+		info.isNotRadio = true
+		info.keepShownOnClick = true
+
+		info.text = L["Pet binding from default profile"]
+		info.checked = function() return btn.journal.db.petListFromDefault end
+		info.func = function(_,_,_, checked)
+			btn.journal.db.petListFromDefault = checked and true or nil
+			btn:event("UPDATE_PROFILE")
+		end
+		UIDropDownMenu_AddButton(info, level)
+
+		info.text = L["Maps settings from default profile"]
+		info.checked = function() return btn.journal.db.zoneMountsFromDefault end
+		info.func = function()
+
+		end
+		UIDropDownMenu_AddButton(info, level)
+
+	elseif UIDROPDOWNMENU_MENU_VALUE == "new" then -- NEW PROFLE
+		info.notCheckable = true
+
 		info.text = L["Create"]
 		info.func = function() btn:createProfile() end
 		UIDropDownMenu_AddButton(info, level)
@@ -139,6 +160,7 @@ function MJProfilesMixin:menuInit(level)
 		UIDropDownMenu_AddButton(info, level)
 
 	elseif UIDROPDOWNMENU_MENU_VALUE == "specialization" then -- SPECS
+		info.notCheckable = true
 		info.hasArrow = true
 		info.keepShownOnClick = true
 
@@ -149,7 +171,6 @@ function MJProfilesMixin:menuInit(level)
 		end
 
 	elseif type(UIDROPDOWNMENU_MENU_VALUE) == "number" then -- PROFILE BY SPEC
-		info.notCheckable = nil
 		info.keepShownOnClick = true
 		info.arg2 = UIDROPDOWNMENU_MENU_VALUE
 
@@ -208,6 +229,7 @@ function MJProfilesMixin:menuInit(level)
 		end
 
 	else -- MENU
+		info.notCheckable = true
 		info.isTitle = true
 
 		info.text = L["Profiles"]
@@ -215,8 +237,8 @@ function MJProfilesMixin:menuInit(level)
 
 		UIDropDownMenu_AddSeparator(level)
 
-		info.isTitle = nil
 		info.notCheckable = nil
+		info.isTitle = nil
 		info.disabled = nil
 
 		if #btn.profileNames > 20 then
@@ -266,6 +288,12 @@ function MJProfilesMixin:menuInit(level)
 		info.keepShownOnClick = true
 		info.notCheckable = true
 		info.hasArrow = true
+
+		if btn.charDB.currentProfileName ~= nil then
+			info.text = "Profile settings"
+			info.value = "settings"
+			UIDropDownMenu_AddButton(info, level)
+		end
 
 		info.text = L["New profile"]
 		info.value = "new"

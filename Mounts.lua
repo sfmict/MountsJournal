@@ -164,7 +164,7 @@ end
 
 
 function mounts:UNIT_SPELLCAST_START(_,_, spellID)
-	local petID = self.db.petForMount[spellID]
+	local petID = self.petForMount[spellID]
 	if petID then
 		local groupType = util.getGroupType()
 		if self.config.noPetInRaid and groupType == "raid"
@@ -250,6 +250,7 @@ function mounts:setDB()
 		ground = self.db.ground,
 		swimming = self.db.swimming,
 	}
+	self.petForMount = self.db.petListFromDefault and self.globalDB.petForMount or self.db.petForMount
 
 	self:setMountsList()
 end

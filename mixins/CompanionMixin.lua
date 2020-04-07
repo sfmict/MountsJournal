@@ -53,7 +53,7 @@ function MJSetPetMixin:refresh()
 	if not self.refreshEnabled then return end
 
 	local selectedSpellID = MountJournal.selectedSpellID
-	local petID = self.journal.db.petForMount[selectedSpellID]
+	local petID = self.journal.petForMount[selectedSpellID]
 	self.id = petID
 
 	if not petID then
@@ -84,7 +84,7 @@ function MJSetPetMixin:refresh()
 			self.infoFrame.favorite:SetShown(favorite)
 			self.infoFrame:Show()
 		else
-			self.journal.db.petForMount[selectedSpellID] = nil
+			self.journal.petForMount[selectedSpellID] = nil
 			self.infoFrame:Hide()
 			self.id = nil
 		end
@@ -181,7 +181,7 @@ end
 
 
 function MJCompanionsPanelMixin:selectButtonClick(id)
-	self.journal.db.petForMount[MountJournal.selectedSpellID] = id
+	self.journal.petForMount[MountJournal.selectedSpellID] = id
 	self:GetParent():refresh()
 	self:Hide()
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -192,7 +192,7 @@ function MJCompanionsPanelMixin:refresh()
 	local scrollFrame = self.listScroll
 	local offset = HybridScrollFrame_GetOffset(scrollFrame)
 	local numPets = #self.petFiltredList
-	local selectedPetID = self.journal.db.petForMount[MountJournal.selectedSpellID]
+	local selectedPetID = self.journal.petForMount[MountJournal.selectedSpellID]
 
 	for i, btn in ipairs(scrollFrame.buttons) do
 		local index = i + offset
