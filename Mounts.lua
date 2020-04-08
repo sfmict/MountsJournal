@@ -200,7 +200,7 @@ end
 
 function mounts:setMountsList()
 	local mapInfo = C_Map.GetMapInfo(MapUtil.GetDisplayableMapForPlayer())
-	local zoneMounts = self.db.zoneMounts
+	local zoneMounts = self.zoneMounts
 	self.mapFlags = nil
 
 	while mapInfo and mapInfo.mapID ~= self.defMountsListID do
@@ -245,6 +245,7 @@ function mounts:setDB()
 	end
 
 	self.db = currentProfileName and self.profiles[currentProfileName] or self.globalDB
+	self.zoneMounts = self.db.zoneMountsFromProfile and self.globalDB.zoneMounts or self.db.zoneMounts
 	self.defList = {
 		fly = self.db.fly,
 		ground = self.db.ground,

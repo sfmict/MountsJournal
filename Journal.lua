@@ -869,6 +869,7 @@ end
 
 function journal:setEditMountsList()
 	self.db = mounts.charDB.currentProfileName and mounts.profiles[mounts.charDB.currentProfileName] or mounts.globalDB
+	self.zoneMounts = self.db.zoneMountsFromProfile and mounts.globalDB.zoneMounts or self.db.zoneMounts
 	local mapID = self.navBar.mapID
 	if mapID == mounts.defMountsListID then
 		self.currentList = {
@@ -879,12 +880,12 @@ function journal:setEditMountsList()
 		self.listMapID = nil
 		self.list = self.currentList
 	else
-		self.currentList = self.db.zoneMounts[mapID]
+		self.currentList = self.zoneMounts[mapID]
 		self.listMapID = mapID
 		self.list = self.currentList
 		while self.list and self.list.listFromID do
 			self.listMapID = self.list.listFromID
-			self.list = self.db.zoneMounts[self.listMapID]
+			self.list = self.zoneMounts[self.listMapID]
 		end
 	end
 	self.petForMount = self.db.petListFromProfile and mounts.globalDB.petForMount or self.db.petForMount
@@ -962,7 +963,7 @@ journal.COMPANION_UNLEARNED = journal.setCountMounts
 
 
 function journal:createMountList(mapID)
-	self.db.zoneMounts[mapID] = {
+	self.zoneMounts[mapID] = {
 		fly = {},
 		ground = {},
 		swimming = {},
@@ -974,7 +975,7 @@ end
 
 function journal:getRemoveMountList(mapID)
 	if not mapID then return end
-	local list = self.db.zoneMounts[mapID]
+	local list = self.zoneMounts[mapID]
 
 	local flags
 	for _, value in pairs(list.flags) do
@@ -987,7 +988,7 @@ function journal:getRemoveMountList(mapID)
 	if #list.fly + #list.ground + #list.swimming == 0
 	and not flags
 	and not list.listFromID then
-		self.db.zoneMounts[mapID] = nil
+		self.zoneMounts[mapID] = nil
 		self:setEditMountsList()
 	end
 end
@@ -1041,7 +1042,7 @@ do
 	function journal:listFromMapClick(btn)
 		wipe(btn.maps)
 		local assocMaps = {}
-		for mapID, mapConfig in pairs(self.db.zoneMounts) do
+		for mapID, mapConfig in pairs(self.zoneMounts) do
 			if not mapConfig.listFromID
 			and mapID ~= self.navBar.mapID
 			and #mapConfig.fly + #mapConfig.ground + #mapConfig.swimming > 0 then

@@ -84,7 +84,7 @@ function MJExistingListsMixin:refresh()
 		end
 	end
 
-	for mapID, mapConfig in pairs(self.journal.db.zoneMounts) do
+	for mapID, mapConfig in pairs(self.journal.zoneMounts) do
 		if mapConfig.listFromID then
 			createOptionButton(self.lists[2].childs, mapID)
 		elseif #mapConfig.fly + #mapConfig.ground + #mapConfig.swimming ~= 0 then

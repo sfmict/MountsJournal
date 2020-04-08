@@ -141,7 +141,7 @@ function MJProfilesMixin:menuInit(level)
 		end
 		UIDropDownMenu_AddButton(info, level)
 
-		info.text = L["Maps settings from default profile"]
+		info.text = L["Zones settings from default profile"]
 		info.checked = function() return btn.journal.db.zoneMountsFromProfile end
 		info.func = function(_,_,_, checked)
 			btn.journal.db.zoneMountsFromProfile = checked and true or nil
@@ -291,7 +291,7 @@ function MJProfilesMixin:menuInit(level)
 		info.hasArrow = true
 
 		if btn.charDB.currentProfileName ~= nil then
-			info.text = "Profile settings"
+			info.text = L["Profile settings"]
 			info.value = "settings"
 			UIDropDownMenu_AddButton(info, level)
 		end
