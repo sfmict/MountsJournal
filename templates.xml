@@ -1237,7 +1237,7 @@
 		</Scripts>
 	</Frame>
 
-	<Frame name="MJModelPanningFrame" parent="UIParent" hidden="true" frameStrata="DIALOG" clampedToScreen="true">
+	<Frame name="MJModelPanningFrame" parent="UIParent" enableMouse="true" hidden="true" frameStrata="DIALOG" clampedToScreen="true">
 		<Size x="32" y="32"/>
 		<Layers>
 			<Layer level="ARTWORK">
