@@ -192,7 +192,7 @@ do
 		-- 768 - cat form
 		-- 783 - travel form
 		-- 24858 - moonkin form
-		if self.classConfig.useLastDruidForm then
+		if self.class == "DRUID" and self.classConfig.useLastDruidForm then
 			local spellID = getFormSpellID()
 
 			if self.classConfig.useDruidFormSpecialization then
@@ -238,9 +238,8 @@ do
 			end
 		-- CLASSMACRO
 		elseif self.macro
-			and (self.classConfig.useMacroAlways
-				  or not self.magicBroom
-				  and (self.sFlags.isIndoors or GetUnitSpeed("player") > 0 or IsFalling())) then
+			and (self.class == "DRUID" and self.classConfig.useMacroAlways
+				  or not self.magicBroom and (self.sFlags.isIndoors or GetUnitSpeed("player") > 0 or IsFalling())) then
 			macro = self.macro
 		-- MOUNT
 		else
@@ -257,7 +256,7 @@ function macroFrame:getCombatMacro()
 
 	if self.combatMacro then
 		macro = self.combatMacro
-	elseif self.macro and self.classConfig.useMacroAlways then
+	elseif self.macro and self.class == "DRUID" and self.classConfig.useMacroAlways then
 		macro = self.macro
 	end
 
