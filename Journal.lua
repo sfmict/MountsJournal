@@ -17,10 +17,7 @@ journal.colors = {
 }
 
 
-journal.displayedMounts = {}
-setmetatable(journal.displayedMounts, {__index = function(self, key)
-	return key
-end})
+journal.displayedMounts = setmetatable({}, {__index = function(_, key) return key end})
 
 
 -- 1 FLY, 2 GROUND, 3 SWIMMING

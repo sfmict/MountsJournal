@@ -106,8 +106,11 @@ end
 
 function MJCompanionsPanelMixin:onLoad()
 	self.util = MountsJournalUtil
+	self.mounts = MountsJournal
 	self.journal = MountsJournalFrame
-	self.journal.profilesMenu:on("UPDATE_PROFILE", function() self:refresh() end)
+	self.journal.profilesMenu:on("UPDATE_PROFILE", function()
+		if self:IsShown() then self:refresh() end
+	end)
 
 	self:SetWidth(250)
 	self:SetPoint("TOPLEFT", MountJournal, "TOPRIGHT")
@@ -152,6 +155,7 @@ function MJCompanionsPanelMixin:onLoad()
 	self.noPet.name:SetWidth(180)
 	self.noPet.name:SetText(L["No Battle Pet"])
 
+	self.owned = 0
 	self.petJournalFiltersBackup = {
 		types = {},
 		sources = {},
@@ -176,7 +180,9 @@ function MJCompanionsPanelMixin:onShow()
 	self:SetScript("OnShow", function(self)
 		self:petListSort()
 	end)
-	C_Timer.After(0, function() self:petListUpdate(true) end)
+	C_Timer.After(0, function()
+		self:petListUpdate(true)
+	end)
 end
 
 
@@ -242,6 +248,28 @@ function MJCompanionsPanelMixin:refresh()
 end
 
 
+function MJCompanionsPanelMixin:updatePetForMount()
+	local petForMount, needUpdate = self.mounts.globalDB.petForMount
+	for spellID, petID in pairs(petForMount) do
+		if type(petID) == "string" and not C_PetJournal.GetPetInfoByPetID(petID) then
+			needUpdate = true
+			petForMount[spellID] = nil
+		end
+	end
+	for _, profile in pairs(self.mounts.profiles) do
+		for spellID, petID in pairs(profile.petForMount) do
+			if type(petID) == "string" and not C_PetJournal.GetPetInfoByPetID(petID) then
+				needUpdate = true
+				profile.petForMount[spellID] = nil
+			end
+		end
+	end
+	if needUpdate then
+		self.journal:mountsListFullUpdate()
+	end
+end
+
+
 function MJCompanionsPanelMixin:setPetJournalFiltersBackup()
 	local backup = self.petJournalFiltersBackup
 	backup.collected = C_PetJournal.IsFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED)
@@ -276,16 +304,19 @@ end
 
 function MJCompanionsPanelMixin:petListUpdate(force)
 	local _, owned = C_PetJournal.GetNumPets()
+	if self.owned > owned then self:updatePetForMount() end
 
 	if not force then
 		if self.owned == owned then return end
+		self.owned = owned
 		if not self:IsVisible() then
 			self:SetScript("OnShow", self.onShow)
 			return
 		end
+	else
+		self.owned = owned
 	end
 
-	self.owned = owned
 	self:setPetJournalFiltersBackup()
 
 	wipe(self.petList)
