@@ -1937,7 +1937,7 @@
 			</OnLoad>
 			<OnEvent method="onEvent"/>
 			<OnShow method="onShow"/>
-			<OnHide>self:Hide()</OnHide>
+			<OnHide method="onHide"/>
 		</Scripts>
 	</Frame>
 

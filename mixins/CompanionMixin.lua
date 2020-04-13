@@ -36,6 +36,7 @@ end
 
 
 function MJSetPetMixin:onShow()
+	self:SetScript("OnShow", function(self) self:refresh() end)
 	C_Timer.After(0, function()
 		self.refreshEnabled = true
 		self:refresh()
@@ -97,20 +98,13 @@ end
 MJCompanionsPanelMixin = {}
 
 
-function MJCompanionsPanelMixin:onEvent(event, ...)
-	if self[event] then
-		self[event](self, ...)
-	end
-end
+function MJCompanionsPanelMixin:onEvent(event, ...) self[event](self, ...) end
 
 
 function MJCompanionsPanelMixin:onLoad()
 	self.util = MountsJournalUtil
 	self.mounts = MountsJournal
 	self.journal = MountsJournalFrame
-	self.journal.profilesMenu:on("UPDATE_PROFILE", function()
-		if self:IsShown() then self:refresh() end
-	end)
 
 	self:SetWidth(250)
 	self:SetPoint("TOPLEFT", MountJournal, "TOPRIGHT")
@@ -178,11 +172,23 @@ end
 
 function MJCompanionsPanelMixin:onShow()
 	self:SetScript("OnShow", function(self)
-		self:petListSort()
+		if self.force then
+			self:petListUpdate(self.force)
+		else
+			self:petListSort()
+		end
+		self.journal.profilesMenu:on("UPDATE_PROFILE.CompanionsPanel", function() self:refresh() end)
 	end)
 	C_Timer.After(0, function()
 		self:petListUpdate(true)
+		self.journal.profilesMenu:on("UPDATE_PROFILE.CompanionsPanel", function() self:refresh() end)
 	end)
+end
+
+
+function MJCompanionsPanelMixin:onHide()
+	self.journal.profilesMenu:off("UPDATE_PROFILE.CompanionsPanel")
+	self:Hide()
 end
 
 
@@ -310,11 +316,12 @@ function MJCompanionsPanelMixin:petListUpdate(force)
 		if self.owned == owned then return end
 		self.owned = owned
 		if not self:IsVisible() then
-			self:SetScript("OnShow", self.onShow)
+			self.force = true
 			return
 		end
 	else
 		self.owned = owned
+		self.force = nil
 	end
 
 	self:setPetJournalFiltersBackup()
