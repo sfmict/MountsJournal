@@ -6,7 +6,6 @@ MJSetPetMixin = {}
 
 function MJSetPetMixin:onLoad()
 	self.journal = MountsJournalFrame
-	self.journal.profilesMenu:on("UPDATE_PROFILE", function() self:refresh() end)
 	_,_, self.randomIcon = GetSpellInfo(243819)
 
 	self:SetScript("OnEnter", function(self)
@@ -40,6 +39,7 @@ function MJSetPetMixin:onShow()
 	C_Timer.After(0, function()
 		self.refreshEnabled = true
 		self:refresh()
+		self.journal.profilesMenu:on("UPDATE_PROFILE", function() self:refresh() end)
 	end)
 end
 
@@ -153,9 +153,21 @@ function MJCompanionsPanelMixin:onLoad()
 	self.petJournalFiltersBackup = {
 		types = {},
 		sources = {},
+		search = "",
 	}
 	self.petList = {}
 	self.petFiltredList = {}
+
+	hooksecurefunc(C_PetJournal, "SetSearchFilter", function(search)
+		if not self.updatingList then
+			self.petJournalFiltersBackup.search = search or ""
+		end
+	end)
+	hooksecurefunc(C_PetJournal, "ClearSearchFilter", function()
+		if not self.updatingList then
+			self.petJournalFiltersBackup.search = ""
+		end
+	end)
 
 	self.searchBox:SetScript("OnTextChanged", function(searchBox)
 		SearchBoxTemplate_OnTextChanged(searchBox)
@@ -304,7 +316,7 @@ function MJCompanionsPanelMixin:restorePetJournalFilters()
 	for i = 1, C_PetJournal.GetNumPetSources() do
 		C_PetJournal.SetPetSourceChecked(i, backup.sources[i])
 	end
-	C_PetJournal.SetSearchFilter(PetJournalSearchBox:GetText())
+	C_PetJournal.SetSearchFilter(backup.search)
 end
 
 
@@ -324,6 +336,7 @@ function MJCompanionsPanelMixin:petListUpdate(force)
 		self.force = nil
 	end
 
+	self.updatingList = true
 	self:setPetJournalFiltersBackup()
 
 	wipe(self.petList)
@@ -335,6 +348,7 @@ function MJCompanionsPanelMixin:petListUpdate(force)
 	end
 
 	self:restorePetJournalFilters()
+	self.updatingList = nil
 	self:petListSort()
 end
 MJCompanionsPanelMixin.PET_JOURNAL_LIST_UPDATE = MJCompanionsPanelMixin.petListUpdate

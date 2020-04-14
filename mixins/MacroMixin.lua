@@ -16,9 +16,13 @@ function macroFrame:PLAYER_LOGIN()
 	self.class = select(2, UnitClass("player"))
 
 	local magicBroom = Item:CreateFromItemID(37011)
-	magicBroom:ContinueOnItemLoad(function()
+	if magicBroom:IsItemDataCached() then
 		self.broomName = magicBroom:GetItemName()
-	end)
+	else
+		magicBroom:ContinueOnItemLoad(function()
+			self.broomName = magicBroom:GetItemName()
+		end)
+	end
 
 	self:refresh()
 end
@@ -65,20 +69,30 @@ do
 			spellIDtoName[spellID] = {
 				name = name,
 				callbacks = {},
+				notCached = true,
 			}
 
-			spell:ContinueOnSpellLoad(function()
+			if spell:IsSpellDataCached() then
+				spellIDtoName[spellID].notCached = nil
 				local subName = spell:GetSpellSubtext()
 				if subName:len() > 0 then
 					spellIDtoName[spellID].name = ("%s(%s)"):format(name, subName)
-					for _, callback in pairs(spellIDtoName[spellID].callbacks) do
-						callback()
-					end
 				end
-			end)
+			else
+				spell:ContinueOnSpellLoad(function()
+					spellIDtoName[spellID].notCached = nil
+					local subName = spell:GetSpellSubtext()
+					if subName:len() > 0 then
+						spellIDtoName[spellID].name = ("%s(%s)"):format(name, subName)
+						for name, callback in pairs(spellIDtoName[spellID].callbacks) do
+							callback()
+						end
+					end
+				end)
+			end
 		end
 
-		if type(cbName) == "string" and type(cb) == "function" then
+		if spellIDtoName[spellID].notCached and type(cbName) == "string" and type(cb) == "function" then
 			spellIDtoName[spellID].callbacks[cbName] = cb
 		end
 		return spellIDtoName[spellID].name

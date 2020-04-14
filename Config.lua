@@ -244,9 +244,13 @@ config:SetScript("OnShow", function(self)
 	self.useMagicBroom = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.useMagicBroom:SetPoint("TOPLEFT", self.herbMountsOnZones, "BOTTOMLEFT", -20, -26)
 	local magicBroom = Item:CreateFromItemID(37011)
-	magicBroom:ContinueOnItemLoad(function()
+	if magicBroom:IsItemDataCached() then
 		self.useMagicBroom.Text:SetText(L["UseMagicBroom"]:format(magicBroom:GetItemLink()))
-	end)
+	else
+		magicBroom:ContinueOnItemLoad(function()
+			self.useMagicBroom.Text:SetText(L["UseMagicBroom"]:format(magicBroom:GetItemLink()))
+		end)
+	end
 	util.setHyperlinkTooltip(self.useMagicBroom)
 	self.useMagicBroom.tooltipText = L["UseMagicBroomTitle"]
 	self.useMagicBroom.tooltipRequirement = L["UseMagicBroomDescription"]
