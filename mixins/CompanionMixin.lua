@@ -1,4 +1,5 @@
 local _, L = ...
+local petRandomIcon = "Interface/Icons/INV_Pet_Achievement_CaptureAPetFromEachFamily_Battle" -- select(3, GetSpellInfo(243819))
 
 
 MJSetPetMixin = {}
@@ -6,7 +7,6 @@ MJSetPetMixin = {}
 
 function MJSetPetMixin:onLoad()
 	self.journal = MountsJournalFrame
-	_,_, self.randomIcon = GetSpellInfo(243819)
 
 	self:SetScript("OnEnter", function(self)
 		self.highlight:Show()
@@ -60,7 +60,7 @@ function MJSetPetMixin:refresh()
 	if not petID then
 		self.infoFrame:Hide()
 	elseif type(petID) == "number" then
-		self.infoFrame.icon:SetTexture(self.randomIcon)
+		self.infoFrame.icon:SetTexture(petRandomIcon)
 		self.infoFrame.qualityBorder:Hide()
 		self.infoFrame.isDead:Hide()
 		self.infoFrame.levelBG:Hide()
@@ -134,13 +134,12 @@ function MJCompanionsPanelMixin:onLoad()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
 
-	local _,_, spellIcon = GetSpellInfo(243819)
 	self.randomFavoritePet.infoFrame.favorite:Show()
-	self.randomFavoritePet.infoFrame.icon:SetTexture(spellIcon)
+	self.randomFavoritePet.infoFrame.icon:SetTexture(petRandomIcon)
 	self.randomFavoritePet.infoFrame.qualityBorder:Hide()
 	self.randomFavoritePet.name:SetWidth(180)
 	self.randomFavoritePet.name:SetText(PET_JOURNAL_SUMMON_RANDOM_FAVORITE_PET)
-	self.randomPet.infoFrame.icon:SetTexture(spellIcon)
+	self.randomPet.infoFrame.icon:SetTexture(petRandomIcon)
 	self.randomPet.infoFrame.qualityBorder:Hide()
 	self.randomPet.name:SetWidth(180)
 	self.randomPet.name:SetText(L["Summon Random Battle Pet"])
