@@ -17,10 +17,7 @@ journal.colors = {
 }
 
 
-journal.displayedMounts = {}
-setmetatable(journal.displayedMounts, {__index = function(self, key)
-	return key
-end})
+journal.displayedMounts = setmetatable({}, {__index = function(_, key) return key end})
 
 
 -- 1 FLY, 2 GROUND, 3 SWIMMING
@@ -110,8 +107,7 @@ function journal:ADDON_LOADED(addonName)
 		mounts.filters.selected = mounts.filters.selected or {false, false, false}
 		mounts.filters.factions = mounts.filters.factions or {true, true, true}
 		mounts.filters.pet = mounts.filters.pet or {true, true, true, true}
-		mounts.filters.expansions = mounts.filters.expansions or {}
-		setmetatable(mounts.filters.expansions, {__index = function(self, key)
+		mounts.filters.expansions = setmetatable(mounts.filters.expansions or {}, {__index = function(self, key)
 			self[key] = true
 			return true
 		end})
@@ -289,7 +285,7 @@ function journal:ADDON_LOADED(addonName)
 		local profilesMenu = CreateFrame("DropDownToggleButton", nil, MountJournal, "MJMenuButtonProfiles")
 		self.profilesMenu = profilesMenu
 		profilesMenu:SetPoint("LEFT", MountJournal.MountButton, "RIGHT", 6, 0)
-		profilesMenu:on("SET_PROFILE", function()
+		profilesMenu:on("UPDATE_PROFILE", function(_, changeProfile)
 			mounts:setDB()
 			self:setEditMountsList()
 			self:updateMountsList()
@@ -297,8 +293,10 @@ function journal:ADDON_LOADED(addonName)
 			self:updateMapSettings()
 			self.existingLists:refresh()
 
-			self.mountListUpdateAnim:Stop()
-			self.mountListUpdateAnim:Play()
+			if changeProfile then
+				self.mountListUpdateAnim:Stop()
+				self.mountListUpdateAnim:Play()
+			end
 		end)
 
 		-- SELECTED BUTTONS
@@ -566,9 +564,11 @@ function journal:ADDON_LOADED(addonName)
 
 		modelControl.panButton:HookScript("OnMouseDown", function(self)
 			self:GetParent():GetParent().isRightButtonDown = true
+			MJModelPanningFrame:Show()
 		end)
 		modelControl.panButton:HookScript("OnMouseUp", function(self)
 			self:GetParent():GetParent().isRightButtonDown = false
+			MJModelPanningFrame:Hide()
 		end)
 
 		local function modelSceneControlOnUpdate(self, elapsed)
@@ -866,6 +866,7 @@ end
 
 function journal:setEditMountsList()
 	self.db = mounts.charDB.currentProfileName and mounts.profiles[mounts.charDB.currentProfileName] or mounts.globalDB
+	self.zoneMounts = self.db.zoneMountsFromProfile and mounts.globalDB.zoneMounts or self.db.zoneMounts
 	local mapID = self.navBar.mapID
 	if mapID == mounts.defMountsListID then
 		self.currentList = {
@@ -876,14 +877,15 @@ function journal:setEditMountsList()
 		self.listMapID = nil
 		self.list = self.currentList
 	else
-		self.currentList = self.db.zoneMounts[mapID]
+		self.currentList = self.zoneMounts[mapID]
 		self.listMapID = mapID
 		self.list = self.currentList
 		while self.list and self.list.listFromID do
 			self.listMapID = self.list.listFromID
-			self.list = self.db.zoneMounts[self.listMapID]
+			self.list = self.zoneMounts[self.listMapID]
 		end
 	end
+	self.petForMount = self.db.petListFromProfile and mounts.globalDB.petForMount or self.db.petForMount
 end
 
 
@@ -958,7 +960,7 @@ journal.COMPANION_UNLEARNED = journal.setCountMounts
 
 
 function journal:createMountList(mapID)
-	self.db.zoneMounts[mapID] = {
+	self.zoneMounts[mapID] = {
 		fly = {},
 		ground = {},
 		swimming = {},
@@ -970,7 +972,7 @@ end
 
 function journal:getRemoveMountList(mapID)
 	if not mapID then return end
-	local list = self.db.zoneMounts[mapID]
+	local list = self.zoneMounts[mapID]
 
 	local flags
 	for _, value in pairs(list.flags) do
@@ -983,7 +985,7 @@ function journal:getRemoveMountList(mapID)
 	if #list.fly + #list.ground + #list.swimming == 0
 	and not flags
 	and not list.listFromID then
-		self.db.zoneMounts[mapID] = nil
+		self.zoneMounts[mapID] = nil
 		self:setEditMountsList()
 	end
 end
@@ -1037,15 +1039,20 @@ do
 	function journal:listFromMapClick(btn)
 		wipe(btn.maps)
 		local assocMaps = {}
-		for mapID, mapConfig in pairs(self.db.zoneMounts) do
+		for mapID, mapConfig in pairs(self.zoneMounts) do
 			if not mapConfig.listFromID
 			and mapID ~= self.navBar.mapID
 			and #mapConfig.fly + #mapConfig.ground + #mapConfig.swimming > 0 then
 				local mapInfo = util.getMapFullNameInfo(mapID)
+				local mapLangType = mapLangTypes[mapInfo.mapType]
+				if not mapLangType then
+					mapInfo.mapType = 5
+					mapLangType = OTHER
+				end
 
 				if not assocMaps[mapInfo.mapType] then
 					assocMaps[mapInfo.mapType] = {
-						name = mapLangTypes[mapInfo.mapType] or OTHER,
+						name = mapLangType,
 						list = {},
 					}
 					tinsert(btn.maps, assocMaps[mapInfo.mapType])
@@ -1071,16 +1078,15 @@ function journal:listFromMapInit(level)
 
 	local btn = self:GetParent()
 	local info = UIDropDownMenu_CreateInfo()
+	local list = UIDROPDOWNMENU_MENU_VALUE or btn.maps
 	info.isNotRadio = true
 	info.notCheckable = true
 
-	if next(btn.maps) == nil then
+	if next(list) == nil then
 		info.notClickable = true
 		info.text = EMPTY
 		UIDropDownMenu_AddButton(info, level)
-	else
-		local list = UIDROPDOWNMENU_MENU_VALUE or btn.maps
-
+	elseif level == 2 then
 		local function setListFrom(_, mapID)
 			if journal.navBar.mapID == mapID then return end
 			if not journal.currentList then
@@ -1099,17 +1105,31 @@ function journal:listFromMapInit(level)
 			journal.mountListUpdateAnim:Play()
 		end
 
-		for _, mapInfo in ipairs(list) do
-			if mapInfo.mapID then
+		if #list > 20 then
+			local searchFrame = util.getDropDownSearchFrame()
+
+			for _, mapInfo in ipairs(list) do
 				info.text = mapInfo.name
 				info.func = setListFrom
 				info.arg1 = mapInfo.mapID
-			else
-				info.keepShownOnClick = true
-				info.hasArrow = true
-				info.text = mapInfo.name
-				info.value = mapInfo.list
+				searchFrame:addButton(info)
 			end
+
+			UIDropDownMenu_AddButton({customFrame = searchFrame}, level)
+		else
+			for _, mapInfo in ipairs(list) do
+				info.text = mapInfo.name
+				info.func = setListFrom
+				info.arg1 = mapInfo.mapID
+				UIDropDownMenu_AddButton(info, level)
+			end
+		end
+	else
+		for _, mapInfo in ipairs(list) do
+			info.keepShownOnClick = true
+			info.hasArrow = true
+			info.text = mapInfo.name
+			info.value = mapInfo.list
 			UIDropDownMenu_AddButton(info, level)
 		end
 	end
@@ -1681,7 +1701,7 @@ function journal:updateMountsList()
 	for i = 1, self.func.GetNumDisplayedMounts() do
 		local _, spellID, _,_,_,_,_,_, mountFaction, _,_, mountID = GetDisplayedMountInfo(i)
 		local _,_,_,_, mountType = GetMountInfoExtraByID(mountID)
-		local petID = self.db.petForMount[spellID]
+		local petID = self.petForMount[spellID]
 		mountFaction = mountFaction or 2
 
 		-- TYPE

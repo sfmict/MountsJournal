@@ -439,7 +439,7 @@
 				self.highlight:Show()
 				if self.tooltip then
 					GameTooltip:SetOwner(self, "ANCHOR_TOP", 0, -15)
-					GameTooltip:AddLine(self.tooltip, nil, nil, nil, true)
+					GameTooltip:SetText(self.tooltip, nil, nil, nil, nil, true)
 					GameTooltip:AddLine(self.tooltipDescription, 1, 1, 1, 1, true)
 					GameTooltip:Show()
 				end
@@ -933,6 +933,7 @@
 		<Scripts>
 			<OnLoad method="onLoad"/>
 			<OnShow method="onShow"/>
+			<OnHide method="onHide"/>
 			<OnUpdate method="onUpdate"/>
 			<OnMouseUp method="onClick"/>
 		</Scripts>
@@ -1233,6 +1234,22 @@
 			<OnEvent method="onEvent"/>
 			<OnLoad method="onLoad"/>
 			<PreClick method="preClick"/>
+		</Scripts>
+	</Frame>
+
+	<Frame name="MJModelPanningFrame" parent="UIParent" enableMouse="true" hidden="true" frameStrata="DIALOG" clampedToScreen="true">
+		<Size x="32" y="32"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture file="Interface/Cursor/UI-Cursor-Move" setAllPoints="true" /> 
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnUpdate>
+				local x, y = GetCursorPosition()
+				local scale = UIParent:GetScale()
+				self:SetPoint("BOTTOMLEFT", x / scale - 16, y / scale - 16)
+			</OnUpdate>
 		</Scripts>
 	</Frame>
 
@@ -1920,7 +1937,7 @@
 			</OnLoad>
 			<OnEvent method="onEvent"/>
 			<OnShow method="onShow"/>
-			<OnHide>self:Hide()</OnHide>
+			<OnHide method="onHide"/>
 		</Scripts>
 	</Frame>
 

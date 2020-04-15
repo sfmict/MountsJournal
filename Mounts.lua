@@ -4,13 +4,7 @@ local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 
 
-mounts:SetScript("OnEvent", function(self, event, ...)
-	if self[event] then
-		self[event](self, ...)
-	else
-		self:setMountsList()
-	end
-end)
+mounts:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
 mounts:RegisterEvent("ADDON_LOADED")
 
 
@@ -131,6 +125,13 @@ function mounts:ADDON_LOADED(addonName)
 			[205] = true, -- Мерцающий простор
 		}
 
+		-- INIT
+		self:setDB()
+		self:setModifier(self.config.modifier)
+		self:setHandleWaterJump(self.config.waterJump)
+		self:setHerbMount()
+		self:init()
+
 		-- MAP CHANGED
 		self:RegisterEvent("NEW_WMO_CHUNK")
 		self:RegisterEvent("ZONE_CHANGED")
@@ -148,12 +149,6 @@ function mounts:ADDON_LOADED(addonName)
 		self:RegisterEvent("PLAYER_REGEN_ENABLED")
 		self:RegisterEvent("PLAYER_REGEN_DISABLED")
 		self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
-
-		self:setDB()
-		self:setModifier(self.config.modifier)
-		self:setHandleWaterJump(self.config.waterJump)
-		self:setHerbMount()
-		self:init()
 	end
 end
 
@@ -169,7 +164,7 @@ end
 
 
 function mounts:UNIT_SPELLCAST_START(_,_, spellID)
-	local petID = self.db.petForMount[spellID]
+	local petID = self.petForMount[spellID]
 	if petID then
 		local groupType = util.getGroupType()
 		if self.config.noPetInRaid and groupType == "raid"
@@ -187,47 +182,47 @@ end
 
 
 function mounts:setModifier(modifier)
-	if util.inTable({"ALT", "CTRL", "SHIFT", "NONE"}, modifier) then
+	if modifier == "NONE" then
 		self.config.modifier = modifier
-		if modifier == "ALT" then
-			self.modifier = IsAltKeyDown
-		elseif modifier == "CTRL" then
-			self.modifier = IsControlKeyDown
-		elseif modifier == "SHIFT" then
-			self.modifier = IsShiftKeyDown
-		else
-			self.modifier = function() return false end
-		end
-		return
+		self.modifier = function() return false end
+	elseif modifier == "SHIFT" then
+		self.config.modifier = modifier
+		self.modifier = IsShiftKeyDown
+	elseif modifier == "CTRL" then
+		self.config.modifier = modifier
+		self.modifier = IsControlKeyDown
+	else
+		self.config.modifier = "ALT"
+		self.modifier = IsAltKeyDown
 	end
-	self.config.modifier = "ALT"
-	self.modifier = IsAltKeyDown
 end
 
 
 function mounts:setMountsList()
 	local mapInfo = C_Map.GetMapInfo(MapUtil.GetDisplayableMapForPlayer())
-	local zoneMounts = self.db.zoneMounts
+	local zoneMounts = self.zoneMounts
 	self.mapFlags = nil
 
-	while mapInfo do
+	while mapInfo and mapInfo.mapID ~= self.defMountsListID do
 		local list = zoneMounts[mapInfo.mapID]
-		if list and not self.mapFlags then self.mapFlags = list.flags end
-		while list and list.listFromID do
-			list = zoneMounts[list.listFromID]
-		end
-		if list and #list.fly + #list.ground + #list.swimming ~= 0 then
-			self.list = list
-			return
+		if list then
+			if not self.mapFlags then self.mapFlags = list.flags end
+			while list and list.listFromID do
+				list = zoneMounts[list.listFromID]
+			end
+			if list and #list.fly + #list.ground + #list.swimming ~= 0 then
+				self.list = list
+				return
+			end
 		end
 		mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
 	end
-	self.list = {
-		fly = self.db.fly,
-		ground = self.db.ground,
-		swimming = self.db.swimming,
-	}
+	self.list = self.defList
 end
+mounts.NEW_WMO_CHUNK = mounts.setMountsList
+mounts.ZONE_CHANGED = mounts.setMountsList
+mounts.ZONE_CHANGED_INDOORS = mounts.setMountsList
+mounts.ZONE_CHANGED_NEW_AREA = mounts.setMountsList
 
 
 function mounts:setDB()
@@ -250,6 +245,13 @@ function mounts:setDB()
 	end
 
 	self.db = currentProfileName and self.profiles[currentProfileName] or self.globalDB
+	self.zoneMounts = self.db.zoneMountsFromProfile and self.globalDB.zoneMounts or self.db.zoneMounts
+	self.defList = {
+		fly = self.db.fly,
+		ground = self.db.ground,
+		swimming = self.db.swimming,
+	}
+	self.petForMount = self.db.petListFromProfile and self.globalDB.petForMount or self.db.petForMount
 
 	self:setMountsList()
 end

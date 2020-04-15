@@ -44,7 +44,7 @@ function test:PLAYER_ENTERING_WORLD()
 	-- MountJournal.MountDisplay.InfoButton.petSelectionBtn:Click()
 
 	-- journal.navBarBtn:Click()
-	-- journal.mapSettings.existingsListsToggle:Click()
+	-- journal.mapSettings.existingListsToggle:Click()
 	-- journal.navBar:setMapID(1033)
 
 	-- CONFIG OPEN

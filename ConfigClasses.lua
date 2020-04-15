@@ -13,7 +13,7 @@ classConfig:SetScript("OnShow", function(self)
 	local info = classConfig:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	info:SetPoint("TOPRIGHT", -16, 16)
 	info:SetTextColor(.5, .5, .5, 1)
-	info:SetText(format("%s %s: %s", GetAddOnMetadata(addon, "Version"), L["author"], GetAddOnMetadata(addon, "Author")))
+	info:SetText(("%s %s: %s"):format(GetAddOnMetadata(addon, "Version"), L["author"], GetAddOnMetadata(addon, "Author")))
 
 	-- TITLE
 	local title = classConfig:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
@@ -243,7 +243,7 @@ do
 	local function createOption(self, option, className)
 		local optionFrame = self.checkPool:Acquire()
 		optionFrame:SetChecked(self.currentMacrosConfig[option.key])
-		optionFrame.Text:SetText(format(L[strupper(className.."_"..option.key)], option.hlink))
+		optionFrame.Text:SetText(L[(className.."_"..option.key):upper()]:format(option.hlink))
 		if not optionFrame.key then
 			optionFrame.Text:SetSize(365, 30)
 			optionFrame:HookScript("OnClick", function(btn) optionClick(self, btn) end)
@@ -261,7 +261,7 @@ do
 		if self.rightPanel.currentBtn then
 			self.rightPanel.currentBtn.check:Hide()
 		end
-		self.subtitle:SetText(format("%s: %s %s", L["Settings"], btn.name:GetText(), btn.description or ""))
+		self.subtitle:SetText(("%s: %s %s"):format(L["Settings"], btn.name:GetText(), btn.description or ""))
 		self.rightPanel.currentBtn = btn
 		btn.check:Show()
 

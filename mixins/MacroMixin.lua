@@ -1,3 +1,4 @@
+local type, pairs, GetShapeshiftFormID, GetShapeshiftForm, GetShapeshiftFormInfo, GetSpecialization = type, pairs, GetShapeshiftFormID, GetShapeshiftForm, GetShapeshiftFormInfo, GetSpecialization
 local macroFrame = CreateFrame("FRAME")
 
 
@@ -15,9 +16,13 @@ function macroFrame:PLAYER_LOGIN()
 	self.class = select(2, UnitClass("player"))
 
 	local magicBroom = Item:CreateFromItemID(37011)
-	magicBroom:ContinueOnItemLoad(function()
+	if magicBroom:IsItemDataCached() then
 		self.broomName = magicBroom:GetItemName()
-	end)
+	else
+		magicBroom:ContinueOnItemLoad(function()
+			self.broomName = magicBroom:GetItemName()
+		end)
+	end
 
 	self:refresh()
 end
@@ -64,20 +69,30 @@ do
 			spellIDtoName[spellID] = {
 				name = name,
 				callbacks = {},
+				notCached = true,
 			}
 
-			spell:ContinueOnSpellLoad(function()
+			if spell:IsSpellDataCached() then
+				spellIDtoName[spellID].notCached = nil
 				local subName = spell:GetSpellSubtext()
 				if subName:len() > 0 then
-					spellIDtoName[spellID].name = format("%s(%s)", name, subName)
-					for _, callback in pairs(spellIDtoName[spellID].callbacks) do
-						callback()
-					end
+					spellIDtoName[spellID].name = ("%s(%s)"):format(name, subName)
 				end
-			end)
+			else
+				spell:ContinueOnSpellLoad(function()
+					spellIDtoName[spellID].notCached = nil
+					local subName = spell:GetSpellSubtext()
+					if subName:len() > 0 then
+						spellIDtoName[spellID].name = ("%s(%s)"):format(name, subName)
+						for name, callback in pairs(spellIDtoName[spellID].callbacks) do
+							callback()
+						end
+					end
+				end)
+			end
 		end
 
-		if type(cbName) == "string" and type(cb) == "function" then
+		if spellIDtoName[spellID].notCached and type(cbName) == "string" and type(cb) == "function" then
 			spellIDtoName[spellID].callbacks[cbName] = cb
 		end
 		return spellIDtoName[spellID].name
@@ -109,7 +124,8 @@ function macroFrame:getDefMacro()
 
 	elseif self.class == "DRUID" then
 		local curFormID = GetShapeshiftFormID()
-		if curFormID == 1 or curFormID == 5 then
+		-- 1:CAT, 3:STAG, 5:BEAR, 36:TREANT
+		if curFormID == 1 or curFormID == 3 or curFormID == 5 or curFormID == 36 then
 			macro = self:addLine(macro, "/cancelform")
 		end
 	end
@@ -190,7 +206,7 @@ do
 		-- 768 - cat form
 		-- 783 - travel form
 		-- 24858 - moonkin form
-		if self.classConfig.useLastDruidForm then
+		if self.class == "DRUID" and self.classConfig.useLastDruidForm then
 			local spellID = getFormSpellID()
 
 			if self.classConfig.useDruidFormSpecialization then
@@ -236,9 +252,8 @@ do
 			end
 		-- CLASSMACRO
 		elseif self.macro
-			and (self.classConfig.useMacroAlways
-				  or not self.magicBroom
-				  and (self.sFlags.isIndoors or GetUnitSpeed("player") > 0 or IsFalling())) then
+			and (self.class == "DRUID" and self.classConfig.useMacroAlways
+				  or not self.magicBroom and (self.sFlags.isIndoors or GetUnitSpeed("player") > 0 or IsFalling())) then
 			macro = self.macro
 		-- MOUNT
 		else
@@ -255,7 +270,7 @@ function macroFrame:getCombatMacro()
 
 	if self.combatMacro then
 		macro = self.combatMacro
-	elseif self.macro and self.classConfig.useMacroAlways then
+	elseif self.macro and self.class == "DRUID" and self.classConfig.useMacroAlways then
 		macro = self.macro
 	end
 

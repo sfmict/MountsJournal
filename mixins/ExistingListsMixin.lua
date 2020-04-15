@@ -1,4 +1,4 @@
-local _,L = ...
+local _, L = ...
 
 
 MJExistingListsMixin = {}
@@ -14,21 +14,21 @@ function MJExistingListsMixin:onLoad()
 	end)
 
 	self.child = self.scrollFrame.child
-	self.optionsButtonPool = CreateFramePool("BUTTON", self.child, "MJOptionButtonTemplate", function(_,frame)
+	self.optionsButtonPool = CreateFramePool("BUTTON", self.child, "MJOptionButtonTemplate", function(_, frame)
 		frame:Hide()
 		frame:ClearAllPoints()
 		frame:Enable()
 	end)
 	self.lists = {}
-	local listsInfo = {
+	local listNames = {
 		L["Zones with list"],
 		L["Zones with relation"],
 		L["Zones with flags"],
 	}
 
-	for i, name in ipairs(listsInfo) do
+	for i, name in ipairs(listNames) do
 		local button = CreateFrame("CheckButton", nil, self.child, "MJCollapseButtonTemplate")
-		button:SetText(name)
+		button.name = name
 		button.childs = {}
 		button:SetScript("OnClick", function(btn)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -46,7 +46,7 @@ function MJExistingListsMixin:collapse(btn, i)
 	local checked = btn:GetChecked()
 	btn.toggle.plusMinus:SetTexture(checked and "Interface/Buttons/UI-PlusButton-UP" or "Interface/Buttons/UI-MinusButton-UP")
 
-	for _,child in ipairs(btn.childs) do
+	for _, child in ipairs(btn.childs) do
 		child:SetShown(not checked)
 	end
 
@@ -64,15 +64,10 @@ function MJExistingListsMixin:refresh()
 	local lastWidth = 0
 	local text = self.util.cleanText(self.searchBox:GetText())
 
-	for _,withList in ipairs(self.lists) do
-		local width = withList.text:GetStringWidth()
-		if width > lastWidth then
-			lastWidth = width
-		end
+	for _, withList in ipairs(self.lists) do
 		wipe(withList.childs)
 	end
 	self.optionsButtonPool:ReleaseAll()
-	lastWidth = lastWidth + 10
 
 	local function createOptionButton(tbl, mapID)
 		local btnText = self.util.getMapFullNameInfo(mapID).name
@@ -84,14 +79,12 @@ function MJExistingListsMixin:refresh()
 				self.journal.navBar:setMapID(mapID)
 			end)
 			local width = optionButton.text:GetStringWidth()
-			if width > lastWidth then
-				lastWidth = width
-			end
+			if width > lastWidth then lastWidth = width end
 			tinsert(tbl, optionButton)
 		end
 	end
 
-	for mapID, mapConfig in pairs(self.journal.db.zoneMounts) do
+	for mapID, mapConfig in pairs(self.journal.zoneMounts) do
 		if mapConfig.listFromID then
 			createOptionButton(self.lists[2].childs, mapID)
 		elseif #mapConfig.fly + #mapConfig.ground + #mapConfig.swimming ~= 0 then
@@ -112,22 +105,30 @@ function MJExistingListsMixin:refresh()
 	end
 
 	for i, withList in ipairs(self.lists) do
-		sort(withList.childs, function(a, b) return a:GetText() < b:GetText() end)
+		local childsCount = #withList.childs
 
-		if #withList.childs == 0 then
+		if childsCount == 0 then
+			withList:SetText(withList.name)
 			local optionButton = self.optionsButtonPool:Acquire()
 			optionButton:SetText(EMPTY)
 			optionButton:Disable()
 			tinsert(withList.childs, optionButton)
+		else
+			withList:SetText(("%s [%s]"):format(withList.name, childsCount))
+			sort(withList.childs, function(a, b) return a:GetText() < b:GetText() end)
 		end
 
+		local width = withList.text:GetStringWidth() + 10
+		if lastWidth < width then lastWidth = width end
+
 		local lastChild
-		for _,child in ipairs(withList.childs) do
+		for _, child in ipairs(withList.childs) do
 			local relativeFrame = lastChild or withList
 			child:SetPoint("TOPLEFT", relativeFrame, "BOTTOMLEFT")
 			child:SetPoint("TOPRIGHT", relativeFrame, "BOTTOMRIGHT")
 			lastChild = child
 		end
+
 		self:collapse(withList, i)
 	end
 

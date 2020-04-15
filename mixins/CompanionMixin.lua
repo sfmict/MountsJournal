@@ -1,4 +1,5 @@
 local _, L = ...
+local petRandomIcon = "Interface/Icons/INV_Pet_Achievement_CaptureAPetFromEachFamily_Battle" -- select(3, GetSpellInfo(243819))
 
 
 MJSetPetMixin = {}
@@ -6,8 +7,6 @@ MJSetPetMixin = {}
 
 function MJSetPetMixin:onLoad()
 	self.journal = MountsJournalFrame
-	self.journal.profilesMenu:on("SET_PROFILE", function() self:refresh() end)
-	_,_, self.randomIcon = GetSpellInfo(243819)
 
 	self:SetScript("OnEnter", function(self)
 		self.highlight:Show()
@@ -36,9 +35,11 @@ end
 
 
 function MJSetPetMixin:onShow()
+	self:SetScript("OnShow", function(self) self:refresh() end)
 	C_Timer.After(0, function()
 		self.refreshEnabled = true
 		self:refresh()
+		self.journal.profilesMenu:on("UPDATE_PROFILE", function() self:refresh() end)
 	end)
 end
 
@@ -53,13 +54,13 @@ function MJSetPetMixin:refresh()
 	if not self.refreshEnabled then return end
 
 	local selectedSpellID = MountJournal.selectedSpellID
-	local petID = self.journal.db.petForMount[selectedSpellID]
+	local petID = self.journal.petForMount[selectedSpellID]
 	self.id = petID
 
 	if not petID then
 		self.infoFrame:Hide()
 	elseif type(petID) == "number" then
-		self.infoFrame.icon:SetTexture(self.randomIcon)
+		self.infoFrame.icon:SetTexture(petRandomIcon)
 		self.infoFrame.qualityBorder:Hide()
 		self.infoFrame.isDead:Hide()
 		self.infoFrame.levelBG:Hide()
@@ -84,7 +85,7 @@ function MJSetPetMixin:refresh()
 			self.infoFrame.favorite:SetShown(favorite)
 			self.infoFrame:Show()
 		else
-			self.journal.db.petForMount[selectedSpellID] = nil
+			self.journal.petForMount[selectedSpellID] = nil
 			self.infoFrame:Hide()
 			self.id = nil
 		end
@@ -97,17 +98,13 @@ end
 MJCompanionsPanelMixin = {}
 
 
-function MJCompanionsPanelMixin:onEvent(event, ...)
-	if self[event] then
-		self[event](self, ...)
-	end
-end
+function MJCompanionsPanelMixin:onEvent(event, ...) self[event](self, ...) end
 
 
 function MJCompanionsPanelMixin:onLoad()
 	self.util = MountsJournalUtil
+	self.mounts = MountsJournal
 	self.journal = MountsJournalFrame
-	self.journal.profilesMenu:on("SET_PROFILE", function() self:refresh() end)
 
 	self:SetWidth(250)
 	self:SetPoint("TOPLEFT", MountJournal, "TOPRIGHT")
@@ -137,13 +134,12 @@ function MJCompanionsPanelMixin:onLoad()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
 
-	local _,_, spellIcon = GetSpellInfo(243819)
 	self.randomFavoritePet.infoFrame.favorite:Show()
-	self.randomFavoritePet.infoFrame.icon:SetTexture(spellIcon)
+	self.randomFavoritePet.infoFrame.icon:SetTexture(petRandomIcon)
 	self.randomFavoritePet.infoFrame.qualityBorder:Hide()
 	self.randomFavoritePet.name:SetWidth(180)
 	self.randomFavoritePet.name:SetText(PET_JOURNAL_SUMMON_RANDOM_FAVORITE_PET)
-	self.randomPet.infoFrame.icon:SetTexture(spellIcon)
+	self.randomPet.infoFrame.icon:SetTexture(petRandomIcon)
 	self.randomPet.infoFrame.qualityBorder:Hide()
 	self.randomPet.name:SetWidth(180)
 	self.randomPet.name:SetText(L["Summon Random Battle Pet"])
@@ -152,12 +148,25 @@ function MJCompanionsPanelMixin:onLoad()
 	self.noPet.name:SetWidth(180)
 	self.noPet.name:SetText(L["No Battle Pet"])
 
+	self.owned = 0
 	self.petJournalFiltersBackup = {
 		types = {},
 		sources = {},
+		search = "",
 	}
 	self.petList = {}
 	self.petFiltredList = {}
+
+	hooksecurefunc(C_PetJournal, "SetSearchFilter", function(search)
+		if not self.updatingList then
+			self.petJournalFiltersBackup.search = search or ""
+		end
+	end)
+	hooksecurefunc(C_PetJournal, "ClearSearchFilter", function()
+		if not self.updatingList then
+			self.petJournalFiltersBackup.search = ""
+		end
+	end)
 
 	self.searchBox:SetScript("OnTextChanged", function(searchBox)
 		SearchBoxTemplate_OnTextChanged(searchBox)
@@ -174,14 +183,28 @@ end
 
 function MJCompanionsPanelMixin:onShow()
 	self:SetScript("OnShow", function(self)
-		self:petListSort()
+		if self.force then
+			self:petListUpdate(self.force)
+		else
+			self:petListSort()
+		end
+		self.journal.profilesMenu:on("UPDATE_PROFILE.CompanionsPanel", function() self:refresh() end)
 	end)
-	C_Timer.After(0, function() self:petListUpdate(true) end)
+	C_Timer.After(0, function()
+		self:petListUpdate(true)
+		self.journal.profilesMenu:on("UPDATE_PROFILE.CompanionsPanel", function() self:refresh() end)
+	end)
+end
+
+
+function MJCompanionsPanelMixin:onHide()
+	self.journal.profilesMenu:off("UPDATE_PROFILE.CompanionsPanel")
+	self:Hide()
 end
 
 
 function MJCompanionsPanelMixin:selectButtonClick(id)
-	self.journal.db.petForMount[MountJournal.selectedSpellID] = id
+	self.journal.petForMount[MountJournal.selectedSpellID] = id
 	self:GetParent():refresh()
 	self:Hide()
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -192,7 +215,7 @@ function MJCompanionsPanelMixin:refresh()
 	local scrollFrame = self.listScroll
 	local offset = HybridScrollFrame_GetOffset(scrollFrame)
 	local numPets = #self.petFiltredList
-	local selectedPetID = self.journal.db.petForMount[MountJournal.selectedSpellID]
+	local selectedPetID = self.journal.petForMount[MountJournal.selectedSpellID]
 
 	for i, btn in ipairs(scrollFrame.buttons) do
 		local index = i + offset
@@ -242,6 +265,28 @@ function MJCompanionsPanelMixin:refresh()
 end
 
 
+function MJCompanionsPanelMixin:updatePetForMount()
+	local petForMount, needUpdate = self.mounts.globalDB.petForMount
+	for spellID, petID in pairs(petForMount) do
+		if type(petID) == "string" and not C_PetJournal.GetPetInfoByPetID(petID) then
+			needUpdate = true
+			petForMount[spellID] = nil
+		end
+	end
+	for _, profile in pairs(self.mounts.profiles) do
+		for spellID, petID in pairs(profile.petForMount) do
+			if type(petID) == "string" and not C_PetJournal.GetPetInfoByPetID(petID) then
+				needUpdate = true
+				profile.petForMount[spellID] = nil
+			end
+		end
+	end
+	if needUpdate then
+		self.journal:mountsListFullUpdate()
+	end
+end
+
+
 function MJCompanionsPanelMixin:setPetJournalFiltersBackup()
 	local backup = self.petJournalFiltersBackup
 	backup.collected = C_PetJournal.IsFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED)
@@ -270,22 +315,27 @@ function MJCompanionsPanelMixin:restorePetJournalFilters()
 	for i = 1, C_PetJournal.GetNumPetSources() do
 		C_PetJournal.SetPetSourceChecked(i, backup.sources[i])
 	end
-	C_PetJournal.SetSearchFilter(PetJournalSearchBox:GetText())
+	C_PetJournal.SetSearchFilter(backup.search)
 end
 
 
 function MJCompanionsPanelMixin:petListUpdate(force)
 	local _, owned = C_PetJournal.GetNumPets()
+	if self.owned > owned then self:updatePetForMount() end
 
 	if not force then
 		if self.owned == owned then return end
+		self.owned = owned
 		if not self:IsVisible() then
-			self:SetScript("OnShow", self.onShow)
+			self.force = true
 			return
 		end
+	else
+		self.owned = owned
+		self.force = nil
 	end
 
-	self.owned = owned
+	self.updatingList = true
 	self:setPetJournalFiltersBackup()
 
 	wipe(self.petList)
@@ -297,6 +347,7 @@ function MJCompanionsPanelMixin:petListUpdate(force)
 	end
 
 	self:restorePetJournalFilters()
+	self.updatingList = nil
 	self:petListSort()
 end
 MJCompanionsPanelMixin.PET_JOURNAL_LIST_UPDATE = MJCompanionsPanelMixin.petListUpdate
