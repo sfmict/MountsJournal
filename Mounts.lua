@@ -6,6 +6,7 @@ local mounts = CreateFrame("Frame", "MountsJournal")
 
 mounts:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
 mounts:RegisterEvent("ADDON_LOADED")
+mounts:RegisterEvent("PLAYER_LOGIN")
 
 
 function mounts:ADDON_LOADED(addonName)
@@ -124,32 +125,35 @@ function mounts:ADDON_LOADED(addonName)
 			[204] = true, -- Бездонные глубины
 			[205] = true, -- Мерцающий простор
 		}
-
-		-- INIT
-		self:setDB()
-		self:setModifier(self.config.modifier)
-		self:setHandleWaterJump(self.config.waterJump)
-		self:setHerbMount()
-		self:init()
-
-		-- MAP CHANGED
-		self:RegisterEvent("NEW_WMO_CHUNK")
-		self:RegisterEvent("ZONE_CHANGED")
-		self:RegisterEvent("ZONE_CHANGED_INDOORS")
-		self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-
-		-- PROFESSION CHANGED OR MOUNT LEARNED
-		self:RegisterEvent("SKILL_LINES_CHANGED")
-		self:RegisterEvent("COMPANION_LEARNED")
-
-		-- SPEC CHANGED
-		self:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
-
-		-- PET USABLE
-		self:RegisterEvent("PLAYER_REGEN_ENABLED")
-		self:RegisterEvent("PLAYER_REGEN_DISABLED")
-		self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
 	end
+end
+
+
+function mounts:PLAYER_LOGIN()
+	-- INIT
+	self:setDB()
+	self:setModifier(self.config.modifier)
+	self:setHandleWaterJump(self.config.waterJump)
+	self:setHerbMount()
+	self:init()
+
+	-- MAP CHANGED
+	self:RegisterEvent("NEW_WMO_CHUNK")
+	self:RegisterEvent("ZONE_CHANGED")
+	self:RegisterEvent("ZONE_CHANGED_INDOORS")
+	self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+
+	-- PROFESSION CHANGED OR MOUNT LEARNED
+	self:RegisterEvent("SKILL_LINES_CHANGED")
+	self:RegisterEvent("COMPANION_LEARNED")
+
+	-- SPEC CHANGED
+	self:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
+
+	-- PET USABLE
+	self:RegisterEvent("PLAYER_REGEN_ENABLED")
+	self:RegisterEvent("PLAYER_REGEN_DISABLED")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
 end
 
 

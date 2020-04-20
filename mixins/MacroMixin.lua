@@ -74,6 +74,7 @@ do
 
 			if spell:IsSpellDataCached() then
 				spellIDtoName[spellID].notCached = nil
+				wipe(spellIDtoName[spellID].callbacks)
 				local subName = spell:GetSpellSubtext()
 				if subName:len() > 0 then
 					spellIDtoName[spellID].name = ("%s(%s)"):format(name, subName)
@@ -88,6 +89,7 @@ do
 							callback()
 						end
 					end
+					wipe(spellIDtoName[spellID].callbacks)
 				end)
 			end
 		end

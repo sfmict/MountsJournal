@@ -16,7 +16,7 @@ function tags:init()
 		whileDead = 1,
 		OnAccept = function(popup, cb)
 			local text = popup.editBox:GetText()
-			if text and text ~= "" then cb(text) end
+			if text and text ~= "" then cb(popup, text) end
 		end,
 		EditBoxOnEnterPressed = function(self)
 			StaticPopup_OnClick(self:GetParent(), 1)
@@ -189,8 +189,9 @@ end
 
 
 function tags:addTag()
-	StaticPopup_Show(self.addonName.."ADD_TAG", nil, nil, function(text)
+	StaticPopup_Show(self.addonName.."ADD_TAG", nil, nil, function(popup, text)
 		if self.filter.tags[text] ~= nil then
+			popup:Hide()
 			StaticPopup_Show(self.addonName.."TAG_EXISTS")
 			return
 		end
