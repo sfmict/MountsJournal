@@ -20,6 +20,7 @@ function MJProfilesMixin:onLoad()
 			local text = popup.editBox:GetText()
 			if text and text ~= "" then
 				if self.profiles[text] ~= nil then
+					popup:Hide()
 					self.lastProfileName = text
 					StaticPopup_Show(self.addonName.."PROFILE_EXISTS", nil, nil, data)
 					return
@@ -47,6 +48,7 @@ function MJProfilesMixin:onLoad()
 	}
 	local function profileExistsAccept(popup, data)
 		if not popup then return end
+		popup:Hide()
 		local dialog = StaticPopup_Show(self.addonName.."NEW_PROFILE", nil, nil, data)
 		if dialog and self.lastProfileName then
 			dialog.editBox:SetText(self.lastProfileName)
@@ -128,7 +130,7 @@ function MJProfilesMixin:menuInit(level)
 	local btn = self:GetParent()
 	local info = UIDropDownMenu_CreateInfo()
 
-	if UIDROPDOWNMENU_MENU_VALUE == "settings" then
+	if UIDROPDOWNMENU_MENU_VALUE == "settings" then -- PROFILE SETTINGS
 		if btn.charDB.currentProfileName == nil then return end
 		info.isNotRadio = true
 		info.keepShownOnClick = true
