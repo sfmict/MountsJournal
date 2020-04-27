@@ -279,6 +279,10 @@ function MJDropDownSearchMixin:refresh()
 				end)
 			end
 
+			if btn.isEnter then
+				btn:GetScript("OnEnter")(btn)
+			end
+
 			btn:SetWidth(self:GetWidth() - 25)
 			btn:Show()
 		else

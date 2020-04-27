@@ -58,7 +58,7 @@ function tags:setSortedTags()
 		tinsert(self.sortedTags, tag)
 	end
 	sort(self.sortedTags, function(tag1, tag2) return filterTags[tag1][1] < filterTags[tag2][1] end)
-	for i, tag in pairs(self.sortedTags) do
+	for i, tag in ipairs(self.sortedTags) do
 		filterTags[tag][1] = i
 	end
 end
@@ -259,8 +259,8 @@ function tags:getFilterMount(mountID)
 		local i = 0
 		for tag, value in next, filterTags do
 			if value[2] then
-				i = i + 1
 				if not mountTags[tag] then return false end
+				i = i + 1
 			end
 		end
 		return i > 0

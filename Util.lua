@@ -13,6 +13,7 @@ local eventsMixin, eventsMeta = {}, {
 
 
 function eventsMixin:initEvents()
+	self.initEvents = nil
 	self._events = {}
 end
 
