@@ -100,6 +100,7 @@ function journal:ADDON_LOADED(addonName)
 	if addonName == "Blizzard_Collections" and select(2, IsAddOnLoaded(addon)) or addonName == addon and IsAddOnLoaded("Blizzard_Collections") then
 		self:UnregisterEvent("ADDON_LOADED")
 
+		self.searchText = ""
 		local texPath = "Interface/AddOns/MountsJournal/textures/"
 		local mountDisplay = MountJournal.MountDisplay
 		local modelScene = mountDisplay.ModelScene
@@ -353,10 +354,6 @@ function journal:ADDON_LOADED(addonName)
 
 		self.searchBox:SetPoint("TOPLEFT", filtersPanel, "TOPLEFT", 54, -4)
 		self.searchBox:SetSize(131, 20)
-		self.searchBox:SetScript("OnTextChanged", function(searchBox)
-			SearchBoxTemplate_OnTextChanged(searchBox)
-			self:mountsListFullUpdate()
-		end)
 		MountJournalFilterButton:SetPoint("TOPRIGHT", filtersPanel, "TOPRIGHT", -3, -4)
 
 		-- FILTERS SHOWN PANEL
@@ -740,6 +737,45 @@ function journal:ADDON_LOADED(addonName)
 
 		-- HOOKS
 		self.func = {}
+		self:setSecureFunc(C_MountJournal, "SetSearch", function(text)
+			if type(text) == "string" then
+				self.searchText = text
+				self:mountsListFullUpdate()
+			end
+		end)
+		self:setSecureFunc(C_MountJournal, "SetCollectedFilterSetting", function(filter, enabled)
+			if filter == LE_MOUNT_JOURNAL_FILTER_COLLECTED then filter = "collected"
+			elseif filter == LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED then filter = "notCollected"
+			elseif filter == LE_MOUNT_JOURNAL_FILTER_UNUSABLE then filter = "unusable"
+			else return end
+			if type(enabled) == "boolean" then
+				mounts.filters[filter] = enabled
+				self:mountsListFullUpdate()
+			end
+		end)
+		self:setSecureFunc(C_MountJournal, "GetCollectedFilterSetting", function(filter)
+			if filter == LE_MOUNT_JOURNAL_FILTER_COLLECTED then filter = "collected"
+			elseif filter == LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED then filter = "notCollected"
+			elseif filter == LE_MOUNT_JOURNAL_FILTER_UNUSABLE then filter = "unusable" end
+			return mounts.filters[filter]
+		end)
+		self:setSecureFunc(C_MountJournal, "SetSourceFilter", function(i, value)
+			if type(i) == "number" and type(value) == "boolean" then
+				mounts.filters.sources[i] = value
+				self:mountsListFullUpdate()
+			end
+		end)
+		self:setSecureFunc(C_MountJournal, "SetAllSourceFilters", function(enabled)
+			if type(enabled) == "boolean" then
+				self:setAllFilters("sources", enabled)
+				self:mountsListFullUpdate()
+			end
+		end)
+		self:setSecureFunc(C_MountJournal, "IsSourceChecked", function(i)
+			if type(i) == "number" then
+				return mounts.filters.sources[i]
+			end
+		end)
 		self:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", function()
 			return #self.displayedMounts
 		end)
@@ -748,8 +784,16 @@ function journal:ADDON_LOADED(addonName)
 			if mountID then return C_MountJournal.GetMountInfoByID(mountID) end
 		end)
 		self:setSecureFunc(C_MountJournal, "Pickup")
-		self:setSecureFunc(C_MountJournal, "SetIsFavorite")
 		self:setSecureFunc(C_MountJournal, "GetIsFavorite")
+		self:setSecureFunc(C_MountJournal, "SetIsFavorite", function(index, ...)
+			index = self.indexByMountID[self.displayedMounts[index]]
+			if index then
+				self.func.SetIsFavorite(index, ...)
+				self:updateIndexByMountID()
+				self:updateMountsList()
+				MountJournal_UpdateMountList()
+			end
+		end)
 		self:setSecureFunc(C_MountJournal, "GetDisplayedMountInfoExtra", function(index)
 			local mountID = self.displayedMounts[index]
 			if mountID then return C_MountJournal.GetMountInfoExtraByID(mountID) end
@@ -988,37 +1032,18 @@ end
 
 function journal:updateIndexByMountID()
 	MountJournal:SetScript("OnEvent", nil)
-	local collected = C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED)
-	local notCollected = C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED)
-	local unusable = C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE)
-	local sources = {}
-	for i = 1, C_PetJournal.GetNumPetSources() do
-		if C_MountJournal.IsValidSourceFilter(i) then
-			sources[i] = C_MountJournal.IsSourceChecked(i)
-		end
-	end
-
-	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
-	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
-	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, true)
-	C_MountJournal.SetAllSourceFilters(true)
-	C_MountJournal.SetSearch("")
+	self.func.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
+	self.func.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
+	self.func.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, true)
+	self.func.SetAllSourceFilters(true)
+	self.func.SetSearch("")
+	MountJournal:SetScript("OnEvent", MountJournal_OnEvent)
 
 	wipe(self.indexByMountID)
 	for i = 1, self.func.GetNumDisplayedMounts() do
 		local _,_,_,_,_,_,_,_,_,_,_, mountID = self.func.GetDisplayedMountInfo(i)
 		self.indexByMountID[mountID] = i
 	end
-
-	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, collected)
-	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, notCollected)
-	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, unusable)
-	for i = 1, C_PetJournal.GetNumPetSources() do
-		if C_MountJournal.IsValidSourceFilter(i) then
-			C_MountJournal.SetSourceFilter(i, sources[i])
-		end
-	end
-	MountJournal:SetScript("OnEvent", MountJournal_OnEvent)
 
 	sort(self.mountIDs, function(a, b)
 		local nameA, spellIDA, iconA, isActiveA, isUsableA, sourceTypeA, isFavoriteA, isFactionSpecificA, factionA, shouldHideOnCharA, isCollectedA, mountIDA = C_MountJournal.GetMountInfoByID(a)
@@ -1884,7 +1909,7 @@ end
 function journal:updateMountsList()
 	local filters, mountTypes, list, tags, inTable, GetMountInfoByID, GetMountInfoExtraByID = mounts.filters, self.mountTypes, self.list, self.tags, util.inTable, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID
 	local sources, types, selected, factions, pet, expansions = filters.sources, filters.types, filters.selected, filters.factions, filters.pet, filters.expansions
-	local text = util.cleanText(self.searchBox:GetText())
+	local text = util.cleanText(self.searchText)
 	wipe(self.displayedMounts)
 
 	for i = 1, #self.mountIDs do
