@@ -1857,7 +1857,7 @@ function journal:updateMountsList()
 
 	local numShowMounts = #self.displayedMounts
 	self.shownPanel.count:SetText(numShowMounts)
-	if self.mountCount.Count.num ~= numShowMounts then
+	if filters.hideOnChar or self.mountCount.Count.num ~= numShowMounts then
 		self.shownPanel:Show()
 		self.leftInset:SetPoint("TOPLEFT", self.shownPanel, "BOTTOMLEFT", 0, -2)
 	else
