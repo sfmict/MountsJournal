@@ -1,3 +1,3 @@
-* Added cancelform to Stag and Treant form.
-* Added profile settings with options: "Pet binding from default profile", "Zones settings from default profile".
+* Battle Pet Search now looks for matches in source text.
+* Added filter "Hidden For Character" (the filter system has been redone).
 * Minor fixes.
