@@ -1045,7 +1045,7 @@ end
 -- UPDATE indexByMountID WHEN SET FAVORITE
 function journal:MOUNT_JOURNAL_SEARCH_UPDATED()
 	self:updateIndexByMountID()
-	slef:mountsListFullUpdate()
+	self:mountsListFullUpdate()
 end
 
 
