@@ -84,7 +84,7 @@ function tags:mountOptionsMenu_Init(level)
 	local mountIndex, mountID = MountJournal.menuMountIndex, MountJournal.menuMountID
 
 	if level == 1 then
-		local active = select(4, C_MountJournal.GetMountInfoByID(mountID))
+		local _,_,_, active, _,_, isFavorite = C_MountJournal.GetMountInfoByID(mountID)
 		local needsFanfare = C_MountJournal.NeedsFanfare(mountID)
 		info.notCheckable = true
 
@@ -107,7 +107,8 @@ function tags:mountOptionsMenu_Init(level)
 		UIDropDownMenu_AddButton(info, level)
 
 		if not needsFanfare then
-			local isFavorite, canFavorite = C_MountJournal.GetIsFavorite(mountIndex)
+			local _, canFavorite = C_MountJournal.GetIsFavorite(mountIndex)
+			info.disabled = not canFavorite
 
 			if isFavorite then
 				info.text = BATTLE_PET_UNFAVORITE
@@ -120,15 +121,9 @@ function tags:mountOptionsMenu_Init(level)
 					C_MountJournal.SetIsFavorite(mountIndex, true)
 				end
 			end
-
-			if canFavorite then
-				info.disabled = false
-			else
-				info.disabled = true
-			end
 			UIDropDownMenu_AddButton(info, level)
 
-			info.disabled = false
+			info.disabled = nil
 			info.keepShownOnClick = true
 			info.hasArrow = true
 			info.func = nil
@@ -136,7 +131,7 @@ function tags:mountOptionsMenu_Init(level)
 			UIDropDownMenu_AddButton(info, level)
 		end
 
-		info.disabled = false
+		info.disabled = nil
 		info.keepShownOnClick = nil
 		info.hasArrow = nil
 		info.func = nil

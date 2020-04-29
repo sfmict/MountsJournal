@@ -1733,7 +1733,7 @@ function journal:updateBtnFilters()
 	local filtersBar, clearShow = self.filtersBar, false
 
 	for typeFilter, filter in pairs(mounts.filters) do
-		-- TYPES AND SELECTED
+		-- SOURCES
 		if typeFilter == "sources" then
 			local i, n = 0, 0
 			for k, v in pairs(filter) do
@@ -1760,7 +1760,7 @@ function journal:updateBtnFilters()
 				filtersBar.sources:GetParent().filtred:Show()
 			end
 
-		-- SOURCES
+		-- TYPES AND SELECTED
 		elseif filtersBar[typeFilter] then
 			local default = typeFilter ~= "selected"
 			local i = 0
