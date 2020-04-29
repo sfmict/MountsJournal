@@ -197,7 +197,7 @@ function tags:addTag()
 		end
 		self.filter.tags[text] = {#self.sortedTags + 1, true}
 		tinsert(self.sortedTags, text)
-		journal:mountsListFullUpdate()
+		journal:updateMountsList()
 	end)
 end
 
@@ -209,7 +209,7 @@ function tags:deleteTag(tag)
 		end
 		self.filter.tags[tag] = nil
 		self:setSortedTags()
-		journal:mountsListFullUpdate()
+		journal:updateMountsList()
 	end)
 end
 

@@ -187,7 +187,6 @@ function journal:ADDON_LOADED(addonName)
 		navBar:on("MAP_CHANGE", function()
 			self:setEditMountsList()
 			self:updateMountsList()
-			MountJournal_UpdateMountList()
 			self:updateMapSettings()
 
 			self.mountListUpdateAnim:Stop()
@@ -232,7 +231,6 @@ function journal:ADDON_LOADED(addonName)
 			self:getRemoveMountList(self.navBar.mapID)
 			self:setEditMountsList()
 			self:updateMountsList()
-			MountJournal_UpdateMountList()
 			self:updateMapSettings()
 			mounts:setMountsList()
 			self.existingLists:refresh()
@@ -297,7 +295,6 @@ function journal:ADDON_LOADED(addonName)
 			mounts:setDB()
 			self:setEditMountsList()
 			self:updateMountsList()
-			MountJournal_UpdateMountList()
 			self:updateMapSettings()
 			self.existingLists:refresh()
 
@@ -736,7 +733,7 @@ function journal:ADDON_LOADED(addonName)
 		self:setSecureFunc(C_MountJournal, "SetSearch", function(text)
 			if type(text) == "string" then
 				self.searchText = text
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 			end
 		end)
 		self:setSecureFunc(C_MountJournal, "SetCollectedFilterSetting", function(filter, enabled)
@@ -746,7 +743,7 @@ function journal:ADDON_LOADED(addonName)
 			else return end
 			if type(enabled) == "boolean" then
 				mounts.filters[filter] = enabled
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 			end
 		end)
 		self:setSecureFunc(C_MountJournal, "GetCollectedFilterSetting", function(filter)
@@ -755,16 +752,16 @@ function journal:ADDON_LOADED(addonName)
 			elseif filter == LE_MOUNT_JOURNAL_FILTER_UNUSABLE then filter = "unusable" end
 			return mounts.filters[filter]
 		end)
-		self:setSecureFunc(C_MountJournal, "SetSourceFilter", function(i, value)
-			if type(i) == "number" and type(value) == "boolean" then
-				mounts.filters.sources[i] = value
-				self:mountsListFullUpdate()
-			end
-		end)
 		self:setSecureFunc(C_MountJournal, "SetAllSourceFilters", function(enabled)
 			if type(enabled) == "boolean" then
 				self:setAllFilters("sources", enabled)
-				self:mountsListFullUpdate()
+				self:updateMountsList()
+			end
+		end)
+		self:setSecureFunc(C_MountJournal, "SetSourceFilter", function(i, value)
+			if type(i) == "number" and type(value) == "boolean" then
+				mounts.filters.sources[i] = value
+				self:updateMountsList()
 			end
 		end)
 		self:setSecureFunc(C_MountJournal, "IsSourceChecked", function(i)
@@ -779,9 +776,6 @@ function journal:ADDON_LOADED(addonName)
 			local mountID = self.displayedMounts[index]
 			if mountID then return C_MountJournal.GetMountInfoByID(mountID) end
 		end)
-		self:setSecureFunc(C_MountJournal, "Pickup")
-		self:setSecureFunc(C_MountJournal, "SetIsFavorite")
-		self:setSecureFunc(C_MountJournal, "GetIsFavorite")
 		self:setSecureFunc(C_MountJournal, "GetDisplayedMountInfoExtra", function(index)
 			local mountID = self.displayedMounts[index]
 			if mountID then return C_MountJournal.GetMountInfoExtraByID(mountID) end
@@ -790,19 +784,14 @@ function journal:ADDON_LOADED(addonName)
 			local mountID = self.displayedMounts[index]
 			if mountID then return C_MountJournal.GetMountAllCreatureDisplayInfoByID(mountID) end
 		end)
+		self:setSecureFunc(C_MountJournal, "Pickup")
+		self:setSecureFunc(C_MountJournal, "SetIsFavorite")
+		self:setSecureFunc(C_MountJournal, "GetIsFavorite")
 
 		hooksecurefunc("MountJournal_UpdateMountList", function() self:configureJournal() end)
 		self.MountJournal_UpdateMountList = MountJournal_UpdateMountList
+		self.grid3_UpdateMountList = function() self:grid3UpdateMountList() end
 		self:setScrollGridMounts(mounts.config.gridToggle)
-
-		local fullUpdate = MountJournal_FullUpdate
-		function MountJournal_FullUpdate(self)
-			if self:IsVisible() then
-				journal:updateMountsList()
-				journal:updateBtnFilters()
-			end
-			fullUpdate(self)
-		end
 
 		-- FILTERS
 		MountJournalFilterDropDown.initialize = function(_, level) self:filterDropDown_Initialize(level) end
@@ -811,6 +800,8 @@ function journal:ADDON_LOADED(addonName)
 		self:setEditMountsList()
 		self:updateIndexByMountID()
 		self:RegisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
+		self:updateBtnFilters()
+		self:updateMountsList()
 	end
 end
 
@@ -821,9 +812,8 @@ function journal:setScrollGridMounts(grid)
 
 	if grid then
 		offset = math.ceil((offset + 1) / 3) - 1
-		local updateList = function() self:grid3UpdateMountList() end
-		scrollFrame.update = updateList
-		MountJournal_UpdateMountList = updateList
+		scrollFrame.update = self.grid3_UpdateMountList
+		MountJournal_UpdateMountList = self.grid3_UpdateMountList
 
 		for _, btn in ipairs(scrollFrame.buttons) do
 			btn.DragButton:Hide()
@@ -1004,8 +994,8 @@ end
 
 function journal:setCountMounts()
 	local count, collected = 0, 0
-	for _, mountID in ipairs(C_MountJournal.GetMountIDs()) do
-		local _,_,_,_,_,_,_,_,_, hideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+	for i = 1, #self.mountIDs do
+		local _,_,_,_,_,_,_,_,_, hideOnChar, isCollected = C_MountJournal.GetMountInfoByID(self.mountIDs[i])
 		if not hideOnChar then
 			count = count + 1
 			if isCollected then
@@ -1033,8 +1023,8 @@ function journal:updateIndexByMountID()
 	end
 
 	sort(self.mountIDs, function(a, b)
-		local nameA, spellIDA, iconA, isActiveA, isUsableA, sourceTypeA, isFavoriteA, isFactionSpecificA, factionA, shouldHideOnCharA, isCollectedA, mountIDA = C_MountJournal.GetMountInfoByID(a)
-		local nameB, spellIDB, iconB, isActiveB, isUsableB, sourceTypeB, isFavoriteB, isFactionSpecificB, factionB, shouldHideOnCharB, isCollectedB, mountIDB = C_MountJournal.GetMountInfoByID(b)
+		local nameA, _,_,_,_,_, isFavoriteA, _,_,_, isCollectedA = C_MountJournal.GetMountInfoByID(a)
+		local nameB, _,_,_,_,_, isFavoriteB, _,_,_, isCollectedB = C_MountJournal.GetMountInfoByID(b)
 		return isFavoriteA and not isFavoriteB
 			or isFavoriteA == isFavoriteB and (isCollectedA and not isCollectedB
 				or isCollectedA == isCollectedB and nameA < nameB)
@@ -1045,7 +1035,7 @@ end
 -- UPDATE indexByMountID WHEN SET FAVORITE
 function journal:MOUNT_JOURNAL_SEARCH_UPDATED()
 	self:updateIndexByMountID()
-	self:mountsListFullUpdate()
+	self:updateMountsList()
 end
 
 
@@ -1193,7 +1183,6 @@ function journal:listFromMapInit(level)
 			journal.currentList.listFromID = mapID
 			journal:setEditMountsList()
 			journal:updateMountsList()
-			MountJournal_UpdateMountList()
 			journal:updateMapSettings()
 			mounts:setMountsList()
 			journal.existingLists:refresh()
@@ -1313,7 +1302,7 @@ function journal:filterDropDown_Initialize(level)
 		info.text = COLLECTED
 		info.func = function(_,_,_, value)
 			mounts.filters.collected = value
-			self:mountsListFullUpdate()
+			self:updateMountsList()
 		end
 		info.checked = function() return mounts.filters.collected end
 		UIDropDownMenu_AddButton(info, level)
@@ -1321,7 +1310,7 @@ function journal:filterDropDown_Initialize(level)
 		info.text = NOT_COLLECTED
 		info.func = function(_,_,_, value)
 			mounts.filters.notCollected = value
-			self:mountsListFullUpdate()
+			self:updateMountsList()
 		end
 		info.checked = function() return mounts.filters.notCollected end
 		UIDropDownMenu_AddButton(info, level)
@@ -1329,7 +1318,7 @@ function journal:filterDropDown_Initialize(level)
 		info.text = MOUNT_JOURNAL_FILTER_UNUSABLE
 		info.func = function(_,_,_, value)
 			mounts.filters.unusable = value
-			self:mountsListFullUpdate()
+			self:updateMountsList()
 		end
 		info.checked = function() return mounts.filters.unusable end
 		UIDropDownMenu_AddButton(info, level)
@@ -1337,7 +1326,7 @@ function journal:filterDropDown_Initialize(level)
 		info.text = L["hidden for character"]
 		info.func = function(_,_,_, value)
 			mounts.filters.hideOnChar = value
-			self:mountsListFullUpdate()
+			self:updateMountsList()
 		end
 		info.checked = function() return mounts.filters.hideOnChar end
 		UIDropDownMenu_AddButton(info, level)
@@ -1383,7 +1372,7 @@ function journal:filterDropDown_Initialize(level)
 			info.func = function()
 				self:setAllFilters("types", true)
 				self:updateBtnFilters()
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -1392,7 +1381,7 @@ function journal:filterDropDown_Initialize(level)
 			info.func = function()
 				self:setAllFilters("types", false)
 				self:updateBtnFilters()
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -1404,7 +1393,7 @@ function journal:filterDropDown_Initialize(level)
 				info.func = function(_,_,_, value)
 					types[i] = value
 					self:updateBtnFilters()
-					self:mountsListFullUpdate()
+					self:updateMountsList()
 				end
 				info.checked = function() return types[i] end
 				UIDropDownMenu_AddButton(info, level)
@@ -1414,7 +1403,7 @@ function journal:filterDropDown_Initialize(level)
 			info.func = function()
 				self:setAllFilters("selected", true)
 				self:updateBtnFilters()
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -1423,7 +1412,7 @@ function journal:filterDropDown_Initialize(level)
 			info.func = function()
 				self:setAllFilters("selected", false)
 				self:updateBtnFilters()
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -1435,7 +1424,7 @@ function journal:filterDropDown_Initialize(level)
 				info.func = function(_,_,_, value)
 					selected[i] = value
 					self:updateBtnFilters()
-					self:mountsListFullUpdate()
+					self:updateMountsList()
 				end
 				info.checked = function() return selected[i] end
 				UIDropDownMenu_AddButton(info, level)
@@ -1445,7 +1434,7 @@ function journal:filterDropDown_Initialize(level)
 			info.func = function()
 				self:setAllFilters("sources", true)
 				self:updateBtnFilters()
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -1454,7 +1443,7 @@ function journal:filterDropDown_Initialize(level)
 			info.func = function()
 				self:setAllFilters("sources", false)
 				self:updateBtnFilters()
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -1468,7 +1457,7 @@ function journal:filterDropDown_Initialize(level)
 						sources[i] = value
 						if not value then sources[0] = value end
 						self:updateBtnFilters()
-						self:mountsListFullUpdate()
+						self:updateMountsList()
 					end
 					info.checked = function() return sources[i] end
 					UIDropDownMenu_AddButton(info, level)
@@ -1478,7 +1467,7 @@ function journal:filterDropDown_Initialize(level)
 			info.text = CHECK_ALL
 			info.func = function()
 				self:setAllFilters("factions", true)
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -1486,7 +1475,7 @@ function journal:filterDropDown_Initialize(level)
 			info.text = UNCHECK_ALL
 			info.func = function()
 				self:setAllFilters("factions", false)
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -1497,7 +1486,7 @@ function journal:filterDropDown_Initialize(level)
 				info.text = L["MOUNT_FACTION_"..i]
 				info.func = function(_,_,_, value)
 					factions[i] = value
-					self:mountsListFullUpdate()
+					self:updateMountsList()
 				end
 				info.checked = function() return factions[i] end
 				UIDropDownMenu_AddButton(info, level)
@@ -1506,7 +1495,7 @@ function journal:filterDropDown_Initialize(level)
 			info.text = CHECK_ALL
 			info.func = function()
 				self:setAllFilters("pet", true)
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -1514,7 +1503,7 @@ function journal:filterDropDown_Initialize(level)
 			info.text = UNCHECK_ALL
 			info.func = function()
 				self:setAllFilters("pet", false)
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -1525,7 +1514,7 @@ function journal:filterDropDown_Initialize(level)
 				info.text = L["PET_"..i]
 				info.func = function(_,_,_, value)
 					pet[i] = value
-					self:mountsListFullUpdate()
+					self:updateMountsList()
 				end
 				info.checked = function() return pet[i] end
 				UIDropDownMenu_AddButton(info, level)
@@ -1534,7 +1523,7 @@ function journal:filterDropDown_Initialize(level)
 			info.text = CHECK_ALL
 			info.func = function()
 				self:setAllFilters("expansions", true)
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -1542,7 +1531,7 @@ function journal:filterDropDown_Initialize(level)
 			info.text = UNCHECK_ALL
 			info.func = function()
 				self:setAllFilters("expansions", false)
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -1553,7 +1542,7 @@ function journal:filterDropDown_Initialize(level)
 				info.text = _G["EXPANSION_NAME"..(i - 1)]
 				info.func = function(_,_,_, value)
 					expansions[i] = value
-					self:mountsListFullUpdate()
+					self:updateMountsList()
 				end
 				info.checked = function() return expansions[i] end
 				UIDropDownMenu_AddButton(info, level)
@@ -1565,7 +1554,7 @@ function journal:filterDropDown_Initialize(level)
 			info.text = L["No tag"]
 			info.func = function(_,_,_, value)
 				filterTags.noTag = value
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 			end
 			info.checked = function() return filterTags.noTag end
 			UIDropDownMenu_AddButton(info, level)
@@ -1573,7 +1562,7 @@ function journal:filterDropDown_Initialize(level)
 			info.text = L["With all tags"]
 			info.func = function(_,_,_, value)
 				filterTags.withAllTags = value
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 			end
 			info.checked = function() return filterTags.withAllTags end
 			UIDropDownMenu_AddButton(info, level)
@@ -1584,7 +1573,7 @@ function journal:filterDropDown_Initialize(level)
 			info.text = CHECK_ALL
 			info.func = function()
 				self.tags:setAllFilterTags(true)
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -1592,7 +1581,7 @@ function journal:filterDropDown_Initialize(level)
 			info.text = UNCHECK_ALL
 			info.func = function()
 				self.tags:setAllFilterTags(false)
-				self:mountsListFullUpdate()
+				self:updateMountsList()
 				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
 			end
 			UIDropDownMenu_AddButton(info, level)
@@ -1605,7 +1594,7 @@ function journal:filterDropDown_Initialize(level)
 					info.text = function() return self.tags.sortedTags[i] end
 					info.func = function(btn, _,_, value)
 						filterTags.tags[btn._text][2] = value
-						self:mountsListFullUpdate()
+						self:updateMountsList()
 					end
 					info.checked = function(btn) return filterTags.tags[btn._text][2] end
 					info.remove = function(btn)
@@ -1629,7 +1618,7 @@ function journal:filterDropDown_Initialize(level)
 					buttonFrame.text = function() return self.tags.sortedTags[i] end
 					buttonFrame.func = function(btn, _,_, value)
 						filterTags.tags[btn._text][2] = value
-						self:mountsListFullUpdate()
+						self:updateMountsList()
 					end
 					buttonFrame.checked = function(btn) return filterTags.tags[btn._text][2] end
 					buttonFrame.remove = function(btn)
@@ -1677,7 +1666,7 @@ function journal:clearBtnFilters()
 	self:setAllFilters("selected", false)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	self:updateBtnFilters()
-	self:mountsListFullUpdate()
+	self:updateMountsList()
 end
 
 
@@ -1728,7 +1717,7 @@ function journal:setBtnFilters(tab)
 
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	self:updateBtnFilters()
-	self:mountsListFullUpdate()
+	self:updateMountsList()
 end
 
 
@@ -1804,12 +1793,6 @@ function journal:updateBtnFilters()
 end
 
 
-function journal:mountsListFullUpdate()
-	self:updateMountsList()
-	MountJournal_UpdateMountList()
-end
-
-
 function journal:updateMountsList()
 	local filters, mountTypes, list, tags, inTable, GetMountInfoByID, GetMountInfoExtraByID = mounts.filters, self.mountTypes, self.list, self.tags, util.inTable, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID
 	local sources, types, selected, factions, pet, expansions = filters.sources, filters.types, filters.selected, filters.factions, filters.pet, filters.expansions
@@ -1864,6 +1847,7 @@ function journal:updateMountsList()
 		self.shownPanel:Hide()
 		self.leftInset:SetPoint("TOPLEFT", self.filtersPanel, "BOTTOMLEFT", 0, -2)
 	end
-
 	self.leftInset:GetHeight()
+
+	MountJournal_UpdateMountList()
 end

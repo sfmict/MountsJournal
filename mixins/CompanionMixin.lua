@@ -91,7 +91,6 @@ function MJSetPetMixin:refresh()
 		end
 	end
 	self.journal:updateMountsList()
-	MountJournal_UpdateMountList()
 end
 
 
@@ -282,7 +281,7 @@ function MJCompanionsPanelMixin:updatePetForMount()
 		end
 	end
 	if needUpdate then
-		self.journal:mountsListFullUpdate()
+		self.journal:updateMountsList()
 	end
 end
 
