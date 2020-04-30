@@ -1,5 +1,5 @@
 local addon, L = ...
-local C_MountJournal, C_PetJournal, pairs, ipairs, select, type, sort = C_MountJournal, C_PetJournal, pairs, ipairs, select, type, sort
+local C_MountJournal, C_PetJournal, C_Timer, pairs, ipairs, select, type, sort = C_MountJournal, C_PetJournal, C_Timer, pairs, ipairs, select, type, sort
 local util, mounts, config = MountsJournalUtil, MountsJournal, MountsJournalConfig
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
 
@@ -98,14 +98,17 @@ function journal:ADDON_LOADED(addonName)
 
 		self.searchText = ""
 		local texPath = "Interface/AddOns/MountsJournal/textures/"
-		local mountDisplay = MountJournal.MountDisplay
+		self.MountJournal = MountJournal
+		local mountDisplay = self.MountJournal.MountDisplay
 		local modelScene = mountDisplay.ModelScene
 		self.mountIDs = C_MountJournal.GetMountIDs()
-		self.searchBox = MountJournal.searchBox
-		self.scrollFrame = MountJournal.ListScrollFrame
+		self.searchBox = self.MountJournal.searchBox
+		self.scrollFrame = self.MountJournal.ListScrollFrame
 		self.scrollButtons = self.scrollFrame.buttons
-		self.leftInset = MountJournal.LeftInset
-		self.rightInset = MountJournal.RightInset
+		self.leftInset = self.MountJournal.LeftInset
+		self.rightInset = self.MountJournal.RightInset
+
+		-- FILTERS INIT
 		if mounts.filters.collected == nil then mounts.filters.collected = true end
 		if mounts.filters.notCollected == nil then mounts.filters.notCollected = true end
 		if mounts.filters.unusable == nil then mounts.filters.unusable = true end
@@ -113,9 +116,9 @@ function journal:ADDON_LOADED(addonName)
 			self[key] = true
 			return self[key]
 		end}
-		mounts.filters.sources = setmetatable(mounts.filters.sources or {}, filtersMeta)
 		mounts.filters.types = setmetatable(mounts.filters.types or {}, filtersMeta)
-		mounts.filters.selected = setmetatable(mounts.filters.selected or {}, filtersMeta)
+		mounts.filters.selected = mounts.filters.selected or {}
+		mounts.filters.sources = setmetatable(mounts.filters.sources or {}, filtersMeta)
 		mounts.filters.factions = setmetatable(mounts.filters.factions or {}, filtersMeta)
 		mounts.filters.pet = setmetatable(mounts.filters.pet or {}, filtersMeta)
 		mounts.filters.expansions = setmetatable(mounts.filters.expansions or {}, filtersMeta)
@@ -126,12 +129,16 @@ function journal:ADDON_LOADED(addonName)
 		}
 		self.tags:init()
 
+		self.MountJournal:UnregisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
+		self.MountJournal:UnregisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
+		self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
+
 		-- MOUNT LIST UPDATE ANIMATION
 		self.leftInset.updateAnimFrame = CreateFrame("FRAME", nil, self.leftInset, "MJUpdateAnimFrame")
 		self.mountListUpdateAnim = self.leftInset.updateAnimFrame.anim
 
 		-- MOUNT COUNT
-		local mountCount = MountJournal.MountCount
+		local mountCount = self.MountJournal.MountCount
 		self.mountCount = mountCount
 		mountCount:SetPoint("TOPLEFT", 70, -25)
 		mountCount:SetHeight(34)
@@ -148,9 +155,9 @@ function journal:ADDON_LOADED(addonName)
 		self:RegisterEvent("COMPANION_UNLEARNED")
 
 		-- MOUNT EQUIPMENT
-		MountJournal.BottomLeftInset:Hide()
-		local slotButton = MountJournal.BottomLeftInset.SlotButton
-		slotButton:SetParent(MountJournal)
+		self.MountJournal.BottomLeftInset:Hide()
+		local slotButton = self.MountJournal.BottomLeftInset.SlotButton
+		slotButton:SetParent(self.MountJournal)
 		slotButton:SetPoint("LEFT", self.mountCount, "RIGHT", 4, 0)
 		slotButton:SetScale(.65)
 		hooksecurefunc("MountJournal_UpdateEquipmentPalette", function()
@@ -158,12 +165,12 @@ function journal:ADDON_LOADED(addonName)
 			local locked = not C_MountJournal.IsMountEquipmentUnlocked()
 			slotButton:DesaturateHierarchy((effectsSuppressed or locked) and 1 or 0)
 		end)
-		self.leftInset:SetPoint("BOTTOMLEFT", MountJournal, "BOTTOMLEFT", 0, 26)
+		self.leftInset:SetPoint("BOTTOMLEFT", self.MountJournal, "BOTTOMLEFT", 0, 26)
 		HybridScrollFrame_CreateButtons(self.scrollFrame, "MountListButtonTemplate", 44, 0)
 		self.rightInset:SetPoint("BOTTOMLEFT", self.leftInset, "BOTTOMRIGHT", 20, 0)
 
 		-- NAVBAR BUTTON
-		local navBarBtn = CreateFrame("CheckButton", nil, MountJournal, "MJMiniMapBtnTemplate")
+		local navBarBtn = CreateFrame("CheckButton", nil, self.MountJournal, "MJMiniMapBtnTemplate")
 		self.navBarBtn = navBarBtn
 		navBarBtn:SetPoint("TOPRIGHT", -2, -60)
 		navBarBtn:HookScript("OnClick", function(btn)
@@ -180,7 +187,7 @@ function journal:ADDON_LOADED(addonName)
 		navBarBtn:SetScript("OnLeave", function() GameTooltip_Hide() end)
 
 		-- NAVBAR
-		local navBar = CreateFrame("FRAME", nil, MountJournal, "MJNavBarTemplate")
+		local navBar = CreateFrame("FRAME", nil, self.MountJournal, "MJNavBarTemplate")
 		self.navBar = navBar
 		navBar:SetPoint("TOPLEFT", 8, -60)
 		navBar:SetPoint("TOPRIGHT", navBarBtn, "TOPLEFT", 0, 0)
@@ -195,13 +202,13 @@ function journal:ADDON_LOADED(addonName)
 		self.rightInset:SetPoint("TOPRIGHT", navBarBtn, "BOTTOMRIGHT", -4, 0)
 
 		-- WORDL MAP
-		local worldMap = CreateFrame("FRAME", nil, MountJournal, "MJMapTemplate")
+		local worldMap = CreateFrame("FRAME", nil, self.MountJournal, "MJMapTemplate")
 		self.worldMap = worldMap
 		worldMap:SetPoint("TOPLEFT", self.rightInset)
 		worldMap:SetPoint("TOPRIGHT", self.rightInset)
 
 		-- MAP SETTINGS
-		local mapSettings = CreateFrame("FRAME", nil, MountJournal, "MJMapSettingsTemplate")
+		local mapSettings = CreateFrame("FRAME", nil, self.MountJournal, "MJMapSettingsTemplate")
 		self.mapSettings = mapSettings
 		mapSettings:SetPoint("TOPLEFT", worldMap, "BOTTOMLEFT", 0, -30)
 		mapSettings:SetPoint("BOTTOMRIGHT", self.rightInset)
@@ -248,11 +255,11 @@ function journal:ADDON_LOADED(addonName)
 		-- EXISTING LISTS
 		local existingLists = CreateFrame("FRAME", nil, mapSettings, "MJExistingListsPanelTemplate")
 		self.existingLists = existingLists
-		existingLists:SetPoint("TOPLEFT", MountJournal, "TOPRIGHT")
-		existingLists:SetPoint("BOTTOMLEFT", MountJournal, "BOTTOMRIGHT")
+		existingLists:SetPoint("TOPLEFT", self.MountJournal, "TOPRIGHT")
+		existingLists:SetPoint("BOTTOMLEFT", self.MountJournal, "BOTTOMRIGHT")
 
 		--MOUNTJOURNAL ONSHOW
-		MountJournal:HookScript("OnShow", function()
+		self.MountJournal:HookScript("OnShow", function()
 			navBarBtn:SetChecked(false)
 			mountDisplay:Show()
 			self.mapSettings:Hide()
@@ -260,14 +267,14 @@ function journal:ADDON_LOADED(addonName)
 		end)
 
 		-- SETTINGS BUTTON
-		local btnConfig = CreateFrame("BUTTON", "MountsJournalBtnConfig", MountJournal, "UIPanelButtonTemplate")
+		local btnConfig = CreateFrame("BUTTON", "MountsJournalBtnConfig", self.MountJournal, "UIPanelButtonTemplate")
 		btnConfig:SetSize(80, 22)
 		btnConfig:SetPoint("BOTTOMRIGHT", -6, 4)
 		btnConfig:SetText(L["Settings"])
 		btnConfig:SetScript("OnClick", function() config:openConfig() end)
 
 		-- ACHIEVEMENT
-		self.achiev = CreateFrame("BUTTON", nil, MountJournal, "MJAchiev")
+		self.achiev = CreateFrame("BUTTON", nil, self.MountJournal, "MJAchiev")
 		self.achiev:SetPoint("TOP", 0, -21)
 		self:ACHIEVEMENT_EARNED()
 		self.achiev:SetScript("OnClick", function()
@@ -288,9 +295,9 @@ function journal:ADDON_LOADED(addonName)
 		self:RegisterEvent("ACHIEVEMENT_EARNED")
 
 		-- PROFILES
-		local profilesMenu = CreateFrame("DropDownToggleButton", nil, MountJournal, "MJMenuButtonProfiles")
+		local profilesMenu = CreateFrame("DropDownToggleButton", nil, self.MountJournal, "MJMenuButtonProfiles")
 		self.profilesMenu = profilesMenu
-		profilesMenu:SetPoint("LEFT", MountJournal.MountButton, "RIGHT", 6, 0)
+		profilesMenu:SetPoint("LEFT", self.MountJournal.MountButton, "RIGHT", 6, 0)
 		profilesMenu:on("UPDATE_PROFILE", function(_, changeProfile)
 			mounts:setDB()
 			self:setEditMountsList()
@@ -340,7 +347,7 @@ function journal:ADDON_LOADED(addonName)
 		end
 
 		-- FILTERS PANEL
-		local filtersPanel = CreateFrame("FRAME", nil, MountJournal, "InsetFrameTemplate")
+		local filtersPanel = CreateFrame("FRAME", nil, self.MountJournal, "InsetFrameTemplate")
 		self.filtersPanel = filtersPanel
 		filtersPanel:SetPoint("TOPLEFT", navBar, "BOTTOMLEFT", -4, -4)
 		filtersPanel:SetSize(280, 29)
@@ -350,7 +357,7 @@ function journal:ADDON_LOADED(addonName)
 		MountJournalFilterButton:SetPoint("TOPRIGHT", filtersPanel, "TOPRIGHT", -3, -4)
 
 		-- FILTERS SHOWN PANEL
-		local shownPanel = CreateFrame("FRAME", nil, MountJournal, "InsetFrameTemplate")
+		local shownPanel = CreateFrame("FRAME", nil, self.MountJournal, "InsetFrameTemplate")
 		self.shownPanel = shownPanel
 		shownPanel:SetPoint("TOPLEFT", filtersPanel, "BOTTOMLEFT", 0, -2)
 		shownPanel:SetSize(280, 26)
@@ -799,7 +806,6 @@ function journal:ADDON_LOADED(addonName)
 		-- UPDATE LISTS
 		self:setEditMountsList()
 		self:updateIndexByMountID()
-		self:RegisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 		self:updateBtnFilters()
 		self:updateMountsList()
 	end
@@ -1010,11 +1016,13 @@ end
 
 
 function journal:updateIndexByMountID()
+	self:UnregisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 	self.func.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
 	self.func.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
 	self.func.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, true)
 	self.func.SetAllSourceFilters(true)
 	self.func.SetSearch("")
+	self:RegisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 
 	wipe(self.indexByMountID)
 	for i = 1, self.func.GetNumDisplayedMounts() do
@@ -1045,6 +1053,15 @@ function journal:mountLearnedUpdate()
 end
 journal.COMPANION_LEARNED = journal.mountLearnedUpdate
 journal.COMPANION_UNLEARNED = journal.mountLearnedUpdate
+
+
+-- isUsable FLAG CHANGED
+function journal:MOUNT_JOURNAL_USABILITY_CHANGED()
+	if self.MountJournal:IsVisible() then
+		self:updateMountsList()
+		MountJournal_UpdateMountDisplay()
+	end
+end
 
 
 function journal:createMountList(mapID)
@@ -1849,5 +1866,5 @@ function journal:updateMountsList()
 	end
 	self.leftInset:GetHeight()
 
-	MountJournal_UpdateMountList()
+	self.scrollFrame.update()
 end
