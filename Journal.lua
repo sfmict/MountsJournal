@@ -18,9 +18,7 @@ journal.colors = {
 }
 
 
-local metaMounts = {__index = function(_, key)
-	if key == 0 then return 0 end
-end}
+local metaMounts = {__index = {[0] = 0}}
 journal.displayedMounts = setmetatable({}, metaMounts)
 journal.indexByMountID = setmetatable({}, metaMounts)
 
@@ -549,6 +547,7 @@ function journal:ADDON_LOADED(addonName)
 			local ApplyFromModelSceneCameraInfo = activeCamera.ApplyFromModelSceneCameraInfo
 			function activeCamera:ApplyFromModelSceneCameraInfo(modelSceneCameraInfo, ...)
 				modelSceneCameraInfo.target.z = mountDescriptionToggle:GetChecked() and 2.2 or 1
+				modelSceneCameraInfo.maxZoomDistance = 24
 				ApplyFromModelSceneCameraInfo(self, modelSceneCameraInfo, ...)
 			end
 
