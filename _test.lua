@@ -105,10 +105,10 @@ function test:PLAYER_ENTERING_WORLD()
 	local modelScene = MountJournal.MountDisplay.ModelScene
 	-- local timer
 	-- local i = 530
-	local i = 1371
+	local i = 557
 	modelScene:HookScript("OnMouseDown", function(self, btn)
-		C_PetJournal.SummonPetByGUID("BattlePet-0-000001B3BB78")
-		if true then return end
+		-- C_PetJournal.SummonPetByGUID("BattlePet-0-000001B3BB78")
+		-- if true then return end
 		-- if self.needsFanFare then return end
 		local actor = self:GetActorByTag("unwrapped")
 		-- local actor2 = self:GetActorByTag("player")
@@ -117,7 +117,7 @@ function test:PLAYER_ENTERING_WORLD()
 		local creatureDisplayID, descriptionText, sourceText, isSelfMount, _, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = C_MountJournal.GetMountInfoExtraByID(MountJournal.selectedMountID)
 
 		local actorInfo = C_ModelInfo.GetModelSceneActorInfoByID(1)
-		fprint(dump, actorInfo)
+		-- fprint(dump, actorInfo)
 
 		-- actor2:SetModelByUnit("player", false)
 		-- actor2:ClearModel()
@@ -148,6 +148,19 @@ function test:PLAYER_ENTERING_WORLD()
 		-- FLIGHT BACK     550 562
 		-- SPECIAL         94 636
 
+		-- ANIMATION KIT
+		-- WALK            565
+		-- WALK BACK       
+		-- RUN             603
+		-- IN WATTER       557
+		-- SWIMM           
+		-- SWIMM BACK      
+		-- FLIGHT          
+		-- FLIGHT FORWARD  
+		-- FLIGHT BACK     
+		-- SPECIAL         
+		-- DEMONIC         651
+
 		-- PLAYER 91
 		local mountDisplay = self:GetParent()
 		if actor then
@@ -157,7 +170,7 @@ function test:PLAYER_ENTERING_WORLD()
 			fprint(i)
 			actor:StopAnimationKit()
 			-- actor:SetAnimationBlendOperation(LE_MODEL_BLEND_OPERATION_ANIM)
-			actor:PlayAnimationKit(i)
+			actor:PlayAnimationKit(i, IsAltKeyDown() and 0 or nil)
 			-- actor:SetAnimation(i)
 			-- actor2:SetAnimation(i)
 			-- if timer then timer:Cancel() end

@@ -1537,6 +1537,7 @@
 		</Frames>
 		<Scripts>
 			<OnEnter>
+				self.isEnter = true
 				if self.remove then
 					self.removeButton:SetAlpha(1)
 				end
@@ -1547,14 +1548,11 @@
 				self.Highlight:Show()
 			</OnEnter>
 			<OnLeave>
+				self.isEnter = nil
 				self.Highlight:Hide()
-				if self.remove then
-					self.removeButton:SetAlpha(0)
-				end
-				if self.order then
-					self.arrowDownButton:SetAlpha(0)
-					self.arrowUpButton:SetAlpha(0)
-				end
+				self.removeButton:SetAlpha(0)
+				self.arrowDownButton:SetAlpha(0)
+				self.arrowUpButton:SetAlpha(0)
 			</OnLeave>
 		</Scripts>
 		<ButtonText parentKey="normalText">

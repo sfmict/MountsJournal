@@ -91,7 +91,6 @@ function MJSetPetMixin:refresh()
 		end
 	end
 	self.journal:updateMountsList()
-	MountJournal_UpdateMountList()
 end
 
 
@@ -282,7 +281,7 @@ function MJCompanionsPanelMixin:updatePetForMount()
 		end
 	end
 	if needUpdate then
-		self.journal:mountsListFullUpdate()
+		self.journal:updateMountsList()
 	end
 end
 
@@ -375,10 +374,11 @@ function MJCompanionsPanelMixin:updateFilters()
 
 	wipe(self.petFiltredList)
 	for _, petID in ipairs(self.petList) do
-		local _, customName, _,_,_,_,_, name, _, petType = GetPetInfoByPetID(petID)
+		local _, customName, _,_,_,_,_, name, _, petType, _, sourceText = GetPetInfoByPetID(petID)
 		if self.typeFilter[petType]
 		and (text:len() == 0
 			  or (name:lower():find(text)
+					or sourceText:lower():find(text)
 					or customName and customName:lower():find(text))) then
 			tinsert(self.petFiltredList, petID)
 		end
