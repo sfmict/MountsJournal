@@ -115,7 +115,10 @@ function journal:ADDON_LOADED(addonName)
 			return self[key]
 		end}
 		mounts.filters.types = setmetatable(mounts.filters.types or {}, filtersMeta)
-		mounts.filters.selected = mounts.filters.selected or {}
+		mounts.filters.selected = setmetatable(mounts.filters.selected or {}, {__index = function(self, key)
+			self[key] = false
+			return self[key]
+		end})
 		mounts.filters.sources = setmetatable(mounts.filters.sources or {}, filtersMeta)
 		mounts.filters.factions = setmetatable(mounts.filters.factions or {}, filtersMeta)
 		mounts.filters.pet = setmetatable(mounts.filters.pet or {}, filtersMeta)
@@ -1404,7 +1407,7 @@ function journal:filterDropDown_Initialize(level)
 
 			info.notCheckable = false
 			local types = mounts.filters.types
-			for i = 1, #types do
+			for i = 1, 3 do
 				info.text = L["MOUNT_TYPE_"..i]
 				info.func = function(_,_,_, value)
 					types[i] = value
@@ -1435,7 +1438,7 @@ function journal:filterDropDown_Initialize(level)
 
 			info.notCheckable = false
 			local selected = mounts.filters.selected
-			for i = 1, #selected do
+			for i = 1, 3 do
 				info.text = L["MOUNT_TYPE_"..i]
 				info.func = function(_,_,_, value)
 					selected[i] = value
@@ -1498,7 +1501,7 @@ function journal:filterDropDown_Initialize(level)
 
 			info.notCheckable = false
 			local factions = mounts.filters.factions
-			for i = 1, #factions do
+			for i = 1, 3 do
 				info.text = L["MOUNT_FACTION_"..i]
 				info.func = function(_,_,_, value)
 					factions[i] = value
@@ -1526,7 +1529,7 @@ function journal:filterDropDown_Initialize(level)
 
 			info.notCheckable = false
 			local pet = mounts.filters.pet
-			for i = 1, #pet do
+			for i = 1, 4 do
 				info.text = L["PET_"..i]
 				info.func = function(_,_,_, value)
 					pet[i] = value
