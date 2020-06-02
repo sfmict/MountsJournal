@@ -716,6 +716,13 @@ function journal:ADDON_LOADED(addonName)
 			infoButton.petSelectionBtn.petSelectionList:Hide()
 		end)
 
+		-- CUSTOM ANIMATION
+		local customAnimationPanel = CreateFrame("FRAME", nil, modelScene, "MJCustomAnimationPanel")
+		customAnimationPanel:SetPoint("BOTTOMRIGHT", animationsCombobox, "TOPRIGHT", 110, 2)
+		-- customAnimationPanel.minus.text:SetText("−")
+		customAnimationPanel.isKit.Text:SetText("IsKit")
+		customAnimationPanel.loop.Text:SetText(L["Loop"])
+
 		-- PLAYER SHOW BUTTON
 		modelScene.TogglePlayer:Hide()
 		local playerToggle = CreateFrame("CheckButton", nil, modelScene, "MJPlayerShowToggle")

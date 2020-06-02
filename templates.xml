@@ -6,6 +6,7 @@
 	<Script file="mixins/ExistingListsMixin.lua"/>
 	<Script file="mixins/ProfilesMixin.lua"/>
 	<Script file="mixins/CompanionMixin.lua"/>
+	<Script file="mixins/CustomAnimationMixin.lua"/>
 
 	<Button name="MJAchiev" virtual="true">
 		<Size x="60" y="40"/>
@@ -1397,6 +1398,212 @@
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.rotateDownButton" relativePoint="RIGHT" x="0" y="0"/>
 				</Anchors>
+			</Button>
+		</Frames>
+	</Frame>
+
+	<Button name="MJOneSymbolButtonTemplate" virtual="true">
+		<Size x="22" y="22"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString inherits="GameFontNormalLarge" parentKey="text" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<HighlightTexture file="Interface/Buttons/ButtonHilight-Square" alphaMode="ADD">
+			<Size x="16" y="16"/>
+			<Anchors>
+				<Anchor point="CENTER"/>
+			</Anchors>
+		</HighlightTexture>
+	</Button>
+
+	<Frame name="MJCustomAnimationPanel" mixin="MJCustomAnimationMixin" virtual="true">
+		<Size x="168" y="66"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="BG" file="Interface/ChatFrame/ChatFrameBackground" setAllPoints="true">
+					<Color r=".1" g=".1" b=".1" a=".5"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button parentKey="minus" inherits="MJOneSymbolButtonTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="0"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>self.text:SetText("−")</OnLoad>
+				</Scripts>
+			</Button>
+			<EditBox parentKey="animationNum" letters="4" autoFocus="false">
+				<Size x="40" y="22"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.minus" relativePoint="RIGHT" x="-2"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture file="Interface/MoneyFrame/UI-MoneyButton-Up" setAllPoints="true" alphaMode="ADD">
+							<TexCoords left=".04" right=".61" top="0" bottom="1"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<FontString inherits="GameFontHighlightSmall" justifyH="CENTER"/>
+				<Scripts>
+					<OnLoad>self:SetTextInsets(2, 2, 0, 0)</OnLoad>
+					<OnEscapePressed function="EditBox_ClearFocus"/>
+					<OnEnterPressed function="EditBox_ClearFocus"/>
+					<OnKeyDown>
+						fprint(self, key)
+						return key
+					</OnKeyDown>
+					<!-- <OnEditFocusLost function="SearchBoxTemplate_OnEditFocusLost"/> -->
+					<!-- <OnEditFocusGained function="SearchBoxTemplate_OnEditFocusGained"/> -->
+					<OnTextChanged>
+						local text = self:GetText()
+						if text:match("%D") then
+							self:SetText(text:gsub("%D", "") or 0)
+						end
+					</OnTextChanged>
+				</Scripts>
+			</EditBox>
+			<Button parentKey="plus" inherits="MJOneSymbolButtonTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.animationNum" relativePoint="RIGHT"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>self.text:SetText("+")</OnLoad>
+				</Scripts>
+			</Button>
+			<Button inherits="UIPanelButtonTemplate" parentKey="play">
+				<Size x="26" y="22"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.plus" relativePoint="RIGHT" x="18"/>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture parentKey="texture" file="Interface\OptionsFrame\VoiceChat-Play">
+							<Size x="10" y="10"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+			</Button>
+			<Button inherits="UIPanelButtonTemplate" parentKey="stop">
+				<Size x="26" y="22"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.play" relativePoint="RIGHT"/>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture parentKey="texture" file="Interface\OptionsFrame\VoiceChat-Record">
+							<Size x="10" y="10"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+			</Button>
+			<CheckButton parentKey="isKit" inherits="MJCheckButtonTemplate">
+				<HitRectInsets>
+					<AbsInset left="0" right="-35" top="0" bottom="0"/>
+				</HitRectInsets>
+				<Anchors>
+					<Anchor point="TOPLEFT" y="-21"/>
+				</Anchors>
+			</CheckButton>
+			<CheckButton parentKey="loop" inherits="MJCheckButtonTemplate">
+				<HitRectInsets>
+					<AbsInset left="0" right="-40" top="0" bottom="0"/>
+				</HitRectInsets>
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.isKit.Text" relativePoint="RIGHT" x="4"/>
+				</Anchors>
+			</CheckButton>
+			<EditBox inherits="InputBoxInstructionsTemplate" parentKey="nameBox" letters="20" autoFocus="false">
+				<Size x="80" y="20"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" x="7" y="2"/>
+				</Anchors>
+				<Frames>
+					<Button parentKey="clearButton" hidden="true">
+						<Size x="17" y="17"/>
+						<Anchors>
+							<Anchor point="RIGHT" x="-3" y="0"/>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture atlas="common-search-clearbutton" useAtlasSize="false" alpha="0.5" parentKey="texture">
+									<Size>
+										<AbsDimension x="10" y="10"/>
+									</Size>
+									<Anchors>
+										<Anchor point="TOPLEFT" x="3" y="-3"/>
+									</Anchors>
+								</Texture>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnEnter>
+								self.texture:SetAlpha(1.0);
+							</OnEnter>
+							<OnLeave>
+								self.texture:SetAlpha(0.5);
+							</OnLeave>
+							<OnMouseDown>
+								if self:IsEnabled() then
+									self.texture:SetPoint("TOPLEFT", self, "TOPLEFT", 4, -4);
+								end
+							</OnMouseDown>
+							<OnMouseUp>
+								self.texture:SetPoint("TOPLEFT", self, "TOPLEFT", 3, -3);
+							</OnMouseUp>
+							<OnClick function="SearchBoxTemplateClearButton_OnClick"/>
+						</Scripts>
+					</Button>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						self.Instructions:SetText("Name")
+						self.Instructions:ClearAllPoints();
+						self.Instructions:SetPoint("TOPLEFT", self, "TOPLEFT", 5, 0);
+						self.Instructions:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -5, 0)
+					</OnLoad>
+					<OnEscapePressed function="EditBox_ClearFocus"/>
+					<OnEnterPressed function="EditBox_ClearFocus"/>
+					<OnEditFocusLost>
+						if self:GetText() == "" then
+							self.clearButton:Hide()
+						end
+					</OnEditFocusLost>
+					<OnEditFocusGained>
+						self.clearButton:Show()
+					</OnEditFocusGained>
+					<OnTextChanged>
+						if not self:HasFocus() and self:GetText() == "" then
+							self.clearButton:Hide()
+						else
+							self.clearButton:Show()
+						end
+						InputBoxInstructions_OnTextChanged(self)
+					</OnTextChanged>
+				</Scripts>
+			</EditBox>
+			<Button inherits="UIPanelButtonTemplate" text="SAVE" parentKey="save">
+				<Size x="80" y="22"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.nameBox" relativePoint="RIGHT" x="0" y="0"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>self:Disable()</OnLoad>
+					<OnClick>PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)</OnClick>
+				</Scripts>
 			</Button>
 		</Frames>
 	</Frame>
