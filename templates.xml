@@ -1421,7 +1421,7 @@
 		</HighlightTexture>
 	</Button>
 
-	<Frame name="MJCustomAnimationPanel" mixin="MJCustomAnimationMixin" virtual="true">
+	<Frame name="MJCustomAnimationPanel" mixin="MJCustomAnimationMixin" hidden="true" virtual="true">
 		<Size x="168" y="66"/>
 		<Layers>
 			<Layer level="BACKGROUND">
@@ -1439,7 +1439,7 @@
 					<OnLoad>self.text:SetText("−")</OnLoad>
 				</Scripts>
 			</Button>
-			<EditBox parentKey="animationNum" letters="4" autoFocus="false">
+			<EditBox parentKey="animationNum" numeric="true" letters="4" multiLine="false" autoFocus="false">
 				<Size x="40" y="22"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.minus" relativePoint="RIGHT" x="-2"/>
@@ -1454,20 +1454,6 @@
 				<FontString inherits="GameFontHighlightSmall" justifyH="CENTER"/>
 				<Scripts>
 					<OnLoad>self:SetTextInsets(2, 2, 0, 0)</OnLoad>
-					<OnEscapePressed function="EditBox_ClearFocus"/>
-					<OnEnterPressed function="EditBox_ClearFocus"/>
-					<OnKeyDown>
-						fprint(self, key)
-						return key
-					</OnKeyDown>
-					<!-- <OnEditFocusLost function="SearchBoxTemplate_OnEditFocusLost"/> -->
-					<!-- <OnEditFocusGained function="SearchBoxTemplate_OnEditFocusGained"/> -->
-					<OnTextChanged>
-						local text = self:GetText()
-						if text:match("%D") then
-							self:SetText(text:gsub("%D", "") or 0)
-						end
-					</OnTextChanged>
 				</Scripts>
 			</EditBox>
 			<Button parentKey="plus" inherits="MJOneSymbolButtonTemplate">
@@ -1478,7 +1464,7 @@
 					<OnLoad>self.text:SetText("+")</OnLoad>
 				</Scripts>
 			</Button>
-			<Button inherits="UIPanelButtonTemplate" parentKey="play">
+			<Button inherits="UIPanelButtonTemplate" parentKey="playButton">
 				<Size x="26" y="22"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.plus" relativePoint="RIGHT" x="18"/>
@@ -1494,10 +1480,10 @@
 					</Layer>
 				</Layers>
 			</Button>
-			<Button inherits="UIPanelButtonTemplate" parentKey="stop">
+			<Button inherits="UIPanelButtonTemplate" parentKey="stopButton">
 				<Size x="26" y="22"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.play" relativePoint="RIGHT"/>
+					<Anchor point="LEFT" relativeKey="$parent.playButton" relativePoint="RIGHT"/>
 				</Anchors>
 				<Layers>
 					<Layer level="OVERLAY">
@@ -1526,7 +1512,7 @@
 					<Anchor point="LEFT" relativeKey="$parent.isKit.Text" relativePoint="RIGHT" x="4"/>
 				</Anchors>
 			</CheckButton>
-			<EditBox inherits="InputBoxInstructionsTemplate" parentKey="nameBox" letters="20" autoFocus="false">
+			<EditBox inherits="InputBoxInstructionsTemplate" parentKey="nameBox" letters="15" autoFocus="false">
 				<Size x="80" y="20"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" x="7" y="2"/>
@@ -1570,7 +1556,8 @@
 				</Frames>
 				<Scripts>
 					<OnLoad>
-						self.Instructions:SetText("Name")
+						self:SetTextInsets(0, 16, 0, 0)
+						self.Instructions:SetText(NAME)
 						self.Instructions:ClearAllPoints();
 						self.Instructions:SetPoint("TOPLEFT", self, "TOPLEFT", 5, 0);
 						self.Instructions:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -5, 0)
@@ -1586,11 +1573,9 @@
 						self.clearButton:Show()
 					</OnEditFocusGained>
 					<OnTextChanged>
-						if not self:HasFocus() and self:GetText() == "" then
-							self.clearButton:Hide()
-						else
-							self.clearButton:Show()
-						end
+						local textExists = self:GetText() ~= ""
+						self:GetParent().save:SetEnabled(textExists)
+						self.clearButton:SetShown(self:HasFocus() or textExists)
 						InputBoxInstructions_OnTextChanged(self)
 					</OnTextChanged>
 				</Scripts>
@@ -1602,10 +1587,12 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>self:Disable()</OnLoad>
-					<OnClick>PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)</OnClick>
 				</Scripts>
 			</Button>
 		</Frames>
+		<Scripts>
+			<OnLoad method="onLoad"/>
+		</Scripts>
 	</Frame>
 
 	<Button name="MJDropDownMenuButtonTemplate" inherits="UIDropDownCustomMenuEntryTemplate" mixin="MJDropDownMenuButtonMixin" virtual="true">

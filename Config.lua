@@ -165,7 +165,7 @@ config:SetScript("OnShow", function(self)
 	modifierCombobox:SetPoint("TOPLEFT", modifierText, "BOTTOMRIGHT", -8, 21)
 	UIDropDownMenu_SetWidth(modifierCombobox, 115)
 
-	UIDropDownMenu_Initialize(modifierCombobox, function(self, level, menuList)
+	UIDropDownMenu_Initialize(modifierCombobox, function(self, level)
 		local info = UIDropDownMenu_CreateInfo()
 		for i, modifier in ipairs({"ALT", "CTRL", "SHIFT", "NONE"}) do
 			info.checked = nil

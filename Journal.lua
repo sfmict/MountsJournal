@@ -98,7 +98,7 @@ function journal:ADDON_LOADED(addonName)
 		local texPath = "Interface/AddOns/MountsJournal/textures/"
 		self.MountJournal = MountJournal
 		local mountDisplay = self.MountJournal.MountDisplay
-		local modelScene = mountDisplay.ModelScene
+		self.modelScene = mountDisplay.ModelScene
 		self.mountIDs = C_MountJournal.GetMountIDs()
 		self.searchBox = self.MountJournal.searchBox
 		self.scrollFrame = self.MountJournal.ListScrollFrame
@@ -511,15 +511,15 @@ function journal:ADDON_LOADED(addonName)
 		mountDescriptionToggle.vertical = true
 		mountDescriptionToggle:SetChecked(mounts.config.mountDescriptionToggle)
 
-		local function setShownDescription(self)
-			local checked = self:GetChecked()
+		local function setShownDescription(btn)
+			local checked = btn:GetChecked()
 			infoButton.Lore:SetShown(checked)
 			infoButton.Source:SetShown(checked)
 			mounts.config.mountDescriptionToggle = checked
 
-			local activeCamera = modelScene.activeCamera
+			local activeCamera = self.modelScene.activeCamera
 			if activeCamera then
-				activeCamera:ApplyFromModelSceneCameraInfo(C_ModelInfo.GetModelSceneCameraInfoByID(activeCamera.modelSceneCameraInfo.modelSceneCameraID), nil, modelScene.cameraModificationType)
+				activeCamera:ApplyFromModelSceneCameraInfo(C_ModelInfo.GetModelSceneCameraInfoByID(activeCamera.modelSceneCameraInfo.modelSceneCameraID), nil, self.modelScene.cameraModificationType)
 			end
 		end
 		setShownDescription(mountDescriptionToggle)
@@ -530,9 +530,9 @@ function journal:ADDON_LOADED(addonName)
 		infoButton.petSelectionBtn:SetPoint("LEFT", infoButton.Name, "RIGHT", 3, 0)
 
 		-- MODEL SCENE
-		modelScene.RotateLeftButton:Hide()
-		modelScene.RotateRightButton:Hide()
-		local modelControl = CreateFrame("FRAME", nil, modelScene, "MJControlFrameTemplate")
+		self.modelScene.RotateLeftButton:Hide()
+		self.modelScene.RotateRightButton:Hide()
+		local modelControl = CreateFrame("FRAME", nil, self.modelScene, "MJControlFrameTemplate")
 		modelControl:SetPoint("BOTTOM", -70, 10)
 		modelControl.zoomIn.icon:SetTexCoord(.57812500, .82812500, .14843750, .27343750)
 		modelControl.zoomOut.icon:SetTexCoord(.29687500, .54687500, .00781250, .13281250)
@@ -544,7 +544,7 @@ function journal:ADDON_LOADED(addonName)
 		modelControl.rotateDownButton.icon:SetTexCoord(.57812500, .82812500, .41406250, .28906250)
 		modelControl.rotateDownButton.icon:SetRotation(-math.pi / 1.6)
 
-		hooksecurefunc(modelScene, "SetActiveCamera", function(self)
+		hooksecurefunc(self.modelScene, "SetActiveCamera", function(self)
 			local activeCamera = self.activeCamera
 
 			local ApplyFromModelSceneCameraInfo = activeCamera.ApplyFromModelSceneCameraInfo
@@ -614,7 +614,7 @@ function journal:ADDON_LOADED(addonName)
 		end)
 
 		-- MOUNT ANIMATIONS
-		local animationsCombobox = CreateFrame("FRAME", "MountsJournalAnimations", modelScene, "UIDropDownMenuTemplate")
+		local animationsCombobox = CreateFrame("FRAME", "MountsJournalAnimations", self.modelScene, "UIDropDownMenuTemplate")
 		animationsCombobox:SetPoint("LEFT", modelControl, "RIGHT", -5, -2)
 		local animationsList = {
 			{
@@ -673,37 +673,101 @@ function journal:ADDON_LOADED(addonName)
 			},
 		}
 
-		local function mountPlayAnimation(animation, isKit)
-			local actor = modelScene:GetActorByTag("unwrapped")
-			actor:StopAnimationKit()
-			if isKit then
-				actor:PlayAnimationKit(animation)
-			else
-				actor:SetAnimation(animation)
-			end
-		end
-
 		local currentMountType
-		UIDropDownMenu_Initialize(animationsCombobox, function()
+		UIDropDownMenu_Initialize(animationsCombobox)
+		animationsCombobox.initialize = function()
 			local info = UIDropDownMenu_CreateInfo()
 			local mountType = self.mountTypes[currentMountType] or 1
 			if currentMountType == 231 then mountType = mountType - 1 end
-			for _, v in ipairs(animationsList) do
-				if v.type == nil or v.type >= mountType then
-					info.checked = nil
+
+			if #mounts.customAnimations > 10 then
+				local searchFrame = util.getDropDownSearchFrame()
+				searchFrame.displayMode = "normal"
+
+				for _, v in ipairs(animationsList) do
 					info.text = v.name
 					info.value = v
+					info.checked = function(self) return animationsCombobox.selectedValue == self.value end
 					info.func = function(self)
-						mountPlayAnimation(self.value.animation, self.value.isKit)
+						journal.customAnimationPanel:Hide()
+						journal.customAnimationPanel:playAnimation(self.value.animation, self.value.isKit)
 						UIDropDownMenu_SetSelectedValue(animationsCombobox, self.value)
+						UIDropDownMenu_SetText(animationsCombobox, self.value.name)
 					end
-					UIDropDownMenu_AddButton(info)
+					searchFrame:addButton(info)
 				end
+
+				for i, v in ipairs(mounts.customAnimations) do
+					info.text = v.name
+					info.value = v
+					info.checked = function(self) return animationsCombobox.selectedValue == self.value end
+					info.func = function(self)
+						journal.customAnimationPanel:Hide()
+						journal.customAnimationPanel:playAnimation(self.value.animation, self.value.isKit, self.value.loop)
+						UIDropDownMenu_SetSelectedValue(animationsCombobox, self.value)
+						UIDropDownMenu_SetText(animationsCombobox, self.value.name)
+					end
+					info.remove = function() end
+					searchFrame:addButton(info)
+				end
+
+				info.text = CUSTOM
+				info.value = "custom"
+				info.checked = function(self) return animationsCombobox.selectedValue == self.value end
+				info.func = function(self)
+					journal.customAnimationPanel:Show()
+					UIDropDownMenu_SetSelectedValue(animationsCombobox, self.value)
+					UIDropDownMenu_SetText(animationsCombobox, CUSTOM)
+				end
+				searchFrame:addButton(info)
+
+				UIDropDownMenu_AddButton({customFrame = searchFrame}, level)
+			else
+				for _, v in ipairs(animationsList) do
+					if v.type == nil or v.type >= mountType then
+						info.checked = nil
+						info.text = v.name
+						info.value = v
+						info.func = function(self)
+							journal.customAnimationPanel:Hide()
+							journal.customAnimationPanel:playAnimation(self.value.animation, self.value.isKit)
+							UIDropDownMenu_SetSelectedValue(animationsCombobox, self.value)
+						end
+						UIDropDownMenu_AddButton(info)
+					end
+				end
+
+				for _, v in ipairs(mounts.customAnimations) do
+					local buttonFrame = util.getDropDownMenuButtonFrame()
+					buttonFrame.text = v.name
+					buttonFrame.value = v
+					buttonFrame.checked = function(self) return animationsCombobox.selectedValue == self.value end
+					buttonFrame.func = function(self)
+						journal.customAnimationPanel:Hide()
+						journal.customAnimationPanel:playAnimation(self.value.animation, self.value.isKit, self.value.loop)
+						UIDropDownMenu_SetSelectedValue(animationsCombobox, self.value)
+						UIDropDownMenu_SetText(animationsCombobox, self.value.name)
+					end
+					buttonFrame.remove = function() end
+					info.customFrame = buttonFrame
+					UIDropDownMenu_AddButton(info)
+
+					info.customFrame = nil
+				end
+
+				info.checked = nil
+				info.text = CUSTOM
+				info.value = "custom"
+				info.func = function(self)
+					journal.customAnimationPanel:Show()
+					UIDropDownMenu_SetSelectedValue(animationsCombobox, self.value)
+				end
+				UIDropDownMenu_AddButton(info)
 			end
-		end)
+		end
 
 		hooksecurefunc("MountJournal_SetSelected", function(mountID)
-			local actor = modelScene:GetActorByTag("unwrapped")
+			local actor = self.modelScene:GetActorByTag("unwrapped")
 			if actor then
 				actor:StopAnimationKit()
 			end
@@ -717,15 +781,12 @@ function journal:ADDON_LOADED(addonName)
 		end)
 
 		-- CUSTOM ANIMATION
-		local customAnimationPanel = CreateFrame("FRAME", nil, modelScene, "MJCustomAnimationPanel")
-		customAnimationPanel:SetPoint("BOTTOMRIGHT", animationsCombobox, "TOPRIGHT", 110, 2)
-		-- customAnimationPanel.minus.text:SetText("−")
-		customAnimationPanel.isKit.Text:SetText("IsKit")
-		customAnimationPanel.loop.Text:SetText(L["Loop"])
+		self.customAnimationPanel = CreateFrame("FRAME", nil, self.modelScene, "MJCustomAnimationPanel")
+		self.customAnimationPanel:SetPoint("BOTTOMRIGHT", animationsCombobox, "TOPRIGHT", 110, 2)
 
 		-- PLAYER SHOW BUTTON
-		modelScene.TogglePlayer:Hide()
-		local playerToggle = CreateFrame("CheckButton", nil, modelScene, "MJPlayerShowToggle")
+		self.modelScene.TogglePlayer:Hide()
+		local playerToggle = CreateFrame("CheckButton", nil, self.modelScene, "MJPlayerShowToggle")
 		playerToggle:SetPoint("LEFT", animationsCombobox, "RIGHT", 232, 5)
 		function playerToggle:setPortrait() SetPortraitTexture(self.portrait, "player") end
 		playerToggle:SetScript("OnEvent", playerToggle.setPortrait)
@@ -740,7 +801,7 @@ function journal:ADDON_LOADED(addonName)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			C_Timer.After(0, function()
 				local value = animationsCombobox.selectedValue
-				mountPlayAnimation(value.animation, value.isKit)
+				journal.customAnimationPanel:playAnimation(value.animation, value.isKit)
 			end)
 		end)
 

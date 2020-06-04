@@ -1,6 +1,7 @@
 local util = MountsJournalUtil
 local dropDownOptions = {
 	"keepShownOnClick",
+	"value",
 	"arg1",
 	"arg2",
 	"notCheckable",
@@ -173,6 +174,7 @@ end
 function MJDropDownSearchMixin:reset()
 	self.index = 1
 	self.width = 0
+	self.displayMode = nil
 	wipe(self.buttons)
 	return self
 end
@@ -193,7 +195,10 @@ function MJDropDownSearchMixin:OnSetOwningButton()
 
 	self.owningButton.checked = function() self:refresh() end
 	self.owningButton.IsShown = function() return self:IsShown() end
-	self.owningButton.SetWidth = function(_, width) self:SetWidth(width) end
+	self.owningButton.SetWidth = function(_, width)
+		if self.displayMode == "normal" then width = width - 10 end
+		self:SetWidth(width)
+	end
 
 	self:SetScript("OnHide", function(self)
 		self.owningButton.checked = nil
@@ -204,6 +209,7 @@ end
 
 
 function MJDropDownSearchMixin:GetPreferredEntryWidth()
+	if self.displayMode == "normal" then return self.width + 10 end
 	return self.width
 end
 
@@ -295,7 +301,11 @@ end
 
 
 function MJDropDownSearchMixin:addButton(info)
-	tinsert(self.buttons, util:copyTable(info))
+	local button = {}
+	for _, opt in ipairs(dropDownOptions) do
+		button[opt] = info[opt]
+	end
+	tinsert(self.buttons, button)
 
 	local btn = self.listScroll.buttons[1]
 	if btn then
