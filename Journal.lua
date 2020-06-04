@@ -685,16 +685,18 @@ function journal:ADDON_LOADED(addonName)
 				searchFrame.displayMode = "normal"
 
 				for _, v in ipairs(animationsList) do
-					info.text = v.name
-					info.value = v
-					info.checked = function(self) return animationsCombobox.selectedValue == self.value end
-					info.func = function(self)
-						journal.customAnimationPanel:Hide()
-						journal.customAnimationPanel:playAnimation(self.value.animation, self.value.isKit)
-						UIDropDownMenu_SetSelectedValue(animationsCombobox, self.value)
-						UIDropDownMenu_SetText(animationsCombobox, self.value.name)
+					if v.type == nil or v.type >= mountType then
+						info.text = v.name
+						info.value = v
+						info.checked = function(self) return animationsCombobox.selectedValue == self.value end
+						info.func = function(self)
+							journal.customAnimationPanel:Hide()
+							journal.customAnimationPanel:playAnimation(self.value.animation, self.value.isKit)
+							UIDropDownMenu_SetSelectedValue(animationsCombobox, self.value)
+							UIDropDownMenu_SetText(animationsCombobox, self.value.name)
+						end
+						searchFrame:addButton(info)
 					end
-					searchFrame:addButton(info)
 				end
 
 				for i, v in ipairs(mounts.customAnimations) do
@@ -774,8 +776,12 @@ function journal:ADDON_LOADED(addonName)
 			if mountID then
 				currentMountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
 			end
-			UIDropDownMenu_SetSelectedValue(animationsCombobox, animationsList[1])
-			UIDropDownMenu_SetText(animationsCombobox, animationsList[1].name)
+			if animationsCombobox.selectedValue == "custom" then
+				self.customAnimationPanel:play()
+			else
+				UIDropDownMenu_SetSelectedValue(animationsCombobox, animationsList[1])
+				UIDropDownMenu_SetText(animationsCombobox, animationsList[1].name)
+			end
 			infoButton.petSelectionBtn:refresh()
 			infoButton.petSelectionBtn.petSelectionList:Hide()
 		end)
@@ -801,7 +807,11 @@ function journal:ADDON_LOADED(addonName)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			C_Timer.After(0, function()
 				local value = animationsCombobox.selectedValue
-				journal.customAnimationPanel:playAnimation(value.animation, value.isKit)
+				if value == "custom" then
+					journal.customAnimationPanel:play()
+				else
+					journal.customAnimationPanel:playAnimation(value.animation, value.isKit, value.loop)
+				end
 			end)
 		end)
 
