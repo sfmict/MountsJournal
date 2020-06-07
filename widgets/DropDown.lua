@@ -20,12 +20,13 @@ local DROPDOWNBUTTON = nil
 
 local dropDownMenusList = setmetatable({}, {
 	__index = function(self, key)
-		local frame = CreateFrame("FRAME", nil, nil, "MJDropDownMenuTemplate")
-		frame.id = #self + 1
+		local frame = CreateFrame("FRAME", nil, key == 1 and UIParent or self[key - 1], "MJDropDownMenuTemplate")
+		frame:SetFrameStrata("FULLSCREEN_DIALOG")
+		frame.id = key
 		frame.searchFrames = {}
 		frame.buttonsList = setmetatable({}, {
 			__index = function(self, key)
-				local button = CreateFrame("BUTTON", nil, frame, "MJDropDownMenuButtonTemplate2")
+				local button = CreateFrame("BUTTON", nil, frame, "MJDropDownMenuButtonTemplate")
 				button:SetPoint("RIGHT", -15, 0)
 				self[key] = button
 				return button
@@ -83,18 +84,18 @@ end)
 MJDropDownButtonMixin = {}
 
 
-function MJDropDownButtonMixin:setSelectedValue(value, level)
+function MJDropDownButtonMixin:ddSetSelectedValue(value, level)
 	self.selectedValue = value
-	self:refresh(level)
+	self:ddRefresh(level)
 end
 
 
-function MJDropDownButtonMixin:setSelectedText(text)
+function MJDropDownButtonMixin:ddSetSelectedText(text)
 	self.Text:SetText(text)
 end
 
 
-function MJDropDownButtonMixin:setInit(initFunction, displayMode)
+function MJDropDownButtonMixin:ddSetInit(initFunction, displayMode)
 	self.initialize = initFunction
 	self.displayMode = displayMode
 end
@@ -106,10 +107,9 @@ function MJDropDownButtonMixin:dropDownToggle(level, value, anchorFrame, xOffset
 
 	if menu:IsShown() then
 		menu:Hide()
-		if level == 1 and menu:GetParent() == anchorFrame then return end
+		if level == 1 and menu.callButton == self then return end
 	end
-	menu:SetParent(anchorFrame)
-	menu:SetFrameStrata("FULLSCREEN_DIALOG")
+	menu.callButton = self
 
 	local displayMode
 	if level == 1 then
@@ -148,17 +148,17 @@ function MJDropDownButtonMixin:dropDownToggle(level, value, anchorFrame, xOffset
 		DROPDOWNBUTTON = self
 		menu:SetPoint("TOPLEFT", anchorFrame, "BOTTOMLEFT", xOffset, yOffset)
 	else
-		if GetScreenWidth() - anchorFrame:GetRight() < menu.width then
-			menu:SetPoint("TOPRIGHT", anchorFrame, "TOPLEFT", 0, 14)
+		if GetScreenWidth() - anchorFrame:GetRight() - 2 < menu.width then
+			menu:SetPoint("TOPRIGHT", anchorFrame, "TOPLEFT", -2, 14)
 		else
-			menu:SetPoint("TOPLEFT", anchorFrame, "TOPRIGHT", 0, 14)
+			menu:SetPoint("TOPLEFT", anchorFrame, "TOPRIGHT", 2, 14)
 		end
 	end
 	menu:Show()
 end
 
 
-function MJDropDownButtonMixin:refresh(level)
+function MJDropDownButtonMixin:ddRefresh(level)
 	if not level then level = 1 end
 	local menu = dropDownMenusList[level]
 
@@ -174,8 +174,8 @@ function MJDropDownButtonMixin:refresh(level)
 				button.Check:SetShown(button._checked)
 				button.UnCheck:SetShown(not button._checked)
 
-				if self.dropDownSetText and button._checked and menu:GetParent() == self then
-					self:setSelectedText(button._text)
+				if self.dropDownSetText and button._checked and menu.callButton == self then
+					self:ddSetSelectedText(button._text)
 				end
 			end
 		else
@@ -186,14 +186,14 @@ function MJDropDownButtonMixin:refresh(level)
 	for _, searchFrame in ipairs(menu.searchFrames) do
 		if searchFrame:IsShown() then
 			searchFrame:refresh()
-			if self.dropDownSetText and menu:GetParent() == self then
+			if self.dropDownSetText and menu.callButton == self then
 				for _, button in ipairs(searchFrame.buttons) do
 					local checked = button.checked
 					if type(checked) == "function" then checked = checked(button) end
 					if checked then
 						local text = button.text
 						if type(text) == "function" then text = text() end
-						self:setSelectedText(text)
+						self:ddSetSelectedText(text)
 					end
 				end
 			end
@@ -207,7 +207,7 @@ function MJDropDownButtonMixin:closeDropDownMenus(level)
 end
 
 
-function MJDropDownButtonMixin:addButton(info, level)
+function MJDropDownButtonMixin:ddAddButton(info, level)
 	if not level then level = 1 end
 	local width = 0
 	local menu = dropDownMenusList[level]
@@ -232,7 +232,7 @@ function MJDropDownButtonMixin:addButton(info, level)
 			menu.height = menu.height + DropDownMenuSearchHeight
 		else
 			for _, subInfo in ipairs(info.list) do
-				self:addButton(subInfo, level)
+				self:ddAddButton(subInfo, level)
 			end
 		end
 		return
@@ -259,6 +259,7 @@ function MJDropDownButtonMixin:addButton(info, level)
 	if button._text then
 		if type(button._text) == "function" then button._text = button._text() end
 		button:SetText(button._text)
+		button.NormalText:Show()
 	else
 		button:SetText("")
 	end
@@ -294,6 +295,8 @@ function MJDropDownButtonMixin:addButton(info, level)
 			button.NormalText:Show()
 		end
 		button.Icon:Show()
+	else
+		button.Icon:Hide()
 	end
 
 	if info.notCheckable then
@@ -320,7 +323,7 @@ function MJDropDownButtonMixin:addButton(info, level)
 	end
 
 	if info.hasArrow then
-		width = width + 10
+		width = width + 12
 	end
 	button.ExpandArrow:SetShown(info.hasArrow)
 
@@ -332,7 +335,7 @@ function MJDropDownButtonMixin:addButton(info, level)
 end
 
 
-function MJDropDownButtonMixin:addSeparator(level)
+function MJDropDownButtonMixin:ddAddSeparator(level)
 	local info = {
 		disabled = true,
 		notCheckable = true,
@@ -343,7 +346,7 @@ function MJDropDownButtonMixin:addSeparator(level)
 			tSizeY = 8,
 		},
 	}
-	self:addButton(info, level)
+	self:ddAddButton(info, level)
 end
 
 
@@ -358,10 +361,10 @@ function MJDropDownButtonMixin:getDropDownSearchFrame()
 end
 
 
-MJDropDownMenuButtonMixin2 = {}
+MJDropDownMenuButtonMixin = {}
 
 
-function MJDropDownMenuButtonMixin2:onLoad()
+function MJDropDownMenuButtonMixin:onLoad()
 	self.removeButton:SetScript("OnClick", function()
 		self:remove(self.arg1, self.arg2)
 		DROPDOWNBUTTON:closeDropDownMenus()
@@ -369,24 +372,26 @@ function MJDropDownMenuButtonMixin2:onLoad()
 
 	self.arrowUpButton:SetScript("OnClick", function()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		self:order(1)
-		DROPDOWNBUTTON:refresh()
+		self:order(-1)
+		DROPDOWNBUTTON:ddRefresh(self:GetParent().id)
 	end)
 	self.arrowDownButton:SetScript("OnClick", function()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		self:order(-1)
-		DROPDOWNBUTTON:refresh()
+		self:order(1)
+		DROPDOWNBUTTON:ddRefresh(self:GetParent().id)
 	end)
 end
 
 
-function MJDropDownMenuButtonMixin2:onClick()
+function MJDropDownMenuButtonMixin:onClick()
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 
-	if self.keepShownOnClick and not self.notCheckable then
+	if not self.notCheckable then
 		self._checked = not self._checked
-		self.Check:SetShown(self._checked)
-		self.UnCheck:SetShown(not self._checked)
+		if self.keepShownOnClick then
+			self.Check:SetShown(self._checked)
+			self.UnCheck:SetShown(not self._checked)
+		end
 	end
 
 	if type(self.func) == "function" then
@@ -399,7 +404,7 @@ function MJDropDownMenuButtonMixin2:onClick()
 end
 
 
-function MJDropDownMenuButtonMixin2:onEnter()
+function MJDropDownMenuButtonMixin:onEnter()
 	self.isEnter = true
 	if self:IsEnabled() then self.highlight:Show() end
 
@@ -420,7 +425,7 @@ function MJDropDownMenuButtonMixin2:onEnter()
 end
 
 
-function MJDropDownMenuButtonMixin2:onLeave()
+function MJDropDownMenuButtonMixin:onLeave()
 	self.isEnter = nil
 	self.highlight:Hide()
 	self.removeButton:SetAlpha(0)
@@ -429,7 +434,7 @@ function MJDropDownMenuButtonMixin2:onLeave()
 end
 
 
-function MJDropDownMenuButtonMixin2:onDisable()
+function MJDropDownMenuButtonMixin:onDisable()
 	self.Check:SetDesaturated(true)
 	self.Check:SetAlpha(.5)
 	self.UnCheck:SetDesaturated(true)
@@ -439,7 +444,7 @@ function MJDropDownMenuButtonMixin2:onDisable()
 end
 
 
-function MJDropDownMenuButtonMixin2:onEnable()
+function MJDropDownMenuButtonMixin:onEnable()
 	self.Check:SetDesaturated()
 	self.Check:SetAlpha(1)
 	self.UnCheck:SetDesaturated()
@@ -465,7 +470,7 @@ function MJDropDownMenuSearchMixin:onLoad()
 	self.listScroll:SetSize(30, DropDownMenuSearchHeight - 26)
 	self.listScroll.update = function() self:refresh() end
 	self.listScroll.scrollBar.doNotHide = true
-	HybridScrollFrame_CreateButtons(self.listScroll, "MJDropDownMenuButtonTemplate2")
+	HybridScrollFrame_CreateButtons(self.listScroll, "MJDropDownMenuButtonTemplate")
 end
 
 

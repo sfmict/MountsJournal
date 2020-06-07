@@ -79,12 +79,11 @@ function MJProfilesMixin:onLoad()
 	self.charDB = self.mounts.charDB
 	self.profileNames = {}
 	self:SetText(self.charDB.currentProfileName or DEFAULT)
-	UIDropDownMenu_Initialize(self.optionsMenu, self.menuInit, "MENU")
+	self:ddSetInit(self.initialize, "menu")
 end
 
 
 function MJProfilesMixin:createProfile(copy)
-	CloseDropDownMenus()
 	local currentProfile
 	if copy then
 		if self.charDB.currentProfileName and self.profiles[self.charDB.currentProfileName] then
@@ -124,45 +123,42 @@ function MJProfilesMixin:setProfile(profileName)
 end
 
 
-function MJProfilesMixin:menuInit(level)
-	if not level then return end
+function MJProfilesMixin:initialize(level, value)
+	local info = {}
 
-	local btn = self:GetParent()
-	local info = UIDropDownMenu_CreateInfo()
-
-	if UIDROPDOWNMENU_MENU_VALUE == "settings" then -- PROFILE SETTINGS
-		if btn.charDB.currentProfileName == nil then return end
+	if value == "settings" then -- PROFILE SETTINGS
+		if self.charDB.currentProfileName == nil then return end
 		info.isNotRadio = true
 		info.keepShownOnClick = true
 
 		info.text = L["Pet binding from default profile"]
-		info.checked = function() return btn.journal.db.petListFromProfile end
+		info.checked = function() return self.journal.db.petListFromProfile end
 		info.func = function(_,_,_, checked)
-			btn.journal.db.petListFromProfile = checked and true or nil
-			btn:event("UPDATE_PROFILE")
+			self.journal.db.petListFromProfile = checked and true or nil
+			self:event("UPDATE_PROFILE")
 		end
-		UIDropDownMenu_AddButton(info, level)
+		self:ddAddButton(info, level)
 
 		info.text = L["Zones settings from default profile"]
-		info.checked = function() return btn.journal.db.zoneMountsFromProfile end
+		info.checked = function() return self.journal.db.zoneMountsFromProfile end
 		info.func = function(_,_,_, checked)
-			btn.journal.db.zoneMountsFromProfile = checked and true or nil
-			btn:event("UPDATE_PROFILE")
+			self.journal.db.zoneMountsFromProfile = checked and true or nil
+			self:event("UPDATE_PROFILE")
 		end
-		UIDropDownMenu_AddButton(info, level)
+		self:ddAddButton(info, level)
 
-	elseif UIDROPDOWNMENU_MENU_VALUE == "new" then -- NEW PROFLE
+	elseif value == "new" then -- NEW PROFLE
 		info.notCheckable = true
 
 		info.text = L["Create"]
-		info.func = function() btn:createProfile() end
-		UIDropDownMenu_AddButton(info, level)
+		info.func = function() self:createProfile() end
+		self:ddAddButton(info, level)
 
 		info.text = L["Copy current"]
-		info.func = function() btn:createProfile(true) end
-		UIDropDownMenu_AddButton(info, level)
+		info.func = function() self:createProfile(true) end
+		self:ddAddButton(info, level)
 
-	elseif UIDROPDOWNMENU_MENU_VALUE == "specialization" then -- SPECS
+	elseif value == "specialization" then -- SPECS
 		info.notCheckable = true
 		info.hasArrow = true
 		info.keepShownOnClick = true
@@ -170,150 +166,100 @@ function MJProfilesMixin:menuInit(level)
 		for i = 1, GetNumSpecializations() do
 			info.text = select(2, GetSpecializationInfo(i))
 			info.value = i
-			UIDropDownMenu_AddButton(info, level)
+			self:ddAddButton(info, level)
 		end
 
-	elseif type(UIDROPDOWNMENU_MENU_VALUE) == "number" then -- PROFILE BY SPEC
-		info.keepShownOnClick = true
-		info.arg2 = UIDROPDOWNMENU_MENU_VALUE
-
-		if #btn.profileNames > 20 then
-			local searchFrame = util.getDropDownSearchFrame()
-
-			info.text = DEFAULT
-			info.checked = function(self)
-				return btn.charDB.profileBySpecialization[self.arg2] == nil
-			end
-			info.func = function(_,_, arg2)
-				btn.charDB.profileBySpecialization[arg2] = nil
-				btn.mounts:setDB()
-			end
-			searchFrame:addButton(info)
-
-			for _, profileName in ipairs(btn.profileNames) do
-				info.text = profileName
-				info.arg1 = profileName
-				info.checked = function(self)
-					return btn.charDB.profileBySpecialization[self.arg2] == self.arg1
-				end
-				info.func = function(_, arg1, arg2)
-					btn.charDB.profileBySpecialization[arg2] = arg1
-					btn.mounts:setDB()
-				end
-				searchFrame:addButton(info)
-			end
-
-			UIDropDownMenu_AddButton({customFrame = searchFrame}, level)
-		else
-			info.text = DEFAULT
-			info.checked = function(self)
-				return btn.charDB.profileBySpecialization[self.arg2] == nil
-			end
-			info.func = function(_,_, arg2)
-				btn.charDB.profileBySpecialization[arg2] = nil
-				btn.mounts:setDB()
-				UIDropDownMenu_Refresh(btn.optionsMenu)
-			end
-			UIDropDownMenu_AddButton(info, level)
-
-			for _, profileName in ipairs(btn.profileNames) do
-				info.text = profileName
-				info.arg1 = profileName
-				info.checked = function(self)
-					return btn.charDB.profileBySpecialization[self.arg2] == self.arg1
-				end
-				info.func = function(_, arg1, arg2)
-					btn.charDB.profileBySpecialization[arg2] = arg1
-					btn.mounts:setDB()
-					UIDropDownMenu_Refresh(btn.optionsMenu)
-				end
-				UIDropDownMenu_AddButton(info, level)
-			end
+	elseif type(value) == "number" then -- PROFILE BY SPEC
+		info.list = {
+			{
+				keepShownOnClick = true,
+				arg1 = value,
+				text = DEFAULT,
+				checked = function(btn)
+					return self.charDB.profileBySpecialization[btn.arg1] == nil
+				end,
+				func = function(_, arg1)
+					self.charDB.profileBySpecialization[arg1] = nil
+					self.mounts:setDB()
+					self:ddRefresh(level)
+				end,
+			}
+		}
+		for _, profileName in ipairs(self.profileNames) do
+			tinsert(info.list, {
+				keepShownOnClick = true,
+				arg1 = value,
+				text = profileName,
+				checked = function(btn)
+					return self.charDB.profileBySpecialization[btn.arg1] == btn.text
+				end,
+				func = function(btn, arg1)
+					self.charDB.profileBySpecialization[arg1] = btn.text
+					self.mounts:setDB()
+					self:ddRefresh(level)
+				end,
+			})
 		end
+		self:ddAddButton(info, level)
 
 	else -- MENU
 		info.notCheckable = true
 		info.isTitle = true
 
 		info.text = L["Profiles"]
-		UIDropDownMenu_AddButton(info, level)
+		self:ddAddButton(info, level)
 
-		UIDropDownMenu_AddSeparator(level)
+		self:ddAddSeparator(level)
 
 		info.notCheckable = nil
 		info.isTitle = nil
-		info.disabled = nil
 
-		if #btn.profileNames > 20 then
-			local searchFrame = util.getDropDownSearchFrame()
-
-			info.text = DEFAULT
-			info.checked = function() return btn.charDB.currentProfileName == nil end
-			info.func = function() btn:setProfile() end
-			searchFrame:addButton(info)
-
-			for _, profileName in ipairs(btn.profileNames) do
-				info.text = profileName
-				info.arg1 = profileName
-				info.checked = function(self) return btn.charDB.currentProfileName == self.arg1 end
-				info.func = function(_, arg1) btn:setProfile(arg1) end
-				info.remove = function(_, arg1) btn:deleteProfile(arg1) end
-				searchFrame:addButton(info)
-			end
-
-			UIDropDownMenu_AddButton({customFrame = searchFrame}, level)
-		else
-			info.text = DEFAULT
-			info.checked = function() return btn.charDB.currentProfileName == nil end
-			info.func = function() btn:setProfile() end
-			UIDropDownMenu_AddButton(info, level)
-
-			for _, profileName in ipairs(btn.profileNames) do
-				local buttonFrame = util.getDropDownMenuButtonFrame()
-				buttonFrame.text = profileName
-				buttonFrame.arg1 = profileName
-				buttonFrame.checked = function(self) return btn.charDB.currentProfileName == self.arg1 end
-				buttonFrame.func = function(_, arg1) btn:setProfile(arg1) end
-				buttonFrame.remove = function(_, arg1) btn:deleteProfile(arg1) end
-
-				info.customFrame = buttonFrame
-				UIDropDownMenu_AddButton(info, level)
-			end
-
-			info.customFrame = nil
+		info.list = {
+			{
+				text = DEFAULT,
+				checked = function() return self.charDB.currentProfileName == nil end,
+				func = function() self:setProfile() end,
+			},
+		}
+		for _, profileName in ipairs(self.profileNames) do
+			tinsert(info.list, {
+				text = profileName,
+				checked = function(btn) return self.charDB.currentProfileName == btn.text end,
+				func = function(btn) self:setProfile(btn.text) end,
+				remove = function(btn) self:deleteProfile(btn.text) end,
+			})
 		end
+		self:ddAddButton(info, level)
+		info.list = nil
 
-		UIDropDownMenu_AddSeparator(level)
+		self:ddAddSeparator(level)
 
-		info.checked = nil
-		info.func = nil
-		info.arg1 = nil
 		info.keepShownOnClick = true
 		info.notCheckable = true
 		info.hasArrow = true
 
-		if btn.charDB.currentProfileName ~= nil then
+		if self.charDB.currentProfileName ~= nil then
 			info.text = L["Profile settings"]
 			info.value = "settings"
-			UIDropDownMenu_AddButton(info, level)
+			self:ddAddButton(info, level)
 		end
 
 		info.text = L["New profile"]
 		info.value = "new"
-		UIDropDownMenu_AddButton(info, level)
+		self:ddAddButton(info, level)
 
-		UIDropDownMenu_AddSeparator(level)
+		self:ddAddSeparator(level)
 
 		info.notCheckable = nil
 		info.isNotRadio = true
 		info.text = L["By Specialization"]
 		info.value = "specialization"
-		info.checked = function() return btn.charDB.profileBySpecialization.enable end
+		info.checked = function() return self.charDB.profileBySpecialization.enable end
 		info.func = function(_,_,_, checked)
-			btn.charDB.profileBySpecialization.enable = checked
-			btn.mounts:setDB()
+			self.charDB.profileBySpecialization.enable = checked
+			self.mounts:setDB()
 		end
-		UIDropDownMenu_AddButton(info, level)
+		self:ddAddButton(info, level)
 	end
 end
 
@@ -323,5 +269,5 @@ function MJProfilesMixin:onClick()
 	wipe(self.profileNames)
 	for k in pairs(self.profiles) do tinsert(self.profileNames, k) end
 	sort(self.profileNames, function(a, b) return a < b end)
-	ToggleDropDownMenu(1, nil, self.optionsMenu, self, 111, 15)
+	self:dropDownToggle(1, nil, self, 111, 15)
 end

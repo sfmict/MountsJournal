@@ -233,21 +233,17 @@ function MJDungeonRaidMixin:onLoad()
 	end
 	EJ_SelectTier(currentTier)
 
-	UIDropDownMenu_Initialize(self.optionsMenu, self.menuInit, "MENU")
+	self:ddSetInit(self.initialize, "menu")
 end
 
 
-function MJDungeonRaidMixin:menuInit(level)
-	if not level then return end
-
-	local btn = self:GetParent()
-	local info = UIDropDownMenu_CreateInfo()
-	local list = UIDROPDOWNMENU_MENU_VALUE or btn.list
+function MJDungeonRaidMixin:initialize(level, value)
+	local info = {}
 
 	info.isNotRadio = true
 	info.notCheckable = true
 
-	for _, v in ipairs(list) do
+	for _, v in ipairs(value) do
 		info.text = v.name
 		if v.list then
 			info.keepShownOnClick = true
@@ -255,16 +251,15 @@ function MJDungeonRaidMixin:menuInit(level)
 			info.value = v.list
 		else
 			info.func = function()
-				btn.journal.navBar:setMapID(v.mapID)
-				CloseDropDownMenus()
+				self.journal.navBar:setMapID(v.mapID)
 			end
 		end
-		UIDropDownMenu_AddButton(info, level)
+		self:ddAddButton(info, level)
 	end
 end
 
 
 function MJDungeonRaidMixin:onClick()
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	ToggleDropDownMenu(1, nil, self.optionsMenu, self, 111, 15)
+	self:dropDownToggle(1, self.list, self, 111, 15)
 end

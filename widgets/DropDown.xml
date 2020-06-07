@@ -68,7 +68,7 @@
 				<Texture parentKey="Icon" file="Interface/ChatFrame/ChatFrameExpandArrow">
 					<Size x="10" y="12"/>
 					<Anchors>
-						<Anchor point="RIGHT" relativeKey="$parent.Right" relativePoint="RIGHT" x="-5"/>
+						<Anchor point="RIGHT" x="-5"/>
 					</Anchors>
 				</Texture>
 			</Layer>
@@ -118,7 +118,7 @@
 		</Frames>
 	</Frame>
 
-	<Button name="MJDropDownMenuButtonTemplate2" mixin="MJDropDownMenuButtonMixin2" motionScriptsWhileDisabled="true" virtual="true">
+	<Button name="MJDropDownMenuButtonTemplate" mixin="MJDropDownMenuButtonMixin" motionScriptsWhileDisabled="true" virtual="true">
 		<Size x="100" y="16"/>
 		<Layers>
 			<Layer level="BACKGROUND">
@@ -148,7 +148,7 @@
 				<Texture parentKey="ExpandArrow" file="Interface/ChatFrame/ChatFrameExpandArrow" hidden="true">
 					<Size x="16" y="16"/>
 					<Anchors>
-						<Anchor point="RIGHT"/>
+						<Anchor point="RIGHT" x="4"/>
 					</Anchors>
 				</Texture>
 			</Layer>

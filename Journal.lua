@@ -134,6 +134,17 @@ function journal:ADDON_LOADED(addonName)
 		self.MountJournal:UnregisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 		self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 
+		-- FILTERS BUTTON
+		local filtersButton = MountJournalFilterButton
+		util.setMixin(filtersButton, MJDropDownButtonMixin)
+		filtersButton.MJNoGlobalMouseEvent = true
+		filtersButton:ddSetInit(function(...) self:filterDropDown_Initialize(...) end, "menu")
+		filtersButton:SetScript("OnMouseDown", UIMenuButtonStretchMixin.OnMouseDown)
+		filtersButton:SetScript("OnClick", function(self)
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+			self:dropDownToggle(1, nil, self, 74, 15)
+		end)
+
 		-- MOUNT LIST UPDATE ANIMATION
 		self.leftInset.updateAnimFrame = CreateFrame("FRAME", nil, self.leftInset, "MJUpdateAnimFrame")
 		self.mountListUpdateAnim = self.leftInset.updateAnimFrame.anim
@@ -233,6 +244,7 @@ function journal:ADDON_LOADED(addonName)
 		mapSettings.listFromMap.Text:SetText(L["ListMountsFromZone"])
 		mapSettings.listFromMap.maps = {}
 		mapSettings.listFromMap:SetScript("OnClick", function(btn) self:listFromMapClick(btn) end)
+		mapSettings.listFromMap:ddSetInit(self.listFromMapInit, "menu")
 		mapSettings.relationClear:SetScript("OnClick", function()
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			self.currentList.listFromID = nil
@@ -246,7 +258,6 @@ function journal:ADDON_LOADED(addonName)
 			self.mountListUpdateAnim:Stop()
 			self.mountListUpdateAnim:Play()
 		end)
-		UIDropDownMenu_Initialize(mapSettings.listFromMap.optionsMenu, self.listFromMapInit, "MENU")
 
 		-- EXISTING LISTS TOGGLE
 		mapSettings.existingListsToggle:HookScript("OnClick", function(btn)
@@ -296,7 +307,7 @@ function journal:ADDON_LOADED(addonName)
 		self:RegisterEvent("ACHIEVEMENT_EARNED")
 
 		-- PROFILES
-		local profilesMenu = CreateFrame("DropDownToggleButton", nil, self.MountJournal, "MJMenuButtonProfiles")
+		local profilesMenu = CreateFrame("Button", nil, self.MountJournal, "MJMenuButtonProfiles")
 		self.profilesMenu = profilesMenu
 		profilesMenu:SetPoint("LEFT", self.MountJournal.MountButton, "RIGHT", 6, 0)
 		profilesMenu:on("UPDATE_PROFILE", function(_, changeProfile)
@@ -689,7 +700,7 @@ function journal:ADDON_LOADED(addonName)
 						func = function(self)
 							journal.customAnimationPanel:Hide()
 							journal.customAnimationPanel:playAnimation(self.value.animation, self.value.isKit)
-							comboBox:setSelectedValue(self.value, level)
+							comboBox:ddSetSelectedValue(self.value, level)
 						end,
 					})
 				end
@@ -702,7 +713,7 @@ function journal:ADDON_LOADED(addonName)
 					func = function(self)
 						journal.customAnimationPanel:Hide()
 						journal.customAnimationPanel:playAnimation(self.value.animation, self.value.isKit, self.value.loop)
-						comboBox:setSelectedValue(self.value, level)
+						comboBox:ddSetSelectedValue(self.value, level)
 					end,
 					remove = function() fprint("remove") end,
 				})
@@ -713,10 +724,10 @@ function journal:ADDON_LOADED(addonName)
 				checked = function(self) return animationsCombobox.selectedValue == self.value end,
 				func = function(self)
 					journal.customAnimationPanel:Show()
-					comboBox:setSelectedValue(self.value, level)
+					comboBox:ddSetSelectedValue(self.value, level)
 				end,
 			})
-			comboBox:addButton(info, level)
+			comboBox:ddAddButton(info, level)
 		end
 
 		hooksecurefunc("MountJournal_SetSelected", function(mountID)
@@ -730,8 +741,8 @@ function journal:ADDON_LOADED(addonName)
 			if animationsCombobox.selectedValue == "custom" then
 				self.customAnimationPanel:play()
 			else
-				animationsCombobox:setSelectedValue(animationsList[1])
-				animationsCombobox:setSelectedText(animationsList[1].name)
+				animationsCombobox:ddSetSelectedValue(animationsList[1])
+				animationsCombobox:ddSetSelectedText(animationsList[1].name)
 			end
 			infoButton.petSelectionBtn:refresh()
 			infoButton.petSelectionBtn.petSelectionList:Hide()
@@ -744,7 +755,7 @@ function journal:ADDON_LOADED(addonName)
 		-- PLAYER SHOW BUTTON
 		self.modelScene.TogglePlayer:Hide()
 		local playerToggle = CreateFrame("CheckButton", nil, self.modelScene, "MJPlayerShowToggle")
-		playerToggle:SetPoint("LEFT", animationsCombobox, "RIGHT", 10, 4)
+		playerToggle:SetPoint("LEFT", animationsCombobox, "RIGHT", 11, 0)
 		function playerToggle:setPortrait() SetPortraitTexture(self.portrait, "player") end
 		playerToggle:SetScript("OnEvent", playerToggle.setPortrait)
 		playerToggle:HookScript("OnShow", function(self)
@@ -784,12 +795,6 @@ function journal:ADDON_LOADED(addonName)
 				self:updateMountsList()
 			end
 		end)
-		self:setSecureFunc(C_MountJournal, "GetCollectedFilterSetting", function(filter)
-			if filter == LE_MOUNT_JOURNAL_FILTER_COLLECTED then filter = "collected"
-			elseif filter == LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED then filter = "notCollected"
-			elseif filter == LE_MOUNT_JOURNAL_FILTER_UNUSABLE then filter = "unusable" end
-			return mounts.filters[filter]
-		end)
 		self:setSecureFunc(C_MountJournal, "SetAllSourceFilters", function(enabled)
 			if type(enabled) == "boolean" then
 				self:setAllFilters("sources", enabled)
@@ -802,11 +807,21 @@ function journal:ADDON_LOADED(addonName)
 				self:updateMountsList()
 			end
 		end)
-		self:setSecureFunc(C_MountJournal, "IsSourceChecked", function(i)
-			if type(i) == "number" then
-				return mounts.filters.sources[i]
-			end
-		end)
+
+		-- OFF TO AVOID TAINTS
+
+		-- self:setSecureFunc(C_MountJournal, "GetCollectedFilterSetting", function(filter)
+		-- 	if filter == LE_MOUNT_JOURNAL_FILTER_COLLECTED then filter = "collected"
+		-- 	elseif filter == LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED then filter = "notCollected"
+		-- 	elseif filter == LE_MOUNT_JOURNAL_FILTER_UNUSABLE then filter = "unusable" end
+		-- 	return mounts.filters[filter]
+		-- end)
+		-- self:setSecureFunc(C_MountJournal, "IsSourceChecked", function(i)
+		-- 	if type(i) == "number" then
+		-- 		return mounts.filters.sources[i]
+		-- 	end
+		-- end)
+
 		self:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", function()
 			return #self.displayedMounts
 		end)
@@ -830,9 +845,6 @@ function journal:ADDON_LOADED(addonName)
 		self.MountJournal_UpdateMountList = MountJournal_UpdateMountList
 		self.grid3_UpdateMountList = function() self:grid3UpdateMountList() end
 		self:setScrollGridMounts(mounts.config.gridToggle)
-
-		-- FILTERS
-		MountJournalFilterDropDown.initialize = function(_, level) self:filterDropDown_Initialize(level) end
 
 		-- UPDATE LISTS
 		self:setEditMountsList()
@@ -1204,24 +1216,19 @@ do
 		end
 
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		ToggleDropDownMenu(1, nil, btn.optionsMenu, btn, 115, 15)
+		btn:dropDownToggle(1, btn.maps, btn, 115, 15)
 	end
 end
 
 
-function journal:listFromMapInit(level)
-	if not level then return end
-
-	local btn = self:GetParent()
-	local info = UIDropDownMenu_CreateInfo()
-	local list = UIDROPDOWNMENU_MENU_VALUE or btn.maps
-	info.isNotRadio = true
+function journal:listFromMapInit(level, value)
+	local info = {}
 	info.notCheckable = true
 
-	if next(list) == nil then
-		info.notClickable = true
+	if next(value) == nil then
+		info.disabled = true
 		info.text = EMPTY
-		UIDropDownMenu_AddButton(info, level)
+		self:ddAddButton(info, level)
 	elseif level == 2 then
 		local function setListFrom(_, mapID)
 			if journal.navBar.mapID == mapID then return end
@@ -1234,38 +1241,28 @@ function journal:listFromMapInit(level)
 			journal:updateMapSettings()
 			mounts:setMountsList()
 			journal.existingLists:refresh()
-			CloseDropDownMenus()
 
 			journal.mountListUpdateAnim:Stop()
 			journal.mountListUpdateAnim:Play()
 		end
 
-		if #list > 20 then
-			local searchFrame = util.getDropDownSearchFrame()
-
-			for _, mapInfo in ipairs(list) do
-				info.text = mapInfo.name
-				info.func = setListFrom
-				info.arg1 = mapInfo.mapID
-				searchFrame:addButton(info)
-			end
-
-			UIDropDownMenu_AddButton({customFrame = searchFrame}, level)
-		else
-			for _, mapInfo in ipairs(list) do
-				info.text = mapInfo.name
-				info.func = setListFrom
-				info.arg1 = mapInfo.mapID
-				UIDropDownMenu_AddButton(info, level)
-			end
+		info.list = {}
+		for _, mapInfo in ipairs(value) do
+			tinsert(info.list, {
+				notCheckable = true,
+				text = mapInfo.name,
+				arg1 = mapInfo.mapID,
+				func = setListFrom,
+			})
+			self:ddAddButton(info, level)
 		end
 	else
-		for _, mapInfo in ipairs(list) do
+		for _, mapInfo in ipairs(value) do
 			info.keepShownOnClick = true
 			info.hasArrow = true
 			info.text = mapInfo.name
 			info.value = mapInfo.list
-			UIDropDownMenu_AddButton(info, level)
+			self:ddAddButton(info, level)
 		end
 	end
 end
@@ -1341,8 +1338,8 @@ function journal:setSecureFunc(obj, funcName, func)
 end
 
 
-function journal:filterDropDown_Initialize(level)
-	local info = UIDropDownMenu_CreateInfo()
+function journal:filterDropDown_Initialize(btn, level, value)
+	local info = {}
 	info.keepShownOnClick = true
 	info.isNotRadio = true
 
@@ -1353,7 +1350,7 @@ function journal:filterDropDown_Initialize(level)
 			self:updateMountsList()
 		end
 		info.checked = function() return mounts.filters.collected end
-		UIDropDownMenu_AddButton(info, level)
+		btn:ddAddButton(info, level)
 
 		info.text = NOT_COLLECTED
 		info.func = function(_,_,_, value)
@@ -1361,7 +1358,7 @@ function journal:filterDropDown_Initialize(level)
 			self:updateMountsList()
 		end
 		info.checked = function() return mounts.filters.notCollected end
-		UIDropDownMenu_AddButton(info, level)
+		btn:ddAddButton(info, level)
 
 		info.text = MOUNT_JOURNAL_FILTER_UNUSABLE
 		info.func = function(_,_,_, value)
@@ -1369,7 +1366,7 @@ function journal:filterDropDown_Initialize(level)
 			self:updateMountsList()
 		end
 		info.checked = function() return mounts.filters.unusable end
-		UIDropDownMenu_AddButton(info, level)
+		btn:ddAddButton(info, level)
 
 		info.text = L["hidden for character"]
 		info.func = function(_,_,_, value)
@@ -1377,7 +1374,7 @@ function journal:filterDropDown_Initialize(level)
 			self:updateMountsList()
 		end
 		info.checked = function() return mounts.filters.hideOnChar end
-		UIDropDownMenu_AddButton(info, level)
+		btn:ddAddButton(info, level)
 
 		info.checked = nil
 		info.isNotRadio = nil
@@ -1387,52 +1384,52 @@ function journal:filterDropDown_Initialize(level)
 
 		info.text = L["types"]
 		info.value = 1
-		UIDropDownMenu_AddButton(info, level)
+		btn:ddAddButton(info, level)
 
 		info.text = L["selected"]
 		info.value = 2
-		UIDropDownMenu_AddButton(info, level)
+		btn:ddAddButton(info, level)
 
 		info.text = SOURCES
 		info.value = 3
-		UIDropDownMenu_AddButton(info, level)
+		btn:ddAddButton(info, level)
 
 		info.text = L["factions"]
 		info.value = 4
-		UIDropDownMenu_AddButton(info, level)
+		btn:ddAddButton(info, level)
 
 		info.text = PET
 		info.value = 5
-		UIDropDownMenu_AddButton(info, level)
+		btn:ddAddButton(info, level)
 
 		info.text = L["expansions"]
 		info.value = 6
-		UIDropDownMenu_AddButton(info, level)
+		btn:ddAddButton(info, level)
 
 		info.text = L["tags"]
 		info.value = 7
-		UIDropDownMenu_AddButton(info, level)
+		btn:ddAddButton(info, level)
 	else
 		info.notCheckable = true
 
-		if UIDROPDOWNMENU_MENU_VALUE == 1 then -- TYPES
+		if value == 1 then -- TYPES
 			info.text = CHECK_ALL
 			info.func = function()
 				self:setAllFilters("types", true)
 				self:updateBtnFilters()
 				self:updateMountsList()
-				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+				btn:ddRefresh(level)
 			end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 
 			info.text = UNCHECK_ALL
 			info.func = function()
 				self:setAllFilters("types", false)
 				self:updateBtnFilters()
 				self:updateMountsList()
-				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+				btn:ddRefresh(level)
 			end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 
 			info.notCheckable = false
 			local types = mounts.filters.types
@@ -1444,26 +1441,26 @@ function journal:filterDropDown_Initialize(level)
 					self:updateMountsList()
 				end
 				info.checked = function() return types[i] end
-				UIDropDownMenu_AddButton(info, level)
+				btn:ddAddButton(info, level)
 			end
-		elseif UIDROPDOWNMENU_MENU_VALUE == 2 then -- SELECTED
+		elseif value == 2 then -- SELECTED
 			info.text = CHECK_ALL
 			info.func = function()
 				self:setAllFilters("selected", true)
 				self:updateBtnFilters()
 				self:updateMountsList()
-				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+				btn:ddRefresh(level)
 			end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 
 			info.text = UNCHECK_ALL
 			info.func = function()
 				self:setAllFilters("selected", false)
 				self:updateBtnFilters()
 				self:updateMountsList()
-				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+				btn:ddRefresh(level)
 			end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 
 			info.notCheckable = false
 			local selected = mounts.filters.selected
@@ -1475,26 +1472,26 @@ function journal:filterDropDown_Initialize(level)
 					self:updateMountsList()
 				end
 				info.checked = function() return selected[i] end
-				UIDropDownMenu_AddButton(info, level)
+				btn:ddAddButton(info, level)
 			end
-		elseif UIDROPDOWNMENU_MENU_VALUE == 3 then -- SOURCES
+		elseif value == 3 then -- SOURCES
 			info.text = CHECK_ALL
 			info.func = function()
 				self:setAllFilters("sources", true)
 				self:updateBtnFilters()
 				self:updateMountsList()
-				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+				btn:ddRefresh(level)
 			end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 
 			info.text = UNCHECK_ALL
 			info.func = function()
 				self:setAllFilters("sources", false)
 				self:updateBtnFilters()
 				self:updateMountsList()
-				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+				btn:ddRefresh(level)
 			end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 
 			info.notCheckable = false
 			local sources = mounts.filters.sources
@@ -1508,25 +1505,25 @@ function journal:filterDropDown_Initialize(level)
 						self:updateMountsList()
 					end
 					info.checked = function() return sources[i] end
-					UIDropDownMenu_AddButton(info, level)
+					btn:ddAddButton(info, level)
 				end
 			end
-		elseif UIDROPDOWNMENU_MENU_VALUE == 4 then -- FACTIONS
+		elseif value == 4 then -- FACTIONS
 			info.text = CHECK_ALL
 			info.func = function()
 				self:setAllFilters("factions", true)
 				self:updateMountsList()
-				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+				btn:ddRefresh(level)
 			end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 
 			info.text = UNCHECK_ALL
 			info.func = function()
 				self:setAllFilters("factions", false)
 				self:updateMountsList()
-				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+				btn:ddRefresh(level)
 			end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 
 			info.notCheckable = false
 			local factions = mounts.filters.factions
@@ -1537,24 +1534,24 @@ function journal:filterDropDown_Initialize(level)
 					self:updateMountsList()
 				end
 				info.checked = function() return factions[i] end
-				UIDropDownMenu_AddButton(info, level)
+				btn:ddAddButton(info, level)
 			end
-		elseif UIDROPDOWNMENU_MENU_VALUE == 5 then -- PET
+		elseif value == 5 then -- PET
 			info.text = CHECK_ALL
 			info.func = function()
 				self:setAllFilters("pet", true)
 				self:updateMountsList()
-				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+				btn:ddRefresh(level)
 			end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 
 			info.text = UNCHECK_ALL
 			info.func = function()
 				self:setAllFilters("pet", false)
 				self:updateMountsList()
-				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+				btn:ddRefresh(level)
 			end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 
 			info.notCheckable = false
 			local pet = mounts.filters.pet
@@ -1565,24 +1562,24 @@ function journal:filterDropDown_Initialize(level)
 					self:updateMountsList()
 				end
 				info.checked = function() return pet[i] end
-				UIDropDownMenu_AddButton(info, level)
+				btn:ddAddButton(info, level)
 			end
-		elseif UIDROPDOWNMENU_MENU_VALUE == 6 then -- EXPANSIONS
+		elseif value == 6 then -- EXPANSIONS
 			info.text = CHECK_ALL
 			info.func = function()
 				self:setAllFilters("expansions", true)
 				self:updateMountsList()
-				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+				btn:ddRefresh(level)
 			end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 
 			info.text = UNCHECK_ALL
 			info.func = function()
 				self:setAllFilters("expansions", false)
 				self:updateMountsList()
-				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+				btn:ddRefresh(level)
 			end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 
 			info.notCheckable = false
 			local expansions = mounts.filters.expansions
@@ -1593,7 +1590,7 @@ function journal:filterDropDown_Initialize(level)
 					self:updateMountsList()
 				end
 				info.checked = function() return expansions[i] end
-				UIDropDownMenu_AddButton(info, level)
+				btn:ddAddButton(info, level)
 			end
 		else -- TAGS
 			local filterTags = self.tags.filter
@@ -1605,7 +1602,7 @@ function journal:filterDropDown_Initialize(level)
 				self:updateMountsList()
 			end
 			info.checked = function() return filterTags.noTag end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 
 			info.text = L["With all tags"]
 			info.func = function(_,_,_, value)
@@ -1613,86 +1610,58 @@ function journal:filterDropDown_Initialize(level)
 				self:updateMountsList()
 			end
 			info.checked = function() return filterTags.withAllTags end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 
-			UIDropDownMenu_AddSeparator(level)
+			btn:ddAddSeparator(level)
 
 			info.notCheckable = true
 			info.text = CHECK_ALL
 			info.func = function()
 				self.tags:setAllFilterTags(true)
 				self:updateMountsList()
-				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+				btn:ddRefresh(level)
 			end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 
 			info.text = UNCHECK_ALL
 			info.func = function()
 				self.tags:setAllFilterTags(false)
 				self:updateMountsList()
-				UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
+				btn:ddRefresh(level)
 			end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 
-			if #self.tags.sortedTags > 20 then
-				local searchFrame = util.getDropDownSearchFrame()
-				info.notCheckable = nil
-
-				for i, tag in ipairs(self.tags.sortedTags) do
-					info.text = function() return self.tags.sortedTags[i] end
-					info.func = function(btn, _,_, value)
-						filterTags.tags[btn._text][2] = value
-						self:updateMountsList()
-					end
-					info.checked = function(btn) return filterTags.tags[btn._text][2] end
-					info.remove = function(btn)
-						self.tags:deleteTag(btn._text)
-						CloseDropDownMenus()
-					end
-					info.order = function(btn, step)
-						self.tags:setOrderTag(btn._text, step)
-					end
-					searchFrame:addButton(info)
-				end
-
-				info.remove = nil
-				info.order = nil
-				UIDropDownMenu_AddButton({customFrame = searchFrame}, level)
+			if #self.tags.sortedTags == 0 then
+				info.text = EMPTY
+				info.disabled = true
+				btn:ddAddButton(info, level)
+				info.disabled = nil
 			else
+				info.list = {}
 				for i, tag in ipairs(self.tags.sortedTags) do
-					local buttonFrame = util.getDropDownMenuButtonFrame()
-					buttonFrame.keepShownOnClick = true
-					buttonFrame.isNotRadio = true
-					buttonFrame.text = function() return self.tags.sortedTags[i] end
-					buttonFrame.func = function(btn, _,_, value)
-						filterTags.tags[btn._text][2] = value
-						self:updateMountsList()
-					end
-					buttonFrame.checked = function(btn) return filterTags.tags[btn._text][2] end
-					buttonFrame.remove = function(btn)
-						self.tags:deleteTag(btn._text)
-						CloseDropDownMenus()
-					end
-					buttonFrame.order = function(btn, step)
-						self.tags:setOrderTag(btn._text, step)
-						UIDropDownMenu_Refresh(MountJournalFilterDropDown, 1, 2)
-					end
-
-					info.customFrame = buttonFrame
-					UIDropDownMenu_AddButton(info, level)
+					tinsert(info.list, {
+						keepShownOnClick = true,
+						isNotRadio = true,
+						text = function() return self.tags.sortedTags[i] end,
+						func = function(btn, _,_, value)
+							filterTags.tags[btn._text][2] = value
+							self:updateMountsList()
+						end,
+						checked = function(btn) return filterTags.tags[btn._text][2] end,
+						remove = function(btn)
+							self.tags:deleteTag(btn._text)
+						end,
+						order = function(btn, step)
+							self.tags:setOrderTag(btn._text, step)
+						end,
+					})
 				end
-
-				info.customFrame = nil
-				if #self.tags.sortedTags == 0 then
-					info.text = EMPTY
-					info.disabled = true
-					UIDropDownMenu_AddButton(info, level)
-				end
+				btn:ddAddButton(info, level)
+				info.list = nil
 			end
 
-			UIDropDownMenu_AddSeparator(level)
+			btn:ddAddSeparator(level)
 
-			info.disabled = nil
 			info.keepShownOnClick = nil
 			info.notCheckable = true
 			info.checked = nil
@@ -1700,9 +1669,8 @@ function journal:filterDropDown_Initialize(level)
 			info.text = L["Add tag"]
 			info.func = function()
 				self.tags:addTag()
-				CloseDropDownMenus()
 			end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 		end
 	end
 end

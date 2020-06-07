@@ -160,22 +160,20 @@ config:SetScript("OnShow", function(self)
 	modifierText:SetText(L["Modifier"]..":")
 
 	-- MODIFIER COMBOBOX
-	local modifierCombobox = CreateFrame("FRAME", "MountsJournalModifier", self, "UIDropDownMenuTemplate")
+	local modifierCombobox = CreateFrame("FRAME", "MountsJournalModifier", self, "MJDropDownButtonTemplate")
 	self.modifierCombobox = modifierCombobox
-	modifierCombobox:SetPoint("TOPLEFT", modifierText, "BOTTOMRIGHT", -8, 21)
-	UIDropDownMenu_SetWidth(modifierCombobox, 115)
-
-	UIDropDownMenu_Initialize(modifierCombobox, function(self, level)
-		local info = UIDropDownMenu_CreateInfo()
+	modifierCombobox:SetPoint("LEFT", modifierText, "RIGHT", 7, 0)
+	modifierCombobox:ddSetInit(function(self, level)
+		local info = {}
 		for i, modifier in ipairs({"ALT", "CTRL", "SHIFT", "NONE"}) do
-			info.checked = nil
 			info.text = _G[modifier.."_KEY"]
 			info.value = modifier
-			info.func = function(self)
-				UIDropDownMenu_SetSelectedValue(modifierCombobox, self.value)
+			info.checked = function(btn) return modifierCombobox.selectedValue == btn.value end
+			info.func = function(btn)
+				self:ddSetSelectedValue(btn.value)
 				config.applyBtn:Enable()
 			end
-			UIDropDownMenu_AddButton(info)
+			self:ddAddButton(info, level)
 		end
 	end)
 
@@ -285,8 +283,8 @@ config:SetScript("OnShow", function(self)
 	-- REFRESH
 	self.refresh = function(self)
 		binding.unboundMessage:Hide()
-		UIDropDownMenu_SetSelectedValue(modifierCombobox, mounts.config.modifier)
-		UIDropDownMenu_SetText(modifierCombobox, _G[mounts.config.modifier.."_KEY"])
+		modifierCombobox:ddSetSelectedValue(mounts.config.modifier)
+		modifierCombobox:ddSetSelectedText(_G[mounts.config.modifier.."_KEY"])
 		self.waterJump:SetChecked(mounts.config.waterJump)
 		binding:setButtonText(self.bindMount)
 		binding:setButtonText(self.bindSecondMount)
