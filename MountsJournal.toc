@@ -8,12 +8,14 @@
 ## SavedVariablesPerCharacter: MountsJournalChar
 locales.xml
 Util.lua
+widgets/Binding.lua
+widgets/DropDown.xml
+widgets/DropDown.lua
 templates.xml
 Mounts.lua
 db.lua
-Binding.lua
-Config.lua
-ConfigClasses.lua
+config/Main.lua
+config/Classes.lua
 Journal.lua
 Tags.lua
 #@do-not-package@
