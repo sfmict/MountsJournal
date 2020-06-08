@@ -5,7 +5,7 @@
 	<Script file="mixins/ExistingListsMixin.lua"/>
 	<Script file="mixins/ProfilesMixin.lua"/>
 	<Script file="mixins/CompanionMixin.lua"/>
-	<Script file="mixins/CustomAnimationMixin.lua"/>
+	<Script file="mixins/MountAnimationsMixin.lua"/>
 
 	<Button name="MJAchiev" virtual="true">
 		<Size x="60" y="40"/>
@@ -1377,6 +1377,12 @@
 		</Frames>
 	</Frame>
 
+	<Frame name="MJMountAnimationPanel" inherits="MJDropDownButtonTemplate" mixin="MJMountAnimationPanelMixin" virtual="true">
+		<Scripts>
+			<OnLoad method="onLoad"/>
+		</Scripts>
+	</Frame>
+
 	<Button name="MJOneSymbolButtonTemplate" virtual="true">
 		<Size x="22" y="22"/>
 		<Layers>
@@ -1396,7 +1402,7 @@
 		</HighlightTexture>
 	</Button>
 
-	<Frame name="MJCustomAnimationPanel" mixin="MJCustomAnimationMixin" hidden="true" virtual="true">
+	<Frame name="MJMountCustomAnimationPanel" mixin="MJMountCustomAnimationMixin" hidden="true" virtual="true">
 		<Size x="168" y="66"/>
 		<Layers>
 			<Layer level="BACKGROUND">

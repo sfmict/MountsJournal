@@ -2,6 +2,7 @@ local addon, L = ...
 local C_MountJournal, C_PetJournal, C_Timer, pairs, ipairs, select, type, sort = C_MountJournal, C_PetJournal, C_Timer, pairs, ipairs, select, type, sort
 local util, mounts, config = MountsJournalUtil, MountsJournal, MountsJournalConfig
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
+util:setEventsMixin(journal)
 
 
 local COLLECTION_ACHIEVEMENT_CATEGORY = 15246
@@ -625,137 +626,13 @@ function journal:ADDON_LOADED(addonName)
 		end)
 
 		-- MOUNT ANIMATIONS
-		local animationsCombobox = CreateFrame("FRAME", "MountsJournalAnimations", self.modelScene, "MJDropDownButtonTemplate")
-		animationsCombobox:SetPoint("LEFT", modelControl, "RIGHT", 10, 0)
-		local animationsList = {
-			{
-				name = L["Default"],
-				animation = 0,
-			},
-			{
-				name = L["Mount special"],
-				animation = 1371,
-				isKit = true,
-			},
-			{
-				name = L["Walk"],
-				animation = 4,
-				type = 2,
-			},
-			{
-				name = L["Walk backwards"],
-				animation = 13,
-				type = 2,
-			},
-			{
-				name = L["Run"],
-				animation = 5,
-				type = 2,
-			},
-			{
-				name = L["Swim idle"],
-				animation = 532,
-				type = 3,
-			},
-			{
-				name = L["Swim"],
-				animation = 540,
-				type = 3,
-			},
-			{
-				name = L["Swim backwards"],
-				animation = 534,
-				type = 3,
-			},
-			{
-				name = L["Fly stand"],
-				animation = 548,
-				type = 1,
-			},
-			{
-				name = L["Fly"],
-				animation = 558,
-				type = 1,
-			},
-			{
-				name = L["Fly backwards"],
-				animation = 562,
-				type = 1,
-			},
-		}
-
-		local currentMountType
-		animationsCombobox.initialize = function(comboBox, level)
-			local info = {}
-			local mountType = self.mountTypes[currentMountType] or 1
-			if currentMountType == 231 then mountType = mountType - 1 end
-
-			info.list = {}
-			for _, v in ipairs(animationsList) do
-				if v.type == nil or v.type >= mountType then
-					tinsert(info.list, {
-						text = v.name,
-						value = v,
-						checked = function(self) return animationsCombobox.selectedValue == self.value end,
-						func = function(self)
-							journal.customAnimationPanel:Hide()
-							journal.customAnimationPanel:playAnimation(self.value.animation, self.value.isKit)
-							comboBox:ddSetSelectedValue(self.value, level)
-						end,
-					})
-				end
-			end
-			for i, v in ipairs(mounts.customAnimations) do
-				tinsert(info.list, {
-					text = v.name,
-					value = v,
-					checked = function(self) return animationsCombobox.selectedValue == self.value end,
-					func = function(self)
-						journal.customAnimationPanel:Hide()
-						journal.customAnimationPanel:playAnimation(self.value.animation, self.value.isKit, self.value.loop)
-						comboBox:ddSetSelectedValue(self.value, level)
-					end,
-					remove = function() fprint("remove") end,
-				})
-			end
-			tinsert(info.list, {
-				text = CUSTOM,
-				value = "custom",
-				checked = function(self) return animationsCombobox.selectedValue == self.value end,
-				func = function(self)
-					journal.customAnimationPanel:Show()
-					comboBox:ddSetSelectedValue(self.value, level)
-				end,
-			})
-			comboBox:ddAddButton(info, level)
-		end
-
-		hooksecurefunc("MountJournal_SetSelected", function(mountID)
-			local actor = self.modelScene:GetActorByTag("unwrapped")
-			if actor then
-				actor:StopAnimationKit()
-			end
-			if mountID then
-				currentMountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
-			end
-			if animationsCombobox.selectedValue == "custom" then
-				self.customAnimationPanel:play()
-			else
-				animationsCombobox:ddSetSelectedValue(animationsList[1])
-				animationsCombobox:ddSetSelectedText(animationsList[1].name)
-			end
-			infoButton.petSelectionBtn:refresh()
-			infoButton.petSelectionBtn.petSelectionList:Hide()
-		end)
-
-		-- CUSTOM ANIMATION
-		self.customAnimationPanel = CreateFrame("FRAME", nil, self.modelScene, "MJCustomAnimationPanel")
-		self.customAnimationPanel:SetPoint("BOTTOMRIGHT", animationsCombobox, "TOPRIGHT", 0, 2)
+		self.animationsCombobox = CreateFrame("FRAME", nil, self.modelScene, "MJMountAnimationPanel")
+		self.animationsCombobox:SetPoint("LEFT", modelControl, "RIGHT", 10, 0)
 
 		-- PLAYER SHOW BUTTON
 		self.modelScene.TogglePlayer:Hide()
 		local playerToggle = CreateFrame("CheckButton", nil, self.modelScene, "MJPlayerShowToggle")
-		playerToggle:SetPoint("LEFT", animationsCombobox, "RIGHT", 11, 0)
+		playerToggle:SetPoint("LEFT", self.animationsCombobox, "RIGHT", 11, 0)
 		function playerToggle:setPortrait() SetPortraitTexture(self.portrait, "player") end
 		playerToggle:SetScript("OnEvent", playerToggle.setPortrait)
 		playerToggle:HookScript("OnShow", function(self)
@@ -765,16 +642,23 @@ function journal:ADDON_LOADED(addonName)
 		playerToggle:SetScript("OnHide", function(self)
 			self:UnregisterEvent("UNIT_PORTRAIT_UPDATE")
 		end)
-		playerToggle:HookScript("OnClick", function(self)
+		playerToggle:HookScript("OnClick", function()
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			C_Timer.After(0, function()
-				local value = animationsCombobox.selectedValue
+				local value = self.animationsCombobox.selectedValue
 				if value == "custom" then
-					journal.customAnimationPanel:play()
+					self.animationsCombobox.customAnimationPanel:play()
 				else
-					journal.customAnimationPanel:playAnimation(value.animation, value.isKit, value.loop)
+					self.animationsCombobox:playAnimation(value.animation, value.isKit, value.loop)
 				end
 			end)
+		end)
+
+		-- MOUNT SELECT HOOK
+		hooksecurefunc("MountJournal_SetSelected", function(mountID)
+			self:event("MOUNT_SELECT", mountID)
+			infoButton.petSelectionBtn:refresh()
+			infoButton.petSelectionBtn.petSelectionList:Hide()
 		end)
 
 		-- HOOKS

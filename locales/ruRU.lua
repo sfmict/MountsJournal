@@ -81,6 +81,8 @@ L["Swim backwards"] = "Плыть назад"
 L["Fly stand"] = "Полет на месте"
 L["Fly"] = "Полет"
 L["Fly backwards"] = "Полет назад"
+L["Loop"] = "Повтор"
+L["Are you sure you want to delete animation %s?"] = "Вы уверены, что хотите удалить анимацию %s?"
 -- PROFILES
 L["Profiles"] = "Профили"
 L["New profile"] = "Новый профиль"

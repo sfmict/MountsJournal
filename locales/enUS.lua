@@ -77,6 +77,8 @@ L["Swim backwards"] = "Swim backwards"
 L["Fly stand"] = "Fly stand"
 L["Fly"] = "Fly"
 L["Fly backwards"] = "Fly backwards"
+L["Loop"] = "Loop"
+L["Are you sure you want to delete animation %s?"] = "Are you sure you want to delete animation %s?"
 -- PROFILES
 L["Profiles"] = "Profiles"
 L["New profile"] = "New profile"

@@ -26,28 +26,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.globalDB.mountTags = self.globalDB.mountTags or {}
 		self.globalDB.filters = self.globalDB.filters or {}
 		self.globalDB.config = self.globalDB.config or {}
-		self.customAnimations = {
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-			{name = "demonic", animation = 651, isKit = true, loop = true},
-		}
+		self.globalDB.mountAnimations = self.globalDB.mountAnimations or {}
 		self.globalDB.mountsProfiles = self.globalDB.mountsProfiles or {}
 		for _, profile in pairs(self.globalDB.mountsProfiles) do
 			profile.fly = profile.fly or {}
