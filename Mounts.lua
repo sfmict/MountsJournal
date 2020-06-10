@@ -1,5 +1,5 @@
 local addon = ...
-local C_MountJournal, C_Map, MapUtil, tinsert, random, C_PetJournal = C_MountJournal, C_Map, MapUtil, tinsert, random, C_PetJournal
+local C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal = C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 
@@ -28,13 +28,6 @@ function mounts:ADDON_LOADED(addonName)
 		self.globalDB.config = self.globalDB.config or {}
 		self.globalDB.mountAnimations = self.globalDB.mountAnimations or {}
 		self.globalDB.mountsProfiles = self.globalDB.mountsProfiles or {}
-		for _, profile in pairs(self.globalDB.mountsProfiles) do
-			profile.fly = profile.fly or {}
-			profile.ground = profile.ground or {}
-			profile.swimming = profile.swimming or {}
-			profile.zoneMounts = profile.zoneMounts or {}
-			profile.petForMount = profile.petForMount or {}
-		end
 		self.filters = self.globalDB.filters
 		self.profiles = self.globalDB.mountsProfiles
 		self.config = self.globalDB.config
@@ -53,34 +46,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.charDB.profileBySpecialization = self.charDB.profileBySpecialization or {}
 
 		-- Рудименты
-		self.config.waterWalkAll = nil
-		self.config.waterWalkList = nil
-		self.config.waterWalkInstance = nil
-		self.config.waterWalkExpedition = nil
-		self.config.waterWalkExpeditionList = nil
-
-		if type(self.charDB.fly) == "table" and #self.charDB.fly > 0
-		or type(self.charDB.ground) == "table" and #self.charDB.ground > 0
-		or type(self.charDB.swimming) == "table" and #self.charDB.swimming > 0
-		or type(self.charDB.zoneMounts) == "table" and next(self.charDB.zoneMounts) ~= nil then
-			local name = UnitName("player").." - "..GetRealmName()
-			self.profiles[name] = {
-				fly = self.charDB.fly or {},
-				ground = self.charDB.ground or {},
-				swimming = self.charDB.swimming or {},
-				zoneMounts = self.charDB.zoneMounts or {},
-				petForMount = {},
-			}
-			if self.charDB.enable then
-				self.charDB.currentProfileName = name
-			end
-		end
-
-		self.charDB.fly = nil
-		self.charDB.ground = nil
-		self.charDB.swimming = nil
-		self.charDB.zoneMounts = nil
-		self.charDB.enable = nil
+		self:setOldChanges()
 
 		-- Списки
 		self.swimmingVashjir = {
@@ -127,6 +93,93 @@ function mounts:ADDON_LOADED(addonName)
 			[205] = true, -- Мерцающий простор
 		}
 	end
+end
+
+
+function mounts:compareVersion(v1, v2)
+	v1 = v1:gsub("^(.*)-.*$", "%1")
+	v2 = v2:gsub("^(.*)-.*$", "%1")
+	v1 = {strsplit(".", v1)}
+	v2 = {strsplit(".", v2)}
+	for i = 1, min(#v1, #v2) do
+		v1[i] = tonumber(v1[i]) or 0
+		v2[i] = tonumber(v2[i]) or 0
+		if v1[i] > v2[i] then return true end
+		if v1[i] < v2[i] then return false end
+	end
+	return #v1 > #v2
+end
+
+
+function mounts:setOldChanges()
+	--@do-not-package@
+	if self.globalDB.lastAddonVersion == "@project-version@" then return end
+	--@end-do-not-package@
+	if self:compareVersion("8.3.2", self.globalDB.lastAddonVersion or "") then
+		self.config.waterWalkAll = nil
+		self.config.waterWalkList = nil
+		self.config.waterWalkInstance = nil
+		self.config.waterWalkExpedition = nil
+		self.config.waterWalkExpeditionList = nil
+
+		if type(self.charDB.fly) == "table" and #self.charDB.fly > 0
+		or type(self.charDB.ground) == "table" and #self.charDB.ground > 0
+		or type(self.charDB.swimming) == "table" and #self.charDB.swimming > 0
+		or type(self.charDB.zoneMounts) == "table" and next(self.charDB.zoneMounts) ~= nil then
+			local name = UnitName("player").." - "..GetRealmName()
+			self.profiles[name] = {
+				fly = self.charDB.fly or {},
+				ground = self.charDB.ground or {},
+				swimming = self.charDB.swimming or {},
+				zoneMounts = self.charDB.zoneMounts or {},
+				petForMount = {},
+			}
+			if self.charDB.enable then
+				self.charDB.currentProfileName = name
+			end
+		end
+
+		self.charDB.fly = nil
+		self.charDB.ground = nil
+		self.charDB.swimming = nil
+		self.charDB.zoneMounts = nil
+		self.charDB.enable = nil
+
+		local function setMounts(tbl)
+			if #tbl > 0 then
+				local newTbl = {}
+				for i = 1, #tbl do
+					newTbl[tbl[i]] = true
+				end
+				return newTbl
+			end
+			return tbl
+		end
+
+		self.globalDB.fly = setMounts(self.globalDB.fly)
+		self.globalDB.ground = setMounts(self.globalDB.ground)
+		self.globalDB.swimming = setMounts(self.globalDB.swimming)
+		for _, list in next, self.globalDB.zoneMounts do
+			list.fly = setMounts(list.fly)
+			list.ground = setMounts(list.ground)
+			list.swimming = setMounts(list.swimming)
+		end
+
+		for _, profile in next, self.globalDB.mountsProfiles do
+			profile.fly = setMounts(profile.fly or {})
+			profile.ground = setMounts(profile.ground or {})
+			profile.swimming = setMounts(profile.swimming or {})
+			profile.zoneMounts = profile.zoneMounts or {}
+			profile.petForMount = profile.petForMount or {}
+
+			for _, list in next, profile.zoneMounts do
+				list.fly = setMounts(list.fly)
+				list.ground = setMounts(list.ground)
+				list.swimming = setMounts(list.swimming)
+			end
+		end
+	end
+	self.globalDB.lastAddonVersion = GetAddOnMetadata(addon, "Version")
 end
 
 
@@ -294,8 +347,7 @@ end
 
 function mounts:summon(ids)
 	local usableIDs = {}
-	for i = 1, #ids do
-		local mountID = ids[i]
+	for mountID in next, ids do
 		local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
 		if isUsable then tinsert(usableIDs, mountID) end
 	end

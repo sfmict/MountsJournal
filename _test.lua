@@ -160,6 +160,7 @@ function test:PLAYER_ENTERING_WORLD()
 		-- FLIGHT BACK     
 		-- SPECIAL         
 		-- DEMONIC         651
+		-- LEFT RIGHT      349
 
 		-- PLAYER 91
 		local mountDisplay = self:GetParent()

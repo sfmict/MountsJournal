@@ -1,5 +1,5 @@
 if GetLocale() ~= "ruRU" then
-	return
+	-- return
 end
 
 local _, L = ...
@@ -82,7 +82,7 @@ L["Fly stand"] = "Полет на месте"
 L["Fly"] = "Полет"
 L["Fly backwards"] = "Полет назад"
 L["Loop"] = "Повтор"
-L["Are you sure you want to delete animation %s?"] = "Вы уверены, что хотите удалить анимацию %s?"
+L["Are you sure you want to delete animation %s?"] = "Вы уверены, что хотите удалить анимацию \"%s\"?"
 -- PROFILES
 L["Profiles"] = "Профили"
 L["New profile"] = "Новый профиль"
@@ -93,10 +93,14 @@ L["By Specialization"] = "По специализации"
 L["Profile settings"] = "Настройки профиля"
 L["Pet binding from default profile"] = "Привязка питомцев из профиля по умолчанию"
 L["Zones settings from default profile"] = "Настройки зон из профиля по умолчанию"
+L["Select all mounts by type"] = "Выбрать всех маунтов по типу"
+L["Unselect all mounts"] = "Отменить выбор всех маунтов"
+L["Are you sure you want to delete profile %s?"] = "Вы уверены, что хотите удалить профиль \"%s\"?"
+L["Are you sure you want %s?"] = "Вы уверен, что хотите \"%s\"?"
 -- TAGS
 L["tags"] = "Теги"
 L["No tag"] = "Без тегов"
 L["With all tags"] = "Со всеми тегами"
 L["Add tag"] = "Добавить тег"
 L["Tag already exists."] = "Тег уже существует."
-L["Are you sure you want to delete tag %s?"] = "Вы уверены, что хотите удалить тег %s?"
+L["Are you sure you want to delete tag %s?"] = "Вы уверены, что хотите удалить тег \"%s\"?"

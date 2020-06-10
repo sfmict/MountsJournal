@@ -1417,7 +1417,7 @@
 					<Anchor point="TOPLEFT" x="0"/>
 				</Anchors>
 				<Scripts>
-					<OnLoad>self.text:SetText("−")</OnLoad>
+					<OnLoad>self.text:SetText("-")</OnLoad>
 				</Scripts>
 			</Button>
 			<EditBox parentKey="animationNum" numeric="true" letters="4" multiLine="false" autoFocus="false">
@@ -1439,7 +1439,7 @@
 			</EditBox>
 			<Button parentKey="plus" inherits="MJOneSymbolButtonTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.animationNum" relativePoint="RIGHT"/>
+					<Anchor point="LEFT" relativeKey="$parent.animationNum" relativePoint="RIGHT" x="-2"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>self.text:SetText("+")</OnLoad>
@@ -1448,7 +1448,7 @@
 			<Button inherits="UIPanelButtonTemplate" parentKey="playButton">
 				<Size x="26" y="22"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.plus" relativePoint="RIGHT" x="18"/>
+					<Anchor point="LEFT" relativeKey="$parent.plus" relativePoint="RIGHT" x="20"/>
 				</Anchors>
 				<Layers>
 					<Layer level="OVERLAY">

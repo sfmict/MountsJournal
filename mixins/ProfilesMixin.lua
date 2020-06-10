@@ -65,8 +65,16 @@ function MJProfilesMixin:onLoad()
 		OnCancel = profileExistsAccept,
 	}
 	StaticPopupDialogs[self.addonName.."DELETE_PROFILE"] = {
-		text = addon..": "..CONFIRM_COMPACT_UNIT_FRAME_PROFILE_DELETION,
+		text = addon..": "..L["Are you sure you want to delete profile %s?"],
 		button1 = DELETE,
+		button2 = CANCEL,
+		hideOnEscape = 1,
+		whileDead = 1,
+		OnAccept = function(_, cb) cb() end,
+	}
+	StaticPopupDialogs[self.addonName.."YOU_WANT"] = {
+		text = addon..": "..L["Are you sure you want \"%s\"?"],
+		button1 = OKAY,
 		button2 = CANCEL,
 		hideOnEscape = 1,
 		whileDead = 1,
@@ -123,28 +131,77 @@ function MJProfilesMixin:setProfile(profileName)
 end
 
 
+function MJProfilesMixin:selectAllMounts()
+	local profile = self.journal.db
+	StaticPopup_Show(self.addonName.."YOU_WANT", NORMAL_FONT_COLOR_CODE..L["Select all mounts by type"]..FONT_COLOR_CODE_CLOSE, nil, function()
+		for _, mountID in ipairs(self.journal.mountIDs) do
+			local _,_,_,_,_,_,_,_,_,_, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+			if isCollected then
+				local _,_,_,_, mountType = C_MountJournal.GetMountInfoExtraByID(mountID)
+				mountType = self.journal.mountTypes[mountType]
+				if mountType then
+					if mountType == 1 then
+						mountType = "fly"
+					elseif mountType == 2 then
+						mountType = "ground"
+					else
+						mountType = "swimming"
+					end
+
+					profile[mountType][mountID] = true
+				end
+			end
+		end
+		self.journal:updateMountsList()
+	end)
+end
+
+
+function MJProfilesMixin:unselectAllMounts()
+	local profile = self.journal.db
+	StaticPopup_Show(self.addonName.."YOU_WANT", NORMAL_FONT_COLOR_CODE..L["Unselect all mounts"]..FONT_COLOR_CODE_CLOSE, nil, function()
+		wipe(profile.fly)
+		wipe(profile.ground)
+		wipe(profile.swimming)
+		self.journal:updateMountsList()
+	end)
+end
+
+
 function MJProfilesMixin:initialize(level, value)
 	local info = {}
 
 	if value == "settings" then -- PROFILE SETTINGS
-		if self.charDB.currentProfileName == nil then return end
-		info.isNotRadio = true
-		info.keepShownOnClick = true
+		if self.charDB.currentProfileName ~= nil then
+			info.isNotRadio = true
+			info.keepShownOnClick = true
 
-		info.text = L["Pet binding from default profile"]
-		info.checked = function() return self.journal.db.petListFromProfile end
-		info.func = function(_,_,_, checked)
-			self.journal.db.petListFromProfile = checked and true or nil
-			self:event("UPDATE_PROFILE")
+			info.text = L["Pet binding from default profile"]
+			info.checked = function() return self.journal.db.petListFromProfile end
+			info.func = function(_,_,_, checked)
+				self.journal.db.petListFromProfile = checked and true or nil
+				self:event("UPDATE_PROFILE")
+			end
+			self:ddAddButton(info, level)
+
+			info.text = L["Zones settings from default profile"]
+			info.checked = function() return self.journal.db.zoneMountsFromProfile end
+			info.func = function(_,_,_, checked)
+				self.journal.db.zoneMountsFromProfile = checked and true or nil
+				self:event("UPDATE_PROFILE")
+			end
+			self:ddAddButton(info, level)
 		end
+
+		info.notCheckable = true
+		info.keepShownOnClick = nil
+
+		info.text = L["Select all mounts by type"]
+		info.func = function() self:selectAllMounts() end
 		self:ddAddButton(info, level)
 
-		info.text = L["Zones settings from default profile"]
-		info.checked = function() return self.journal.db.zoneMountsFromProfile end
-		info.func = function(_,_,_, checked)
-			self.journal.db.zoneMountsFromProfile = checked and true or nil
-			self:event("UPDATE_PROFILE")
-		end
+		info.text = L["Unselect all mounts"]
+		info.func = function() self:unselectAllMounts() end
 		self:ddAddButton(info, level)
 
 	elseif value == "new" then -- NEW PROFLE
@@ -238,11 +295,9 @@ function MJProfilesMixin:initialize(level, value)
 		info.notCheckable = true
 		info.hasArrow = true
 
-		if self.charDB.currentProfileName ~= nil then
-			info.text = L["Profile settings"]
-			info.value = "settings"
-			self:ddAddButton(info, level)
-		end
+		info.text = L["Profile settings"]
+		info.value = "settings"
+		self:ddAddButton(info, level)
 
 		info.text = L["New profile"]
 		info.value = "new"

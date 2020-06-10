@@ -168,7 +168,7 @@ function MJMountAnimationPanelMixin:deleteAnimation(id)
 			self:ddSetSelectedValue(value)
 			self:ddSetSelectedText(value.name)
 		end
-		table.remove(self.animations, id)
+		tremove(self.animations, id)
 	end)
 end
 

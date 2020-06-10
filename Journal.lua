@@ -1,5 +1,5 @@
 local addon, L = ...
-local C_MountJournal, C_PetJournal, C_Timer, pairs, ipairs, select, type, sort = C_MountJournal, C_PetJournal, C_Timer, pairs, ipairs, select, type, sort
+local C_MountJournal, C_PetJournal, C_Timer, next, pairs, ipairs, select, type, sort = C_MountJournal, C_PetJournal, C_Timer, next, pairs, ipairs, select, type, sort
 local util, mounts, config = MountsJournalUtil, MountsJournal, MountsJournalConfig
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
 util:setEventsMixin(journal)
@@ -881,7 +881,7 @@ end
 
 function journal:updateMountToggleButton(btn)
 	local function setColor(btn, mountsTbl)
-		if mountsTbl and util.inTable(mountsTbl, btn.mountID) then
+		if mountsTbl and mountsTbl[btn.mountID] then
 			btn.icon:SetVertexColor(self.colors.gold:GetRGB())
 			btn:SetChecked(true)
 		else
@@ -1014,7 +1014,7 @@ function journal:getRemoveMountList(mapID)
 		end
 	end
 
-	if #list.fly + #list.ground + #list.swimming == 0
+	if not (next(list.fly) or next(list.ground) or next(list.swimming))
 	and not flags
 	and not list.listFromID then
 		self.zoneMounts[mapID] = nil
@@ -1030,13 +1030,12 @@ function journal:mountToggle(btn)
 	local tbl = self.list[btn.type]
 
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	local pos = util.inTable(tbl, btn.mountID)
-	if pos then
-		tremove(tbl, pos)
+	if tbl[btn.mountID] then
+		tbl[btn.mountID] = nil
 		btn.icon:SetVertexColor(self.colors.gray:GetRGB())
 		self:getRemoveMountList(self.listMapID)
 	else
-		tinsert(tbl, btn.mountID)
+		tbl[btn.mountID] = true
 		btn.icon:SetVertexColor(self.colors.gold:GetRGB())
 	end
 
@@ -1694,7 +1693,7 @@ end
 
 
 function journal:updateMountsList()
-	local filters, mountTypes, list, tags, inTable, GetMountInfoByID, GetMountInfoExtraByID = mounts.filters, self.mountTypes, self.list, self.tags, util.inTable, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID
+	local filters, mountTypes, list, tags, GetMountInfoByID, GetMountInfoExtraByID = mounts.filters, self.mountTypes, self.list, self.tags, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID
 	local sources, types, selected, factions, pet, expansions = filters.sources, filters.types, filters.selected, filters.factions, filters.pet, filters.expansions
 	local text = util.cleanText(self.searchText)
 	wipe(self.displayedMounts)
@@ -1723,11 +1722,11 @@ function journal:updateMountsList()
 		-- SELECTED
 		and (not selected[1] and not selected[2] and not selected[3]
 			-- FLY
-			or selected[1] and list and inTable(list.fly, mountID)
+			or selected[1] and list and list.fly[mountID]
 			-- GROUND
-			or selected[2] and list and inTable(list.ground, mountID)
+			or selected[2] and list and list.ground[mountID]
 			-- SWIMMING
-			or selected[3] and list and inTable(list.swimming, mountID))
+			or selected[3] and list and list.swimming[mountID])
 		-- PET
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
 		-- EXPANSIONS
