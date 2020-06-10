@@ -632,7 +632,7 @@ function journal:ADDON_LOADED(addonName)
 		-- PLAYER SHOW BUTTON
 		self.modelScene.TogglePlayer:Hide()
 		local playerToggle = CreateFrame("CheckButton", nil, self.modelScene, "MJPlayerShowToggle")
-		playerToggle:SetPoint("LEFT", self.animationsCombobox, "RIGHT", 11, 0)
+		playerToggle:SetPoint("LEFT", self.animationsCombobox, "RIGHT", 11, 1)
 		function playerToggle:setPortrait() SetPortraitTexture(self.portrait, "player") end
 		playerToggle:SetScript("OnEvent", playerToggle.setPortrait)
 		playerToggle:HookScript("OnShow", function(self)

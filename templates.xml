@@ -1592,14 +1592,19 @@
 			</Layer>
 			<Layer level="ARTWORK">
 				<Texture parentKey="portrait">
-					<Size x="70" y="70"/>
+					<Size x="69" y="69"/>
 					<Anchors>
 						<Anchor point="CENTER" relativeKey="$parent.border"/>
 					</Anchors>
 				</Texture>
 			</Layer>
 		</Layers>
-		<HighlightTexture alphaMode="ADD" file="Interface/Minimap/UI-Minimap-ZoomButton-Highlight"/>
+		<HighlightTexture alphaMode="ADD" file="Interface/Minimap/UI-Minimap-ZoomButton-Highlight">
+			<Size x="80" y="80"/>
+			<Anchors>
+				<Anchor point="CENTER" y="-3"/>
+			</Anchors>
+		</HighlightTexture>
 		<CheckedTexture file="Interface/Minimap/ping/ping4" alphaMode="ADD" alpha=".6">
 			<Size x="77" y="77"/>
 			<Anchors>

@@ -97,10 +97,10 @@ end
 
 
 function mounts:compareVersion(v1, v2)
-	v1 = v1:gsub("^(.*)-.*$", "%1")
-	v2 = v2:gsub("^(.*)-.*$", "%1")
-	v1 = {strsplit(".", v1)}
-	v2 = {strsplit(".", v2)}
+	v1 = v1:gsub("%D*([%d%.]+).*", "%1")
+	v2 = v2:gsub("%D*([%d%.]+).*", "%1")
+	v1 = {("."):split(v1)}
+	v2 = {("."):split(v2)}
 	for i = 1, min(#v1, #v2) do
 		v1[i] = tonumber(v1[i]) or 0
 		v2[i] = tonumber(v2[i]) or 0

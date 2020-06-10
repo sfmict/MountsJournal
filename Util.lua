@@ -156,5 +156,5 @@ end
 
 
 function MountsJournalUtil.cleanText(text)
-	return text:lower():gsub("^%s*(.-)%s*$", "%1"):gsub("[%(%)%.%%%+%-%*%?%[%^%$]", "%%%1")
+	return text:trim():lower():gsub("[%(%)%.%%%+%-%*%?%[%^%$]", "%%%1")
 end
