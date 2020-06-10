@@ -1,5 +1,5 @@
 if GetLocale() ~= "ruRU" then
-	-- return
+	return
 end
 
 local _, L = ...
@@ -93,8 +93,8 @@ L["By Specialization"] = "По специализации"
 L["Profile settings"] = "Настройки профиля"
 L["Pet binding from default profile"] = "Привязка питомцев из профиля по умолчанию"
 L["Zones settings from default profile"] = "Настройки зон из профиля по умолчанию"
-L["Select all mounts by type"] = "Выбрать всех маунтов по типу"
-L["Unselect all mounts"] = "Отменить выбор всех маунтов"
+L["Select all mounts by type in selected zone"] = "Выбрать всех маунтов по типу в выбранной зоне"
+L["Unselect all mounts in selected zone"] = "Отменить выбор всех маунтов в выбранной зоне"
 L["Are you sure you want to delete profile %s?"] = "Вы уверены, что хотите удалить профиль \"%s\"?"
 L["Are you sure you want %s?"] = "Вы уверен, что хотите \"%s\"?"
 -- TAGS

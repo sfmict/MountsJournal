@@ -113,7 +113,7 @@ end
 
 function mounts:setOldChanges()
 	--@do-not-package@
-	if self.globalDB.lastAddonVersion == "@project-version@" then return end
+	if self.globalDB.lastAddonVersion == "@project-version@" and self.charDB.lastAddonVersion == "@project-version@" then return end
 	--@end-do-not-package@
 	if self:compareVersion("8.3.2", self.globalDB.lastAddonVersion or "") then
 		self.config.waterWalkAll = nil
@@ -121,29 +121,6 @@ function mounts:setOldChanges()
 		self.config.waterWalkInstance = nil
 		self.config.waterWalkExpedition = nil
 		self.config.waterWalkExpeditionList = nil
-
-		if type(self.charDB.fly) == "table" and #self.charDB.fly > 0
-		or type(self.charDB.ground) == "table" and #self.charDB.ground > 0
-		or type(self.charDB.swimming) == "table" and #self.charDB.swimming > 0
-		or type(self.charDB.zoneMounts) == "table" and next(self.charDB.zoneMounts) ~= nil then
-			local name = UnitName("player").." - "..GetRealmName()
-			self.profiles[name] = {
-				fly = self.charDB.fly or {},
-				ground = self.charDB.ground or {},
-				swimming = self.charDB.swimming or {},
-				zoneMounts = self.charDB.zoneMounts or {},
-				petForMount = {},
-			}
-			if self.charDB.enable then
-				self.charDB.currentProfileName = name
-			end
-		end
-
-		self.charDB.fly = nil
-		self.charDB.ground = nil
-		self.charDB.swimming = nil
-		self.charDB.zoneMounts = nil
-		self.charDB.enable = nil
 
 		local function setMounts(tbl)
 			if #tbl > 0 then
@@ -180,6 +157,50 @@ function mounts:setOldChanges()
 		end
 	end
 	self.globalDB.lastAddonVersion = GetAddOnMetadata(addon, "Version")
+
+	if self:compareVersion("8.3.2", self.charDB.lastAddonVersion or "") then
+		local function setMounts(tbl)
+			if #tbl > 0 then
+				local newTbl = {}
+				for i = 1, #tbl do
+					newTbl[tbl[i]] = true
+				end
+				return newTbl
+			end
+			return tbl
+		end
+
+		if type(self.charDB.fly) == "table" and #self.charDB.fly > 0
+		or type(self.charDB.ground) == "table" and #self.charDB.ground > 0
+		or type(self.charDB.swimming) == "table" and #self.charDB.swimming > 0
+		or type(self.charDB.zoneMounts) == "table" and next(self.charDB.zoneMounts) ~= nil then
+			local name = UnitName("player").." - "..GetRealmName()
+			if not self.profiles[name] then
+				self.profiles[name] = {
+					fly =  setMounts(self.charDB.fly or {}),
+					ground = setMounts(self.charDB.ground or {}),
+					swimming = setMounts(self.charDB.swimming or {}),
+					zoneMounts = self.charDB.zoneMounts or {},
+					petForMount = {},
+				}
+				if self.charDB.enable then
+					self.charDB.currentProfileName = name
+				end
+				for _, list in next, self.profiles[name].zoneMounts do
+					list.fly = setMounts(list.fly)
+					list.ground = setMounts(list.ground)
+					list.swimming = setMounts(list.swimming)
+				end
+			end
+		end
+
+		self.charDB.fly = nil
+		self.charDB.ground = nil
+		self.charDB.swimming = nil
+		self.charDB.zoneMounts = nil
+		self.charDB.enable = nil
+	end
+	self.charDB.lastAddonVersion = GetAddOnMetadata(addon, "Version")
 end
 
 

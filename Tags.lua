@@ -53,9 +53,9 @@ function tags:init()
 
 	MountJournal_ShowMountDropdown = function(index, anchorTo, offsetX, offsetY)
 		if not index then return end
+		local _,_,_, active, isUsable, _,_,_,_,_,_, mountID = C_MountJournal.GetDisplayedMountInfo(index)
 		MountJournal.menuMountIndex = index
-		MountJournal.menuMountID = select(12, C_MountJournal.GetDisplayedMountInfo(MountJournal.menuMountIndex))
-		local active, isUsable = select(4, C_MountJournal.GetDisplayedMountInfo(index))
+		MountJournal.menuMountID = mountID
 		MountJournal.active = active
 		MountJournal.menuIsUsable = isUsable
 		mountOptionsMenu:dropDownToggle(1, nil, anchorTo, offsetX, offsetY)

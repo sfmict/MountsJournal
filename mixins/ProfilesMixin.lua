@@ -73,7 +73,7 @@ function MJProfilesMixin:onLoad()
 		OnAccept = function(_, cb) cb() end,
 	}
 	StaticPopupDialogs[self.addonName.."YOU_WANT"] = {
-		text = addon..": "..L["Are you sure you want \"%s\"?"],
+		text = addon..": "..L["Are you sure you want %s?"],
 		button1 = OKAY,
 		button2 = CANCEL,
 		hideOnEscape = 1,
@@ -132,8 +132,11 @@ end
 
 
 function MJProfilesMixin:selectAllMounts()
-	local profile = self.journal.db
-	StaticPopup_Show(self.addonName.."YOU_WANT", NORMAL_FONT_COLOR_CODE..L["Select all mounts by type"]..FONT_COLOR_CODE_CLOSE, nil, function()
+	StaticPopup_Show(self.addonName.."YOU_WANT", NORMAL_FONT_COLOR_CODE..L["Select all mounts by type in selected zone"]..FONT_COLOR_CODE_CLOSE, nil, function()
+		if not self.journal.list then
+			self.journal:createMountList(self.journal.listMapID)
+		end
+
 		for _, mountID in ipairs(self.journal.mountIDs) do
 			local _,_,_,_,_,_,_,_,_,_, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 			if isCollected then
@@ -148,22 +151,24 @@ function MJProfilesMixin:selectAllMounts()
 						mountType = "swimming"
 					end
 
-					profile[mountType][mountID] = true
+					self.journal.list[mountType][mountID] = true
 				end
 			end
 		end
-		self.journal:updateMountsList()
+		self:event("UPDATE_PROFILE")
 	end)
 end
 
 
 function MJProfilesMixin:unselectAllMounts()
-	local profile = self.journal.db
-	StaticPopup_Show(self.addonName.."YOU_WANT", NORMAL_FONT_COLOR_CODE..L["Unselect all mounts"]..FONT_COLOR_CODE_CLOSE, nil, function()
-		wipe(profile.fly)
-		wipe(profile.ground)
-		wipe(profile.swimming)
-		self.journal:updateMountsList()
+	StaticPopup_Show(self.addonName.."YOU_WANT", NORMAL_FONT_COLOR_CODE..L["Unselect all mounts in selected zone"]..FONT_COLOR_CODE_CLOSE, nil, function()
+		if self.journal.list then
+			wipe(self.journal.list.fly)
+			wipe(self.journal.list.ground)
+			wipe(self.journal.list.swimming)
+			self.journal:getRemoveMountList(self.journal.listMapID)
+			self:event("UPDATE_PROFILE")
+		end
 	end)
 end
 
@@ -196,11 +201,11 @@ function MJProfilesMixin:initialize(level, value)
 		info.notCheckable = true
 		info.keepShownOnClick = nil
 
-		info.text = L["Select all mounts by type"]
+		info.text = L["Select all mounts by type in selected zone"]
 		info.func = function() self:selectAllMounts() end
 		self:ddAddButton(info, level)
 
-		info.text = L["Unselect all mounts"]
+		info.text = L["Unselect all mounts in selected zone"]
 		info.func = function() self:unselectAllMounts() end
 		self:ddAddButton(info, level)
 
