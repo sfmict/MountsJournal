@@ -1714,7 +1714,7 @@ function journal:updateMountsList()
 		-- SOURCES
 		and sources[sourceType]
 		-- SEARCH
-		and (text:len() == 0 or name:lower():find(text) or sourceText:lower():find(text))
+		and (text:len() == 0 or name:lower():find(text) or sourceText:lower():find(text) or tags:toString(mountID):find(text))
 		-- TYPE
 		and types[mountTypes[mountType]]
 		-- FACTION

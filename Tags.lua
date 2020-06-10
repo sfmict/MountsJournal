@@ -243,6 +243,18 @@ function tags:removeMountTag(mountID, tag)
 end
 
 
+function tags:toString(mountID)
+	local str = ""
+	local mountTags = self.mountTags[mountID]
+	if mountTags then
+		for tag in next, mountTags do
+			str = str..tag
+		end
+	end
+	return str:lower()
+end
+
+
 function tags:getFilterMount(mountID)
 	local mountTags = self.mountTags[mountID]
 	if not mountTags then return self.filter.noTag end

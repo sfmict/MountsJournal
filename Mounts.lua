@@ -50,14 +50,14 @@ function mounts:ADDON_LOADED(addonName)
 
 		-- Списки
 		self.swimmingVashjir = {
-			373, -- Вайш'ирский морской конек
+			[373] = true, -- Вайш'ирский морской конек
 		}
 		self.lowLevel = {
-			678, -- Механоцикл с шофером
-			679, -- Анжинерский чоппер с водителем
+			[678] = true, -- Механоцикл с шофером
+			[679] = true, -- Анжинерский чоппер с водителем
 		}
 		self.herbalismMounts = {
-			522, -- Небесный голем
+			[522] = true, -- Небесный голем
 		}
 
 		self.sFlags = {}
@@ -403,7 +403,7 @@ function mounts:setHerbMount()
 	if self.config.useHerbMounts then
 		local prof1, prof2 = GetProfessions()
 		if (prof1 and select(7, GetProfessionInfo(prof1)) == 182 or prof2 and select(7, GetProfessionInfo(prof2)) == 182) then
-			for _, mountID in ipairs(self.herbalismMounts) do
+			for mountID in next, self.herbalismMounts do
 				if select(11, C_MountJournal.GetMountInfoByID(mountID)) then
 					self.herbMount = true
 					return
