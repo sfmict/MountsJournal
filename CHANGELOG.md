@@ -2,3 +2,4 @@
 * Added ability to create custom animation for mounts.
 * Added select/unselect all mounts button in profile settings.
 * Mounts search now looks for matches in tags.
+* Minor fixes.

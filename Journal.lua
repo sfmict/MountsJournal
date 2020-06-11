@@ -1073,7 +1073,7 @@ do
 		for mapID, mapConfig in pairs(self.zoneMounts) do
 			if not mapConfig.listFromID
 			and mapID ~= self.navBar.mapID
-			and #mapConfig.fly + #mapConfig.ground + #mapConfig.swimming > 0 then
+			and (next(mapConfig.fly) or next(mapConfig.ground) or next(mapConfig.swimming)) then
 				local mapInfo = util.getMapFullNameInfo(mapID)
 				local mapLangType = mapLangTypes[mapInfo.mapType]
 				if not mapLangType then
@@ -1714,7 +1714,7 @@ function journal:updateMountsList()
 		-- SOURCES
 		and sources[sourceType]
 		-- SEARCH
-		and (text:len() == 0 or name:lower():find(text) or sourceText:lower():find(text) or tags:toString(mountID):find(text))
+		and (text:len() == 0 or name:lower():find(text) or sourceText:lower():find(text) or tags:find(mountID, text))
 		-- TYPE
 		and types[mountTypes[mountType]]
 		-- FACTION

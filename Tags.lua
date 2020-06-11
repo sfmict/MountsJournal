@@ -243,15 +243,20 @@ function tags:removeMountTag(mountID, tag)
 end
 
 
-function tags:toString(mountID)
-	local str = ""
+function tags:find(mountID, text)
 	local mountTags = self.mountTags[mountID]
 	if mountTags then
+		local str = ""
 		for tag in next, mountTags do
-			str = str..tag
+			str = str..tag:lower()
 		end
+
+		text = {(" "):split(text)}
+		for i = 1, #text do
+			if not str:find(text[i]) then return end
+		end
+		return true
 	end
-	return str:lower()
 end
 
 
