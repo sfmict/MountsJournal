@@ -289,7 +289,7 @@ function mounts:setMountsList()
 			while list and list.listFromID do
 				list = zoneMounts[list.listFromID]
 			end
-			if list and #list.fly + #list.ground + #list.swimming ~= 0 then
+			if list and (next(list.fly) or next(list.ground) or next(list.swimming)) then
 				self.list = list
 				return
 			end
