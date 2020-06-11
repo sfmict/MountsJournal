@@ -3,6 +3,7 @@ local dropDownOptions = {
 	"keepShownOnClick",
 	"hasArrow",
 	"value",
+	"owner",
 	"arg1",
 	"arg2",
 	"notCheckable",
@@ -107,9 +108,9 @@ function MJDropDownButtonMixin:dropDownToggle(level, value, anchorFrame, xOffset
 
 	if menu:IsShown() then
 		menu:Hide()
-		if level == 1 and menu.callButton == self then return end
+		if level == 1 and menu.callButton == anchorFrame then return end
 	end
-	menu.callButton = self
+	menu.callButton = anchorFrame
 
 	local displayMode
 	if level == 1 then

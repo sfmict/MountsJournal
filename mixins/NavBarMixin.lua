@@ -17,11 +17,16 @@ MJNavBarMixin = util.createFromEventsMixin()
 
 function MJNavBarMixin:onLoad()
 	self.defMapID = MountsJournal.defMountsListID
+
+	self.dropDown = CreateFrame("FRAME", nil, self, "MJDropDownScriptButton")
+	self.dropDown:ddSetInit(function(...) self:dropDownInit(...) end, "menu")
+
 	local homeData = {
 		name = WORLD,
 		OnClick = function() self:setDefMap() end,
 	}
 	NavBar_Initialize(self, "MJNavButtonTemplate", homeData, self.home, self.overflow)
+	self.overflow:SetScript("OnMouseDown", function(btn) self:dropDownToggleClick(btn) end)
 	self:setDefMap()
 end
 
@@ -69,6 +74,34 @@ function MJNavBarMixin:getDropDownList()
 		end
 	end
 	return list
+end
+
+
+function MJNavBarMixin:dropDownToggleClick(btn)
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	self.dropDown.buttonOwner = btn
+	self.dropDown:dropDownToggle(1, nil, btn, 20, 3)
+end
+
+
+function MJNavBarMixin:dropDownInit(btn, level)
+	local navButton = btn.buttonOwner
+	if not (navButton and navButton.listFunc) then return end
+
+	local info = {
+		func = NavBar_DropDown_Click,
+		owner = navButton,
+		notCheckable = true,
+	}
+	local list = navButton:listFunc()
+	if list then
+		for i, entry in ipairs(list) do
+			info.text = entry.text
+			info.arg1 = entry.id
+			info.arg2 = entry.func
+			btn:ddAddButton(info, level)
+		end
+	end
 end
 
 

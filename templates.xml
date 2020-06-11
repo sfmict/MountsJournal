@@ -691,9 +691,16 @@
 						<Anchor point="CENTER"/>
 					</Anchors>
 				</HighlightTexture>
+				<KeyValues>
+					<KeyValue key="MJNoGlobalMouseEvent" value="true" type="boolean"/>
+				</KeyValues>
 				<Scripts>
 					<OnMouseDown>
 						self.Art:SetPoint("CENTER", -1, -2)
+						if button == "LeftButton" then
+							local parent = self:GetParent()
+							parent:GetParent():dropDownToggleClick(parent)
+						end
 					</OnMouseDown>
 					<OnMouseUp>
 						self.Art:SetPoint("CENTER", 0, -1)
@@ -706,10 +713,6 @@
 						self.NormalTexture:SetAlpha(0)
 						self.PushedTexture:SetAlpha(0)
 					</OnLeave>
-					<OnClick>
-						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-						NavBar_ToggleMenu(self:GetParent())
-					</OnClick>
 				</Scripts>
 			</Button>
 		</Frames>
@@ -790,14 +793,10 @@
 		<Frames>
 			<Button parentKey="overflow">
 				<Size x="44" y="24"/>
-				<Scripts>
-					<OnLoad>
-						self.xoffset = -18
-					</OnLoad>
-					<OnClick>
-						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-					</OnClick>
-				</Scripts>
+				<KeyValues>
+					<KeyValue key="MJNoGlobalMouseEvent" value="true" type="boolean"/>
+					<KeyValue key="xoffset" value="-18" tyoe="number"/>
+				</KeyValues>
 				<NormalTexture file="Interface/HelpFrame/CS_HelpTextures">
 					<TexCoords left=".54296875" right=".62890625" top=".7578125" bottom=".9921875"/>
 				</NormalTexture>
@@ -899,9 +898,9 @@
 	<Frame name="MJMapTemplate" hidden="true" inherits="InsetFrameTemplate" mixin="MJMapCanvasMixin" virtual="true">
 		<Size y="276"/>
 		<Frames>
-			<Frame parentKey="navigation" inherits="WorldMapFloorNavigationFrameTemplate" frameStrata="DIALOG">
+			<Frame parentKey="navigation" inherits="MJDropDownButtonTemplate" frameStrata="DIALOG">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="-13" y="-2"/>
+					<Anchor point="TOPLEFT" x="2" y="-5"/>
 				</Anchors>
 			</Frame>
 			<ScrollFrame parentKey="ScrollContainer">
