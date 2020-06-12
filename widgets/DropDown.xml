@@ -1,0 +1,303 @@
+<Ui>
+	<Button name="MJDropDownScriptButton" mixin="MJDropDownButtonMixin" virtual="true"/>
+
+	<Frame name="MJDropDownButtonTemplate" inherits="MJDropDownScriptButton" virtual="true">
+		<Size x="135" y="24"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture parentKey="Left" file="Interface/Glues/CharacterCreate/CharacterCreate-LabelFrame">
+					<Size x="25" y="64"/>
+					<Anchors>
+						<Anchor point="LEFT" x="-15"/>
+					</Anchors>
+					<TexCoords left="0" right=".1953125" top="0" bottom="1"/>
+				</Texture>
+				<Texture parentKey="Right" file="Interface/Glues/CharacterCreate/CharacterCreate-LabelFrame">
+					<Size x="25" y="64"/>
+					<Anchors>
+						<Anchor point="RIGHT" x="15"/>
+					</Anchors>
+					<TexCoords left=".8046875" right="1" top="0" bottom="1"/>
+				</Texture>
+				<Texture parentKey="Middle" file="Interface/Glues/CharacterCreate/CharacterCreate-LabelFrame">
+					<Size y="64"/>
+					<Anchors>
+						<Anchor point="LEFT" relativeKey="$parent.Left" relativePoint="RIGHT"/>
+						<Anchor point="RIGHT" relativeKey="$parent.Right" relativePoint="LEFT"/>
+					</Anchors>
+					<TexCoords left=".1953125" right=".8046875" top="0" bottom="1"/>
+				</Texture>
+				<FontString parentKey="Text" inherits="GameFontHighlightSmall" wordwrap="false" justifyH="RIGHT">
+					<Anchors>
+						<Anchor point="LEFT" relativeKey="$parent.Left" relativePoint="RIGHT" y="2"/>
+						<Anchor point="RIGHT" relativeKey="$parent.Right" relativePoint="LEFT" x="-17" y="2"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button parentKey="Button" motionScriptsWhileDisabled="true">
+				<Size x="26" y="26"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.Right" relativePoint="LEFT" x="9" y="1"/>
+				</Anchors>
+				<NormalTexture parentKey="NormalTexture" file="Interface/ChatFrame/UI-ChatIcon-ScrollDown-Up"/>
+				<PushedTexture name="$parentPushedTexture" parentKey="PushedTexture" file="Interface/ChatFrame/UI-ChatIcon-ScrollDown-Down"/>
+				<DisabledTexture name="$parentDisabledTexture" parentKey="DisabledTexture" file="Interface/ChatFrame/UI-ChatIcon-ScrollDown-Disabled"/>
+				<HighlightTexture name="$parentHighlightTexture" parentKey="HighlightTexture" file="Interface/Buttons/UI-Common-MouseHilight" alphaMode="ADD"/>
+				<KeyValues>
+					<KeyValue key="MJNoGlobalMouseEvent" value="true" type="boolean"/>
+				</KeyValues>
+				<Scripts>
+					<OnClick>
+						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+						local parent = self:GetParent()
+						parent:dropDownToggle(1, nil, parent)
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+		<KeyValues>
+			<KeyValue key="dropDownSetText" value="true" type="boolean"/>
+		</KeyValues>
+	</Frame>
+
+	<Button name="MJDropDownStreatchButtonTemplate" inherits="UIMenuButtonStretchTemplate,MJDropDownScriptButton" virtual="true">
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture parentKey="Icon" file="Interface/ChatFrame/ChatFrameExpandArrow">
+					<Size x="10" y="12"/>
+					<Anchors>
+						<Anchor point="RIGHT" x="-5"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<ButtonText parentKey="Text">
+			<Anchors>
+				<Anchor point="TOP" x="0" y="-4" />
+				<Anchor point="BOTTOM" x="0" y="4" />
+				<Anchor point="LEFT" x="4" y="0" />
+				<Anchor point="RIGHT" x="-15" y="0" />
+			</Anchors>
+		</ButtonText>
+		<KeyValues>
+			<KeyValue key="MJNoGlobalMouseEvent" value="true" type="boolean"/>
+		</KeyValues>
+		<Scripts>
+			<OnClick>
+				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+				self:dropDownToggle(1, nil, self, 111, 15)
+			</OnClick>
+		</Scripts>
+	</Button>
+
+	<Frame name="MJDropDownMenuTemplate" hidden="true" enableMouse="true" clampedToScreen="true" virtual="true">
+		<Frames>
+			<Frame parentKey="backdrop" useParentLevel="true" inherits="DialogBorderDarkTemplate"/>
+			<Frame parentKey="menuBackdrop" useParentLevel="true" setAllPoints="true">
+				<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background" edgeFile="Interface/Tooltips/UI-Tooltip-Border" tile="true">
+					<EdgeSize>
+						<AbsValue val="16"/>
+					</EdgeSize>
+					<TileSize>
+						<AbsValue val="16"/>
+					</TileSize>
+					<BackgroundInsets>
+						<AbsInset left="5" right="4" top="4" bottom="4"/>
+					</BackgroundInsets>
+				</Backdrop>
+				<Scripts>
+					<OnLoad>
+						self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR:GetRGB())
+						self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR:GetRGB())
+					</OnLoad>
+					<OnHide>self:Hide()</OnHide>
+				</Scripts>
+			</Frame>
+		</Frames>
+	</Frame>
+
+	<Button name="MJDropDownMenuButtonTemplate" mixin="MJDropDownMenuButtonMixin" motionScriptsWhileDisabled="true" virtual="true">
+		<Size x="100" y="16"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="highlight" file="Interface/QuestFrame/UI-QuestTitleHighlight" alphaMode="ADD" setAllPoints="true" hidden="true"/>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture parentKey="Check" file="Interface/Common/UI-DropDownRadioChecks">
+					<Size x="16" y="16"/>
+					<Anchors>
+						<Anchor point="LEFT"/>
+					</Anchors>
+					<TexCoords left="0" right=".5" top=".5" bottom="1"/>
+				</Texture>
+				<Texture parentKey="UnCheck" file="Interface/Common/UI-DropDownRadioChecks">
+					<Size x="16" y="16"/>
+					<Anchors>
+						<Anchor point="LEFT"/>
+					</Anchors>
+					<TexCoords left=".5" right="1" top=".5" bottom="1"/>
+				</Texture>
+				<Texture parentKey="Icon" hidden="true">
+					<Size x="16" y="16"/>
+					<Anchors>
+						<Anchor point="RIGHT"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="ExpandArrow" file="Interface/ChatFrame/ChatFrameExpandArrow" hidden="true">
+					<Size x="16" y="16"/>
+					<Anchors>
+						<Anchor point="RIGHT" x="4"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button parentKey="removeButton" alpha="0">
+				<Size x="16" y="16"/>
+				<Anchors>
+					<Anchor point="RIGHT" x="-5" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="icon" file="Interface\BUTTONS\UI-GroupLoot-Pass-Up">
+							<Size x="16" y="16"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+							<Color r=".7" g=".7" b=".7"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnEnter>
+						self.icon:SetVertexColor(1, 1, 1)
+						local parent = self:GetParent()
+						parent:GetScript("OnEnter")(parent)
+					</OnEnter>
+					<OnLeave>
+						self.icon:SetVertexColor(.7, .7, .7)
+						local parent = self:GetParent()
+						parent:GetScript("OnLeave")(parent)
+					</OnLeave>
+					<OnMouseDown>self.icon:SetScale(.9)</OnMouseDown>
+					<OnMouseUp>self.icon:SetScale(1)</OnMouseUp>
+				</Scripts>
+			</Button>
+			<Button parentKey="arrowDownButton" alpha="0">
+				<Size x="12" y="16"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.removeButton" relativePoint="LEFT" x="0" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="icon" file="Interface\BUTTONS\UI-MicroStream-Yellow">
+							<Size x="8" y="14"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+							<TexCoords left=".25" right=".75" top="0" bottom=".875"/>
+							<Color r=".7" g=".7" b=".7"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnEnter>
+						self.icon:SetVertexColor(1, 1, 1)
+						local parent = self:GetParent()
+						parent:GetScript("OnEnter")(parent)
+					</OnEnter>
+					<OnLeave>
+						self.icon:SetVertexColor(.7, .7, .7)
+						local parent = self:GetParent()
+						parent:GetScript("OnLeave")(parent)
+					</OnLeave>
+					<OnMouseDown>self.icon:SetScale(.88)</OnMouseDown>
+					<OnMouseUp>self.icon:SetScale(1)</OnMouseUp>
+				</Scripts>
+			</Button>
+			<Button parentKey="arrowUpButton" alpha="0">
+				<Size x="12" y="16"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.arrowDownButton" relativePoint="LEFT" x="0" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="icon" file="Interface\BUTTONS\UI-MicroStream-Yellow">
+							<Size x="8" y="14"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+							<Color r=".7" g=".7" b=".7"/>
+							<TexCoords left=".25" right=".75" top=".875" bottom="0"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnEnter>
+						self.icon:SetVertexColor(1, 1, 1)
+						local parent = self:GetParent()
+						parent:GetScript("OnEnter")(parent)
+					</OnEnter>
+					<OnLeave>
+						self.icon:SetVertexColor(.7, .7, .7)
+						local parent = self:GetParent()
+						parent:GetScript("OnLeave")(parent)
+					</OnLeave>
+					<OnMouseDown>self.icon:SetScale(.88)</OnMouseDown>
+					<OnMouseUp>self.icon:SetScale(1)</OnMouseUp>
+				</Scripts>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad method="onLoad"/>
+			<OnClick method="onClick"/>
+			<OnEnter method="onEnter"/>
+			<OnLeave method="onLeave"/>
+			<OnEnable method="onEnable"/>
+			<OnDisable method="onDisable"/>
+			<OnHide>self:Hide()</OnHide>
+		</Scripts>
+		<ButtonText parentKey="NormalText">
+			<Anchors>
+				<Anchor point="LEFT" x="-5" y="0"/>
+			</Anchors>
+		</ButtonText>
+		<NormalFont style="GameFontHighlightSmallLeft"/>
+		<HighlightFont style="GameFontHighlightSmallLeft"/>
+		<DisabledFont style="GameFontDisableSmallLeft"/>
+	</Button>
+
+	<Frame name="MJDropDownMenuSearchTemplate" mixin="MJDropDownMenuSearchMixin" hidden="true" virtual="true">
+		<Size x="100"/>
+		<Frames>
+			<EditBox parentKey="searchBox" inherits="SearchBoxTemplate" letters="40">
+				<Size y="20"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="5" y="-3"/>
+					<Anchor point="TOPRIGHT" x="1"/>
+				</Anchors>
+			</EditBox>
+			<ScrollFrame parentKey="listScroll" inherits="HybridScrollFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.searchBox" relativePoint="BOTTOMLEFT" x="-5" y="-3"/>
+					<Anchor point="BOTTOMRIGHT" x="-30" y="3"/>
+				</Anchors>
+				<Frames>
+					<Slider parentKey="scrollBar" inherits="HybridScrollBarTrimTemplate">
+						<Anchors>
+							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="10" y="-18"/>
+							<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="10" y="15"/>
+						</Anchors>
+					</Slider>
+				</Frames>
+			</ScrollFrame>
+		</Frames>
+		<Scripts>
+			<OnLoad method="onLoad"/>
+			<OnShow method="onShow"/>
+			<OnHide>self:Hide()</OnHide>
+		</Scripts>
+	</Frame>
+</Ui>

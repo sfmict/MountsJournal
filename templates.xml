@@ -1,11 +1,11 @@
 <Ui>
-	<Script file="mixins/DropDownSearchMixin.lua"/>
 	<Script file="mixins/MacroMixin.lua"/>
 	<Script file="mixins/NavBarMixin.lua"/>
 	<Script file="mixins/WorldMapMixin.lua"/>
 	<Script file="mixins/ExistingListsMixin.lua"/>
 	<Script file="mixins/ProfilesMixin.lua"/>
 	<Script file="mixins/CompanionMixin.lua"/>
+	<Script file="mixins/MountAnimationsMixin.lua"/>
 
 	<Button name="MJAchiev" virtual="true">
 		<Size x="60" y="40"/>
@@ -691,9 +691,16 @@
 						<Anchor point="CENTER"/>
 					</Anchors>
 				</HighlightTexture>
+				<KeyValues>
+					<KeyValue key="MJNoGlobalMouseEvent" value="true" type="boolean"/>
+				</KeyValues>
 				<Scripts>
 					<OnMouseDown>
 						self.Art:SetPoint("CENTER", -1, -2)
+						if button == "LeftButton" then
+							local parent = self:GetParent()
+							parent:GetParent():dropDownToggleClick(parent)
+						end
 					</OnMouseDown>
 					<OnMouseUp>
 						self.Art:SetPoint("CENTER", 0, -1)
@@ -706,10 +713,6 @@
 						self.NormalTexture:SetAlpha(0)
 						self.PushedTexture:SetAlpha(0)
 					</OnLeave>
-					<OnClick>
-						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-						NavBar_ToggleMenu(self:GetParent())
-					</OnClick>
 				</Scripts>
 			</Button>
 		</Frames>
@@ -790,14 +793,10 @@
 		<Frames>
 			<Button parentKey="overflow">
 				<Size x="44" y="24"/>
-				<Scripts>
-					<OnLoad>
-						self.xoffset = -18
-					</OnLoad>
-					<OnClick>
-						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-					</OnClick>
-				</Scripts>
+				<KeyValues>
+					<KeyValue key="MJNoGlobalMouseEvent" value="true" type="boolean"/>
+					<KeyValue key="xoffset" value="-18" tyoe="number"/>
+				</KeyValues>
 				<NormalTexture file="Interface/HelpFrame/CS_HelpTextures">
 					<TexCoords left=".54296875" right=".62890625" top=".7578125" bottom=".9921875"/>
 				</NormalTexture>
@@ -899,9 +898,9 @@
 	<Frame name="MJMapTemplate" hidden="true" inherits="InsetFrameTemplate" mixin="MJMapCanvasMixin" virtual="true">
 		<Size y="276"/>
 		<Frames>
-			<Frame parentKey="navigation" inherits="WorldMapFloorNavigationFrameTemplate" frameStrata="DIALOG">
+			<Frame parentKey="navigation" inherits="MJDropDownButtonTemplate" frameStrata="DIALOG">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="-13" y="-2"/>
+					<Anchor point="TOPLEFT" x="2" y="-5"/>
 				</Anchors>
 			</Frame>
 			<ScrollFrame parentKey="ScrollContainer">
@@ -938,30 +937,6 @@
 			<OnMouseUp method="onClick"/>
 		</Scripts>
 	</Frame>
-
-	<Button name="MJMenuButtonStreatchTemplate" inherits="UIMenuButtonStretchTemplate" virtual="true">
-		<Layers>
-			<Layer level="ARTWORK">
-				<Texture parentKey="Icon" file="Interface/ChatFrame/ChatFrameExpandArrow">
-					<Size x="10" y="12"/>
-					<Anchors>
-						<Anchor point="RIGHT" relativeKey="$parent.Right" relativePoint="RIGHT" x="-5"/>
-					</Anchors>
-				</Texture>
-			</Layer>
-		</Layers>
-		<Frames>
-			<Frame parentKey="optionsMenu" inherits="UIDropDownMenuTemplate" enableMouse="true"/>
-		</Frames>
-		<ButtonText parentKey="Text">
-			<Anchors>
-				<Anchor point="TOP" x="0" y="-4" />
-				<Anchor point="BOTTOM" x="0" y="4" />
-				<Anchor point="LEFT" x="4" y="0" />
-				<Anchor point="RIGHT" x="-15" y="0" />
-			</Anchors>
-		</ButtonText>
-	</Button>
 
 	<CheckButton name="MJArrowToggle" inherits="UIMenuButtonStretchTemplate" virtual="true">
 		<Size x="24" y="24"/>
@@ -1061,7 +1036,7 @@
 					<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT"/>
 				</Anchors>
 			</Frame>
-			<DropDownToggleButton parentKey="dungeonRaidBtn" inherits="MJMenuButtonStreatchTemplate" mixin="MJDungeonRaidMixin">
+			<Button parentKey="dungeonRaidBtn" inherits="MJDropDownStreatchButtonTemplate" mixin="MJDungeonRaidMixin">
 				<Size x="130" y="24"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.mapControl" relativePoint="TOPLEFT" x="3" y="-3"/>
@@ -1070,7 +1045,7 @@
 					<OnLoad method="onLoad"/>
 					<OnClick method="onClick"/>
 				</Scripts>
-			</DropDownToggleButton>
+			</Button>
 			<CheckButton parentKey="existingListsToggle" inherits="MJArrowToggle">
 				<Anchors>
 					<Anchor point="TOPRIGHT" relativeKey="$parent.mapControl" relativePoint="TOPRIGHT" x="-3" y="-3"/>
@@ -1098,12 +1073,12 @@
 					<Anchor point="TOP" relativeKey="$parent.WaterWalk" relativePoint="BOTTOM" x="0" y="-5"/>
 				</Anchors>
 			</CheckButton>
-			<DropDownToggleButton parentKey="listFromMap" inherits="MJMenuButtonStreatchTemplate">
+			<Button parentKey="listFromMap" inherits="MJDropDownStreatchButtonTemplate">
 				<Size x="134" y="30"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.HerbGathering" relativePoint="BOTTOMLEFT" x="0" y="-20"/>
 				</Anchors>
-			</DropDownToggleButton>
+			</Button>
 			<Frame parentKey="relationMap">
 				<Size x="210" y="30"/>
 				<Anchors>
@@ -1401,210 +1376,212 @@
 		</Frames>
 	</Frame>
 
-	<Button name="MJDropDownMenuButtonTemplate" inherits="UIDropDownCustomMenuEntryTemplate" mixin="MJDropDownMenuButtonMixin" virtual="true">
-		<Size x="100" y="16"/>
+	<Frame name="MJMountAnimationPanel" inherits="MJDropDownButtonTemplate" mixin="MJMountAnimationPanelMixin" virtual="true">
+		<Scripts>
+			<OnLoad method="onLoad"/>
+		</Scripts>
+	</Frame>
+
+	<Button name="MJOneSymbolButtonTemplate" virtual="true">
+		<Size x="22" y="22"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString inherits="GameFontNormalLarge" parentKey="text" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<HighlightTexture file="Interface/Buttons/ButtonHilight-Square" alphaMode="ADD">
+			<Size x="16" y="16"/>
+			<Anchors>
+				<Anchor point="CENTER"/>
+			</Anchors>
+		</HighlightTexture>
+	</Button>
+
+	<Frame name="MJMountCustomAnimationPanel" mixin="MJMountCustomAnimationMixin" hidden="true" virtual="true">
+		<Size x="168" y="66"/>
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture parentKey="Highlight" file="Interface\QuestFrame\UI-QuestTitleHighlight" alphaMode="ADD" setAllPoints="true" hidden="true"/>
-			</Layer>
-			<Layer level="ARTWORK">
-				<Texture parentKey="Check" file="Interface\Common\UI-DropDownRadioChecks">
-					<Size x="16" y="16"/>
-					<Anchors>
-						<Anchor point="LEFT">
-							<Offset x="0" y="0"/>
-						</Anchor>
-					</Anchors>
-					<TexCoords left="0" right=".5" top=".5" bottom="1"/>
-				</Texture>
-				<Texture parentKey="Uncheck" file="Interface\Common\UI-DropDownRadioChecks">
-					<Size x="16" y="16"/>
-					<Anchors>
-						<Anchor point="LEFT">
-							<Offset x="0" y="0"/>
-						</Anchor>
-					</Anchors>
-					<TexCoords left=".5" right="1" top=".5" bottom="1"/>
-				</Texture>
-				<Texture parentKey="Icon" hidden="true">
-					<Size>
-						<AbsDimension x="16" y="16"/>
-					</Size>
-					<Anchors>
-						<Anchor point="RIGHT">
-							<Offset x="0" y="0"/>
-						</Anchor>
-					</Anchors>
+				<Texture parentKey="BG" file="Interface/ChatFrame/ChatFrameBackground" setAllPoints="true">
+					<Color r=".1" g=".1" b=".1" a=".5"/>
 				</Texture>
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button parentKey="removeButton" alpha="0">
-				<Size x="16" y="16"/>
+			<Button parentKey="minus" inherits="MJOneSymbolButtonTemplate">
 				<Anchors>
-					<Anchor point="RIGHT" x="-5" y="0"/>
+					<Anchor point="TOPLEFT" x="0"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>self.text:SetText("-")</OnLoad>
+				</Scripts>
+			</Button>
+			<EditBox parentKey="animationNum" numeric="true" letters="4" multiLine="false" autoFocus="false">
+				<Size x="40" y="22"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.minus" relativePoint="RIGHT" x="-2"/>
 				</Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
-						<Texture parentKey="icon" file="Interface\BUTTONS\UI-GroupLoot-Pass-Up">
-							<Size x="16" y="16"/>
-							<Anchors>
-								<Anchor point="CENTER"/>
-							</Anchors>
-							<Color r=".7" g=".7" b=".7"/>
+						<Texture file="Interface/MoneyFrame/UI-MoneyButton-Up" setAllPoints="true" alphaMode="ADD">
+							<TexCoords left=".04" right=".61" top="0" bottom="1"/>
 						</Texture>
 					</Layer>
 				</Layers>
+				<FontString inherits="GameFontHighlightSmall" justifyH="CENTER"/>
 				<Scripts>
-					<OnEnter>
-						self.icon:SetVertexColor(1, 1, 1)
-						local parent = self:GetParent()
-						parent:GetScript("OnEnter")(parent)
-					</OnEnter>
-					<OnLeave>
-						self.icon:SetVertexColor(.7, .7, .7)
-						local parent = self:GetParent()
-						parent:GetScript("OnLeave")(parent)
-					</OnLeave>
-					<OnMouseDown>self.icon:SetScale(.9)</OnMouseDown>
-					<OnMouseUp>self.icon:SetScale(1)</OnMouseUp>
+					<OnLoad>self:SetTextInsets(2, 2, 0, 0)</OnLoad>
 				</Scripts>
-			</Button>
-			<Button parentKey="arrowDownButton" alpha="0">
-				<Size x="12" y="16"/>
-				<Anchors>
-					<Anchor point="RIGHT" relativeKey="$parent.removeButton" relativePoint="LEFT" x="0" y="0"/>
-				</Anchors>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<Texture parentKey="icon" file="Interface\BUTTONS\UI-MicroStream-Yellow">
-							<Size x="8" y="14"/>
-							<Anchors>
-								<Anchor point="CENTER"/>
-							</Anchors>
-							<TexCoords left=".25" right=".75" top="0" bottom=".875"/>
-							<Color r=".7" g=".7" b=".7"/>
-						</Texture>
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnEnter>
-						self.icon:SetVertexColor(1, 1, 1)
-						local parent = self:GetParent()
-						parent:GetScript("OnEnter")(parent)
-					</OnEnter>
-					<OnLeave>
-						self.icon:SetVertexColor(.7, .7, .7)
-						local parent = self:GetParent()
-						parent:GetScript("OnLeave")(parent)
-					</OnLeave>
-					<OnMouseDown>self.icon:SetScale(.88)</OnMouseDown>
-					<OnMouseUp>self.icon:SetScale(1)</OnMouseUp>
-				</Scripts>
-			</Button>
-			<Button parentKey="arrowUpButton" alpha="0">
-				<Size x="12" y="16"/>
-				<Anchors>
-					<Anchor point="RIGHT" relativeKey="$parent.arrowDownButton" relativePoint="LEFT" x="0" y="0"/>
-				</Anchors>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<Texture parentKey="icon" file="Interface\BUTTONS\UI-MicroStream-Yellow">
-							<Size x="8" y="14"/>
-							<Anchors>
-								<Anchor point="CENTER"/>
-							</Anchors>
-							<Color r=".7" g=".7" b=".7"/>
-							<TexCoords left=".25" right=".75" top=".875" bottom="0"/>
-						</Texture>
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnEnter>
-						self.icon:SetVertexColor(1, 1, 1)
-						local parent = self:GetParent()
-						parent:GetScript("OnEnter")(parent)
-					</OnEnter>
-					<OnLeave>
-						self.icon:SetVertexColor(.7, .7, .7)
-						local parent = self:GetParent()
-						parent:GetScript("OnLeave")(parent)
-					</OnLeave>
-					<OnMouseDown>self.icon:SetScale(.88)</OnMouseDown>
-					<OnMouseUp>self.icon:SetScale(1)</OnMouseUp>
-				</Scripts>
-			</Button>
-		</Frames>
-		<Scripts>
-			<OnEnter>
-				self.isEnter = true
-				if self.remove then
-					self.removeButton:SetAlpha(1)
-				end
-				if self.order then
-					self.arrowDownButton:SetAlpha(1)
-					self.arrowUpButton:SetAlpha(1)
-				end
-				self.Highlight:Show()
-			</OnEnter>
-			<OnLeave>
-				self.isEnter = nil
-				self.Highlight:Hide()
-				self.removeButton:SetAlpha(0)
-				self.arrowDownButton:SetAlpha(0)
-				self.arrowUpButton:SetAlpha(0)
-			</OnLeave>
-		</Scripts>
-		<ButtonText parentKey="normalText">
-			<Anchors>
-				<Anchor point="LEFT">
-					<Offset x="-5" y="0"/>
-				</Anchor>
-			</Anchors>
-		</ButtonText>
-		<NormalFont style="GameFontHighlightSmallLeft"/>
-		<HighlightFont style="GameFontHighlightSmallLeft"/>
-		<DisabledFont style="GameFontDisableSmallLeft"/>
-	</Button>
-
-	<Frame name="MJMenuDropDownSearchTemplate" inherits="UIDropDownCustomMenuEntryTemplate" mixin="MJDropDownSearchMixin" virtual="true">
-		<Size x="100"/>
-		<Frames>
-			<EditBox inherits="SearchBoxTemplate" parentKey="searchBox" letters="40">
-				<Size y="20"/>
-				<Anchors>
-					<Anchor point="TOPLEFT" x="5" y="-3"/>
-					<Anchor point="TOPRIGHT" x="3"/>
-				</Anchors>
 			</EditBox>
-			<ScrollFrame parentKey="listScroll" inherits="HybridScrollFrameTemplate">
+			<Button parentKey="plus" inherits="MJOneSymbolButtonTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.searchBox" relativePoint="BOTTOMLEFT" x="-5" y="-3"/>
-					<Anchor point="BOTTOMRIGHT" x="-28" y="3"/>
+					<Anchor point="LEFT" relativeKey="$parent.animationNum" relativePoint="RIGHT" x="-2"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>self.text:SetText("+")</OnLoad>
+				</Scripts>
+			</Button>
+			<Button inherits="UIPanelButtonTemplate" parentKey="playButton">
+				<Size x="26" y="22"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.plus" relativePoint="RIGHT" x="20"/>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture parentKey="texture" file="Interface\OptionsFrame\VoiceChat-Play">
+							<Size x="10" y="10"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+			</Button>
+			<Button inherits="UIPanelButtonTemplate" parentKey="stopButton">
+				<Size x="26" y="22"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.playButton" relativePoint="RIGHT"/>
+				</Anchors>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture parentKey="texture" file="Interface\OptionsFrame\VoiceChat-Record">
+							<Size x="10" y="10"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+			</Button>
+			<CheckButton parentKey="isKit" inherits="MJCheckButtonTemplate">
+				<HitRectInsets>
+					<AbsInset left="0" right="-35" top="0" bottom="0"/>
+				</HitRectInsets>
+				<Anchors>
+					<Anchor point="TOPLEFT" y="-21"/>
+				</Anchors>
+			</CheckButton>
+			<CheckButton parentKey="loop" inherits="MJCheckButtonTemplate">
+				<HitRectInsets>
+					<AbsInset left="0" right="-40" top="0" bottom="0"/>
+				</HitRectInsets>
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.isKit.Text" relativePoint="RIGHT" x="4"/>
+				</Anchors>
+			</CheckButton>
+			<EditBox inherits="InputBoxInstructionsTemplate" parentKey="nameBox" letters="15" autoFocus="false">
+				<Size x="80" y="20"/>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT" x="7" y="2"/>
 				</Anchors>
 				<Frames>
-					<Slider parentKey="scrollBar" inherits="HybridScrollBarTrimTemplate">
+					<Button parentKey="clearButton" hidden="true">
+						<Size x="17" y="17"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="10" y="-18"/>
-							<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="10" y="15"/>
+							<Anchor point="RIGHT" x="-3" y="0"/>
 						</Anchors>
-					</Slider>
+						<Layers>
+							<Layer level="ARTWORK">
+								<Texture atlas="common-search-clearbutton" useAtlasSize="false" alpha="0.5" parentKey="texture">
+									<Size>
+										<AbsDimension x="10" y="10"/>
+									</Size>
+									<Anchors>
+										<Anchor point="TOPLEFT" x="3" y="-3"/>
+									</Anchors>
+								</Texture>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnEnter>
+								self.texture:SetAlpha(1.0);
+							</OnEnter>
+							<OnLeave>
+								self.texture:SetAlpha(0.5);
+							</OnLeave>
+							<OnMouseDown>
+								if self:IsEnabled() then
+									self.texture:SetPoint("TOPLEFT", self, "TOPLEFT", 4, -4);
+								end
+							</OnMouseDown>
+							<OnMouseUp>
+								self.texture:SetPoint("TOPLEFT", self, "TOPLEFT", 3, -3);
+							</OnMouseUp>
+							<OnClick function="SearchBoxTemplateClearButton_OnClick"/>
+						</Scripts>
+					</Button>
 				</Frames>
-			</ScrollFrame>
+				<Scripts>
+					<OnLoad>
+						self:SetTextInsets(0, 16, 0, 0)
+						self.Instructions:SetText(NAME)
+						self.Instructions:ClearAllPoints();
+						self.Instructions:SetPoint("TOPLEFT", self, "TOPLEFT", 5, 0);
+						self.Instructions:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -5, 0)
+					</OnLoad>
+					<OnEscapePressed function="EditBox_ClearFocus"/>
+					<OnEnterPressed function="EditBox_ClearFocus"/>
+					<OnEditFocusLost>
+						if self:GetText() == "" then
+							self.clearButton:Hide()
+						end
+					</OnEditFocusLost>
+					<OnEditFocusGained>
+						self.clearButton:Show()
+					</OnEditFocusGained>
+					<OnTextChanged>
+						local textExists = self:GetText() ~= ""
+						self:GetParent().save:SetEnabled(textExists)
+						self.clearButton:SetShown(self:HasFocus() or textExists)
+						InputBoxInstructions_OnTextChanged(self)
+					</OnTextChanged>
+				</Scripts>
+			</EditBox>
+			<Button inherits="UIPanelButtonTemplate" text="SAVE" parentKey="save">
+				<Size x="80" y="22"/>
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.nameBox" relativePoint="RIGHT" x="0" y="0"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>self:Disable()</OnLoad>
+				</Scripts>
+			</Button>
 		</Frames>
 		<Scripts>
 			<OnLoad method="onLoad"/>
-			<OnShow method="onShow"/>
 		</Scripts>
 	</Frame>
 
-	<DropDownToggleButton name="MJMenuButtonProfiles" inherits="MJMenuButtonStreatchTemplate" mixin="MJProfilesMixin" virtual="true">
+	<Button name="MJMenuButtonProfiles" inherits="MJDropDownStreatchButtonTemplate" mixin="MJProfilesMixin" virtual="true">
 		<Size x="130" y="22"/>
 		<Scripts>
 			<OnLoad method="onLoad"/>
 			<OnClick method="onClick"/>
 		</Scripts>
-	</DropDownToggleButton>
+	</Button>
 
 	<CheckButton name="MJPlayerShowToggle" mixin="PlayerPreviewToggle" scale=".5" virtual="true">
 		<Size x="77" y="77"/>
@@ -1614,14 +1591,19 @@
 			</Layer>
 			<Layer level="ARTWORK">
 				<Texture parentKey="portrait">
-					<Size x="70" y="70"/>
+					<Size x="69" y="69"/>
 					<Anchors>
 						<Anchor point="CENTER" relativeKey="$parent.border"/>
 					</Anchors>
 				</Texture>
 			</Layer>
 		</Layers>
-		<HighlightTexture alphaMode="ADD" file="Interface/Minimap/UI-Minimap-ZoomButton-Highlight"/>
+		<HighlightTexture alphaMode="ADD" file="Interface/Minimap/UI-Minimap-ZoomButton-Highlight">
+			<Size x="80" y="80"/>
+			<Anchors>
+				<Anchor point="CENTER" y="-3"/>
+			</Anchors>
+		</HighlightTexture>
 		<CheckedTexture file="Interface/Minimap/ping/ping4" alphaMode="ADD" alpha=".6">
 			<Size x="77" y="77"/>
 			<Anchors>

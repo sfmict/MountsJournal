@@ -46,6 +46,7 @@ function test:PLAYER_ENTERING_WORLD()
 	-- journal.navBarBtn:Click()
 	-- journal.mapSettings.existingListsToggle:Click()
 	-- journal.navBar:setMapID(1033)
+	-- journal.navBar:setMapID(909)
 
 	-- CONFIG OPEN
 	-- local classConfig = MountsJournalConfig
@@ -160,6 +161,7 @@ function test:PLAYER_ENTERING_WORLD()
 		-- FLIGHT BACK     
 		-- SPECIAL         
 		-- DEMONIC         651
+		-- LEFT RIGHT      349
 
 		-- PLAYER 91
 		local mountDisplay = self:GetParent()

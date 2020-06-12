@@ -13,6 +13,7 @@ classConfig:SetScript("OnShow", function(self)
 	local info = classConfig:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	info:SetPoint("TOPRIGHT", -16, 16)
 	info:SetTextColor(.5, .5, .5, 1)
+	info:SetJustifyH("RIGHT")
 	info:SetText(("%s %s: %s"):format(GetAddOnMetadata(addon, "Version"), L["author"], GetAddOnMetadata(addon, "Author")))
 
 	-- TITLE

@@ -47,7 +47,20 @@ function tags:init()
 	self.sortedTags = {}
 	self:setSortedTags()
 
-	MountJournal.mountOptionsMenu.initialize = function(_, level) self:mountOptionsMenu_Init(level) end
+	local mountOptionsMenu = MountJournal.mountOptionsMenu
+	util.setMixin(mountOptionsMenu, MJDropDownButtonMixin)
+	mountOptionsMenu:ddSetInit(function(...) self:mountOptionsMenu_Init(...) end, "menu")
+
+	MountJournal_ShowMountDropdown = function(index, anchorTo, offsetX, offsetY)
+		if not index then return end
+		local _,_,_, active, isUsable, _,_,_,_,_,_, mountID = C_MountJournal.GetDisplayedMountInfo(index)
+		MountJournal.menuMountIndex = index
+		MountJournal.menuMountID = mountID
+		MountJournal.active = active
+		MountJournal.menuIsUsable = isUsable
+		mountOptionsMenu:dropDownToggle(1, nil, anchorTo, offsetX, offsetY)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end
 end
 
 
@@ -78,9 +91,9 @@ function tags:resetFilter()
 end
 
 
-function tags:mountOptionsMenu_Init(level)
+function tags:mountOptionsMenu_Init(btn, level)
 	if not MountJournal.menuMountIndex then return end
-	local info = UIDropDownMenu_CreateInfo()
+	local info = {}
 	local mountIndex, mountID = MountJournal.menuMountIndex, MountJournal.menuMountID
 
 	if level == 1 then
@@ -104,7 +117,7 @@ function tags:mountOptionsMenu_Init(level)
 			MountJournalMountButton_UseMount(mountID)
 		end
 
-		UIDropDownMenu_AddButton(info, level)
+		btn:ddAddButton(info, level)
 
 		if not needsFanfare then
 			local _, canFavorite = C_MountJournal.GetIsFavorite(mountIndex)
@@ -121,14 +134,14 @@ function tags:mountOptionsMenu_Init(level)
 					C_MountJournal.SetIsFavorite(mountIndex, true)
 				end
 			end
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 
 			info.disabled = nil
 			info.keepShownOnClick = true
 			info.hasArrow = true
 			info.func = nil
 			info.text = L["tags"]
-			UIDropDownMenu_AddButton(info, level)
+			btn:ddAddButton(info, level)
 		end
 
 		info.disabled = nil
@@ -136,48 +149,33 @@ function tags:mountOptionsMenu_Init(level)
 		info.hasArrow = nil
 		info.func = nil
 		info.text = CANCEL
-		UIDropDownMenu_AddButton(info, level)
+		btn:ddAddButton(info, level)
 	else
-		info.isNotRadio = true
-		info.keepShownOnClick = true
-
-		if #self.sortedTags > 20 then
-			local searchFrame = util.getDropDownSearchFrame()
-
-			for _, tag in ipairs(self.sortedTags) do
-				info.text = tag
-				info.func = function(_,_,_, value)
-					if value then
-						self:addMountTag(mountID, tag)
-					else
-						self:removeMountTag(mountID, tag)
-					end
-				end
-				info.checked = function() return self:getTagInMount(mountID, tag) end
-				searchFrame:addButton(info)
-			end
-
-			UIDropDownMenu_AddButton({customFrame = searchFrame}, level)
+		if #self.sortedTags == 0 then
+			info.isNotRadio = true
+			info.keepShownOnClick = true
+			info.notCheckable = true
+			info.disabled = true
+			info.text = EMPTY
+			btn:ddAddButton(info, level)
 		else
+			info.list = {}
 			for _, tag in ipairs(self.sortedTags) do
-				info.text = tag
-				info.func = function(_,_,_, value)
-					if value then
-						self:addMountTag(mountID, tag)
-					else
-						self:removeMountTag(mountID, tag)
-					end
-				end
-				info.checked = function() return self:getTagInMount(mountID, tag) end
-				UIDropDownMenu_AddButton(info, level)
+				tinsert(info.list, {
+					isNotRadio = true,
+					keepShownOnClick = true,
+					text = tag,
+					func = function(_,_,_, value)
+						if value then
+							self:addMountTag(mountID, tag)
+						else
+							self:removeMountTag(mountID, tag)
+						end
+					end,
+					checked = function() return self:getTagInMount(mountID, tag) end,
+				})
 			end
-
-			if #self.sortedTags == 0 then
-				info.notCheckable = true
-				info.disabled = true
-				info.text = EMPTY
-				UIDropDownMenu_AddButton(info, level)
-			end
+			btn:ddAddButton(info, level)
 		end
 	end
 end
@@ -241,6 +239,23 @@ function tags:removeMountTag(mountID, tag)
 	if mountTags then
 		mountTags[tag] = nil
 		if next(mountTags) == nil then self.mountTags[mountID] = nil end
+	end
+end
+
+
+function tags:find(mountID, text)
+	local mountTags = self.mountTags[mountID]
+	if mountTags then
+		local str = ""
+		for tag in next, mountTags do
+			str = str..tag:lower()
+		end
+
+		text = {(" "):split(text)}
+		for i = 1, #text do
+			if not str:find(text[i]) then return end
+		end
+		return true
 	end
 end
 

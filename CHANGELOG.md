@@ -1,7 +1,5 @@
-###### v8.3.1
-* Fixed initialization filters
-###### v8.3
-* Added filter "Hidden For Character" (the filter system has been redone).
-* Increased maximum zoom distance from camera when viewing mount.
-* Battle Pet Search now looks for matches in source text.
+* Made its own system of drop-down menus. (The guild errors must be gone)
+* Added ability to create custom animation for mounts.
+* Added select/unselect all mounts button in profile settings.
+* Mounts search now looks for matches in tags.
 * Minor fixes.

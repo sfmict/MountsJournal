@@ -79,11 +79,16 @@ function MountsJournalUtil.createFromEventsMixin(...)
 end
 
 
-function MountsJournalUtil.setEventsMixin(frame)
-	for k, v in pairs(eventsMixin) do
+function MountsJournalUtil:setEventsMixin(frame)
+	self.setMixin(frame, eventsMixin)
+	frame:initEvents()
+end
+
+
+function MountsJournalUtil.setMixin(frame, mixin)
+	for k, v in pairs(mixin) do
 		frame[k] = v
 	end
-	frame:initEvents()
 end
 
 
@@ -151,5 +156,5 @@ end
 
 
 function MountsJournalUtil.cleanText(text)
-	return text:lower():gsub("^%s*(.-)%s*$", "%1"):gsub("[%(%)%.%%%+%-%*%?%[%^%$]", "%%%1")
+	return text:trim():lower():gsub("[%(%)%.%%%+%-%*%?%[%^%$]", "%%%1")
 end

@@ -7,6 +7,7 @@ function MJMapCanvasMixin:onLoad()
 	self.highlight = self.child.HighlightTexture
 	self.detailLayerPool = CreateFramePool("FRAME", self.child, "MapCanvasDetailLayerTemplate")
 	self.explorationLayerPool = CreateTexturePool(self.child.Exploration, "ARTWORK", 0)
+	self.navigation:ddSetInit(function(...) self:dropDownInit(...) end)
 end
 
 
@@ -43,13 +44,25 @@ function MJMapCanvasMixin:onUpdate()
 end
 
 
-function MJMapCanvasMixin:GetMapID()
-	return self.mapID
-end
+function MJMapCanvasMixin:dropDownInit(btn, level)
+	local mapGroupID = C_Map.GetMapGroupID(self.mapID)
+	if not mapGroupID then return end
 
+	local mapGroupMembersInfo = C_Map.GetMapGroupMembersInfo(mapGroupID)
+	if not mapGroupMembersInfo then return end
 
-function MJMapCanvasMixin:SetMapID(mapID)
-	self.navBar:setMapID(mapID)
+	local function goToMap(button)
+		self.navBar:setMapID(button.value)
+	end
+
+	local info = {}
+	for _, mapInfo in ipairs(mapGroupMembersInfo) do
+		info.text = mapInfo.name
+		info.value = mapInfo.mapID
+		info.checked = self.mapID == mapInfo.mapID
+		info.func = goToMap
+		btn:ddAddButton(info, level)
+	end
 end
 
 
@@ -57,12 +70,12 @@ function MJMapCanvasMixin:onClick(btn)
 	if btn == "LeftButton" then
 		local mapInfo = C_Map.GetMapInfoAtPosition(self.mapID, self:getCursorPosition())
 		if mapInfo and mapInfo.mapID ~= self.mapID then
-			self:SetMapID(mapInfo.mapID)
+			self.navBar:setMapID(mapInfo.mapID)
 		end
 	else
 		local mapInfo = C_Map.GetMapInfo(self.mapID)
 		if mapInfo.parentMapID > 0 then
-			self:SetMapID(mapInfo.parentMapID)
+			self.navBar:setMapID(mapInfo.parentMapID)
 		elseif mapInfo.mapID ~= self.navBar.defMapID then
 			self.navBar:setDefMap()
 		end
@@ -72,7 +85,21 @@ end
 
 function MJMapCanvasMixin:refresh()
 	self:refreshLayers()
-	self.navigation:Refresh()
+
+	local mapGroupID = C_Map.GetMapGroupID(self.mapID)
+	if mapGroupID then
+		local mapGroupInfo = C_Map.GetMapGroupMembersInfo(mapGroupID)
+		if mapGroupInfo then
+			for _, mapInfo in ipairs(mapGroupInfo) do
+				if mapInfo.mapID == self.mapID then
+					self.navigation:ddSetSelectedText(mapInfo.name)
+					self.navigation:Show()
+					return
+				end
+			end
+		end
+	end
+	self.navigation:Hide()
 end
 
 
@@ -233,21 +260,17 @@ function MJDungeonRaidMixin:onLoad()
 	end
 	EJ_SelectTier(currentTier)
 
-	UIDropDownMenu_Initialize(self.optionsMenu, self.menuInit, "MENU")
+	self:ddSetInit(self.initialize, "menu")
 end
 
 
-function MJDungeonRaidMixin:menuInit(level)
-	if not level then return end
-
-	local btn = self:GetParent()
-	local info = UIDropDownMenu_CreateInfo()
-	local list = UIDROPDOWNMENU_MENU_VALUE or btn.list
+function MJDungeonRaidMixin:initialize(level, value)
+	local info = {}
 
 	info.isNotRadio = true
 	info.notCheckable = true
 
-	for _, v in ipairs(list) do
+	for _, v in ipairs(value) do
 		info.text = v.name
 		if v.list then
 			info.keepShownOnClick = true
@@ -255,16 +278,15 @@ function MJDungeonRaidMixin:menuInit(level)
 			info.value = v.list
 		else
 			info.func = function()
-				btn.journal.navBar:setMapID(v.mapID)
-				CloseDropDownMenus()
+				self.journal.navBar:setMapID(v.mapID)
 			end
 		end
-		UIDropDownMenu_AddButton(info, level)
+		self:ddAddButton(info, level)
 	end
 end
 
 
 function MJDungeonRaidMixin:onClick()
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	ToggleDropDownMenu(1, nil, self.optionsMenu, self, 111, 15)
+	self:dropDownToggle(1, self.list, self, 111, 15)
 end
