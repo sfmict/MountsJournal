@@ -85,9 +85,9 @@ end)
 MJDropDownButtonMixin = {}
 
 
-function MJDropDownButtonMixin:ddSetSelectedValue(value, level)
+function MJDropDownButtonMixin:ddSetSelectedValue(value, level, anchorFrame)
 	self.selectedValue = value
-	self:ddRefresh(level)
+	self:ddRefresh(level, anchorFrame)
 end
 
 
@@ -108,9 +108,9 @@ function MJDropDownButtonMixin:dropDownToggle(level, value, anchorFrame, xOffset
 
 	if menu:IsShown() then
 		menu:Hide()
-		if level == 1 and menu.callButton == anchorFrame then return end
+		if level == 1 and menu.anchorFrame == anchorFrame then return end
 	end
-	menu.callButton = anchorFrame
+	menu.anchorFrame = anchorFrame
 
 	local displayMode
 	if level == 1 then
@@ -159,8 +159,9 @@ function MJDropDownButtonMixin:dropDownToggle(level, value, anchorFrame, xOffset
 end
 
 
-function MJDropDownButtonMixin:ddRefresh(level)
+function MJDropDownButtonMixin:ddRefresh(level, anchorFrame)
 	if not level then level = 1 end
+	if not anchorFrame then anchorFrame = self end
 	local menu = dropDownMenusList[level]
 
 	for _, button in ipairs(menu.buttonsList) do
@@ -175,7 +176,7 @@ function MJDropDownButtonMixin:ddRefresh(level)
 				button.Check:SetShown(button._checked)
 				button.UnCheck:SetShown(not button._checked)
 
-				if self.dropDownSetText and button._checked and menu.callButton == self then
+				if self.dropDownSetText and button._checked and menu.anchorFrame == anchorFrame then
 					self:ddSetSelectedText(button._text)
 				end
 			end
@@ -187,7 +188,7 @@ function MJDropDownButtonMixin:ddRefresh(level)
 	for _, searchFrame in ipairs(menu.searchFrames) do
 		if searchFrame:IsShown() then
 			searchFrame:refresh()
-			if self.dropDownSetText and menu.callButton == self then
+			if self.dropDownSetText and menu.anchorFrame == anchorFrame then
 				for _, button in ipairs(searchFrame.buttons) do
 					local checked = button.checked
 					if type(checked) == "function" then checked = checked(button) end
@@ -374,12 +375,12 @@ function MJDropDownMenuButtonMixin:onLoad()
 	self.arrowUpButton:SetScript("OnClick", function()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		self:order(-1)
-		DROPDOWNBUTTON:ddRefresh(self:GetParent().id)
+		DROPDOWNBUTTON:ddRefresh(self:GetParent().id, DROPDOWNBUTTON.anchorFrame)
 	end)
 	self.arrowDownButton:SetScript("OnClick", function()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		self:order(1)
-		DROPDOWNBUTTON:ddRefresh(self:GetParent().id)
+		DROPDOWNBUTTON:ddRefresh(self:GetParent().id, DROPDOWNBUTTON.anchorFrame)
 	end)
 end
 

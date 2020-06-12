@@ -46,6 +46,7 @@ function test:PLAYER_ENTERING_WORLD()
 	-- journal.navBarBtn:Click()
 	-- journal.mapSettings.existingListsToggle:Click()
 	-- journal.navBar:setMapID(1033)
+	-- journal.navBar:setMapID(909)
 
 	-- CONFIG OPEN
 	-- local classConfig = MountsJournalConfig

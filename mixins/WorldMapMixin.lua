@@ -92,7 +92,6 @@ function MJMapCanvasMixin:refresh()
 		if mapGroupInfo then
 			for _, mapInfo in ipairs(mapGroupInfo) do
 				if mapInfo.mapID == self.mapID then
-					self.navigation:ddSetSelectedValue(self.mapID)
 					self.navigation:ddSetSelectedText(mapInfo.name)
 					self.navigation:Show()
 					return
