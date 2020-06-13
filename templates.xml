@@ -1543,7 +1543,10 @@
 						self.Instructions:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -5, 0)
 					</OnLoad>
 					<OnEscapePressed function="EditBox_ClearFocus"/>
-					<OnEnterPressed function="EditBox_ClearFocus"/>
+					<OnEnterPressed>
+						self:GetParent():saveAnimation()
+						EditBox_ClearFocus(self)
+					</OnEnterPressed>
 					<OnEditFocusLost>
 						if self:GetText() == "" then
 							self.clearButton:Hide()

@@ -253,7 +253,7 @@ function MJMountCustomAnimationMixin:onLoad()
 
 	self.save:SetScript("OnClick", function()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		self:saveAnamtion()
+		self:saveAnimation()
 	end)
 end
 
@@ -291,12 +291,15 @@ function MJMountCustomAnimationMixin:stop()
 end
 
 
-function MJMountCustomAnimationMixin:saveAnamtion()
-	tinsert(self.animations, {
-		name = self.nameBox:GetText(),
-		animation = tonumber(self.animationNum:GetText()) or 0,
-		isKit = self.isKit:GetChecked(),
-		loop = self.loop:GetChecked(),
-	})
-	self.nameBox:SetText("")
+function MJMountCustomAnimationMixin:saveAnimation()
+	local name = self.nameBox:GetText()
+	if name:len() > 0 then
+		tinsert(self.animations, {
+			name = name,
+			animation = self.animations.current or 0,
+			isKit = self.isKit:GetChecked(),
+			loop = self.loop:GetChecked(),
+		})
+		self.nameBox:SetText("")
+	end
 end
