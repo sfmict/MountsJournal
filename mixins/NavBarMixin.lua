@@ -48,7 +48,7 @@ function MJNavBarMixin:refresh()
 	end
 
 	NavBar_Reset(self)
-	for _,btnData in ipairs(hierarchy) do
+	for _, btnData in ipairs(hierarchy) do
 		NavBar_AddButton(self, btnData)
 	end
 end
@@ -65,7 +65,7 @@ function MJNavBarMixin:getDropDownList()
 					local data = {
 						text = childInfo.name,
 						id = childInfo.mapID,
-						func = function(_,mapID) self:GetParent():setMapID(mapID) end,
+						func = function(_, mapID) self:GetParent():setMapID(mapID) end,
 					}
 					tinsert(list, data)
 				end

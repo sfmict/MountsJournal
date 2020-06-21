@@ -1506,9 +1506,7 @@
 						<Layers>
 							<Layer level="ARTWORK">
 								<Texture atlas="common-search-clearbutton" useAtlasSize="false" alpha="0.5" parentKey="texture">
-									<Size>
-										<AbsDimension x="10" y="10"/>
-									</Size>
+									<Size x="10" y="10"/>
 									<Anchors>
 										<Anchor point="TOPLEFT" x="3" y="-3"/>
 									</Anchors>
