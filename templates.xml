@@ -308,9 +308,6 @@
 				</Layers>
 				<HighlightTexture name="$parentHighlight" file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
 				<Scripts>
-					<OnClick>
-						MountListItem_OnClick(self:GetParent(), button)
-					</OnClick>
 					<OnEnter>
 						GameTooltip:SetOwner(self, "ANCHOR_LEFT")
 						local parent = self:GetParent()
@@ -1515,18 +1512,18 @@
 						</Layers>
 						<Scripts>
 							<OnEnter>
-								self.texture:SetAlpha(1.0);
+								self.texture:SetAlpha(1.0)
 							</OnEnter>
 							<OnLeave>
-								self.texture:SetAlpha(0.5);
+								self.texture:SetAlpha(0.5)
 							</OnLeave>
 							<OnMouseDown>
 								if self:IsEnabled() then
-									self.texture:SetPoint("TOPLEFT", self, "TOPLEFT", 4, -4);
+									self.texture:SetPoint("TOPLEFT", 4, -4)
 								end
 							</OnMouseDown>
 							<OnMouseUp>
-								self.texture:SetPoint("TOPLEFT", self, "TOPLEFT", 3, -3);
+								self.texture:SetPoint("TOPLEFT", 3, -3)
 							</OnMouseUp>
 							<OnClick function="SearchBoxTemplateClearButton_OnClick"/>
 						</Scripts>
@@ -1536,8 +1533,8 @@
 					<OnLoad>
 						self:SetTextInsets(0, 16, 0, 0)
 						self.Instructions:SetText(NAME)
-						self.Instructions:ClearAllPoints();
-						self.Instructions:SetPoint("TOPLEFT", self, "TOPLEFT", 5, 0);
+						self.Instructions:ClearAllPoints()
+						self.Instructions:SetPoint("TOPLEFT", self, "TOPLEFT", 5, 0)
 						self.Instructions:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", -5, 0)
 					</OnLoad>
 					<OnEscapePressed function="EditBox_ClearFocus"/>

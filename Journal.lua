@@ -353,10 +353,17 @@ function journal:ADDON_LOADED(addonName)
 				btn.fly:SetScript("OnClick", btnClick)
 				btn.ground:SetScript("OnClick", btnClick)
 				btn.swimming:SetScript("OnClick", btnClick)
-				btn.DragButton:HookScript("OnClick", function(btn, mouseBtn) self:mountDblClick(btn:GetParent().index, mouseBtn) end)
+				btn.DragButton:SetScript("OnClick", function(btn, mouseBtn)
+					self.tags:listItemClick(btn:GetParent(), mouseBtn)
+				end)
 			end
 
-			child:HookScript("OnClick", function(btn, mouseBtn) self:mountDblClick(btn.index, mouseBtn) end)
+			child:SetScript("OnClick", function(btn, mouseBtn)
+				self.tags:listItemClick(btn, mouseBtn)
+			end)
+			child.DragButton:SetScript("OnClick", function(btn, mouseBtn)
+				self.tags:dragButtonClick(btn, mouseBtn)
+			end)
 		end
 
 		-- FILTERS PANEL
@@ -1179,27 +1186,6 @@ function journal:updateMapSettings()
 		relationText:SetText(L["No relation"])
 		relationText:SetTextColor(self.colors.gray:GetRGB())
 		relationClear:Hide()
-	end
-end
-
-
-do
-	local lastMountClick = 0
-	local lastMountIndex = 0
-	function journal:mountDblClick(index, btn)
-		if btn == "RightButton" then return end
-
-		if lastMountIndex == index and GetTime() - lastMountClick < .4 then
-			local _,_,_, active, isUsable, _,_,_,_,_,_, mountID = C_MountJournal.GetDisplayedMountInfo(index)
-			if active then
-				C_MountJournal.Dismiss()
-			elseif isUsable then
-				C_MountJournal.SummonByID(mountID)
-			end
-		else
-			lastMountIndex = index
-			lastMountClick = GetTime()
-		end
 	end
 end
 
