@@ -797,7 +797,7 @@ function journal:grid3UpdateMountList()
 	local scrollFrame = self.scrollFrame
 	local offset = HybridScrollFrame_GetOffset(scrollFrame)
 	local numDisplayedMounts = C_MountJournal.GetNumDisplayedMounts()
-	local selectedSpellID = MountJournal.selectedSpellID
+	local selectedSpellID = self.MountJournal.selectedSpellID
 
 	for i, btn in ipairs(scrollFrame.buttons) do
 		for j = 1, 3 do

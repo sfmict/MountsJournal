@@ -74,6 +74,7 @@ menu1:SetScript("OnEvent", function(self, event, button)
 	end
 end)
 menu1:SetScript("OnShow", function(self)
+	self:Raise()
 	self:RegisterEvent("GLOBAL_MOUSE_DOWN")
 end)
 menu1:SetScript("OnHide", function(self)
