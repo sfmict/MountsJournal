@@ -48,11 +48,17 @@
 		</HighlightTexture>
 	</Button>
 
-	<Frame name="MJFilterPanelTemplate" virtual="true">
-		<Backdrop edgeFile="Interface/Tooltips/UI-Tooltip-Border" tile="true">
-			<EdgeSize val="16"/>
-			<BorderColor r=".6" g=".6" b=".6"/>
-		</Backdrop>
+	<Frame name="MJFilterPanelTemplate" inherits="BackdropTemplate" virtual="true">
+		<Scripts>
+			<OnLoad>
+				self.backdropInfo = {
+					edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+					edgeSize = 16,
+				}
+				self:ApplyBackdrop()
+				self:SetBackdropBorderColor(.6, .6, .6)
+			</OnLoad>
+		</Scripts>
 	</Frame>
 
 	<Button name="MJTabTemplate" virtual="true">
@@ -200,11 +206,7 @@
 		</Scripts>
 	</Button>
 
-	<Button name="MJFilterButtonTemplate" virtual="true">
-		<Backdrop edgeFile="Interface/AddOns/MountsJournal/textures/border" tile="true">
-			<EdgeSize val="8"/>
-			<BorderColor r=".4" g=".4" b=".4"/>
-		</Backdrop>
+	<Button name="MJFilterButtonTemplate" inherits="BackdropTemplate" virtual="true">
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture parentKey="icon">
@@ -215,6 +217,11 @@
 			</Layer>
 		</Layers>
 		<Scripts>
+			<OnLoad>
+				self.backdropInfo = MountsJournalUtil.filterButtonBackdrop
+				self:ApplyBackdrop()
+				self:SetBackdropBorderColor(.4, .4, .4)
+			</OnLoad>
 			<OnMouseDown>self.icon:SetScale(.9)</OnMouseDown>
 			<OnMouseUp>self.icon:SetScale(1)</OnMouseUp>
 		</Scripts>
@@ -386,15 +393,31 @@
 		</Frames>
 	</Button>
 
-	<Frame name="MJOptionsPanel" virtual="true">
-		<Backdrop bgFile="Interface/ChatFrame/ChatFrameBackground" edgeFile="Interface/Tooltips/UI-Tooltip-border" tile="true">
-			<EdgeSize val="14"/>
-			<TileSize val="14"/>
-			<BackgroundInsets left="4" right="4" top="4" bottom="4"/>
-			<Color r=".1" g=".1" b=".1" a=".3"/>
-			<BorderColor r=".5" g=".5" b=".5"/>
-		</Backdrop>
+	<Frame name="MJOptionsPanel" inherits="BackdropTemplate" virtual="true">
+		<Scripts>
+			<OnLoad>
+				self.backdropInfo = MountsJournalUtil.optionsPanelBackdrop
+				self:ApplyBackdrop()
+				self:SetBackdropColor(.1, .1, .1, .5)
+				self:SetBackdropBorderColor(.5, .5, .5)
+			</OnLoad>
+		</Scripts>
 	</Frame>
+
+	<ScrollFrame name="MJPanelScrollFrameTemplate" inherits="UIPanelScrollFrameTemplate" virtual="true">
+		<Scripts>
+			<OnLoad>
+				ScrollFrame_OnLoad(self)
+				self.ScrollBar.bg = self.ScrollBar:CreateTexture(nil, "BACKGROUND")
+				self.ScrollBar.bg:SetAllPoints()
+				self.ScrollBar.bg:SetTexture("interface/buttons/white8x8")
+				self.ScrollBar.bg:SetVertexColor(0, 0, 0, .2)
+				self.child = CreateFrame("FRAME")
+				self.child:SetSize(1, 1)
+				self:SetScrollChild(self.child)
+			</OnLoad>
+		</Scripts>
+	</ScrollFrame>
 
 	<Frame name="MJHelpPlate" virtual="true">
 		<Size x="64" y="64"/>
@@ -518,13 +541,8 @@
 		</HighlightTexture>
 	</Button>
 
-	<Frame name="MJMacroFrame" virtual="true">
+	<Frame name="MJMacroFrame" inherits="TooltipBackdropTemplate" virtual="true">
 		<Size x="395" y="150"/>
-		<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background" edgeFile="Interface/Tooltips/UI-Tooltip-Border" tile="true">
-			<EdgeSize val="16"/>
-			<TileSize val="16"/>
-			<BackgroundInsets left="5" right="5" top="5" bottom="5"/>
-		</Backdrop>
 		<Layers>
 			<Layer level="ARTWORK">
 				<FontString parentKey="lable" justifyH="LEFT" inherits="GameFontNormalSmall">
@@ -618,12 +636,6 @@
 				</Scripts>
 			</Button>
 		</Frames>
-		<Scripts>
-			<OnLoad>
-				self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR:GetRGB())
-				self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR:GetRGB())
-			</OnLoad>
-		</Scripts>
 	</Frame>
 
 	<Button name="MJNavButtonTemplate" motionScriptsWhileDisabled="true" virtual="true">
@@ -1055,6 +1067,11 @@
 					<Anchor point="RIGHT" relativeKey="$parent.existingListsToggle" relativePoint="LEFT" x="2"/>
 				</Anchors>
 			</Button>
+			<Frame parentKey="hint" inherits="MJHelpPlate">
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeKey="$parent.mapControl" relativePoint="TOPRIGHT" x="13" y="-16"/>
+				</Anchors>
+			</Frame>
 			<CheckButton parentKey="Ground" inherits="MJCheckButtonTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" x="33" y="-20"/>
@@ -1112,12 +1129,7 @@
 		</Frames>
 	</Frame>
 
-	<Frame name="MJExistingListsPanelTemplate" enableMouse="true" mixin="MJExistingListsMixin" hidden="true" virtual="true">
-		<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background" edgeFile="Interface/Tooltips/UI-Tooltip-Border" tile="true">
-			<EdgeSize val="16"/>
-			<TileSize val="16"/>
-			<BackgroundInsets left="4" right="4" top="4" bottom="4"/>
-		</Backdrop>
+	<Frame name="MJExistingListsPanelTemplate" inherits="TooltipBackdropTemplate" enableMouse="true" mixin="MJExistingListsMixin" hidden="true" virtual="true">
 		<Frames>
 			<EditBox inherits="SearchBoxTemplate" parentKey="searchBox" letters="40">
 				<Size y="20"/>
@@ -1143,7 +1155,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR:GetRGB())
+				self:OnBackdropLoaded()
 				self:onLoad()
 			</OnLoad>
 			<OnShow method="refresh"/>
@@ -1614,18 +1626,11 @@
 		</Scripts>
 	</CheckButton>
 
-	<Frame name="MJTooltipModel" parent="UIParent" frameStrata="TOOLTIP" hidden="true">
+	<Frame name="MJTooltipModel" inherits="TooltipBackdropTemplate" parent="UIParent" frameStrata="TOOLTIP" hidden="true">
 		<Size x="150" y="150"/>
 		<Anchors>
 			<Anchor point="TOPLEFT" relativeTo="GameTooltip" relativePoint="BOTTOMLEFT" y="3"/>
 		</Anchors>
-		<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background" edgeFile="Interface/Tooltips/UI-Tooltip-Border" tile="true">
-			<EdgeSize val="16" />
-			<TileSize val="16" />
-			<BackgroundInsets>
-				<AbsInset left="5" right="5" top="5" bottom="5"/>
-			</BackgroundInsets>
-		</Backdrop>
 		<Frames>
 			<PlayerModel parentKey="model">
 				<Anchors>
@@ -1639,12 +1644,6 @@
 				</Scripts>
 			 </PlayerModel>
 		</Frames>
-		<Scripts>
-			<Onload>
-				self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR:GetRGB())
-				self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR:GetRGB())
-			</Onload>
-		</Scripts>
 	</Frame>
 
 	<Frame name="MJPetInfo" virtual="true">
@@ -1812,12 +1811,7 @@
 		</Scripts>
 	</Button>
 
-	<Frame name="MJCompanionsPanel" mixin="MJCompanionsPanelMixin" enableMouse="true" hidden="true" virtual="true">
-		<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background" edgeFile="Interface/Tooltips/UI-Tooltip-Border" tile="true">
-			<EdgeSize val="16"/>
-			<TileSize val="16"/>
-			<BackgroundInsets left="4" right="4" top="4" bottom="4"/>
-		</Backdrop>
+	<Frame name="MJCompanionsPanel" inherits="TooltipBackdropTemplate" mixin="MJCompanionsPanelMixin" enableMouse="true" hidden="true" virtual="true">
 		<Frames>
 			<Frame parentKey="controlPanel" useParentLevel="false" inherits="InsetFrameTemplate">
 				<Size y="26"/>
@@ -1910,7 +1904,7 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR:GetRGB())
+				self:OnBackdropLoaded()
 				self:onLoad()
 			</OnLoad>
 			<OnEvent method="onEvent"/>

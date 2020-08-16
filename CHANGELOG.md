@@ -1,5 +1,3 @@
-* Made its own system of drop-down menus. (The guild errors must be gone)
-* Added ability to create custom animation for mounts.
-* Added select/unselect all mounts button in profile settings.
-* Mounts search now looks for matches in tags.
-* Minor fixes.
+* Update to PTR(9.0.1).
+* Added option to disable auto-scrolling.
+* Added hint to zone settings menu.

@@ -114,14 +114,9 @@ classConfig:SetScript("OnShow", function(self)
 	rightPanel:SetPoint("BOTTOMLEFT", leftPanel, "BOTTOMRIGHT", 0, 0)
 
 	-- RIGHT PANEL SCROLL
-	local rightPanelScroll = CreateFrame("ScrollFrame", nil, rightPanel, "UIPanelScrollFrameTemplate")
+	local rightPanelScroll = CreateFrame("ScrollFrame", nil, rightPanel, "MJPanelScrollFrameTemplate")
 	rightPanelScroll:SetPoint("TOPLEFT", rightPanel, 4, -6)
 	rightPanelScroll:SetPoint("BOTTOMRIGHT", rightPanel, -26, 5)
-	rightPanelScroll.ScrollBar:SetBackdrop({bgFile='interface/buttons/white8x8'})
-	rightPanelScroll.ScrollBar:SetBackdropColor(0,0,0,.2)
-	rightPanelScroll.child = CreateFrame("FRAME")
-	rightPanelScroll.child:SetSize(1, 1)
-	rightPanelScroll:SetScrollChild(rightPanelScroll.child)
 
 	-- CLASS FEATURE
 	self.checkPool = CreateFramePool("CHECKBUTTON", rightPanelScroll.child, "MJCheckButtonTemplate", function(_, frame)

@@ -90,7 +90,6 @@ function MJSetPetMixin:refresh()
 			self.id = nil
 		end
 	end
-	self.journal:updateMountsList()
 end
 
 
@@ -204,6 +203,7 @@ end
 
 function MJCompanionsPanelMixin:selectButtonClick(id)
 	self.journal.petForMount[MountJournal.selectedSpellID] = id
+	self.journal:updateMountsList()
 	self:GetParent():refresh()
 	self:Hide()
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)

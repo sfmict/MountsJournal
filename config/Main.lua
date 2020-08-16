@@ -40,8 +40,8 @@ do
 	end
 
 	function config:PLAYER_LOGIN()
-		self.bindMount = binding:createButtonBinding(self, secureButtonNameMount, "MJSecureActionButtonTemplate")
-		self.bindSecondMount = binding:createButtonBinding(self, secureButtonNameSecondMount, "MJSecureActionButtonTemplate")
+		self.bindMount = binding:createButtonBinding(nil, secureButtonNameMount, "MJSecureActionButtonTemplate")
+		self.bindSecondMount = binding:createButtonBinding(nil, secureButtonNameSecondMount, "MJSecureActionButtonTemplate")
 		self.bindSecondMount.secure.forceModifier = true
 		setMacroText(self)
 	end
@@ -114,7 +114,7 @@ config:SetScript("OnShow", function(self)
 	leftPanel:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", 300, 32)
 
 	-- WATER JUMP
-	self.waterJump = CreateFrame("CheckButton", nil, self, "MJCheckButtonTemplate")
+	self.waterJump = CreateFrame("CheckButton", nil, leftPanel, "MJCheckButtonTemplate")
 	self.waterJump:SetPoint("TOPLEFT", subtitle, "BOTTOMLEFT", 8, -20)
 	self.waterJump.Text:SetText(L["Handle a jump in water"])
 	self.waterJump.tooltipText = L["Handle a jump in water"]
@@ -127,7 +127,7 @@ config:SetScript("OnShow", function(self)
 	summon1:SetText(SUMMONS.." 1")
 
 	-- CREATE MACRO
-	local createMacroBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
+	local createMacroBtn = CreateFrame("BUTTON", nil, leftPanel, "UIPanelButtonTemplate")
 	createMacroBtn:SetSize(258, 30)
 	createMacroBtn:SetPoint("TOPLEFT", summon1, "BOTTOMLEFT", 0, -5)
 	createMacroBtn:SetText(L["CreateMacro"])
@@ -141,6 +141,7 @@ config:SetScript("OnShow", function(self)
 	macroOrBind:SetText(L["or key bind"])
 
 	-- BIND MOUNT
+	self.bindMount:SetParent(leftPanel)
 	self.bindMount:SetSize(258, 22)
 	self.bindMount:SetPoint("TOPLEFT", createMacroBtn, "BOTTOMLEFT", 0, -20)
 	self.bindMount:on("SET_BINDING", function()
@@ -149,7 +150,7 @@ config:SetScript("OnShow", function(self)
 	end)
 
 	-- HELP PLATE
-	local helpPlate = CreateFrame("FRAME", nil, self, "MJHelpPlate")
+	local helpPlate = CreateFrame("FRAME", nil, leftPanel, "MJHelpPlate")
 	helpPlate:SetPoint("TOP", self.bindMount, "BOTTOM", 0, -20)
 	helpPlate.tooltip = L["SecondMountTooltipTitle"]:format(SUMMONS)
 	helpPlate.tooltipDescription = L["SecondMountTooltipDescription"]
@@ -160,7 +161,7 @@ config:SetScript("OnShow", function(self)
 	modifierText:SetText(L["Modifier"]..":")
 
 	-- MODIFIER COMBOBOX
-	local modifierCombobox = CreateFrame("FRAME", "MountsJournalModifier", self, "MJDropDownButtonTemplate")
+	local modifierCombobox = CreateFrame("FRAME", "MountsJournalModifier", leftPanel, "MJDropDownButtonTemplate")
 	self.modifierCombobox = modifierCombobox
 	modifierCombobox:SetPoint("LEFT", modifierText, "RIGHT", 7, 0)
 	modifierCombobox:ddSetInit(function(self, level)
@@ -183,7 +184,7 @@ config:SetScript("OnShow", function(self)
 	summon2:SetText(SUMMONS.." 2")
 
 	-- CREATE SECOND MACRO
-	local createSecondMacroBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
+	local createSecondMacroBtn = CreateFrame("BUTTON", nil, leftPanel, "UIPanelButtonTemplate")
 	createSecondMacroBtn:SetSize(258, 30)
 	createSecondMacroBtn:SetPoint("TOPLEFT", summon2, "BOTTOMLEFT", 0, -5)
 	createSecondMacroBtn:SetText(L["CreateMacro"])
@@ -197,6 +198,7 @@ config:SetScript("OnShow", function(self)
 	macroOrBindSecond:SetText(L["or key bind"])
 
 	-- BIND SECOND MOUNT
+	self.bindSecondMount:SetParent(leftPanel)
 	self.bindSecondMount:SetSize(258, 22)
 	self.bindSecondMount:SetPoint("TOP", createSecondMacroBtn, "BOTTOM", 0, -20)
 	self.bindSecondMount:on("SET_BINDING", function()
@@ -214,14 +216,9 @@ config:SetScript("OnShow", function(self)
 	rightPanel:SetPoint("TOPLEFT", leftPanel, "TOPRIGHT", 4, 0)
 	rightPanel:SetPoint("BOTTOMRIGHT", self, -8, 32)
 
-	local rightPanelScroll = CreateFrame("ScrollFrame", nil, rightPanel, "UIPanelScrollFrameTemplate")
+	local rightPanelScroll = CreateFrame("ScrollFrame", nil, rightPanel, "MJPanelScrollFrameTemplate")
 	rightPanelScroll:SetPoint("TOPLEFT", rightPanel, 4, -6)
 	rightPanelScroll:SetPoint("BOTTOMRIGHT", rightPanel, -26, 5)
-	rightPanelScroll.ScrollBar:SetBackdrop({bgFile='interface/buttons/white8x8'})
-	rightPanelScroll.ScrollBar:SetBackdropColor(0,0,0,.2)
-	rightPanelScroll.child = CreateFrame("FRAME")
-	rightPanelScroll.child:SetSize(1, 1)
-	rightPanelScroll:SetScrollChild(rightPanelScroll.child)
 
 	-- USE HERBALISM MOUNTS
 	self.useHerbMounts = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
@@ -268,6 +265,13 @@ config:SetScript("OnShow", function(self)
 	self.noPetInGroup.Text:SetText(L["NoPetInGroup"])
 	self.noPetInGroup:HookScript("OnClick", function() self.applyBtn:Enable() end)
 
+	-- DISABLE AUTO SCROLL
+	self.disableAutoScroll = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.disableAutoScroll:SetPoint("TOPLEFT", self.noPetInGroup, "BOTTOMLEFT", 0, -26)
+	self.disableAutoScroll.Text:SetSize(245, 25)
+	self.disableAutoScroll.Text:SetText(L["DisableAutoScroll"])
+	self.disableAutoScroll:HookScript("OnClick", function() self.applyBtn:Enable() end)
+
 	-- APPLY
 	self.applyBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
 	self.applyBtn:SetSize(96, 22)
@@ -296,6 +300,7 @@ config:SetScript("OnShow", function(self)
 		self.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
 		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
+		self.disableAutoScroll:SetChecked(mounts.config.disableAutoScroll)
 		self.applyBtn:Disable()
 	end
 
@@ -353,6 +358,7 @@ config.okay = function(self)
 	mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
 	mounts.config.noPetInRaid = self.noPetInRaid:GetChecked()
 	mounts.config.noPetInGroup = self.noPetInGroup:GetChecked()
+	mounts.config.disableAutoScroll = self.disableAutoScroll:GetChecked()
 end
 
 

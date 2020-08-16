@@ -175,7 +175,7 @@ function journal:ADDON_LOADED(addonName)
 		slotButton:SetScale(.65)
 		hooksecurefunc("MountJournal_UpdateEquipmentPalette", function()
 			local effectsSuppressed = C_MountJournal.AreMountEquipmentEffectsSuppressed()
-			local locked = not C_MountJournal.IsMountEquipmentUnlocked()
+			local locked = not C_PlayerInfo.CanPlayerUseMountEquipment()
 			slotButton:DesaturateHierarchy((effectsSuppressed or locked) and 1 or 0)
 		end)
 		self.leftInset:SetPoint("BOTTOMLEFT", self.MountJournal, "BOTTOMLEFT", 0, 26)
@@ -232,6 +232,8 @@ function journal:ADDON_LOADED(addonName)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			navBar:setCurrentMap()
 		end)
+		mapSettings.hint.tooltip = L["ZoneSettingsTooltip"]
+		mapSettings.hint.tooltipDescription = L["ZoneSettingsTooltipDescription"]
 		mapSettings.Ground.Text:SetText(L["Ground Mounts Only"])
 		mapSettings.Ground:HookScript("OnClick", function(check) self:setFlag("groundOnly", check:GetChecked()) end)
 		mapSettings.WaterWalk.Text:SetText(L["Water Walking"])
@@ -325,6 +327,28 @@ function journal:ADDON_LOADED(addonName)
 		end)
 
 		-- SELECTED BUTTONS
+		function MountJournal_SetSelected(selectedMountID, selectedSpellID)
+			MountJournal.selectedSpellID = selectedSpellID
+			MountJournal.selectedMountID = selectedMountID
+			MountJournal_UpdateMountList()
+			MountJournal_UpdateMountDisplay()
+
+			if not mounts.config.disableAutoScroll then
+				local index
+				for i = 1, C_MountJournal.GetNumDisplayedMounts() do
+					local _,_,_,_,_,_,_,_,_,_,_, mountID = C_MountJournal.GetDisplayedMountInfo(i)
+					if mountID == selectedMountID then
+						index = i
+						break
+					end
+				end
+				if index then
+					if mounts.config.gridToggle then index = math.ceil(index / 3) end
+					HybridScrollFrame_ScrollToIndex(MountJournal.ListScrollFrame, index, MountJournal_GetMountButtonHeight)
+				end
+			end
+		end
+
 		local function btnClick(btn) self:mountToggle(btn) end
 
 		local function CreateButtonMountToggle(name, parent, pointX, pointY)

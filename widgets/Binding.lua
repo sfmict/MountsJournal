@@ -90,7 +90,7 @@ function binding:OnKeyDown(keyPressed)
 		keyPressed = GetConvertedKeyOrButton(keyPressed)
 
 		if not IsKeyPressIgnoredForBinding(keyPressed) then
-			keyPressed = CreateKeyChordString(keyPressed)
+			keyPressed = CreateKeyChordStringUsingMetaKeyState(keyPressed)
 
 			self:setBinding(keyPressed, self.selected.command)
 			self:setButtonText(self.selected)
