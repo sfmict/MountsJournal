@@ -1,5 +1,5 @@
 local addon = ...
-local C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal = C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal
+local C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal, IsSpellKnown = C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal, IsSpellKnown
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 
@@ -395,7 +395,9 @@ function mounts:getSpellKnown()
 		return true, false
 	end
 
-	return false, false
+	-- 34091 and 34090 not detected
+	-- return false, false
+	return true, true
 end
 
 
