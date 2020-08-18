@@ -308,13 +308,6 @@ config:SetScript("OnShow", function(self)
 end)
 
 
-function config:setEnableCheckButtons(enable, tbl)
-	for _, check in ipairs(tbl) do
-		check:SetEnabled(enable)
-	end
-end
-
-
 function config:createMacro(macroName, buttonName, texture)
 	DeleteMacro(macroName)
 	CreateMacro(macroName, texture, "/click "..buttonName)
