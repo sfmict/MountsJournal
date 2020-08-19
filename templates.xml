@@ -804,7 +804,7 @@
 				<Size x="44" y="24"/>
 				<KeyValues>
 					<KeyValue key="MJNoGlobalMouseEvent" value="true" type="boolean"/>
-					<KeyValue key="xoffset" value="-18" tyoe="number"/>
+					<KeyValue key="xoffset" value="-18" type="number"/>
 				</KeyValues>
 				<NormalTexture file="Interface/HelpFrame/CS_HelpTextures">
 					<TexCoords left=".54296875" right=".62890625" top=".7578125" bottom=".9921875"/>
