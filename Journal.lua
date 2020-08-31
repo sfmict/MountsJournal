@@ -25,19 +25,23 @@ journal.indexByMountID = setmetatable({}, metaMounts)
 
 
 -- 1 FLY, 2 GROUND, 3 SWIMMING
-journal.mountTypes = {
+journal.mountTypes = setmetatable({
 	[242] = 1,
 	[247] = 1,
 	[248] = 1,
 	[398] = 1,
 	[230] = 2,
 	[241] = 2,
-	[269] = 2,
 	[284] = 2,
 	[231] = 3,
 	[232] = 3,
 	[254] = 3,
-}
+}, {
+	__index = function(self, key)
+		self[key] = 1
+		return self[key]
+	end
+})
 
 
 local function tabClick(self)
