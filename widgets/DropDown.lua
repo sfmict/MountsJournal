@@ -287,7 +287,7 @@ function MJDropDownButtonMixin:ddAddButton(info, level)
 	if info.icon then
 		button.Icon:SetTexture(info.icon)
 		if info.iconInfo then
-			button.Icon:SetSize(info.iconInfo.tSizeX or DropDownMenuButtonHeight, info.iconInfo.tSizeY or DropDownMenuBattonHeight)
+			button.Icon:SetSize(info.iconInfo.tSizeX or DropDownMenuButtonHeight, info.iconInfo.tSizeY or DropDownMenuButtonHeight)
 		end
 		if info.iconOnly then
 			button.Icon:SetPoint("LEFT")

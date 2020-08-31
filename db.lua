@@ -884,6 +884,8 @@ MountsJournal.mountsDB = {
 	[1423] = 9, -- 341776 Highwind Darkmane
 	[1425] = 9, -- 342334 Bastion - Larion - Gold
 	[1426] = 9, -- 342335 Bastion - Horned Horse - Bastion Blue
+	[1428] = 9, -- 342666 Amber Glitterwing
+	[1429] = 9, -- 342667 Vibrant Flutterwing
 }
 setmetatable(MountsJournal.mountsDB, {__index = function(self, key)
 	self[key] = EJ_GetNumTiers()

@@ -328,6 +328,6 @@ function MJProfilesMixin:onClick()
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	wipe(self.profileNames)
 	for k in pairs(self.profiles) do tinsert(self.profileNames, k) end
-	sort(self.profileNames, function(a, b) return a < b end)
+	sort(self.profileNames)
 	self:dropDownToggle(1, nil, self, 111, 15)
 end

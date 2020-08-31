@@ -335,9 +335,8 @@ function journal:ADDON_LOADED(addonName)
 
 			if not mounts.config.disableAutoScroll then
 				local index
-				for i = 1, C_MountJournal.GetNumDisplayedMounts() do
-					local _,_,_,_,_,_,_,_,_,_,_, mountID = C_MountJournal.GetDisplayedMountInfo(i)
-					if mountID == selectedMountID then
+				for i = 1, #self.displayedMounts do
+					if selectedMountID == self.displayedMounts[i] then
 						index = i
 						break
 					end
@@ -349,12 +348,15 @@ function journal:ADDON_LOADED(addonName)
 			end
 		end
 
-		local function btnClick(btn) self:mountToggle(btn) end
+		local function typeClick(btn) self:mountToggle(btn) end
+		local function grid3Click(btn, mouse) self.tags:listItemClick(btn:GetParent(), mouse) end
+		local function btnClick(btn, mouse) self.tags:listItemClick(btn, mouse) end
+		local function dragClick(btn, mouse) self.tags:dragButtonClick(btn, mouse) end
 
 		local function CreateButtonMountToggle(name, parent, pointX, pointY)
 			local btnFrame = CreateFrame("CheckButton", nil, parent, "MJSetMountToggleTemplate")
 			btnFrame:SetPoint("TOPRIGHT", pointX, pointY)
-			btnFrame:SetScript("OnClick", btnClick)
+			btnFrame:SetScript("OnClick", typeClick)
 			btnFrame.type = name
 			parent[name] = btnFrame
 			btnFrame.icon:SetTexture(texPath..name)
@@ -374,20 +376,14 @@ function journal:ADDON_LOADED(addonName)
 			child.grid3list:SetPoint("LEFT", -41, 0)
 			for i = 1, 3 do
 				local btn = child.grid3list["mount"..i]
-				btn.fly:SetScript("OnClick", btnClick)
-				btn.ground:SetScript("OnClick", btnClick)
-				btn.swimming:SetScript("OnClick", btnClick)
-				btn.DragButton:SetScript("OnClick", function(btn, mouseBtn)
-					self.tags:listItemClick(btn:GetParent(), mouseBtn)
-				end)
+				btn.fly:SetScript("OnClick", typeClick)
+				btn.ground:SetScript("OnClick", typeClick)
+				btn.swimming:SetScript("OnClick", typeClick)
+				btn.DragButton:SetScript("OnClick", grid3Click)
 			end
 
-			child:SetScript("OnClick", function(btn, mouseBtn)
-				self.tags:listItemClick(btn, mouseBtn)
-			end)
-			child.DragButton:SetScript("OnClick", function(btn, mouseBtn)
-				self.tags:dragButtonClick(btn, mouseBtn)
-			end)
+			child:SetScript("OnClick", btnClick)
+			child.DragButton:SetScript("OnClick", dragClick)
 		end
 
 		-- FILTERS PANEL
@@ -910,8 +906,8 @@ function journal:ACHIEVEMENT_EARNED()
 end
 
 
-function journal:updateMountToggleButton(btn)
-	local function setColor(btn, mountsTbl)
+do
+	local function setColor(self, btn, mountsTbl)
 		if mountsTbl and mountsTbl[btn.mountID] then
 			btn.icon:SetVertexColor(self.colors.gold:GetRGB())
 			btn:SetChecked(true)
@@ -921,22 +917,24 @@ function journal:updateMountToggleButton(btn)
 		end
 	end
 
-	if btn.index then
-		local mountID = select(12, C_MountJournal.GetDisplayedMountInfo(btn.index))
+	function journal:updateMountToggleButton(btn)
+		if btn.index then
+			local mountID = select(12, C_MountJournal.GetDisplayedMountInfo(btn.index))
 
-		btn.fly:Enable()
-		btn.ground:Enable()
-		btn.swimming:Enable()
-		btn.fly.mountID = mountID
-		btn.ground.mountID = mountID
-		btn.swimming.mountID = mountID
-		setColor(btn.fly, self.list and self.list.fly)
-		setColor(btn.ground, self.list and self.list.ground)
-		setColor(btn.swimming, self.list and self.list.swimming)
-	else
-		btn.fly:Disable()
-		btn.ground:Disable()
-		btn.swimming:Disable()
+			btn.fly:Enable()
+			btn.ground:Enable()
+			btn.swimming:Enable()
+			btn.fly.mountID = mountID
+			btn.ground.mountID = mountID
+			btn.swimming.mountID = mountID
+			setColor(self, btn.fly, self.list and self.list.fly)
+			setColor(self, btn.ground, self.list and self.list.ground)
+			setColor(self, btn.swimming, self.list and self.list.swimming)
+		else
+			btn.fly:Disable()
+			btn.ground:Disable()
+			btn.swimming:Disable()
+		end
 	end
 end
 
@@ -1713,7 +1711,6 @@ function journal:updateMountsList()
 		local name, spellID, _,_, isUsable, sourceType, _,_, mountFaction, shouldHideOnChar, isCollected = GetMountInfoByID(mountID)
 		local _,_, sourceText, _, mountType = GetMountInfoExtraByID(mountID)
 		local petID = self.petForMount[spellID]
-		mountFaction = mountFaction or 2
 
 		-- HIDDEN FOR CHARACTER
 		if (not shouldHideOnChar or filters.hideOnChar)
@@ -1728,7 +1725,7 @@ function journal:updateMountsList()
 		-- TYPE
 		and types[mountTypes[mountType]]
 		-- FACTION
-		and factions[mountFaction + 1]
+		and factions[(mountFaction or 2) + 1]
 		-- SELECTED
 		and (not selected[1] and not selected[2] and not selected[3]
 			-- FLY
