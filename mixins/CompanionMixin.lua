@@ -29,30 +29,30 @@ function MJSetPetMixin:onLoad()
 		self.highlight:Hide()
 		GameTooltip:Hide()
 	end)
-
-	self.petSelectionList = CreateFrame("FRAME", nil, self, "MJCompanionsPanel")
 end
 
 
 function MJSetPetMixin:onShow()
-	self:SetScript("OnShow", function(self) self:refresh() end)
+	self:SetScript("OnShow", nil)
 	C_Timer.After(0, function()
-		self.refreshEnabled = true
+		self:SetScript("OnShow", self.refresh)
 		self:refresh()
+		self.journal:on("MOUNT_SELECT", function() self:refresh() end)
 		self.journal.profilesMenu:on("UPDATE_PROFILE", function() self:refresh() end)
 	end)
 end
 
 
 function MJSetPetMixin:onClick()
+	if not self.petSelectionList then
+		self.petSelectionList = CreateFrame("FRAME", nil, self, "MJCompanionsPanel")
+	end
 	self.petSelectionList:SetShown(not self.petSelectionList:IsShown())
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 end
 
 
 function MJSetPetMixin:refresh()
-	if not self.refreshEnabled then return end
-
 	local selectedSpellID = MountJournal.selectedSpellID
 	local petID = self.journal.petForMount[selectedSpellID]
 	self.id = petID
@@ -175,6 +175,7 @@ function MJCompanionsPanelMixin:onLoad()
 	self.listScroll.scrollBar.doNotHide = true
 	HybridScrollFrame_CreateButtons(self.listScroll, "MJPetListButton")
 
+	self.journal:on("MOUNT_SELECT", function() self:Hide() end)
 	self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 end
 

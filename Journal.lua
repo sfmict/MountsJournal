@@ -1,5 +1,5 @@
 local addon, L = ...
-local C_MountJournal, C_PetJournal, C_Timer, next, pairs, ipairs, select, type, sort = C_MountJournal, C_PetJournal, C_Timer, next, pairs, ipairs, select, type, sort
+local C_MountJournal, C_PetJournal, C_Timer, wipe, tinsert, next, pairs, ipairs, select, type, sort = C_MountJournal, C_PetJournal, C_Timer, wipe, tinsert, next, pairs, ipairs, select, type, sort
 local util, mounts, config = MountsJournalUtil, MountsJournal, MountsJournalConfig
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
 util:setEventsMixin(journal)
@@ -38,8 +38,10 @@ journal.mountTypes = setmetatable({
 	[254] = 3,
 }, {
 	__index = function(self, key)
-		self[key] = 1
-		return self[key]
+		if type(key) == "number" then
+			self[key] = 1
+			return self[key]
+		end
 	end
 })
 
@@ -272,10 +274,9 @@ function journal:ADDON_LOADED(addonName)
 		end)
 
 		-- EXISTING LISTS
-		local existingLists = CreateFrame("FRAME", nil, mapSettings, "MJExistingListsPanelTemplate")
-		self.existingLists = existingLists
-		existingLists:SetPoint("TOPLEFT", self.MountJournal, "TOPRIGHT")
-		existingLists:SetPoint("BOTTOMLEFT", self.MountJournal, "BOTTOMRIGHT")
+		self.existingLists = CreateFrame("FRAME", nil, mapSettings, "MJExistingListsPanelTemplate")
+		self.existingLists:SetPoint("TOPLEFT", self.MountJournal, "TOPRIGHT")
+		self.existingLists:SetPoint("BOTTOMLEFT", self.MountJournal, "BOTTOMRIGHT")
 
 		--MOUNTJOURNAL ONSHOW
 		self.MountJournal:HookScript("OnShow", function()
@@ -314,10 +315,9 @@ function journal:ADDON_LOADED(addonName)
 		self:RegisterEvent("ACHIEVEMENT_EARNED")
 
 		-- PROFILES
-		local profilesMenu = CreateFrame("Button", nil, self.MountJournal, "MJMenuButtonProfiles")
-		self.profilesMenu = profilesMenu
-		profilesMenu:SetPoint("LEFT", self.MountJournal.MountButton, "RIGHT", 6, 0)
-		profilesMenu:on("UPDATE_PROFILE", function(_, changeProfile)
+		self.profilesMenu = CreateFrame("Button", nil, self.MountJournal, "MJMenuButtonProfiles")
+		self.profilesMenu:SetPoint("LEFT", self.MountJournal.MountButton, "RIGHT", 6, 0)
+		self.profilesMenu:on("UPDATE_PROFILE", function(_, changeProfile)
 			mounts:setDB()
 			self:setEditMountsList()
 			self:updateMountsList()
@@ -350,6 +350,8 @@ function journal:ADDON_LOADED(addonName)
 					HybridScrollFrame_ScrollToIndex(MountJournal.ListScrollFrame, index, MountJournal_GetMountButtonHeight)
 				end
 			end
+
+			self:event("MOUNT_SELECT", selectedMountID)
 		end
 
 		local function typeClick(btn) self:mountToggle(btn) end
@@ -683,13 +685,6 @@ function journal:ADDON_LOADED(addonName)
 					self.animationsCombobox:playAnimation(value.animation, value.isKit, value.loop)
 				end
 			end)
-		end)
-
-		-- MOUNT SELECT HOOK
-		hooksecurefunc("MountJournal_SetSelected", function(mountID)
-			self:event("MOUNT_SELECT", mountID)
-			infoButton.petSelectionBtn:refresh()
-			infoButton.petSelectionBtn.petSelectionList:Hide()
 		end)
 
 		-- HOOKS
@@ -1705,7 +1700,7 @@ end
 
 
 function journal:updateMountsList()
-	local filters, mountTypes, list, tags, GetMountInfoByID, GetMountInfoExtraByID = mounts.filters, self.mountTypes, self.list, self.tags, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID
+	local filters, mountTypes, list, mountsDB, tags, GetMountInfoByID, GetMountInfoExtraByID = mounts.filters, self.mountTypes, self.list, mounts.mountsDB, self.tags, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID
 	local sources, types, selected, factions, pet, expansions = filters.sources, filters.types, filters.selected, filters.factions, filters.pet, filters.expansions
 	local text = util.cleanText(self.searchText)
 	wipe(self.displayedMounts)
@@ -1725,23 +1720,23 @@ function journal:updateMountsList()
 		-- SOURCES
 		and sources[sourceType]
 		-- SEARCH
-		and (text:len() == 0 or name:lower():find(text) or sourceText:lower():find(text) or tags:find(mountID, text))
+		and (text:len() == 0
+			or name:lower():find(text)
+			or sourceText:lower():find(text)
+			or tags:find(mountID, text))
 		-- TYPE
 		and types[mountTypes[mountType]]
 		-- FACTION
 		and factions[(mountFaction or 2) + 1]
 		-- SELECTED
-		and (not selected[1] and not selected[2] and not selected[3]
-			-- FLY
-			or selected[1] and list and list.fly[mountID]
-			-- GROUND
-			or selected[2] and list and list.ground[mountID]
-			-- SWIMMING
-			or selected[3] and list and list.swimming[mountID])
+		and (not (selected[1] or selected[2] or selected[3]) or list and
+			(selected[1] and list.fly[mountID]
+			or selected[2] and list.ground[mountID]
+			or selected[3] and list.swimming[mountID]))
 		-- PET
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
 		-- EXPANSIONS
-		and expansions[mounts.mountsDB[mountID]]
+		and expansions[mountsDB[mountID]]
 		-- TAGS
 		and tags:getFilterMount(mountID) then
 			tinsert(self.displayedMounts, mountID)
