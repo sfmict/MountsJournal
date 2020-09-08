@@ -319,11 +319,12 @@ function config:createMacro(macroName, buttonName, texture)
 	if MacroFrame:IsShown() then
 		MacroFrame_Update()
 	else
-		self:okay()
-		local b_CanOpenPanels = CanOpenPanels
-		CanOpenPanels = function() return 1 end
-		ShowUIPanel(MacroFrame, 1)
-		CanOpenPanels = b_CanOpenPanels
+		InterfaceOptionsFrame:SetAttribute("UIPanelLayout-allowOtherPanels", 1)
+		local b_HideUIPanel = HideUIPanel
+		HideUIPanel = function() end
+		ShowUIPanel(MacroFrame)
+		HideUIPanel = b_HideUIPanel
+		InterfaceOptionsFrame:SetAttribute("UIPanelLayout-allowOtherPanels", nil)
 	end
 
 	if MacroFrame.selectedTab ~= 1 then

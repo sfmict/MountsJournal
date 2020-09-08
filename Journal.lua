@@ -136,6 +136,10 @@ function journal:ADDON_LOADED(addonName)
 			tags = {},
 		}
 		self.tags:init()
+		mounts.filters.sorting = mounts.filters.sorting or {
+			by = "name",
+			favoritesFirst = true,
+		}
 
 		self.MountJournal:UnregisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 		self.MountJournal:UnregisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
@@ -760,7 +764,6 @@ function journal:ADDON_LOADED(addonName)
 		self:setEditMountsList()
 		self:updateIndexByMountID()
 		self:updateBtnFilters()
-		self:updateMountsList()
 	end
 end
 
@@ -970,6 +973,45 @@ function journal:setCountMounts()
 end
 
 
+function journal:sortMounts()
+	local fSort = mounts.filters.sorting
+
+	sort(self.mountIDs, function(a, b)
+		local nameA, _,_,_,_,_, isFavoriteA, _,_,_, isCollectedA = C_MountJournal.GetMountInfoByID(a)
+		local nameB, _,_,_,_,_, isFavoriteB, _,_,_, isCollectedB = C_MountJournal.GetMountInfoByID(b)
+
+		-- FAVORITES
+		if fSort.favoritesFirst then
+			if isFavoriteA and not isFavoriteB then return true
+			elseif not isFavoriteA and isFavoriteB then return false end
+		end
+
+		-- COLLECTED
+		if isCollectedA and not isCollectedB then return true
+		elseif not isCollectedA and isCollectedB then return false end
+
+		-- TYPE
+		if fSort.by == "type" then
+			local _,_,_,_, typeA = C_MountJournal.GetMountInfoExtraByID(a)
+			local _,_,_,_, typeB = C_MountJournal.GetMountInfoExtraByID(b)
+
+			if self.mountTypes[typeA] < self.mountTypes[typeB] then return not fSort.reverse
+			elseif self.mountTypes[typeA] > self.mountTypes[typeB] then return fSort.reverse end
+		-- EXPANSION
+		elseif fSort.by == "expansion" then
+			if mounts.mountsDB[a] < mounts.mountsDB[b] then return not fSort.reverse
+			elseif mounts.mountsDB[a] > mounts.mountsDB[b] then return fSort.reverse end
+		-- NAME
+		elseif fSort.by == "name" and fSort.reverse then
+			return nameA > nameB
+		end
+		return nameA < nameB
+	end)
+
+	self:updateMountsList()
+end
+
+
 function journal:updateIndexByMountID()
 	self:UnregisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 	self.func.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
@@ -985,21 +1027,9 @@ function journal:updateIndexByMountID()
 		self.indexByMountID[mountID] = i
 	end
 
-	sort(self.mountIDs, function(a, b)
-		local nameA, _,_,_,_,_, isFavoriteA, _,_,_, isCollectedA = C_MountJournal.GetMountInfoByID(a)
-		local nameB, _,_,_,_,_, isFavoriteB, _,_,_, isCollectedB = C_MountJournal.GetMountInfoByID(b)
-		return isFavoriteA and not isFavoriteB
-			or isFavoriteA == isFavoriteB and (isCollectedA and not isCollectedB
-				or isCollectedA == isCollectedB and nameA < nameB)
-	end)
+	self:sortMounts()
 end
-
-
--- UPDATE indexByMountID WHEN SET FAVORITE
-function journal:MOUNT_JOURNAL_SEARCH_UPDATED()
-	self:updateIndexByMountID()
-	self:updateMountsList()
-end
+journal.MOUNT_JOURNAL_SEARCH_UPDATED = journal.updateIndexByMountID -- UPDATE indexByMountID WHEN SET FAVORITE
 
 
 function journal:mountLearnedUpdate()
@@ -1299,6 +1329,10 @@ function journal:filterDropDown_Initialize(btn, level, value)
 		info.text = L["tags"]
 		info.value = 7
 		btn:ddAddButton(info, level)
+
+		info.text = L["sorting"]
+		info.value = 8
+		btn:ddAddButton(info, level)
 	else
 		info.notCheckable = true
 
@@ -1482,7 +1516,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 				info.checked = function() return expansions[i] end
 				btn:ddAddButton(info, level)
 			end
-		else -- TAGS
+		elseif value == 7 then -- TAGS
 			local filterTags = self.tags.filter
 
 			info.notCheckable = false
@@ -1560,6 +1594,57 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			info.func = function()
 				self.tags:addTag()
 			end
+			btn:ddAddButton(info, level)
+		else -- SORTING
+			local fSort = mounts.filters.sorting
+			info.isNotRadio = nil
+			info.notCheckable = nil
+
+			info.text = NAME
+			info.func = function()
+				fSort.by = "name"
+				self:sortMounts()
+				btn:ddRefresh(level)
+			end
+			info.checked = function() return fSort.by == "name" end
+			btn:ddAddButton(info, level)
+
+			info.text = TYPE
+			info.func = function()
+				fSort.by = "type"
+				self:sortMounts()
+				btn:ddRefresh(level)
+			end
+			info.checked = function() return fSort.by == "type" end
+			btn:ddAddButton(info, level)
+
+			info.text = EXPANSION_FILTER_TEXT
+			info.func = function()
+				fSort.by = "expansion"
+				self:sortMounts()
+				btn:ddRefresh(level)
+			end
+			info.checked = function() return fSort.by == "expansion" end
+			btn:ddAddButton(info, level)
+
+			btn:ddAddSeparator(level)
+
+			info.isNotRadio = true
+			info.text = L["Reverse Sort"]
+			info.func = function(_,_,_, value)
+				fSort.reverse = value
+				self:sortMounts()
+			end
+			info.checked = fSort.reverse
+			btn:ddAddButton(info, level)
+
+			info.isNotRadio = true
+			info.text = L["Favorites First"]
+			info.func = function(_,_,_, value)
+				fSort.favoritesFirst = value
+				self:sortMounts()
+			end
+			info.checked = fSort.favoritesFirst
 			btn:ddAddButton(info, level)
 		end
 	end
