@@ -335,16 +335,50 @@ function journal:ADDON_LOADED(addonName)
 		end)
 
 		-- SELECTED BUTTONS
-		function MountJournal_SetSelected(selectedMountID, selectedSpellID)
-			MountJournal.selectedSpellID = selectedSpellID
-			MountJournal.selectedMountID = selectedMountID
+		function MountJournal_GetMountButtonByMountID(mountID)
+			local buttons = self.scrollFrame.buttons
+			for i = 1, #buttons do
+				local button = buttons[i]
+				if mounts.config.gridToggle then
+					for j = 1, 3 do
+						local grid3Button = button.grid3list["mount"..j]
+						if grid3Button.mountID == mountID then
+							return grid3Button
+						end
+					end
+				else
+					if button.mountID == mountID then
+						return button
+					end
+				end
+			end
+		end
+
+		function MountJournal_SetSelected(mountID, spellID)
+			MountJournal.selectedMountID = mountID
+			MountJournal.selectedSpellID = spellID
 			MountJournal_UpdateMountList()
 			MountJournal_UpdateMountDisplay()
 
-			if not mounts.config.disableAutoScroll then
+			-- if not mounts.config.disableAutoScroll then
+			-- 	local index
+			-- 	for i = 1, #self.displayedMounts do
+			-- 		if mountID == self.displayedMounts[i] then
+			-- 			index = i
+			-- 			break
+			-- 		end
+			-- 	end
+			-- 	if index then
+			-- 		if mounts.config.gridToggle then index = math.ceil(index / 3) end
+			-- 		HybridScrollFrame_ScrollToIndex(MountJournal.ListScrollFrame, index, MountJournal_GetMountButtonHeight)
+			-- 	end
+			-- end
+
+			local button = MountJournal_GetMountButtonByMountID(mountID)
+			if not button or self.scrollFrame:GetBottom() >= button:GetTop() then
 				local index
 				for i = 1, #self.displayedMounts do
-					if selectedMountID == self.displayedMounts[i] then
+					if mountID == self.displayedMounts[i] then
 						index = i
 						break
 					end
@@ -355,7 +389,7 @@ function journal:ADDON_LOADED(addonName)
 				end
 			end
 
-			self:event("MOUNT_SELECT", selectedMountID)
+			self:event("MOUNT_SELECT", mountID)
 		end
 
 		local function typeClick(btn) self:mountToggle(btn) end

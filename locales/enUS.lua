@@ -70,7 +70,7 @@ L["Summon Random Battle Pet"] = "Summon Random Battle Pet"
 L["No Battle Pet"] = "No Battle Pet"
 L["NoPetInRaid"] = "Do not summon battle pet in raid group"
 L["NoPetInGroup"] = "Do not summon battle pet in group"
-L["DisableAutoScroll"] = "Disable auto-scrolling in the mount menu"
+-- L["DisableAutoScroll"] = "Disable auto-scrolling in the mount menu"
 -- ANIMATIONS
 L["Default"] = "Default"
 L["Mount special"] = "Mount special"

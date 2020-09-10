@@ -266,11 +266,11 @@ config:SetScript("OnShow", function(self)
 	self.noPetInGroup:HookScript("OnClick", function() self.applyBtn:Enable() end)
 
 	-- DISABLE AUTO SCROLL
-	self.disableAutoScroll = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.disableAutoScroll:SetPoint("TOPLEFT", self.noPetInGroup, "BOTTOMLEFT", 0, -26)
-	self.disableAutoScroll.Text:SetSize(245, 25)
-	self.disableAutoScroll.Text:SetText(L["DisableAutoScroll"])
-	self.disableAutoScroll:HookScript("OnClick", function() self.applyBtn:Enable() end)
+	-- self.disableAutoScroll = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	-- self.disableAutoScroll:SetPoint("TOPLEFT", self.noPetInGroup, "BOTTOMLEFT", 0, -26)
+	-- self.disableAutoScroll.Text:SetSize(245, 25)
+	-- self.disableAutoScroll.Text:SetText(L["DisableAutoScroll"])
+	-- self.disableAutoScroll:HookScript("OnClick", function() self.applyBtn:Enable() end)
 
 	-- APPLY
 	self.applyBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
@@ -300,7 +300,7 @@ config:SetScript("OnShow", function(self)
 		self.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
 		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
-		self.disableAutoScroll:SetChecked(mounts.config.disableAutoScroll)
+		-- self.disableAutoScroll:SetChecked(mounts.config.disableAutoScroll)
 		self.applyBtn:Disable()
 	end
 
