@@ -832,6 +832,7 @@ function journal:grid3UpdateMountList()
 
 				btnGrid.index = index
 				btnGrid.spellID = spellID
+				btnGrid.mountID = mountID
 				btnGrid.active = active
 				btnGrid.selected = selectedSpellID == spellID
 				btnGrid.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
@@ -909,8 +910,8 @@ end
 
 
 do
-	local function setColor(self, btn, mountsTbl)
-		if mountsTbl and mountsTbl[btn.mountID] then
+	local function setColor(self, btn, checked)
+		if checked then
 			btn.icon:SetVertexColor(self.colors.gold:GetRGB())
 			btn:SetChecked(true)
 		else
@@ -921,17 +922,12 @@ do
 
 	function journal:updateMountToggleButton(btn)
 		if btn.index then
-			local mountID = select(12, C_MountJournal.GetDisplayedMountInfo(btn.index))
-
 			btn.fly:Enable()
 			btn.ground:Enable()
 			btn.swimming:Enable()
-			btn.fly.mountID = mountID
-			btn.ground.mountID = mountID
-			btn.swimming.mountID = mountID
-			setColor(self, btn.fly, self.list and self.list.fly)
-			setColor(self, btn.ground, self.list and self.list.ground)
-			setColor(self, btn.swimming, self.list and self.list.swimming)
+			setColor(self, btn.fly, self.list and self.list.fly[btn.mountID])
+			setColor(self, btn.ground, self.list and self.list.ground[btn.mountID])
+			setColor(self, btn.swimming, self.list and self.list.swimming[btn.mountID])
 		else
 			btn.fly:Disable()
 			btn.ground:Disable()
@@ -1086,14 +1082,15 @@ function journal:mountToggle(btn)
 		self:createMountList(self.listMapID)
 	end
 	local tbl = self.list[btn.type]
+	local mountID = btn:GetParent().mountID
 
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	if tbl[btn.mountID] then
-		tbl[btn.mountID] = nil
+	if tbl[mountID] then
+		tbl[mountID] = nil
 		btn.icon:SetVertexColor(self.colors.gray:GetRGB())
 		self:getRemoveMountList(self.listMapID)
 	else
-		tbl[btn.mountID] = true
+		tbl[mountID] = true
 		btn.icon:SetVertexColor(self.colors.gold:GetRGB())
 	end
 
