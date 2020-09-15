@@ -354,7 +354,7 @@ function journal:ADDON_LOADED(addonName)
 			end
 		end
 
-		function MountJournal_SetSelected(mountID, spellID)
+		function MountJournal_SetSelected(mountID, spellID, button)
 			MountJournal.selectedMountID = mountID
 			MountJournal.selectedSpellID = spellID
 			MountJournal_UpdateMountList()
@@ -373,8 +373,9 @@ function journal:ADDON_LOADED(addonName)
 			-- 		HybridScrollFrame_ScrollToIndex(MountJournal.ListScrollFrame, index, MountJournal_GetMountButtonHeight)
 			-- 	end
 			-- end
-
-			local button = MountJournal_GetMountButtonByMountID(mountID)
+			if not button then
+				button = MountJournal_GetMountButtonByMountID(mountID)
+			end
 			if not button or self.scrollFrame:GetBottom() >= button:GetTop() then
 				local index
 				for i = 1, #self.displayedMounts do
@@ -385,7 +386,7 @@ function journal:ADDON_LOADED(addonName)
 				end
 				if index then
 					if mounts.config.gridToggle then index = math.ceil(index / 3) end
-					HybridScrollFrame_ScrollToIndex(MountJournal.ListScrollFrame, index, MountJournal_GetMountButtonHeight)
+					HybridScrollFrame_ScrollToIndex(self.scrollFrame, index, MountJournal_GetMountButtonHeight)
 				end
 			end
 
@@ -602,7 +603,7 @@ function journal:ADDON_LOADED(addonName)
 
 			local activeCamera = self.modelScene.activeCamera
 			if activeCamera then
-				activeCamera:ApplyFromModelSceneCameraInfo(C_ModelInfo.GetModelSceneCameraInfoByID(activeCamera.modelSceneCameraInfo.modelSceneCameraID), nil, self.modelScene.cameraModificationType)
+				activeCamera.yOffset = activeCamera.yOffset + (checked and 40 or -40)
 			end
 		end
 		setShownDescription(mountDescriptionToggle)
@@ -629,12 +630,79 @@ function journal:ADDON_LOADED(addonName)
 
 		hooksecurefunc(self.modelScene, "SetActiveCamera", function(self)
 			local activeCamera = self.activeCamera
+			activeCamera.panningXOffset = 0
+			activeCamera.panningYOffset = 0
 
-			local ApplyFromModelSceneCameraInfo = activeCamera.ApplyFromModelSceneCameraInfo
-			function activeCamera:ApplyFromModelSceneCameraInfo(modelSceneCameraInfo, ...)
-				modelSceneCameraInfo.target.z = mountDescriptionToggle:GetChecked() and 2.2 or 1
+			local function TryCreateZoomSpline(x, y, z, existingSpline)
+				if x and y and z and (x ~= 0 or y ~= 0 or z ~= 0) then
+					local spline = existingSpline or CreateCatmullRomSpline(3)
+					spline:ClearPoints()
+					spline:AddPoint(0, 0, 0)
+					spline:AddPoint(x, y, z)
+
+					return spline
+				end
+			end
+
+			function activeCamera:ApplyFromModelSceneCameraInfo(modelSceneCameraInfo, transitionType, modificationType) -- override
+				modelSceneCameraInfo.target.z = 1
 				modelSceneCameraInfo.maxZoomDistance = 24
-				ApplyFromModelSceneCameraInfo(self, modelSceneCameraInfo, ...)
+				if modificationType ~= CAMERA_MODIFICATION_TYPE_MAINTAIN then
+					self.xOffset = 0
+					self.yOffset = mountDescriptionToggle:GetChecked() and 40 or 0
+				end
+
+				local transitionalCameraInfo = self:CalculateTransitionalValues(self.modelSceneCameraInfo, modelSceneCameraInfo, modificationType)
+
+				self.modelSceneCameraInfo = modelSceneCameraInfo
+
+				self:SetTarget(transitionalCameraInfo.target:GetXYZ())
+				self:SetTargetSpline(TryCreateZoomSpline(transitionalCameraInfo.zoomedTargetOffset:GetXYZ()), self:GetTargetSpline())
+				self:SetOrientationSpline(TryCreateZoomSpline(transitionalCameraInfo.zoomedYawOffset, transitionalCameraInfo.zoomedPitchOffset, transitionalCameraInfo.zoomedRollOffset), self:GetOrientationSpline())
+
+				self:SetMinZoomDistance(transitionalCameraInfo.minZoomDistance)
+				self:SetMaxZoomDistance(transitionalCameraInfo.maxZoomDistance)
+
+				self:SetZoomDistance(transitionalCameraInfo.zoomDistance)
+
+				self:SetYaw(transitionalCameraInfo.yaw)
+				self:SetPitch(transitionalCameraInfo.pitch)
+				self:SetRoll(transitionalCameraInfo.roll)
+
+				if transitionType == CAMERA_TRANSITION_TYPE_IMMEDIATE then
+					self:SnapAllInterpolatedValues()
+				end
+				self:UpdateCameraOrientationAndPosition()
+
+				self:SaveInitialTransform(transitionalCameraInfo)
+			end
+
+			local function InterpolateDimension(lastValue, targetValue, amount, elapsed)
+				return lastValue and amount and DeltaLerp(lastValue, targetValue, amount, elapsed) or targetValue
+			end
+
+			hooksecurefunc(activeCamera, "UpdateInterpolationTargets", function(self, elapsed)
+				self.panningXOffset = InterpolateDimension(self.panningXOffset, self.xOffset, .15, elapsed)
+				self.panningYOffset = InterpolateDimension(self.panningYOffset, self.yOffset, .15, elapsed)
+			end)
+
+			local HandleMouseMovement = activeCamera.HandleMouseMovement
+			function activeCamera:HandleMouseMovement(mode, delta, snapToValue)
+				if mode == ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL then
+					self.xOffset = self.xOffset + delta
+
+					if snapToValue then
+						self.panningXOffset = self.xOffset
+					end
+				elseif mode == ORBIT_CAMERA_MOUSE_PAN_VERTICAL then
+					self.yOffset = self.yOffset + delta
+
+					if snapToValue then
+						self.panningYOffset = self.yOffset
+					end
+				else
+					HandleMouseMovement(self, mode, delta, snapToValue)
+				end
 			end
 
 			activeCamera:SetLeftMouseButtonYMode(ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION, true)
@@ -693,6 +761,11 @@ function journal:ADDON_LOADED(addonName)
 
 		modelControl.reset:SetScript("OnClick", function(self)
 			local activeCamera = self:GetParent():GetParent().activeCamera
+			local pi2 = math.pi * 2
+			activeCamera.yaw = math.fmod(activeCamera.yaw, pi2)
+			activeCamera.interpolatedYaw = math.fmod(activeCamera.interpolatedYaw, pi2)
+			activeCamera.pitch = math.fmod(activeCamera.pitch, pi2)
+			activeCamera.interpolatedPitch = math.fmod(activeCamera.interpolatedPitch, pi2)
 			activeCamera:ApplyFromModelSceneCameraInfo(activeCamera.modelSceneCameraInfo)
 		end)
 

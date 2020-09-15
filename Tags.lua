@@ -115,8 +115,8 @@ do
 			end
 		else
 			local time = GetTime()
-			if btn.spellID ~= MountJournal.selectedSpellID then
-				MountJournal_Select(btn.index)
+			if btn.mountID ~= MountJournal.selectedMountID then
+				MountJournal_SetSelected(btn.mountID, btn.spellID, btn)
 			elseif time - lastMountClick < .4 then
 				local _,_,_, active, isUsable, _,_,_,_,_,_, mountID = C_MountJournal.GetDisplayedMountInfo(btn.index)
 				if active then
