@@ -2,8 +2,8 @@ local mounts, journal = MountsJournal, MountsJournalFrame
 
 
 journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
-	local GetScaledCursorDelta = GetScaledCursorDelta
-	local GetScaledCursorPosition = GetScaledCursorPosition
+	local GetScaledCursorDelta, GetScaledCursorPosition = GetScaledCursorDelta, GetScaledCursorPosition
+	local Vector3D_CalculateNormalFromYawPitch, Vector3D_ScaleBy, Vector3D_Add = Vector3D_CalculateNormalFromYawPitch, Vector3D_ScaleBy, Vector3D_Add
 	local mountDisplay = self.MountJournal.MountDisplay
 
 	activeCamera.panningXOffset = 0
@@ -117,11 +117,43 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 		self.panningYOffset = InterpolateDimension(self.panningYOffset, self.yOffset, .15, elapsed)
 	end)
 
+	function activeCamera:UpdateCameraOrientationAndPosition()
+		local yaw, pitch, roll = self:GetInterpolatedOrientation()
+		self:GetOwningScene():SetCameraOrientationByYawPitchRoll(yaw, pitch, roll)
+
+		local axisAngleX, axisAngleY, axisAngleZ = Vector3D_CalculateNormalFromYawPitch(yaw, pitch)
+		local targetX, targetY, targetZ = self:GetInterpolatedTarget()
+		local zoomDistance = self:GetInterpolatedZoomDistance()
+
+		-- Panning start --
+		-- We want the model to move 1-to-1 with the mouse.
+		-- Panning formula: dx / hypotenuse * (zoomDistance - 1 / zoomDistance^3)
+		-- It was experimentally determined that adding the additional fudge factor 1/z^3 resulted in better tracking.
+		local width = self:GetOwningScene():GetWidth()
+		local height = self:GetOwningScene():GetHeight()
+		local scaleFactor = math.sqrt(width * width + height * height)
+		local zoomFactor = 1
+		if zoomDistance > 1 then
+			zoomFactor = zoomDistance - 1 / (zoomDistance * zoomDistance * zoomDistance)
+			if zoomFactor < 1 then
+				zoomFactor = 1
+			end
+		end
+
+		local rightX, rightY, rightZ = Vector3D_ScaleBy(self.panningXOffset / scaleFactor * zoomFactor, self:GetRightVector())
+		local upX, upY, upZ = Vector3D_ScaleBy(self.panningYOffset / scaleFactor * zoomFactor, self:GetUpVector())
+		targetX, targetY, targetZ = Vector3D_Add(targetX, targetY, targetZ, rightX, rightY, rightZ)
+		targetX, targetY, targetZ = Vector3D_Add(targetX, targetY, targetZ, upX, upY, upZ)
+		-- Panning end --
+
+		self:SetPosition(self:CalculatePositionByDistanceFromTarget(targetX, targetY, targetZ, zoomDistance, axisAngleX, axisAngleY, axisAngleZ))
+	end
+
 	activeCamera:SetLeftMouseButtonYMode(ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION, true)
 	activeCamera:SetRightMouseButtonXMode(ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, true)
 	activeCamera:SetRightMouseButtonYMode(ORBIT_CAMERA_MOUSE_PAN_VERTICAL, true)
 
-	activeCamera.deltaModifierForCameraMode = {
+	activeCamera.deltaModifierForCameraMode = setmetatable({
 		[ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION),
 		[ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION),
 		[ORBIT_CAMERA_MOUSE_MODE_ROLL_ROTATION] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_ROLL_ROTATION),
@@ -130,10 +162,7 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 		[ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL),
 		[ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL),
 		[ORBIT_CAMERA_MOUSE_PAN_VERTICAL] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_PAN_VERTICAL),
-	}
-	setmetatable(activeCamera.deltaModifierForCameraMode, {__index = function()
-		return 0
-	end})
+	}, {__index = function() return 0 end})
 	function activeCamera:GetDeltaModifierForCameraMode(mode)
 		return self.deltaModifierForCameraMode[mode]
 	end
