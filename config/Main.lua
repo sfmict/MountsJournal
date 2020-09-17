@@ -352,7 +352,7 @@ config.okay = function(self)
 	mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
 	mounts.config.noPetInRaid = self.noPetInRaid:GetChecked()
 	mounts.config.noPetInGroup = self.noPetInGroup:GetChecked()
-	mounts.config.disableAutoScroll = self.disableAutoScroll:GetChecked()
+	-- mounts.config.disableAutoScroll = self.disableAutoScroll:GetChecked()
 end
 
 
