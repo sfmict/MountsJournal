@@ -1,4 +1,5 @@
-* Update to PTR(9.0.1).
-* Added option to disable auto-scrolling.
+* Updated to Shadowlands.
 * Added hint to zone settings menu.
 * Fixed riding detection (hopefully temporary).
+* Added sorting.
+* Updated mount display system.
