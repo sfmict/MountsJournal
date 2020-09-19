@@ -75,10 +75,10 @@
 		</Layers>
 		<ButtonText parentKey="Text">
 			<Anchors>
-				<Anchor point="TOP" x="0" y="-4" />
-				<Anchor point="BOTTOM" x="0" y="4" />
-				<Anchor point="LEFT" x="4" y="0" />
-				<Anchor point="RIGHT" x="-15" y="0" />
+				<Anchor point="TOP" x="0" y="-4"/>
+				<Anchor point="BOTTOM" x="0" y="4"/>
+				<Anchor point="LEFT" x="4" y="0"/>
+				<Anchor point="RIGHT" x="-15" y="0"/>
 			</Anchors>
 		</ButtonText>
 		<KeyValues>

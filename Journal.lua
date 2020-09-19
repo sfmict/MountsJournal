@@ -665,8 +665,7 @@ function journal:ADDON_LOADED(addonName)
 		modelControl.rotateDownButton:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
 
 		modelControl.reset:SetScript("OnClick", function(self)
-			local activeCamera = self:GetParent():GetParent().activeCamera
-			activeCamera:ApplyFromModelSceneCameraInfo(activeCamera.modelSceneCameraInfo)
+			self:GetParent():GetParent().activeCamera:resetPosition()
 		end)
 
 		-- MOUNT ANIMATIONS
@@ -777,7 +776,7 @@ end
 
 function journal:setScrollGridMounts(grid)
 	local scrollFrame = self.scrollFrame
-	local offset = HybridScrollFrame_GetOffset(scrollFrame)
+	local offset = math.floor((scrollFrame.offset or 0) + .1)
 
 	if grid then
 		offset = math.ceil((offset + 1) / 3) - 1

@@ -5,10 +5,12 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 	local ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, ORBIT_CAMERA_MOUSE_PAN_VERTICAL = ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, ORBIT_CAMERA_MOUSE_PAN_VERTICAL
 	local GetScaledCursorDelta, GetScaledCursorPosition = GetScaledCursorDelta, GetScaledCursorPosition
 	local DeltaLerp, Vector3D_CalculateNormalFromYawPitch, Vector3D_ScaleBy, Vector3D_Add = DeltaLerp, Vector3D_CalculateNormalFromYawPitch, Vector3D_ScaleBy, Vector3D_Add
-	local mountDisplay = self.MountJournal.MountDisplay
 
-	activeCamera.panningXOffset = 0
-	activeCamera.panningYOffset = 0
+	function activeCamera:SaveInitialTransform()
+		local initialLightYaw, initialLightPitch = Vector3D_CalculateYawPitchFromNormal(Vector3D_Normalize(self:GetOwningScene():GetLightDirection()))
+		self.lightDeltaYaw = initialLightYaw - self:GetYaw()
+		self.lightDeltaPitch = initialLightPitch - self:GetPitch()
+	end
 
 	local function TryCreateZoomSpline(x, y, z, existingSpline)
 		if x and y and z and (x ~= 0 or y ~= 0 or z ~= 0) then
@@ -24,19 +26,8 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 	function activeCamera:ApplyFromModelSceneCameraInfo(modelSceneCameraInfo, transitionType, modificationType)
 		modelSceneCameraInfo.target.z = 1
 		modelSceneCameraInfo.maxZoomDistance = 24
-		if modificationType ~= CAMERA_MODIFICATION_TYPE_MAINTAIN then
-			self.xOffset = 0
-			self.yOffset = mounts.config.mountDescriptionToggle and 40 or 0
-		end
-
-		local pi2 = math.pi * 2
-		activeCamera.yaw = math.fmod(activeCamera.yaw, pi2)
-		activeCamera.interpolatedYaw = math.fmod(activeCamera.interpolatedYaw or 0, pi2)
-		activeCamera.pitch = math.fmod(activeCamera.pitch, pi2)
-		activeCamera.interpolatedPitch = math.fmod(activeCamera.interpolatedPitch or 0, pi2)
 
 		local transitionalCameraInfo = self:CalculateTransitionalValues(self.modelSceneCameraInfo, modelSceneCameraInfo, modificationType)
-
 		self.modelSceneCameraInfo = modelSceneCameraInfo
 
 		self:SetTarget(transitionalCameraInfo.target:GetXYZ())
@@ -52,14 +43,18 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 		self:SetPitch(transitionalCameraInfo.pitch)
 		self:SetRoll(transitionalCameraInfo.roll)
 
+		if self.xOffset == nil then
+			self.xOffset = 0
+			self.yOffset = mounts.config.mountDescriptionToggle and 40 or 0
+			self.panningXOffset = 0
+			self.panningYOffset = self.yOffset
+			self:SaveInitialTransform()
+		end
+
 		if transitionType == CAMERA_TRANSITION_TYPE_IMMEDIATE then
 			self:SnapAllInterpolatedValues()
 		end
 		self:UpdateCameraOrientationAndPosition()
-
-		if modificationType == CAMERA_MODIFICATION_TYPE_DISCARD then
-			self:SaveInitialTransform(transitionalCameraInfo)
-		end
 	end
 
 	local HandleMouseMovement = activeCamera.HandleMouseMovement
@@ -97,12 +92,13 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 		if self:IsRightMouseButtonDown() then
 			local deltaX, deltaY = GetScaledCursorDelta()
 			local x, y = GetScaledCursorPosition()
-			if deltaX > 0 and x > mountDisplay:GetLeft() - 65
-			or deltaX < 0 and x < mountDisplay:GetRight() + 65 then
+			local modelScene = self:GetOwningScene()
+			if deltaX > 0 and x > modelScene:GetLeft() - 65
+			or deltaX < 0 and x < modelScene:GetRight() + 65 then
 				self:HandleMouseMovement(self.buttonModes.rightX, deltaX * self:GetDeltaModifierForCameraMode(self.buttonModes.rightX), not self.buttonModes.rightXinterpolate)
 			end
-			if deltaY > 0 and y > mountDisplay:GetBottom() - 60
-			or deltaY < 0 and y < mountDisplay:GetTop() + 60 then
+			if deltaY > 0 and y > modelScene:GetBottom() - 60
+			or deltaY < 0 and y < modelScene:GetTop() + 60 then
 				self:HandleMouseMovement(self.buttonModes.rightY, -deltaY * self:GetDeltaModifierForCameraMode(self.buttonModes.rightY), not self.buttonModes.rightYinterpolate)
 			end
 		end
@@ -144,6 +140,14 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 		modelScene:SetCameraPosition(self:CalculatePositionByDistanceFromTarget(targetX, targetY, targetZ, zoomDistance, axisAngleX, axisAngleY, axisAngleZ))
 	end
 
+	function activeCamera:UpdateLight()
+		if self:ShouldAlignLightToOrbitDelta() then
+			local lightYaw = self.lightDeltaYaw + self.interpolatedYaw
+			local lightPitch = self.lightDeltaPitch + self.interpolatedPitch
+			self:GetOwningScene():SetLightDirection(Vector3D_CalculateNormalFromYawPitch(lightYaw, lightPitch))
+		end
+	end
+
 	activeCamera:SetLeftMouseButtonYMode(ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION, true)
 	activeCamera:SetRightMouseButtonXMode(ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, true)
 	activeCamera:SetRightMouseButtonYMode(ORBIT_CAMERA_MOUSE_PAN_VERTICAL, true)
@@ -161,5 +165,18 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 
 	function activeCamera:GetDeltaModifierForCameraMode(mode)
 		return self.deltaModifierForCameraMode[mode]
+	end
+
+	function activeCamera:resetPosition()
+		local pi2 = math.pi * 2
+		self.interpolatedYaw = math.fmod(self.interpolatedYaw or 0, pi2)
+		self.interpolatedPitch = math.fmod(self.interpolatedPitch or 0, pi2)
+
+		self:SetYaw(self.modelSceneCameraInfo.yaw)
+		self:SetPitch(self.modelSceneCameraInfo.pitch)
+		self:SetRoll(self.modelSceneCameraInfo.roll)
+		self:SetZoomDistance(self.modelSceneCameraInfo.zoomDistance)
+		self.xOffset = 0
+		self.yOffset = mounts.config.mountDescriptionToggle and 40 or 0
 	end
 end)

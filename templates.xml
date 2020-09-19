@@ -51,11 +51,10 @@
 	<Frame name="MJFilterPanelTemplate" inherits="BackdropTemplate" virtual="true">
 		<Scripts>
 			<OnLoad>
-				self.backdropInfo = {
+				self:SetBackdrop({
 					edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
 					edgeSize = 16,
-				}
-				self:ApplyBackdrop()
+				})
 				self:SetBackdropBorderColor(.6, .6, .6)
 			</OnLoad>
 		</Scripts>
@@ -218,8 +217,7 @@
 		</Layers>
 		<Scripts>
 			<OnLoad>
-				self.backdropInfo = MountsJournalUtil.filterButtonBackdrop
-				self:ApplyBackdrop()
+				self:SetBackdrop(MountsJournalUtil.filterButtonBackdrop)
 				self:SetBackdropBorderColor(.4, .4, .4)
 			</OnLoad>
 			<OnMouseDown>self.icon:SetScale(.9)</OnMouseDown>
@@ -396,8 +394,7 @@
 	<Frame name="MJOptionsPanel" inherits="BackdropTemplate" virtual="true">
 		<Scripts>
 			<OnLoad>
-				self.backdropInfo = MountsJournalUtil.optionsPanelBackdrop
-				self:ApplyBackdrop()
+				self:SetBackdrop(MountsJournalUtil.optionsPanelBackdrop)
 				self:SetBackdropColor(.1, .1, .1, .5)
 				self:SetBackdropBorderColor(.5, .5, .5)
 			</OnLoad>
@@ -527,16 +524,16 @@
 			<Layer level="BACKGROUND">
 				<Texture parentKey="check" file="Interface/QuestFrame/UI-QuestLogTitleHighlight" alphaMode="ADD" alpha=".6" hidden="true">
 					<Anchors>
-						<Anchor point="TOPLEFT" x="27" y="0" />
-						<Anchor point="BOTTOMRIGHT" x="0" y="0" />
+						<Anchor point="TOPLEFT" x="27" y="0"/>
+						<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
 					</Anchors>
 				</Texture>
 			</Layer>
 		</Layers>
 		<HighlightTexture parentKey="highlight" file="Interface/QuestFrame/UI-QuestLogTitleHighlight" alphaMode="ADD" alpha=".3">
 			<Anchors>
-				<Anchor point="TOPLEFT" x="27" y="0" />
-				<Anchor point="BOTTOMRIGHT" x="0" y="0" />
+				<Anchor point="TOPLEFT" x="27" y="0"/>
+				<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
 			</Anchors>
 		</HighlightTexture>
 	</Button>
@@ -1154,10 +1151,7 @@
 			</ScrollFrame>
 		</Frames>
 		<Scripts>
-			<OnLoad>
-				self:OnBackdropLoaded()
-				self:onLoad()
-			</OnLoad>
+			<OnLoad inherit="prepend" method="onLoad"/>
 			<OnShow method="refresh"/>
 		</Scripts>
 	</Frame>
@@ -1225,7 +1219,7 @@
 		<Size x="32" y="32"/>
 		<Layers>
 			<Layer level="ARTWORK">
-				<Texture file="Interface/Cursor/UI-Cursor-Move" setAllPoints="true" /> 
+				<Texture file="Interface/Cursor/UI-Cursor-Move" setAllPoints="true"/>
 			</Layer>
 		</Layers>
 		<Scripts>
@@ -1634,8 +1628,8 @@
 		<Frames>
 			<PlayerModel parentKey="model">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="8" y="-8" />
-					<Anchor point="BOTTOMRIGHT" x="-8" y="8" />
+					<Anchor point="TOPLEFT" x="8" y="-8"/>
+					<Anchor point="BOTTOMRIGHT" x="-8" y="8"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -1700,7 +1694,7 @@
 			</Layer>
 			<Layer level="ARTWORK">
 				<Texture file="Interface/Buttons/SquareButtonTextures" parentKey="arrow">
-					<Size x="12" y="12" />
+					<Size x="12" y="12"/>
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="RIGHT" x="-3"/>
 					</Anchors>
@@ -1903,10 +1897,7 @@
 			</ScrollFrame>
 		</Frames>
 		<Scripts>
-			<OnLoad>
-				self:OnBackdropLoaded()
-				self:onLoad()
-			</OnLoad>
+			<OnLoad inherit="prepend" method="onLoad"/>
 			<OnEvent method="onEvent"/>
 			<OnShow method="onShow"/>
 			<OnHide method="onHide"/>
