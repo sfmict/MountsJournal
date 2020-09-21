@@ -64,28 +64,6 @@ config:SetScript("OnShow", function(self)
 		end)
 	end
 
-	-- CHECKBOX CHILD
-	local function createCheckboxChild(text, parent)
-		if not parent.childs then
-			parent.childs = {}
-			parent:HookScript("OnClick", function(self)
-				for _, child in ipairs(self.childs) do
-					child:SetEnabled(self:GetChecked())
-				end
-			end)
-		end
-
-		local check = CreateFrame("CheckButton", nil, parent:GetParent(), "MJCheckButtonTemplate")
-		if #parent.childs == 0 then
-			check:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 20, -3)
-		else
-			check:SetPoint("TOPLEFT", parent.childs[#parent.childs], "BOTTOMLEFT", 0, -3)
-		end
-		check.Text:SetText(text)
-		tinsert(parent.childs, check)
-		return check
-	end
-
 	-- ADDON INFO
 	local info = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	info:SetPoint("TOPRIGHT", -16, 16)
@@ -114,7 +92,7 @@ config:SetScript("OnShow", function(self)
 	leftPanel:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", 300, 32)
 
 	-- WATER JUMP
-	self.waterJump = CreateFrame("CheckButton", nil, self, "MJCheckButtonTemplate")
+	self.waterJump = CreateFrame("CheckButton", nil, leftPanel, "MJCheckButtonTemplate")
 	self.waterJump:SetPoint("TOPLEFT", subtitle, "BOTTOMLEFT", 8, -20)
 	self.waterJump.Text:SetText(L["Handle a jump in water"])
 	self.waterJump.tooltipText = L["Handle a jump in water"]
@@ -127,7 +105,7 @@ config:SetScript("OnShow", function(self)
 	summon1:SetText(SUMMONS.." 1")
 
 	-- CREATE MACRO
-	local createMacroBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
+	local createMacroBtn = CreateFrame("BUTTON", nil, leftPanel, "UIPanelButtonTemplate")
 	createMacroBtn:SetSize(258, 30)
 	createMacroBtn:SetPoint("TOPLEFT", summon1, "BOTTOMLEFT", 0, -5)
 	createMacroBtn:SetText(L["CreateMacro"])
@@ -141,6 +119,7 @@ config:SetScript("OnShow", function(self)
 	macroOrBind:SetText(L["or key bind"])
 
 	-- BIND MOUNT
+	self.bindMount:SetParent(leftPanel)
 	self.bindMount:SetSize(258, 22)
 	self.bindMount:SetPoint("TOPLEFT", createMacroBtn, "BOTTOMLEFT", 0, -20)
 	self.bindMount:on("SET_BINDING", function()
@@ -149,7 +128,7 @@ config:SetScript("OnShow", function(self)
 	end)
 
 	-- HELP PLATE
-	local helpPlate = CreateFrame("FRAME", nil, self, "MJHelpPlate")
+	local helpPlate = CreateFrame("FRAME", nil, leftPanel, "MJHelpPlate")
 	helpPlate:SetPoint("TOP", self.bindMount, "BOTTOM", 0, -20)
 	helpPlate.tooltip = L["SecondMountTooltipTitle"]:format(SUMMONS)
 	helpPlate.tooltipDescription = L["SecondMountTooltipDescription"]
@@ -160,7 +139,7 @@ config:SetScript("OnShow", function(self)
 	modifierText:SetText(L["Modifier"]..":")
 
 	-- MODIFIER COMBOBOX
-	local modifierCombobox = CreateFrame("FRAME", "MountsJournalModifier", self, "MJDropDownButtonTemplate")
+	local modifierCombobox = CreateFrame("FRAME", "MountsJournalModifier", leftPanel, "MJDropDownButtonTemplate")
 	self.modifierCombobox = modifierCombobox
 	modifierCombobox:SetPoint("LEFT", modifierText, "RIGHT", 7, 0)
 	modifierCombobox:ddSetInit(function(self, level)
@@ -183,7 +162,7 @@ config:SetScript("OnShow", function(self)
 	summon2:SetText(SUMMONS.." 2")
 
 	-- CREATE SECOND MACRO
-	local createSecondMacroBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
+	local createSecondMacroBtn = CreateFrame("BUTTON", nil, leftPanel, "UIPanelButtonTemplate")
 	createSecondMacroBtn:SetSize(258, 30)
 	createSecondMacroBtn:SetPoint("TOPLEFT", summon2, "BOTTOMLEFT", 0, -5)
 	createSecondMacroBtn:SetText(L["CreateMacro"])
@@ -197,6 +176,7 @@ config:SetScript("OnShow", function(self)
 	macroOrBindSecond:SetText(L["or key bind"])
 
 	-- BIND SECOND MOUNT
+	self.bindSecondMount:SetParent(leftPanel)
 	self.bindSecondMount:SetSize(258, 22)
 	self.bindSecondMount:SetPoint("TOP", createSecondMacroBtn, "BOTTOM", 0, -20)
 	self.bindSecondMount:on("SET_BINDING", function()
@@ -232,7 +212,7 @@ config:SetScript("OnShow", function(self)
 	self.useHerbMounts:HookScript("OnClick", function() self.applyBtn:Enable() end)
 
 	-- USE HERBALISM MOUNTS ON HERBALISM ZONES
-	self.herbMountsOnZones = createCheckboxChild(L["UseHerbMountsOnZones"], self.useHerbMounts)
+	self.herbMountsOnZones = util.createCheckboxChild(L["UseHerbMountsOnZones"], self.useHerbMounts)
 	self.herbMountsOnZones.tooltipText = L["UseHerbMountsOnZones"]
 	self.herbMountsOnZones.tooltipRequirement = L["UseHerbMountsDescription"]
 	self.herbMountsOnZones.checkFunc = function() return mounts.config.herbMountsOnZones end
@@ -290,7 +270,6 @@ config:SetScript("OnShow", function(self)
 		binding:setButtonText(self.bindSecondMount)
 		self.useHerbMounts:SetChecked(mounts.config.useHerbMounts)
 		for _, child in ipairs(self.useHerbMounts.childs) do
-			child:SetEnabled(mounts.config.useHerbMounts)
 			child:SetChecked(child:checkFunc())
 		end
 		self.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
@@ -301,13 +280,6 @@ config:SetScript("OnShow", function(self)
 
 	self:SetScript("OnShow", nil)
 end)
-
-
-function config:setEnableCheckButtons(enable, tbl)
-	for _, check in ipairs(tbl) do
-		check:SetEnabled(enable)
-	end
-end
 
 
 function config:createMacro(macroName, buttonName, texture)

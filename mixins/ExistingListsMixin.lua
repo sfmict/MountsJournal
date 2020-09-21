@@ -69,11 +69,15 @@ function MJExistingListsMixin:refresh()
 	end
 	self.optionsButtonPool:ReleaseAll()
 
-	local function createOptionButton(tbl, mapID)
+	local function createOptionButton(tbl, mapID, isGray)
 		local btnText = self.util.getMapFullNameInfo(mapID).name
 		if text:len() == 0 or btnText:lower():find(text) then
 			local optionButton = self.optionsButtonPool:Acquire()
+			local color = isGray and GRAY_FONT_COLOR or WHITE_FONT_COLOR
+			optionButton.isGray = isGray
+			optionButton.text:SetTextColor(color:GetRGB())
 			optionButton:SetText(btnText)
+
 			optionButton:SetScript("OnClick", function()
 				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 				self.journal.navBar:setMapID(mapID)
@@ -82,6 +86,7 @@ function MJExistingListsMixin:refresh()
 			if width > lastWidth then lastWidth = width end
 			tinsert(tbl, optionButton)
 		end
+		return btnText
 	end
 
 	for mapID, mapConfig in pairs(self.journal.zoneMounts) do
@@ -100,7 +105,7 @@ function MJExistingListsMixin:refresh()
 		end
 
 		if flags then
-			createOptionButton(self.lists[3].childs, mapID)
+			createOptionButton(self.lists[3].childs, mapID, not mapConfig.flags.enableFlags)
 		end
 	end
 
@@ -115,7 +120,10 @@ function MJExistingListsMixin:refresh()
 			tinsert(withList.childs, optionButton)
 		else
 			withList:SetText(("%s [%s]"):format(withList.name, childsCount))
-			sort(withList.childs, function(a, b) return a:GetText() < b:GetText() end)
+			sort(withList.childs, function(a, b)
+				return not a.isGray and b.isGray
+					or a.isGray == b.isGray and a:GetText() < b:GetText()
+			end)
 		end
 
 		local width = withList.text:GetStringWidth() + 10
