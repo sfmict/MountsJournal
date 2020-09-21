@@ -244,13 +244,15 @@ function journal:ADDON_LOADED(addonName)
 		end)
 		mapSettings.hint.tooltip = L["ZoneSettingsTooltip"]
 		mapSettings.hint.tooltipDescription = L["ZoneSettingsTooltipDescription"]
-		mapSettings.Ground.Text:SetText(L["Ground Mounts Only"])
+		mapSettings.Flags.Text:SetText(L["Enable Flags"])
+		mapSettings.Flags:HookScript("OnClick", function(check) self:setFlag("enableFlags", check:GetChecked()) end)
+		mapSettings.Ground = util.createCheckboxChild(L["Ground Mounts Only"], mapSettings.Flags)
 		mapSettings.Ground:HookScript("OnClick", function(check) self:setFlag("groundOnly", check:GetChecked()) end)
-		mapSettings.WaterWalk.Text:SetText(L["Water Walking"])
+		mapSettings.WaterWalk = util.createCheckboxChild(L["Water Walking"], mapSettings.Flags)
 		mapSettings.WaterWalk.tooltipText = L["Water Walking"]
 		mapSettings.WaterWalk.tooltipRequirement = L["WaterWalkFlagDescription"]
 		mapSettings.WaterWalk:HookScript("OnClick", function(check) self:setFlag("waterWalkOnly", check:GetChecked()) end)
-		mapSettings.HerbGathering.Text:SetText(L["Herb Gathering"])
+		mapSettings.HerbGathering = util.createCheckboxChild(L["Herb Gathering"], mapSettings.Flags)
 		mapSettings.HerbGathering.tooltipText = L["Herb Gathering"]
 		mapSettings.HerbGathering.tooltipRequirement = L["HerbGatheringFlagDescription"]
 		mapSettings.HerbGathering:HookScript("OnClick", function(check) self:setFlag("herbGathering", check:GetChecked()) end)
@@ -1215,19 +1217,20 @@ end
 function journal:updateMapSettings()
 	local mapSettings = self.mapSettings
 	if not mapSettings:IsShown() then return end
+	local flags = self.currentList and self.currentList.flags
 
+	local flagsCheck = mapSettings.Flags
 	local groundCheck = mapSettings.Ground
 	local waterWalkCheck = mapSettings.WaterWalk
 	local herbGathering = mapSettings.HerbGathering
 	local listFromMap = mapSettings.listFromMap
-	groundCheck:SetChecked(self.currentList and self.currentList.flags and self.currentList.flags.groundOnly)
-	waterWalkCheck:SetChecked(self.currentList and self.currentList.flags and self.currentList.flags.waterWalkOnly)
-	herbGathering:SetChecked(self.currentList and self.currentList.flags and self.currentList.flags.herbGathering)
+	flagsCheck:SetChecked(flags and flags.enableFlags)
+	groundCheck:SetChecked(flags and flags.groundOnly)
+	waterWalkCheck:SetChecked(flags and flags.waterWalkOnly)
+	herbGathering:SetChecked(flags and flags.herbGathering)
 
 	local optionsEnable = self.navBar.mapID ~= mounts.defMountsListID
-	groundCheck:SetEnabled(optionsEnable)
-	waterWalkCheck:SetEnabled(optionsEnable)
-	herbGathering:SetEnabled(optionsEnable)
+	flagsCheck:SetEnabled(optionsEnable)
 	listFromMap:SetEnabled(optionsEnable)
 
 	local relationText = mapSettings.relationMap.text

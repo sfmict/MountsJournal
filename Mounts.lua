@@ -281,18 +281,23 @@ function mounts:setMountsList()
 	local mapInfo = C_Map.GetMapInfo(MapUtil.GetDisplayableMapForPlayer())
 	local zoneMounts = self.zoneMounts
 	self.mapFlags = nil
+	self.list = nil
 
 	while mapInfo and mapInfo.mapID ~= self.defMountsListID do
 		local list = zoneMounts[mapInfo.mapID]
 		if list then
-			if not self.mapFlags then self.mapFlags = list.flags end
-			while list and list.listFromID do
-				list = zoneMounts[list.listFromID]
+			if not self.mapFlags and list.flags and list.flags.enableFlags then
+				self.mapFlags = list.flags
 			end
-			if list and (next(list.fly) or next(list.ground) or next(list.swimming)) then
-				self.list = list
-				return
+			if not self.list then
+				while list and list.listFromID do
+					list = zoneMounts[list.listFromID]
+				end
+				if list and (next(list.fly) or next(list.ground) or next(list.swimming)) then
+					self.list = list
+				end
 			end
+			if self.list and self.mapFlags then return end
 		end
 		mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
 	end

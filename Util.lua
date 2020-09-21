@@ -140,6 +140,39 @@ end
 
 
 do
+	local function setEnabledChilds(self)
+		for _, child in ipairs(self.childs) do
+			child:SetEnabled(self:GetChecked())
+		end
+	end
+
+	function MountsJournalUtil.createCheckboxChild(text, parent)
+		if not parent.childs then
+			parent.childs = {}
+			hooksecurefunc(parent, "SetChecked", setEnabledChilds)
+			parent:HookScript("OnClick", setEnabledChilds)
+			parent:HookScript("OnEnable", setEnabledChilds)
+			parent:HookScript("OnDisable", function(self)
+				for _, child in ipairs(self.childs) do
+					child:Disable()
+				end
+			end)
+		end
+
+		local check = CreateFrame("CheckButton", nil, parent:GetParent(), "MJCheckButtonTemplate")
+		if #parent.childs == 0 then
+			check:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 20, -3)
+		else
+			check:SetPoint("TOPLEFT", parent.childs[#parent.childs], "BOTTOMLEFT", 0, -3)
+		end
+		check.Text:SetText(text)
+		tinsert(parent.childs, check)
+		return check
+	end
+end
+
+
+do
 	local function showTooltip(_,_, hyperLink)
 		GameTooltip:SetOwner(UIParent, "ANCHOR_CURSOR")
 		GameTooltip:SetHyperlink(hyperLink)

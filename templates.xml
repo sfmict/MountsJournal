@@ -1069,25 +1069,15 @@
 					<Anchor point="TOPRIGHT" relativeKey="$parent.mapControl" relativePoint="TOPRIGHT" x="13" y="-16"/>
 				</Anchors>
 			</Frame>
-			<CheckButton parentKey="Ground" inherits="MJCheckButtonTemplate">
+			<CheckButton parentKey="Flags" inherits="MJCheckButtonTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" x="33" y="-20"/>
-				</Anchors>
-			</CheckButton>
-			<CheckButton parentKey="WaterWalk" inherits="MJCheckButtonTemplate">
-				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.Ground" relativePoint="BOTTOM" x="0" y="-5"/>
-				</Anchors>
-			</CheckButton>
-			<CheckButton parentKey="HerbGathering" inherits="MJCheckButtonTemplate">
-				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.WaterWalk" relativePoint="BOTTOM" x="0" y="-5"/>
+					<Anchor point="TOPLEFT" x="33" y="-15"/>
 				</Anchors>
 			</CheckButton>
 			<Button parentKey="listFromMap" inherits="MJDropDownStreatchButtonTemplate">
 				<Size x="134" y="30"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.HerbGathering" relativePoint="BOTTOMLEFT" x="0" y="-20"/>
+					<Anchor point="BOTTOMLEFT" x="33" y="15"/>
 				</Anchors>
 			</Button>
 			<Frame parentKey="relationMap">

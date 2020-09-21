@@ -64,28 +64,6 @@ config:SetScript("OnShow", function(self)
 		end)
 	end
 
-	-- CHECKBOX CHILD
-	local function createCheckboxChild(text, parent)
-		if not parent.childs then
-			parent.childs = {}
-			parent:HookScript("OnClick", function(self)
-				for _, child in ipairs(self.childs) do
-					child:SetEnabled(self:GetChecked())
-				end
-			end)
-		end
-
-		local check = CreateFrame("CheckButton", nil, parent:GetParent(), "MJCheckButtonTemplate")
-		if #parent.childs == 0 then
-			check:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 20, -3)
-		else
-			check:SetPoint("TOPLEFT", parent.childs[#parent.childs], "BOTTOMLEFT", 0, -3)
-		end
-		check.Text:SetText(text)
-		tinsert(parent.childs, check)
-		return check
-	end
-
 	-- ADDON INFO
 	local info = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	info:SetPoint("TOPRIGHT", -16, 16)
@@ -229,7 +207,7 @@ config:SetScript("OnShow", function(self)
 	self.useHerbMounts:HookScript("OnClick", function() self.applyBtn:Enable() end)
 
 	-- USE HERBALISM MOUNTS ON HERBALISM ZONES
-	self.herbMountsOnZones = createCheckboxChild(L["UseHerbMountsOnZones"], self.useHerbMounts)
+	self.herbMountsOnZones = util.createCheckboxChild(L["UseHerbMountsOnZones"], self.useHerbMounts)
 	self.herbMountsOnZones.tooltipText = L["UseHerbMountsOnZones"]
 	self.herbMountsOnZones.tooltipRequirement = L["UseHerbMountsDescription"]
 	self.herbMountsOnZones.checkFunc = function() return mounts.config.herbMountsOnZones end
@@ -294,7 +272,6 @@ config:SetScript("OnShow", function(self)
 		binding:setButtonText(self.bindSecondMount)
 		self.useHerbMounts:SetChecked(mounts.config.useHerbMounts)
 		for _, child in ipairs(self.useHerbMounts.childs) do
-			child:SetEnabled(mounts.config.useHerbMounts)
 			child:SetChecked(child:checkFunc())
 		end
 		self.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
