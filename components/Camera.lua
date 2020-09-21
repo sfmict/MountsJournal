@@ -1,4 +1,4 @@
-local mounts, journal = MountsJournal, MountsJournalFrame
+local mounts, journal, math = MountsJournal, MountsJournalFrame, math
 
 
 journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
@@ -167,11 +167,18 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 		return self.deltaModifierForCameraMode[mode]
 	end
 
-	function activeCamera:resetPosition()
+	local function normalizeRad(angle, defAngle)
 		local pi2 = math.pi * 2
-		self.interpolatedYaw = math.fmod(self.interpolatedYaw or 0, pi2)
-		self.interpolatedPitch = math.fmod(self.interpolatedPitch or 0, pi2)
+		angle = math.fmod((angle or 0) - defAngle, pi2)
+		if angle > math.pi then angle = angle - pi2
+		elseif angle < -math.pi then angle = angle + pi2 end
+		return angle + defAngle
+	end
 
+	function activeCamera:resetPosition()
+		self.interpolatedYaw = normalizeRad(self.interpolatedYaw, self.modelSceneCameraInfo.yaw)
+		self.interpolatedPitch = normalizeRad(self.interpolatedPitch, self.modelSceneCameraInfo.pitch)
+		self.interpolatedRoll = normalizeRad(self.interpolatedRoll, self.modelSceneCameraInfo.roll)
 		self:SetYaw(self.modelSceneCameraInfo.yaw)
 		self:SetPitch(self.modelSceneCameraInfo.pitch)
 		self:SetRoll(self.modelSceneCameraInfo.roll)
