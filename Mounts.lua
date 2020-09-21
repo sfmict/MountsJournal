@@ -301,7 +301,9 @@ function mounts:setMountsList()
 		end
 		mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
 	end
-	self.list = self.defList
+	if not self.list then
+		self.list = self.defList
+	end
 end
 mounts.NEW_WMO_CHUNK = mounts.setMountsList
 mounts.ZONE_CHANGED = mounts.setMountsList
