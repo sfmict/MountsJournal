@@ -1,5 +1,5 @@
 local addon = ...
-local C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal, IsSpellKnown = C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal, IsSpellKnown
+local C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal, IsSpellKnown, GetTime = C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal, IsSpellKnown, GetTime
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 

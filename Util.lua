@@ -141,8 +141,9 @@ end
 
 do
 	local function setEnabledChilds(self)
+		local checked = self:GetChecked()
 		for _, child in ipairs(self.childs) do
-			child:SetEnabled(self:GetChecked())
+			child:SetEnabled(checked)
 		end
 	end
 
