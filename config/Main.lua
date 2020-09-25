@@ -50,6 +50,8 @@ end
 
 -- SHOW CONFIG
 config:SetScript("OnShow", function(self)
+	self:SetScript("OnShow", nil)
+
 	-- TOOLTIP
 	local function setTooltip(frame, anchor, title, text)
 		frame:SetScript("OnEnter", function()
@@ -280,8 +282,6 @@ config:SetScript("OnShow", function(self)
 		-- self.disableAutoScroll:SetChecked(mounts.config.disableAutoScroll)
 		self.applyBtn:Disable()
 	end
-
-	self:SetScript("OnShow", nil)
 end)
 
 

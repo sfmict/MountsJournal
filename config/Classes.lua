@@ -6,6 +6,7 @@ classConfig.parent = addon
 
 
 classConfig:SetScript("OnShow", function(self)
+	classConfig:SetScript("OnShow", nil)
 	self.macrosConfig = mounts.config.macrosConfig
 	self.charMacrosConfig = mounts.charDB.macrosConfig
 
@@ -179,7 +180,6 @@ classConfig:SetScript("OnShow", function(self)
 	end)
 
 	firstClassFrame:Click()
-	classConfig:SetScript("OnShow", nil)
 end)
 
 
