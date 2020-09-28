@@ -362,19 +362,6 @@ function journal:ADDON_LOADED(addonName)
 			MountJournal_UpdateMountList()
 			MountJournal_UpdateMountDisplay()
 
-			-- if not mounts.config.disableAutoScroll then
-			-- 	local index
-			-- 	for i = 1, #self.displayedMounts do
-			-- 		if mountID == self.displayedMounts[i] then
-			-- 			index = i
-			-- 			break
-			-- 		end
-			-- 	end
-			-- 	if index then
-			-- 		if mounts.config.gridToggle then index = math.ceil(index / 3) end
-			-- 		HybridScrollFrame_ScrollToIndex(MountJournal.ListScrollFrame, index, MountJournal_GetMountButtonHeight)
-			-- 	end
-			-- end
 			if not button then
 				button = MountJournal_GetMountButtonByMountID(mountID)
 			end

@@ -75,7 +75,6 @@ L["Summon Random Battle Pet"] = "召喚隨機戰鬥寵物"
 L["No Battle Pet"] = "非戰鬥寵物"
 L["NoPetInRaid"] = "團隊中不要召喚戰鬥寵物"
 L["NoPetInGroup"] = "隊伍中不要召喚戰鬥寵物"
--- L["DisableAutoScroll"] = "Disable auto-scrolling in the mount menu"
 -- ANIMATIONS
 L["Default"] = "預設"
 L["Mount special"] = "坐騎特殊動作"

@@ -75,7 +75,6 @@ L["CHARACTER_CLASS_DESCRIPTION"] = "(Charaktereinstellungen überschreiben Klass
 -- L[No Battle Pet] = ""
 -- L[NoPetInRaid] = ""
 -- L[NoPetInGroup] = ""
--- L["DisableAutoScroll"] = "Disable auto-scrolling in the mount menu"
 -- ANIMATIONS
 -- L[Default] = ""
 -- L[Mount special] = ""

@@ -286,7 +286,7 @@ function mounts:setMountsList()
 	while mapInfo and mapInfo.mapID ~= self.defMountsListID do
 		local list = zoneMounts[mapInfo.mapID]
 		if list then
-			if not self.mapFlags and list.flags and list.flags.enableFlags then
+			if not self.mapFlags and list.flags.enableFlags then
 				self.mapFlags = list.flags
 			end
 			if not self.list then

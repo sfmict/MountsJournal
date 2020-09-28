@@ -66,12 +66,12 @@ config:SetScript("OnShow", function(self)
 		end)
 	end
 
-	-- ADDON INFO
-	local info = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	info:SetPoint("TOPRIGHT", -16, 16)
-	info:SetTextColor(.5, .5, .5, 1)
-	info:SetJustifyH("RIGHT")
-	info:SetText(("%s %s: %s"):format(GetAddOnMetadata(addon, "Version"), L["author"], GetAddOnMetadata(addon, "Author")))
+	-- VERSION
+	local ver = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	ver:SetPoint("TOPRIGHT", -16, 16)
+	ver:SetTextColor(.5, .5, .5, 1)
+	ver:SetJustifyH("RIGHT")
+	ver:SetText(GetAddOnMetadata(addon, "Version"))
 
 	-- TITLE
 	local title = self:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
@@ -245,13 +245,6 @@ config:SetScript("OnShow", function(self)
 	self.noPetInGroup.Text:SetText(L["NoPetInGroup"])
 	self.noPetInGroup:HookScript("OnClick", function() self.applyBtn:Enable() end)
 
-	-- DISABLE AUTO SCROLL
-	-- self.disableAutoScroll = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	-- self.disableAutoScroll:SetPoint("TOPLEFT", self.noPetInGroup, "BOTTOMLEFT", 0, -26)
-	-- self.disableAutoScroll.Text:SetSize(245, 25)
-	-- self.disableAutoScroll.Text:SetText(L["DisableAutoScroll"])
-	-- self.disableAutoScroll:HookScript("OnClick", function() self.applyBtn:Enable() end)
-
 	-- APPLY
 	self.applyBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
 	self.applyBtn:SetSize(96, 22)
@@ -279,7 +272,6 @@ config:SetScript("OnShow", function(self)
 		self.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
 		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
-		-- self.disableAutoScroll:SetChecked(mounts.config.disableAutoScroll)
 		self.applyBtn:Disable()
 	end
 end)
@@ -329,7 +321,6 @@ config.okay = function(self)
 	mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
 	mounts.config.noPetInRaid = self.noPetInRaid:GetChecked()
 	mounts.config.noPetInGroup = self.noPetInGroup:GetChecked()
-	-- mounts.config.disableAutoScroll = self.disableAutoScroll:GetChecked()
 end
 
 

@@ -86,8 +86,6 @@ aboutConfig:SetScript("OnShow", function(self)
 		str:SetText(("|cff82c5ff%s:|r |cffffff9a%s|r"):format(l[1], l[2]))
 		tinsert(list, str)
 	end
-
-	self.refresh = function() editbox:SetText(link) end
 end)
 
 
