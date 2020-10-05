@@ -411,12 +411,10 @@ function MJDropDownMenuButtonMixin:onEnter()
 	if self:IsEnabled() then self.highlight:Show() end
 
 	local level = self:GetParent().id + 1
-	if self.hasArrow then
-		if self:IsEnabled() then
-			DROPDOWNBUTTON:dropDownToggle(level, self.value, self)
-		else
-			DROPDOWNBUTTON:closeDropDownMenus(level)
-		end
+	if self.hasArrow and self:IsEnabled() then
+		DROPDOWNBUTTON:dropDownToggle(level, self.value, self)
+	elseif #dropDownMenusList >= level then
+		DROPDOWNBUTTON:closeDropDownMenus(level)
 	end
 
 	if self.remove then
