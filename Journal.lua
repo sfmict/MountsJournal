@@ -149,6 +149,7 @@ function journal:ADDON_LOADED(addonName)
 		local filtersButton = MountJournalFilterButton
 		util.setMixin(filtersButton, MJDropDownButtonMixin)
 		filtersButton.MJNoGlobalMouseEvent = true
+		filtersButton:SetScript("OnHide", filtersButton.onHide)
 		filtersButton:ddSetInit(function(...) self:filterDropDown_Initialize(...) end, "menu")
 		filtersButton:SetScript("OnMouseDown", UIMenuButtonStretchMixin.OnMouseDown)
 		filtersButton:SetScript("OnClick", function(self)
@@ -716,21 +717,17 @@ function journal:ADDON_LOADED(addonName)
 				self:updateMountsList()
 			end
 		end)
-
-		-- OFF TO AVOID TAINTS
-
-		-- self:setSecureFunc(C_MountJournal, "GetCollectedFilterSetting", function(filter)
-		-- 	if filter == LE_MOUNT_JOURNAL_FILTER_COLLECTED then filter = "collected"
-		-- 	elseif filter == LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED then filter = "notCollected"
-		-- 	elseif filter == LE_MOUNT_JOURNAL_FILTER_UNUSABLE then filter = "unusable" end
-		-- 	return mounts.filters[filter]
-		-- end)
-		-- self:setSecureFunc(C_MountJournal, "IsSourceChecked", function(i)
-		-- 	if type(i) == "number" then
-		-- 		return mounts.filters.sources[i]
-		-- 	end
-		-- end)
-
+		self:setSecureFunc(C_MountJournal, "GetCollectedFilterSetting", function(filter)
+			if filter == LE_MOUNT_JOURNAL_FILTER_COLLECTED then filter = "collected"
+			elseif filter == LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED then filter = "notCollected"
+			elseif filter == LE_MOUNT_JOURNAL_FILTER_UNUSABLE then filter = "unusable" end
+			return mounts.filters[filter]
+		end)
+		self:setSecureFunc(C_MountJournal, "IsSourceChecked", function(i)
+			if type(i) == "number" then
+				return mounts.filters.sources[i]
+			end
+		end)
 		self:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", function()
 			return #self.displayedMounts
 		end)
@@ -750,6 +747,12 @@ function journal:ADDON_LOADED(addonName)
 		self:setSecureFunc(C_MountJournal, "SetIsFavorite")
 		self:setSecureFunc(C_MountJournal, "GetIsFavorite")
 
+		-- FIX TAINTS
+		for i = 1, UIDROPDOWNMENU_MAXBUTTONS do
+			_G["DropDownList1Button"..i].checked = nil
+		end
+
+		-- HOOK UPDATE MOUNT LIST
 		hooksecurefunc("MountJournal_UpdateMountList", function() self:configureJournal() end)
 		self.MountJournal_UpdateMountList = MountJournal_UpdateMountList
 		self.grid3_UpdateMountList = function() self:grid3UpdateMountList() end
@@ -813,7 +816,7 @@ end
 function journal:grid3UpdateMountList()
 	local scrollFrame = self.scrollFrame
 	local offset = HybridScrollFrame_GetOffset(scrollFrame)
-	local numDisplayedMounts = C_MountJournal.GetNumDisplayedMounts()
+	local numDisplayedMounts = #self.displayedMounts
 	local selectedSpellID = self.MountJournal.selectedSpellID
 
 	for i, btn in ipairs(scrollFrame.buttons) do
@@ -994,9 +997,15 @@ function journal:sortMounts()
 			elseif mounts.mountsDB[a] > mounts.mountsDB[b] then return fSort.reverse end
 		-- NAME
 		elseif fSort.by == "name" and fSort.reverse then
-			return nameA > nameB
+			if nameA > nameB then return true
+			elseif nameA < nameB then return false end
 		end
-		return nameA < nameB
+
+		if fSort.by ~= "name" or not fSort.reverse then
+			if nameA < nameB then return true
+			elseif nameA > nameB then return false end
+		end
+		return a < b
 	end)
 
 	self:updateMountsList()
@@ -1206,19 +1215,14 @@ function journal:updateMapSettings()
 	if not mapSettings:IsShown() then return end
 	local flags = self.currentList and self.currentList.flags
 
-	local flagsCheck = mapSettings.Flags
-	local groundCheck = mapSettings.Ground
-	local waterWalkCheck = mapSettings.WaterWalk
-	local herbGathering = mapSettings.HerbGathering
-	local listFromMap = mapSettings.listFromMap
-	flagsCheck:SetChecked(flags and flags.enableFlags)
-	groundCheck:SetChecked(flags and flags.groundOnly)
-	waterWalkCheck:SetChecked(flags and flags.waterWalkOnly)
-	herbGathering:SetChecked(flags and flags.herbGathering)
+	mapSettings.Flags:SetChecked(flags and flags.enableFlags)
+	mapSettings.Ground:SetChecked(flags and flags.groundOnly)
+	mapSettings.WaterWalk:SetChecked(flags and flags.waterWalkOnly)
+	mapSettings.HerbGathering:SetChecked(flags and flags.herbGathering)
 
 	local optionsEnable = self.navBar.mapID ~= mounts.defMountsListID
-	flagsCheck:SetEnabled(optionsEnable)
-	listFromMap:SetEnabled(optionsEnable)
+	mapSettings.Flags:SetEnabled(optionsEnable)
+	mapSettings.listFromMap:SetEnabled(optionsEnable)
 
 	local relationText = mapSettings.relationMap.text
 	local relationClear = mapSettings.relationClear

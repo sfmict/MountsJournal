@@ -75,6 +75,9 @@ L["CHARACTER_CLASS_DESCRIPTION"] = "(Charaktereinstellungen überschreiben Klass
 -- L[No Battle Pet] = ""
 -- L[NoPetInRaid] = ""
 -- L[NoPetInGroup] = ""
+-- L[About] = ""
+-- L[Help with translation of %s. Thanks.] = ""
+-- L[Localization Translators:] = ""
 -- ANIMATIONS
 -- L[Default] = ""
 -- L[Mount special] = ""

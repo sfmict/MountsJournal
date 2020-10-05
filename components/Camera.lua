@@ -6,6 +6,16 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 	local GetScaledCursorDelta, GetScaledCursorPosition = GetScaledCursorDelta, GetScaledCursorPosition
 	local DeltaLerp, Vector3D_CalculateNormalFromYawPitch, Vector3D_ScaleBy, Vector3D_Add = DeltaLerp, Vector3D_CalculateNormalFromYawPitch, Vector3D_ScaleBy, Vector3D_Add
 
+	function activeCamera:setMaxOffsets()
+		local w, h = self:GetOwningScene():GetSize()
+		local hw, hh = w / 2, h / 2
+		local extra = 50
+		self.xMaxOffset = hw + extra
+		self.yMaxOffset = hh + extra
+		self.xMaxCursor = self.xMaxOffset / self:GetDeltaModifierForCameraMode(self.buttonModes.rightX) - hw
+		self.yMaxCursor = self.yMaxOffset / self:GetDeltaModifierForCameraMode(self.buttonModes.rightY) - hh
+	end
+
 	function activeCamera:SaveInitialTransform()
 		local initialLightYaw, initialLightPitch = Vector3D_CalculateYawPitchFromNormal(Vector3D_Normalize(self:GetOwningScene():GetLightDirection()))
 		self.lightDeltaYaw = initialLightYaw - self:GetYaw()
@@ -48,6 +58,7 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 			self.yOffset = mounts.config.mountDescriptionToggle and 40 or 0
 			self.panningXOffset = 0
 			self.panningYOffset = self.yOffset
+			self:setMaxOffsets()
 			self:SaveInitialTransform()
 		end
 
@@ -62,8 +73,8 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 		if mode == ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL then
 			self.xOffset = self.xOffset + delta
 
-			if self.xOffset > 250 then self.xOffset = 250
-			elseif self.xOffset < -250 then self.xOffset = -250 end
+			if self.xOffset > self.xMaxOffset then self.xOffset = self.xMaxOffset
+			elseif self.xOffset < -self.xMaxOffset then self.xOffset = -self.xMaxOffset end
 
 			if snapToValue then
 				self.panningXOffset = nil
@@ -71,8 +82,8 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 		elseif mode == ORBIT_CAMERA_MOUSE_PAN_VERTICAL then
 			self.yOffset = self.yOffset + delta
 
-			if self.yOffset > 280 then self.yOffset = 280
-			elseif self.yOffset < -280 then self.yOffset = -280 end
+			if self.yOffset > self.yMaxOffset then self.yOffset = self.yMaxOffset
+			elseif self.yOffset < -self.yMaxOffset then self.yOffset = -self.yMaxOffset end
 
 			if snapToValue then
 				self.panningYOffset = nil
@@ -93,12 +104,12 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 			local deltaX, deltaY = GetScaledCursorDelta()
 			local x, y = GetScaledCursorPosition()
 			local modelScene = self:GetOwningScene()
-			if deltaX > 0 and x > modelScene:GetLeft() - 65
-			or deltaX < 0 and x < modelScene:GetRight() + 65 then
+			if deltaX > 0 and x > modelScene:GetLeft() - self.xMaxCursor
+			or deltaX < 0 and x < modelScene:GetRight() + self.xMaxCursor then
 				self:HandleMouseMovement(self.buttonModes.rightX, deltaX * self:GetDeltaModifierForCameraMode(self.buttonModes.rightX), not self.buttonModes.rightXinterpolate)
 			end
-			if deltaY > 0 and y > modelScene:GetBottom() - 60
-			or deltaY < 0 and y < modelScene:GetTop() + 60 then
+			if deltaY > 0 and y > modelScene:GetBottom() - self.yMaxCursor
+			or deltaY < 0 and y < modelScene:GetTop() + self.yMaxCursor then
 				self:HandleMouseMovement(self.buttonModes.rightY, -deltaY * self:GetDeltaModifierForCameraMode(self.buttonModes.rightY), not self.buttonModes.rightYinterpolate)
 			end
 		end

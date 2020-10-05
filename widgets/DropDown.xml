@@ -1,5 +1,9 @@
 <Ui>
-	<Button name="MJDropDownScriptButton" mixin="MJDropDownButtonMixin" virtual="true"/>
+	<Button name="MJDropDownScriptButton" mixin="MJDropDownButtonMixin" virtual="true">
+		<Scripts>
+			<OnHide method="onHide"/>
+		</Scripts>
+	</Button>
 
 	<Frame name="MJDropDownButtonTemplate" inherits="MJDropDownScriptButton" virtual="true">
 		<Size x="135" y="24"/>
@@ -92,7 +96,7 @@
 		</Scripts>
 	</Button>
 
-	<Frame name="MJDropDownMenuTemplate" hidden="true" enableMouse="true" clampedToScreen="true" virtual="true">
+	<Frame name="MJDropDownMenuTemplate" hidden="true" enableMouse="true" clampedToScreen="true" frameStrata="FULLSCREEN_DIALOG" virtual="true">
 		<Frames>
 			<Frame parentKey="backdrop" useParentLevel="true" inherits="DialogBorderDarkTemplate"/>
 			<Frame parentKey="menuBackdrop" setAllPoints="true" inherits="TooltipBackdropTemplate"/>

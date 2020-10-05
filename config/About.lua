@@ -52,13 +52,16 @@ aboutConfig:SetScript("OnShow", function(self)
 	editbox:SetFontObject("GameFontHighlight")
 	editbox:SetSize(410, 20)
 	editbox:SetPoint("TOPLEFT", helpText, "BOTTOMLEFT", 8, 0)
+	editbox:SetText(link)
+	editbox:SetCursorPosition(0)
 	editbox:SetScript("OnEditFocusGained", function(self) self:HighlightText() end)
 	editbox:SetScript("OnEditFocusLost", function(self) self:HighlightText(0, 0) end)
 	editbox:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
-	editbox:SetScript("OnTextChanged", function(self)
-		self:SetText(link)
-		self:SetCursorPosition(0)
-		if self:HasFocus() then self:HighlightText() end
+	editbox:SetScript("OnTextChanged", function(self, userInput)
+		if userInput then
+			self:SetText(link)
+			self:HighlightText()
+		end
 	end)
 
 	-- TRANSLATORS
@@ -66,17 +69,15 @@ aboutConfig:SetScript("OnShow", function(self)
 	translators:SetPoint("TOPLEFT", helpText, "BOTTOMLEFT", 0, -80)
 	translators:SetText(L["Localization Translators:"])
 
-
-	local langs = {
+	local langs, last = {
 		{"deDE", "Flammenengel92"},
 		{"zhTW", "BNS333"},
 	}
 
-	local list = {}
 	for _, l in ipairs(langs) do
 		local str = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-		if #list > 0 then
-			str:SetPoint("TOPLEFT", list[#list], "BOTTOMLEFT", 0, -10)
+		if last then
+			str:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 0, -10)
 		else
 			str:SetPoint("TOP", translators, "BOTTOM", 0, -16)
 			str:SetPoint("LEFT", 96, 0)
@@ -84,7 +85,7 @@ aboutConfig:SetScript("OnShow", function(self)
 		end
 		str:SetJustifyH("LEFT")
 		str:SetText(("|cff82c5ff%s:|r |cffffff9a%s|r"):format(l[1], l[2]))
-		tinsert(list, str)
+		last = str
 	end
 end)
 
