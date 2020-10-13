@@ -103,7 +103,7 @@ end
 
 
 function MJDropDownButtonMixin:dropDownToggle(level, value, anchorFrame, xOffset, yOffset)
-	if level == nil then level = 1 end
+	if not level then level = 1 end
 	local menu = dropDownMenusList[level]
 
 	if menu:IsShown() then
@@ -198,7 +198,8 @@ end
 
 
 function MJDropDownButtonMixin:closeDropDownMenus(level)
-	dropDownMenusList[level or 1]:Hide()
+	local menu = rawget(dropDownMenusList, level or 1)
+	if menu then menu:Hide() end
 end
 
 
@@ -413,7 +414,7 @@ function MJDropDownMenuButtonMixin:onEnter()
 	local level = self:GetParent().id + 1
 	if self.hasArrow and self:IsEnabled() then
 		DROPDOWNBUTTON:dropDownToggle(level, self.value, self)
-	elseif #dropDownMenusList >= level then
+	else
 		DROPDOWNBUTTON:closeDropDownMenus(level)
 	end
 

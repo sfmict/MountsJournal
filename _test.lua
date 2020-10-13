@@ -31,6 +31,9 @@ end)
 -- test:RegisterEvent("COMPANION_LEARNED")
 -- test:RegisterEvent("COMPANION_UNLEARNED")
 
+-- test:RegisterEvent("CALENDAR_ACTION_PENDING")
+-- test:RegisterEvent("CALENDAR_UPDATE_EVENT")
+
 
 function test:PLAYER_ENTERING_WORLD()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
@@ -72,17 +75,18 @@ function test:PLAYER_ENTERING_WORLD()
 	-- journal.navBar:setMapID(980)
 
 	-- CONFIG OPEN
-	-- local classConfig = MountsJournalConfig
-	-- local classConfig = MountsJournalConfigClasses
-	-- if InterfaceOptionsFrameAddOns:IsVisible() and classConfig:IsVisible() then
+	-- local config = MountsJournalConfig
+	-- local config = MountsJournalConfigClasses
+	-- local config = MountsJournalConfigAbout
+	-- if InterfaceOptionsFrameAddOns:IsVisible() and config:IsVisible() then
 	-- 	InterfaceOptionsFrame:Hide()
 	-- else
-	-- 	InterfaceOptionsFrame_OpenToCategory(classConfig.name)
+	-- 	InterfaceOptionsFrame_OpenToCategory(config.name)
 	-- 	if not InterfaceOptionsFrameAddOns:IsVisible() then
-	-- 		InterfaceOptionsFrame_OpenToCategory(classConfig.name)
+	-- 		InterfaceOptionsFrame_OpenToCategory(config.name)
 	-- 	end
 	-- end
-	-- select(14,classConfig:GetChildren()):Click()
+	-- select(14,config:GetChildren()):Click()
 	-- if true then return end
 
 	-- MOUNT ANIMATION

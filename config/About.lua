@@ -50,7 +50,7 @@ aboutConfig:SetScript("OnShow", function(self)
 	editbox:SetAutoFocus(false)
 	editbox:SetAltArrowKeyMode(true)
 	editbox:SetFontObject("GameFontHighlight")
-	editbox:SetSize(410, 20)
+	editbox:SetSize(500, 20)
 	editbox:SetPoint("TOPLEFT", helpText, "BOTTOMLEFT", 8, 0)
 	editbox:SetText(link)
 	editbox:SetCursorPosition(0)
@@ -75,17 +75,23 @@ aboutConfig:SetScript("OnShow", function(self)
 	}
 
 	for _, l in ipairs(langs) do
-		local str = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+		local sl = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 		if last then
-			str:SetPoint("TOPLEFT", last, "BOTTOMLEFT", 0, -10)
+			sl:SetPoint("TOPRIGHT", last, "BOTTOMLEFT", -5, -10)
 		else
-			str:SetPoint("TOP", translators, "BOTTOM", 0, -16)
-			str:SetPoint("LEFT", 96, 0)
-			str:SetPoint("RIGHT", -96, 0)
+			sl:SetPoint("TOP", translators, "BOTTOM", 0, -16)
+			sl:SetPoint("RIGHT", self, "LEFT", 136, 0)
 		end
-		str:SetJustifyH("LEFT")
-		str:SetText(("|cff82c5ff%s:|r |cffffff9a%s|r"):format(l[1], l[2]))
-		last = str
+		sl:SetJustifyH("RIGHT")
+		sl:SetText("|cff82c5ff"..l[1]..":|r")
+
+		local st = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+		st:SetPoint("LEFT", sl, "RIGHT", 5, 0)
+		st:SetPoint("RIGHT", -96, 0)
+		st:SetJustifyH("LEFT")
+		st:SetText("|cffffff9a"..l[2].."|r")
+
+		last = st
 	end
 end)
 

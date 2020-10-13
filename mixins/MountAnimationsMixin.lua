@@ -79,18 +79,16 @@ function MJMountAnimationPanelMixin:onLoad()
 	self.customAnimationPanel:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 0, 2)
 
 	self.journal:on("MOUNT_SELECT", function(_, mountID)
-		local actor = self.modelScene:GetActorByTag("unwrapped")
-		if actor then
-			actor:StopAnimationKit()
-		end
 		if mountID then
-			self.currentMountType = select(5, C_MountJournal.GetMountInfoExtraByID(mountID))
+			local _,_,_,_, mountType = C_MountJournal.GetMountInfoExtraByID(mountID)
+			self.currentMountType = mountType == 231 and 2 or self.journal.mountTypes[mountType]
 		end
 		if self.selectedValue == "custom" then
-			C_Timer.After(.1, function()
-				self.customAnimationPanel:play()
-			end)
+			self.customAnimationPanel:play()
+		elseif self.selectedValue and (self.selectedValue.type == nil or self.selectedValue.type >= self.currentMountType) then
+			self:playAnimation(self.selectedValue.animation, self.selectedValue.isKit, self.selectedValue.loop)
 		else
+			self.modelScene:GetActorByTag("unwrapped"):StopAnimationKit()
 			self:ddSetSelectedValue(self.animationsList[1])
 			self:ddSetSelectedText(self.animationsList[1].name)
 		end
@@ -100,8 +98,7 @@ end
 
 function MJMountAnimationPanelMixin:initialize(level)
 	local info = {}
-	local mountType = self.journal.mountTypes[self.currentMountType] or 1
-	if self.currentMountType == 231 then mountType = mountType - 1 end
+	local mountType = self.currentMountType or 1
 
 	info.list = {}
 	for _, v in ipairs(self.animationsList) do
