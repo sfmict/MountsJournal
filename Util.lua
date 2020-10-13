@@ -72,6 +72,23 @@ end
 MountsJournalUtil = {}
 
 
+MountsJournalUtil.filterButtonBackdrop = {
+	edgeFile = "Interface/AddOns/MountsJournal/textures/border",
+	edgeSize = 8,
+}
+
+
+MountsJournalUtil.optionsPanelBackdrop = {
+	bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+	edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+	tile = true,
+	tileEdge = true,
+	tileSize = 14,
+	edgeSize = 14,
+	insets = {left = 4, right = 4, top = 4, bottom = 4}
+}
+
+
 function MountsJournalUtil.createFromEventsMixin(...)
 	local mixin = CreateFromMixins(eventsMixin, ...)
 	setmetatable(mixin, eventsMeta)
@@ -124,8 +141,9 @@ end
 
 do
 	local function setEnabledChilds(self)
+		local checked = self:GetChecked()
 		for _, child in ipairs(self.childs) do
-			child:SetEnabled(self:GetChecked())
+			child:SetEnabled(checked)
 		end
 	end
 

@@ -86,7 +86,6 @@ function MJExistingListsMixin:refresh()
 			if width > lastWidth then lastWidth = width end
 			tinsert(tbl, optionButton)
 		end
-		return btnText
 	end
 
 	for mapID, mapConfig in pairs(self.journal.zoneMounts) do

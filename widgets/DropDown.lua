@@ -22,7 +22,6 @@ local DROPDOWNBUTTON = nil
 local dropDownMenusList = setmetatable({}, {
 	__index = function(self, key)
 		local frame = CreateFrame("FRAME", nil, key == 1 and UIParent or self[key - 1], "MJDropDownMenuTemplate")
-		frame:SetFrameStrata("FULLSCREEN_DIALOG")
 		frame.id = key
 		frame.searchFrames = {}
 		frame.buttonsList = setmetatable({}, {
@@ -74,6 +73,7 @@ menu1:SetScript("OnEvent", function(self, event, button)
 	end
 end)
 menu1:SetScript("OnShow", function(self)
+	self:Raise()
 	self:RegisterEvent("GLOBAL_MOUSE_DOWN")
 end)
 menu1:SetScript("OnHide", function(self)
@@ -103,7 +103,7 @@ end
 
 
 function MJDropDownButtonMixin:dropDownToggle(level, value, anchorFrame, xOffset, yOffset)
-	if level == nil then level = 1 end
+	if not level then level = 1 end
 	local menu = dropDownMenusList[level]
 
 	if menu:IsShown() then
@@ -111,22 +111,6 @@ function MJDropDownButtonMixin:dropDownToggle(level, value, anchorFrame, xOffset
 		if level == 1 and menu.anchorFrame == anchorFrame then return end
 	end
 	menu.anchorFrame = anchorFrame
-
-	local displayMode
-	if level == 1 then
-		displayMode = self.displayMode
-	else
-		displayMode = dropDownMenusList[level - 1].displayMode
-	end
-	if displayMode == "menu" then
-		menu.displayMode = "menu"
-		menu.backdrop:Hide()
-		menu.menuBackdrop:Show()
-	else
-		menu.displayMode = nil
-		menu.backdrop:Show()
-		menu.menuBackdrop:Hide()
-	end
 
 	if not xOffset or not yOffset then
 		xOffset = -5
@@ -155,6 +139,15 @@ function MJDropDownButtonMixin:dropDownToggle(level, value, anchorFrame, xOffset
 			menu:SetPoint("TOPLEFT", anchorFrame, "TOPRIGHT", 2, 14)
 		end
 	end
+
+	if DROPDOWNBUTTON.displayMode == "menu" then
+		menu.backdrop:Hide()
+		menu.menuBackdrop:Show()
+	else
+		menu.backdrop:Show()
+		menu.menuBackdrop:Hide()
+	end
+
 	menu:Show()
 end
 
@@ -205,7 +198,15 @@ end
 
 
 function MJDropDownButtonMixin:closeDropDownMenus(level)
-	dropDownMenusList[level or 1]:Hide()
+	local menu = rawget(dropDownMenusList, level or 1)
+	if menu then menu:Hide() end
+end
+
+
+function MJDropDownButtonMixin:onHide()
+	if self == DROPDOWNBUTTON then
+		self:closeDropDownMenus()
+	end
 end
 
 
@@ -286,7 +287,7 @@ function MJDropDownButtonMixin:ddAddButton(info, level)
 	if info.icon then
 		button.Icon:SetTexture(info.icon)
 		if info.iconInfo then
-			button.Icon:SetSize(info.iconInfo.tSizeX or DropDownMenuButtonHeight, info.iconInfo.tSizeY or DropDownMenuBattonHeight)
+			button.Icon:SetSize(info.iconInfo.tSizeX or DropDownMenuButtonHeight, info.iconInfo.tSizeY or DropDownMenuButtonHeight)
 		end
 		if info.iconOnly then
 			button.Icon:SetPoint("LEFT")

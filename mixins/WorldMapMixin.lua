@@ -113,6 +113,9 @@ function MJMapCanvasMixin:onHide()
 	self.navBar:off("MAP_CHANGE.WORLDMAP")
 end
 
+-- Need for MapCanvasDetailLayerTemplate (MapCanvasDetailLayerMixin)
+function MJMapCanvasMixin:AddMaskableTexture() end
+
 
 function MJMapCanvasMixin:refreshLayers()
 	self.mapID = self.navBar.mapID
@@ -123,7 +126,7 @@ function MJMapCanvasMixin:refreshLayers()
 	for index, layerInfo in ipairs(layers) do
 		local detailLayer = self.detailLayerPool:Acquire()
 		detailLayer:SetAllPoints(self.child)
-		detailLayer:SetMapAndLayer(self.mapID, index)
+		detailLayer:SetMapAndLayer(self.mapID, index, self)
 		detailLayer:SetGlobalAlpha(1)
 		detailLayer:Show()
 	end
@@ -281,6 +284,12 @@ function MJDungeonRaidMixin:initialize(level, value)
 				self.journal.navBar:setMapID(v.mapID)
 			end
 		end
+		self:ddAddButton(info, level)
+	end
+
+	if #value == 0 then
+		info.text = EMPTY
+		info.disabled = true
 		self:ddAddButton(info, level)
 	end
 end

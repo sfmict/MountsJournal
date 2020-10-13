@@ -1,5 +1,9 @@
 <Ui>
-	<Button name="MJDropDownScriptButton" mixin="MJDropDownButtonMixin" virtual="true"/>
+	<Button name="MJDropDownScriptButton" mixin="MJDropDownButtonMixin" virtual="true">
+		<Scripts>
+			<OnHide method="onHide"/>
+		</Scripts>
+	</Button>
 
 	<Frame name="MJDropDownButtonTemplate" inherits="MJDropDownScriptButton" virtual="true">
 		<Size x="135" y="24"/>
@@ -75,10 +79,10 @@
 		</Layers>
 		<ButtonText parentKey="Text">
 			<Anchors>
-				<Anchor point="TOP" x="0" y="-4" />
-				<Anchor point="BOTTOM" x="0" y="4" />
-				<Anchor point="LEFT" x="4" y="0" />
-				<Anchor point="RIGHT" x="-15" y="0" />
+				<Anchor point="TOP" x="0" y="-4"/>
+				<Anchor point="BOTTOM" x="0" y="4"/>
+				<Anchor point="LEFT" x="4" y="0"/>
+				<Anchor point="RIGHT" x="-15" y="0"/>
 			</Anchors>
 		</ButtonText>
 		<KeyValues>
@@ -92,30 +96,14 @@
 		</Scripts>
 	</Button>
 
-	<Frame name="MJDropDownMenuTemplate" hidden="true" enableMouse="true" clampedToScreen="true" virtual="true">
+	<Frame name="MJDropDownMenuTemplate" hidden="true" enableMouse="true" clampedToScreen="true" frameStrata="FULLSCREEN_DIALOG" virtual="true">
 		<Frames>
 			<Frame parentKey="backdrop" useParentLevel="true" inherits="DialogBorderDarkTemplate"/>
-			<Frame parentKey="menuBackdrop" useParentLevel="true" setAllPoints="true">
-				<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background" edgeFile="Interface/Tooltips/UI-Tooltip-Border" tile="true">
-					<EdgeSize>
-						<AbsValue val="16"/>
-					</EdgeSize>
-					<TileSize>
-						<AbsValue val="16"/>
-					</TileSize>
-					<BackgroundInsets>
-						<AbsInset left="5" right="4" top="4" bottom="4"/>
-					</BackgroundInsets>
-				</Backdrop>
-				<Scripts>
-					<OnLoad>
-						self:SetBackdropBorderColor(TOOLTIP_DEFAULT_COLOR:GetRGB())
-						self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR:GetRGB())
-					</OnLoad>
-					<OnHide>self:Hide()</OnHide>
-				</Scripts>
-			</Frame>
+			<Frame parentKey="menuBackdrop" setAllPoints="true" inherits="TooltipBackdropTemplate"/>
 		</Frames>
+		<Scripts>
+			<OnHide>self:Hide()</OnHide>
+		</Scripts>
 	</Frame>
 
 	<Button name="MJDropDownMenuButtonTemplate" mixin="MJDropDownMenuButtonMixin" motionScriptsWhileDisabled="true" virtual="true">

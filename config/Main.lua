@@ -40,8 +40,8 @@ do
 	end
 
 	function config:PLAYER_LOGIN()
-		self.bindMount = binding:createButtonBinding(self, secureButtonNameMount, "MJSecureActionButtonTemplate")
-		self.bindSecondMount = binding:createButtonBinding(self, secureButtonNameSecondMount, "MJSecureActionButtonTemplate")
+		self.bindMount = binding:createButtonBinding(nil, secureButtonNameMount, "MJSecureActionButtonTemplate")
+		self.bindSecondMount = binding:createButtonBinding(nil, secureButtonNameSecondMount, "MJSecureActionButtonTemplate")
 		self.bindSecondMount.secure.forceModifier = true
 		setMacroText(self)
 	end
@@ -50,6 +50,8 @@ end
 
 -- SHOW CONFIG
 config:SetScript("OnShow", function(self)
+	self:SetScript("OnShow", nil)
+
 	-- TOOLTIP
 	local function setTooltip(frame, anchor, title, text)
 		frame:SetScript("OnEnter", function()
@@ -64,12 +66,12 @@ config:SetScript("OnShow", function(self)
 		end)
 	end
 
-	-- ADDON INFO
-	local info = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	info:SetPoint("TOPRIGHT", -16, 16)
-	info:SetTextColor(.5, .5, .5, 1)
-	info:SetJustifyH("RIGHT")
-	info:SetText(("%s %s: %s"):format(GetAddOnMetadata(addon, "Version"), L["author"], GetAddOnMetadata(addon, "Author")))
+	-- VERSION
+	local ver = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	ver:SetPoint("TOPRIGHT", -16, 16)
+	ver:SetTextColor(.5, .5, .5, 1)
+	ver:SetJustifyH("RIGHT")
+	ver:SetText(GetAddOnMetadata(addon, "Version"))
 
 	-- TITLE
 	local title = self:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
@@ -194,14 +196,9 @@ config:SetScript("OnShow", function(self)
 	rightPanel:SetPoint("TOPLEFT", leftPanel, "TOPRIGHT", 4, 0)
 	rightPanel:SetPoint("BOTTOMRIGHT", self, -8, 32)
 
-	local rightPanelScroll = CreateFrame("ScrollFrame", nil, rightPanel, "UIPanelScrollFrameTemplate")
+	local rightPanelScroll = CreateFrame("ScrollFrame", nil, rightPanel, "MJPanelScrollFrameTemplate")
 	rightPanelScroll:SetPoint("TOPLEFT", rightPanel, 4, -6)
 	rightPanelScroll:SetPoint("BOTTOMRIGHT", rightPanel, -26, 5)
-	rightPanelScroll.ScrollBar:SetBackdrop({bgFile='interface/buttons/white8x8'})
-	rightPanelScroll.ScrollBar:SetBackdropColor(0,0,0,.2)
-	rightPanelScroll.child = CreateFrame("FRAME")
-	rightPanelScroll.child:SetSize(1, 1)
-	rightPanelScroll:SetScrollChild(rightPanelScroll.child)
 
 	-- USE HERBALISM MOUNTS
 	self.useHerbMounts = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
@@ -277,8 +274,6 @@ config:SetScript("OnShow", function(self)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
 		self.applyBtn:Disable()
 	end
-
-	self:SetScript("OnShow", nil)
 end)
 
 
@@ -293,11 +288,12 @@ function config:createMacro(macroName, buttonName, texture)
 	if MacroFrame:IsShown() then
 		MacroFrame_Update()
 	else
-		self:okay()
-		local b_CanOpenPanels = CanOpenPanels
-		CanOpenPanels = function() return 1 end
-		ShowUIPanel(MacroFrame, 1)
-		CanOpenPanels = b_CanOpenPanels
+		InterfaceOptionsFrame:SetAttribute("UIPanelLayout-allowOtherPanels", 1)
+		local b_HideUIPanel = HideUIPanel
+		HideUIPanel = function() end
+		ShowUIPanel(MacroFrame)
+		HideUIPanel = b_HideUIPanel
+		InterfaceOptionsFrame:SetAttribute("UIPanelLayout-allowOtherPanels", nil)
 	end
 
 	if MacroFrame.selectedTab ~= 1 then

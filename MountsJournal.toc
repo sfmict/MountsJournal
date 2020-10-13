@@ -1,4 +1,4 @@
-## Interface: 80300
+## Interface: 90001
 ## Title: MountsJournal
 ## Author: sfmict
 ## Version: @project-version@
@@ -16,8 +16,10 @@ Mounts.lua
 db.lua
 config/Main.lua
 config/Classes.lua
+config/About.lua
 Journal.lua
-Tags.lua
+components/Tags.lua
+components/Camera.lua
 #@do-not-package@
 _test.lua
 #@end-do-not-package@

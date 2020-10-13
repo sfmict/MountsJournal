@@ -1,2 +1,4 @@
-* Added "Enable Flags" option in map settings.
-* Fixes.
+* Updated to Shadowlands.
+* Added hint to zone settings menu.
+* Added sorting.
+* Updated mount display system.

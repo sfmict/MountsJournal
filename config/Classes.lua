@@ -6,23 +6,24 @@ classConfig.parent = addon
 
 
 classConfig:SetScript("OnShow", function(self)
+	self:SetScript("OnShow", nil)
 	self.macrosConfig = mounts.config.macrosConfig
 	self.charMacrosConfig = mounts.charDB.macrosConfig
 
-	-- ADDON INFO
-	local info = classConfig:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	info:SetPoint("TOPRIGHT", -16, 16)
-	info:SetTextColor(.5, .5, .5, 1)
-	info:SetJustifyH("RIGHT")
-	info:SetText(("%s %s: %s"):format(GetAddOnMetadata(addon, "Version"), L["author"], GetAddOnMetadata(addon, "Author")))
+	-- VERSION
+	local ver = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	ver:SetPoint("TOPRIGHT", -16, 16)
+	ver:SetTextColor(.5, .5, .5, 1)
+	ver:SetJustifyH("RIGHT")
+	ver:SetText(GetAddOnMetadata(addon, "Version"))
 
 	-- TITLE
-	local title = classConfig:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+	local title = self:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 	title:SetPoint("TOPLEFT", 16, -16)
 	title:SetText(L["Class settings"])
 
 	-- SUBTITLE
-	local subtitle = classConfig:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	local subtitle = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	self.subtitle = subtitle
 	subtitle:SetHeight(30)
 	subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 1, -8)
@@ -31,9 +32,9 @@ classConfig:SetScript("OnShow", function(self)
 	subtitle:SetJustifyV("TOP")
 
 	-- LEFT PANEL
-	local leftPanel = CreateFrame("FRAME", nil, classConfig, "MJOptionsPanel")
+	local leftPanel = CreateFrame("FRAME", nil, self, "MJOptionsPanel")
 	leftPanel:SetPoint("TOPLEFT", 8, -67)
-	leftPanel:SetPoint("BOTTOMRIGHT", classConfig, "BOTTOMLEFT", 181, 8)
+	leftPanel:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", 181, 8)
 
 	-- CLASS BUTTONS
 	local _, playerClassName = UnitClass("player")
@@ -42,7 +43,7 @@ classConfig:SetScript("OnShow", function(self)
 	for i = 1, GetNumClasses() do
 		local localized, className = GetClassInfo(i)
 		local classColor = C_ClassColor.GetClassColor(className)
-		local classFrame = CreateFrame("BUTTON", nil, classConfig, "MJClassButtonTemplate")
+		local classFrame = CreateFrame("BUTTON", nil, self, "MJClassButtonTemplate")
 
 		if lastClassFrame then
 			classFrame:SetPoint("TOPLEFT", lastClassFrame, "BOTTOMLEFT", 0, 0)
@@ -74,7 +75,7 @@ classConfig:SetScript("OnShow", function(self)
 
 	-- CURRENT CHARACTER
 	local classColor = C_ClassColor.GetClassColor(playerClassName)
-	local classFrame = CreateFrame("BUTTON", nil, classConfig, "MJClassButtonTemplate")
+	local classFrame = CreateFrame("BUTTON", nil, self, "MJClassButtonTemplate")
 	classFrame:SetPoint("TOPLEFT", lastClassFrame, "BOTTOMLEFT", 0, -20)
 	classFrame.key = playerClassName
 	classFrame.default = util.getClassMacro(playerClassName, "character", function()
@@ -108,20 +109,15 @@ classConfig:SetScript("OnShow", function(self)
 	end)
 
 	-- RIGHT PANEL
-	local rightPanel = CreateFrame("FRAME", nil, classConfig, "MJOptionsPanel")
+	local rightPanel = CreateFrame("FRAME", nil, self, "MJOptionsPanel")
 	self.rightPanel = rightPanel
 	rightPanel:SetPoint("TOPRIGHT", -8, -67)
 	rightPanel:SetPoint("BOTTOMLEFT", leftPanel, "BOTTOMRIGHT", 0, 0)
 
 	-- RIGHT PANEL SCROLL
-	local rightPanelScroll = CreateFrame("ScrollFrame", nil, rightPanel, "UIPanelScrollFrameTemplate")
+	local rightPanelScroll = CreateFrame("ScrollFrame", nil, rightPanel, "MJPanelScrollFrameTemplate")
 	rightPanelScroll:SetPoint("TOPLEFT", rightPanel, 4, -6)
 	rightPanelScroll:SetPoint("BOTTOMRIGHT", rightPanel, -26, 5)
-	rightPanelScroll.ScrollBar:SetBackdrop({bgFile='interface/buttons/white8x8'})
-	rightPanelScroll.ScrollBar:SetBackdropColor(0,0,0,.2)
-	rightPanelScroll.child = CreateFrame("FRAME")
-	rightPanelScroll.child:SetSize(1, 1)
-	rightPanelScroll:SetScrollChild(rightPanelScroll.child)
 
 	-- CLASS FEATURE
 	self.checkPool = CreateFramePool("CHECKBUTTON", rightPanelScroll.child, "MJCheckButtonTemplate", function(_, frame)
@@ -184,7 +180,6 @@ classConfig:SetScript("OnShow", function(self)
 	end)
 
 	firstClassFrame:Click()
-	classConfig:SetScript("OnShow", nil)
 end)
 
 

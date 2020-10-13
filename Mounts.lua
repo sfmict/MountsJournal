@@ -1,5 +1,5 @@
 local addon = ...
-local C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal = C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal
+local C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal, IsSpellKnown, GetTime = C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal, IsSpellKnown, GetTime
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 
@@ -286,7 +286,7 @@ function mounts:setMountsList()
 	while mapInfo and mapInfo.mapID ~= self.defMountsListID do
 		local list = zoneMounts[mapInfo.mapID]
 		if list then
-			if not self.mapFlags and list.flags and list.flags.enableFlags then
+			if not self.mapFlags and list.flags.enableFlags then
 				self.mapFlags = list.flags
 			end
 			if not self.list then
@@ -402,7 +402,9 @@ function mounts:getSpellKnown()
 		return true, false
 	end
 
-	return false, false
+	-- 34091 and 34090 not detected
+	-- return false, false
+	return true, true
 end
 
 

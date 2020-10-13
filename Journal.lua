@@ -1,5 +1,5 @@
 local addon, L = ...
-local C_MountJournal, C_PetJournal, C_Timer, next, pairs, ipairs, select, type, sort = C_MountJournal, C_PetJournal, C_Timer, next, pairs, ipairs, select, type, sort
+local C_MountJournal, C_PetJournal, C_Timer, wipe, tinsert, next, pairs, ipairs, select, type, sort = C_MountJournal, C_PetJournal, C_Timer, wipe, tinsert, next, pairs, ipairs, select, type, sort
 local util, mounts, config = MountsJournalUtil, MountsJournal, MountsJournalConfig
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
 util:setEventsMixin(journal)
@@ -25,19 +25,25 @@ journal.indexByMountID = setmetatable({}, metaMounts)
 
 
 -- 1 FLY, 2 GROUND, 3 SWIMMING
-journal.mountTypes = {
+journal.mountTypes = setmetatable({
 	[242] = 1,
 	[247] = 1,
 	[248] = 1,
 	[398] = 1,
 	[230] = 2,
 	[241] = 2,
-	[269] = 2,
 	[284] = 2,
 	[231] = 3,
 	[232] = 3,
 	[254] = 3,
-}
+}, {
+	__index = function(self, key)
+		if type(key) == "number" then
+			self[key] = 1
+			return self[key]
+		end
+	end
+})
 
 
 local function tabClick(self)
@@ -130,6 +136,10 @@ function journal:ADDON_LOADED(addonName)
 			tags = {},
 		}
 		self.tags:init()
+		mounts.filters.sorting = mounts.filters.sorting or {
+			by = "name",
+			favoritesFirst = true,
+		}
 
 		self.MountJournal:UnregisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 		self.MountJournal:UnregisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
@@ -139,6 +149,7 @@ function journal:ADDON_LOADED(addonName)
 		local filtersButton = MountJournalFilterButton
 		util.setMixin(filtersButton, MJDropDownButtonMixin)
 		filtersButton.MJNoGlobalMouseEvent = true
+		filtersButton:SetScript("OnHide", filtersButton.onHide)
 		filtersButton:ddSetInit(function(...) self:filterDropDown_Initialize(...) end, "menu")
 		filtersButton:SetScript("OnMouseDown", UIMenuButtonStretchMixin.OnMouseDown)
 		filtersButton:SetScript("OnClick", function(self)
@@ -175,7 +186,7 @@ function journal:ADDON_LOADED(addonName)
 		slotButton:SetScale(.65)
 		hooksecurefunc("MountJournal_UpdateEquipmentPalette", function()
 			local effectsSuppressed = C_MountJournal.AreMountEquipmentEffectsSuppressed()
-			local locked = not C_MountJournal.IsMountEquipmentUnlocked()
+			local locked = not C_PlayerInfo.CanPlayerUseMountEquipment()
 			slotButton:DesaturateHierarchy((effectsSuppressed or locked) and 1 or 0)
 		end)
 		self.leftInset:SetPoint("BOTTOMLEFT", self.MountJournal, "BOTTOMLEFT", 0, 26)
@@ -232,6 +243,8 @@ function journal:ADDON_LOADED(addonName)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			navBar:setCurrentMap()
 		end)
+		mapSettings.hint.tooltip = L["ZoneSettingsTooltip"]
+		mapSettings.hint.tooltipDescription = L["ZoneSettingsTooltipDescription"]
 		mapSettings.Flags.Text:SetText(L["Enable Flags"])
 		mapSettings.Flags:HookScript("OnClick", function(check) self:setFlag("enableFlags", check:GetChecked()) end)
 		mapSettings.Ground = util.createCheckboxChild(L["Ground Mounts Only"], mapSettings.Flags)
@@ -268,10 +281,9 @@ function journal:ADDON_LOADED(addonName)
 		end)
 
 		-- EXISTING LISTS
-		local existingLists = CreateFrame("FRAME", nil, mapSettings, "MJExistingListsPanelTemplate")
-		self.existingLists = existingLists
-		existingLists:SetPoint("TOPLEFT", self.MountJournal, "TOPRIGHT")
-		existingLists:SetPoint("BOTTOMLEFT", self.MountJournal, "BOTTOMRIGHT")
+		self.existingLists = CreateFrame("FRAME", nil, mapSettings, "MJExistingListsPanelTemplate")
+		self.existingLists:SetPoint("TOPLEFT", self.MountJournal, "TOPRIGHT")
+		self.existingLists:SetPoint("BOTTOMLEFT", self.MountJournal, "BOTTOMRIGHT")
 
 		--MOUNTJOURNAL ONSHOW
 		self.MountJournal:HookScript("OnShow", function()
@@ -310,10 +322,9 @@ function journal:ADDON_LOADED(addonName)
 		self:RegisterEvent("ACHIEVEMENT_EARNED")
 
 		-- PROFILES
-		local profilesMenu = CreateFrame("Button", nil, self.MountJournal, "MJMenuButtonProfiles")
-		self.profilesMenu = profilesMenu
-		profilesMenu:SetPoint("LEFT", self.MountJournal.MountButton, "RIGHT", 6, 0)
-		profilesMenu:on("UPDATE_PROFILE", function(_, changeProfile)
+		self.profilesMenu = CreateFrame("Button", nil, self.MountJournal, "MJMenuButtonProfiles")
+		self.profilesMenu:SetPoint("LEFT", self.MountJournal.MountButton, "RIGHT", 6, 0)
+		self.profilesMenu:on("UPDATE_PROFILE", function(_, changeProfile)
 			mounts:setDB()
 			self:setEditMountsList()
 			self:updateMountsList()
@@ -327,12 +338,60 @@ function journal:ADDON_LOADED(addonName)
 		end)
 
 		-- SELECTED BUTTONS
-		local function btnClick(btn) self:mountToggle(btn) end
+		function MountJournal_GetMountButtonByMountID(mountID)
+			local buttons = self.scrollFrame.buttons
+			for i = 1, #buttons do
+				local button = buttons[i]
+				if mounts.config.gridToggle then
+					for j = 1, 3 do
+						local grid3Button = button.grid3list["mount"..j]
+						if grid3Button.mountID == mountID then
+							return grid3Button
+						end
+					end
+				else
+					if button.mountID == mountID then
+						return button
+					end
+				end
+			end
+		end
+
+		function MountJournal_SetSelected(mountID, spellID, button)
+			MountJournal.selectedMountID = mountID
+			MountJournal.selectedSpellID = spellID
+			MountJournal_UpdateMountList()
+			MountJournal_UpdateMountDisplay()
+
+			if not button then
+				button = MountJournal_GetMountButtonByMountID(mountID)
+			end
+			if not button or self.scrollFrame:GetBottom() >= button:GetTop() then
+				local index
+				for i = 1, #self.displayedMounts do
+					if mountID == self.displayedMounts[i] then
+						index = i
+						break
+					end
+				end
+				if index then
+					if mounts.config.gridToggle then index = math.ceil(index / 3) end
+					HybridScrollFrame_ScrollToIndex(self.scrollFrame, index, MountJournal_GetMountButtonHeight)
+				end
+			end
+
+			self:event("MOUNT_SELECT", mountID)
+		end
+
+		local function typeClick(btn) self:mountToggle(btn) end
+		local function grid3Click(btn, mouse) self.tags:listItemClick(btn:GetParent(), mouse) end
+		local function btnClick(btn, mouse) self.tags:listItemClick(btn, mouse) end
+		local function dragClick(btn, mouse) self.tags:dragButtonClick(btn, mouse) end
 
 		local function CreateButtonMountToggle(name, parent, pointX, pointY)
 			local btnFrame = CreateFrame("CheckButton", nil, parent, "MJSetMountToggleTemplate")
 			btnFrame:SetPoint("TOPRIGHT", pointX, pointY)
-			btnFrame:SetScript("OnClick", btnClick)
+			btnFrame:SetScript("OnClick", typeClick)
 			btnFrame.type = name
 			parent[name] = btnFrame
 			btnFrame.icon:SetTexture(texPath..name)
@@ -352,13 +411,14 @@ function journal:ADDON_LOADED(addonName)
 			child.grid3list:SetPoint("LEFT", -41, 0)
 			for i = 1, 3 do
 				local btn = child.grid3list["mount"..i]
-				btn.fly:SetScript("OnClick", btnClick)
-				btn.ground:SetScript("OnClick", btnClick)
-				btn.swimming:SetScript("OnClick", btnClick)
-				btn.DragButton:HookScript("OnClick", function(btn, mouseBtn) self:mountDblClick(btn:GetParent().index, mouseBtn) end)
+				btn.fly:SetScript("OnClick", typeClick)
+				btn.ground:SetScript("OnClick", typeClick)
+				btn.swimming:SetScript("OnClick", typeClick)
+				btn.DragButton:SetScript("OnClick", grid3Click)
 			end
 
-			child:HookScript("OnClick", function(btn, mouseBtn) self:mountDblClick(btn.index, mouseBtn) end)
+			child:SetScript("OnClick", btnClick)
+			child.DragButton:SetScript("OnClick", dragClick)
 		end
 
 		-- FILTERS PANEL
@@ -533,7 +593,7 @@ function journal:ADDON_LOADED(addonName)
 
 			local activeCamera = self.modelScene.activeCamera
 			if activeCamera then
-				activeCamera:ApplyFromModelSceneCameraInfo(C_ModelInfo.GetModelSceneCameraInfoByID(activeCamera.modelSceneCameraInfo.modelSceneCameraID), nil, self.modelScene.cameraModificationType)
+				activeCamera.yOffset = activeCamera.yOffset + (checked and 40 or -40)
 			end
 		end
 		setShownDescription(mountDescriptionToggle)
@@ -559,35 +619,7 @@ function journal:ADDON_LOADED(addonName)
 		modelControl.rotateDownButton.icon:SetRotation(-math.pi / 1.6)
 
 		hooksecurefunc(self.modelScene, "SetActiveCamera", function(self)
-			local activeCamera = self.activeCamera
-
-			local ApplyFromModelSceneCameraInfo = activeCamera.ApplyFromModelSceneCameraInfo
-			function activeCamera:ApplyFromModelSceneCameraInfo(modelSceneCameraInfo, ...)
-				modelSceneCameraInfo.target.z = mountDescriptionToggle:GetChecked() and 2.2 or 1
-				modelSceneCameraInfo.maxZoomDistance = 24
-				ApplyFromModelSceneCameraInfo(self, modelSceneCameraInfo, ...)
-			end
-
-			activeCamera:SetLeftMouseButtonYMode(ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION, true)
-			activeCamera:SetRightMouseButtonXMode(ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, true)
-			activeCamera:SetRightMouseButtonYMode(ORBIT_CAMERA_MOUSE_PAN_VERTICAL, true)
-
-			activeCamera.deltaModifierForCameraMode = {
-				[ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION),
-				[ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION] = -activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION),
-				[ORBIT_CAMERA_MOUSE_MODE_ROLL_ROTATION] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_ROLL_ROTATION),
-				[ORBIT_CAMERA_MOUSE_MODE_ZOOM] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_ZOOM),
-				[ORBIT_CAMERA_MOUSE_MODE_TARGET_HORIZONTAL] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_TARGET_HORIZONTAL),
-				[ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL),
-				[ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL),
-				[ORBIT_CAMERA_MOUSE_PAN_VERTICAL] = activeCamera:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_PAN_VERTICAL),
-			}
-			setmetatable(activeCamera.deltaModifierForCameraMode, {__index = function()
-				return 0
-			end})
-			function activeCamera:GetDeltaModifierForCameraMode(mode)
-				return self.deltaModifierForCameraMode[mode]
-			end
+			journal:event("SET_ACTIVE_CAMERA", self.activeCamera)
 		end)
 
 		modelControl.panButton:HookScript("OnMouseDown", function(self)
@@ -623,8 +655,7 @@ function journal:ADDON_LOADED(addonName)
 		modelControl.rotateDownButton:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
 
 		modelControl.reset:SetScript("OnClick", function(self)
-			local activeCamera = self:GetParent():GetParent().activeCamera
-			activeCamera:ApplyFromModelSceneCameraInfo(activeCamera.modelSceneCameraInfo)
+			self:GetParent():GetParent().activeCamera:resetPosition()
 		end)
 
 		-- MOUNT ANIMATIONS
@@ -654,13 +685,6 @@ function journal:ADDON_LOADED(addonName)
 					self.animationsCombobox:playAnimation(value.animation, value.isKit, value.loop)
 				end
 			end)
-		end)
-
-		-- MOUNT SELECT HOOK
-		hooksecurefunc("MountJournal_SetSelected", function(mountID)
-			self:event("MOUNT_SELECT", mountID)
-			infoButton.petSelectionBtn:refresh()
-			infoButton.petSelectionBtn.petSelectionList:Hide()
 		end)
 
 		-- HOOKS
@@ -693,21 +717,17 @@ function journal:ADDON_LOADED(addonName)
 				self:updateMountsList()
 			end
 		end)
-
-		-- OFF TO AVOID TAINTS
-
-		-- self:setSecureFunc(C_MountJournal, "GetCollectedFilterSetting", function(filter)
-		-- 	if filter == LE_MOUNT_JOURNAL_FILTER_COLLECTED then filter = "collected"
-		-- 	elseif filter == LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED then filter = "notCollected"
-		-- 	elseif filter == LE_MOUNT_JOURNAL_FILTER_UNUSABLE then filter = "unusable" end
-		-- 	return mounts.filters[filter]
-		-- end)
-		-- self:setSecureFunc(C_MountJournal, "IsSourceChecked", function(i)
-		-- 	if type(i) == "number" then
-		-- 		return mounts.filters.sources[i]
-		-- 	end
-		-- end)
-
+		self:setSecureFunc(C_MountJournal, "GetCollectedFilterSetting", function(filter)
+			if filter == LE_MOUNT_JOURNAL_FILTER_COLLECTED then filter = "collected"
+			elseif filter == LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED then filter = "notCollected"
+			elseif filter == LE_MOUNT_JOURNAL_FILTER_UNUSABLE then filter = "unusable" end
+			return mounts.filters[filter]
+		end)
+		self:setSecureFunc(C_MountJournal, "IsSourceChecked", function(i)
+			if type(i) == "number" then
+				return mounts.filters.sources[i]
+			end
+		end)
 		self:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", function()
 			return #self.displayedMounts
 		end)
@@ -727,6 +747,12 @@ function journal:ADDON_LOADED(addonName)
 		self:setSecureFunc(C_MountJournal, "SetIsFavorite")
 		self:setSecureFunc(C_MountJournal, "GetIsFavorite")
 
+		-- FIX TAINTS
+		for i = 1, UIDROPDOWNMENU_MAXBUTTONS do
+			_G["DropDownList1Button"..i].checked = nil
+		end
+
+		-- HOOK UPDATE MOUNT LIST
 		hooksecurefunc("MountJournal_UpdateMountList", function() self:configureJournal() end)
 		self.MountJournal_UpdateMountList = MountJournal_UpdateMountList
 		self.grid3_UpdateMountList = function() self:grid3UpdateMountList() end
@@ -736,14 +762,13 @@ function journal:ADDON_LOADED(addonName)
 		self:setEditMountsList()
 		self:updateIndexByMountID()
 		self:updateBtnFilters()
-		self:updateMountsList()
 	end
 end
 
 
 function journal:setScrollGridMounts(grid)
 	local scrollFrame = self.scrollFrame
-	local offset = HybridScrollFrame_GetOffset(scrollFrame)
+	local offset = math.floor((scrollFrame.offset or 0) + .1)
 
 	if grid then
 		offset = math.ceil((offset + 1) / 3) - 1
@@ -791,8 +816,8 @@ end
 function journal:grid3UpdateMountList()
 	local scrollFrame = self.scrollFrame
 	local offset = HybridScrollFrame_GetOffset(scrollFrame)
-	local numDisplayedMounts = C_MountJournal.GetNumDisplayedMounts()
-	local selectedSpellID = MountJournal.selectedSpellID
+	local numDisplayedMounts = #self.displayedMounts
+	local selectedSpellID = self.MountJournal.selectedSpellID
 
 	for i, btn in ipairs(scrollFrame.buttons) do
 		for j = 1, 3 do
@@ -805,6 +830,7 @@ function journal:grid3UpdateMountList()
 
 				btnGrid.index = index
 				btnGrid.spellID = spellID
+				btnGrid.mountID = mountID
 				btnGrid.active = active
 				btnGrid.selected = selectedSpellID == spellID
 				btnGrid.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
@@ -881,9 +907,9 @@ function journal:ACHIEVEMENT_EARNED()
 end
 
 
-function journal:updateMountToggleButton(btn)
-	local function setColor(btn, mountsTbl)
-		if mountsTbl and mountsTbl[btn.mountID] then
+do
+	local function setColor(self, btn, checked)
+		if checked then
 			btn.icon:SetVertexColor(self.colors.gold:GetRGB())
 			btn:SetChecked(true)
 		else
@@ -892,22 +918,19 @@ function journal:updateMountToggleButton(btn)
 		end
 	end
 
-	if btn.index then
-		local mountID = select(12, C_MountJournal.GetDisplayedMountInfo(btn.index))
-
-		btn.fly:Enable()
-		btn.ground:Enable()
-		btn.swimming:Enable()
-		btn.fly.mountID = mountID
-		btn.ground.mountID = mountID
-		btn.swimming.mountID = mountID
-		setColor(btn.fly, self.list and self.list.fly)
-		setColor(btn.ground, self.list and self.list.ground)
-		setColor(btn.swimming, self.list and self.list.swimming)
-	else
-		btn.fly:Disable()
-		btn.ground:Disable()
-		btn.swimming:Disable()
+	function journal:updateMountToggleButton(btn)
+		if btn.index then
+			btn.fly:Enable()
+			btn.ground:Enable()
+			btn.swimming:Enable()
+			setColor(self, btn.fly, self.list and self.list.fly[btn.mountID])
+			setColor(self, btn.ground, self.list and self.list.ground[btn.mountID])
+			setColor(self, btn.swimming, self.list and self.list.swimming[btn.mountID])
+		else
+			btn.fly:Disable()
+			btn.ground:Disable()
+			btn.swimming:Disable()
+		end
 	end
 end
 
@@ -944,6 +967,51 @@ function journal:setCountMounts()
 end
 
 
+function journal:sortMounts()
+	local fSort = mounts.filters.sorting
+
+	sort(self.mountIDs, function(a, b)
+		local nameA, _,_,_,_,_, isFavoriteA, _,_,_, isCollectedA = C_MountJournal.GetMountInfoByID(a)
+		local nameB, _,_,_,_,_, isFavoriteB, _,_,_, isCollectedB = C_MountJournal.GetMountInfoByID(b)
+
+		-- FAVORITES
+		if fSort.favoritesFirst then
+			if isFavoriteA and not isFavoriteB then return true
+			elseif not isFavoriteA and isFavoriteB then return false end
+		end
+
+		-- COLLECTED
+		if isCollectedA and not isCollectedB then return true
+		elseif not isCollectedA and isCollectedB then return false end
+
+		-- TYPE
+		if fSort.by == "type" then
+			local _,_,_,_, typeA = C_MountJournal.GetMountInfoExtraByID(a)
+			local _,_,_,_, typeB = C_MountJournal.GetMountInfoExtraByID(b)
+
+			if self.mountTypes[typeA] < self.mountTypes[typeB] then return not fSort.reverse
+			elseif self.mountTypes[typeA] > self.mountTypes[typeB] then return fSort.reverse end
+		-- EXPANSION
+		elseif fSort.by == "expansion" then
+			if mounts.mountsDB[a] < mounts.mountsDB[b] then return not fSort.reverse
+			elseif mounts.mountsDB[a] > mounts.mountsDB[b] then return fSort.reverse end
+		-- NAME
+		elseif fSort.by == "name" and fSort.reverse then
+			if nameA > nameB then return true
+			elseif nameA < nameB then return false end
+		end
+
+		if fSort.by ~= "name" or not fSort.reverse then
+			if nameA < nameB then return true
+			elseif nameA > nameB then return false end
+		end
+		return a < b
+	end)
+
+	self:updateMountsList()
+end
+
+
 function journal:updateIndexByMountID()
 	self:UnregisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 	self.func.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
@@ -959,21 +1027,9 @@ function journal:updateIndexByMountID()
 		self.indexByMountID[mountID] = i
 	end
 
-	sort(self.mountIDs, function(a, b)
-		local nameA, _,_,_,_,_, isFavoriteA, _,_,_, isCollectedA = C_MountJournal.GetMountInfoByID(a)
-		local nameB, _,_,_,_,_, isFavoriteB, _,_,_, isCollectedB = C_MountJournal.GetMountInfoByID(b)
-		return isFavoriteA and not isFavoriteB
-			or isFavoriteA == isFavoriteB and (isCollectedA and not isCollectedB
-				or isCollectedA == isCollectedB and nameA < nameB)
-	end)
+	self:sortMounts()
 end
-
-
--- UPDATE indexByMountID WHEN SET FAVORITE
-function journal:MOUNT_JOURNAL_SEARCH_UPDATED()
-	self:updateIndexByMountID()
-	self:updateMountsList()
-end
+journal.MOUNT_JOURNAL_SEARCH_UPDATED = journal.updateIndexByMountID -- UPDATE indexByMountID WHEN SET FAVORITE
 
 
 function journal:mountLearnedUpdate()
@@ -1030,14 +1086,15 @@ function journal:mountToggle(btn)
 		self:createMountList(self.listMapID)
 	end
 	local tbl = self.list[btn.type]
+	local mountID = btn:GetParent().mountID
 
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	if tbl[btn.mountID] then
-		tbl[btn.mountID] = nil
+	if tbl[mountID] then
+		tbl[mountID] = nil
 		btn.icon:SetVertexColor(self.colors.gray:GetRGB())
 		self:getRemoveMountList(self.listMapID)
 	else
-		tbl[btn.mountID] = true
+		tbl[mountID] = true
 		btn.icon:SetVertexColor(self.colors.gold:GetRGB())
 	end
 
@@ -1158,19 +1215,14 @@ function journal:updateMapSettings()
 	if not mapSettings:IsShown() then return end
 	local flags = self.currentList and self.currentList.flags
 
-	local flagsCheck = mapSettings.Flags
-	local groundCheck = mapSettings.Ground
-	local waterWalkCheck = mapSettings.WaterWalk
-	local herbGathering = mapSettings.HerbGathering
-	local listFromMap = mapSettings.listFromMap
-	flagsCheck:SetChecked(flags and flags.enableFlags)
-	groundCheck:SetChecked(flags and flags.groundOnly)
-	waterWalkCheck:SetChecked(flags and flags.waterWalkOnly)
-	herbGathering:SetChecked(flags and flags.herbGathering)
+	mapSettings.Flags:SetChecked(flags and flags.enableFlags)
+	mapSettings.Ground:SetChecked(flags and flags.groundOnly)
+	mapSettings.WaterWalk:SetChecked(flags and flags.waterWalkOnly)
+	mapSettings.HerbGathering:SetChecked(flags and flags.herbGathering)
 
 	local optionsEnable = self.navBar.mapID ~= mounts.defMountsListID
-	flagsCheck:SetEnabled(optionsEnable)
-	listFromMap:SetEnabled(optionsEnable)
+	mapSettings.Flags:SetEnabled(optionsEnable)
+	mapSettings.listFromMap:SetEnabled(optionsEnable)
 
 	local relationText = mapSettings.relationMap.text
 	local relationClear = mapSettings.relationClear
@@ -1182,27 +1234,6 @@ function journal:updateMapSettings()
 		relationText:SetText(L["No relation"])
 		relationText:SetTextColor(self.colors.gray:GetRGB())
 		relationClear:Hide()
-	end
-end
-
-
-do
-	local lastMountClick = 0
-	local lastMountIndex = 0
-	function journal:mountDblClick(index, btn)
-		if btn == "RightButton" then return end
-
-		if lastMountIndex == index and GetTime() - lastMountClick < .4 then
-			local _,_,_, active, isUsable, _,_,_,_,_,_, mountID = C_MountJournal.GetDisplayedMountInfo(index)
-			if active then
-				C_MountJournal.Dismiss()
-			elseif isUsable then
-				C_MountJournal.SummonByID(mountID)
-			end
-		else
-			lastMountIndex = index
-			lastMountClick = GetTime()
-		end
 	end
 end
 
@@ -1294,6 +1325,10 @@ function journal:filterDropDown_Initialize(btn, level, value)
 
 		info.text = L["tags"]
 		info.value = 7
+		btn:ddAddButton(info, level)
+
+		info.text = L["sorting"]
+		info.value = 8
 		btn:ddAddButton(info, level)
 	else
 		info.notCheckable = true
@@ -1478,7 +1513,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 				info.checked = function() return expansions[i] end
 				btn:ddAddButton(info, level)
 			end
-		else -- TAGS
+		elseif value == 7 then -- TAGS
 			local filterTags = self.tags.filter
 
 			info.notCheckable = false
@@ -1556,6 +1591,57 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			info.func = function()
 				self.tags:addTag()
 			end
+			btn:ddAddButton(info, level)
+		else -- SORTING
+			local fSort = mounts.filters.sorting
+			info.isNotRadio = nil
+			info.notCheckable = nil
+
+			info.text = NAME
+			info.func = function()
+				fSort.by = "name"
+				self:sortMounts()
+				btn:ddRefresh(level)
+			end
+			info.checked = function() return fSort.by == "name" end
+			btn:ddAddButton(info, level)
+
+			info.text = TYPE
+			info.func = function()
+				fSort.by = "type"
+				self:sortMounts()
+				btn:ddRefresh(level)
+			end
+			info.checked = function() return fSort.by == "type" end
+			btn:ddAddButton(info, level)
+
+			info.text = EXPANSION_FILTER_TEXT
+			info.func = function()
+				fSort.by = "expansion"
+				self:sortMounts()
+				btn:ddRefresh(level)
+			end
+			info.checked = function() return fSort.by == "expansion" end
+			btn:ddAddButton(info, level)
+
+			btn:ddAddSeparator(level)
+
+			info.isNotRadio = true
+			info.text = L["Reverse Sort"]
+			info.func = function(_,_,_, value)
+				fSort.reverse = value
+				self:sortMounts()
+			end
+			info.checked = fSort.reverse
+			btn:ddAddButton(info, level)
+
+			info.isNotRadio = true
+			info.text = L["Favorites First"]
+			info.func = function(_,_,_, value)
+				fSort.favoritesFirst = value
+				self:sortMounts()
+			end
+			info.checked = fSort.favoritesFirst
 			btn:ddAddButton(info, level)
 		end
 	end
@@ -1696,7 +1782,7 @@ end
 
 
 function journal:updateMountsList()
-	local filters, mountTypes, list, tags, GetMountInfoByID, GetMountInfoExtraByID = mounts.filters, self.mountTypes, self.list, self.tags, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID
+	local filters, mountTypes, list, mountsDB, tags, GetMountInfoByID, GetMountInfoExtraByID = mounts.filters, self.mountTypes, self.list, mounts.mountsDB, self.tags, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID
 	local sources, types, selected, factions, pet, expansions = filters.sources, filters.types, filters.selected, filters.factions, filters.pet, filters.expansions
 	local text = util.cleanText(self.searchText)
 	wipe(self.displayedMounts)
@@ -1706,7 +1792,6 @@ function journal:updateMountsList()
 		local name, spellID, _,_, isUsable, sourceType, _,_, mountFaction, shouldHideOnChar, isCollected = GetMountInfoByID(mountID)
 		local _,_, sourceText, _, mountType = GetMountInfoExtraByID(mountID)
 		local petID = self.petForMount[spellID]
-		mountFaction = mountFaction or 2
 
 		-- HIDDEN FOR CHARACTER
 		if (not shouldHideOnChar or filters.hideOnChar)
@@ -1717,23 +1802,23 @@ function journal:updateMountsList()
 		-- SOURCES
 		and sources[sourceType]
 		-- SEARCH
-		and (text:len() == 0 or name:lower():find(text) or sourceText:lower():find(text) or tags:find(mountID, text))
+		and (text:len() == 0
+			or name:lower():find(text)
+			or sourceText:lower():find(text)
+			or tags:find(mountID, text))
 		-- TYPE
 		and types[mountTypes[mountType]]
 		-- FACTION
-		and factions[mountFaction + 1]
+		and factions[(mountFaction or 2) + 1]
 		-- SELECTED
-		and (not selected[1] and not selected[2] and not selected[3]
-			-- FLY
-			or selected[1] and list and list.fly[mountID]
-			-- GROUND
-			or selected[2] and list and list.ground[mountID]
-			-- SWIMMING
-			or selected[3] and list and list.swimming[mountID])
+		and (not (selected[1] or selected[2] or selected[3]) or list and
+			(selected[1] and list.fly[mountID]
+			or selected[2] and list.ground[mountID]
+			or selected[3] and list.swimming[mountID]))
 		-- PET
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
 		-- EXPANSIONS
-		and expansions[mounts.mountsDB[mountID]]
+		and expansions[mountsDB[mountID]]
 		-- TAGS
 		and tags:getFilterMount(mountID) then
 			tinsert(self.displayedMounts, mountID)
