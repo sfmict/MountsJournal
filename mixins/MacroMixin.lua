@@ -1,4 +1,4 @@
-local type, pairs, GetShapeshiftFormID, GetShapeshiftForm, GetShapeshiftFormInfo, GetSpecialization = type, pairs, GetShapeshiftFormID, GetShapeshiftForm, GetShapeshiftFormInfo, GetSpecialization
+local type, pairs, GetShapeshiftFormID, GetShapeshiftForm, GetShapeshiftFormInfo, GetSpecialization, GetItemCount, GetUnitSpeed, IsFalling = type, pairs, GetShapeshiftFormID, GetShapeshiftForm, GetShapeshiftFormInfo, GetSpecialization, GetItemCount, GetUnitSpeed, IsFalling
 local macroFrame = CreateFrame("FRAME")
 
 
@@ -144,18 +144,22 @@ end
 
 
 do
-	local function classDefFunc(spellName)
-		if spellName then
-			return "/cast "..spellName
+	local function getClassDefFunc(spellID)
+		return function(self, ...)
+			local spellName = self:getSpellName(spellID, ...)
+			if spellName then
+				return "/cast "..spellName
+			end
 		end
 	end
 
 
 	local classFunc = {
-		PRIEST = function(self, ...) return classDefFunc(self:getSpellName(1706, ...)) end, -- Levitation
-		SHAMAN = function(self, ...) return classDefFunc(self:getSpellName(2645, ...)) end, -- Ghost Wolf
-		MAGE = function(self, ...) return classDefFunc(self:getSpellName(130, ...)) end, -- Slow Fall
-		MONK = function(self, ...) return classDefFunc(self:getSpellName(125883, ...)) end, --Zen Flight
+		PALADIN = getClassDefFunc(190784), -- Devine Steed,
+		PRIEST = getClassDefFunc(1706), -- Levitation
+		SHAMAN = getClassDefFunc(2645), -- Ghost Wolf
+		MAGE = getClassDefFunc(130), -- Slow Fall
+		MONK = getClassDefFunc(125883), --Zen Flight
 		DRUID = function(self, ...)
 			local catForm = self:getSpellName(768, ...)
 			local travelForm = self:getSpellName(783, ...)

@@ -308,10 +308,10 @@
 				</Anchors>
 				<Layers>
 					<Layer level="OVERLAY">
-						<Texture file="Interface\Buttons\CheckButtonHilight" parentKey="selectedTexture" alphaMode="ADD"/>
+						<Texture file="Interface/Buttons/CheckButtonHilight" parentKey="selectedTexture" alphaMode="ADD"/>
 					</Layer>
 				</Layers>
-				<HighlightTexture name="$parentHighlight" file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
+				<HighlightTexture name="$parentHighlight" file="Interface/Buttons/ButtonHilight-Square" alphaMode="ADD"/>
 				<Scripts>
 					<OnEnter>
 						GameTooltip:SetOwner(self, "ANCHOR_LEFT")
@@ -423,7 +423,7 @@
 		</HitRectInsets>
 		<Layers>
 			<Layer level="BACKGROUND">
-				<Texture parentKey="I" file="Interface\common\help-i">
+				<Texture parentKey="I" file="Interface/common/help-i">
 					<Size x="46" y="46"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
@@ -431,19 +431,19 @@
 				</Texture>
 			</Layer>
 			<Layer level="OVERLAY">
-				<Texture parentKey="BigIPulse" file="Interface\common\help-i" alphaMode="ADD" hidden="true">
+				<Texture parentKey="BigIPulse" file="Interface/common/help-i" alphaMode="ADD" hidden="true">
 					<Size x="46" y="46"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
 				</Texture>
-				<Texture parentKey="RingPulse" file="Interface\TutorialFrame\minimap-glow" alphaMode="ADD" hidden="true">
+				<Texture parentKey="RingPulse" file="Interface/TutorialFrame/minimap-glow" alphaMode="ADD" hidden="true">
 					<Size x="52" y="52"/>
 					<Anchors>
 						<Anchor point="CENTER" x="0" y="0"/>
 					</Anchors>
 				</Texture>
-				<Texture hidden="true" parentKey="highlight" alphaMode="ADD" file="Interface\Minimap\UI-Minimap-ZoomButton-Highlight">
+				<Texture hidden="true" parentKey="highlight" alphaMode="ADD" file="Interface/Minimap/UI-Minimap-ZoomButton-Highlight">
 					<Size x="40" y="40"/>
 					<Anchors>
 						<Anchor point="CENTER" x="-1" y="0"/>
@@ -1444,7 +1444,7 @@
 				</Anchors>
 				<Layers>
 					<Layer level="OVERLAY">
-						<Texture parentKey="texture" file="Interface\OptionsFrame\VoiceChat-Play">
+						<Texture parentKey="texture" file="Interface/OptionsFrame/VoiceChat-Play">
 							<Size x="10" y="10"/>
 							<Anchors>
 								<Anchor point="CENTER"/>
@@ -1460,7 +1460,7 @@
 				</Anchors>
 				<Layers>
 					<Layer level="OVERLAY">
-						<Texture parentKey="texture" file="Interface\OptionsFrame\VoiceChat-Record">
+						<Texture parentKey="texture" file="Interface/OptionsFrame/VoiceChat-Record">
 							<Size x="10" y="10"/>
 							<Anchors>
 								<Anchor point="CENTER"/>

@@ -1,5 +1,5 @@
 local addon = ...
-local C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal, IsSpellKnown, GetTime = C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal, IsSpellKnown, GetTime
+local C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown = C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 
@@ -453,31 +453,48 @@ function mounts:isWaterWalkLocation()
 end
 
 
-function mounts:setFlags()
-	local flags = self.sFlags
-	local groundSpellKnown, flySpellKnown = self:getSpellKnown()
-	local modifier = self.modifier() or flags.forceModifier
-	local isSubmerged = IsSubmerged()
-	local isFloating = self:isFloating()
-	local instance = select(8, GetInstanceInfo())
-	local isFlyableLocation = flySpellKnown
-									  and IsFlyableArea()
-									  and self:isFlyLocation(instance)
-									  and not (self.mapFlags and self.mapFlags.groundOnly)
+do
+	local isFlyableOverride = {
+		-- Draenor
+		[1116] = true,
+		[1152] = true,
+		[1330] = true,
+		[1153] = true,
+		[1154] = true,
+		[1158] = true,
+		[1331] = true,
+		[1159] = true,
+		[1160] = true,
+		[1464] = true,
+		-- Legion
+		[1220] = true,
+	}
+	function mounts:setFlags()
+		local flags = self.sFlags
+		local groundSpellKnown, flySpellKnown = self:getSpellKnown()
+		local modifier = self.modifier() or flags.forceModifier
+		local isSubmerged = IsSubmerged()
+		local isFloating = self:isFloating()
+		local _,_,_,_,_,_,_, instance = GetInstanceInfo()
+		local isFlyableLocation = flySpellKnown
+										  and (IsFlyableArea() or isFlyableOverride[instance])
+										  and self:isFlyLocation(instance)
+										  and not (self.mapFlags and self.mapFlags.groundOnly)
 
-	flags.isIndoors = IsIndoors()
-	flags.inVehicle = UnitInVehicle("player")
-	flags.isMounted = IsMounted()
-	flags.groundSpellKnown = groundSpellKnown
-	flags.swimming = isSubmerged
-						  and not (modifier or isFloating)
-	flags.fly = isFlyableLocation
-					and (not modifier or isSubmerged)
-	flags.waterWalk = isFloating
-							or not isFlyableLocation and modifier
-							or self:isWaterWalkLocation()
-	flags.herb = self.herbMount and (not self.config.herbMountsOnZones
-												or self.mapFlags and self.mapFlags.herbGathering)
+		flags.isIndoors = IsIndoors()
+		flags.inVehicle = UnitInVehicle("player")
+		flags.isMounted = IsMounted()
+		flags.groundSpellKnown = groundSpellKnown
+		flags.swimming = isSubmerged
+							  and not (modifier or isFloating)
+		flags.fly = isFlyableLocation
+						and (not modifier or isSubmerged)
+		flags.waterWalk = isFloating
+								or not isFlyableLocation and modifier
+								or self:isWaterWalkLocation()
+		flags.herb = self.herbMount and (not self.config.herbMountsOnZones
+													or self.mapFlags and self.mapFlags.herbGathering)
+	end
 end
 
 
