@@ -101,6 +101,7 @@ function journal:ADDON_LOADED(addonName)
 	if addonName == "Blizzard_Collections" and select(2, IsAddOnLoaded(addon)) or addonName == addon and IsAddOnLoaded("Blizzard_Collections") then
 		self:UnregisterEvent("ADDON_LOADED")
 
+		local function void() end
 		self.searchText = ""
 		local texPath = "Interface/AddOns/MountsJournal/textures/"
 		self.MountJournal = MountJournal
@@ -399,6 +400,8 @@ function journal:ADDON_LOADED(addonName)
 
 		for _, child in ipairs(self.scrollButtons) do
 			child:SetWidth(child:GetWidth() - 25)
+			child.SetSize = void
+			child.SetWidth = void
 			child.name:SetWidth(child.name:GetWidth() - 18)
 			child.icon:SetPoint("LEFT", child, "LEFT", -41, 0)
 			child.icon:SetSize(40, 40)
@@ -429,7 +432,9 @@ function journal:ADDON_LOADED(addonName)
 
 		self.searchBox:SetPoint("TOPLEFT", filtersPanel, "TOPLEFT", 54, -4)
 		self.searchBox:SetSize(131, 20)
-		MountJournalFilterButton:SetPoint("TOPRIGHT", filtersPanel, "TOPRIGHT", -3, -4)
+		filtersButton:SetPoint("TOPRIGHT", filtersPanel, "TOPRIGHT", -3, -4)
+		filtersButton.ClearAllPoints = void
+		filtersButton.SetPoint = void
 
 		-- FILTERS SHOWN PANEL
 		local shownPanel = CreateFrame("FRAME", nil, self.MountJournal, "InsetFrameTemplate")
