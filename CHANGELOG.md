@@ -1,1 +1,1 @@
-* Fixed IsFlyableArea() in Legion and Drainor.
+* Fixes.
