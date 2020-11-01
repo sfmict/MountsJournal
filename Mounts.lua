@@ -58,6 +58,7 @@ function mounts:ADDON_LOADED(addonName)
 		}
 		self.herbalismMounts = {
 			[522] = true, -- Небесный голем
+			[845] = true, -- Механизированный хвататель разностей
 		}
 
 		self.sFlags = {}

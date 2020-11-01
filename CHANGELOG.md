@@ -1,1 +1,1 @@
-* Fixes.
+* Added "Mechanized Lumber Extractor" to herbalism mounts list.

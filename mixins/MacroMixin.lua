@@ -1,4 +1,4 @@
-local type, pairs, GetShapeshiftFormID, GetShapeshiftForm, GetShapeshiftFormInfo, GetSpecialization, GetItemCount, GetUnitSpeed, IsFalling = type, pairs, GetShapeshiftFormID, GetShapeshiftForm, GetShapeshiftFormInfo, GetSpecialization, GetItemCount, GetUnitSpeed, IsFalling
+local type, pairs, GetShapeshiftFormID, GetShapeshiftForm, GetShapeshiftFormInfo, GetSpecialization, GetItemCount, GetUnitSpeed, IsFalling, InCombatLockdown = type, pairs, GetShapeshiftFormID, GetShapeshiftForm, GetShapeshiftFormInfo, GetSpecialization, GetItemCount, GetUnitSpeed, IsFalling, InCombatLockdown
 local macroFrame = CreateFrame("FRAME")
 
 
