@@ -1,5 +1,5 @@
 local addon = ...
-local C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown = C_MountJournal, C_Map, MapUtil, next, tinsert, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown
+local C_MountJournal, C_Map, MapUtil, next, tinsert, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown = C_MountJournal, C_Map, MapUtil, next, tinsert, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 
@@ -374,17 +374,42 @@ function mounts:isFloating()
 end
 
 
-function mounts:summon(ids)
-	local usableIDs = {}
-	for mountID in next, ids do
-		local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
-		if isUsable then tinsert(usableIDs, mountID) end
+do
+	local mountIDFromTarget, UnitBuff = {}, UnitBuff
+	function mounts:summonTarget()
+		if self.config.copyMountTarget then
+			local i = 1
+			repeat
+				local _,_,_,_,_,_,_,_,_, spellID = UnitBuff("target", i)
+				if spellID then
+					local mountID = C_MountJournal.GetMountFromSpell(spellID)
+					if mountID then
+						wipe(mountIDFromTarget)
+						mountIDFromTarget[mountID] = true
+						return self:summon(mountIDFromTarget)
+					end
+					i = i + 1
+				end
+			until not spellID
+		end
 	end
-	if #usableIDs ~= 0 then
-		C_MountJournal.SummonByID(usableIDs[random(#usableIDs)])
-		return true
-	else
-		return false
+end
+
+
+do
+	local usableIDs = {}
+	function mounts:summon(ids)
+		wipe(usableIDs)
+		for mountID in next, ids do
+			local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
+			if isUsable then tinsert(usableIDs, mountID) end
+		end
+		if #usableIDs ~= 0 then
+			C_MountJournal.SummonByID(usableIDs[random(#usableIDs)])
+			return true
+		else
+			return false
+		end
 	end
 end
 
@@ -521,8 +546,10 @@ function mounts:init()
 					  or self:summon(self.lowLevel)) then
 				self:errorSummon()
 			end
+		-- target's mount
+		elseif not self:summonTarget()
 		-- swimming
-		elseif not (flags.swimming
+		and not (flags.swimming
 						and (self.mapVashjir[C_Map.GetBestMapForUnit("player")]
 							  and self:summon(self.swimmingVashjir)
 							  or self:summon(self.list.swimming)))

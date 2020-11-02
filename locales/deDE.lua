@@ -75,6 +75,7 @@ L["CHARACTER_CLASS_DESCRIPTION"] = "(Charaktereinstellungen überschreiben Klass
 -- L[No Battle Pet] = ""
 -- L[NoPetInRaid] = ""
 -- L[NoPetInGroup] = ""
+L["CopyMountTarget"] = "Versuche, das Reittier deines Ziels zu kopieren"
 -- L[About] = ""
 -- L[Help with translation of %s. Thanks.] = ""
 -- L[Localization Translators:] = ""

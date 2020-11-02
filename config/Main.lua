@@ -52,6 +52,9 @@ end
 config:SetScript("OnShow", function(self)
 	self:SetScript("OnShow", nil)
 
+	-- ENABLE APPLY
+	local function applyEnable() self.applyBtn:Enable() end
+
 	-- TOOLTIP
 	local function setTooltip(frame, anchor, title, text)
 		frame:SetScript("OnEnter", function()
@@ -99,7 +102,7 @@ config:SetScript("OnShow", function(self)
 	self.waterJump.Text:SetText(L["Handle a jump in water"])
 	self.waterJump.tooltipText = L["Handle a jump in water"]
 	self.waterJump.tooltipRequirement = L["WaterJumpDescription"]
-	self.waterJump:HookScript("OnClick", function() self.applyBtn:Enable() end)
+	self.waterJump:HookScript("OnClick", applyEnable)
 
 	-- SUMMON 1
 	local summon1 = leftPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -206,14 +209,14 @@ config:SetScript("OnShow", function(self)
 	self.useHerbMounts.Text:SetText(L["UseHerbMounts"])
 	self.useHerbMounts.tooltipText = L["UseHerbMounts"]
 	self.useHerbMounts.tooltipRequirement = L["UseHerbMountsDescription"]
-	self.useHerbMounts:HookScript("OnClick", function() self.applyBtn:Enable() end)
+	self.useHerbMounts:HookScript("OnClick", applyEnable)
 
 	-- USE HERBALISM MOUNTS ON HERBALISM ZONES
 	self.herbMountsOnZones = util.createCheckboxChild(L["UseHerbMountsOnZones"], self.useHerbMounts)
 	self.herbMountsOnZones.tooltipText = L["UseHerbMountsOnZones"]
 	self.herbMountsOnZones.tooltipRequirement = L["UseHerbMountsDescription"]
 	self.herbMountsOnZones.checkFunc = function() return mounts.config.herbMountsOnZones end
-	self.herbMountsOnZones:HookScript("OnClick", function() self.applyBtn:Enable() end)
+	self.herbMountsOnZones:HookScript("OnClick", applyEnable)
 
 	-- USE MAGIC BROOM
 	self.useMagicBroom = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
@@ -229,21 +232,28 @@ config:SetScript("OnShow", function(self)
 	util.setHyperlinkTooltip(self.useMagicBroom)
 	self.useMagicBroom.tooltipText = L["UseMagicBroomTitle"]
 	self.useMagicBroom.tooltipRequirement = L["UseMagicBroomDescription"]
-	self.useMagicBroom:HookScript("OnClick", function() self.applyBtn:Enable() end)
+	self.useMagicBroom:HookScript("OnClick", applyEnable)
 
 	-- NO PET IN RAID
 	self.noPetInRaid = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.noPetInRaid:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 0, -26)
 	self.noPetInRaid.Text:SetSize(245, 25)
 	self.noPetInRaid.Text:SetText(L["NoPetInRaid"])
-	self.noPetInRaid:HookScript("OnClick", function() self.applyBtn:Enable() end)
+	self.noPetInRaid:HookScript("OnClick", applyEnable)
 
 	-- NO PET IN GROUP
 	self.noPetInGroup = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.noPetInGroup:SetPoint("TOPLEFT", self.noPetInRaid, "BOTTOMLEFT", 0, -3)
 	self.noPetInGroup.Text:SetSize(245, 25)
 	self.noPetInGroup.Text:SetText(L["NoPetInGroup"])
-	self.noPetInGroup:HookScript("OnClick", function() self.applyBtn:Enable() end)
+	self.noPetInGroup:HookScript("OnClick", applyEnable)
+
+	-- COPY MOUNT TARGET
+	self.copyMountTarget = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.copyMountTarget:SetPoint("TOPLEFT", self.noPetInGroup, "BOTTOMLEFT", 0, -26)
+	self.copyMountTarget.Text:SetSize(245, 25)
+	self.copyMountTarget.Text:SetText(L["CopyMountTarget"])
+	self.copyMountTarget:HookScript("OnClick", applyEnable)
 
 	-- APPLY
 	self.applyBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
@@ -272,6 +282,7 @@ config:SetScript("OnShow", function(self)
 		self.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
 		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
+		self.copyMountTarget:SetChecked(mounts.config.copyMountTarget)
 		self.applyBtn:Disable()
 	end
 end)
@@ -321,6 +332,7 @@ config.okay = function(self)
 	mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
 	mounts.config.noPetInRaid = self.noPetInRaid:GetChecked()
 	mounts.config.noPetInGroup = self.noPetInGroup:GetChecked()
+	mounts.config.copyMountTarget = self.copyMountTarget:GetChecked()
 end
 
 
