@@ -28,8 +28,12 @@ function mounts:ADDON_LOADED(addonName)
 		self.globalDB.config = self.globalDB.config or {}
 		self.globalDB.mountAnimations = self.globalDB.mountAnimations or {}
 		self.globalDB.mountsProfiles = self.globalDB.mountsProfiles or {}
+		self.globalDB.help = self.globalDB.help or {}
+
 		self.filters = self.globalDB.filters
 		self.profiles = self.globalDB.mountsProfiles
+		self.help = self.globalDB.help
+		self.help.journal = self.help.journal or {}
 		self.config = self.globalDB.config
 		if self.config.mountDescriptionToggle == nil then
 			self.config.mountDescriptionToggle = true

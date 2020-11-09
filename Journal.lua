@@ -300,14 +300,15 @@ function journal:ADDON_LOADED(addonName)
 			mountDisplay:Show()
 			self.mapSettings:Hide()
 			self.worldMap:Hide()
+			util.showHelpJournal()
 		end)
 
 		-- SETTINGS BUTTON
-		local btnConfig = CreateFrame("BUTTON", "MountsJournalBtnConfig", self.MountJournal, "UIPanelButtonTemplate")
-		btnConfig:SetSize(80, 22)
-		btnConfig:SetPoint("BOTTOMRIGHT", -6, 4)
-		btnConfig:SetText(L["Settings"])
-		btnConfig:SetScript("OnClick", function() config:openConfig() end)
+		self.btnConfig = CreateFrame("BUTTON", "MountsJournalBtnConfig", self.MountJournal, "UIPanelButtonTemplate")
+		self.btnConfig:SetSize(80, 22)
+		self.btnConfig:SetPoint("BOTTOMRIGHT", -6, 4)
+		self.btnConfig:SetText(L["Settings"])
+		self.btnConfig:SetScript("OnClick", function() config:openConfig() end)
 
 		-- ACHIEVEMENT
 		self.achiev = CreateFrame("BUTTON", nil, self.MountJournal, "MJAchiev")

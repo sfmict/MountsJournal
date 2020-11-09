@@ -255,6 +255,18 @@ config:SetScript("OnShow", function(self)
 	self.copyMountTarget.Text:SetText(L["CopyMountTarget"])
 	self.copyMountTarget:HookScript("OnClick", applyEnable)
 
+	-- RESET HELP
+	local resetHelp = CreateFrame("BUTTON", nil, rightPanelScroll.child, "UIPanelButtonTemplate")
+	resetHelp:SetSize(128, 22)
+	resetHelp:SetPoint("TOPLEFT", self.copyMountTarget, "BOTTOMLEFT", 0, -26)
+	resetHelp:SetText(RESET_TUTORIALS)
+	resetHelp:SetScript("OnClick", function(btn)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		wipe(mounts.help.journal)
+		util.showHelpJournal()
+		btn:Disable()
+	end)
+
 	-- APPLY
 	self.applyBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
 	self.applyBtn:SetSize(96, 22)
@@ -283,6 +295,7 @@ config:SetScript("OnShow", function(self)
 		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
 		self.copyMountTarget:SetChecked(mounts.config.copyMountTarget)
+		resetHelp:Enable()
 		self.applyBtn:Disable()
 	end
 end)

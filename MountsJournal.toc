@@ -20,6 +20,7 @@ config/About.lua
 Journal.lua
 components/Tags.lua
 components/Camera.lua
+components/Help.lua
 #@do-not-package@
 _test.lua
 #@end-do-not-package@
