@@ -7,11 +7,7 @@ local secureButtonNameMount = addon.."_Mount"
 local secureButtonNameSecondMount = addon.."_SecondMount"
 
 
-config:SetScript("OnEvent", function(self, event, ...)
-	if self[event] then
-		self[event](self, ...)
-	end
-end)
+config:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
 config:RegisterEvent("PLAYER_LOGIN")
 
 
@@ -262,7 +258,7 @@ config:SetScript("OnShow", function(self)
 	resetHelp:SetText(RESET_TUTORIALS)
 	resetHelp:SetScript("OnClick", function(btn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		wipe(mounts.help.journal)
+		mounts.help.journal = 0
 		util.showHelpJournal()
 		btn:Disable()
 	end)

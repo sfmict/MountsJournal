@@ -3,38 +3,39 @@ local util, mounts, journal = MountsJournalUtil, MountsJournal, MountsJournalFra
 
 
 local function nextTip(t)
-	mounts.help.journal[t] = 1
+	mounts.help.journal = t
 	util.showHelpJournal()
 end
 
 
 function util.showHelpJournal()
 	if not journal.MountJournal:IsShown() then return end
+	local step = type(mounts.help.journal) == "number" and mounts.help.journal or 0
 	HelpTip:HideAll(journal.MountJournal)
-	if not mounts.help.journal[1] then
+	if step == 0 then
 		local helpTipInfo = {
 			text = L["ButtonsSelectedTooltipDescription"]:format(addon),
 			buttonStyle = HelpTip.ButtonStyle.Next,
 			targetPoint = HelpTip.Point.RightEdgeTop,
 			alignment = HelpTip.Alignment.Top,
-			callbackArg = 1,
 			offsetX = -4,
 			offsetY = -23,
+			callbackArg = 1,
 			onAcknowledgeCallback = nextTip,
 		}
 		HelpTip:Show(journal.MountJournal, helpTipInfo, journal.scrollFrame)
-	elseif not mounts.help.journal[2] then
+	elseif step == 1 then
 		local helpTipInfo = {
 			text = L["ZoneSettingsTooltipDescription"]:gsub("\n*(.*)", "%1"),
 			buttonStyle = HelpTip.ButtonStyle.Next,
 			targetPoint = HelpTip.Point.RightEdgeCenter,
 			alignment = HelpTip.Alignment.Top,
-			callbackArg = 2,
 			offsetX = -4,
+			callbackArg = 2,
 			onAcknowledgeCallback = nextTip,
 		}
 		HelpTip:Show(journal.MountJournal, helpTipInfo, journal.navBarBtn)
-	elseif not mounts.help.journal[3] then
+	elseif step == 2 then
 		local helpTipInfo = {
 			text = L["ProfilesTooltipDescription"],
 			buttonStyle = HelpTip.ButtonStyle.Next,
@@ -45,7 +46,7 @@ function util.showHelpJournal()
 			onAcknowledgeCallback = nextTip,
 		}
 		HelpTip:Show(journal.MountJournal, helpTipInfo, journal.profilesMenu)
-	elseif not mounts.help.journal[4] then
+	elseif step == 3 then
 		local helpTipInfo = {
 			text = L["SettingsTooltipDescription"]:format(addon),
 			buttonStyle = HelpTip.ButtonStyle.GotIt,
