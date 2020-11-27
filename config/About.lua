@@ -70,8 +70,9 @@ aboutConfig:SetScript("OnShow", function(self)
 	translators:SetText(L["Localization Translators:"])
 
 	local langs, last = {
-		{"deDE", "Flammenengel92"},
+		{"deDE", "Flammenengel92, Asraael"},
 		{"zhTW", "BNS333"},
+		{"frFR", "Asraael"},
 	}
 
 	for _, l in ipairs(langs) do

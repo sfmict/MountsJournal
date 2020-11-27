@@ -1,1 +1,1 @@
-* Added help.
+* Updated translations.
