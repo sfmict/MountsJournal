@@ -118,9 +118,12 @@ end
 
 
 function mounts:setOldChanges()
+	local currentVersion = GetAddOnMetadata(addon, "Version")
 	--@do-not-package@
-	if self.globalDB.lastAddonVersion == "@project-version@" and self.charDB.lastAddonVersion == "@project-version@" then return end
+	if currentVersion == "@project-version@" then currentVersion = "9.0.8" end
 	--@end-do-not-package@
+
+	--IF < 8.3.2 GLOBAL
 	if self:compareVersion("8.3.2", self.globalDB.lastAddonVersion or "") then
 		self.config.waterWalkAll = nil
 		self.config.waterWalkList = nil
@@ -165,6 +168,7 @@ function mounts:setOldChanges()
 		end
 	end
 
+	--IF < 9.0.8 GLOBAL
 	if self:compareVersion("9.0.8", self.globalDB.lastAddonVersion or "") then
 		local function updateTable(to, from)
 			for k, v in next, from do
@@ -199,8 +203,11 @@ function mounts:setOldChanges()
 			self.globalDB.petForMount = nil
 		end
 	end
-	self.globalDB.lastAddonVersion = GetAddOnMetadata(addon, "Version")
 
+	-- SET LAST GLOBAL VERSION
+	self.globalDB.lastAddonVersion = currentVersion
+
+	-- IF < 8.3.2 CHAR
 	if self:compareVersion("8.3.2", self.charDB.lastAddonVersion or "") then
 		local function setMounts(tbl)
 			if #tbl > 0 then
@@ -243,7 +250,9 @@ function mounts:setOldChanges()
 		self.charDB.zoneMounts = nil
 		self.charDB.enable = nil
 	end
-	self.charDB.lastAddonVersion = GetAddOnMetadata(addon, "Version")
+
+	-- SET LAST CHAR VERSION
+	self.charDB.lastAddonVersion = currentVersion
 end
 
 
