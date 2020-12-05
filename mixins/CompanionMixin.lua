@@ -266,7 +266,7 @@ end
 
 
 function MJCompanionsPanelMixin:updatePetForMount()
-	local petForMount, needUpdate = self.mounts.globalDB.petForMount
+	local petForMount, needUpdate = self.mounts.defProfile.petForMount
 	for spellID, petID in pairs(petForMount) do
 		if type(petID) == "string" and not C_PetJournal.GetPetInfoByPetID(petID) then
 			needUpdate = true
