@@ -18,11 +18,6 @@ function mounts:ADDON_LOADED(addonName)
 
 		MountsJournalDB = MountsJournalDB or {}
 		self.globalDB = MountsJournalDB
-		-- self.globalDB.fly = self.globalDB.fly or {}
-		-- self.globalDB.ground = self.globalDB.ground or {}
-		-- self.globalDB.swimming = self.globalDB.swimming or {}
-		-- self.globalDB.zoneMounts = self.globalDB.zoneMounts or {}
-		-- self.globalDB.petForMount = self.globalDB.petForMount or {}
 		self.globalDB.mountTags = self.globalDB.mountTags or {}
 		self.globalDB.filters = self.globalDB.filters or {}
 		self.globalDB.config = self.globalDB.config or {}
@@ -134,7 +129,7 @@ function mounts:setOldChanges()
 		self.config.waterWalkExpeditionList = nil
 
 		local function setMounts(tbl)
-			if #tbl > 0 then
+			if tbl and #tbl > 0 then
 				local newTbl = {}
 				for i = 1, #tbl do
 					newTbl[tbl[i]] = true
@@ -147,10 +142,12 @@ function mounts:setOldChanges()
 		self.globalDB.fly = setMounts(self.globalDB.fly)
 		self.globalDB.ground = setMounts(self.globalDB.ground)
 		self.globalDB.swimming = setMounts(self.globalDB.swimming)
-		for _, list in next, self.globalDB.zoneMounts do
-			list.fly = setMounts(list.fly)
-			list.ground = setMounts(list.ground)
-			list.swimming = setMounts(list.swimming)
+		if self.globalDB.zoneMounts then
+			for _, list in next, self.globalDB.zoneMounts do
+				list.fly = setMounts(list.fly)
+				list.ground = setMounts(list.ground)
+				list.swimming = setMounts(list.swimming)
+			end
 		end
 
 		for _, profile in next, self.globalDB.mountsProfiles do
