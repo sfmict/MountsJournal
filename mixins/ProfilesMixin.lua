@@ -177,10 +177,10 @@ function MJProfilesMixin:initialize(level, value)
 	local info = {}
 
 	if value == "settings" then -- PROFILE SETTINGS
-		if self.charDB.currentProfileName ~= nil then
-			info.isNotRadio = true
-			info.keepShownOnClick = true
+		info.isNotRadio = true
+		info.keepShownOnClick = true
 
+		if self.charDB.currentProfileName ~= nil then
 			info.text = L["Pet binding from default profile"]
 			info.checked = function() return self.journal.db.petListFromProfile end
 			info.func = function(_,_,_, checked)
@@ -197,6 +197,24 @@ function MJProfilesMixin:initialize(level, value)
 			end
 			self:ddAddButton(info, level)
 		end
+
+		info.text = L["Auto add new mounts to selected"]
+		info.checked = function()
+			if self.charDB.currentProfileName ~= nil then
+				return self.journal.db.autoAddNewMount
+			else
+				return self.mounts.config.autoAddNewMount
+			end
+		end
+		info.func = function(_,_,_, checked)
+			checked = checked and true or nil
+			if self.charDB.currentProfileName ~= nil then
+				self.journal.db.autoAddNewMount = checked
+			else
+				self.mounts.config.autoAddNewMount = checked
+			end
+		end
+		self:ddAddButton(info, level)
 
 		info.notCheckable = true
 		info.keepShownOnClick = nil

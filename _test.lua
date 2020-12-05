@@ -6,20 +6,43 @@ local test = CreateFrame("Frame")
 test:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 
+local ignoreEvents = {
+	["SPELL_ACTIVATION_OVERLAY_HIDE"] = true,
+	["ARENA_SEASON_WORLD_STATE"] = true,
+	["PVP_RATED_STATS_UPDATE"] = true,
+	["UNIT_AURA"] = true,
+	["BAG_UPDATE_COOLDOWN"] = true,
+	["GLOBAL_MOUSE_DOWN"] = true,
+	["GLOBAL_MOUSE_UP"] = true,
+	["PLAYER_STOPPED_MOVING"] = true,
+	["PLAYER_STARTED_MOVING"] = true,
+	["ACTIONBAR_SLOT_CHANGED"] = true,
+	["ACTIONBAR_UPDATE_COOLDOWN"] = true,
+	["SPELL_UPDATE_USABLE"] = true,
+	["MODIFIER_STATE_CHANGED"] = true,
+	["SPELL_UPDATE_COOLDOWN"] = true,
+	["UPDATE_FACTION"] = true,
+	-- [""] = true,
+	-- [""] = true,
+	-- [""] = true,
+	-- [""] = true,
+	-- [""] = true,
+}
+
+
 test:SetScript("OnEvent", function(self, event, ...)
 	if self[event] then
 		fprint(event, ...)
 		self[event](self, ...)
 	else
-		if event ~= "ARENA_SEASON_WORLD_STATE"
-		and event ~= "PVP_RATED_STATS_UPDATE" then
+		if not ignoreEvents[event] then
 			fprint("None:", event, ...)
 		end
 	end
 end)
 -- test:RegisterAllEvents()
--- test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 
+-- test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 -- test:RegisterEvent("PET_JOURNAL_PET_DELETED")
 -- test:RegisterEvent("PET_JOURNAL_PETS_HEALED")
 -- test:RegisterEvent("PET_JOURNAL_CAGE_FAILED")
@@ -29,6 +52,7 @@ end)
 -- test:RegisterEvent("PET_BATTLE_QUEUE_STATUS")
 -- test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 -- test:RegisterEvent("COMPANION_LEARNED")
+-- test:RegisterEvent("SKILL_LINES_CHANGED")
 -- test:RegisterEvent("COMPANION_UNLEARNED")
 
 -- test:RegisterEvent("CALENDAR_ACTION_PENDING")

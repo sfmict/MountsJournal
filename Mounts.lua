@@ -233,6 +233,9 @@ function mounts:PLAYER_LOGIN()
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
+
+	-- AUTO ADD MOUNT
+	self:RegisterEvent("NEW_MOUNT_ADDED")
 end
 
 
@@ -259,6 +262,29 @@ function mounts:UNIT_SPELLCAST_START(_,_, spellID)
 			C_PetJournal.SummonRandomPet(petID == 1)
 		elseif C_PetJournal.PetIsSummonable(petID) and C_PetJournal.GetSummonedPetGUID() ~= petID then
 			C_PetJournal.SummonPetByGUID(petID)
+		end
+	end
+end
+
+
+function mounts:NEW_MOUNT_ADDED(mountID)
+	local _,_,_,_, mountTypeExtra = C_MountJournal.GetMountInfoExtraByID(mountID)
+	local mountType = util.mountTypes[mountTypeExtra]
+	if mountType == 1 then
+		mountType = "fly"
+	elseif mountType == 2 then
+		mountType = "ground"
+	else
+		mountType = "swimming"
+	end
+
+	if self.config.autoAddNewMount then
+		self.globalDB[mountType][mountID] = true
+	end
+
+	for _, profile in next, self.profiles do
+		if profile.autoAddNewMount then
+			profile[mountType][mountID] = true
 		end
 	end
 end
@@ -387,9 +413,10 @@ do
 				if spellID then
 					local mountID = C_MountJournal.GetMountFromSpell(spellID)
 					if mountID then
-						wipe(mountIDFromTarget)
 						mountIDFromTarget[mountID] = true
-						return self:summon(mountIDFromTarget)
+						local isSummoned = self:summon(mountIDFromTarget)
+						mountIDFromTarget[mountID] = nil
+						return isSummoned
 					end
 					i = i + 1
 				end

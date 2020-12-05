@@ -2,6 +2,7 @@ local addon, L = ...
 local C_MountJournal, C_PetJournal, C_Timer, wipe, tinsert, next, pairs, ipairs, select, type, sort = C_MountJournal, C_PetJournal, C_Timer, wipe, tinsert, next, pairs, ipairs, select, type, sort
 local util, mounts, config = MountsJournalUtil, MountsJournal, MountsJournalConfig
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
+journal.mountTypes = util.mountTypes
 util:setEventsMixin(journal)
 
 
@@ -22,28 +23,6 @@ journal.colors = {
 local metaMounts = {__index = {[0] = 0}}
 journal.displayedMounts = setmetatable({}, metaMounts)
 journal.indexByMountID = setmetatable({}, metaMounts)
-
-
--- 1 FLY, 2 GROUND, 3 SWIMMING
-journal.mountTypes = setmetatable({
-	[242] = 1,
-	[247] = 1,
-	[248] = 1,
-	[398] = 1,
-	[230] = 2,
-	[241] = 2,
-	[284] = 2,
-	[231] = 3,
-	[232] = 3,
-	[254] = 3,
-}, {
-	__index = function(self, key)
-		if type(key) == "number" then
-			self[key] = 1
-			return self[key]
-		end
-	end
-})
 
 
 local function tabClick(self)

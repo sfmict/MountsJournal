@@ -72,6 +72,28 @@ end
 MountsJournalUtil = {}
 
 
+-- 1 FLY, 2 GROUND, 3 SWIMMING
+MountsJournalUtil.mountTypes = setmetatable({
+	[242] = 1,
+	[247] = 1,
+	[248] = 1,
+	[398] = 1,
+	[230] = 2,
+	[241] = 2,
+	[284] = 2,
+	[231] = 3,
+	[232] = 3,
+	[254] = 3,
+}, {
+	__index = function(self, key)
+		if type(key) == "number" then
+			self[key] = 1
+			return self[key]
+		end
+	end
+})
+
+
 MountsJournalUtil.filterButtonBackdrop = {
 	edgeFile = "Interface/AddOns/MountsJournal/textures/border",
 	edgeSize = 8,
