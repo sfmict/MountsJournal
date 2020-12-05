@@ -869,15 +869,11 @@ end
 
 
 function journal:setEditMountsList()
-	self.db = mounts.charDB.currentProfileName and mounts.profiles[mounts.charDB.currentProfileName] or mounts.globalDB
-	self.zoneMounts = self.db.zoneMountsFromProfile and mounts.globalDB.zoneMounts or self.db.zoneMounts
+	self.db = mounts.charDB.currentProfileName and mounts.profiles[mounts.charDB.currentProfileName] or mounts.defProfile
+	self.zoneMounts = self.db.zoneMountsFromProfile and mounts.defProfile.zoneMounts or self.db.zoneMounts
 	local mapID = self.navBar.mapID
 	if mapID == mounts.defMountsListID then
-		self.currentList = {
-			fly = self.db.fly,
-			ground = self.db.ground,
-			swimming = self.db.swimming,
-		}
+		self.currentList = self.db
 		self.listMapID = nil
 		self.list = self.currentList
 	else
@@ -889,7 +885,7 @@ function journal:setEditMountsList()
 			self.list = self.zoneMounts[self.listMapID]
 		end
 	end
-	self.petForMount = self.db.petListFromProfile and mounts.globalDB.petForMount or self.db.petForMount
+	self.petForMount = self.db.petListFromProfile and mounts.defProfile.petForMount or self.db.petForMount
 end
 
 

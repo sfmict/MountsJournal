@@ -18,20 +18,27 @@ function mounts:ADDON_LOADED(addonName)
 
 		MountsJournalDB = MountsJournalDB or {}
 		self.globalDB = MountsJournalDB
-		self.globalDB.fly = self.globalDB.fly or {}
-		self.globalDB.ground = self.globalDB.ground or {}
-		self.globalDB.swimming = self.globalDB.swimming or {}
-		self.globalDB.zoneMounts = self.globalDB.zoneMounts or {}
-		self.globalDB.petForMount = self.globalDB.petForMount or {}
+		-- self.globalDB.fly = self.globalDB.fly or {}
+		-- self.globalDB.ground = self.globalDB.ground or {}
+		-- self.globalDB.swimming = self.globalDB.swimming or {}
+		-- self.globalDB.zoneMounts = self.globalDB.zoneMounts or {}
+		-- self.globalDB.petForMount = self.globalDB.petForMount or {}
 		self.globalDB.mountTags = self.globalDB.mountTags or {}
 		self.globalDB.filters = self.globalDB.filters or {}
 		self.globalDB.config = self.globalDB.config or {}
 		self.globalDB.mountAnimations = self.globalDB.mountAnimations or {}
+		self.globalDB.defProfile = self.globalDB.defProfile or {}
 		self.globalDB.mountsProfiles = self.globalDB.mountsProfiles or {}
 		self.globalDB.help = self.globalDB.help or {}
 
-		self.filters = self.globalDB.filters
+		self.defProfile = self.globalDB.defProfile
+		self.defProfile.fly = self.defProfile.fly or {}
+		self.defProfile.ground = self.defProfile.ground or {}
+		self.defProfile.swimming = self.defProfile.swimming or {}
+		self.defProfile.zoneMounts = self.defProfile.zoneMounts or {}
+		self.defProfile.petForMount = self.defProfile.petForMount or {}
 		self.profiles = self.globalDB.mountsProfiles
+		self.filters = self.globalDB.filters
 		self.help = self.globalDB.help
 		self.config = self.globalDB.config
 		if self.config.mountDescriptionToggle == nil then
@@ -160,6 +167,41 @@ function mounts:setOldChanges()
 			end
 		end
 	end
+
+	if self:compareVersion("9.0.8", self.globalDB.lastAddonVersion or "") then
+		local function updateTable(to, from)
+			for k, v in next, from do
+				if type(v) ~= "table" then
+					to[k] = v
+				elseif type(to[k]) ~= "table" then
+					to[k] = util:copyTable(v)
+				else
+					updateTable(to[k], v)
+				end
+			end
+		end
+
+		if type(self.globalDB.fly) == "table" then
+			updateTable(self.defProfile.fly, self.globalDB.fly)
+			self.globalDB.fly = nil
+		end
+		if type(self.globalDB.ground) == "table" then
+			updateTable(self.defProfile.ground, self.globalDB.ground)
+			self.globalDB.ground = nil
+		end
+		if type(self.globalDB.swimming) == "table" then
+			updateTable(self.defProfile.swimming, self.globalDB.swimming)
+			self.globalDB.swimming = nil
+		end
+		if type(self.globalDB.zoneMounts) == "table" then
+			updateTable(self.defProfile.zoneMounts, self.globalDB.zoneMounts)
+			self.globalDB.zoneMounts = nil
+		end
+		if type(self.globalDB.petForMount) == "table" then
+			updateTable(self.defProfile.petForMount, self.globalDB.petForMount)
+			self.globalDB.petForMount = nil
+		end
+	end
 	self.globalDB.lastAddonVersion = GetAddOnMetadata(addon, "Version")
 
 	if self:compareVersion("8.3.2", self.charDB.lastAddonVersion or "") then
@@ -278,8 +320,8 @@ function mounts:NEW_MOUNT_ADDED(mountID)
 		mountType = "swimming"
 	end
 
-	if self.config.autoAddNewMount then
-		self.globalDB[mountType][mountID] = true
+	if self.defProfile.autoAddNewMount then
+		self.defProfile[mountType][mountID] = true
 	end
 
 	for _, profile in next, self.profiles do
@@ -332,7 +374,7 @@ function mounts:setMountsList()
 		mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
 	end
 	if not self.list then
-		self.list = self.defList
+		self.list = self.db
 	end
 end
 mounts.NEW_WMO_CHUNK = mounts.setMountsList
@@ -360,14 +402,9 @@ function mounts:setDB()
 		currentProfileName = self.charDB.currentProfileName
 	end
 
-	self.db = currentProfileName and self.profiles[currentProfileName] or self.globalDB
-	self.zoneMounts = self.db.zoneMountsFromProfile and self.globalDB.zoneMounts or self.db.zoneMounts
-	self.defList = {
-		fly = self.db.fly,
-		ground = self.db.ground,
-		swimming = self.db.swimming,
-	}
-	self.petForMount = self.db.petListFromProfile and self.globalDB.petForMount or self.db.petForMount
+	self.db = currentProfileName and self.profiles[currentProfileName] or self.defProfile
+	self.zoneMounts = self.db.zoneMountsFromProfile and self.defProfile.zoneMounts or self.db.zoneMounts
+	self.petForMount = self.db.petListFromProfile and self.defProfile.petForMount or self.db.petForMount
 
 	self:setMountsList()
 end

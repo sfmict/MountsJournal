@@ -199,20 +199,9 @@ function MJProfilesMixin:initialize(level, value)
 		end
 
 		info.text = L["Auto add new mounts to selected"]
-		info.checked = function()
-			if self.charDB.currentProfileName ~= nil then
-				return self.journal.db.autoAddNewMount
-			else
-				return self.mounts.config.autoAddNewMount
-			end
-		end
+		info.checked = function() return self.journal.db.autoAddNewMount end
 		info.func = function(_,_,_, checked)
-			checked = checked and true or nil
-			if self.charDB.currentProfileName ~= nil then
-				self.journal.db.autoAddNewMount = checked
-			else
-				self.mounts.config.autoAddNewMount = checked
-			end
+			self.journal.db.autoAddNewMount = checked and true or nil
 		end
 		self:ddAddButton(info, level)
 
