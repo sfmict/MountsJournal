@@ -1,5 +1,5 @@
 local addon = ...
-local C_MountJournal, C_Map, MapUtil, next, tinsert, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown = C_MountJournal, C_Map, MapUtil, next, tinsert, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown
+local C_MountJournal, C_Map, MapUtil, next, tinsert, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown = C_MountJournal, C_Map, MapUtil, next, tinsert, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 
@@ -306,11 +306,16 @@ function mounts:UNIT_SPELLCAST_START(_,_, spellID)
 			return
 		end
 
-		if type(petID) == "number" then
-			C_PetJournal.SummonRandomPet(petID == 1)
-		elseif C_PetJournal.PetIsSummonable(petID) and C_PetJournal.GetSummonedPetGUID() ~= petID then
-			C_PetJournal.SummonPetByGUID(petID)
-		end
+		local start, duration = GetSpellCooldown(61304)
+		if duration ~= 0 then duration = start - GetTime() + duration end
+
+		C_Timer.After(duration, function()
+			if type(petID) == "number" then
+				C_PetJournal.SummonRandomPet(petID == 1)
+			elseif C_PetJournal.PetIsSummonable(petID) and C_PetJournal.GetSummonedPetGUID() ~= petID then
+				C_PetJournal.SummonPetByGUID(petID)
+			end
+		end)
 	end
 end
 
