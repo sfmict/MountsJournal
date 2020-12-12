@@ -235,16 +235,21 @@ function MJMountCustomAnimationMixin:onLoad()
 	end)
 
 	self.isKit.Text:SetText("IsKit")
+	self.isKit:SetChecked(self.animations.isKit)
 	self.isKit:SetScript("Onclick", function(btn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		self.loop:SetEnabled(btn:GetChecked())
+		local checked = btn:GetChecked()
+		self.animations.isKit = checked
+		self.loop:SetEnabled(checked)
 		self:play()
 	end)
 
 	self.loop.Text:SetText(L["Loop"])
-	self.loop:Disable()
-	self.loop:SetScript("OnClick", function()
+	self.loop:SetChecked(self.animations.loop)
+	self.loop:SetEnabled(self.animations.isKit)
+	self.loop:SetScript("OnClick", function(btn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		self.animations.loop = btn:GetChecked()
 		self:play()
 	end)
 
@@ -277,7 +282,7 @@ end
 
 
 function MJMountCustomAnimationMixin:play()
-	self:GetParent():playAnimation(self.animations.current, self.isKit:GetChecked(), self.loop:GetChecked())
+	self:GetParent():playAnimation(self.animations.current, self.animations.isKit, self.animations.loop)
 end
 
 
