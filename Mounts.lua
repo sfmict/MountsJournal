@@ -227,7 +227,7 @@ function mounts:setOldChanges()
 			local name = UnitName("player").." - "..GetRealmName()
 			if not self.profiles[name] then
 				self.profiles[name] = {
-					fly =  setMounts(self.charDB.fly or {}),
+					fly = setMounts(self.charDB.fly or {}),
 					ground = setMounts(self.charDB.ground or {}),
 					swimming = setMounts(self.charDB.swimming or {}),
 					zoneMounts = self.charDB.zoneMounts or {},
@@ -531,7 +531,7 @@ mounts.COMPANION_LEARNED = mounts.setHerbMount
 
 
 function mounts:summonListOr(ids)
-	return self.sFlags.herb and self:summon(self.herbalismMounts) or self:summon(ids)  -- herbMount
+	return self.sFlags.herb and self:summon(self.herbalismMounts) or self:summon(ids) -- herbMount
 end
 
 

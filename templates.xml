@@ -768,12 +768,12 @@
 			<Layer level="BORDER" textureSubLevel="-5">
 				<Texture inherits="UI-Frame-InnerBotLeftCorner" parentKey="InsetBorderBottomLeft">
 					<Anchors>
-						<Anchor point="BOTTOMLEFT"  x="-3" y="-3"/>
+						<Anchor point="BOTTOMLEFT" x="-3" y="-3"/>
 					</Anchors>
 				</Texture>
 				<Texture inherits="UI-Frame-InnerBotRight" parentKey="InsetBorderBottomRight">
 					<Anchors>
-						<Anchor point="BOTTOMRIGHT"  x="3" y="-3"/>
+						<Anchor point="BOTTOMRIGHT" x="3" y="-3"/>
 					</Anchors>
 				</Texture>
 				<Texture inherits="_UI-Frame-InnerBotTile" parentKey="InsetBorderBottom">
@@ -790,7 +790,7 @@
 				</Texture>
 				<Texture inherits="!UI-Frame-InnerRightTile" parentKey="InsetBorderRight">
 					<Anchors>
-						<Anchor point="TOPRIGHT"  x="3" y="0"/>
+						<Anchor point="TOPRIGHT" x="3" y="0"/>
 						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.InsetBorderBottomRight" relativePoint="TOPRIGHT"/>
 					</Anchors>
 				</Texture>
@@ -1865,7 +1865,7 @@
 					<Anchor point="TOPLEFT" relativeKey="$parent.randomPet" relativePoint="BOTTOMLEFT"/>
 				</Anchors>
 			</Button>
-			<Frame parentKey="petListFrame"  useParentLevel="false" inherits="InsetFrameTemplate">
+			<Frame parentKey="petListFrame" useParentLevel="false" inherits="InsetFrameTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.filtersPanel" relativePoint="BOTTOMLEFT"/>
 					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.controlButtons" relativePoint="TOPRIGHT"/>

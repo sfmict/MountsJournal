@@ -485,7 +485,7 @@ function journal:ADDON_LOADED(addonName)
 			end)
 		end
 
-		--  FILTERS TYPES BUTTONS
+		-- FILTERS TYPES BUTTONS
 		local typesTextures = {
 			{path = texPath.."fly", width = 32, height = 16},
 			{path = texPath.."ground", width = 32, height = 16},
@@ -1282,7 +1282,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 
 		info.checked = nil
 		info.isNotRadio = nil
-		info.func =  nil
+		info.func = nil
 		info.hasArrow = true
 		info.notCheckable = true
 
