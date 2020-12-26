@@ -1,6 +1,7 @@
 local addon, L = ...
 local util, mounts, journal, tags = MountsJournalUtil, MountsJournal, MountsJournalFrame, {}
 journal.tags = tags
+journal:on("MODULES_INIT", function() tags:init() end)
 
 
 function tags:init()

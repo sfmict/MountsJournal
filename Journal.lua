@@ -123,7 +123,6 @@ function journal:ADDON_LOADED(addonName)
 			withAllTags = false,
 			tags = {},
 		}
-		self.tags:init()
 		mounts.filters.sorting = mounts.filters.sorting or {
 			by = "name",
 			favoritesFirst = true,
@@ -749,6 +748,9 @@ function journal:ADDON_LOADED(addonName)
 		self.grid3_UpdateMountList = function() self:grid3UpdateMountList() end
 		self:setScrollGridMounts(mounts.config.gridToggle)
 
+		-- MODULES INIT
+		self:event("MODULES_INIT")
+
 		-- UPDATE LISTS
 		self:setEditMountsList()
 		self:updateIndexByMountID()
@@ -896,13 +898,9 @@ end
 
 do
 	local function setColor(self, btn, checked)
-		if checked then
-			btn.icon:SetVertexColor(self.colors.gold:GetRGB())
-			btn:SetChecked(true)
-		else
-			btn.icon:SetVertexColor(self.colors.gray:GetRGB())
-			btn:SetChecked(false)
-		end
+		local color = checked and self.colors.gold or self.colors.gray
+		btn.icon:SetVertexColor(color:GetRGB())
+		btn:SetChecked(checked)
 	end
 
 	function journal:updateMountToggleButton(btn)

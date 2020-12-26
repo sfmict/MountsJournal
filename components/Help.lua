@@ -9,7 +9,7 @@ end
 
 
 function util.showHelpJournal()
-	if not journal.MountJournal:IsShown() then return end
+	if not journal.MountJournal or not journal.MountJournal:IsShown() then return end
 	local step = type(mounts.help.journal) == "number" and mounts.help.journal or 0
 	HelpTip:HideAll(journal.MountJournal)
 	if step == 0 then

@@ -307,7 +307,7 @@ function mounts:UNIT_SPELLCAST_START(_,_, spellID)
 		end
 
 		local start, duration = GetSpellCooldown(61304)
-		if duration ~= 0 then duration = start - GetTime() + duration end
+		if duration ~= 0 then duration = start + duration - GetTime() end
 
 		C_Timer.After(duration, function()
 			if type(petID) == "number" then
