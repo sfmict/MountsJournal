@@ -1,2 +1,3 @@
-* Added option "Auto add new mounts to selected" in profile settings.
-* Fixed pet summoning during GCD.
+* Fixed camera distance when changing mount with non-default animation selected.
+* Fixed bug when resetting tutorial.
+* Updated display of existing lists.

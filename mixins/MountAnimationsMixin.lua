@@ -83,14 +83,32 @@ function MJMountAnimationPanelMixin:onLoad()
 			local _,_,_,_, mountType = C_MountJournal.GetMountInfoExtraByID(mountID)
 			self.currentMountType = mountType == 231 and 2 or self.journal.mountTypes[mountType]
 		end
+		self:replayAnimation()
+	end)
+end
+
+
+function MJMountAnimationPanelMixin:replayAnimation()
+	if self.selectedValue == "custom" or self.selectedValue and (self.selectedValue.type == nil or self.selectedValue.type >= self.currentMountType) then
+			self:SetScript("OnUpdate", self.onUpdate)
+	else
+		self.modelScene:GetActorByTag("unwrapped"):StopAnimationKit()
+		self:ddSetSelectedValue(self.animationsList[1])
+		self:ddSetSelectedText(self.animationsList[1].name)
+	end
+end
+
+
+function MJMountAnimationPanelMixin:onUpdate()
+	local actor = self.modelScene:GetActorByTag("unwrapped")
+	if not actor:IsLoaded() then return end
+	self:SetScript("OnUpdate", nil)
+
+	C_Timer.After(0, function()
 		if self.selectedValue == "custom" then
 			self.customAnimationPanel:play()
-		elseif self.selectedValue and (self.selectedValue.type == nil or self.selectedValue.type >= self.currentMountType) then
-			self:playAnimation(self.selectedValue.animation, self.selectedValue.isKit, self.selectedValue.loop)
 		else
-			self.modelScene:GetActorByTag("unwrapped"):StopAnimationKit()
-			self:ddSetSelectedValue(self.animationsList[1])
-			self:ddSetSelectedText(self.animationsList[1].name)
+			self:playAnimation(self.selectedValue.animation, self.selectedValue.isKit, self.selectedValue.loop)
 		end
 	end)
 end

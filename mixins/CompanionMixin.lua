@@ -378,9 +378,9 @@ function MJCompanionsPanelMixin:updateFilters()
 		local _, customName, _,_,_,_,_, name, _, petType, _, sourceText = GetPetInfoByPetID(petID)
 		if self.typeFilter[petType]
 		and (text:len() == 0
-			  or (name:lower():find(text)
-					or sourceText:lower():find(text)
-					or customName and customName:lower():find(text))) then
+			or name:lower():find(text)
+			or sourceText:lower():find(text)
+			or customName and customName:lower():find(text)) then
 			tinsert(self.petFiltredList, petID)
 		end
 	end

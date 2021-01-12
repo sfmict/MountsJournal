@@ -667,14 +667,7 @@ function journal:ADDON_LOADED(addonName)
 		end)
 		playerToggle:HookScript("OnClick", function()
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			C_Timer.After(0, function()
-				local value = self.animationsCombobox.selectedValue
-				if value == "custom" then
-					self.animationsCombobox.customAnimationPanel:play()
-				else
-					self.animationsCombobox:playAnimation(value.animation, value.isKit, value.loop)
-				end
-			end)
+			self.animationsCombobox:replayAnimation()
 		end)
 
 		-- HOOKS
