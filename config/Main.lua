@@ -36,8 +36,8 @@ do
 	end
 
 	function config:PLAYER_LOGIN()
-		self.bindMount = binding:createButtonBinding(nil, secureButtonNameMount, "MJSecureActionButtonTemplate")
-		self.bindSecondMount = binding:createButtonBinding(nil, secureButtonNameSecondMount, "MJSecureActionButtonTemplate")
+		self.bindMount = binding:createButtonBinding(nil, secureButtonNameMount, ("%s %s %d"):format(addon, SUMMONS, 1), "MJSecureActionButtonTemplate")
+		self.bindSecondMount = binding:createButtonBinding(nil, secureButtonNameSecondMount, ("%s %s %d"):format(addon, SUMMONS, 2), "MJSecureActionButtonTemplate")
 		self.bindSecondMount.secure.forceModifier = true
 		setMacroText(self)
 	end

@@ -9,6 +9,7 @@ local dropDownOptions = {
 	"notCheckable",
 	"isNotRadio",
 	"text",
+	"searchText",
 	"checked",
 	"func",
 	"remove",
@@ -504,7 +505,7 @@ function MJDropDownMenuSearchMixin:updateFilters()
 
 	wipe(self.filtredButtons)
 	for _, btn in ipairs(self.buttons) do
-		if text:len() == 0 or (type(btn.text) == "function" and btn.text() or btn.text):lower():find(text) then
+		if text:len() == 0 or (btn.searchText or type(btn.text) == "function" and btn.text() or btn.text):lower():find(text) then
 			tinsert(self.filtredButtons, btn)
 		end
 	end

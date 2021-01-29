@@ -82,15 +82,17 @@ function MJMountAnimationPanelMixin:onLoad()
 		if mountID then
 			local _,_,_,_, mountType = C_MountJournal.GetMountInfoExtraByID(mountID)
 			self.currentMountType = mountType == 231 and 2 or self.journal.mountTypes[mountType]
+			self:replayAnimation()
 		end
-		self:replayAnimation()
 	end)
 end
 
 
 function MJMountAnimationPanelMixin:replayAnimation()
-	if self.selectedValue == "custom" or self.selectedValue and (self.selectedValue.type == nil or self.selectedValue.type >= self.currentMountType) then
+	if self.selectedValue == "custom" or self.selectedValue and (self.selectedValue.type == nil	or self.selectedValue.type >= self.currentMountType) then
+		if self.selectedValue.animation ~= 0 then
 			self:SetScript("OnUpdate", self.onUpdate)
+		end
 	else
 		self.modelScene:GetActorByTag("unwrapped"):StopAnimationKit()
 		self:ddSetSelectedValue(self.animationsList[1])
@@ -123,6 +125,7 @@ function MJMountAnimationPanelMixin:initialize(level)
 		if v.type == nil or v.type >= mountType then
 			tinsert(info.list, {
 				text = ("%s|cff808080.%d%s|r"):format(v.name, v.animation, v.isKit and ".k" or ""),
+				searchText = ("%s.%d%s"):format(v.name, v.animation, v.isKit and ".k" or ""),
 				value = v,
 				checked = function(btn) return self.selectedValue == btn.value end,
 				func = function(btn)
@@ -137,6 +140,7 @@ function MJMountAnimationPanelMixin:initialize(level)
 	for i, v in ipairs(self.animations) do
 		tinsert(info.list, {
 			text = ("%s|cff808080.%d%s|r"):format(v.name, v.animation, v.isKit and ".k" or ""),
+			searchText = ("%s.%d%s"):format(v.name, v.animation, v.isKit and ".k" or ""),
 			value = v,
 			arg1 = i,
 			checked = function(btn) return self.selectedValue == btn.value end,

@@ -15,7 +15,7 @@ binding:SetScript("OnEvent", function(self)
 end)
 
 
-function binding:createButtonBinding(parent, name, secureTemplate, macro)
+function binding:createButtonBinding(parent, name, description, secureTemplate, macro)
 	local button = CreateFrame("Button", nil, parent, "UIMenuButtonStretchTemplate")
 	util:setEventsMixin(button)
 	button.selectedHighlight = button:CreateTexture(nil, "OVERLAY")
@@ -29,7 +29,7 @@ function binding:createButtonBinding(parent, name, secureTemplate, macro)
 	button.secure:SetAttribute("type", "macro")
 	if macro then button.secure:SetAttribute("macrotext", macro) end
 	button.command = "CLICK "..name..":LeftButton"
-	_G["BINDING_NAME_"..button.command] = name
+	_G["BINDING_NAME_"..button.command] = description or name
 	button:SetScript("OnClick", function(self, key) binding:OnClick(self, key) end)
 	button:SetScript("OnMouseWheel", function(self, delta) binding:OnKeyDown(delta > 0 and "MOUSEWHEELUP" or "MOUSEWHEELDOWN") end)
 	self:setButtonText(button)

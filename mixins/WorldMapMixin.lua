@@ -113,6 +113,7 @@ function MJMapCanvasMixin:onHide()
 	self.navBar:off("MAP_CHANGE.WORLDMAP")
 end
 
+
 -- Need for MapCanvasDetailLayerTemplate (MapCanvasDetailLayerMixin)
 function MJMapCanvasMixin:AddMaskableTexture() end
 
