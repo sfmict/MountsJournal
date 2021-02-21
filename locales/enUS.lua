@@ -22,6 +22,7 @@ L["HerbGatheringFlagDescription"] = "Used to configure use of Mount to Herbalism
 L["UseMagicBroom"] = "Use %s"
 L["UseMagicBroomTitle"] = "Use Magic Broom"
 L["UseMagicBroomDescription"] = "When \"Hallow's End\" event is active, if you have a \"Magic Broom\", it is used."
+L["A macro named \"%s\" already exists, overwrite it?"] = "A macro named \"%s\" already exists, overwrite it?"
 L["CreateMacro"] = "Create Macro"
 L["CreateMacroTooltip"] = "The created macro is used to summon the selected mounts."
 L["or key bind"] = "or key bind"

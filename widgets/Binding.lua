@@ -44,7 +44,7 @@ function binding:setButtonText(button)
 		button:SetText(GetBindingText(key1))
 		button:SetAlpha(1)
 	else
-		button:SetText(GRAY_FONT_COLOR_CODE..NOT_BOUND..FONT_COLOR_CODE_CLOSE)
+		button:SetText(GRAY_FONT_COLOR:WrapTextInColorCode(NOT_BOUND))
 		button:SetAlpha(.8)
 	end
 end

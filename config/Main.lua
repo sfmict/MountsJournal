@@ -12,41 +12,26 @@ config:RegisterEvent("PLAYER_LOGIN")
 
 
 -- BIND MOUNT
-do
-	local function setMacroText(self)
-		if not InCombatLockdown() then
-			-- MACRO
-			local texture = select(2, GetMacroInfo(macroName))
-			if texture then
-				EditMacro(macroName, macroName, texture, "/click "..secureButtonNameMount)
-			end
-			-- SECOND MACRO
-			texture = select(2, GetMacroInfo(secondMacroName))
-			if texture then
-				EditMacro(secondMacroName, secondMacroName, texture, "/click "..secureButtonNameSecondMount)
-			end
-		else
-			self:RegisterEvent("PLAYER_REGEN_ENABLED")
-		end
-	end
-
-	function config:PLAYER_REGEN_ENABLED()
-		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-		setMacroText(self)
-	end
-
-	function config:PLAYER_LOGIN()
-		self.bindMount = binding:createButtonBinding(nil, secureButtonNameMount, ("%s %s %d"):format(addon, SUMMONS, 1), "MJSecureActionButtonTemplate")
-		self.bindSecondMount = binding:createButtonBinding(nil, secureButtonNameSecondMount, ("%s %s %d"):format(addon, SUMMONS, 2), "MJSecureActionButtonTemplate")
-		self.bindSecondMount.secure.forceModifier = true
-		setMacroText(self)
-	end
+function config:PLAYER_LOGIN()
+	self.bindMount = binding:createButtonBinding(nil, secureButtonNameMount, ("%s %s %d"):format(addon, SUMMONS, 1), "MJSecureActionButtonTemplate")
+	self.bindSecondMount = binding:createButtonBinding(nil, secureButtonNameSecondMount, ("%s %s %d"):format(addon, SUMMONS, 2), "MJSecureActionButtonTemplate")
+	self.bindSecondMount.secure.forceModifier = true
 end
 
 
 -- SHOW CONFIG
 config:SetScript("OnShow", function(self)
 	self:SetScript("OnShow", nil)
+
+	self.addonName = ("%s_ADDON_"):format(addon:upper())
+	StaticPopupDialogs[self.addonName.."MACRO_EXISTS"] = {
+		text = addon..": "..L["A macro named \"%s\" already exists, overwrite it?"],
+		button1 = ACCEPT,
+		button2 = CANCEL,
+		hideOnEscape = 1,
+		whileDead = 1,
+		OnAccept = function(popup, cb) popup:Hide() cb() end,
+	}
 
 	-- ENABLE APPLY
 	local function applyEnable() self.applyBtn:Enable() end
@@ -297,9 +282,21 @@ config:SetScript("OnShow", function(self)
 end)
 
 
-function config:createMacro(macroName, buttonName, texture)
-	DeleteMacro(macroName)
-	CreateMacro(macroName, texture, "/click "..buttonName)
+function config:createMacro(macroName, buttonName, texture, overwrite)
+	if InCombatLockdown() then return end
+	local _, ctexture = GetMacroInfo(macroName)
+	if ctexture and not overwrite then
+		StaticPopup_Show(self.addonName.."MACRO_EXISTS", macroName, nil, function()
+			self:createMacro(macroName, buttonName, ctexture, true)
+		end)
+		return
+	end
+
+	if overwrite then
+		EditMacro(macroName, macroName, texture, "/click "..buttonName)
+	else
+		CreateMacro(macroName, texture, "/click "..buttonName)
+	end
 
 	if not IsAddOnLoaded("Blizzard_MacroUI") then
 		LoadAddOn("Blizzard_MacroUI")
@@ -309,10 +306,7 @@ function config:createMacro(macroName, buttonName, texture)
 		MacroFrame_Update()
 	else
 		InterfaceOptionsFrame:SetAttribute("UIPanelLayout-allowOtherPanels", 1)
-		local b_HideUIPanel = HideUIPanel
-		HideUIPanel = function() end
 		ShowUIPanel(MacroFrame)
-		HideUIPanel = b_HideUIPanel
 		InterfaceOptionsFrame:SetAttribute("UIPanelLayout-allowOtherPanels", nil)
 	end
 
