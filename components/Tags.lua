@@ -5,8 +5,7 @@ journal:on("MODULES_INIT", function() tags:init() end)
 
 
 function tags:init()
-	self.addonName = ("%s_ADDON_"):format(addon:upper())
-	StaticPopupDialogs[self.addonName.."ADD_TAG"] = {
+	StaticPopupDialogs[util.addonName.."ADD_TAG"] = {
 		text = addon..": "..L["Add tag"],
 		button1 = ACCEPT,
 		button2 = CANCEL,
@@ -29,12 +28,12 @@ function tags:init()
 			self.editBox:SetFocus()
 		end,
 	}
-	StaticPopupDialogs[self.addonName.."TAG_EXISTS"] = {
+	StaticPopupDialogs[util.addonName.."TAG_EXISTS"] = {
 		text = addon..": "..L["Tag already exists."],
 		button1 = OKAY,
 		whileDead = 1,
 	}
-	StaticPopupDialogs[self.addonName.."DELETE_TAG"] = {
+	StaticPopupDialogs[util.addonName.."DELETE_TAG"] = {
 		text = addon..": "..L["Are you sure you want to delete tag %s?"],
 		button1 = DELETE,
 		button2 = CANCEL,
@@ -235,10 +234,10 @@ end
 
 
 function tags:addTag()
-	StaticPopup_Show(self.addonName.."ADD_TAG", nil, nil, function(popup, text)
+	StaticPopup_Show(util.addonName.."ADD_TAG", nil, nil, function(popup, text)
 		if self.filter.tags[text] ~= nil then
 			popup:Hide()
-			StaticPopup_Show(self.addonName.."TAG_EXISTS")
+			StaticPopup_Show(util.addonName.."TAG_EXISTS")
 			return
 		end
 		self.filter.tags[text] = {#self.sortedTags + 1, true}
@@ -249,7 +248,7 @@ end
 
 
 function tags:deleteTag(tag)
-	StaticPopup_Show(self.addonName.."DELETE_TAG", NORMAL_FONT_COLOR_CODE..tag..FONT_COLOR_CODE_CLOSE, nil, function()
+	StaticPopup_Show(util.addonName.."DELETE_TAG", NORMAL_FONT_COLOR_CODE..tag..FONT_COLOR_CODE_CLOSE, nil, function()
 		for mountID in pairs(self.mountTags) do
 			self:removeMountTag(mountID, tag)
 		end

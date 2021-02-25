@@ -1,12 +1,13 @@
-local adddon = ...
+local addon = ...
 local util = MountsJournalUtil
-local binding = CreateFrame("Frame", adddon.."Binding")
+local binding = CreateFrame("Frame", addon.."Binding")
 binding.mode = 1
 binding:Hide()
 
 
 binding.unboundMessage = binding:CreateFontString(nil, "ARTWORK", "GameFontWhite")
 binding.unboundMessage:Hide()
+util:setEventsMixin(binding)
 
 
 binding:SetScript("OnEvent", function(self)
@@ -17,7 +18,6 @@ end)
 
 function binding:createButtonBinding(parent, name, description, secureTemplate, macro)
 	local button = CreateFrame("Button", nil, parent, "UIMenuButtonStretchTemplate")
-	util:setEventsMixin(button)
 	button.selectedHighlight = button:CreateTexture(nil, "OVERLAY")
 	button.selectedHighlight:SetTexture("Interface/Buttons/UI-Silver-Button-Select")
 	button.selectedHighlight:SetPoint("TOPLEFT", 0, -3)
@@ -30,6 +30,7 @@ function binding:createButtonBinding(parent, name, description, secureTemplate, 
 	if macro then button.secure:SetAttribute("macrotext", macro) end
 	button.command = "CLICK "..name..":LeftButton"
 	_G["BINDING_NAME_"..button.command] = description or name
+	button:SetScript("OnShow", function(self) binding:setButtonText(self) end)
 	button:SetScript("OnClick", function(self, key) binding:OnClick(self, key) end)
 	button:SetScript("OnMouseWheel", function(self, delta) binding:OnKeyDown(delta > 0 and "MOUSEWHEELUP" or "MOUSEWHEELDOWN") end)
 	self:setButtonText(button)
@@ -94,6 +95,7 @@ function binding:OnKeyDown(keyPressed)
 
 			self:setBinding(keyPressed, self.selected.command)
 			self:setButtonText(self.selected)
+			self:event("SET_BINDING", self.selected)
 			self:setSelected()
 		end
 	end
@@ -113,8 +115,6 @@ function binding:setBinding(key, selectedBinding)
 		if SetBinding(key, selectedBinding, self.mode) and oldKey then
 			SetBinding(oldKey, nil, self.mode)
 		end
-
-		self.selected:event("SET_BINDING")
 	end
 end
 

@@ -6,8 +6,7 @@ MJProfilesMixin = util.createFromEventsMixin()
 
 
 function MJProfilesMixin:onLoad()
-	self.addonName = ("%s_ADDON_"):format(addon:upper())
-	StaticPopupDialogs[self.addonName.."NEW_PROFILE"] = {
+	StaticPopupDialogs[util.addonName.."NEW_PROFILE"] = {
 		text = addon..": "..L["New profile"],
 		button1 = ACCEPT,
 		button2 = CANCEL,
@@ -22,7 +21,7 @@ function MJProfilesMixin:onLoad()
 				if self.profiles[text] ~= nil then
 					popup:Hide()
 					self.lastProfileName = text
-					StaticPopup_Show(self.addonName.."PROFILE_EXISTS", nil, nil, data)
+					StaticPopup_Show(util.addonName.."PROFILE_EXISTS", nil, nil, data)
 					return
 				end
 				self.profiles[text] = data and util:copyTable(data) or {
@@ -49,14 +48,14 @@ function MJProfilesMixin:onLoad()
 	local function profileExistsAccept(popup, data)
 		if not popup then return end
 		popup:Hide()
-		local dialog = StaticPopup_Show(self.addonName.."NEW_PROFILE", nil, nil, data)
+		local dialog = StaticPopup_Show(util.addonName.."NEW_PROFILE", nil, nil, data)
 		if dialog and self.lastProfileName then
 			dialog.editBox:SetText(self.lastProfileName)
 			dialog.editBox:HighlightText()
 			self.lastProfileName = nil
 		end
 	end
-	StaticPopupDialogs[self.addonName.."PROFILE_EXISTS"] = {
+	StaticPopupDialogs[util.addonName.."PROFILE_EXISTS"] = {
 		text = addon..": "..L["A profile with the same name exists."],
 		button1 = OKAY,
 		hideOnEscape = 1,
@@ -64,7 +63,7 @@ function MJProfilesMixin:onLoad()
 		OnAccept = profileExistsAccept,
 		OnCancel = profileExistsAccept,
 	}
-	StaticPopupDialogs[self.addonName.."DELETE_PROFILE"] = {
+	StaticPopupDialogs[util.addonName.."DELETE_PROFILE"] = {
 		text = addon..": "..L["Are you sure you want to delete profile %s?"],
 		button1 = DELETE,
 		button2 = CANCEL,
@@ -72,7 +71,7 @@ function MJProfilesMixin:onLoad()
 		whileDead = 1,
 		OnAccept = function(_, cb) cb() end,
 	}
-	StaticPopupDialogs[self.addonName.."YOU_WANT"] = {
+	StaticPopupDialogs[util.addonName.."YOU_WANT"] = {
 		text = addon..": "..L["Are you sure you want %s?"],
 		button1 = OKAY,
 		button2 = CANCEL,
@@ -106,12 +105,12 @@ function MJProfilesMixin:createProfile(copy)
 			}
 		end
 	end
-	StaticPopup_Show(self.addonName.."NEW_PROFILE", nil, nil, currentProfile)
+	StaticPopup_Show(util.addonName.."NEW_PROFILE", nil, nil, currentProfile)
 end
 
 
 function MJProfilesMixin:deleteProfile(profileName)
-	StaticPopup_Show(self.addonName.."DELETE_PROFILE", NORMAL_FONT_COLOR_CODE..profileName..FONT_COLOR_CODE_CLOSE, nil, function()
+	StaticPopup_Show(util.addonName.."DELETE_PROFILE", NORMAL_FONT_COLOR_CODE..profileName..FONT_COLOR_CODE_CLOSE, nil, function()
 		self.profiles[profileName] = nil
 		if self.charDB.currentProfileName == profileName then
 			self:setProfile()
@@ -132,7 +131,7 @@ end
 
 
 function MJProfilesMixin:selectAllMounts()
-	StaticPopup_Show(self.addonName.."YOU_WANT", NORMAL_FONT_COLOR_CODE..L["Select all mounts by type in selected zone"]..FONT_COLOR_CODE_CLOSE, nil, function()
+	StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR_CODE..L["Select all mounts by type in selected zone"]..FONT_COLOR_CODE_CLOSE, nil, function()
 		if not self.journal.list then
 			self.journal:createMountList(self.journal.listMapID)
 		end
@@ -161,7 +160,7 @@ end
 
 
 function MJProfilesMixin:unselectAllMounts()
-	StaticPopup_Show(self.addonName.."YOU_WANT", NORMAL_FONT_COLOR_CODE..L["Unselect all mounts in selected zone"]..FONT_COLOR_CODE_CLOSE, nil, function()
+	StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR_CODE..L["Unselect all mounts in selected zone"]..FONT_COLOR_CODE_CLOSE, nil, function()
 		if self.journal.list then
 			wipe(self.journal.list.fly)
 			wipe(self.journal.list.ground)

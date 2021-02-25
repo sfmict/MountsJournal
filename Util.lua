@@ -1,3 +1,4 @@
+local addon = ...
 local eventsMixin, eventsMeta = {}, {
 	__newindex = function(self, key, value)
 		if key == "onLoad" and type(value) == "function" then
@@ -62,14 +63,15 @@ end
 function eventsMixin:event(event, ...)
 	local handlerList = self._events[event]
 	if handlerList then
-		for _, handler in ipairs(handlerList) do
-			handler.func(self, ...)
+		for i = 1, #handlerList do
+			handlerList[i].func(self, ...)
 		end
 	end
 end
 
 
 MountsJournalUtil = {}
+MountsJournalUtil.addonName = ("%s_ADDON_"):format(addon:upper())
 
 
 -- 1 FLY, 2 GROUND, 3 SWIMMING

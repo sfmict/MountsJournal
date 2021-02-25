@@ -1,12 +1,12 @@
 local addon, L = ...
+local util = MountsJournalUtil
 
 
 MJMountAnimationPanelMixin = {}
 
 
 function MJMountAnimationPanelMixin:onLoad()
-	self.addonName = ("%s_ADDON_"):format(addon:upper())
-	StaticPopupDialogs[self.addonName.."DELETE_MOUNT_ANIMATION"] = {
+	StaticPopupDialogs[util.addonName.."DELETE_MOUNT_ANIMATION"] = {
 		text = addon..": "..L["Are you sure you want to delete animation %s?"],
 		button1 = DELETE,
 		button2 = CANCEL,
@@ -180,7 +180,7 @@ end
 
 
 function MJMountAnimationPanelMixin:deleteAnimation(id)
-	StaticPopup_Show(self.addonName.."DELETE_MOUNT_ANIMATION", NORMAL_FONT_COLOR_CODE..self.animations[id].name..FONT_COLOR_CODE_CLOSE, nil, function()
+	StaticPopup_Show(util.addonName.."DELETE_MOUNT_ANIMATION", NORMAL_FONT_COLOR_CODE..self.animations[id].name..FONT_COLOR_CODE_CLOSE, nil, function()
 		if self.selectedValue == self.animations[id] then
 			local value = self.animationsList[1]
 			self:playAnimation(value.animation, value.isKit, value.loop)

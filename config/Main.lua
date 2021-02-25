@@ -23,8 +23,7 @@ end
 config:SetScript("OnShow", function(self)
 	self:SetScript("OnShow", nil)
 
-	self.addonName = ("%s_ADDON_"):format(addon:upper())
-	StaticPopupDialogs[self.addonName.."MACRO_EXISTS"] = {
+	StaticPopupDialogs[util.addonName.."MACRO_EXISTS"] = {
 		text = addon..": "..L["A macro named \"%s\" already exists, overwrite it?"],
 		button1 = ACCEPT,
 		button2 = CANCEL,
@@ -108,10 +107,6 @@ config:SetScript("OnShow", function(self)
 	self.bindMount:SetParent(leftPanel)
 	self.bindMount:SetSize(258, 22)
 	self.bindMount:SetPoint("TOPLEFT", createMacroBtn, "BOTTOMLEFT", 0, -20)
-	self.bindMount:on("SET_BINDING", function()
-		binding:setButtonText(self.bindSecondMount)
-		self.applyBtn:Enable()
-	end)
 
 	-- HELP PLATE
 	local helpPlate = CreateFrame("FRAME", nil, leftPanel, "MJHelpPlate")
@@ -165,10 +160,6 @@ config:SetScript("OnShow", function(self)
 	self.bindSecondMount:SetParent(leftPanel)
 	self.bindSecondMount:SetSize(258, 22)
 	self.bindSecondMount:SetPoint("TOP", createSecondMacroBtn, "BOTTOM", 0, -20)
-	self.bindSecondMount:on("SET_BINDING", function()
-		binding:setButtonText(self.bindMount)
-		self.applyBtn:Enable()
-	end)
 
 	-- UNBOUND MESSAGE
 	binding.unboundMessage:SetParent(self)
@@ -260,14 +251,19 @@ config:SetScript("OnShow", function(self)
 		btn:Disable()
 	end)
 
+	-- UPDATE BINDING BUTTONS
+	binding:on("SET_BINDING", function(_, btn)
+		if self.bindMount ~= btn then binding:setButtonText(self.bindMount) end
+		if self.bindSecondMount ~= btn then binding:setButtonText(self.bindSecondMount) end
+		self.applyBtn:Enable()
+	end)
+
 	-- REFRESH
 	self.refresh = function(self)
 		binding.unboundMessage:Hide()
 		modifierCombobox:ddSetSelectedValue(mounts.config.modifier)
 		modifierCombobox:ddSetSelectedText(_G[mounts.config.modifier.."_KEY"])
 		self.waterJump:SetChecked(mounts.config.waterJump)
-		binding:setButtonText(self.bindMount)
-		binding:setButtonText(self.bindSecondMount)
 		self.useHerbMounts:SetChecked(mounts.config.useHerbMounts)
 		for _, child in ipairs(self.useHerbMounts.childs) do
 			child:SetChecked(child:checkFunc())
@@ -286,7 +282,7 @@ function config:createMacro(macroName, buttonName, texture, overwrite)
 	if InCombatLockdown() then return end
 	local _, ctexture = GetMacroInfo(macroName)
 	if ctexture and not overwrite then
-		StaticPopup_Show(self.addonName.."MACRO_EXISTS", macroName, nil, function()
+		StaticPopup_Show(util.addonName.."MACRO_EXISTS", macroName, nil, function()
 			self:createMacro(macroName, buttonName, ctexture, true)
 		end)
 		return
