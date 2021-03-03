@@ -1,6 +1,7 @@
 local addon, L = ...
 local util, mounts, binding = MountsJournalUtil, MountsJournal, _G[addon.."Binding"]
 local config = CreateFrame("FRAME", "MountsJournalConfig", InterfaceOptionsFramePanelContainer)
+config:Hide()
 config.name = addon
 local macroName, secondMacroName = "MJMacro", "MJSecondMacro"
 local secureButtonNameMount = addon.."_Mount"

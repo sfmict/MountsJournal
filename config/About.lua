@@ -1,5 +1,6 @@
 local addon, L = ...
 local aboutConfig = CreateFrame("FRAME", "MountsJournalConfigAbout", InterfaceOptionsFramePanelContainer)
+aboutConfig:Hide()
 aboutConfig.name = L["About"]
 aboutConfig.parent = addon
 

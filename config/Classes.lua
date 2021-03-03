@@ -1,6 +1,7 @@
 local addon, L = ...
 local util, mounts = MountsJournalUtil, MountsJournal
 local classConfig = CreateFrame("Frame", "MountsJournalConfigClasses", InterfaceOptionsFramePanelContainer)
+classConfig:Hide()
 classConfig.name = L["Class settings"]
 classConfig.parent = addon
 
