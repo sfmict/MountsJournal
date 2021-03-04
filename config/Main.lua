@@ -22,8 +22,6 @@ end
 
 -- SHOW CONFIG
 config:SetScript("OnShow", function(self)
-	self:SetScript("OnShow", nil)
-
 	StaticPopupDialogs[util.addonName.."MACRO_EXISTS"] = {
 		text = addon..": "..L["A macro named \"%s\" already exists, overwrite it?"],
 		button1 = ACCEPT,
@@ -260,7 +258,7 @@ config:SetScript("OnShow", function(self)
 	end)
 
 	-- REFRESH
-	self.refresh = function(self)
+	self:SetScript("OnShow", function(self)
 		binding.unboundMessage:Hide()
 		modifierCombobox:ddSetSelectedValue(mounts.config.modifier)
 		modifierCombobox:ddSetSelectedText(_G[mounts.config.modifier.."_KEY"])
@@ -275,7 +273,8 @@ config:SetScript("OnShow", function(self)
 		self.copyMountTarget:SetChecked(mounts.config.copyMountTarget)
 		resetHelp:Enable()
 		self.applyBtn:Disable()
-	end
+	end)
+	self:GetScript("OnShow")(self)
 end)
 
 
