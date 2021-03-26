@@ -365,6 +365,7 @@ end
 function mounts:setMountsList()
 	local mapInfo = C_Map.GetMapInfo(MapUtil.GetDisplayableMapForPlayer())
 	local zoneMounts = self.zoneMounts
+	self.mapID = mapInfo.mapID
 	self.mapFlags = nil
 	self.list = nil
 
@@ -630,7 +631,7 @@ function mounts:init()
 		elseif not self:summonTarget()
 		-- swimming
 		and not (flags.swimming
-						and (self.mapVashjir[C_Map.GetBestMapForUnit("player")]
+						and (self.mapVashjir[self.mapID]
 							  and self:summon(self.swimmingVashjir)
 							  or self:summon(self.list.swimming)))
 		-- fly
