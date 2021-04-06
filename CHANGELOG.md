@@ -1,1 +1,1 @@
-* Updated to 9.0.5
+* Added option to set a profile for arenas and battlegrounds.

@@ -49,6 +49,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.charDB = MountsJournalChar
 		self.charDB.macrosConfig = self.charDB.macrosConfig or {}
 		self.charDB.profileBySpecialization = self.charDB.profileBySpecialization or {}
+		self.charDB.profileBySpecializationPVP = self.charDB.profileBySpecializationPVP or {}
 
 		-- Рудименты
 		self:setOldChanges()
@@ -260,7 +261,6 @@ end
 
 function mounts:PLAYER_LOGIN()
 	-- INIT
-	self:setDB()
 	self:setModifier(self.config.modifier)
 	self:setHandleWaterJump(self.config.waterJump)
 	self:setHerbMount()
@@ -271,6 +271,9 @@ function mounts:PLAYER_LOGIN()
 	self:RegisterEvent("ZONE_CHANGED")
 	self:RegisterEvent("ZONE_CHANGED_INDOORS")
 	self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+
+	-- INSTANCE INFO UPDATE
+	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 	-- PROFESSION CHANGED OR MOUNT LEARNED
 	self:RegisterEvent("SKILL_LINES_CHANGED")
@@ -362,6 +365,17 @@ function mounts:setModifier(modifier)
 end
 
 
+function mounts:PLAYER_ENTERING_WORLD()
+	local _, instanceType, _,_,_,_,_, instanceID = GetInstanceInfo()
+	self.instanceID = instanceID
+	local pvp = instanceType == "arena" or instanceType == "pvp"
+	if self.pvp ~= pvp then
+		self.pvp = pvp
+		self:setDB()
+	end
+end
+
+
 function mounts:setMountsList()
 	local mapInfo = C_Map.GetMapInfo(MapUtil.GetDisplayableMapForPlayer())
 	local zoneMounts = self.zoneMounts
@@ -400,8 +414,12 @@ mounts.ZONE_CHANGED_NEW_AREA = mounts.setMountsList
 function mounts:setDB()
 	for i = 1, GetNumSpecializations() do
 		local profileName = self.charDB.profileBySpecialization[i]
-		if profileName ~= nil and not self.profiles[profileName] then
+		if not self.profiles[profileName] then
 			self.charDB.profileBySpecialization[i] = nil
+		end
+		profileName = self.charDB.profileBySpecializationPVP[i]
+		if not self.profiles[profileName] then
+			self.charDB.profileBySpecializationPVP[i] = nil
 		end
 	end
 
@@ -410,7 +428,9 @@ function mounts:setDB()
 	end
 
 	local currentProfileName
-	if self.charDB.profileBySpecialization.enable then
+	if self.pvp and self.charDB.profileBySpecializationPVP.enable then
+		currentProfileName = self.charDB.profileBySpecializationPVP[GetSpecialization()]
+	elseif self.charDB.profileBySpecialization.enable then
 		currentProfileName = self.charDB.profileBySpecialization[GetSpecialization()]
 	else
 		currentProfileName = self.charDB.currentProfileName
@@ -544,10 +564,10 @@ do
 		[1643] = true, -- Кул-Тирас
 		[1718] = true, -- Назжатар
 	}
-	function mounts:isFlyLocation(instance)
-		if self.continentsGround[instance]
+	function mounts:isFlyLocation(instanceID)
+		if self.continentsGround[instanceID]
 		-- Битва за Азерот
-		or bfaLocations[instance] and not IsSpellKnown(278833)
+		or bfaLocations[instanceID] and not IsSpellKnown(278833)
 		then return false end
 
 		return true
@@ -582,10 +602,9 @@ do
 		local modifier = self.modifier() or flags.forceModifier
 		local isSubmerged = IsSubmerged()
 		local isFloating = self:isFloating()
-		local _,_,_,_,_,_,_, instance = GetInstanceInfo()
 		local isFlyableLocation = flySpellKnown
-										  and (IsFlyableArea() or isFlyableOverride[instance])
-										  and self:isFlyLocation(instance)
+										  and (IsFlyableArea() or isFlyableOverride[self.instanceID])
+										  and self:isFlyLocation(self.instanceID)
 										  and not (self.mapFlags and self.mapFlags.groundOnly)
 
 		flags.isIndoors = IsIndoors()

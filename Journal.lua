@@ -77,7 +77,8 @@ journal:RegisterEvent("ADDON_LOADED")
 
 
 function journal:ADDON_LOADED(addonName)
-	if addonName == "Blizzard_Collections" and select(2, IsAddOnLoaded(addon)) or addonName == addon and IsAddOnLoaded("Blizzard_Collections") then
+	if addonName == "Blizzard_Collections" and select(2, IsAddOnLoaded(addon))
+	or addonName == addon and select(2, IsAddOnLoaded("Blizzard_Collections")) then
 		self:UnregisterEvent("ADDON_LOADED")
 
 		local function void() end

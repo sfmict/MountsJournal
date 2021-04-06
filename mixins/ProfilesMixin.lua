@@ -228,6 +228,15 @@ function MJProfilesMixin:initialize(level, value)
 
 	elseif value == "specialization" then -- SPECS
 		info.notCheckable = true
+		info.isTitle = true
+		info.text = L["By Specialization"]
+		self:ddAddButton(info, level)
+
+		self:ddAddSeparator(level)
+
+		info.notCheckable = nil
+		info.isTitle = nil
+		info.notCheckable = true
 		info.hasArrow = true
 		info.keepShownOnClick = true
 
@@ -237,7 +246,27 @@ function MJProfilesMixin:initialize(level, value)
 			self:ddAddButton(info, level)
 		end
 
-	elseif type(value) == "number" then -- PROFILE BY SPEC
+	elseif value == "pvp" then -- PVP
+		info.notCheckable = true
+		info.isTitle = true
+		info.text = L["Areans and Battlegrounds"]
+		self:ddAddButton(info, level)
+
+		self:ddAddSeparator(level)
+
+		info.notCheckable = nil
+		info.isTitle = nil
+		info.notCheckable = true
+		info.hasArrow = true
+		info.keepShownOnClick = true
+
+		for i = 1, GetNumSpecializations() do
+			info.text = select(2, GetSpecializationInfo(i))
+			info.value = i + 10
+			self:ddAddButton(info, level)
+		end
+
+	elseif type(value) == "number" and value < 10 then -- PROFILE BY SPEC
 		info.list = {
 			{
 				keepShownOnClick = true,
@@ -270,10 +299,43 @@ function MJProfilesMixin:initialize(level, value)
 		end
 		self:ddAddButton(info, level)
 
+	elseif type(value) == "number" then -- PVP BY SPEC
+		value = value - 10
+		info.list = {
+			{
+				keepShownOnClick = true,
+				arg1 = value,
+				text = DEFAULT,
+				checked = function(btn)
+					return self.charDB.profileBySpecializationPVP[btn.arg1] == nil
+				end,
+				func = function(_, arg1)
+					self.charDB.profileBySpecializationPVP[arg1] = nil
+					self.mounts:setDB()
+					self:ddRefresh(level)
+				end,
+			}
+		}
+		for _, profileName in ipairs(self.profileNames) do
+			tinsert(info.list, {
+				keepShownOnClick = true,
+				arg1 = value,
+				text = profileName,
+				checked = function(btn)
+					return self.charDB.profileBySpecializationPVP[btn.arg1] == btn.text
+				end,
+				func = function(btn, arg1)
+					self.charDB.profileBySpecializationPVP[arg1] = btn.text
+					self.mounts:setDB()
+					self:ddRefresh(level)
+				end,
+			})
+		end
+		self:ddAddButton(info, level)
+
 	else -- MENU
 		info.notCheckable = true
 		info.isTitle = true
-
 		info.text = L["Profiles"]
 		self:ddAddButton(info, level)
 
@@ -323,6 +385,15 @@ function MJProfilesMixin:initialize(level, value)
 		info.checked = function() return self.charDB.profileBySpecialization.enable end
 		info.func = function(_,_,_, checked)
 			self.charDB.profileBySpecialization.enable = checked
+			self.mounts:setDB()
+		end
+		self:ddAddButton(info, level)
+
+		info.text = L["Areans and Battlegrounds"]
+		info.value = "pvp"
+		info.checked = function() return self.charDB.profileBySpecializationPVP.enable end
+		info.func = function(_,_,_, checked)
+			self.charDB.profileBySpecializationPVP.enable = checked
 			self.mounts:setDB()
 		end
 		self:ddAddButton(info, level)
