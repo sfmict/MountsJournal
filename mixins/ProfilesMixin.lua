@@ -91,20 +91,7 @@ end
 
 
 function MJProfilesMixin:createProfile(copy)
-	local currentProfile
-	if copy then
-		if self.charDB.currentProfileName and self.profiles[self.charDB.currentProfileName] then
-			currentProfile = self.profiles[self.charDB.currentProfileName]
-		else
-			currentProfile = {
-				fly = self.journal.db.fly,
-				ground = self.journal.db.ground,
-				swimming = self.journal.db.swimming,
-				zoneMounts = self.journal.db.zoneMounts,
-				petForMount = self.journal.db.petForMount,
-			}
-		end
-	end
+	local currentProfile = copy and self.journal.db or nil
 	StaticPopup_Show(util.addonName.."NEW_PROFILE", nil, nil, currentProfile)
 end
 
@@ -175,7 +162,81 @@ end
 function MJProfilesMixin:initialize(level, value)
 	local info = {}
 
-	if value == "settings" then -- PROFILE SETTINGS
+	if level == 1 then -- MENU
+		info.notCheckable = true
+		info.isTitle = true
+		info.text = L["Profiles"]
+		self:ddAddButton(info, level)
+
+		self:ddAddSeparator(level)
+
+		info.notCheckable = nil
+		info.isTitle = nil
+
+		info.list = {
+			{
+				text = DEFAULT,
+				checked = function() return self.charDB.currentProfileName == nil end,
+				func = function() self:setProfile() end,
+			},
+		}
+		for _, profileName in ipairs(self.profileNames) do
+			tinsert(info.list, {
+				text = profileName,
+				checked = function(btn) return self.charDB.currentProfileName == btn.text end,
+				func = function(btn) self:setProfile(btn.text) end,
+				remove = function(btn) self:deleteProfile(btn.text) end,
+			})
+		end
+		self:ddAddButton(info, level)
+		info.list = nil
+
+		self:ddAddSeparator(level)
+
+		info.keepShownOnClick = true
+		info.notCheckable = true
+		info.hasArrow = true
+
+		info.text = L["Profile settings"]
+		info.value = "settings"
+		self:ddAddButton(info, level)
+
+		info.text = L["New profile"]
+		info.value = "new"
+		self:ddAddButton(info, level)
+
+		self:ddAddSeparator(level)
+
+		info.notCheckable = nil
+		info.isNotRadio = true
+		info.text = L["By Specialization"]
+		info.value = "specialization"
+		info.checked = function() return self.charDB.profileBySpecialization.enable end
+		info.func = function(_,_,_, checked)
+			self.charDB.profileBySpecialization.enable = checked
+			self.mounts:setDB()
+		end
+		self:ddAddButton(info, level)
+
+		info.text = L["Areans and Battlegrounds"]
+		info.value = "pvp"
+		info.checked = function() return self.charDB.profileBySpecializationPVP.enable end
+		info.func = function(_,_,_, checked)
+			self.charDB.profileBySpecializationPVP.enable = checked
+			self.mounts:setDB()
+		end
+		self:ddAddButton(info, level)
+
+	elseif value == "settings" then -- PROFILE SETTINGS
+		info.notCheckable = true
+		info.isTitle = true
+		info.text = self.charDB.currentProfileName or DEFAULT
+		self:ddAddButton(info, level)
+
+		self:ddAddSeparator(level)
+
+		info.notCheckable = nil
+		info.isTitle = nil
 		info.isNotRadio = true
 		info.keepShownOnClick = true
 
@@ -266,135 +327,51 @@ function MJProfilesMixin:initialize(level, value)
 			self:ddAddButton(info, level)
 		end
 
-	elseif type(value) == "number" and value < 10 then -- PROFILE BY SPEC
-		info.list = {
-			{
-				keepShownOnClick = true,
-				arg1 = value,
-				text = DEFAULT,
-				checked = function(btn)
-					return self.charDB.profileBySpecialization[btn.arg1] == nil
-				end,
-				func = function(_, arg1)
-					self.charDB.profileBySpecialization[arg1] = nil
-					self.mounts:setDB()
-					self:ddRefresh(level)
-				end,
-			}
-		}
-		for _, profileName in ipairs(self.profileNames) do
-			tinsert(info.list, {
-				keepShownOnClick = true,
-				arg1 = value,
-				text = profileName,
-				checked = function(btn)
-					return self.charDB.profileBySpecialization[btn.arg1] == btn.text
-				end,
-				func = function(btn, arg1)
-					self.charDB.profileBySpecialization[arg1] = btn.text
-					self.mounts:setDB()
-					self:ddRefresh(level)
-				end,
-			})
+	elseif type(value) == "number" then -- PROFILE BY SPEC
+		local profileBy
+		if value < 10 then
+			profileBy = self.charDB.profileBySpecialization
+		else
+			value = value - 10
+			profileBy = self.charDB.profileBySpecializationPVP
 		end
-		self:ddAddButton(info, level)
 
-	elseif type(value) == "number" then -- PVP BY SPEC
-		value = value - 10
-		info.list = {
-			{
-				keepShownOnClick = true,
-				arg1 = value,
-				text = DEFAULT,
-				checked = function(btn)
-					return self.charDB.profileBySpecializationPVP[btn.arg1] == nil
-				end,
-				func = function(_, arg1)
-					self.charDB.profileBySpecializationPVP[arg1] = nil
-					self.mounts:setDB()
-					self:ddRefresh(level)
-				end,
-			}
-		}
-		for _, profileName in ipairs(self.profileNames) do
-			tinsert(info.list, {
-				keepShownOnClick = true,
-				arg1 = value,
-				text = profileName,
-				checked = function(btn)
-					return self.charDB.profileBySpecializationPVP[btn.arg1] == btn.text
-				end,
-				func = function(btn, arg1)
-					self.charDB.profileBySpecializationPVP[arg1] = btn.text
-					self.mounts:setDB()
-					self:ddRefresh(level)
-				end,
-			})
-		end
-		self:ddAddButton(info, level)
-
-	else -- MENU
 		info.notCheckable = true
 		info.isTitle = true
-		info.text = L["Profiles"]
+		info.text = select(2, GetSpecializationInfo(value))
 		self:ddAddButton(info, level)
 
 		self:ddAddSeparator(level)
-
-		info.notCheckable = nil
-		info.isTitle = nil
 
 		info.list = {
 			{
+				keepShownOnClick = true,
+				arg1 = value,
 				text = DEFAULT,
-				checked = function() return self.charDB.currentProfileName == nil end,
-				func = function() self:setProfile() end,
-			},
+				checked = function(btn)
+					return profileBy[btn.arg1] == nil
+				end,
+				func = function(_, arg1)
+					profileBy[arg1] = nil
+					self.mounts:setDB()
+					self:ddRefresh(level)
+				end,
+			}
 		}
 		for _, profileName in ipairs(self.profileNames) do
 			tinsert(info.list, {
+				keepShownOnClick = true,
+				arg1 = value,
 				text = profileName,
-				checked = function(btn) return self.charDB.currentProfileName == btn.text end,
-				func = function(btn) self:setProfile(btn.text) end,
-				remove = function(btn) self:deleteProfile(btn.text) end,
+				checked = function(btn)
+					return profileBy[btn.arg1] == btn.text
+				end,
+				func = function(btn, arg1)
+					profileBy[arg1] = btn.text
+					self.mounts:setDB()
+					self:ddRefresh(level)
+				end,
 			})
-		end
-		self:ddAddButton(info, level)
-		info.list = nil
-
-		self:ddAddSeparator(level)
-
-		info.keepShownOnClick = true
-		info.notCheckable = true
-		info.hasArrow = true
-
-		info.text = L["Profile settings"]
-		info.value = "settings"
-		self:ddAddButton(info, level)
-
-		info.text = L["New profile"]
-		info.value = "new"
-		self:ddAddButton(info, level)
-
-		self:ddAddSeparator(level)
-
-		info.notCheckable = nil
-		info.isNotRadio = true
-		info.text = L["By Specialization"]
-		info.value = "specialization"
-		info.checked = function() return self.charDB.profileBySpecialization.enable end
-		info.func = function(_,_,_, checked)
-			self.charDB.profileBySpecialization.enable = checked
-			self.mounts:setDB()
-		end
-		self:ddAddButton(info, level)
-
-		info.text = L["Areans and Battlegrounds"]
-		info.value = "pvp"
-		info.checked = function() return self.charDB.profileBySpecializationPVP.enable end
-		info.func = function(_,_,_, checked)
-			self.charDB.profileBySpecializationPVP.enable = checked
-			self.mounts:setDB()
 		end
 		self:ddAddButton(info, level)
 	end

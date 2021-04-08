@@ -414,11 +414,11 @@ mounts.ZONE_CHANGED_NEW_AREA = mounts.setMountsList
 function mounts:setDB()
 	for i = 1, GetNumSpecializations() do
 		local profileName = self.charDB.profileBySpecialization[i]
-		if not self.profiles[profileName] then
+		if profileName and not self.profiles[profileName] then
 			self.charDB.profileBySpecialization[i] = nil
 		end
 		profileName = self.charDB.profileBySpecializationPVP[i]
-		if not self.profiles[profileName] then
+		if profileName and not self.profiles[profileName] then
 			self.charDB.profileBySpecializationPVP[i] = nil
 		end
 	end

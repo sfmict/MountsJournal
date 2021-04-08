@@ -53,7 +53,7 @@ classConfig:SetScript("OnShow", function(self)
 		end
 		lastClassFrame = classFrame
 		classFrame.key = className
-		classFrame.default = util.getClassMacro(className, "config"..className, function()
+		classFrame.default = util.getClassMacro(className, function()
 			classFrame.default = util.getClassMacro(className)
 			if self.rightPanel and self.rightPanel.currentBtn == classFrame then
 				classFrame:Click()
@@ -79,7 +79,7 @@ classConfig:SetScript("OnShow", function(self)
 	local classFrame = CreateFrame("BUTTON", nil, self, "MJClassButtonTemplate")
 	classFrame:SetPoint("TOPLEFT", lastClassFrame, "BOTTOMLEFT", 0, -20)
 	classFrame.key = playerClassName
-	classFrame.default = util.getClassMacro(playerClassName, "character", function()
+	classFrame.default = util.getClassMacro(playerClassName, function()
 		classFrame.default = util.getClassMacro(playerClassName)
 		if self.rightPanel and self.rightPanel.currentBtn == classFrame then
 			classFrame:Click()

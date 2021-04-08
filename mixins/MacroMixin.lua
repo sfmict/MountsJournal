@@ -24,14 +24,67 @@ function macroFrame:PLAYER_LOGIN()
 		end)
 	end
 
+	local getDefMacro = [[
+		return function(self)
+			local macro
+	]]
+	if self.class == "DEATHKNIGHT" then
+		getDefMacro = getDefMacro..[[
+			if self.classConfig.usePathOfFrost
+			and (not self.classConfig.useOnlyInWaterWalkLocation or self.sFlags.waterWalk)
+			and not self.sFlags.swimming
+			and not self.sFlags.fly then
+				macro = self:addLine(macro, "/cast "..self:getSpellName(3714)) -- Path of Frost
+			end
+		]]
+	elseif self.class == "SHAMAN" then
+		getDefMacro = getDefMacro..[[
+			if self.classConfig.useWaterWalking
+			and (not self.classConfig.useOnlyInWaterWalkLocation or self.sFlags.waterWalk)
+			and not self.sFlags.swimming
+			and not self.sFlags.fly then
+				macro = self:addLine(macro, "/cast [@player]"..self:getSpellName(546)) -- Water Walking
+			end
+		]]
+	elseif self.class == "DRUID" then
+		getDefMacro = getDefMacro..[[
+			local curFormID = GetShapeshiftFormID()
+			-- 1:CAT, 3:STAG, 5:BEAR, 36:TREANT
+			if curFormID == 1 or curFormID == 3 or curFormID == 5 or curFormID == 36 then
+				macro = self:addLine(macro, "/cancelform")
+			end
+		]]
+	end
+	getDefMacro = getDefMacro..[[
+			if self.magicBroom then
+				macro = self:addLine(macro, "/use "..self.broomName) -- MAGIC BROOM
+				self.lastUseTime = GetTime()
+			else
+				macro = self:addLine(macro, "/mount doNotSetFlags")
+			end
+			return macro
+		end
+	]]
+
+	local loadedFunc, err = loadstring(getDefMacro)
+	if err then
+		geterrorhandler()(err)
+	else
+		local success, func = pcall(loadedFunc)
+		if success then
+			self.getDefMacro = func
+		end
+	end
+
 	self:refresh()
+	self:getClassMacro(self.class, function() self:refresh() end)
 end
 
 
 function macroFrame:setMacro()
 	self.macro = nil
 	if self.classConfig.macroEnable then
-		self.macro = self.classConfig.macro or self:getClassMacro(nil, "macro", function() self:setMacro() end)
+		self.macro = self.classConfig.macro or self:getClassMacro()
 	end
 end
 
@@ -39,7 +92,7 @@ end
 function macroFrame:setCombatMacro()
 	self.combatMacro = nil
 	if self.classConfig.combatMacroEnable then
-		self.combatMacro = self.classConfig.combatMacro or self:getClassMacro(nil, "combatMacro", function() self:setCombatMacro() end)
+		self.combatMacro = self.classConfig.combatMacro or self:getClassMacro()
 	end
 end
 
@@ -61,85 +114,29 @@ end
 
 
 do
-	local spellIDtoName = {}
-	function macroFrame:getSpellName(spellID, cbName, cb)
-		if not spellIDtoName[spellID] then
-			local spell = Spell:CreateFromSpellID(spellID)
-			local name = spell:GetSpellName()
-			spellIDtoName[spellID] = {
-				name = name,
-				callbacks = {},
-				notCached = true,
-			}
-
-			if spell:IsSpellDataCached() then
-				spellIDtoName[spellID].notCached = nil
-				wipe(spellIDtoName[spellID].callbacks)
-				local subName = spell:GetSpellSubtext()
-				if subName:len() > 0 then
-					spellIDtoName[spellID].name = ("%s(%s)"):format(name, subName)
+	local spellCache = {}
+	function macroFrame:getSpellName(spellID, cb)
+		if spellCache[spellID] then
+			return spellCache[spellID]
+		else
+			local name = GetSpellInfo(spellID)
+			if C_Spell.IsSpellDataCached(spellID) then
+				local subText = GetSpellSubtext(spellID)
+				if subText:len() > 0 then
+					name = name.."("..subText..")"
 				end
-			else
-				spell:ContinueOnSpellLoad(function()
-					spellIDtoName[spellID].notCached = nil
-					local subName = spell:GetSpellSubtext()
-					if subName:len() > 0 then
-						spellIDtoName[spellID].name = ("%s(%s)"):format(name, subName)
-						for name, callback in pairs(spellIDtoName[spellID].callbacks) do
-							callback()
-						end
-					end
-					wipe(spellIDtoName[spellID].callbacks)
-				end)
+				spellCache[spellID] = name
+			elseif cb then
+				SpellEventListener:AddCallback(spellID, cb)
 			end
+			return name
 		end
-
-		if spellIDtoName[spellID].notCached and type(cbName) == "string" and type(cb) == "function" then
-			spellIDtoName[spellID].callbacks[cbName] = cb
-		end
-		return spellIDtoName[spellID].name
 	end
 end
 
 
 function macroFrame:getDismountMacro()
 	return self:addLine("/leavevehicle [vehicleui]", "/dismount [mounted]")
-end
-
-
-function macroFrame:getDefMacro()
-	local macro
-
-	if self.class == "DEATHKNIGHT"
-	and self.classConfig.usePathOfFrost
-	and (not self.classConfig.useOnlyInWaterWalkLocation or self.sFlags.waterWalk)
-	and not self.sFlags.swimming
-	and not self.sFlags.fly then
-		macro = self:addLine(macro, "/cast "..self:getSpellName(3714)) -- Path of Frost
-
-	elseif self.class == "SHAMAN"
-	and self.classConfig.useWaterWalking
-	and (not self.classConfig.useOnlyInWaterWalkLocation or self.sFlags.waterWalk)
-	and not self.sFlags.swimming
-	and not self.sFlags.fly then
-		macro = self:addLine(macro, "/cast [@player]"..self:getSpellName(546)) -- Water Walking
-
-	elseif self.class == "DRUID" then
-		local curFormID = GetShapeshiftFormID()
-		-- 1:CAT, 3:STAG, 5:BEAR, 36:TREANT
-		if curFormID == 1 or curFormID == 3 or curFormID == 5 or curFormID == 36 then
-			macro = self:addLine(macro, "/cancelform")
-		end
-	end
-
-	if self.magicBroom then
-		macro = self:addLine(macro, "/use "..self.broomName) -- MAGIC BROOM
-		self.lastUseTime = GetTime()
-	else
-		macro = self:addLine(macro, "/mount doNotSetFlags")
-	end
-
-	return macro
 end
 
 
