@@ -70,10 +70,7 @@ function macroFrame:PLAYER_LOGIN()
 	if err then
 		geterrorhandler()(err)
 	else
-		local success, func = pcall(loadedFunc)
-		if success then
-			self.getDefMacro = func
-		end
+		self.getDefMacro = loadedFunc()
 	end
 
 	self:refresh()

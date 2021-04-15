@@ -1898,14 +1898,14 @@
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture setAllPoints="true">
-					<Color r=".8" g=".6" b="0" a=".2"/>
+					<Color r=".8" g=".6" b="0" a=".3"/>
 				</Texture>
 			</Layer>
 		</Layers>
 		<Animations>
 			<AnimationGroup parentKey="anim">
-				<Alpha childKey="alpha1" smoothing="IN" duration=".2" order="1" fromAlpha="0" toAlpha=".8"/>
-				<Alpha childKey="alpha2" smoothing="OUT_IN" duration=".5" order="2" fromAlpha=".8" toAlpha="0"/>
+				<Alpha childKey="alpha1" smoothing="IN" duration=".2" order="1" fromAlpha="0" toAlpha="1"/>
+				<Alpha childKey="alpha2" smoothing="OUT_IN" duration=".8" order="2" fromAlpha="1" toAlpha="0"/>
 			</AnimationGroup>
 		</Animations>
 	</Frame>

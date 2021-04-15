@@ -131,6 +131,7 @@ function journal:ADDON_LOADED(addonName)
 
 		self.MountJournal:UnregisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 		self.MountJournal:UnregisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
+		self:RegisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 		self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 
 		-- FILTERS BUTTON
@@ -947,11 +948,27 @@ end
 
 
 function journal:sortMounts()
-	local fSort = mounts.filters.sorting
+	local fSort, mCache = mounts.filters.sorting, {}
+
+	local function setMCache(mountID)
+		local name, _,_,_,_,_, isFavorite, _,_,_, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+		mCache[mountID] = {name, isFavorite, isCollected}
+		if fSort.by == "type" then
+			local _,_,_,_, mType = C_MountJournal.GetMountInfoExtraByID(mountID)
+			mCache[mountID][4] = mType
+		end
+	end
 
 	sort(self.mountIDs, function(a, b)
-		local nameA, _,_,_,_,_, isFavoriteA, _,_,_, isCollectedA = C_MountJournal.GetMountInfoByID(a)
-		local nameB, _,_,_,_,_, isFavoriteB, _,_,_, isCollectedB = C_MountJournal.GetMountInfoByID(b)
+		if not mCache[a] then setMCache(a) end
+		local nameA = mCache[a][1]
+		local isFavoriteA = mCache[a][2]
+		local isCollectedA = mCache[a][3]
+
+		if not mCache[b] then setMCache(b) end
+		local nameB = mCache[b][1]
+		local isFavoriteB = mCache[b][2]
+		local isCollectedB = mCache[b][3]
 
 		-- FAVORITES
 		if fSort.favoritesFirst then
@@ -965,8 +982,8 @@ function journal:sortMounts()
 
 		-- TYPE
 		if fSort.by == "type" then
-			local _,_,_,_, typeA = C_MountJournal.GetMountInfoExtraByID(a)
-			local _,_,_,_, typeB = C_MountJournal.GetMountInfoExtraByID(b)
+			local typeA = mCache[a][4]
+			local typeB = mCache[b][4]
 
 			if self.mountTypes[typeA] < self.mountTypes[typeB] then return not fSort.reverse
 			elseif self.mountTypes[typeA] > self.mountTypes[typeB] then return fSort.reverse end
@@ -992,13 +1009,15 @@ end
 
 
 function journal:updateIndexByMountID()
-	self:UnregisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
-	self.func.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
-	self.func.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
-	self.func.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, true)
-	self.func.SetAllSourceFilters(true)
-	self.func.SetSearch("")
-	self:RegisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
+	if self.func.GetNumDisplayedMounts() ~= self.mountCount.Count.num then
+		self:UnregisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
+		self.func.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
+		self.func.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
+		self.func.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, true)
+		self.func.SetAllSourceFilters(true)
+		self.func.SetSearch("")
+		self:RegisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
+	end
 
 	wipe(self.indexByMountID)
 	for i = 1, self.func.GetNumDisplayedMounts() do
@@ -1013,7 +1032,7 @@ journal.MOUNT_JOURNAL_SEARCH_UPDATED = journal.updateIndexByMountID -- UPDATE in
 
 function journal:mountLearnedUpdate()
 	self:setCountMounts()
-	self:MOUNT_JOURNAL_SEARCH_UPDATED()
+	self:updateIndexByMountID()
 end
 journal.COMPANION_LEARNED = journal.mountLearnedUpdate
 journal.COMPANION_UNLEARNED = journal.mountLearnedUpdate
