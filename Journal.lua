@@ -955,7 +955,7 @@ function journal:sortMounts()
 		mCache[mountID] = {name, isFavorite, isCollected}
 		if fSort.by == "type" then
 			local _,_,_,_, mType = C_MountJournal.GetMountInfoExtraByID(mountID)
-			mCache[mountID][4] = mType
+			mCache[mountID][4] = self.mountTypes[mType]
 		end
 	end
 
@@ -985,8 +985,8 @@ function journal:sortMounts()
 			local typeA = mCache[a][4]
 			local typeB = mCache[b][4]
 
-			if self.mountTypes[typeA] < self.mountTypes[typeB] then return not fSort.reverse
-			elseif self.mountTypes[typeA] > self.mountTypes[typeB] then return fSort.reverse end
+			if typeA < typeB then return not fSort.reverse
+			elseif typeA > typeB then return fSort.reverse end
 		-- EXPANSION
 		elseif fSort.by == "expansion" then
 			if mounts.mountsDB[a] < mounts.mountsDB[b] then return not fSort.reverse

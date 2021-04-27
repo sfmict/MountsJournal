@@ -354,15 +354,27 @@ MJCompanionsPanelMixin.PET_JOURNAL_LIST_UPDATE = MJCompanionsPanelMixin.petListU
 
 
 function MJCompanionsPanelMixin:petListSort()
-	local GetPetInfoByPetID = C_PetJournal.GetPetInfoByPetID
+	local GetPetInfoByPetID, GetPetStats = C_PetJournal.GetPetInfoByPetID, C_PetJournal.GetPetStats
 	sort(self.petList, function(p1, p2)
 		local _,_, level1, _,_,_, favorite1, name1 = GetPetInfoByPetID(p1)
 		local _,_, level2, _,_,_, favorite2, name2 = GetPetInfoByPetID(p2)
 
-		if favorite1 and not favorite2
-		or favorite1 == favorite2 and (level1 > level2
-			or level1 == level2 and name1 < name2)
-		then return true end
+		if favorite1 and not favorite2 then return true
+		elseif not favorite1 and favorite2 then return false end
+
+		if level1 > level2 then return true
+		elseif level1 < level2 then return false end
+
+		if name1 < name2 then return true
+		elseif name1 > name2 then return false end
+
+		local _,_,_,_, rarity1 = GetPetStats(p1)
+		local _,_,_,_, rarity2 = GetPetStats(p2)
+
+		if rarity1 > rarity2 then return true
+		elseif rarity1 < rarity2 then return false end
+
+		return p1 < p2
 	end)
 
 	self:updateFilters()
