@@ -877,7 +877,10 @@ function journal:setArrowSelectMount(enabled)
 			if time <= 0 then
 				time = .1
 				index = index + delta
-				if index < 1 or index > #self.displayedMounts then return end
+				if index < 1 or index > #self.displayedMounts then
+					scroll:SetScript("OnUpdate", nil)
+					return
+				end
 				MountJournal_Select(index)
 			end
 		end
@@ -885,16 +888,8 @@ function journal:setArrowSelectMount(enabled)
 		self.scrollFrame:SetScript("OnKeyDown", function(scroll, key)
 			if key == "UP" or key == "DOWN" or key == "LEFT" or key == "RIGHT" then
 				scroll:SetPropagateKeyboardInput(false)
-				pressed = key
-				time = .5
-				scroll:SetScript("OnUpdate", onUpdate)
 
-				if key == "UP" or key == "LEFT" then
-					delta = -1
-				else
-					delta = 1
-				end
-
+				delta = (key == "UP" or key == "LEFT") and -1 or 1
 				if mounts.config.gridToggle and (key == "UP" or key == "DOWN") then
 					delta = delta * 3
 				end
@@ -903,6 +898,7 @@ function journal:setArrowSelectMount(enabled)
 				for i = 1, #self.displayedMounts do
 					if self.MountJournal.selectedMountID == self.displayedMounts[i] then
 						index = i
+						break
 					end
 				end
 
@@ -912,11 +908,16 @@ function journal:setArrowSelectMount(enabled)
 					else
 						index = scroll.buttons[1].index
 					end
+					if not index then return end
+				else
+					index = index + delta
+					if index < 1 or index > #self.displayedMounts then return end
 				end
-
-				index = index + delta
-				if index < 1 or index > #self.displayedMounts then return end
 				MountJournal_Select(index)
+
+				pressed = key
+				time = .5
+				scroll:SetScript("OnUpdate", onUpdate)
 			else
 				scroll:SetPropagateKeyboardInput(true)
 			end
