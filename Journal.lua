@@ -747,7 +747,7 @@ function journal:ADDON_LOADED(addonName)
 		self:event("MODULES_INIT")
 
 		-- ARROW BIND
-		self:setArrowSelectMount(true)
+		self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 
 		-- UPDATE LISTS
 		self:setEditMountsList()
