@@ -80,6 +80,7 @@ L["CHARACTER_CLASS_DESCRIPTION"] = "(Charaktereinstellungen überschreiben Klass
 -- L[NoPetInRaid] = ""
 -- L[NoPetInGroup] = ""
 L["CopyMountTarget"] = "Versuche, das Reittier deines Ziels zu kopieren"
+-- L[Enable arrow buttons to browse mounts] = ""
 L["About"] = "Über"
 -- L[Help with translation of %s. Thanks.] = ""
 -- L[Localization Translators:] = ""

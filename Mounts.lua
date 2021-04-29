@@ -39,6 +39,9 @@ function mounts:ADDON_LOADED(addonName)
 		if self.config.mountDescriptionToggle == nil then
 			self.config.mountDescriptionToggle = true
 		end
+		if self.config.arrowButtonsBrowse == nil then
+			self.config.arrowButtonsBrowse = true
+		end
 		self.config.macrosConfig = self.config.macrosConfig or {}
 		for i = 1, GetNumClasses() do
 			local _, className = GetClassInfo(i)

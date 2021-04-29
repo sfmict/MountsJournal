@@ -226,10 +226,17 @@ config:SetScript("OnShow", function(self)
 	self.copyMountTarget.Text:SetText(L["CopyMountTarget"])
 	self.copyMountTarget:HookScript("OnClick", applyEnable)
 
+	-- ARROW BUTTONS
+	self.arrowButtons = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.arrowButtons:SetPoint("TOPLEFT", self.copyMountTarget, "BOTTOMLEFT", 0, -26)
+	self.arrowButtons.Text:SetSize(245, 25)
+	self.arrowButtons.Text:SetText(L["Enable arrow buttons to browse mounts"])
+	self.arrowButtons:HookScript("OnClick", applyEnable)
+
 	-- RESET HELP
 	local resetHelp = CreateFrame("BUTTON", nil, rightPanelScroll.child, "UIPanelButtonTemplate")
 	resetHelp:SetSize(128, 22)
-	resetHelp:SetPoint("TOPLEFT", self.copyMountTarget, "BOTTOMLEFT", 0, -26)
+	resetHelp:SetPoint("TOPLEFT", self.arrowButtons, "BOTTOMLEFT", 0, -26)
 	resetHelp:SetText(RESET_TUTORIALS)
 	resetHelp:SetScript("OnClick", function(btn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -271,6 +278,7 @@ config:SetScript("OnShow", function(self)
 		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
 		self.copyMountTarget:SetChecked(mounts.config.copyMountTarget)
+		self.arrowButtons:SetChecked(mounts.config.arrowButtonsBrowse)
 		resetHelp:Enable()
 		self.applyBtn:Disable()
 	end)
@@ -332,6 +340,8 @@ config.okay = function(self)
 	mounts.config.noPetInRaid = self.noPetInRaid:GetChecked()
 	mounts.config.noPetInGroup = self.noPetInGroup:GetChecked()
 	mounts.config.copyMountTarget = self.copyMountTarget:GetChecked()
+	mounts.config.arrowButtonsBrowse = self.arrowButtons:GetChecked()
+	MountsJournalFrame:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 end
 
 

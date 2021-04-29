@@ -1,1 +1,3 @@
-* Added option to set a profile for arenas and battlegrounds.
+# MountsJournal
+
+* Added option "Enable arrow buttons to browse mounts".

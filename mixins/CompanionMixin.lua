@@ -184,7 +184,7 @@ function MJCompanionsPanelMixin:onShow()
 	self:SetScript("OnShow", function(self)
 		if self.force then
 			self:petListUpdate(self.force)
-		else
+		elseif self.needSort then
 			self:petListSort()
 		end
 		self.journal.profilesMenu:on("UPDATE_PROFILE.CompanionsPanel", function() self:refresh() end)
@@ -320,6 +320,7 @@ end
 
 
 function MJCompanionsPanelMixin:petListUpdate(force)
+	self.needSort = true
 	local _, owned = C_PetJournal.GetNumPets()
 	if self.owned > owned then self:updatePetForMount() end
 
@@ -377,6 +378,7 @@ function MJCompanionsPanelMixin:petListSort()
 		return p1 < p2
 	end)
 
+	self.needSort = false
 	self:updateFilters()
 end
 

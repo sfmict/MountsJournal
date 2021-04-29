@@ -80,6 +80,7 @@ local _, L = ...
 -- L[NoPetInRaid] = ""
 -- L[NoPetInGroup] = ""
 -- L[CopyMountTarget] = ""
+-- L[Enable arrow buttons to browse mounts] = ""
 L["About"] = "关于"
 L["Help with translation of %s. Thanks."] = "参与帮助翻译 %s. 谢谢"
 L["Localization Translators:"] = "本地化翻译者:"

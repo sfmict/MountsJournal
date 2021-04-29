@@ -746,6 +746,9 @@ function journal:ADDON_LOADED(addonName)
 		-- MODULES INIT
 		self:event("MODULES_INIT")
 
+		-- ARROW BIND
+		self:setArrowSelectMount(true)
+
 		-- UPDATE LISTS
 		self:setEditMountsList()
 		self:updateIndexByMountID()
@@ -862,6 +865,73 @@ function journal:grid3UpdateMountList()
 
 	HybridScrollFrame_Update(scrollFrame, scrollFrame.buttonHeight * math.ceil(numDisplayedMounts / 3), scrollFrame:GetHeight())
 	self:configureJournal(true)
+end
+
+
+function journal:setArrowSelectMount(enabled)
+	if not self.scrollFrame then return end
+	if enabled then
+		local time, pressed, delta, index
+		local onUpdate = function(scroll, elapsed)
+			time = time - elapsed
+			if time <= 0 then
+				time = .1
+				index = index + delta
+				if index < 1 or index > #self.displayedMounts then return end
+				MountJournal_Select(index)
+			end
+		end
+
+		self.scrollFrame:SetScript("OnKeyDown", function(scroll, key)
+			if key == "UP" or key == "DOWN" or key == "LEFT" or key == "RIGHT" then
+				scroll:SetPropagateKeyboardInput(false)
+				pressed = key
+				time = .5
+				scroll:SetScript("OnUpdate", onUpdate)
+
+				if key == "UP" or key == "LEFT" then
+					delta = -1
+				else
+					delta = 1
+				end
+
+				if mounts.config.gridToggle and (key == "UP" or key == "DOWN") then
+					delta = delta * 3
+				end
+
+				index = nil
+				for i = 1, #self.displayedMounts do
+					if self.MountJournal.selectedMountID == self.displayedMounts[i] then
+						index = i
+					end
+				end
+
+				if not index then
+					if mounts.config.gridToggle then
+						index = scroll.buttons[1].grid3list.mount1.index
+					else
+						index = scroll.buttons[1].index
+					end
+				end
+
+				index = index + delta
+				if index < 1 or index > #self.displayedMounts then return end
+				MountJournal_Select(index)
+			else
+				scroll:SetPropagateKeyboardInput(true)
+			end
+		end)
+
+		self.scrollFrame:SetScript("OnKeyUp", function(scroll, key)
+			if pressed == key then
+				scroll:SetScript("OnUpdate", nil)
+			end
+		end)
+	else
+		self.scrollFrame:SetScript("OnKeyDown", nil)
+		self.scrollFrame:SetScript("OnKeyUp", nil)
+		self.scrollFrame:SetScript("OnUpdate", nil)
+	end
 end
 
 
