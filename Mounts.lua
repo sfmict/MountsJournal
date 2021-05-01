@@ -270,10 +270,10 @@ function mounts:PLAYER_LOGIN()
 	self:init()
 
 	-- MAP CHANGED
-	self:RegisterEvent("NEW_WMO_CHUNK")
-	self:RegisterEvent("ZONE_CHANGED")
-	self:RegisterEvent("ZONE_CHANGED_INDOORS")
-	self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+	-- self:RegisterEvent("NEW_WMO_CHUNK")
+	-- self:RegisterEvent("ZONE_CHANGED")
+	-- self:RegisterEvent("ZONE_CHANGED_INDOORS")
+	-- self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
 	-- INSTANCE INFO UPDATE
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
@@ -408,10 +408,10 @@ function mounts:setMountsList()
 		self.list = self.db
 	end
 end
-mounts.NEW_WMO_CHUNK = mounts.setMountsList
-mounts.ZONE_CHANGED = mounts.setMountsList
-mounts.ZONE_CHANGED_INDOORS = mounts.setMountsList
-mounts.ZONE_CHANGED_NEW_AREA = mounts.setMountsList
+-- mounts.NEW_WMO_CHUNK = mounts.setMountsList
+-- mounts.ZONE_CHANGED = mounts.setMountsList
+-- mounts.ZONE_CHANGED_INDOORS = mounts.setMountsList
+-- mounts.ZONE_CHANGED_NEW_AREA = mounts.setMountsList
 
 
 function mounts:setDB()
@@ -635,6 +635,7 @@ end
 function mounts:init()
 	SLASH_MOUNTSJOURNAL1 = "/mount"
 	SlashCmdList["MOUNTSJOURNAL"] = function(msg)
+		self:setMountsList()
 		local flags = self.sFlags
 		if msg ~= "doNotSetFlags" then
 			flags.forceModifier = nil
