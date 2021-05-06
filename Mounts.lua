@@ -443,7 +443,7 @@ function mounts:setDB()
 	self.zoneMounts = self.db.zoneMountsFromProfile and self.defProfile.zoneMounts or self.db.zoneMounts
 	self.petForMount = self.db.petListFromProfile and self.defProfile.petForMount or self.db.petForMount
 
-	self:setMountsList()
+	-- self:setMountsList()
 end
 mounts.PLAYER_SPECIALIZATION_CHANGED = mounts.setDB
 

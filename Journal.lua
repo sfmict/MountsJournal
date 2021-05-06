@@ -257,7 +257,7 @@ function journal:ADDON_LOADED(addonName)
 			self:setEditMountsList()
 			self:updateMountsList()
 			self:updateMapSettings()
-			mounts:setMountsList()
+			-- mounts:setMountsList()
 			self.existingLists:refresh()
 
 			self.mountListUpdateAnim:Stop()
@@ -1033,16 +1033,17 @@ function journal:sortMounts()
 	sort(self.mountIDs, function(a, b)
 		if not mCache[a] then setMCache(a) end
 		local nameA = mCache[a][1]
-		local isFavoriteA = mCache[a][2]
 		local isCollectedA = mCache[a][3]
 
 		if not mCache[b] then setMCache(b) end
 		local nameB = mCache[b][1]
-		local isFavoriteB = mCache[b][2]
 		local isCollectedB = mCache[b][3]
 
 		-- FAVORITES
 		if fSort.favoritesFirst then
+			local isFavoriteA = mCache[a][2]
+			local isFavoriteB = mCache[b][2]
+
 			if isFavoriteA and not isFavoriteB then return true
 			elseif not isFavoriteA and isFavoriteB then return false end
 		end
@@ -1167,7 +1168,7 @@ function journal:mountToggle(btn)
 		btn.icon:SetVertexColor(self.colors.gold:GetRGB())
 	end
 
-	mounts:setMountsList()
+	-- mounts:setMountsList()
 	self.existingLists:refresh()
 end
 
@@ -1183,7 +1184,7 @@ function journal:setFlag(flag, enable)
 		self:getRemoveMountList(self.navBar.mapID)
 	end
 
-	mounts:setMountsList()
+	-- mounts:setMountsList()
 	self.existingLists:refresh()
 end
 
@@ -1250,7 +1251,7 @@ function journal:listFromMapInit(level, value)
 			journal:setEditMountsList()
 			journal:updateMountsList()
 			journal:updateMapSettings()
-			mounts:setMountsList()
+			-- mounts:setMountsList()
 			journal.existingLists:refresh()
 
 			journal.mountListUpdateAnim:Stop()

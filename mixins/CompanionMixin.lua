@@ -186,6 +186,8 @@ function MJCompanionsPanelMixin:onShow()
 			self:petListUpdate(self.force)
 		elseif self.needSort then
 			self:petListSort()
+		else
+			self:refresh()
 		end
 		self.journal.profilesMenu:on("UPDATE_PROFILE.CompanionsPanel", function() self:refresh() end)
 	end)
