@@ -111,10 +111,7 @@ function journal:ADDON_LOADED(addonName)
 			return self[key]
 		end}
 		mounts.filters.types = setmetatable(mounts.filters.types or {}, filtersMeta)
-		mounts.filters.selected = setmetatable(mounts.filters.selected or {}, {__index = function(self, key)
-			self[key] = false
-			return self[key]
-		end})
+		mounts.filters.selected = setmetatable(mounts.filters.selected or {}, filtersMeta)
 		mounts.filters.sources = setmetatable(mounts.filters.sources or {}, filtersMeta)
 		mounts.filters.factions = setmetatable(mounts.filters.factions or {}, filtersMeta)
 		mounts.filters.pet = setmetatable(mounts.filters.pet or {}, filtersMeta)
@@ -799,7 +796,7 @@ function journal:setScrollGridMounts(grid)
 		end
 	end
 
-	scrollFrame.update()
+	scrollFrame:update()
 	scrollFrame.scrollBar:SetValue(offset * scrollFrame.buttonHeight)
 end
 
@@ -1455,7 +1452,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 
 			info.notCheckable = false
 			local selected = mounts.filters.selected
-			for i = 1, 3 do
+			for i = 1, 4 do
 				info.text = L["MOUNT_TYPE_"..i]
 				info.func = function(_,_,_, value)
 					selected[i] = value
@@ -1721,7 +1718,7 @@ end
 function journal:clearBtnFilters()
 	self:setAllFilters("sources", true)
 	self:setAllFilters("types", true)
-	self:setAllFilters("selected", false)
+	self:setAllFilters("selected", true)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	self:updateBtnFilters()
 	self:updateMountsList()
@@ -1748,16 +1745,19 @@ function journal:setBtnFilters(tab)
 	local filters = mounts.filters[tab]
 
 	if tab ~= "sources" then
-		local default = tab ~= "selected"
-
 		for _, btn in ipairs(children) do
 			local checked = btn:GetChecked()
 			filters[btn.id] = checked
-			if not checked and default then i = i + 1 end
+			if not checked then i = i + 1 end
+		end
+
+		if tab == "selected" then
+			filters[4] = false
+			i = i + 1
 		end
 
 		if i == #filters then
-			self:setAllFilters(tab, default)
+			self:setAllFilters(tab, true)
 		end
 	else
 		for _, btn in ipairs(children) do
@@ -1820,17 +1820,15 @@ function journal:updateBtnFilters()
 
 		-- TYPES AND SELECTED
 		elseif filtersBar[typeFilter] then
-			local default = typeFilter ~= "selected"
 			local i = 0
 			for _, v in ipairs(filter) do
-				if v == default then i = i + 1 end
+				if v then i = i + 1 end
 			end
 
 			if i == #filter then
 				for _, btn in ipairs(filtersBar[typeFilter].childs) do
-					local color = default and self.colors["mount"..btn.id] or self.colors.dark
 					btn:SetChecked(false)
-					btn.icon:SetVertexColor(color:GetRGB())
+					btn.icon:SetVertexColor(self.colors["mount"..btn.id]:GetRGB())
 				end
 				filtersBar[typeFilter]:GetParent().filtred:Hide()
 			else
@@ -1881,10 +1879,14 @@ function journal:updateMountsList()
 		-- FACTION
 		and factions[(mountFaction or 2) + 1]
 		-- SELECTED
-		and (not (selected[1] or selected[2] or selected[3]) or list and
-			(selected[1] and list.fly[mountID]
-			or selected[2] and list.ground[mountID]
-			or selected[3] and list.swimming[mountID]))
+		and (list
+			and (selected[1] and list.fly[mountID]
+				or selected[2] and list.ground[mountID]
+				or selected[3] and list.swimming[mountID])
+			or selected[4] and not (list
+				and (list.fly[mountID]
+					or list.ground[mountID]
+					or list.swimming[mountID])))
 		-- PET
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
 		-- EXPANSIONS
@@ -1906,5 +1908,5 @@ function journal:updateMountsList()
 	end
 	self.leftInset:GetHeight()
 
-	self.scrollFrame.update()
+	self.scrollFrame:update()
 end

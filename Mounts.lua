@@ -503,13 +503,13 @@ end
 do
 	local usableIDs = {}
 	function mounts:summon(ids)
-		wipe(usableIDs)
 		for mountID in next, ids do
 			local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
 			if isUsable then tinsert(usableIDs, mountID) end
 		end
 		if #usableIDs ~= 0 then
 			C_MountJournal.SummonByID(usableIDs[random(#usableIDs)])
+			wipe(usableIDs)
 			return true
 		else
 			return false
