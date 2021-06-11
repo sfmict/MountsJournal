@@ -1,5 +1,5 @@
 local addon = ...
-local C_MountJournal, C_Map, MapUtil, next, tinsert, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown = C_MountJournal, C_Map, MapUtil, next, tinsert, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown
+local C_MountJournal, C_Map, MapUtil, next, tinsert, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff = C_MountJournal, C_Map, MapUtil, next, tinsert, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 
@@ -477,25 +477,23 @@ function mounts:isFloating()
 end
 
 
-do
-	local mountIDFromTarget, UnitBuff = {}, UnitBuff
-	function mounts:summonTarget()
-		if self.config.copyMountTarget then
-			local i = 1
-			repeat
-				local _,_,_,_,_,_,_,_,_, spellID = UnitBuff("target", i)
-				if spellID then
-					local mountID = C_MountJournal.GetMountFromSpell(spellID)
-					if mountID then
-						mountIDFromTarget[mountID] = true
-						local isSummoned = self:summon(mountIDFromTarget)
-						mountIDFromTarget[mountID] = nil
-						return isSummoned
+function mounts:summonTarget()
+	if self.config.copyMountTarget then
+		local i = 1
+		repeat
+			local _,_,_,_,_,_,_,_,_, spellID = UnitBuff("target", i)
+			if spellID then
+				local mountID = C_MountJournal.GetMountFromSpell(spellID)
+				if mountID then
+					local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
+					if isUsable then
+						C_MountJournal.SummonByID(mountID)
 					end
-					i = i + 1
+					return isUsable
 				end
-			until not spellID
-		end
+				i = i + 1
+			end
+		until not spellID
 	end
 end
 

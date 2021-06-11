@@ -566,6 +566,8 @@ function journal:ADDON_LOADED(addonName)
 
 		-- MOUNT DESCRIPTION TOGGLE
 		local infoButton = mountDisplay.InfoButton
+		infoButton.New.Show = void
+		infoButton.NewGlow.Show = void
 		infoButton.Name:SetPoint("LEFT", infoButton.Icon, "RIGHT", 20, 0)
 
 		local mountDescriptionToggle = CreateFrame("CheckButton", nil, infoButton, "MJArrowToggle")
@@ -728,6 +730,12 @@ function journal:ADDON_LOADED(addonName)
 		self:setSecureFunc(C_MountJournal, "Pickup")
 		self:setSecureFunc(C_MountJournal, "SetIsFavorite")
 		self:setSecureFunc(C_MountJournal, "GetIsFavorite")
+
+		-- FANFARE
+		hooksecurefunc(C_MountJournal, "ClearFanfare", function()
+			MountJournal_UpdateMountDisplay(true)
+			self:sortMounts()
+		end)
 
 		-- FIX TAINTS
 		for i = 1, UIDROPDOWNMENU_MAXBUTTONS do
@@ -1017,13 +1025,18 @@ end
 
 function journal:sortMounts()
 	local fSort, mCache = mounts.filters.sorting, {}
+	local numNeedingFanfare = C_MountJournal.GetNumMountsNeedingFanfare()
 
 	local function setMCache(mountID)
 		local name, _,_,_,_,_, isFavorite, _,_,_, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 		mCache[mountID] = {name, isFavorite, isCollected}
+		if numNeedingFanfare > 0 and C_MountJournal.NeedsFanfare(mountID) then
+			mCache[mountID][4] = true
+			numNeedingFanfare = numNeedingFanfare - 1
+		end
 		if fSort.by == "type" then
 			local _,_,_,_, mType = C_MountJournal.GetMountInfoExtraByID(mountID)
-			mCache[mountID][4] = self.mountTypes[mType]
+			mCache[mountID][5] = self.mountTypes[mType]
 		end
 	end
 
@@ -1031,10 +1044,16 @@ function journal:sortMounts()
 		if not mCache[a] then setMCache(a) end
 		local nameA = mCache[a][1]
 		local isCollectedA = mCache[a][3]
+		local needFanfareA = mCache[a][4]
 
 		if not mCache[b] then setMCache(b) end
 		local nameB = mCache[b][1]
 		local isCollectedB = mCache[b][3]
+		local needFanfareB = mCache[b][4]
+
+		-- FANFARE
+		if needFanfareA and not needFanfareB then return true
+		elseif not needFanfareA and needFanfareB then return false end
 
 		-- FAVORITES
 		if fSort.favoritesFirst then
@@ -1051,8 +1070,8 @@ function journal:sortMounts()
 
 		-- TYPE
 		if fSort.by == "type" then
-			local typeA = mCache[a][4]
-			local typeB = mCache[b][4]
+			local typeA = mCache[a][5]
+			local typeB = mCache[b][5]
 
 			if typeA < typeB then return not fSort.reverse
 			elseif typeA > typeB then return fSort.reverse end
