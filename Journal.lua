@@ -43,7 +43,6 @@ end
 
 local function setTabs(frame, ...)
 	frame.tabs = {}
-	local contents = {}
 
 	for i = 1, select("#", ...) do
 		local tab = CreateFrame("BUTTON", nil, frame, "MJTabTemplate")
@@ -60,15 +59,13 @@ local function setTabs(frame, ...)
 		tab.content:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
 		tab:SetScript("OnClick", tabClick)
 
+		frame[tab.id] = tab.content
 		tinsert(frame.tabs, tab)
-		tinsert(contents, tab.content)
 	end
 
 	if #frame.tabs ~= 0 then
 		tabClick(frame.tabs[1])
 	end
-
-	return unpack(contents)
 end
 
 
@@ -444,9 +441,9 @@ function journal:ADDON_LOADED(addonName)
 		-- FILTERS BAR
 		local filtersBar = CreateFrame("FRAME", nil, filtersPanel, "MJFilterPanelTemplate")
 		self.filtersBar = filtersBar
-		filtersBar:SetSize(259, 35)
+		filtersBar:SetSize(260, 35)
 		filtersBar:SetPoint("TOP", 0, -46)
-		filtersBar.types, filtersBar.selected, filtersBar.sources = setTabs(filtersBar, "types", "selected", "sources")
+		setTabs(filtersBar, "types", "selected", "sources")
 
 		-- FILTERS CLEAR
 		filtersBar.clear = CreateFrame("BUTTON", nil, filtersBar, "MJClearButtonTemplate")
@@ -491,12 +488,13 @@ function journal:ADDON_LOADED(addonName)
 		}
 
 		for i = 1, #typesTextures do
-			CreateButtonFilter(i, filtersBar.types, 83, 25, typesTextures[i], L["MOUNT_TYPE_"..i])
+			CreateButtonFilter(i, filtersBar.types, 83.3333, 25, typesTextures[i], L["MOUNT_TYPE_"..i])
 		end
 
 		-- FILTERS SELECTED BUTTONS
+		typesTextures[4] = {path = "Interface/BUTTONS/UI-GROUPLOOT-PASS-DOWN", width = 16, height = 16}
 		for i = 1, #typesTextures do
-			CreateButtonFilter(i, filtersBar.selected, 83, 25, typesTextures[i], L["MOUNT_TYPE_"..i])
+			CreateButtonFilter(i, filtersBar.selected, 62.5, 25, typesTextures[i], L["MOUNT_TYPE_"..i])
 		end
 
 		-- FILTERS SOURCES BUTTONS
@@ -1770,11 +1768,6 @@ function journal:setBtnFilters(tab)
 			if not checked then i = i + 1 end
 		end
 
-		if tab == "selected" then
-			filters[4] = false
-			i = i + 1
-		end
-
 		if i == #filters then
 			self:setAllFilters(tab, true)
 		end
@@ -1847,16 +1840,24 @@ function journal:updateBtnFilters()
 			if i == #filter then
 				for _, btn in ipairs(filtersBar[typeFilter].childs) do
 					btn:SetChecked(false)
-					btn.icon:SetVertexColor(self.colors["mount"..btn.id]:GetRGB())
+					if btn.id > 3 then
+						btn.icon:SetDesaturated()
+					else
+						btn.icon:SetVertexColor(self.colors["mount"..btn.id]:GetRGB())
+					end
 				end
 				filtersBar[typeFilter]:GetParent().filtred:Hide()
 			else
 				clearShow = true
 				for _, btn in ipairs(filtersBar[typeFilter].childs) do
 					local checked = filter[btn.id]
-					local color = checked and self.colors["mount"..btn.id] or self.colors.dark
 					btn:SetChecked(checked)
-					btn.icon:SetVertexColor(color:GetRGB())
+					if btn.id > 3 then
+						btn.icon:SetDesaturated(not checked)
+					else
+						local color = checked and self.colors["mount"..btn.id] or self.colors.dark
+						btn.icon:SetVertexColor(color:GetRGB())
+					end
 				end
 				filtersBar[typeFilter]:GetParent().filtred:Show()
 			end
