@@ -731,7 +731,8 @@ function journal:ADDON_LOADED(addonName)
 
 		-- FANFARE
 		hooksecurefunc(C_MountJournal, "ClearFanfare", function()
-			MountJournal_UpdateMountDisplay(true)
+			local _,_, icon = C_MountJournal.GetMountInfoByID(self.MountJournal.selectedMountID)
+			infoButton.Icon:SetTexture(icon)
 			self:sortMounts()
 		end)
 
@@ -829,9 +830,9 @@ function journal:grid3UpdateMountList()
 				btnGrid.selected = selectedSpellID == spellID
 				btnGrid.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
 				btnGrid.icon:SetVertexColor(1, 1, 1)
-				btnGrid.favorite:SetShown(isFavorite)
 				btnGrid.DragButton:Enable()
 				btnGrid.DragButton.selectedTexture:SetShown(btnGrid.selected)
+				btnGrid.DragButton.favorite:SetShown(isFavorite)
 				btnGrid:Show()
 				btnGrid:Enable()
 
@@ -861,7 +862,7 @@ function journal:grid3UpdateMountList()
 				btnGrid:Disable()
 				btnGrid.DragButton:Disable()
 				btnGrid.DragButton.selectedTexture:Hide()
-				btnGrid.favorite:Hide()
+				btnGrid.DragButton.favorite:Hide()
 			end
 		end
 	end
@@ -1078,12 +1079,12 @@ function journal:sortMounts()
 			if mounts.mountsDB[a] < mounts.mountsDB[b] then return not fSort.reverse
 			elseif mounts.mountsDB[a] > mounts.mountsDB[b] then return fSort.reverse end
 		-- NAME
-		elseif fSort.by == "name" and fSort.reverse then
-			if nameA > nameB then return true
-			elseif nameA < nameB then return false end
+		elseif fSort.by == "name" then
+			if nameA < nameB then return not fSort.reverse
+			elseif nameA > nameB then return fSort.reverse end
 		end
 
-		if fSort.by ~= "name" or not fSort.reverse then
+		if fSort.by ~= "name" then
 			if nameA < nameB then return true
 			elseif nameA > nameB then return false end
 		end

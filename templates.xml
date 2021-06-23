@@ -292,13 +292,6 @@
 			<Layer level="BORDER">
 				<Texture parentKey="icon" setAllPoints="true"/>
 			</Layer>
-			<Layer level="OVERLAY">
-				<Texture parentKey="favorite" atlas="PetJournal-FavoritesIcon" useAtlasSize="true">
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeKey="$parent.icon" x="-8" y="8"/>
-					</Anchors>
-				</Texture>
-			</Layer>
 		</Layers>
 		<Frames>
 			<Button parentKey="DragButton" motionScriptsWhileDisabled="true">
@@ -307,8 +300,15 @@
 					<Anchor point="CENTER" relativeKey="$parent.icon" x="0" y="0"/>
 				</Anchors>
 				<Layers>
-					<Layer level="OVERLAY">
+					<Layer level="ARTWORK">
 						<Texture file="Interface/Buttons/CheckButtonHilight" parentKey="selectedTexture" alphaMode="ADD"/>
+					</Layer>
+					<Layer level="OVERLAY">
+						<Texture parentKey="favorite" atlas="PetJournal-FavoritesIcon" useAtlasSize="true">
+							<Anchors>
+								<Anchor point="TOPLEFT" x="-8" y="8"/>
+							</Anchors>
+						</Texture>
 					</Layer>
 				</Layers>
 				<HighlightTexture name="$parentHighlight" file="Interface/Buttons/ButtonHilight-Square" alphaMode="ADD"/>
