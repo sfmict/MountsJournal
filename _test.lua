@@ -22,8 +22,8 @@ local ignoreEvents = {
 	["MODIFIER_STATE_CHANGED"] = true,
 	["SPELL_UPDATE_COOLDOWN"] = true,
 	["UPDATE_FACTION"] = true,
-	-- [""] = true,
-	-- [""] = true,
+	["UNIT_POWER_FREQUENT"] = true,
+	["UNIT_POWER_UPDATE"] = true,
 	-- [""] = true,
 	-- [""] = true,
 	-- [""] = true,
@@ -40,6 +40,7 @@ test:SetScript("OnEvent", function(self, event, ...)
 		end
 	end
 end)
+test:RegisterEvent("ADDON_LOADED")
 -- test:RegisterAllEvents()
 
 -- test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
@@ -58,6 +59,98 @@ end)
 -- test:RegisterEvent("CALENDAR_ACTION_PENDING")
 -- test:RegisterEvent("CALENDAR_UPDATE_EVENT")
 
+-- if AddOnSkins then
+	-- local AS = unpack(AddOnSkins)
+
+	-- function AS:SkinMountsJournal()
+	-- 	local function reskinMainConfig(self)
+	-- 		for _, frame in ipairs({self:GetChildren()}) do
+	-- 			local ftype = frame:GetObjectType()
+	-- 			if ftype == "Frame" then
+	-- 				AS:SkinBackdropFrame(frame)
+	-- 				for i, frame in ipairs({frame:GetChildren()}) do
+	-- 					ftype = frame:GetObjectType()
+	-- 					fprint(i, ftype)
+	-- 					if ftype == "Button" then
+	-- 						AS:SkinButton(frame)
+	-- 					end
+	-- 				end
+	-- 			elseif ftype == "Button" then
+	-- 				AS:SkinButton(frame)
+	-- 			end
+	-- 		end
+	-- 		AS:SkinCheckBox(self.waterJump)
+	-- 	end
+
+	-- 	if MountsJournalConfig:IsShown() then
+	-- 		reskinMainConfig(MountsJournalConfig)
+	-- 	else
+	-- 		MountsJournalConfig:HookScript("OnShow", function(self)
+	-- 			self:SetScript("OnShow", nil)
+	-- 			reskinMainConfig(self)
+	-- 		end)
+	-- 	end
+	-- end
+
+-- 	AS:RegisterSkin(addon, AS.SkinMountsJournal)
+-- end
+
+-- local f = CreateFrame("FRAME", nil, UIParent)
+-- f:SetFrameStrata("BACKGROUND")
+-- f:SetPoint("TOPLEFT", ChatFrame1)
+-- f:SetPoint("BOTTOMRIGHT", ChatFrame1)
+-- f:SetAlpha(0)
+-- f.bg = f:CreateTexture(nil, "BACKGROUND")
+-- f.bg:SetColorTexture(0, 0, 0)
+-- f.bg:SetAllPoints()
+-- f:SetScript("OnEnter", function(self)
+-- 	UIFrameFadeRemoveFrame(self)
+-- 	self:SetAlpha(1)
+-- end)
+-- f:SetScript("OnLeave", function(self)
+-- 	local delay, oldAlpha, newAlpha = 1, self:GetAlpha(), 0
+-- 	UIFrameFadeOut(self, delay, oldAlpha, newAlpha)
+-- end)
+
+-- local btn = CreateFrame("BUTTON", nil, Minimap)
+-- btn:SetSize(31, 31)
+-- btn:SetNormalTexture("Interface\\Icons\\xp_icon")
+-- btn:SetScript("OnClick", function() fprint("asd") end)
+
+-- local btn = CreateFrame("BUTTON", nil, Minimap)
+-- btn:SetSize(31, 31)
+-- btn:SetNormalTexture("Interface\\Artifacts\\ArtifactPower-QuestBorder")
+-- btn:SetScript("OnClick", function() fprint("asd2") end)
+
+-- local needsFanfare = C_MountJournal.NeedsFanfare
+-- local mFanfare = {
+-- 	[1049] = true,
+-- 	[896] = true,
+-- }
+
+-- C_MountJournal.NeedsFanfare = function(mountID)
+-- 	return mFanfare[mountID] or needsFanfare(mountID)
+-- end
+
+-- local clearFanfare = C_MountJournal.ClearFanfare
+-- C_MountJournal.ClearFanfare = function(mountID)
+-- 	if mFanfare[mountID] then
+-- 		mFanfare[mountID] = nil
+-- 	else
+-- 		clearFanfare(mountID)
+-- 	end
+-- end
+
+-- local getNumMountsNeedingFanfare = C_MountJournal.GetNumMountsNeedingFanfare
+-- C_MountJournal.GetNumMountsNeedingFanfare = function()
+-- 	local num = getNumMountsNeedingFanfare()
+-- 	for mountID in pairs(mFanfare) do
+-- 		num = num + 1
+-- 	end
+-- 	return num
+-- end
+
+-- GROUP_ROSTER_UPDATE
 
 function test:PLAYER_ENTERING_WORLD()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
@@ -77,6 +170,24 @@ function test:PLAYER_ENTERING_WORLD()
 			fprint(("IsSpellKnown(%d)"):format(id), "NOT DETECTED")
 		end
 	end
+
+	-- self.a = function(...) return ... end
+	-- local err, r = xpcall(self.a, geterrorhandler(), "dsa")
+	-- fprint("asd", err, r)
+
+	-- local str = [[
+	-- 	return function() fprint(exec) end
+	-- ]]
+	-- local loadedFunction, err = loadstring(str)
+	-- if err then
+	-- 	fprint(err)
+	-- else
+	-- 	setfenv(loadedFunction, {exec = "WoW", fprint = fprint, _G = _G})
+	-- 	local success, func = pcall(loadedFunction)
+	-- 	if success then
+	-- 		func()
+	-- 	end
+	-- end
 
 	-- for i = 1, 1000 do
 	-- 	local info = GetProfessionInfo(i)

@@ -1205,6 +1205,30 @@
 		</Scripts>
 	</Frame>
 
+	<Button name="MJSecureMacroButtonTemplate" inherits="MJSecureActionButtonTemplate" virtual="true">
+		<Size x="33" y="33"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<Texture parentKey="border" inherits="ActionBarFlyoutButton-IconFrame">
+					<Size x="35" y="35"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<HighlightTexture parentKey="highlight" file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
+		<Scripts>
+			<OnLoad inherit="append">
+				self:SetAttribute("type", "macro")
+				self:RegisterForDrag("LeftButton")
+			</OnLoad>
+			<OnLeave>
+				GameTooltip:Hide()
+			</OnLeave>
+		</Scripts>
+	</Button>
+
 	<Frame name="MJModelPanningFrame" parent="UIParent" enableMouse="true" hidden="true" frameStrata="DIALOG" clampedToScreen="true">
 		<Size x="32" y="32"/>
 		<Layers>

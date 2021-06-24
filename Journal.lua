@@ -669,6 +669,46 @@ function journal:ADDON_LOADED(addonName)
 			self.animationsCombobox:replayAnimation()
 		end)
 
+		-- MACRO BUTTONS
+		MountJournalSummonRandomFavoriteButton.spellname:Hide()
+
+		local summon1 = CreateFrame("BUTTON", nil, self.MountJournal, "MJSecureMacroButtonTemplate")
+		summon1:SetPoint("CENTER", self.MountJournal, "TOPRIGHT", -110, -42)
+ 		summon1:SetNormalTexture(413588)
+		summon1:SetScript("OnDragStart", function()
+			if InCombatLockdown() then return end
+			if not GetMacroInfo(config.macroName) then 
+				config:createMacro(config.macroName, config.secureButtonNameMount, 413588)
+			end
+			PickupMacro(config.macroName)
+		end)
+		summon1:SetScript("OnEnter", function(btn)
+			GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+			GameTooltip:SetText(addon.." \""..SUMMONS.." 1\"", 1, 1, 1, 1)
+			GameTooltip:AddLine(L["Normal mount summon"])
+			GameTooltip:AddLine("\nMacro: /click "..config.secureButtonNameMount)
+			GameTooltip:Show()
+		end)
+
+		local summon2 = CreateFrame("BUTTON", nil, self.MountJournal, "MJSecureMacroButtonTemplate")
+		summon2.forceModifier = true
+		summon2:SetPoint("LEFT", summon1, "RIGHT", 5, 0)
+ 		summon2:SetNormalTexture(631718)
+		summon2:SetScript("OnDragStart", function()
+			if InCombatLockdown() then return end
+			if not GetMacroInfo(config.secondMacroName) then 
+				config:createMacro(config.secondMacroName, config.secureButtonNameSecondMount, 631718)
+			end
+			PickupMacro(config.secondMacroName)
+		end)
+		summon2:SetScript("OnEnter", function(btn)
+			GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+			GameTooltip:SetText(addon.." \""..SUMMONS.." 2\"", 1, 1, 1, 1)
+			GameTooltip:AddLine(L["SecondMountTooltipDescription"]:gsub("^\n", ""):gsub("\n\n", "\n"), 1, .82, 0, 1, true)
+			GameTooltip:AddLine("\nMacro: /click "..config.secureButtonNameSecondMount)
+			GameTooltip:Show()
+		end)
+
 		-- HOOKS
 		self.func = {}
 		self:setSecureFunc(C_MountJournal, "SetSearch", function(text)
@@ -725,7 +765,11 @@ function journal:ADDON_LOADED(addonName)
 			local mountID = self.displayedMounts[index]
 			if mountID then return C_MountJournal.GetMountAllCreatureDisplayInfoByID(mountID) end
 		end)
-		self:setSecureFunc(C_MountJournal, "Pickup")
+		self:setSecureFunc(C_MountJournal, "Pickup", function(index)
+			if InCombatLockdown() then return end
+			index = self.indexByMountID[self.displayedMounts[index]]
+			if index then self.func.Pickup(index) end
+		end)
 		self:setSecureFunc(C_MountJournal, "SetIsFavorite")
 		self:setSecureFunc(C_MountJournal, "GetIsFavorite")
 

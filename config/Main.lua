@@ -3,9 +3,10 @@ local util, mounts, binding = MountsJournalUtil, MountsJournal, _G[addon.."Bindi
 local config = CreateFrame("FRAME", "MountsJournalConfig", InterfaceOptionsFramePanelContainer)
 config:Hide()
 config.name = addon
-local macroName, secondMacroName = "MJMacro", "MJSecondMacro"
-local secureButtonNameMount = addon.."_Mount"
-local secureButtonNameSecondMount = addon.."_SecondMount"
+config.macroName = "MJMacro"
+config.secondMacroName = "MJSecondMacro"
+config.secureButtonNameMount = addon.."_Mount"
+config.secureButtonNameSecondMount = addon.."_SecondMount"
 
 
 config:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
@@ -14,8 +15,8 @@ config:RegisterEvent("PLAYER_LOGIN")
 
 -- BIND MOUNT
 function config:PLAYER_LOGIN()
-	self.bindMount = binding:createButtonBinding(nil, secureButtonNameMount, ("%s %s %d"):format(addon, SUMMONS, 1), "MJSecureActionButtonTemplate")
-	self.bindSecondMount = binding:createButtonBinding(nil, secureButtonNameSecondMount, ("%s %s %d"):format(addon, SUMMONS, 2), "MJSecureActionButtonTemplate")
+	self.bindMount = binding:createButtonBinding(nil, self.secureButtonNameMount, ("%s %s %d"):format(addon, SUMMONS, 1), "MJSecureActionButtonTemplate")
+	self.bindSecondMount = binding:createButtonBinding(nil, self.secureButtonNameSecondMount, ("%s %s %d"):format(addon, SUMMONS, 2), "MJSecureActionButtonTemplate")
 	self.bindSecondMount.secure.forceModifier = true
 end
 
@@ -93,7 +94,7 @@ config:SetScript("OnShow", function(self)
 	createMacroBtn:SetSize(258, 30)
 	createMacroBtn:SetPoint("TOPLEFT", summon1, "BOTTOMLEFT", 0, -5)
 	createMacroBtn:SetText(L["CreateMacro"])
-	createMacroBtn:SetScript("OnClick", function() self:createMacro(macroName, secureButtonNameMount, 413588) end)
+	createMacroBtn:SetScript("OnClick", function() self:createMacro(self.macroName, self.secureButtonNameMount, 413588, true) end)
 
 	setTooltip(createMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
 
@@ -146,7 +147,7 @@ config:SetScript("OnShow", function(self)
 	createSecondMacroBtn:SetSize(258, 30)
 	createSecondMacroBtn:SetPoint("TOPLEFT", summon2, "BOTTOMLEFT", 0, -5)
 	createSecondMacroBtn:SetText(L["CreateMacro"])
-	createSecondMacroBtn:SetScript("OnClick", function() self:createMacro(secondMacroName, secureButtonNameSecondMount, 631718) end)
+	createSecondMacroBtn:SetScript("OnClick", function() self:createMacro(self.secondMacroName, self.secureButtonNameSecondMount, 631718, true) end)
 
 	setTooltip(createSecondMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
 
@@ -286,12 +287,12 @@ config:SetScript("OnShow", function(self)
 end)
 
 
-function config:createMacro(macroName, buttonName, texture, overwrite)
+function config:createMacro(macroName, buttonName, texture, openMacroFrame, overwrite)
 	if InCombatLockdown() then return end
 	local _, ctexture = GetMacroInfo(macroName)
 	if ctexture and not overwrite then
 		StaticPopup_Show(util.addonName.."MACRO_EXISTS", macroName, nil, function()
-			self:createMacro(macroName, buttonName, ctexture, true)
+			self:createMacro(macroName, buttonName, ctexture, openMacroFrame, true)
 		end)
 		return
 	end
@@ -302,13 +303,17 @@ function config:createMacro(macroName, buttonName, texture, overwrite)
 		CreateMacro(macroName, texture, "/click "..buttonName)
 	end
 
+	if MacroFrame and MacroFrame:IsShown() then
+		MacroFrame_Update()
+	end
+
+	if not openMacroFrame then return end
+
 	if not IsAddOnLoaded("Blizzard_MacroUI") then
 		LoadAddOn("Blizzard_MacroUI")
 	end
 
-	if MacroFrame:IsShown() then
-		MacroFrame_Update()
-	else
+	if not MacroFrame:IsShown() then
 		InterfaceOptionsFrame:SetAttribute("UIPanelLayout-allowOtherPanels", 1)
 		ShowUIPanel(MacroFrame)
 		InterfaceOptionsFrame:SetAttribute("UIPanelLayout-allowOtherPanels", nil)
