@@ -675,6 +675,7 @@ function journal:ADDON_LOADED(addonName)
 		local summon1 = CreateFrame("BUTTON", nil, self.MountJournal, "MJSecureMacroButtonTemplate")
 		summon1:SetPoint("CENTER", self.MountJournal, "TOPRIGHT", -110, -42)
  		summon1:SetNormalTexture(413588)
+ 		summon1:SetAttribute("clickbutton", _G[config.secureButtonNameMount])
 		summon1:SetScript("OnDragStart", function()
 			if InCombatLockdown() then return end
 			if not GetMacroInfo(config.macroName) then 
@@ -694,6 +695,7 @@ function journal:ADDON_LOADED(addonName)
 		summon2.forceModifier = true
 		summon2:SetPoint("LEFT", summon1, "RIGHT", 5, 0)
  		summon2:SetNormalTexture(631718)
+ 		summon2:SetAttribute("clickbutton", _G[config.secureButtonNameSecondMount])
 		summon2:SetScript("OnDragStart", function()
 			if InCombatLockdown() then return end
 			if not GetMacroInfo(config.secondMacroName) then 
@@ -1422,6 +1424,16 @@ function journal:filterDropDown_Initialize(btn, level, value)
 		info.checked = function() return mounts.filters.hideOnChar end
 		btn:ddAddButton(info, level)
 
+		info.text = L["only hidden"]
+		info.indent = 8
+		info.func = function(_,_,_, value)
+			mounts.filters.onlyHideOnChar = value
+			self:updateMountsList()
+		end
+		info.checked = function() return mounts.filters.onlyHideOnChar end
+		btn:ddAddButton(info, level)
+
+		info.indent = nil
 		info.checked = nil
 		info.isNotRadio = nil
 		info.func = nil
@@ -1792,6 +1804,7 @@ function journal:clearAllFilters()
 	mounts.filters.notCollected = true
 	mounts.filters.unusable = true
 	mounts.filters.hideOnChar = false
+	mounts.filters.onlyHideOnChar = false
 	self.searchBox:SetText("")
 	self:setAllFilters("factions", true)
 	self:setAllFilters("pet", true)
@@ -1927,7 +1940,8 @@ function journal:updateMountsList()
 		local petID = self.petForMount[spellID]
 
 		-- HIDDEN FOR CHARACTER
-		if (not shouldHideOnChar or filters.hideOnChar)
+		if (not filters.onlyHideOnChar or shouldHideOnChar)
+		and (not shouldHideOnChar or filters.hideOnChar)
 		-- COLLECTED
 		and (isCollected and filters.collected or not isCollected and filters.notCollected)
 		-- UNUSABLE

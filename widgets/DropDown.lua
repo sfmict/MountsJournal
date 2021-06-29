@@ -14,6 +14,7 @@ local dropDownOptions = {
 	"func",
 	"remove",
 	"order",
+	"indent",
 }
 local DropDownMenuButtonHeight = 16
 local DropDownMenuSearchHeight = DropDownMenuButtonHeight * 20 + 26
@@ -303,12 +304,17 @@ function MJDropDownButtonMixin:ddAddButton(info, level)
 		button.Icon:Hide()
 	end
 
+	local indent = button.indent or 0
+	width = width + indent
+
 	if info.notCheckable then
 		button.Check:Hide()
 		button.UnCheck:Hide()
-		button.NormalText:SetPoint("LEFT")
+		button.NormalText:SetPoint("LEFT", indent, 0)
 	else
-		button.NormalText:SetPoint("LEFT", 20, 0)
+		button.Check:SetPoint("LEFT", indent, 0)
+		button.UnCheck:SetPoint("LEFT", indent, 0)
+		button.NormalText:SetPoint("LEFT", 20 + indent, 0)
 		width = width + 30
 
 		if info.isNotRadio then

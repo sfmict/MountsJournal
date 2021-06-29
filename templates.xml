@@ -1205,7 +1205,7 @@
 		</Scripts>
 	</Frame>
 
-	<Button name="MJSecureMacroButtonTemplate" inherits="MJSecureActionButtonTemplate" virtual="true">
+	<Button name="MJSecureMacroButtonTemplate" inherits="SecureActionButtonTemplate" virtual="true">
 		<Size x="33" y="33"/>
 		<Layers>
 			<Layer level="OVERLAY">
@@ -1219,8 +1219,8 @@
 		</Layers>
 		<HighlightTexture parentKey="highlight" file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
 		<Scripts>
-			<OnLoad inherit="append">
-				self:SetAttribute("type", "macro")
+			<OnLoad>
+				self:SetAttribute("type", "click")
 				self:RegisterForDrag("LeftButton")
 			</OnLoad>
 			<OnLeave>
