@@ -186,13 +186,22 @@ end)
 
 do
 	local classOptions = {
+		PRIEST = {
+			{
+				key = "useLevitation",
+				text = L["CLASS_USEWHENCHARACTERFALLS"],
+				hlink = GetSpellLink(111759),
+			},
+		},
 		DEATHKNIGHT = {
 			{
 				key = "usePathOfFrost",
+				text = L["CLASS_USEWATERWALKINGSPELL"],
 				hlink = GetSpellLink(3714),
 				childs = {
 					{
 						key = "useOnlyInWaterWalkLocation",
+						text = L["CLASS_USEONLYWATERWALKLOCATION"],
 					},
 				},
 			},
@@ -200,12 +209,28 @@ do
 		SHAMAN = {
 			{
 				key = "useWaterWalking",
+				text = L["CLASS_USEWATERWALKINGSPELL"],
 				hlink = GetSpellLink(546),
 				childs = {
 					{
 						key = "useOnlyInWaterWalkLocation",
+						text = L["CLASS_USEONLYWATERWALKLOCATION"],
 					},
 				},
+			},
+		},
+		MAGE = {
+			{
+				key = "useSlowFall",
+				text = L["CLASS_USEWHENCHARACTERFALLS"],
+				hlink = GetSpellLink(130),
+			},
+		},
+		MONK = {
+			{
+				key = "useZenFlight",
+				text = L["CLASS_USEWHENCHARACTERFALLS"],
+				hlink = GetSpellLink(125883),
 			},
 		},
 		DRUID = {
@@ -240,7 +265,7 @@ do
 	local function createOption(self, option, className)
 		local optionFrame = self.checkPool:Acquire()
 		optionFrame:SetChecked(self.currentMacrosConfig[option.key])
-		optionFrame.Text:SetText(L[(className.."_"..option.key):upper()]:format(option.hlink))
+		optionFrame.Text:SetText((option.text or L[(className.."_"..option.key):upper()]):format(option.hlink))
 		if not optionFrame.key then
 			optionFrame.Text:SetSize(365, 30)
 			optionFrame:HookScript("OnClick", function(btn) optionClick(self, btn) end)
