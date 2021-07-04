@@ -211,16 +211,16 @@ function test:PLAYER_ENTERING_WORLD()
 
 	-- CONFIG OPEN
 	-- local config = MountsJournalConfig
-	local config = MountsJournalConfigClasses
+	-- local config = MountsJournalConfigClasses
 	-- local config = MountsJournalConfigAbout
-	if InterfaceOptionsFrameAddOns:IsVisible() and config:IsVisible() then
-		InterfaceOptionsFrame:Hide()
-	else
-		InterfaceOptionsFrame_OpenToCategory(config.name)
-		if not InterfaceOptionsFrameAddOns:IsVisible() then
-			InterfaceOptionsFrame_OpenToCategory(config.name)
-		end
-	end
+	-- if InterfaceOptionsFrameAddOns:IsVisible() and config:IsVisible() then
+	-- 	InterfaceOptionsFrame:Hide()
+	-- else
+	-- 	InterfaceOptionsFrame_OpenToCategory(config.name)
+	-- 	if not InterfaceOptionsFrameAddOns:IsVisible() then
+	-- 		InterfaceOptionsFrame_OpenToCategory(config.name)
+	-- 	end
+	-- end
 	-- select(14,config:GetChildren()):Click()
 	-- if true then return end
 
