@@ -321,7 +321,7 @@ do
 		CharacterSecondaryHandSlot:GetID(),
 	}
 	function mounts:UPDATE_INVENTORY_DURABILITY()
-		local percent = (tonumber(self.config.useRepairMountsDurability) or 0) / 100 
+		local percent = (tonumber(self.config.useRepairMountsDurability) or 0) / 100
 		local flyablePercent = (tonumber(self.config.useRepairFlyableDurability) or 0) / 100
 		self.sFlags.repair = false
 		self.sFlags.flyableRepair = false

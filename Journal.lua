@@ -674,11 +674,11 @@ function journal:ADDON_LOADED(addonName)
 
 		local summon1 = CreateFrame("BUTTON", nil, self.MountJournal, "MJSecureMacroButtonTemplate")
 		summon1:SetPoint("CENTER", self.MountJournal, "TOPRIGHT", -110, -42)
- 		summon1:SetNormalTexture(413588)
- 		summon1:SetAttribute("clickbutton", _G[config.secureButtonNameMount])
+		summon1:SetNormalTexture(413588)
+		summon1:SetAttribute("clickbutton", _G[config.secureButtonNameMount])
 		summon1:SetScript("OnDragStart", function()
 			if InCombatLockdown() then return end
-			if not GetMacroInfo(config.macroName) then 
+			if not GetMacroInfo(config.macroName) then
 				config:createMacro(config.macroName, config.secureButtonNameMount, 413588)
 			end
 			PickupMacro(config.macroName)
@@ -694,11 +694,11 @@ function journal:ADDON_LOADED(addonName)
 		local summon2 = CreateFrame("BUTTON", nil, self.MountJournal, "MJSecureMacroButtonTemplate")
 		summon2.forceModifier = true
 		summon2:SetPoint("LEFT", summon1, "RIGHT", 5, 0)
- 		summon2:SetNormalTexture(631718)
- 		summon2:SetAttribute("clickbutton", _G[config.secureButtonNameSecondMount])
+		summon2:SetNormalTexture(631718)
+		summon2:SetAttribute("clickbutton", _G[config.secureButtonNameSecondMount])
 		summon2:SetScript("OnDragStart", function()
 			if InCombatLockdown() then return end
-			if not GetMacroInfo(config.secondMacroName) then 
+			if not GetMacroInfo(config.secondMacroName) then
 				config:createMacro(config.secondMacroName, config.secureButtonNameSecondMount, 631718)
 			end
 			PickupMacro(config.secondMacroName)
