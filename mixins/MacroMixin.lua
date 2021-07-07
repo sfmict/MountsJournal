@@ -79,7 +79,7 @@ function macroFrame:PLAYER_LOGIN()
 	if self.class == "PRIEST" then
 		classOptionMacro = classOptionMacro..[[
 			-- 111759 - Levitation
-			if self.classConfig.useLevitation and IsFalling() then
+			if self.classConfig.useLevitation and not self.magicBroom and IsFalling() then
 				if GetTime() - (self.lastUseClassSpellTime or 0) < .5 then return "" end
 				local i = 1
 				repeat
@@ -114,7 +114,7 @@ function macroFrame:PLAYER_LOGIN()
 	elseif self.class == "MAGE" then
 		classOptionMacro = classOptionMacro..[[
 			-- 130 - Slow Fall
-			if self.classConfig.useSlowFall and IsFalling() then
+			if self.classConfig.useSlowFall and not self.magicBroom and IsFalling() then
 				if GetTime() - (self.lastUseClassSpellTime or 0) < .5 then return "" end
 				local i = 1
 				repeat
@@ -131,7 +131,7 @@ function macroFrame:PLAYER_LOGIN()
 	elseif self.class == "MONK" then
 		classOptionMacro = classOptionMacro..[[
 			-- 125883 - Zen Flight
-			if self.classConfig.useZenFlight then
+			if self.classConfig.useZenFlight and not self.magicBroom then
 				if IsFalling() then
 					self.lastUseClassSpellTime = GetTime()
 					return "/cast "..self:getSpellName(125883)
@@ -300,7 +300,7 @@ do
 			local feather = self:getSpellName(121536, ...) -- Angelic Feather
 
 			if shield and feather then
-				return "/cast [spec:1,talent:2/3,@player][spec:2,talent:2/3,@player]"..feather..";"..shield
+				return "/cast [spec:1,talent:2/3,@player][spec:2,talent:2/3,@player]"..feather..";[@player]"..shield
 			end
 		end,
 		DEATHKNIGHT = getClassDefFunc(218999), -- Wraith Walk
@@ -339,9 +339,7 @@ end
 
 function macroFrame:getMacro()
 	self.mounts:setFlags()
-	local macro = self:getClassOptionMacro()
-	if macro then return macro end
-
+	
 	-- MAGIC BROOM IS USABLE
 	self.magicBroom = self.mounts.config.useMagicBroom
 							and GetItemCount(37011) > 0
@@ -350,6 +348,10 @@ function macroFrame:getMacro()
 							and not self.sFlags.herb
 							and not self.sFlags.swimming
 							and self.broomName
+
+	-- CLASS OPTIONS
+	local macro = self:getClassOptionMacro()
+	if macro then return macro end
 
 	-- EXIT VEHICLE
 	if self.sFlags.inVehicle then

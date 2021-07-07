@@ -190,9 +190,130 @@ config:SetScript("OnShow", function(self)
 	self.herbMountsOnZones.checkFunc = function() return mounts.config.herbMountsOnZones end
 	self.herbMountsOnZones:HookScript("OnClick", applyEnable)
 
+	-- USE REPAIR MOUNTS
+	self.useRepairMounts = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.useRepairMounts:SetPoint("TOPLEFT", self.herbMountsOnZones, "BOTTOMLEFT", -20, -15)
+	self.useRepairMounts.Text:SetText(L["If item durability is less than"])
+	self.useRepairMounts.tooltipText = L["If item durability is less than"]
+	self.useRepairMounts.tooltipRequirement = L["UseRepairMountsDescription"]
+	self.useRepairMounts.setEnabledFunc = function(btn)
+		local checked = btn:GetChecked()
+		self.repairPecent:SetEnabled(checked)
+		self.repairMountsCombobox:SetEnabled(checked)
+	end
+	hooksecurefunc(self.useRepairMounts, "SetChecked", self.useRepairMounts.setEnabledFunc)
+	self.useRepairMounts:HookScript("OnClick", function(btn)
+		btn:setEnabledFunc()
+		applyEnable()
+	end)
+
+	self.repairPecent = CreateFrame("Editbox", nil, rightPanelScroll.child, "MJNumberTextBox")
+	self.repairPecent:SetPoint("LEFT", self.useRepairMounts.Text, "RIGHT", 3, 0)
+	self.repairPecent:SetScript("OnTextChanged", function(editBox, userInput)
+		if userInput then
+			local value = tonumber(editBox:GetText()) or 0
+			if value < 0 then
+				editBox:SetNumber(0)
+			elseif value > 100 then
+				editBox:SetNumber(100)
+			end
+			applyEnable()
+		end
+	end)
+	self.repairPecent:SetScript("OnMouseWheel", function(editBox, delta)
+		if editBox:IsEnabled() then
+			local value = (tonumber(editBox:GetText()) or 0) + (delta > 0 and 1 or -1)
+			if value >= 0 and value <= 100 then
+				editBox:SetNumber(value)
+			end
+			applyEnable()
+		end
+	end)
+
+	self.repairPecentText = self.repairPecent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	self.repairPecentText:SetPoint("LEFT", self.repairPecent, "RIGHT", 3, 0)
+	self.repairPecentText:SetText("%")
+
+	-- USE REPAIR MOUNTS IN FLYABLE ZONES
+	self.repairFlyable = util.createCheckboxChild(L["In flyable zones"], self.useRepairMounts)
+	self.repairFlyable.tooltipText = L["In flyable zones"]
+	self.repairFlyable.tooltipRequirement = L["UseRepairMountsDescription"]
+	self.repairFlyable.checkFunc = function() return mounts.config.useRepairFlyable end
+	self.repairFlyable.setEnabledFunc = function(btn)
+		self.repairFlyablePercent:SetEnabled(btn:IsEnabled() and btn:GetChecked())
+		self.repairFlyablePercentText:SetTextColor(btn.Text:GetTextColor())
+	end
+	hooksecurefunc(self.repairFlyable, "SetChecked", self.repairFlyable.setEnabledFunc)
+	self.repairFlyable:HookScript("OnClick", function(btn)
+		btn:setEnabledFunc()
+		applyEnable()
+	end)
+	self.repairFlyable:HookScript("OnEnable", self.repairFlyable.setEnabledFunc)
+	self.repairFlyable:HookScript("OnDisable", self.repairFlyable.setEnabledFunc)
+
+	self.repairFlyablePercent = CreateFrame("Editbox", nil, rightPanelScroll.child, "MJNumberTextBox")
+	self.repairFlyablePercent:SetPoint("LEFT", self.repairFlyable.Text, "RIGHT", 3, 0)
+	self.repairFlyablePercent:SetScript("OnTextChanged", function(editBox, userInput)
+		if userInput then
+			local value = tonumber(editBox:GetText()) or 0
+			if value < 0 then
+				editBox:SetNumber(0)
+			elseif value > 100 then
+				editBox:SetNumber(100)
+			end
+			applyEnable()
+		end
+	end)
+	self.repairFlyablePercent:SetScript("OnMouseWheel", function(editBox, delta)
+		if editBox:IsEnabled() then
+			local value = (tonumber(editBox:GetText()) or 0) + (delta > 0 and 1 or -1)
+			if value >= 0 and value <= 100 then
+				editBox:SetNumber(value)
+			end
+			applyEnable()
+		end
+	end)
+
+	self.repairFlyablePercentText = self.repairPecent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	self.repairFlyablePercentText:SetPoint("LEFT", self.repairFlyablePercent, "RIGHT", 3, 0)
+	self.repairFlyablePercentText:SetText("%")
+
+	-- REPAIR MOUNTS COMBOBOX
+	self.repairMountsCombobox = CreateFrame("FRAME", "MountsJournalRepairCombobox", rightPanelScroll.child, "MJDropDownButtonTemplate")
+	self.repairMountsCombobox:SetWidth(230)
+	self.repairMountsCombobox:SetPoint("TOPLEFT", self.repairFlyable, "BOTTOMLEFT", 0, -8)
+	self.repairMountsCombobox:ddSetInit(function(self, level)
+		local info = {}
+
+		info.text = L["Random available mount"]
+		info.value = nil
+		info.checked = function(btn) return self.selectedValue == btn.value end
+		info.func = function(btn)
+			self:ddSetSelectedValue(btn.value)
+			config.applyBtn:Enable()
+		end
+		self:ddAddButton(info, level)
+
+		for i, mountID in ipairs(mounts.repairMounts) do
+			local name, _, icon, _,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+			if not shouldHideOnChar then
+				info.text = name
+				info.icon = icon
+				info.value = mountID
+				info.disabled = not isCollected
+				info.checked = function(btn) return self.selectedValue == btn.value end
+				info.func = function(btn)
+					self:ddSetSelectedValue(btn.value)
+					config.applyBtn:Enable()
+				end
+				self:ddAddButton(info, level)
+			end
+		end
+	end)
+
 	-- USE MAGIC BROOM
 	self.useMagicBroom = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.useMagicBroom:SetPoint("TOPLEFT", self.herbMountsOnZones, "BOTTOMLEFT", -20, -26)
+	self.useMagicBroom:SetPoint("TOPLEFT", self.repairMountsCombobox, "BOTTOMLEFT", -20, -20)
 	local magicBroom = Item:CreateFromItemID(37011)
 	if magicBroom:IsItemDataCached() then
 		self.useMagicBroom.Text:SetText(L["UseMagicBroom"]:format(magicBroom:GetItemLink()))
@@ -208,7 +329,7 @@ config:SetScript("OnShow", function(self)
 
 	-- NO PET IN RAID
 	self.noPetInRaid = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.noPetInRaid:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 0, -26)
+	self.noPetInRaid:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 0, -15)
 	self.noPetInRaid.Text:SetSize(245, 25)
 	self.noPetInRaid.Text:SetText(L["NoPetInRaid"])
 	self.noPetInRaid:HookScript("OnClick", applyEnable)
@@ -222,14 +343,14 @@ config:SetScript("OnShow", function(self)
 
 	-- COPY MOUNT TARGET
 	self.copyMountTarget = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.copyMountTarget:SetPoint("TOPLEFT", self.noPetInGroup, "BOTTOMLEFT", 0, -26)
+	self.copyMountTarget:SetPoint("TOPLEFT", self.noPetInGroup, "BOTTOMLEFT", 0, -15)
 	self.copyMountTarget.Text:SetSize(245, 25)
 	self.copyMountTarget.Text:SetText(L["CopyMountTarget"])
 	self.copyMountTarget:HookScript("OnClick", applyEnable)
 
 	-- ARROW BUTTONS
 	self.arrowButtons = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.arrowButtons:SetPoint("TOPLEFT", self.copyMountTarget, "BOTTOMLEFT", 0, -26)
+	self.arrowButtons:SetPoint("TOPLEFT", self.copyMountTarget, "BOTTOMLEFT", 0, -15)
 	self.arrowButtons.Text:SetSize(245, 25)
 	self.arrowButtons.Text:SetText(L["Enable arrow buttons to browse mounts"])
 	self.arrowButtons:HookScript("OnClick", applyEnable)
@@ -237,7 +358,7 @@ config:SetScript("OnShow", function(self)
 	-- RESET HELP
 	local resetHelp = CreateFrame("BUTTON", nil, rightPanelScroll.child, "UIPanelButtonTemplate")
 	resetHelp:SetSize(128, 22)
-	resetHelp:SetPoint("TOPLEFT", self.arrowButtons, "BOTTOMLEFT", 0, -26)
+	resetHelp:SetPoint("TOPLEFT", self.arrowButtons, "BOTTOMLEFT", 0, -15)
 	resetHelp:SetText(RESET_TUTORIALS)
 	resetHelp:SetScript("OnClick", function(btn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -275,6 +396,14 @@ config:SetScript("OnShow", function(self)
 		for _, child in ipairs(self.useHerbMounts.childs) do
 			child:SetChecked(child:checkFunc())
 		end
+		self.useRepairMounts:SetChecked(mounts.config.useRepairMounts)
+		for _, child in ipairs(self.useRepairMounts.childs) do
+			child:SetChecked(child:checkFunc())
+		end
+		self.repairPecent:SetNumber(tonumber(mounts.config.useRepairMountsDurability) or 0)
+		self.repairFlyablePercent:SetNumber(tonumber(mounts.config.useRepairFlyableDurability) or 0)
+		self.repairMountsCombobox:ddSetSelectedValue(mounts.config.repairSelectedMount)
+		self.repairMountsCombobox:ddSetSelectedText(not mounts.config.repairSelectedMount and L["Random available mount"] or C_MountJournal.GetMountInfoByID(mounts.config.repairSelectedMount))
 		self.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
 		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
@@ -341,6 +470,13 @@ config.okay = function(self)
 	mounts.config.useHerbMounts = self.useHerbMounts:GetChecked()
 	mounts.config.herbMountsOnZones = self.herbMountsOnZones:GetChecked()
 	mounts:setHerbMount()
+	mounts.config.useRepairMounts = self.useRepairMounts:GetChecked()
+	mounts.config.useRepairMountsDurability = tonumber(self.repairPecent:GetText()) or 0
+	mounts.config.useRepairFlyable = self.repairFlyable:GetChecked()
+	mounts.config.useRepairFlyableDurability = tonumber(self.repairFlyablePercent:GetText()) or 0
+	mounts:UPDATE_INVENTORY_DURABILITY()
+	mounts.config.repairSelectedMount = self.repairMountsCombobox.selectedValue
+	mounts:setUsableRepairMounts()
 	mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
 	mounts.config.noPetInRaid = self.noPetInRaid:GetChecked()
 	mounts.config.noPetInGroup = self.noPetInGroup:GetChecked()

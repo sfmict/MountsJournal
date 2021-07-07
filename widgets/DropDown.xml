@@ -64,6 +64,15 @@
 		<KeyValues>
 			<KeyValue key="dropDownSetText" value="true" type="boolean"/>
 		</KeyValues>
+		<Scripts>
+			<OnLoad>
+				function self:SetEnabled(enabled)
+					self.Button:SetEnabled(enabled)
+					local color = enabled and HIGHLIGHT_FONT_COLOR or GRAY_FONT_COLOR
+					self.Text:SetTextColor(color:GetRGB())
+				end
+			</OnLoad>
+		</Scripts>
 	</Frame>
 
 	<Button name="MJDropDownStreatchButtonTemplate" inherits="UIMenuButtonStretchTemplate,MJDropDownScriptButton" virtual="true">
@@ -130,7 +139,7 @@
 				<Texture parentKey="Icon" hidden="true">
 					<Size x="16" y="16"/>
 					<Anchors>
-						<Anchor point="RIGHT"/>
+						<Anchor point="LEFT"/>
 					</Anchors>
 				</Texture>
 				<Texture parentKey="ExpandArrow" file="Interface/ChatFrame/ChatFrameExpandArrow" hidden="true">
@@ -247,11 +256,7 @@
 			<OnDisable method="onDisable"/>
 			<OnHide>self:Hide()</OnHide>
 		</Scripts>
-		<ButtonText parentKey="NormalText">
-			<Anchors>
-				<Anchor point="LEFT" x="-5" y="0"/>
-			</Anchors>
-		</ButtonText>
+		<ButtonText parentKey="NormalText"/>
 		<NormalFont style="GameFontHighlightSmallLeft"/>
 		<HighlightFont style="GameFontHighlightSmallLeft"/>
 		<DisabledFont style="GameFontDisableSmallLeft"/>

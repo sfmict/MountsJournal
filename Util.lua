@@ -113,6 +113,13 @@ MountsJournalUtil.optionsPanelBackdrop = {
 }
 
 
+MountsJournalUtil.editBoxBackdrop = {
+	bgFile = "Interface/ChatFrame/ChatFrameBackground",
+	edgeFile = "Interface/ChatFrame/ChatFrameBackground",
+	tile = true, edgeSize = 1, tileSize = 5,
+}
+
+
 function MountsJournalUtil.createFromEventsMixin(...)
 	local mixin = CreateFromMixins(eventsMixin, ...)
 	setmetatable(mixin, eventsMeta)
@@ -171,17 +178,19 @@ do
 		end
 	end
 
+	local function disableChilds(self)
+		for _, child in ipairs(self.childs) do
+			child:Disable()
+		end
+	end
+
 	function MountsJournalUtil.createCheckboxChild(text, parent)
 		if not parent.childs then
 			parent.childs = {}
 			hooksecurefunc(parent, "SetChecked", setEnabledChilds)
 			parent:HookScript("OnClick", setEnabledChilds)
 			parent:HookScript("OnEnable", setEnabledChilds)
-			parent:HookScript("OnDisable", function(self)
-				for _, child in ipairs(self.childs) do
-					child:Disable()
-				end
-			end)
+			parent:HookScript("OnDisable", disableChilds)
 		end
 
 		local check = CreateFrame("CheckButton", nil, parent:GetParent(), "MJCheckButtonTemplate")

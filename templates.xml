@@ -538,6 +538,27 @@
 		</HighlightTexture>
 	</Button>
 
+	<EditBox name="MJEditBoxTemplate" inherits="InputBoxScriptTemplate,BackdropTemplate" multiLine="false" autoFocus="false" virtual="true">
+		<FontString inherits="GameFontHighlightSmall" justifyH="CENTER"/>
+		<Scripts>
+			<OnLoad>
+				self:SetBackdrop(MountsJournalUtil.editBoxBackdrop)
+				self:SetBackdropColor(0, 0, 0, .5)
+				self:SetBackdropBorderColor(.3, .3, .3, .8)
+			</OnLoad>
+			<OnEditFocusGained>self:HighlightText()</OnEditFocusGained>
+			<OnEnterPressed function="EditBox_ClearFocus"/>
+			<OnEnter>if self:IsEnabled() then self:SetBackdropBorderColor(.5, .5, .5, .8) end</OnEnter>
+			<OnLeave>self:SetBackdropBorderColor(.3, .3, .3, .8)</OnLeave>
+			<OnEnable>self:SetTextColor(HIGHLIGHT_FONT_COLOR:GetRGB())</OnEnable>
+			<OnDisable>self:SetTextColor(GRAY_FONT_COLOR:GetRGB())</OnDisable>
+		</Scripts>
+	</EditBox>
+
+	<EditBox name="MJNumberTextBox" inherits="MJEditBoxTemplate" numeric="true" letters="3" virtual="true">
+		<Size x="28" y="18"/>
+	</EditBox>
+
 	<Frame name="MJMacroFrame" inherits="TooltipBackdropTemplate" virtual="true">
 		<Size x="395" y="150"/>
 		<Layers>

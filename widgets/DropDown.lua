@@ -290,14 +290,17 @@ function MJDropDownButtonMixin:ddAddButton(info, level)
 		button.Icon:SetTexture(info.icon)
 		if info.iconInfo then
 			button.Icon:SetSize(info.iconInfo.tSizeX or DropDownMenuButtonHeight, info.iconInfo.tSizeY or DropDownMenuButtonHeight)
+		else
+			button.Icon:SetSize(DropDownMenuButtonHeight, DropDownMenuButtonHeight)
 		end
+
 		if info.iconOnly then
-			button.Icon:SetPoint("LEFT")
+			button.Icon:SetPoint("RIGHT")
 			button.NormalText:Hide()
 		else
 			button.Icon:ClearAllPoints()
-			button.Icon:SetPoint("RIGHT")
 			button.NormalText:Show()
+			width = width + button.Icon:GetWidth() + 2
 		end
 		button.Icon:Show()
 	else
@@ -310,10 +313,18 @@ function MJDropDownButtonMixin:ddAddButton(info, level)
 	if info.notCheckable then
 		button.Check:Hide()
 		button.UnCheck:Hide()
+		if info.icon then
+			button.Icon:SetPoint("LEFT", indent, 0)
+			indent = indent + button.Icon:GetWidth() + 2
+		end
 		button.NormalText:SetPoint("LEFT", indent, 0)
 	else
 		button.Check:SetPoint("LEFT", indent, 0)
 		button.UnCheck:SetPoint("LEFT", indent, 0)
+		if info.icon then
+			button.Icon:SetPoint("LEFT", 20 + indent, 0)
+			indent = indent + button.Icon:GetWidth() + 2
+		end
 		button.NormalText:SetPoint("LEFT", 20 + indent, 0)
 		width = width + 30
 

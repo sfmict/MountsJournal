@@ -7,6 +7,7 @@ local mounts = CreateFrame("Frame", "MountsJournal")
 mounts:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
 mounts:RegisterEvent("ADDON_LOADED")
 mounts:RegisterEvent("PLAYER_LOGIN")
+mounts:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
 
 
 function mounts:ADDON_LOADED(addonName)
@@ -42,6 +43,8 @@ function mounts:ADDON_LOADED(addonName)
 		if self.config.arrowButtonsBrowse == nil then
 			self.config.arrowButtonsBrowse = true
 		end
+		self.config.useRepairMountsDurability = self.config.useRepairMountsDurability or 41
+		self.config.useRepairFlyableDurability = self.config.useRepairFlyableDurability or 31
 		self.config.macrosConfig = self.config.macrosConfig or {}
 		for i = 1, GetNumClasses() do
 			local _, className = GetClassInfo(i)
@@ -104,6 +107,15 @@ function mounts:ADDON_LOADED(addonName)
 			[204] = true, -- Бездонные глубины
 			[205] = true, -- Мерцающий простор
 		}
+
+		self.repairMounts = {
+			280,
+			284,
+			460,
+			1039,
+		}
+		self.usableRepairMounts = {}
+		self:setUsableRepairMounts()
 	end
 end
 
@@ -292,6 +304,64 @@ function mounts:PLAYER_LOGIN()
 
 	-- AUTO ADD MOUNT
 	self:RegisterEvent("NEW_MOUNT_ADDED")
+end
+
+
+do
+	local durabilitySlots = {
+		CharacterHeadSlot:GetID(),
+		CharacterShoulderSlot:GetID(),
+		CharacterChestSlot:GetID(),
+		CharacterWristSlot:GetID(),
+		CharacterHandsSlot:GetID(),
+		CharacterWaistSlot:GetID(),
+		CharacterLegsSlot:GetID(),
+		CharacterFeetSlot:GetID(),
+		CharacterMainHandSlot:GetID(),
+		CharacterSecondaryHandSlot:GetID(),
+	}
+	function mounts:UPDATE_INVENTORY_DURABILITY()
+		local percent = (tonumber(self.config.useRepairMountsDurability) or 0) / 100 
+		local flyablePercent = (tonumber(self.config.useRepairFlyableDurability) or 0) / 100
+		self.sFlags.repair = false
+		self.sFlags.flyableRepair = false
+		if self.config.useRepairMounts then
+			for i = 1, #durabilitySlots do
+				local durCur, durMax = GetInventoryItemDurability(durabilitySlots[i])
+				if durCur and durMax then
+					local itemPercent = durCur / durMax 
+					if itemPercent < percent then
+						self.sFlags.repair = true
+					end
+					if itemPercent < flyablePercent then
+						self.sFlags.flyableRepair = true
+					end
+				end
+			end
+			if not self.config.useRepairFlyable then
+				self.sFlags.flyableRepair = self.sFlags.repair
+			end
+		end
+	end
+end
+
+
+function mounts:setUsableRepairMounts()
+	wipe(self.usableRepairMounts)
+	if not self.config.repairSelectedMount then
+		for _, mountID in ipairs(self.repairMounts) do
+			local _,_,_,_,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+			if isCollected and not shouldHideOnChar then
+				self.usableRepairMounts[mountID] = true
+			end
+		end
+	else
+		local _,_,_,_,_,_,_,_,_, shouldHideOnChar = C_MountJournal.GetMountInfoByID(self.config.repairSelectedMount)
+		if shouldHideOnChar then
+			self.config.repairSelectedMount = self.config.repairSelectedMount == 280 and 284 or 280
+		end
+		self.usableRepairMounts[self.config.repairSelectedMount] = true
+	end
 end
 
 
@@ -644,17 +714,18 @@ function mounts:init()
 		elseif flags.isMounted then
 			Dismount()
 		elseif not flags.groundSpellKnown then
-			if not (flags.swimming and self:summon(self.list.swimming)
-					  or self:summon(self.lowLevel)) then
+			if not (flags.swimming and self:summon(self.list.swimming) or self:summon(self.lowLevel)) then
 				self:errorSummon()
 			end
+		-- repair mounts
+		elseif not ((flags.repair or flags.fly and flags.flyableRepair) and self:summon(self.usableRepairMounts))
 		-- target's mount
-		elseif not self:summonTarget()
+		and not self:summonTarget()
 		-- swimming
 		and not (flags.swimming
-						and (self.mapVashjir[self.mapID]
-							  and self:summon(self.swimmingVashjir)
-							  or self:summon(self.list.swimming)))
+			and (self.mapVashjir[self.mapID]
+				and self:summon(self.swimmingVashjir)
+				or self:summon(self.list.swimming)))
 		-- fly
 		and not (flags.fly and self:summonListOr(self.list.fly))
 		-- ground
