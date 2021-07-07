@@ -718,7 +718,7 @@ function mounts:init()
 				self:errorSummon()
 			end
 		-- repair mounts
-		elseif not ((flags.repair or flags.fly and flags.flyableRepair) and self:summon(self.usableRepairMounts))
+		elseif not ((flags.repair and not flags.fly or flags.flyableRepair and flags.fly) and self:summon(self.usableRepairMounts))
 		-- target's mount
 		and not self:summonTarget()
 		-- swimming
