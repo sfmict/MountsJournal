@@ -329,7 +329,7 @@ do
 			for i = 1, #durabilitySlots do
 				local durCur, durMax = GetInventoryItemDurability(durabilitySlots[i])
 				if durCur and durMax then
-					local itemPercent = durCur / durMax 
+					local itemPercent = durCur / durMax
 					if itemPercent < percent then
 						self.sFlags.repair = true
 					end
