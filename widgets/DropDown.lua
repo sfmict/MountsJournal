@@ -15,6 +15,8 @@ local dropDownOptions = {
 	"remove",
 	"order",
 	"indent",
+	"icon",
+	"iconInfo",
 }
 local DropDownMenuButtonHeight = 16
 local DropDownMenuSearchHeight = DropDownMenuButtonHeight * 20 + 26
@@ -93,8 +95,18 @@ function MJDropDownButtonMixin:ddSetSelectedValue(value, level, anchorFrame)
 end
 
 
-function MJDropDownButtonMixin:ddSetSelectedText(text)
+function MJDropDownButtonMixin:ddSetSelectedText(text, icon, width, height)
 	self.Text:SetText(text)
+	if icon then
+		self.Icon:Show()
+		self.Icon:SetTexture(icon)
+		self.Icon:SetSize(width or DropDownMenuButtonHeight, height or DropDownMenuButtonHeight)
+		self.Text:SetPoint("LEFT", self.Left, "RIGHT", self.Icon:GetWidth() - 2, 2)
+		self.Icon:SetPoint("RIGHT", self.Text, "RIGHT", -math.min(self.Text:GetStringWidth(), self.Text:GetWidth()) - 1, -1)
+	else
+		self.Icon:Hide()
+		self.Text:SetPoint("LEFT", self.Left, "RIGHT", 0, 2)
+	end
 end
 
 
@@ -172,7 +184,12 @@ function MJDropDownButtonMixin:ddRefresh(level, anchorFrame)
 				button.UnCheck:SetShown(not button._checked)
 
 				if self.dropDownSetText and button._checked and menu.anchorFrame == anchorFrame then
-					self:ddSetSelectedText(button._text)
+					local width, height
+					if button.iconInfo then
+						width = button.iconInfo.tSizeX
+						height = button.iconInfo.tSizeY
+					end
+					self:ddSetSelectedText(button._text, button.icon, width, height)
 				end
 			end
 		else
@@ -188,9 +205,13 @@ function MJDropDownButtonMixin:ddRefresh(level, anchorFrame)
 					local checked = button.checked
 					if type(checked) == "function" then checked = checked(button) end
 					if checked then
-						local text = button.text
+						local text, width, height = button.text
 						if type(text) == "function" then text = text() end
-						self:ddSetSelectedText(text)
+						if button.iconInfo then
+							width = button.iconInfo.tSizeX
+							height = button.iconInfo.tSizeY
+						end
+						self:ddSetSelectedText(text, button.icon, width, height)
 					end
 				end
 			end
@@ -568,12 +589,35 @@ function MJDropDownMenuSearchMixin:refresh()
 				btn.arrowUpButton:Hide()
 			end
 
+			if btn.icon then
+				btn.Icon:SetTexture(btn.icon)
+				if btn.iconInfo then
+					btn.Icon:SetSize(btn.iconInfo.tSizeX or DropDownMenuButtonHeight, btn.iconInfo.tSizeY or DropDownMenuButtonHeight)
+				else
+					btn.Icon:SetSize(DropDownMenuButtonHeight, DropDownMenuButtonHeight)
+				end
+				btn.Icon:Show()
+			else
+				btn.Icon:Hide()
+			end
+
+			local indent = btn.indent or 0
 			if btn.notCheckable then
 				btn.Check:Hide()
 				btn.UnCheck:Hide()
-				btn.NormalText:SetPoint("LEFT")
+				if btn.icon then
+					btn.Icon:SetPoint("LEFT", indent, 0)
+					indent = indent + btn.Icon:GetWidth() + 2
+				end
+				btn.NormalText:SetPoint("LEFT", indent, 0)
 			else
-				btn.NormalText:SetPoint("LEFT", 20, 0)
+				btn.Check:SetPoint("LEFT", indent, 0)
+				btn.UnCheck:SetPoint("LEFT", indent, 0)
+				if btn.icon then
+					btn.Icon:SetPoint("LEFT", 20 + indent, 0)
+					indent = indent + btn.Icon:GetWidth() + 2
+				end
+				btn.NormalText:SetPoint("LEFT", 20 + indent, 0)
 
 				if info.isNotRadio then
 					btn.Check:SetTexCoord(0, .5, 0, .5)
@@ -617,6 +661,10 @@ function MJDropDownMenuSearchMixin:addButton(info)
 		if info.text then
 			btn:SetText(type(info.text) == "function" and info.text() or info.text)
 			local width = btn.NormalText:GetWidth() + 50
+
+			if info.indent then
+				width = width + info.indent
+			end
 
 			if info.notCheckable then
 				width = width - 20

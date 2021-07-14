@@ -373,19 +373,19 @@
 	<Button name="MJGrid3MountListButtonTemplate" hidden="true" virtual="true">
 		<Size x="249" y="46"/>
 		<Frames>
-			<Button parentKey="mount1" inherits="MJMountButtonTemplate">
+			<Button parentArray="mounts" inherits="MJMountButtonTemplate">
 				<Anchors>
 					<Anchor point="LEFT" x="10" y="0"/>
 				</Anchors>
 			</Button>
-			<Button parentKey="mount2" inherits="MJMountButtonTemplate">
+			<Button parentArray="mounts" inherits="MJMountButtonTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.mount1" relativePoint="RIGHT" x="42" y="0"/>
+					<Anchor point="LEFT" x="92" y="0"/>
 				</Anchors>
 			</Button>
-			<Button parentKey="mount3" inherits="MJMountButtonTemplate">
+			<Button parentArray="mounts" inherits="MJMountButtonTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.mount2" relativePoint="RIGHT" x="42" y="0"/>
+					<Anchor point="LEFT" x="174" y="0"/>
 				</Anchors>
 			</Button>
 		</Frames>

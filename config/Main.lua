@@ -287,6 +287,7 @@ config:SetScript("OnShow", function(self)
 
 		info.text = L["Random available mount"]
 		info.value = nil
+		info.icon = 413588
 		info.checked = function(btn) return self.selectedValue == btn.value end
 		info.func = function(btn)
 			self:ddSetSelectedValue(btn.value)
@@ -403,7 +404,12 @@ config:SetScript("OnShow", function(self)
 		self.repairPecent:SetNumber(tonumber(mounts.config.useRepairMountsDurability) or 0)
 		self.repairFlyablePercent:SetNumber(tonumber(mounts.config.useRepairFlyableDurability) or 0)
 		self.repairMountsCombobox:ddSetSelectedValue(mounts.config.repairSelectedMount)
-		self.repairMountsCombobox:ddSetSelectedText(not mounts.config.repairSelectedMount and L["Random available mount"] or C_MountJournal.GetMountInfoByID(mounts.config.repairSelectedMount))
+		if mounts.config.repairSelectedMount then
+			local name, _, icon = C_MountJournal.GetMountInfoByID(mounts.config.repairSelectedMount)
+			self.repairMountsCombobox:ddSetSelectedText(name, icon)
+		else
+			self.repairMountsCombobox:ddSetSelectedText(L["Random available mount"])
+		end
 		self.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
 		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)

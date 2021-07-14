@@ -54,7 +54,7 @@ local function setTabs(frame, ...)
 			tab:SetPoint("LEFT", frame.tabs[i - 1], "RIGHT", -5, 0)
 		end
 
-		tab.text:SetText(L[select(i, ...)])
+		tab.text:SetText(L[tab.id])
 		tab.content:SetPoint("TOPLEFT", frame, "TOPLEFT")
 		tab.content:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
 		tab:SetScript("OnClick", tabClick)
@@ -328,7 +328,7 @@ function journal:ADDON_LOADED(addonName)
 				local button = buttons[i]
 				if mounts.config.gridToggle then
 					for j = 1, 3 do
-						local grid3Button = button.grid3list["mount"..j]
+						local grid3Button = button.grid3list.mounts[j]
 						if grid3Button.mountID == mountID then
 							return grid3Button
 						end
@@ -395,7 +395,7 @@ function journal:ADDON_LOADED(addonName)
 			child.grid3list = CreateFrame("BUTTON", nil, child, "MJGrid3MountListButtonTemplate")
 			child.grid3list:SetPoint("LEFT", -41, 0)
 			for i = 1, 3 do
-				local btn = child.grid3list["mount"..i]
+				local btn = child.grid3list.mounts[i]
 				btn.fly:SetScript("OnClick", typeClick)
 				btn.ground:SetScript("OnClick", typeClick)
 				btn.swimming:SetScript("OnClick", typeClick)
@@ -863,7 +863,7 @@ function journal:grid3UpdateMountList()
 	for i, btn in ipairs(scrollFrame.buttons) do
 		for j = 1, 3 do
 			local index = (offset + i - 1) * 3 + j
-			local btnGrid = btn.grid3list["mount"..j]
+			local btnGrid = btn.grid3list.mounts[j]
 
 			if index <= numDisplayedMounts then
 				local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected, mountID = C_MountJournal.GetDisplayedMountInfo(index)
@@ -1040,7 +1040,7 @@ function journal:configureJournal(isGrid)
 	for _, btn in ipairs(self.scrollButtons) do
 		if isGrid then
 			for i = 1, 3 do
-				self:updateMountToggleButton(btn.grid3list["mount"..i])
+				self:updateMountToggleButton(btn.grid3list.mounts[i])
 			end
 		else
 			self:updateMountToggleButton(btn)
@@ -1283,9 +1283,10 @@ do
 			end
 		end
 
-		sort(btn.maps, function(a, b) return a.name < b.name end)
+		local function sortFunc(a, b) return a.name < b.name end
+		sort(btn.maps, sortFunc)
 		for _, mapInfo in ipairs(btn.maps) do
-			sort(mapInfo.list, function(a, b) return a.name < b.name end)
+			sort(mapInfo.list, sortFunc)
 		end
 
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)

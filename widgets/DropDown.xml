@@ -8,7 +8,7 @@
 	<Frame name="MJDropDownButtonTemplate" inherits="MJDropDownScriptButton" virtual="true">
 		<Size x="135" y="24"/>
 		<Layers>
-			<Layer level="ARTWORK">
+			<Layer level="BACKGROUND">
 				<Texture parentKey="Left" file="Interface/Glues/CharacterCreate/CharacterCreate-LabelFrame">
 					<Size x="25" y="64"/>
 					<Anchors>
@@ -31,12 +31,19 @@
 					</Anchors>
 					<TexCoords left=".1953125" right=".8046875" top="0" bottom="1"/>
 				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
 				<FontString parentKey="Text" inherits="GameFontHighlightSmall" wordwrap="false" justifyH="RIGHT">
 					<Anchors>
 						<Anchor point="LEFT" relativeKey="$parent.Left" relativePoint="RIGHT" y="2"/>
 						<Anchor point="RIGHT" relativeKey="$parent.Right" relativePoint="LEFT" x="-17" y="2"/>
 					</Anchors>
 				</FontString>
+				<Texture parentKey="Icon">
+					<Anchors>
+						<Anchor point="RIGHT" relativeKey="$parent.Text" relativePoint="RIGHT"/>
+					</Anchors>
+				</Texture>
 			</Layer>
 		</Layers>
 		<Frames>
