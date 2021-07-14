@@ -408,7 +408,7 @@ config:SetScript("OnShow", function(self)
 			local name, _, icon = C_MountJournal.GetMountInfoByID(mounts.config.repairSelectedMount)
 			self.repairMountsCombobox:ddSetSelectedText(name, icon)
 		else
-			self.repairMountsCombobox:ddSetSelectedText(L["Random available mount"])
+			self.repairMountsCombobox:ddSetSelectedText(L["Random available mount"], 413588)
 		end
 		self.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
 		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
