@@ -109,7 +109,7 @@ function journal:init()
 
 	-- MOUNT COUNT
 	self.mountCount.collectedLabel:SetText(L["Collected:"])
-	self:setCountMounts()
+	self:updateCountMounts()
 
 	self:RegisterEvent("COMPANION_LEARNED")
 	self:RegisterEvent("COMPANION_UNLEARNED")
@@ -172,7 +172,6 @@ function journal:init()
 
 	-- SLOT BUTTON
 	self.slotButton = self.MountJournal.SlotButton
-	self.slotButtonBackup = {points = {}}
 	hooksecurefunc("MountJournal_UpdateEquipmentPalette", function()
 		if not self.slotButtonBackup.grabbed then return end
 		local effectsSuppressed = C_MountJournal.AreMountEquipmentEffectsSuppressed()
@@ -629,18 +628,8 @@ function journal:ADDON_LOADED(addonName)
 		self:UnregisterEvent("ADDON_LOADED")
 		self.ADDON_LOADED = nil
 
-		-- self.secureHideShow = CreateFrame("FRAME", nil, MountJournal, "SecureHandlerShowHideTemplate")
-		-- self.secureHideShow:SetAttribute("isHide", true)
-		-- self.secureHideShow:SetAttribute("_onhide", [=[
-		-- 	-- print(self:GetAttribute("asd"))
-		-- ]=])
-		-- self.secureHideShow:SetAttribute("_onshow", [=[
-		-- 	if self:GetAttribute("isHide") then
-		-- 		self:GetParent():Hide()
-		-- 	end
-		-- ]=])
-
 		self.mjFiltersBackup = {sources = {}}
+		self.slotButtonBackup = {points = {}}
 		self.MountJournal = MountJournal
 		hooksecurefunc(self.MountJournal, "SetShown", function(_, shown) self:setShown(shown) end)
 		CollectionsJournal:HookScript("OnHide", function() self:setShown(false) end)
@@ -648,8 +637,12 @@ function journal:ADDON_LOADED(addonName)
 		self.useMountsJournalButton = CreateFrame("CheckButton", nil, CollectionsJournal, "MJCheckButtonTemplate")
 		self.useMountsJournalButton:SetPoint("BOTTOMLEFT", 279, 1)
 		self.useMountsJournalButton:SetFrameLevel(1010)
+		self.useMountsJournalButton.Text:SetFontObject("GameFontNormal")
 		self.useMountsJournalButton.Text:SetText(addon)
 		self.useMountsJournalButton:SetChecked(not mounts.config.useDefaultJournal)
+		self.useMountsJournalButton:SetScript("OnEnable", function(btn)
+			btn.Text:SetVertexColor(NORMAL_FONT_COLOR:GetRGB())
+		end)
 		self.useMountsJournalButton:SetScript("OnClick", function(btn)
 			if InCombatLockdown() then return end
 			mounts.config.useDefaultJournal = not btn:GetChecked()
@@ -700,6 +693,7 @@ function journal:setShown(shown)
 		self.isShow = shown
 	end
 	local useDefaultJournal = mounts.config.useDefaultJournal
+	self.useMountsJournalButton:SetShown(self.isShow)
 
 	if self.isShow then
 		self:RegisterEvent("PLAYER_REGEN_DISABLED")
@@ -709,11 +703,9 @@ function journal:setShown(shown)
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 	end
 
-	self.useMountsJournalButton:SetShown(self.isShow)
-
 	if InCombatLockdown() then
 		self.useMountsJournalButton:Disable()
-		useDefaultJournal = true
+		return
 	else
 		self.useMountsJournalButton:Enable()
 	end
@@ -758,13 +750,14 @@ end
 
 
 function journal:grabSlotButton()
-	if not self.slotButtonBackup or self.slotButtonBackup.grabbed then return end
-	self.slotButtonBackup.grabbed = true
-	self.slotButtonBackup.parent = self.slotButton:GetParent()
-	self.slotButtonBackup.scale = self.slotButton:GetScale()
-	wipe(self.slotButtonBackup.points)
+	local backup = self.slotButtonBackup
+	if backup.grabbed then return end
+	backup.grabbed = true
+	backup.parent = self.slotButton:GetParent()
+	backup.scale = self.slotButton:GetScale()
+	wipe(backup.points)
 	for i = 1, self.slotButton:GetNumPoints() do
-		self.slotButtonBackup.points[i] = {self.slotButton:GetPoint(i)}
+		backup.points[i] = {self.slotButton:GetPoint(i)}
 	end
 
 	self.slotButton:SetParent(self.bgFrame)
@@ -772,31 +765,47 @@ function journal:grabSlotButton()
 	self.slotButton:ClearAllPoints()
 	self.slotButton:SetPoint("RIGHT", self.bgFrame.summon1, "LEFT", -20, 0)
 
+	self.slotButton.GetNumPoints = function()
+		return #backup.points
+	end
+	self.slotButton.GetPoint = function(_, i)
+		return unpack(backup.points[i])
+	end
 	self.slotButton.SetParent = function(_, parent)
-		self.slotButtonBackup.parent = parent
+		backup.parent = parent
 	end
 	self.slotButton.SetScale = function(_, scale)
-		self.slotButtonBackup.scale = scale
+		backup.scale = scale
 	end
-	self.slotButton.SetPoint = function()
-		wipe(self.slotButtonBackup.points)
-		for i = 1, self.slotButton:GetNumPoints() do
-			self.slotButtonBackup.points[i] = {self.slotButton:GetPoint(i)}
+	self.slotButton.ClearAllPoints = function()
+		wipe(backup.points)
+	end
+	self.slotButton.SetPoint = function(_, point, ...)
+		for i = 1, #backup.points do
+			if backup.points[i][1] == point then
+				backup.points[i] = {point, ...}
+				return
+			end
 		end
+		tinsert(backup.points, {point, ...})
 	end
 end
 
 
 function journal:restoreSlotButton()
-	if not (self.slotButtonBackup and self.slotButtonBackup.grabbed) then return end
-	self.slotButtonBackup.grabbed = false
+	local backup = self.slotButtonBackup
+	if not backup.grabbed then return end
+	backup.grabbed = false
+	self.slotButton.GetNumPoints = nil
+	self.slotButton.GetPoint = nil
 	self.slotButton.SetParent = nil
 	self.slotButton.SetScale = nil
+	self.slotButton.ClearAllPoints = nil
 	self.slotButton.SetPoint = nil
-	self.slotButton:SetParent(self.slotButtonBackup.parent)
-	self.slotButton:SetScale(self.slotButtonBackup.scale)
+	self.slotButton:SetParent(backup.parent)
+	self.slotButton:SetScale(backup.scale)
 	self.slotButton:ClearAllPoints()
-	for i, v in ipairs(self.slotButtonBackup.points) do
+	for i, v in ipairs(backup.points) do
 		self.slotButton:SetPoint(unpack(v))
 	end
 end
@@ -1092,7 +1101,18 @@ end
 
 
 function journal:setCountMounts()
-	local count, collected = 0, 0
+	if mounts.filters.hideOnChar then
+		self.mountCount.count:SetText(#self.mountIDs)
+		self.mountCount.collected:SetText(self.mountCount.collected.numWithHidden)
+	else
+		self.mountCount.count:SetText(self.mountCount.count.num)
+		self.mountCount.collected:SetText(self.mountCount.collected.num)
+	end
+end
+
+
+function journal:updateCountMounts()
+	local count, collected, collectedWithHidden = 0, 0, 0
 	for i = 1, #self.mountIDs do
 		local _,_,_,_,_,_,_,_,_, hideOnChar, isCollected = C_MountJournal.GetMountInfoByID(self.mountIDs[i])
 		if not hideOnChar then
@@ -1101,10 +1121,14 @@ function journal:setCountMounts()
 				collected = collected + 1
 			end
 		end
+		if isCollected then
+			collectedWithHidden = collectedWithHidden + 1
+		end
 	end
 	self.mountCount.count.num = count
-	self.mountCount.count:SetText(count)
-	self.mountCount.collected:SetText(collected)
+	self.mountCount.collected.num = collected
+	self.mountCount.collected.numWithHidden = collectedWithHidden
+	self:setCountMounts()
 end
 
 
@@ -1208,7 +1232,7 @@ end
 
 
 function journal:mountLearnedUpdate()
-	self:setCountMounts()
+	self:updateCountMounts()
 	self:updateIndexByMountID()
 end
 journal.COMPANION_LEARNED = journal.mountLearnedUpdate
@@ -1594,6 +1618,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 		info.text = L["hidden for character"]
 		info.func = function(_,_,_, value)
 			mounts.filters.hideOnChar = value
+			self:setCountMounts()
 			self:updateMountsList()
 		end
 		info.checked = function() return mounts.filters.hideOnChar end

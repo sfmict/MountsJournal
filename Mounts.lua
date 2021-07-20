@@ -309,16 +309,16 @@ end
 
 do
 	local durabilitySlots = {
-		CharacterHeadSlot:GetID(),
-		CharacterShoulderSlot:GetID(),
-		CharacterChestSlot:GetID(),
-		CharacterWristSlot:GetID(),
-		CharacterHandsSlot:GetID(),
-		CharacterWaistSlot:GetID(),
-		CharacterLegsSlot:GetID(),
-		CharacterFeetSlot:GetID(),
-		CharacterMainHandSlot:GetID(),
-		CharacterSecondaryHandSlot:GetID(),
+		INVSLOT_HEAD,
+		INVSLOT_SHOULDER,
+		INVSLOT_CHEST,
+		INVSLOT_WRIST,
+		INVSLOT_HAND,
+		INVSLOT_WAIST,
+		INVSLOT_LEGS,
+		INVSLOT_FEET,
+		INVSLOT_MAINHAND,
+		INVSLOT_OFFHAND,
 	}
 	function mounts:UPDATE_INVENTORY_DURABILITY()
 		local percent = (tonumber(self.config.useRepairMountsDurability) or 0) / 100
