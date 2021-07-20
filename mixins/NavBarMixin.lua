@@ -16,6 +16,7 @@ MJNavBarMixin = util.createFromEventsMixin()
 
 
 function MJNavBarMixin:onLoad()
+	self.overlay:SetFrameLevel(self:GetFrameLevel() + 50)
 	self.defMapID = MountsJournal.defMountsListID
 
 	self.dropDown = CreateFrame("FRAME", nil, self, "MJDropDownScriptButton")

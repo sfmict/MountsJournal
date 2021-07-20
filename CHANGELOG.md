@@ -1,3 +1,4 @@
 # MountsJournal
 
-* Added item durability control.
+* Recycled code.
+* Fixed compatibility with the majority of addons.

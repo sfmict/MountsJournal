@@ -30,6 +30,7 @@ function eventsMixin:on(event, func)
 		name = name,
 		func = func,
 	})
+	return self
 end
 
 
@@ -57,6 +58,7 @@ function eventsMixin:off(event, func)
 			self._events[event] = nil
 		end
 	end
+	return self
 end
 
 
@@ -67,6 +69,7 @@ function eventsMixin:event(event, ...)
 			handlerList[i].func(self, ...)
 		end
 	end
+	return self
 end
 
 

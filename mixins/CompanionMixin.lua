@@ -53,8 +53,9 @@ end
 
 
 function MJSetPetMixin:refresh()
-	local selectedSpellID = MountJournal.selectedSpellID
-	local petID = self.journal.petForMount[selectedSpellID]
+	if not self.journal.selectedMountID then return end
+	local _, spellID = C_MountJournal.GetMountInfoByID(self.journal.selectedMountID)
+	local petID = self.journal.petForMount[spellID]
 	self.id = petID
 
 	if not petID then
@@ -85,7 +86,7 @@ function MJSetPetMixin:refresh()
 			self.infoFrame.favorite:SetShown(favorite)
 			self.infoFrame:Show()
 		else
-			self.journal.petForMount[selectedSpellID] = nil
+			self.journal.petForMount[spellID] = nil
 			self.infoFrame:Hide()
 			self.id = nil
 		end
@@ -105,8 +106,8 @@ function MJCompanionsPanelMixin:onLoad()
 	self.journal = MountsJournalFrame
 
 	self:SetWidth(250)
-	self:SetPoint("TOPLEFT", MountJournal, "TOPRIGHT")
-	self:SetPoint("BOTTOMLEFT", MountJournal, "BOTTOMRIGHT")
+	self:SetPoint("TOPLEFT", self.journal.bgFrame, "TOPRIGHT")
+	self:SetPoint("BOTTOMLEFT", self.journal.bgFrame, "BOTTOMRIGHT")
 
 	self.filtersPanel.buttons = {}
 	self.typeFilter = {}
@@ -205,7 +206,8 @@ end
 
 
 function MJCompanionsPanelMixin:selectButtonClick(id)
-	self.journal.petForMount[MountJournal.selectedSpellID] = id
+	local _, spellID = C_MountJournal.GetMountInfoByID(self.journal.selectedMountID)
+	self.journal.petForMount[spellID] = id
 	self.journal:updateMountsList()
 	self:GetParent():refresh()
 	self:Hide()
@@ -217,7 +219,8 @@ function MJCompanionsPanelMixin:refresh()
 	local scrollFrame = self.listScroll
 	local offset = HybridScrollFrame_GetOffset(scrollFrame)
 	local numPets = #self.petFiltredList
-	local selectedPetID = self.journal.petForMount[MountJournal.selectedSpellID]
+	local _, spellID = C_MountJournal.GetMountInfoByID(self.journal.selectedMountID)
+	local selectedPetID = self.journal.petForMount[spellID]
 
 	for i, btn in ipairs(scrollFrame.buttons) do
 		local index = i + offset

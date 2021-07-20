@@ -25,47 +25,597 @@ journal.displayedMounts = setmetatable({}, metaMounts)
 journal.indexByMountID = setmetatable({}, metaMounts)
 
 
-local function tabClick(self)
-	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	local id = self.id
+function journal:init()
+	self.init = nil
 
-	for _, tab in ipairs(self:GetParent().tabs) do
-		if tab.id == id then
-			tab.selected:Show()
-			tab.content:Show()
-		else
-			tab.selected:Hide()
-			tab.content:Hide()
+	local texPath = "Interface/AddOns/MountsJournal/textures/"
+	self.searchText = ""
+	self.mountIDs = C_MountJournal.GetMountIDs()
+
+	-- FILTERS INIT
+	if mounts.filters.collected == nil then mounts.filters.collected = true end
+	if mounts.filters.notCollected == nil then mounts.filters.notCollected = true end
+	if mounts.filters.unusable == nil then mounts.filters.unusable = true end
+	local filtersMeta = {__index = function(self, key)
+		self[key] = true
+		return self[key]
+	end}
+	mounts.filters.types = setmetatable(mounts.filters.types or {}, filtersMeta)
+	mounts.filters.selected = setmetatable(mounts.filters.selected or {}, filtersMeta)
+	mounts.filters.sources = setmetatable(mounts.filters.sources or {}, filtersMeta)
+	mounts.filters.factions = setmetatable(mounts.filters.factions or {}, filtersMeta)
+	mounts.filters.pet = setmetatable(mounts.filters.pet or {}, filtersMeta)
+	mounts.filters.expansions = setmetatable(mounts.filters.expansions or {}, filtersMeta)
+	mounts.filters.tags = mounts.filters.tags or {
+		noTag = true,
+		withAllTags = false,
+		tags = {},
+	}
+	mounts.filters.sorting = mounts.filters.sorting or {
+		by = "name",
+		favoritesFirst = true,
+	}
+
+	-- BACKGROUND FRAME
+	self.bgFrame = CreateFrame("FRAME", "MountsJournalBackground", CollectionsJournal, "MJMountJournalFrameTemplate")
+	self.bgFrame:SetPoint("TOPLEFT", CollectionsJournal, "TOPLEFT", 0, 0)
+	self.bgFrame:SetTitle(MOUNTS)
+	self.bgFrame:SetPortraitToAsset("Interface/Icons/MountJournalPortrait")
+
+	self.bgFrame:SetScript("OnShow", function()
+		self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
+		self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
+		self.scrollFrame:update()
+		util.showHelpJournal()
+	end)
+
+	self.bgFrame:SetScript("OnHide", function()
+		self:UnregisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
+		self:UnregisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
+		self.mountDisplay:Show()
+		self.navBarBtn:SetChecked(false)
+		self.mapSettings:Hide()
+		self.worldMap:Hide()
+	end)
+
+	self.bgFrame.CloseButton:SetScript("OnClick", function()
+		if not InCombatLockdown() then
+			HideUIPanel(CollectionsJournal)
+		end
+	end)
+
+	self.mountCount = self.bgFrame.mountCount
+	self.achiev = self.bgFrame.achiev
+	self.navBarBtn = self.bgFrame.navBarBtn
+	self.navBar = self.bgFrame.navBar
+	self.worldMap = self.bgFrame.worldMap
+	self.mapSettings = self.bgFrame.mapSettings
+	self.existingLists = self.mapSettings.existingLists
+	self.filtersPanel = self.bgFrame.filtersPanel
+	self.filtersToggle = self.filtersPanel.btnToggle
+	self.gridToggleButton = self.filtersPanel.gridToggleButton
+	self.searchBox = self.filtersPanel.searchBox
+	self.filtersButton = self.filtersPanel.filtersButton
+	self.filtersBar = self.filtersPanel.filtersBar
+	self.shownPanel = self.bgFrame.shownPanel
+	self.leftInset = self.bgFrame.leftInset
+	self.mountDisplay = self.bgFrame.mountDisplay
+	self.mountDescriptionToggle = self.mountDisplay.info.mountDescriptionToggle
+	self.modelScene = self.mountDisplay.modelScene
+	self.mountListUpdateAnim = self.leftInset.updateAnimFrame.anim
+	self.scrollFrame = self.bgFrame.scrollFrame
+	self.summonButton = self.bgFrame.summonButton
+	self.profilesMenu = self.bgFrame.profilesMenu
+
+	-- MOUNT COUNT
+	self.mountCount.collectedLabel:SetText(L["Collected:"])
+	self:setCountMounts()
+
+	self:RegisterEvent("COMPANION_LEARNED")
+	self:RegisterEvent("COMPANION_UNLEARNED")
+
+	-- ACHIEVEMENT
+	self:ACHIEVEMENT_EARNED()
+	self.achiev:SetScript("OnClick", function()
+		ToggleAchievementFrame()
+		local i = 1
+		local button = _G["AchievementFrameCategoriesContainerButton"..i]
+		while button do
+			if button.categoryID == COLLECTION_ACHIEVEMENT_CATEGORY then
+				button:Click()
+			elseif button.categoryID == MOUNT_ACHIEVEMENT_CATEGORY then
+				button:Click()
+				return
+			end
+			i = i + 1
+			button = _G["AchievementFrameCategoriesContainerButton"..i]
+		end
+	end)
+	self:RegisterEvent("ACHIEVEMENT_EARNED")
+
+	-- MACRO BUTTONS
+	local summon1 = self.bgFrame.summon1
+	summon1:SetNormalTexture(413588)
+	summon1:SetAttribute("clickbutton", _G[config.secureButtonNameMount])
+	summon1:SetScript("OnDragStart", function()
+		if InCombatLockdown() then return end
+		if not GetMacroInfo(config.macroName) then
+			config:createMacro(config.macroName, config.secureButtonNameMount, 413588)
+		end
+		PickupMacro(config.macroName)
+	end)
+	summon1:SetScript("OnEnter", function(btn)
+		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+		GameTooltip:SetText(addon.." \""..SUMMONS.." 1\"", 1, 1, 1, 1)
+		GameTooltip:AddLine(L["Normal mount summon"])
+		GameTooltip:AddLine("\nMacro: /click "..config.secureButtonNameMount)
+		GameTooltip:Show()
+	end)
+
+	local summon2 = self.bgFrame.summon2
+	summon2:SetNormalTexture(631718)
+	summon2:SetAttribute("clickbutton", _G[config.secureButtonNameSecondMount])
+	summon2:SetScript("OnDragStart", function()
+		if InCombatLockdown() then return end
+		if not GetMacroInfo(config.secondMacroName) then
+			config:createMacro(config.secondMacroName, config.secureButtonNameSecondMount, 631718)
+		end
+		PickupMacro(config.secondMacroName)
+	end)
+	summon2:SetScript("OnEnter", function(btn)
+		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+		GameTooltip:SetText(addon.." \""..SUMMONS.." 2\"", 1, 1, 1, 1)
+		GameTooltip:AddLine(L["SecondMountTooltipDescription"]:gsub("^\n", ""):gsub("\n\n", "\n"), 1, .82, 0, 1, true)
+		GameTooltip:AddLine("\nMacro: /click "..config.secureButtonNameSecondMount)
+		GameTooltip:Show()
+	end)
+
+	-- SLOT BUTTON
+	self.slotButton = self.MountJournal.SlotButton
+	self.slotButtonBackup = {points = {}}
+	hooksecurefunc("MountJournal_UpdateEquipmentPalette", function()
+		if not self.slotButtonBackup.grabbed then return end
+		local effectsSuppressed = C_MountJournal.AreMountEquipmentEffectsSuppressed()
+		local locked = not C_PlayerInfo.CanPlayerUseMountEquipment()
+		self.slotButton:DesaturateHierarchy((effectsSuppressed or locked) and 1 or 0)
+	end)
+
+	-- NAVBAR BUTTON
+	self.navBarBtn:HookScript("OnClick", function(btn)
+		local checked = btn:GetChecked()
+		self.mountDisplay:SetShown(not checked)
+		self.worldMap:SetShown(checked)
+		self.mapSettings:SetShown(checked)
+	end)
+	self.navBarBtn:SetScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT", -4, -32)
+		GameTooltip:SetText(L["Map / Model"])
+		GameTooltip:Show()
+	end)
+	self.navBarBtn:SetScript("OnLeave", function() GameTooltip_Hide() end)
+
+	-- NAVBAR
+	self.navBar:on("MAP_CHANGE", function()
+		self:setEditMountsList()
+		self:updateMountsList()
+		self:updateMapSettings()
+
+		self.mountListUpdateAnim:Stop()
+		self.mountListUpdateAnim:Play()
+	end)
+
+	-- MAP SETTINGS
+	self.mapSettings:SetScript("OnShow", function() self:updateMapSettings() end)
+	self.mapSettings.dungeonRaidBtn:SetText(L["Dungeons and Raids"])
+	self.mapSettings.CurrentMap:SetText(L["Current Location"])
+	self.mapSettings.CurrentMap:SetScript("OnClick", function()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		self.navBar:setCurrentMap()
+	end)
+	self.mapSettings.hint.tooltip = L["ZoneSettingsTooltip"]
+	self.mapSettings.hint.tooltipDescription = L["ZoneSettingsTooltipDescription"]
+	self.mapSettings.Flags.Text:SetText(L["Enable Flags"])
+	self.mapSettings.Flags:HookScript("OnClick", function(check) self:setFlag("enableFlags", check:GetChecked()) end)
+	self.mapSettings.Ground = util.createCheckboxChild(L["Ground Mounts Only"], self.mapSettings.Flags)
+	self.mapSettings.Ground:HookScript("OnClick", function(check) self:setFlag("groundOnly", check:GetChecked()) end)
+	self.mapSettings.WaterWalk = util.createCheckboxChild(L["Water Walking"], self.mapSettings.Flags)
+	self.mapSettings.WaterWalk.tooltipText = L["Water Walking"]
+	self.mapSettings.WaterWalk.tooltipRequirement = L["WaterWalkFlagDescription"]
+	self.mapSettings.WaterWalk:HookScript("OnClick", function(check) self:setFlag("waterWalkOnly", check:GetChecked()) end)
+	self.mapSettings.HerbGathering = util.createCheckboxChild(L["Herb Gathering"], self.mapSettings.Flags)
+	self.mapSettings.HerbGathering.tooltipText = L["Herb Gathering"]
+	self.mapSettings.HerbGathering.tooltipRequirement = L["HerbGatheringFlagDescription"]
+	self.mapSettings.HerbGathering:HookScript("OnClick", function(check) self:setFlag("herbGathering", check:GetChecked()) end)
+	self.mapSettings.listFromMap.Text:SetText(L["ListMountsFromZone"])
+	self.mapSettings.listFromMap.maps = {}
+	self.mapSettings.listFromMap:SetScript("OnClick", function(btn) self:listFromMapClick(btn) end)
+	self.mapSettings.listFromMap:ddSetInit(function(...) self:listFromMapInit(...) end, "menu")
+	self.mapSettings.relationClear:SetScript("OnClick", function()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		self.currentList.listFromID = nil
+		self:getRemoveMountList(self.navBar.mapID)
+		self:setEditMountsList()
+		self:updateMountsList()
+		self:updateMapSettings()
+		-- mounts:setMountsList()
+		self.existingLists:refresh()
+
+		self.mountListUpdateAnim:Stop()
+		self.mountListUpdateAnim:Play()
+	end)
+
+	-- EXISTING LISTS TOGGLE
+	self.mapSettings.existingListsToggle:HookScript("OnClick", function(btn)
+		self.existingLists:SetShown(btn:GetChecked())
+	end)
+
+
+	-- SCROLL FRAME
+	self.scrollFrame.scrollBar.doNotHide = true
+	self.scrollFrame.scrollBar:SetPoint("TOPLEFT", self.scrollFrame, "TOPRIGHT", 1, -12)
+	self.scrollFrame.scrollBar:SetPoint("BOTTOMLEFT", self.scrollFrame, "BOTTOMRIGHT", 4, 11)
+	HybridScrollFrame_CreateButtons(self.scrollFrame, "MJMountListPanelTemplate", 2, 0)
+
+	local function typeClick(btn) self:mountToggle(btn) end
+	local function dragClick(btn, mouse) self.tags:dragButtonClick(btn, mouse) end
+	local function btnClick(btn, mouse) self.tags:listItemClick(btn:GetParent(), btn, mouse) end
+	local function drag(btn) self.tags:dragMount(btn:GetParent().index) end
+	local function grid3Click(btn, mouse) self.tags:listItemClick(btn, btn, mouse) end
+	local function grid3Drag(btn) self.tags:dragMount(btn.index) end
+
+	for _, child in ipairs(self.scrollFrame.buttons) do
+		child.defaultList.dragButton:SetScript("OnClick", dragClick)
+		child.defaultList.dragButton:SetScript("OnDragStart", drag)
+		child.defaultList.btn:SetScript("OnClick", btnClick)
+		child.defaultList.fly:SetScript("OnClick", typeClick)
+		child.defaultList.ground:SetScript("OnClick", typeClick)
+		child.defaultList.swimming:SetScript("OnClick", typeClick)
+		for i, btn in ipairs(child.grid3List.mounts) do
+			btn:SetScript("OnClick", grid3Click)
+			btn:SetScript("OnDragStart", grid3Drag)
+			btn.fly:SetScript("OnClick", typeClick)
+			btn.ground:SetScript("OnClick", typeClick)
+			btn.swimming:SetScript("OnClick", typeClick)
 		end
 	end
-end
 
+	self.default_UpdateMountList = function(...) self:defaultUpdateMountList(...) end
+	self.grid3_UpdateMountList = function(...) self:grid3UpdateMountList(...) end
+	self:setScrollGridMounts(mounts.config.gridToggle)
 
-local function setTabs(frame, ...)
-	frame.tabs = {}
+	-- FILTERS BAR
+	self.filtersBar.clear:SetScript("OnClick", function() self:clearBtnFilters() end)
 
-	for i = 1, select("#", ...) do
-		local tab = CreateFrame("BUTTON", nil, frame, "MJTabTemplate")
-		tab.id = select(i, ...)
+	local function tabClick(self)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		local id = self.id
 
-		if i == 1 then
-			tab:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", 4, -4)
-		else
-			tab:SetPoint("LEFT", frame.tabs[i - 1], "RIGHT", -5, 0)
+		for _, tab in ipairs(self:GetParent().tabs) do
+			if tab.id == id then
+				tab.selected:Show()
+				tab.content:Show()
+			else
+				tab.selected:Hide()
+				tab.content:Hide()
+			end
+		end
+	end
+
+	local function setTabs(frame, ...)
+		frame.tabs = {}
+
+		for i = 1, select("#", ...) do
+			local tab = CreateFrame("BUTTON", nil, frame, "MJTabTemplate")
+			tab.id = select(i, ...)
+
+			if i == 1 then
+				tab:SetPoint("BOTTOMLEFT", frame, "TOPLEFT", 4, -4)
+			else
+				tab:SetPoint("LEFT", frame.tabs[i - 1], "RIGHT", -5, 0)
+			end
+
+			tab.text:SetText(L[tab.id])
+			tab.content:SetPoint("TOPLEFT", frame, "TOPLEFT")
+			tab.content:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
+			tab:SetScript("OnClick", tabClick)
+
+			frame[tab.id] = tab.content
+			tinsert(frame.tabs, tab)
 		end
 
-		tab.text:SetText(L[tab.id])
-		tab.content:SetPoint("TOPLEFT", frame, "TOPLEFT")
-		tab.content:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT")
-		tab:SetScript("OnClick", tabClick)
+		if #frame.tabs ~= 0 then
+			tabClick(frame.tabs[1])
+		end
+	end
+	setTabs(self.filtersBar, "types", "selected", "sources")
 
-		frame[tab.id] = tab.content
-		tinsert(frame.tabs, tab)
+	-- FILTERS BTN TOGGLE
+	self.filtersToggle.vertical = true
+	self.filtersToggle:SetChecked(mounts.config.filterToggle)
+
+	self.filtersToggle.setFiltersToggleCheck = function()
+		if mounts.config.filterToggle then
+			self.filtersPanel:SetHeight(84)
+			self.filtersBar:Show()
+		else
+			self.filtersPanel:SetHeight(29)
+			self.filtersBar:Hide()
+		end
+	end
+	self.filtersToggle.setFiltersToggleCheck()
+
+	self.filtersToggle:HookScript("OnClick", function(btn)
+		mounts.config.filterToggle = btn:GetChecked()
+		btn.setFiltersToggleCheck()
+	end)
+
+	-- GRID TOGGLE BUTTON
+	self.gridToggleButton:SetChecked(mounts.config.gridToggle)
+
+	function self.gridToggleButton:setCoordIcon()
+		if self:GetChecked() then
+			self.icon:SetTexCoord(0, .625, 0, .25)
+		else
+			self.icon:SetTexCoord(0, .625, .28125, .5325)
+		end
+	end
+	self.gridToggleButton:setCoordIcon()
+
+	self.gridToggleButton:SetScript("OnClick", function(btn)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		local checked = btn:GetChecked()
+		mounts.config.gridToggle = checked
+		btn:setCoordIcon()
+		self:setScrollGridMounts(checked)
+	end)
+
+	-- MOUNT DESCRIPTION TOGGLE
+	self.mountDescriptionToggle.vertical = true
+	self.mountDescriptionToggle:SetChecked(mounts.config.mountDescriptionToggle)
+
+	local function setShownDescription(btn)
+		local checked = btn:GetChecked()
+		self.mountDisplay.info.lore:SetShown(checked)
+		self.mountDisplay.info.source:SetShown(checked)
+		mounts.config.mountDescriptionToggle = checked
+
+		local activeCamera = self.modelScene.activeCamera
+		if activeCamera then
+			activeCamera.yOffset = activeCamera.yOffset + (checked and 40 or -40)
+		end
+	end
+	setShownDescription(self.mountDescriptionToggle)
+	self.mountDescriptionToggle:HookScript("OnClick", setShownDescription)
+
+	-- SEARCH BOX
+	self.searchBox:HookScript("OnTextChanged", function(editBox)
+		self.searchText = editBox:GetText()
+		self:updateMountsList()
+	end)
+	self.searchBox:SetScript("OnHide", function(editBox)
+		editBox:SetText("")
+	end)
+
+	-- FILTERS BUTTON
+	self.filtersButton:ddSetInit(function(...) self:filterDropDown_Initialize(...) end, "menu")
+	self.filtersButton:SetScript("OnClick", function(self)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		self:dropDownToggle(1, nil, self, 74, 15)
+	end)
+
+	-- FILTERS BUTTONS
+	local function CreateButtonFilter(id, parent, width, height, texture, tooltip)
+		local btn = CreateFrame("CheckButton", nil, parent, width == height and "MJFilterButtonSquareTemplate" or "MJFilterButtonRectangleTemplate")
+		btn.id = id
+		btn:SetSize(width, height)
+		if id == 1 then
+			btn:SetPoint("LEFT", 5, 0)
+			parent.childs = {}
+		else
+			btn:SetPoint("LEFT", parent.childs[#parent.childs], "RIGHT")
+		end
+		tinsert(parent.childs, btn)
+
+		btn.icon:SetTexture(texture.path)
+		btn.icon:SetSize(texture.width, texture.height)
+		if texture.texCoord then btn.icon:SetTexCoord(unpack(texture.texCoord)) end
+
+		btn:SetScript("OnEnter", function(btn)
+			GameTooltip:SetOwner(btn, "ANCHOR_BOTTOM")
+			GameTooltip:SetText(tooltip)
+			GameTooltip:Show()
+		end)
+		btn:SetScript("OnLeave", function()
+			GameTooltip:Hide()
+		end)
+		btn:SetScript("OnClick", function(btn)
+			self:setBtnFilters(btn:GetParent():GetParent().id)
+		end)
 	end
 
-	if #frame.tabs ~= 0 then
-		tabClick(frame.tabs[1])
+	-- FILTERS TYPES BUTTONS
+	local typesTextures = {
+		{path = texPath.."fly", width = 32, height = 16},
+		{path = texPath.."ground", width = 32, height = 16},
+		{path = texPath.."swimming", width = 32, height = 16},
+	}
+
+	for i = 1, #typesTextures do
+		CreateButtonFilter(i, self.filtersBar.types, 83.3333, 25, typesTextures[i], L["MOUNT_TYPE_"..i])
 	end
+
+	-- FILTERS SELECTED BUTTONS
+	typesTextures[4] = {path = "Interface/BUTTONS/UI-GROUPLOOT-PASS-DOWN", width = 16, height = 16}
+	for i = 1, #typesTextures do
+		CreateButtonFilter(i, self.filtersBar.selected, 62.5, 25, typesTextures[i], L["MOUNT_TYPE_"..i])
+	end
+
+	-- FILTERS SOURCES BUTTONS
+	local sourcesTextures = {
+		{path = texPath.."sources", texCoord = {0, .25, 0, .25}, width = 20, height = 20},
+		{path = texPath.."sources", texCoord = {.25, .5, 0, .25}, width = 20, height = 20},
+		{path = texPath.."sources", texCoord = {.5, .75, 0, .25}, width = 20, height = 20},
+		{path = texPath.."sources", texCoord = {.75, 1, 0, .25}, width = 20, height = 20},
+		nil,
+		{path = texPath.."sources", texCoord = {.25, .5, .25, .5}, width = 20, height = 20},
+		{path = texPath.."sources", texCoord = {.5, .75, .25, .5}, width = 20, height = 20},
+		{path = texPath.."sources", texCoord = {.75, 1, .25, .5}, width = 20, height = 20},
+		{path = texPath.."sources", texCoord = {0, .25, .5, .75}, width = 20, height = 20},
+		{path = texPath.."sources", texCoord = {.25, .5, .5, .75}, width = 20, height = 20},
+		{path = texPath.."sources", texCoord = {.5, .75, .5, .75}, width = 20, height = 20},
+	}
+
+	for i = 1, #sourcesTextures do
+		if sourcesTextures[i] then
+			CreateButtonFilter(i, self.filtersBar.sources, 25, 25, sourcesTextures[i], _G["BATTLE_PET_SOURCE_"..i])
+		end
+	end
+
+	-- SHOWN PANEL
+	self.shownPanel.text:SetText(L["Shown:"])
+	self.shownPanel.clear:SetScript("OnClick", function() self:clearAllFilters() end)
+
+	-- MODEL SCENE
+	hooksecurefunc(self.modelScene, "SetActiveCamera", function(self)
+		journal:event("SET_ACTIVE_CAMERA", self.activeCamera)
+	end)
+
+	local modelControl = self.modelScene.modelControl
+	modelControl.zoomIn.icon:SetTexCoord(.57812500, .82812500, .14843750, .27343750)
+	modelControl.zoomOut.icon:SetTexCoord(.29687500, .54687500, .00781250, .13281250)
+	modelControl.panButton.icon:SetTexCoord(.29687500, .54687500, .28906250, .41406250)
+	modelControl.rotateLeftButton.icon:SetTexCoord(.01562500, .26562500, .28906250, .41406250)
+	modelControl.rotateRightButton.icon:SetTexCoord(.57812500, .82812500, .28906250, .41406250)
+	modelControl.rotateUpButton.icon:SetTexCoord(.01562500, .26562500, .28906250, .41406250)
+	modelControl.rotateUpButton.icon:SetRotation(-math.pi / 1.6, .5, .43)
+	modelControl.rotateDownButton.icon:SetTexCoord(.57812500, .82812500, .41406250, .28906250)
+	modelControl.rotateDownButton.icon:SetRotation(-math.pi / 1.6)
+
+	modelControl.panButton:HookScript("OnMouseDown", function(self)
+		self:GetParent():GetParent().isRightButtonDown = true
+		MJModelPanningFrame:Show()
+	end)
+	modelControl.panButton:HookScript("OnMouseUp", function(self)
+		self:GetParent():GetParent().isRightButtonDown = false
+		MJModelPanningFrame:Hide()
+	end)
+
+	local function modelSceneControlOnUpdate(self, elapsed)
+		self:GetParent():GetParent().activeCamera:HandleMouseMovement(self.cmd, elapsed * self.delta, self.snapToValue)
+	end
+	local function modelSceneControlOnMouseDown(self)
+		self:SetScript("OnUpdate", modelSceneControlOnUpdate)
+	end
+	local function modelSceneControlOnMouseUp(self)
+		self:SetScript("OnUpdate", nil)
+	end
+
+	modelControl.zoomIn:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
+	modelControl.zoomIn:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
+	modelControl.zoomOut:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
+	modelControl.zoomOut:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
+	modelControl.rotateLeftButton:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
+	modelControl.rotateLeftButton:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
+	modelControl.rotateRightButton:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
+	modelControl.rotateRightButton:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
+	modelControl.rotateUpButton:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
+	modelControl.rotateUpButton:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
+	modelControl.rotateDownButton:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
+	modelControl.rotateDownButton:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
+
+	modelControl.reset:SetScript("OnClick", function(self)
+		self:GetParent():GetParent().activeCamera:resetPosition()
+	end)
+
+	-- PLAYER SHOW BUTTON
+	local playerToggle = self.modelScene.playerToggle
+	playerToggle:SetChecked(GetCVarBool("mountJournalShowPlayer"))
+	function playerToggle:setPortrait() SetPortraitTexture(self.portrait, "player") end
+	playerToggle:SetScript("OnEvent", playerToggle.setPortrait)
+	playerToggle:SetScript("OnShow", function(self)
+		self:setPortrait()
+		self:RegisterUnitEvent("UNIT_PORTRAIT_UPDATE", "player")
+	end)
+	playerToggle:SetScript("OnHide", function(self)
+		self:UnregisterEvent("UNIT_PORTRAIT_UPDATE")
+	end)
+	playerToggle:SetScript("OnClick", function(btn)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		SetCVar("mountJournalShowPlayer", btn:GetChecked() and 1 or 0)
+		self:updateMountDisplay(true)
+		self.modelScene.animationsCombobox:replayAnimation()
+	end)
+
+	-- SUMMON BUTTON
+	self.summonButton:SetScript("OnEnter", function(btn)
+		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+		GameTooltip:SetText(btn:GetText(), HIGHLIGHT_FONT_COLOR:GetRGB())
+
+		local needsFanFare = self.selectedMountID and C_MountJournal.NeedsFanfare(self.selectedMountID)
+		if needsFanFare then
+			GameTooltip_AddNormalLine(GameTooltip, MOUNT_UNWRAP_TOOLTIP, true)
+		else
+			GameTooltip_AddNormalLine(GameTooltip, MOUNT_SUMMON_TOOLTIP, true)
+		end
+
+		if self.selectedMountID ~= nil then
+			local checkIndoors = true
+			local isUsable, errorText = C_MountJournal.GetMountUsabilityByID(self.selectedMountID, checkIndoors)
+			if errorText ~= nil then
+				GameTooltip_AddErrorLine(GameTooltip, errorText, true)
+			end
+		end
+
+		GameTooltip:Show()
+	end)
+	self.summonButton:SetScript("OnClick", function()
+		if self.selectedMountID then
+			self:useMount(self.selectedMountID)
+		end
+	end)
+
+	-- PROFILES
+	self.profilesMenu:on("UPDATE_PROFILE", function(_, changeProfile)
+		mounts:setDB()
+		self:setEditMountsList()
+		self:updateMountsList()
+		self:updateMapSettings()
+		self.existingLists:refresh()
+
+		if changeProfile then
+			self.mountListUpdateAnim:Stop()
+			self.mountListUpdateAnim:Play()
+		end
+	end)
+
+	-- SETTINGS BUTTON
+	self.bgFrame.btnConfig:SetText(L["Settings"])
+	self.bgFrame.btnConfig:SetScript("OnClick", function() config:openConfig() end)
+
+	-- FANFARE
+	hooksecurefunc(C_MountJournal, "ClearFanfare", function(mountID)
+		self:sortMounts()
+		if self.selectedMountID == mountID then
+			self:updateMountDisplay()
+			if self.modelScene:GetActorByTag("wrapped"):GetAlpha() == 1 then
+				self.modelScene:StartUnwrapAnimation()
+			end
+		end
+	end)
+
+	-- MODULES INIT
+	self:event("MODULES_INIT"):off("MODULES_INIT")
+
+	-- ARROW BIND
+	self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
+
+	-- UPDATES
+	self:setEditMountsList()
+	self:updateBtnFilters()
+	self:sortMounts()
+	self:updateMountDisplay()
+	self.bgFrame:GetScript("OnShow")(self.bgFrame)
+	C_Timer.After(0, function() self:selectMount(1) end)
 end
 
 
@@ -77,732 +627,177 @@ function journal:ADDON_LOADED(addonName)
 	if addonName == "Blizzard_Collections" and select(2, IsAddOnLoaded(addon))
 	or addonName == addon and select(2, IsAddOnLoaded("Blizzard_Collections")) then
 		self:UnregisterEvent("ADDON_LOADED")
+		self.ADDON_LOADED = nil
 
-		local function void() end
-		local function disableMethods(frame)
-			frame.SetSize = void
-			frame.SetWidth = void
-			frame.SetHeight = void
-			frame.ClearAllPoints = void
-			frame.SetPoint = void
-		end
+		-- self.secureHideShow = CreateFrame("FRAME", nil, MountJournal, "SecureHandlerShowHideTemplate")
+		-- self.secureHideShow:SetAttribute("isHide", true)
+		-- self.secureHideShow:SetAttribute("_onhide", [=[
+		-- 	-- print(self:GetAttribute("asd"))
+		-- ]=])
+		-- self.secureHideShow:SetAttribute("_onshow", [=[
+		-- 	if self:GetAttribute("isHide") then
+		-- 		self:GetParent():Hide()
+		-- 	end
+		-- ]=])
 
-		self.searchText = ""
-		local texPath = "Interface/AddOns/MountsJournal/textures/"
+		self.mjFiltersBackup = {sources = {}}
 		self.MountJournal = MountJournal
-		local mountDisplay = self.MountJournal.MountDisplay
-		self.modelScene = mountDisplay.ModelScene
-		self.mountIDs = C_MountJournal.GetMountIDs()
-		self.searchBox = self.MountJournal.searchBox
-		self.scrollFrame = self.MountJournal.ListScrollFrame
-		self.scrollButtons = self.scrollFrame.buttons
-		self.leftInset = self.MountJournal.LeftInset
-		self.rightInset = self.MountJournal.RightInset
-
-		-- FILTERS INIT
-		if mounts.filters.collected == nil then mounts.filters.collected = true end
-		if mounts.filters.notCollected == nil then mounts.filters.notCollected = true end
-		if mounts.filters.unusable == nil then mounts.filters.unusable = true end
-		local filtersMeta = {__index = function(self, key)
-			self[key] = true
-			return self[key]
-		end}
-		mounts.filters.types = setmetatable(mounts.filters.types or {}, filtersMeta)
-		mounts.filters.selected = setmetatable(mounts.filters.selected or {}, filtersMeta)
-		mounts.filters.sources = setmetatable(mounts.filters.sources or {}, filtersMeta)
-		mounts.filters.factions = setmetatable(mounts.filters.factions or {}, filtersMeta)
-		mounts.filters.pet = setmetatable(mounts.filters.pet or {}, filtersMeta)
-		mounts.filters.expansions = setmetatable(mounts.filters.expansions or {}, filtersMeta)
-		mounts.filters.tags = mounts.filters.tags or {
-			noTag = true,
-			withAllTags = false,
-			tags = {},
-		}
-		mounts.filters.sorting = mounts.filters.sorting or {
-			by = "name",
-			favoritesFirst = true,
-		}
-
-		self.MountJournal:UnregisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
-		self.MountJournal:UnregisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
-		self:RegisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
-		self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
-
-		-- FILTERS BUTTON
-		local filtersButton = MountJournalFilterButton
-		util.setMixin(filtersButton, MJDropDownButtonMixin)
-		filtersButton.MJNoGlobalMouseEvent = true
-		filtersButton:SetScript("OnHide", filtersButton.onHide)
-		filtersButton:ddSetInit(function(...) self:filterDropDown_Initialize(...) end, "menu")
-		filtersButton:SetScript("OnMouseDown", UIMenuButtonStretchMixin.OnMouseDown)
-		filtersButton:SetScript("OnClick", function(self)
-			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			self:dropDownToggle(1, nil, self, 74, 15)
-		end)
-
-		-- MOUNT LIST UPDATE ANIMATION
-		self.leftInset.updateAnimFrame = CreateFrame("FRAME", nil, self.leftInset, "MJUpdateAnimFrame")
-		self.mountListUpdateAnim = self.leftInset.updateAnimFrame.anim
-
-		-- MOUNT COUNT
-		local mountCount = self.MountJournal.MountCount
-		self.mountCount = mountCount
-		mountCount:SetPoint("TOPLEFT", 70, -25)
-		mountCount:SetHeight(34)
-		mountCount.Count:SetPoint("RIGHT", -10, 6)
-		mountCount.Label:SetPoint("LEFT", 10, 6)
-		mountCount.collected = mountCount:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-		mountCount.collected:SetPoint("RIGHT", -10, -6)
-		mountCount.collectedLabel = mountCount:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
-		mountCount.collectedLabel:SetPoint("LEFT", 10, -6)
-		mountCount.collectedLabel:SetText(L["Collected:"])
-
-		self:setCountMounts()
-		self:RegisterEvent("COMPANION_LEARNED")
-		self:RegisterEvent("COMPANION_UNLEARNED")
-
-		-- MOUNT EQUIPMENT
-		self.MountJournal.BottomLeftInset:Hide()
-		local slotButton = self.MountJournal.BottomLeftInset.SlotButton
-		slotButton:SetParent(self.MountJournal)
-		slotButton:SetPoint("LEFT", self.mountCount, "RIGHT", 4, 0)
-		slotButton:SetScale(.65)
-		hooksecurefunc("MountJournal_UpdateEquipmentPalette", function()
-			local effectsSuppressed = C_MountJournal.AreMountEquipmentEffectsSuppressed()
-			local locked = not C_PlayerInfo.CanPlayerUseMountEquipment()
-			slotButton:DesaturateHierarchy((effectsSuppressed or locked) and 1 or 0)
-		end)
-		self.leftInset:SetPoint("BOTTOMLEFT", self.MountJournal, "BOTTOMLEFT", 0, 26)
-		HybridScrollFrame_CreateButtons(self.scrollFrame, "MountListButtonTemplate", 44, 0)
-		self.rightInset:SetPoint("BOTTOMLEFT", self.leftInset, "BOTTOMRIGHT", 20, 0)
-
-		-- NAVBAR BUTTON
-		local navBarBtn = CreateFrame("CheckButton", nil, self.MountJournal, "MJMiniMapBtnTemplate")
-		self.navBarBtn = navBarBtn
-		navBarBtn:SetPoint("TOPRIGHT", -2, -60)
-		navBarBtn:HookScript("OnClick", function(btn)
-			local checked = btn:GetChecked()
-			mountDisplay:SetShown(not checked)
-			self.worldMap:SetShown(checked)
-			self.mapSettings:SetShown(checked)
-		end)
-		navBarBtn:SetScript("OnEnter", function()
-			GameTooltip:SetOwner(navBarBtn, "ANCHOR_RIGHT", -4, -32)
-			GameTooltip:SetText(L["Map / Model"])
-			GameTooltip:Show()
-		end)
-		navBarBtn:SetScript("OnLeave", function() GameTooltip_Hide() end)
-
-		-- NAVBAR
-		local navBar = CreateFrame("FRAME", nil, self.MountJournal, "MJNavBarTemplate")
-		self.navBar = navBar
-		navBar:SetPoint("TOPLEFT", 8, -60)
-		navBar:SetPoint("TOPRIGHT", navBarBtn, "TOPLEFT", 0, 0)
-		navBar:on("MAP_CHANGE", function()
-			self:setEditMountsList()
-			self:updateMountsList()
-			self:updateMapSettings()
-
-			self.mountListUpdateAnim:Stop()
-			self.mountListUpdateAnim:Play()
-		end)
-		self.rightInset:SetPoint("TOPRIGHT", navBarBtn, "BOTTOMRIGHT", -4, 0)
-
-		-- WORDL MAP
-		local worldMap = CreateFrame("FRAME", nil, self.MountJournal, "MJMapTemplate")
-		self.worldMap = worldMap
-		worldMap:SetPoint("TOPLEFT", self.rightInset)
-		worldMap:SetPoint("TOPRIGHT", self.rightInset)
-
-		-- MAP SETTINGS
-		local mapSettings = CreateFrame("FRAME", nil, self.MountJournal, "MJMapSettingsTemplate")
-		self.mapSettings = mapSettings
-		mapSettings:SetPoint("TOPLEFT", worldMap, "BOTTOMLEFT", 0, -30)
-		mapSettings:SetPoint("BOTTOMRIGHT", self.rightInset)
-		mapSettings:SetScript("OnShow", function() self:updateMapSettings() end)
-		mapSettings.dungeonRaidBtn:SetText(L["Dungeons and Raids"])
-		mapSettings.CurrentMap:SetText(L["Current Location"])
-		mapSettings.CurrentMap:SetScript("OnClick", function()
-			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			navBar:setCurrentMap()
-		end)
-		mapSettings.hint.tooltip = L["ZoneSettingsTooltip"]
-		mapSettings.hint.tooltipDescription = L["ZoneSettingsTooltipDescription"]
-		mapSettings.Flags.Text:SetText(L["Enable Flags"])
-		mapSettings.Flags:HookScript("OnClick", function(check) self:setFlag("enableFlags", check:GetChecked()) end)
-		mapSettings.Ground = util.createCheckboxChild(L["Ground Mounts Only"], mapSettings.Flags)
-		mapSettings.Ground:HookScript("OnClick", function(check) self:setFlag("groundOnly", check:GetChecked()) end)
-		mapSettings.WaterWalk = util.createCheckboxChild(L["Water Walking"], mapSettings.Flags)
-		mapSettings.WaterWalk.tooltipText = L["Water Walking"]
-		mapSettings.WaterWalk.tooltipRequirement = L["WaterWalkFlagDescription"]
-		mapSettings.WaterWalk:HookScript("OnClick", function(check) self:setFlag("waterWalkOnly", check:GetChecked()) end)
-		mapSettings.HerbGathering = util.createCheckboxChild(L["Herb Gathering"], mapSettings.Flags)
-		mapSettings.HerbGathering.tooltipText = L["Herb Gathering"]
-		mapSettings.HerbGathering.tooltipRequirement = L["HerbGatheringFlagDescription"]
-		mapSettings.HerbGathering:HookScript("OnClick", function(check) self:setFlag("herbGathering", check:GetChecked()) end)
-		mapSettings.listFromMap.Text:SetText(L["ListMountsFromZone"])
-		mapSettings.listFromMap.maps = {}
-		mapSettings.listFromMap:SetScript("OnClick", function(btn) self:listFromMapClick(btn) end)
-		mapSettings.listFromMap:ddSetInit(self.listFromMapInit, "menu")
-		mapSettings.relationClear:SetScript("OnClick", function()
-			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			self.currentList.listFromID = nil
-			self:getRemoveMountList(self.navBar.mapID)
-			self:setEditMountsList()
-			self:updateMountsList()
-			self:updateMapSettings()
-			-- mounts:setMountsList()
-			self.existingLists:refresh()
-
-			self.mountListUpdateAnim:Stop()
-			self.mountListUpdateAnim:Play()
-		end)
-
-		-- EXISTING LISTS TOGGLE
-		mapSettings.existingListsToggle:HookScript("OnClick", function(btn)
-			self.existingLists:SetShown(btn:GetChecked())
-		end)
-
-		-- EXISTING LISTS
-		self.existingLists = CreateFrame("FRAME", nil, mapSettings, "MJExistingListsPanelTemplate")
-		self.existingLists:SetPoint("TOPLEFT", self.MountJournal, "TOPRIGHT")
-		self.existingLists:SetPoint("BOTTOMLEFT", self.MountJournal, "BOTTOMRIGHT")
-
-		--MOUNTJOURNAL ONSHOW
-		self.MountJournal:HookScript("OnShow", function()
-			navBarBtn:SetChecked(false)
-			mountDisplay:Show()
-			self.mapSettings:Hide()
-			self.worldMap:Hide()
-			util.showHelpJournal()
-		end)
-
-		-- SETTINGS BUTTON
-		self.btnConfig = CreateFrame("BUTTON", "MountsJournalBtnConfig", self.MountJournal, "UIPanelButtonTemplate")
-		self.btnConfig:SetSize(80, 22)
-		self.btnConfig:SetPoint("BOTTOMRIGHT", -6, 4)
-		self.btnConfig:SetText(L["Settings"])
-		self.btnConfig:SetScript("OnClick", function() config:openConfig() end)
-
-		-- ACHIEVEMENT
-		self.achiev = CreateFrame("BUTTON", nil, self.MountJournal, "MJAchiev")
-		self.achiev:SetPoint("TOP", 0, -21)
-		self:ACHIEVEMENT_EARNED()
-		self.achiev:SetScript("OnClick", function()
-			ToggleAchievementFrame()
-			local i = 1
-			local button = _G["AchievementFrameCategoriesContainerButton"..i]
-			while button do
-				if button.categoryID == COLLECTION_ACHIEVEMENT_CATEGORY then
-					button:Click()
-				elseif button.categoryID == MOUNT_ACHIEVEMENT_CATEGORY then
-					button:Click()
-					return
-				end
-				i = i + 1
-				button = _G["AchievementFrameCategoriesContainerButton"..i]
-			end
-		end)
-		self:RegisterEvent("ACHIEVEMENT_EARNED")
-
-		-- PROFILES
-		self.profilesMenu = CreateFrame("Button", nil, self.MountJournal, "MJMenuButtonProfiles")
-		self.profilesMenu:SetPoint("LEFT", self.MountJournal.MountButton, "RIGHT", 6, 0)
-		self.profilesMenu:on("UPDATE_PROFILE", function(_, changeProfile)
-			mounts:setDB()
-			self:setEditMountsList()
-			self:updateMountsList()
-			self:updateMapSettings()
-			self.existingLists:refresh()
-
-			if changeProfile then
-				self.mountListUpdateAnim:Stop()
-				self.mountListUpdateAnim:Play()
-			end
-		end)
-
-		-- SELECTED BUTTONS
-		function MountJournal_GetMountButtonByMountID(mountID)
-			local buttons = self.scrollFrame.buttons
-			for i = 1, #buttons do
-				local button = buttons[i]
-				if mounts.config.gridToggle then
-					for j = 1, 3 do
-						local grid3Button = button.grid3list.mounts[j]
-						if grid3Button.mountID == mountID then
-							return grid3Button
-						end
-					end
-				else
-					if button.mountID == mountID then
-						return button
-					end
-				end
-			end
-		end
-
-		function MountJournal_SetSelected(mountID, spellID, button)
-			MountJournal.selectedMountID = mountID
-			MountJournal.selectedSpellID = spellID
-			MountJournal_UpdateMountList()
-			MountJournal_UpdateMountDisplay()
-
-			if not button then
-				button = MountJournal_GetMountButtonByMountID(mountID)
-			end
-			if not button or self.scrollFrame:GetBottom() >= button:GetTop() then
-				local index
-				for i = 1, #self.displayedMounts do
-					if mountID == self.displayedMounts[i] then
-						index = i
-						break
-					end
-				end
-				if index then
-					if mounts.config.gridToggle then index = math.ceil(index / 3) end
-					HybridScrollFrame_ScrollToIndex(self.scrollFrame, index, MountJournal_GetMountButtonHeight)
-				end
-			end
-
-			self:event("MOUNT_SELECT", mountID)
-		end
-
-		local function typeClick(btn) self:mountToggle(btn) end
-		local function grid3Click(btn, mouse) self.tags:listItemClick(btn:GetParent(), mouse) end
-		local function btnClick(btn, mouse) self.tags:listItemClick(btn, mouse) end
-		local function dragClick(btn, mouse) self.tags:dragButtonClick(btn, mouse) end
-
-		local function CreateButtonMountToggle(name, parent, pointX, pointY)
-			local btnFrame = CreateFrame("CheckButton", nil, parent, "MJSetMountToggleTemplate")
-			btnFrame:SetPoint("TOPRIGHT", pointX, pointY)
-			btnFrame:SetScript("OnClick", typeClick)
-			btnFrame.type = name
-			parent[name] = btnFrame
-			btnFrame.icon:SetTexture(texPath..name)
-		end
-
-		for _, child in ipairs(self.scrollButtons) do
-			child:SetWidth(child:GetWidth() - 25)
-			disableMethods(child)
-			child.name:SetWidth(child.name:GetWidth() - 18)
-			child.icon:SetPoint("LEFT", child, "LEFT", -41, 0)
-			child.icon:SetSize(40, 40)
-
-			CreateButtonMountToggle("fly", child, 25, -3)
-			CreateButtonMountToggle("ground", child, 25, -17)
-			CreateButtonMountToggle("swimming", child, 25, -31)
-
-			child.grid3list = CreateFrame("BUTTON", nil, child, "MJGrid3MountListButtonTemplate")
-			child.grid3list:SetPoint("LEFT", -41, 0)
-			for i = 1, 3 do
-				local btn = child.grid3list.mounts[i]
-				btn.fly:SetScript("OnClick", typeClick)
-				btn.ground:SetScript("OnClick", typeClick)
-				btn.swimming:SetScript("OnClick", typeClick)
-				btn.DragButton:SetScript("OnClick", grid3Click)
-			end
-
-			child:SetScript("OnClick", btnClick)
-			child.DragButton:SetScript("OnClick", dragClick)
-		end
-
-		-- FILTERS PANEL
-		local filtersPanel = CreateFrame("FRAME", nil, self.MountJournal, "InsetFrameTemplate")
-		self.filtersPanel = filtersPanel
-		filtersPanel:SetPoint("TOPLEFT", navBar, "BOTTOMLEFT", -4, -4)
-		filtersPanel:SetSize(280, 29)
-
-		self.searchBox:SetPoint("TOPLEFT", filtersPanel, "TOPLEFT", 54, -4)
-		self.searchBox:SetSize(131, 20)
-		filtersButton:SetPoint("TOPRIGHT", filtersPanel, "TOPRIGHT", -3, -4)
-		disableMethods(filtersButton)
-
-		-- FILTERS SHOWN PANEL
-		local shownPanel = CreateFrame("FRAME", nil, self.MountJournal, "InsetFrameTemplate")
-		self.shownPanel = shownPanel
-		shownPanel:SetPoint("TOPLEFT", filtersPanel, "BOTTOMLEFT", 0, -2)
-		shownPanel:SetSize(280, 26)
-
-		shownPanel.text = shownPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-		shownPanel.text:SetPoint("LEFT", 8, -1)
-		shownPanel.text:SetText(L["Shown:"])
-
-		shownPanel.count = shownPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-		shownPanel.count:SetPoint("LEFT", shownPanel.text, "RIGHT", 2, 0)
-
-		shownPanel.clear = CreateFrame("BUTTON", nil, shownPanel, "MJClearButtonTemplate")
-		shownPanel.clear:SetPoint("RIGHT", -5, 0)
-		shownPanel.clear:SetScript("OnClick", function() self:clearAllFilters() end)
-
-		-- SCROLL FRAME
-		self.scrollFrame:SetPoint("TOPLEFT", self.leftInset, "TOPLEFT", 3, -5)
-		self.scrollFrame.scrollBar:SetPoint("TOPLEFT", self.scrollFrame, "TOPRIGHT", 1, -12)
-
-		-- FILTERS BAR
-		local filtersBar = CreateFrame("FRAME", nil, filtersPanel, "MJFilterPanelTemplate")
-		self.filtersBar = filtersBar
-		filtersBar:SetSize(260, 35)
-		filtersBar:SetPoint("TOP", 0, -46)
-		setTabs(filtersBar, "types", "selected", "sources")
-
-		-- FILTERS CLEAR
-		filtersBar.clear = CreateFrame("BUTTON", nil, filtersBar, "MJClearButtonTemplate")
-		filtersBar.clear:SetPoint("BOTTOMRIGHT", filtersBar, "TOPRIGHT")
-		filtersBar.clear:SetScript("OnClick", function() self:clearBtnFilters() end)
-
-		-- FILTERS BUTTONS
-		local function CreateButtonFilter(id, parent, width, height, texture, tooltip)
-			local btn = CreateFrame("CheckButton", nil, parent, width == height and "MJFilterButtonSquareTemplate" or "MJFilterButtonRectangleTemplate")
-			btn.id = id
-			btn:SetSize(width, height)
-			if id == 1 then
-				btn:SetPoint("LEFT", 5, 0)
-				parent.childs = {}
-			else
-				btn:SetPoint("LEFT", parent.childs[#parent.childs], "RIGHT")
-			end
-			tinsert(parent.childs, btn)
-
-			btn.icon:SetTexture(texture.path)
-			btn.icon:SetSize(texture.width, texture.height)
-			if texture.texCoord then btn.icon:SetTexCoord(unpack(texture.texCoord)) end
-
-			btn:SetScript("OnEnter", function(btn)
-				GameTooltip:SetOwner(btn, "ANCHOR_BOTTOM")
-				GameTooltip:SetText(tooltip)
-				GameTooltip:Show()
-			end)
-			btn:SetScript("OnLeave", function()
-				GameTooltip:Hide()
-			end)
-			btn:SetScript("OnClick", function(btn)
-				self:setBtnFilters(btn:GetParent():GetParent().id)
-			end)
-		end
-
-		-- FILTERS TYPES BUTTONS
-		local typesTextures = {
-			{path = texPath.."fly", width = 32, height = 16},
-			{path = texPath.."ground", width = 32, height = 16},
-			{path = texPath.."swimming", width = 32, height = 16},
-		}
-
-		for i = 1, #typesTextures do
-			CreateButtonFilter(i, filtersBar.types, 83.3333, 25, typesTextures[i], L["MOUNT_TYPE_"..i])
-		end
-
-		-- FILTERS SELECTED BUTTONS
-		typesTextures[4] = {path = "Interface/BUTTONS/UI-GROUPLOOT-PASS-DOWN", width = 16, height = 16}
-		for i = 1, #typesTextures do
-			CreateButtonFilter(i, filtersBar.selected, 62.5, 25, typesTextures[i], L["MOUNT_TYPE_"..i])
-		end
-
-		-- FILTERS SOURCES BUTTONS
-		local sourcesTextures = {
-			{path = texPath.."sources", texCoord = {0, .25, 0, .25}, width = 20, height = 20},
-			{path = texPath.."sources", texCoord = {.25, .5, 0, .25}, width = 20, height = 20},
-			{path = texPath.."sources", texCoord = {.5, .75, 0, .25}, width = 20, height = 20},
-			{path = texPath.."sources", texCoord = {.75, 1, 0, .25}, width = 20, height = 20},
-			nil,
-			{path = texPath.."sources", texCoord = {.25, .5, .25, .5}, width = 20, height = 20},
-			{path = texPath.."sources", texCoord = {.5, .75, .25, .5}, width = 20, height = 20},
-			{path = texPath.."sources", texCoord = {.75, 1, .25, .5}, width = 20, height = 20},
-			{path = texPath.."sources", texCoord = {0, .25, .5, .75}, width = 20, height = 20},
-			{path = texPath.."sources", texCoord = {.25, .5, .5, .75}, width = 20, height = 20},
-			{path = texPath.."sources", texCoord = {.5, .75, .5, .75}, width = 20, height = 20},
-		}
-
-		for i = 1, #sourcesTextures do
-			if sourcesTextures[i] then
-				CreateButtonFilter(i, filtersBar.sources, 25, 25, sourcesTextures[i], _G["BATTLE_PET_SOURCE_"..i])
-			end
-		end
-
-		-- FILTERS BTN TOGGLE
-		self.btnToggle = CreateFrame("CheckButton", nil, filtersPanel, "MJArrowToggle")
-		self.btnToggle:SetPoint("TOPLEFT", 3, -3)
-		self.btnToggle.vertical = true
-		self.btnToggle:SetChecked(mounts.config.filterToggle)
-
-		function self.btnToggle:setBtnToggleCheck()
-			if mounts.config.filterToggle then
-				filtersPanel:SetHeight(84)
-				filtersBar:Show()
-			else
-				filtersPanel:SetHeight(29)
-				filtersBar:Hide()
-			end
-		end
-		self.btnToggle:setBtnToggleCheck()
-
-		self.btnToggle:HookScript("OnClick", function(btn)
-			mounts.config.filterToggle = btn:GetChecked()
-			btn:setBtnToggleCheck()
-		end)
-
-		-- GRID TOGGLE BUTTON
-		self.gridToggleButton = CreateFrame("CheckButton", nil, filtersPanel, "MJGridToggle")
-		self.gridToggleButton:SetPoint("LEFT", self.btnToggle, "RIGHT", -2, 0)
-		self.gridToggleButton:SetChecked(mounts.config.gridToggle)
-
-		function self.gridToggleButton:setCoordIcon()
-			if self:GetChecked() then
-				self.icon:SetTexCoord(0, .625, 0, .25)
-			else
-				self.icon:SetTexCoord(0, .625, .28125, .5325)
-			end
-		end
-		self.gridToggleButton:setCoordIcon()
-
-		self.gridToggleButton:SetScript("OnClick", function(btn)
-			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			local checked = btn:GetChecked()
-			mounts.config.gridToggle = checked
-			btn:setCoordIcon()
-			self:setScrollGridMounts(checked)
-		end)
-
-		-- MOUNT DESCRIPTION TOGGLE
-		local infoButton = mountDisplay.InfoButton
-		infoButton.New.Show = void
-		infoButton.NewGlow.Show = void
-		infoButton.Name:SetPoint("LEFT", infoButton.Icon, "RIGHT", 20, 0)
-
-		local mountDescriptionToggle = CreateFrame("CheckButton", nil, infoButton, "MJArrowToggle")
-		mountDescriptionToggle:SetPoint("LEFT", infoButton.Icon, "RIGHT", -2, 0)
-		mountDescriptionToggle:SetSize(20, 40)
-		mountDescriptionToggle.vertical = true
-		mountDescriptionToggle:SetChecked(mounts.config.mountDescriptionToggle)
-
-		local function setShownDescription(btn)
-			local checked = btn:GetChecked()
-			infoButton.Lore:SetShown(checked)
-			infoButton.Source:SetShown(checked)
-			mounts.config.mountDescriptionToggle = checked
-
-			local activeCamera = self.modelScene.activeCamera
-			if activeCamera then
-				activeCamera.yOffset = activeCamera.yOffset + (checked and 40 or -40)
-			end
-		end
-		setShownDescription(mountDescriptionToggle)
-		mountDescriptionToggle:HookScript("OnClick", setShownDescription)
-
-		-- PET SELECTION
-		infoButton.petSelectionBtn = CreateFrame("BUTTON", nil, infoButton, "MJSetPetButton")
-		infoButton.petSelectionBtn:SetPoint("LEFT", infoButton.Name, "RIGHT", 3, 0)
-
-		-- MODEL SCENE
-		self.modelScene.RotateLeftButton:Hide()
-		self.modelScene.RotateRightButton:Hide()
-		local modelControl = CreateFrame("FRAME", nil, self.modelScene, "MJControlFrameTemplate")
-		modelControl:SetPoint("BOTTOM", -70, 10)
-		modelControl.zoomIn.icon:SetTexCoord(.57812500, .82812500, .14843750, .27343750)
-		modelControl.zoomOut.icon:SetTexCoord(.29687500, .54687500, .00781250, .13281250)
-		modelControl.panButton.icon:SetTexCoord(.29687500, .54687500, .28906250, .41406250)
-		modelControl.rotateLeftButton.icon:SetTexCoord(.01562500, .26562500, .28906250, .41406250)
-		modelControl.rotateRightButton.icon:SetTexCoord(.57812500, .82812500, .28906250, .41406250)
-		modelControl.rotateUpButton.icon:SetTexCoord(.01562500, .26562500, .28906250, .41406250)
-		modelControl.rotateUpButton.icon:SetRotation(-math.pi / 1.6, .5, .43)
-		modelControl.rotateDownButton.icon:SetTexCoord(.57812500, .82812500, .41406250, .28906250)
-		modelControl.rotateDownButton.icon:SetRotation(-math.pi / 1.6)
-
-		hooksecurefunc(self.modelScene, "SetActiveCamera", function(self)
-			journal:event("SET_ACTIVE_CAMERA", self.activeCamera)
-		end)
-
-		modelControl.panButton:HookScript("OnMouseDown", function(self)
-			self:GetParent():GetParent().isRightButtonDown = true
-			MJModelPanningFrame:Show()
-		end)
-		modelControl.panButton:HookScript("OnMouseUp", function(self)
-			self:GetParent():GetParent().isRightButtonDown = false
-			MJModelPanningFrame:Hide()
-		end)
-
-		local function modelSceneControlOnUpdate(self, elapsed)
-			self:GetParent():GetParent().activeCamera:HandleMouseMovement(self.cmd, elapsed * self.delta, self.snapToValue)
-		end
-		local function modelSceneControlOnMouseDown(self)
-			self:SetScript("OnUpdate", modelSceneControlOnUpdate)
-		end
-		local function modelSceneControlOnMouseUp(self)
-			self:SetScript("OnUpdate", nil)
-		end
-
-		modelControl.zoomIn:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
-		modelControl.zoomIn:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
-		modelControl.zoomOut:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
-		modelControl.zoomOut:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
-		modelControl.rotateLeftButton:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
-		modelControl.rotateLeftButton:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
-		modelControl.rotateRightButton:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
-		modelControl.rotateRightButton:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
-		modelControl.rotateUpButton:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
-		modelControl.rotateUpButton:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
-		modelControl.rotateDownButton:HookScript("OnMouseDown", modelSceneControlOnMouseDown)
-		modelControl.rotateDownButton:HookScript("OnMouseUp", modelSceneControlOnMouseUp)
-
-		modelControl.reset:SetScript("OnClick", function(self)
-			self:GetParent():GetParent().activeCamera:resetPosition()
-		end)
-
-		-- MOUNT ANIMATIONS
-		self.animationsCombobox = CreateFrame("FRAME", nil, self.modelScene, "MJMountAnimationPanel")
-		self.animationsCombobox:SetPoint("LEFT", modelControl, "RIGHT", 10, 0)
-
-		-- PLAYER SHOW BUTTON
-		self.modelScene.TogglePlayer:Hide()
-		local playerToggle = CreateFrame("CheckButton", nil, self.modelScene, "MJPlayerShowToggle")
-		playerToggle:SetPoint("LEFT", self.animationsCombobox, "RIGHT", 11, 1)
-		function playerToggle:setPortrait() SetPortraitTexture(self.portrait, "player") end
-		playerToggle:SetScript("OnEvent", playerToggle.setPortrait)
-		playerToggle:HookScript("OnShow", function(self)
-			self:setPortrait()
-			self:RegisterUnitEvent("UNIT_PORTRAIT_UPDATE", "player")
-		end)
-		playerToggle:SetScript("OnHide", function(self)
-			self:UnregisterEvent("UNIT_PORTRAIT_UPDATE")
-		end)
-		playerToggle:HookScript("OnClick", function()
-			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			self.animationsCombobox:replayAnimation()
-		end)
-
-		-- MACRO BUTTONS
-		MountJournalSummonRandomFavoriteButton.spellname:Hide()
-
-		local summon1 = CreateFrame("BUTTON", nil, self.MountJournal, "MJSecureMacroButtonTemplate")
-		summon1:SetPoint("CENTER", self.MountJournal, "TOPRIGHT", -110, -42)
-		summon1:SetNormalTexture(413588)
-		summon1:SetAttribute("clickbutton", _G[config.secureButtonNameMount])
-		summon1:SetScript("OnDragStart", function()
+		hooksecurefunc(self.MountJournal, "SetShown", function(_, shown) self:setShown(shown) end)
+		CollectionsJournal:HookScript("OnHide", function() self:setShown(false) end)
+
+		self.useMountsJournalButton = CreateFrame("CheckButton", nil, CollectionsJournal, "MJCheckButtonTemplate")
+		self.useMountsJournalButton:SetPoint("BOTTOMLEFT", 279, 1)
+		self.useMountsJournalButton:SetFrameLevel(1010)
+		self.useMountsJournalButton.Text:SetText(addon)
+		self.useMountsJournalButton:SetChecked(not mounts.config.useDefaultJournal)
+		self.useMountsJournalButton:SetScript("OnClick", function(btn)
 			if InCombatLockdown() then return end
-			if not GetMacroInfo(config.macroName) then
-				config:createMacro(config.macroName, config.secureButtonNameMount, 413588)
-			end
-			PickupMacro(config.macroName)
+			mounts.config.useDefaultJournal = not btn:GetChecked()
+			self:setShown()
 		end)
-		summon1:SetScript("OnEnter", function(btn)
-			GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-			GameTooltip:SetText(addon.." \""..SUMMONS.." 1\"", 1, 1, 1, 1)
-			GameTooltip:AddLine(L["Normal mount summon"])
-			GameTooltip:AddLine("\nMacro: /click "..config.secureButtonNameMount)
-			GameTooltip:Show()
-		end)
+	end
+end
 
-		local summon2 = CreateFrame("BUTTON", nil, self.MountJournal, "MJSecureMacroButtonTemplate")
-		summon2.forceModifier = true
-		summon2:SetPoint("LEFT", summon1, "RIGHT", 5, 0)
-		summon2:SetNormalTexture(631718)
-		summon2:SetAttribute("clickbutton", _G[config.secureButtonNameSecondMount])
-		summon2:SetScript("OnDragStart", function()
-			if InCombatLockdown() then return end
-			if not GetMacroInfo(config.secondMacroName) then
-				config:createMacro(config.secondMacroName, config.secureButtonNameSecondMount, 631718)
-			end
-			PickupMacro(config.secondMacroName)
-		end)
-		summon2:SetScript("OnEnter", function(btn)
-			GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-			GameTooltip:SetText(addon.." \""..SUMMONS.." 2\"", 1, 1, 1, 1)
-			GameTooltip:AddLine(L["SecondMountTooltipDescription"]:gsub("^\n", ""):gsub("\n\n", "\n"), 1, .82, 0, 1, true)
-			GameTooltip:AddLine("\nMacro: /click "..config.secureButtonNameSecondMount)
-			GameTooltip:Show()
-		end)
 
-		-- HOOKS
-		self.func = {}
-		self:setSecureFunc(C_MountJournal, "SetSearch", function(text)
-			if type(text) == "string" then
-				self.searchText = text
-				self:updateMountsList()
-			end
-		end)
-		self:setSecureFunc(C_MountJournal, "SetCollectedFilterSetting", function(filter, enabled)
-			if filter == LE_MOUNT_JOURNAL_FILTER_COLLECTED then filter = "collected"
-			elseif filter == LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED then filter = "notCollected"
-			elseif filter == LE_MOUNT_JOURNAL_FILTER_UNUSABLE then filter = "unusable"
-			else return end
-			if type(enabled) == "boolean" then
-				mounts.filters[filter] = enabled
-				self:updateMountsList()
-			end
-		end)
-		self:setSecureFunc(C_MountJournal, "SetAllSourceFilters", function(enabled)
-			if type(enabled) == "boolean" then
-				self:setAllFilters("sources", enabled)
-				self:updateMountsList()
-			end
-		end)
-		self:setSecureFunc(C_MountJournal, "SetSourceFilter", function(i, value)
-			if type(i) == "number" and type(value) == "boolean" then
-				mounts.filters.sources[i] = value
-				self:updateMountsList()
-			end
-		end)
-		self:setSecureFunc(C_MountJournal, "GetCollectedFilterSetting", function(filter)
-			if filter == LE_MOUNT_JOURNAL_FILTER_COLLECTED then filter = "collected"
-			elseif filter == LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED then filter = "notCollected"
-			elseif filter == LE_MOUNT_JOURNAL_FILTER_UNUSABLE then filter = "unusable" end
-			return mounts.filters[filter]
-		end)
-		self:setSecureFunc(C_MountJournal, "IsSourceChecked", function(i)
-			if type(i) == "number" then
-				return mounts.filters.sources[i]
-			end
-		end)
-		self:setSecureFunc(C_MountJournal, "GetNumDisplayedMounts", function()
-			return #self.displayedMounts
-		end)
-		self:setSecureFunc(C_MountJournal, "GetDisplayedMountInfo", function(index)
-			local mountID = self.displayedMounts[index]
-			if mountID then return C_MountJournal.GetMountInfoByID(mountID) end
-		end)
-		self:setSecureFunc(C_MountJournal, "GetDisplayedMountInfoExtra", function(index)
-			local mountID = self.displayedMounts[index]
-			if mountID then return C_MountJournal.GetMountInfoExtraByID(mountID) end
-		end)
-		self:setSecureFunc(C_MountJournal, "GetDisplayedMountAllCreatureDisplayInfo", function(index)
-			local mountID = self.displayedMounts[index]
-			if mountID then return C_MountJournal.GetMountAllCreatureDisplayInfoByID(mountID) end
-		end)
-		self:setSecureFunc(C_MountJournal, "Pickup", function(index)
-			if InCombatLockdown() then return end
-			index = self.indexByMountID[self.displayedMounts[index]]
-			if index then self.func.Pickup(index) end
-		end)
-		self:setSecureFunc(C_MountJournal, "SetIsFavorite")
-		self:setSecureFunc(C_MountJournal, "GetIsFavorite")
-
-		-- FANFARE
-		hooksecurefunc(C_MountJournal, "ClearFanfare", function()
-			local _,_, icon = C_MountJournal.GetMountInfoByID(self.MountJournal.selectedMountID)
-			infoButton.Icon:SetTexture(icon)
-			self:sortMounts()
-		end)
-
-		-- FIX TAINTS
-		for i = 1, UIDROPDOWNMENU_MAXBUTTONS do
-			_G["DropDownList1Button"..i].checked = nil
+function journal:setMJFiltersBackup()
+	local backup = self.mjFiltersBackup
+	if backup.isBackuped then return end
+	backup.collected = C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED)
+	backup.notCollected = C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED)
+	backup.unusable = C_MountJournal.GetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE)
+	for i = 1, C_PetJournal.GetNumPetSources() do
+		if C_MountJournal.IsValidSourceFilter(i) then
+			backup.sources[i] = C_MountJournal.IsSourceChecked(i)
 		end
+	end
+	backup.isBackuped = true
+	self:RegisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
+	self:RegisterEvent("PLAYER_LEAVING_WORLD")
+	self:updateIndexByMountID()
+end
 
-		-- HOOK UPDATE MOUNT LIST
-		hooksecurefunc("MountJournal_UpdateMountList", function() self:configureJournal() end)
-		self.MountJournal_UpdateMountList = MountJournal_UpdateMountList
-		self.grid3_UpdateMountList = function() self:grid3UpdateMountList() end
-		self:setScrollGridMounts(mounts.config.gridToggle)
 
-		-- MODULES INIT
-		self:event("MODULES_INIT")
+function journal:restoreMJFilters()
+	local backup = self.mjFiltersBackup
+	if not backup.isBackuped then return end
+	self:UnregisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
+	self:UnregisterEvent("PLAYER_LEAVING_WORLD")
+	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, backup.collected)
+	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, backup.notCollected)
+	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, backup.unusable)
+	for i = 1, C_PetJournal.GetNumPetSources() do
+		if C_MountJournal.IsValidSourceFilter(i) then
+			C_MountJournal.SetSourceFilter(i, backup.sources[i])
+		end
+	end
+	backup.isBackuped = false
+end
+journal.PLAYER_LEAVING_WORLD = journal.restoreMJFilters
 
-		-- ARROW BIND
-		self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 
-		-- UPDATE LISTS
-		self:setEditMountsList()
-		self:updateIndexByMountID()
-		self:updateBtnFilters()
+function journal:setShown(shown)
+	if shown ~= nil then
+		self.isShow = shown
+	end
+	local useDefaultJournal = mounts.config.useDefaultJournal
+
+	if self.isShow then
+		self:RegisterEvent("PLAYER_REGEN_DISABLED")
+		self:RegisterEvent("PLAYER_REGEN_ENABLED")
+	else
+		self:UnregisterEvent("PLAYER_REGEN_DISABLED")
+		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+	end
+
+	self.useMountsJournalButton:SetShown(self.isShow)
+
+	if InCombatLockdown() then
+		self.useMountsJournalButton:Disable()
+		useDefaultJournal = true
+	else
+		self.useMountsJournalButton:Enable()
+	end
+
+	if useDefaultJournal then
+		if self.isShow then
+			self:restoreMJFilters()
+			self:restoreSlotButton()
+			self.MountJournal:Show()
+		end
+		if self.bgFrame then self.bgFrame:Hide() end
+	else
+		if self.init then self:init() end
+		if self.isShow then
+			self.MountJournal:Hide()
+			self:setMJFiltersBackup()
+			self:grabSlotButton()
+		end
+		self.bgFrame:SetShown(self.isShow)
+	end
+end
+
+
+function journal:PLAYER_REGEN_DISABLED()
+	self.useMountsJournalButton:Disable()
+	self.MountJournal:Show()
+	if self.bgFrame then self.bgFrame:Hide() end
+	self:restoreMJFilters()
+	self:restoreSlotButton()
+end
+
+
+function journal:PLAYER_REGEN_ENABLED()
+	self.useMountsJournalButton:Enable()
+	self.MountJournal:SetShown(true)
+end
+
+
+function journal:PLAYER_MOUNT_DISPLAY_CHANGED()
+	self.scrollFrame:update()
+end
+
+
+function journal:grabSlotButton()
+	if not self.slotButtonBackup or self.slotButtonBackup.grabbed then return end
+	self.slotButtonBackup.grabbed = true
+	self.slotButtonBackup.parent = self.slotButton:GetParent()
+	self.slotButtonBackup.scale = self.slotButton:GetScale()
+	wipe(self.slotButtonBackup.points)
+	for i = 1, self.slotButton:GetNumPoints() do
+		self.slotButtonBackup.points[i] = {self.slotButton:GetPoint(i)}
+	end
+
+	self.slotButton:SetParent(self.bgFrame)
+	self.slotButton:SetScale(.69)
+	self.slotButton:ClearAllPoints()
+	self.slotButton:SetPoint("RIGHT", self.bgFrame.summon1, "LEFT", -20, 0)
+
+	self.slotButton.SetParent = function(_, parent)
+		self.slotButtonBackup.parent = parent
+	end
+	self.slotButton.SetScale = function(_, scale)
+		self.slotButtonBackup.scale = scale
+	end
+	self.slotButton.SetPoint = function()
+		wipe(self.slotButtonBackup.points)
+		for i = 1, self.slotButton:GetNumPoints() do
+			self.slotButtonBackup.points[i] = {self.slotButton:GetPoint(i)}
+		end
+	end
+end
+
+
+function journal:restoreSlotButton()
+	if not (self.slotButtonBackup and self.slotButtonBackup.grabbed) then return end
+	self.slotButtonBackup.grabbed = false
+	self.slotButton.SetParent = nil
+	self.slotButton.SetScale = nil
+	self.slotButton.SetPoint = nil
+	self.slotButton:SetParent(self.slotButtonBackup.parent)
+	self.slotButton:SetScale(self.slotButtonBackup.scale)
+	self.slotButton:ClearAllPoints()
+	for i, v in ipairs(self.slotButtonBackup.points) do
+		self.slotButton:SetPoint(unpack(v))
 	end
 end
 
@@ -814,39 +809,14 @@ function journal:setScrollGridMounts(grid)
 	if grid then
 		offset = math.ceil((offset + 1) / 3) - 1
 		scrollFrame.update = self.grid3_UpdateMountList
-		MountJournal_UpdateMountList = self.grid3_UpdateMountList
-
-		for _, btn in ipairs(scrollFrame.buttons) do
-			btn.DragButton:Hide()
-			btn.background:Hide()
-			btn.factionIcon:Hide()
-			btn.favorite:Hide()
-			btn.fly:Hide()
-			btn.ground:Hide()
-			btn.swimming:Hide()
-			btn.icon:Hide()
-			btn.name:Hide()
-			btn.new:Hide()
-			btn.newGlow:Hide()
-			btn.selectedTexture:Hide()
-			btn:Disable()
-			btn.grid3list:Show()
-		end
 	else
 		offset = offset * 3
-		scrollFrame.update = self.MountJournal_UpdateMountList
-		MountJournal_UpdateMountList = self.MountJournal_UpdateMountList
+		scrollFrame.update = self.default_UpdateMountList
+	end
 
-		for _, btn in ipairs(scrollFrame.buttons) do
-			btn.DragButton:Show()
-			btn.background:Show()
-			btn.fly:Show()
-			btn.ground:Show()
-			btn.swimming:Show()
-			btn.icon:Show()
-			btn.name:Show()
-			btn.grid3list:Hide()
-		end
+	for _, btn in ipairs(scrollFrame.buttons) do
+		btn.defaultList:SetShown(not grid)
+		btn.grid3List:SetShown(grid)
 	end
 
 	scrollFrame:update()
@@ -854,67 +824,176 @@ function journal:setScrollGridMounts(grid)
 end
 
 
-function journal:grid3UpdateMountList()
-	local scrollFrame = self.scrollFrame
+do
+	local function setColor(self, btn, checked)
+		local color = checked and self.colors.gold or self.colors.gray
+		btn.icon:SetVertexColor(color:GetRGB())
+		btn:SetChecked(checked)
+	end
+
+	function journal:updateMountToggleButton(btn)
+		if btn.mountID then
+			btn.fly:Enable()
+			btn.ground:Enable()
+			btn.swimming:Enable()
+			setColor(self, btn.fly, self.list and self.list.fly[btn.mountID])
+			setColor(self, btn.ground, self.list and self.list.ground[btn.mountID])
+			setColor(self, btn.swimming, self.list and self.list.swimming[btn.mountID])
+		else
+			btn.fly:Disable()
+			btn.ground:Disable()
+			btn.swimming:Disable()
+		end
+	end
+end
+
+
+function journal:defaultUpdateMountList(scrollFrame)
 	local offset = HybridScrollFrame_GetOffset(scrollFrame)
 	local numDisplayedMounts = #self.displayedMounts
-	local selectedSpellID = self.MountJournal.selectedSpellID
+	local selectedSpellID
+
+	for i, btn in ipairs(scrollFrame.buttons) do
+		local index = offset + i
+		local dlist = btn.defaultList
+
+		if index <= numDisplayedMounts then
+			local mountID = self.displayedMounts[index]
+			local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+			local needsFanfare = C_MountJournal.NeedsFanfare(mountID)
+
+			dlist.index = index
+			dlist.spellID = spellID
+			dlist.mountID = mountID
+
+			dlist.dragButton.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
+			dlist.dragButton.icon:SetVertexColor(1, 1, 1)
+			dlist.dragButton.favorite:SetShown(isFavorite)
+			dlist.dragButton.activeTexture:SetShown(active)
+
+			dlist.btn:Enable()
+			dlist.btn.name:SetText(creatureName)
+			dlist.btn.new:SetShown(needsFanfare)
+			dlist.btn.newGlow:SetShown(needsFanfare)
+			dlist.btn.background:SetVertexColor(1, 1, 1)
+			dlist.btn.selectedTexture:SetShown(mountID == self.selectedMountID)
+
+			if isFactionSpecific then
+				dlist.btn.factionIcon:SetAtlas(faction == 0 and "MountJournalIcons-Horde" or "MountJournalIcons-Alliance", true)
+				dlist.btn.factionIcon:Show()
+			else
+				dlist.btn.factionIcon:Hide()
+			end
+
+			if isUsable or needsFanfare then
+				dlist.dragButton:Enable()
+				dlist.dragButton.icon:SetDesaturated()
+				dlist.dragButton.icon:SetAlpha(1)
+				dlist.btn.name:SetFontObject("GameFontNormal")
+			elseif isCollected then
+				dlist.dragButton:Enable()
+				dlist.dragButton.icon:SetDesaturated(true)
+				dlist.dragButton.icon:SetVertexColor(.58823529411765, .19607843137255, .19607843137255)
+				dlist.dragButton.icon:SetAlpha(.75)
+				dlist.btn.name:SetFontObject("GameFontNormal")
+				dlist.btn.background:SetVertexColor(1, 0, 0)
+			else
+				dlist.dragButton:Disable()
+				dlist.dragButton.icon:SetDesaturated(true)
+				dlist.dragButton.icon:SetAlpha(.25)
+				dlist.btn.name:SetFontObject("GameFontDisable")
+			end
+
+			if dlist.showingTooltip then
+				GameTooltip:SetMountBySpellID(spellID)
+			end
+		else
+			dlist.index = nil
+			dlist.spellID = 0
+			dlist.mountID = nil
+
+			dlist.dragButton:Disable()
+			dlist.dragButton.icon:SetTexture("Interface/PetBattles/MountJournalEmptyIcon")
+			dlist.dragButton.icon:SetVertexColor(1, 1, 1)
+			dlist.dragButton.icon:SetAlpha(.5)
+			dlist.dragButton.icon:SetDesaturated(true)
+			dlist.dragButton.favorite:Hide()
+
+			dlist.btn:Disable()
+			dlist.btn.name:SetText("")
+			dlist.btn.new:Hide()
+			dlist.btn.newGlow:Hide()
+			dlist.btn.factionIcon:Hide()
+			dlist.btn.background:SetVertexColor(1, 1, 1)
+			dlist.btn.selectedTexture:Hide()
+		end
+
+		self:updateMountToggleButton(dlist)
+	end
+
+	HybridScrollFrame_Update(scrollFrame, scrollFrame.buttonHeight * numDisplayedMounts, scrollFrame:GetHeight())
+end
+
+
+function journal:grid3UpdateMountList(scrollFrame)
+	local offset = HybridScrollFrame_GetOffset(scrollFrame)
+	local numDisplayedMounts = #self.displayedMounts
+	local selectedSpellID = self.selectedSpellID
 
 	for i, btn in ipairs(scrollFrame.buttons) do
 		for j = 1, 3 do
 			local index = (offset + i - 1) * 3 + j
-			local btnGrid = btn.grid3list.mounts[j]
+			local g3btn = btn.grid3List.mounts[j]
 
 			if index <= numDisplayedMounts then
-				local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected, mountID = C_MountJournal.GetDisplayedMountInfo(index)
+				local mountID = self.displayedMounts[index]
+				local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 				local needsFanfare = C_MountJournal.NeedsFanfare(mountID)
 
-				btnGrid.index = index
-				btnGrid.spellID = spellID
-				btnGrid.mountID = mountID
-				btnGrid.active = active
-				btnGrid.selected = selectedSpellID == spellID
-				btnGrid.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
-				btnGrid.icon:SetVertexColor(1, 1, 1)
-				btnGrid.DragButton:Enable()
-				btnGrid.DragButton.selectedTexture:SetShown(btnGrid.selected)
-				btnGrid.DragButton.favorite:SetShown(isFavorite)
-				btnGrid:Show()
-				btnGrid:Enable()
+				g3btn.index = index
+				g3btn.spellID = spellID
+				g3btn.mountID = mountID
+				g3btn.active = active
+				g3btn.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
+				g3btn.icon:SetVertexColor(1, 1, 1)
+				g3btn:Enable()
+				g3btn.selectedTexture:SetShown(mountID == self.selectedMountID)
+				g3btn.favorite:SetShown(isFavorite)
 
 				if isUsable or needsFanfare then
-					btnGrid.icon:SetDesaturated()
-					btnGrid.icon:SetAlpha(1)
+					g3btn.icon:SetDesaturated()
+					g3btn.icon:SetAlpha(1)
 				elseif isCollected then
-					btnGrid.icon:SetDesaturated(true)
-					btnGrid.icon:SetVertexColor(.58823529411765, .19607843137255, .19607843137255)
-					btnGrid.icon:SetAlpha(.75)
+					g3btn.icon:SetDesaturated(true)
+					g3btn.icon:SetVertexColor(.58823529411765, .19607843137255, .19607843137255)
+					g3btn.icon:SetAlpha(.75)
 				else
-					btnGrid.icon:SetDesaturated(true)
-					btnGrid.icon:SetAlpha(.5)
+					g3btn.icon:SetDesaturated(true)
+					g3btn.icon:SetAlpha(.5)
 				end
 
-				if btnGrid.showingTooltip then
-					MountJournalMountButton_UpdateTooltip(btnGrid)
+				if g3btn.showingTooltip then
+					GameTooltip:SetMountBySpellID(spellID)
 				end
 			else
-				btnGrid.icon:SetTexture("Interface/PetBattles/MountJournalEmptyIcon")
-				btnGrid.icon:SetDesaturated(true)
-				btnGrid.icon:SetVertexColor(.4, .4, .4)
-				btnGrid.icon:SetAlpha(.5)
-				btnGrid.index = nil
-				btnGrid.spellID = 0
-				btnGrid.selected = false
-				btnGrid:Disable()
-				btnGrid.DragButton:Disable()
-				btnGrid.DragButton.selectedTexture:Hide()
-				btnGrid.DragButton.favorite:Hide()
+				g3btn.icon:SetTexture("Interface/PetBattles/MountJournalEmptyIcon")
+				g3btn.icon:SetDesaturated(true)
+				g3btn.icon:SetVertexColor(.4, .4, .4)
+				g3btn.icon:SetAlpha(.5)
+				g3btn.index = nil
+				g3btn.spellID = 0
+				g3btn.mountID = nil
+				g3btn.selected = false
+				g3btn:Disable()
+				g3btn.selectedTexture:Hide()
+				g3btn.favorite:Hide()
 			end
+
+			self:updateMountToggleButton(g3btn)
 		end
 	end
 
 	HybridScrollFrame_Update(scrollFrame, scrollFrame.buttonHeight * math.ceil(numDisplayedMounts / 3), scrollFrame:GetHeight())
-	self:configureJournal(true)
 end
 
 
@@ -931,7 +1010,7 @@ function journal:setArrowSelectMount(enabled)
 					scroll:SetScript("OnUpdate", nil)
 					return
 				end
-				MountJournal_Select(index)
+				self:selectMount(index)
 			end
 		end
 
@@ -946,7 +1025,7 @@ function journal:setArrowSelectMount(enabled)
 
 				index = nil
 				for i = 1, #self.displayedMounts do
-					if self.MountJournal.selectedMountID == self.displayedMounts[i] then
+					if self.selectedMountID == self.displayedMounts[i] then
 						index = i
 						break
 					end
@@ -954,7 +1033,7 @@ function journal:setArrowSelectMount(enabled)
 
 				if not index then
 					if mounts.config.gridToggle then
-						index = scroll.buttons[1].grid3list.mount1.index
+						index = scroll.buttons[1].grid3List.mounts[1].index
 					else
 						index = scroll.buttons[1].index
 					end
@@ -963,7 +1042,7 @@ function journal:setArrowSelectMount(enabled)
 					index = index + delta
 					if index < 1 or index > #self.displayedMounts then return end
 				end
-				MountJournal_Select(index)
+				self:selectMount(index)
 
 				pressed = key
 				time = .5
@@ -1012,45 +1091,6 @@ function journal:ACHIEVEMENT_EARNED()
 end
 
 
-do
-	local function setColor(self, btn, checked)
-		local color = checked and self.colors.gold or self.colors.gray
-		btn.icon:SetVertexColor(color:GetRGB())
-		btn:SetChecked(checked)
-	end
-
-	function journal:updateMountToggleButton(btn)
-		if btn.index then
-			btn.fly:Enable()
-			btn.ground:Enable()
-			btn.swimming:Enable()
-			setColor(self, btn.fly, self.list and self.list.fly[btn.mountID])
-			setColor(self, btn.ground, self.list and self.list.ground[btn.mountID])
-			setColor(self, btn.swimming, self.list and self.list.swimming[btn.mountID])
-		else
-			btn.fly:Disable()
-			btn.ground:Disable()
-			btn.swimming:Disable()
-		end
-	end
-end
-
-
-function journal:configureJournal(isGrid)
-	for _, btn in ipairs(self.scrollButtons) do
-		if isGrid then
-			for i = 1, 3 do
-				self:updateMountToggleButton(btn.grid3list.mounts[i])
-			end
-		else
-			self:updateMountToggleButton(btn)
-		end
-	end
-
-	self.mountCount.Count:SetText(self.mountCount.Count.num)
-end
-
-
 function journal:setCountMounts()
 	local count, collected = 0, 0
 	for i = 1, #self.mountIDs do
@@ -1062,8 +1102,8 @@ function journal:setCountMounts()
 			end
 		end
 	end
-	self.mountCount.Count.num = count
-	self.mountCount.Count:SetText(count)
+	self.mountCount.count.num = count
+	self.mountCount.count:SetText(count)
 	self.mountCount.collected:SetText(collected)
 end
 
@@ -1142,25 +1182,29 @@ end
 
 
 function journal:updateIndexByMountID()
-	if self.func.GetNumDisplayedMounts() ~= self.mountCount.Count.num then
+	if C_MountJournal.GetNumDisplayedMounts() ~= self.mountCount.count.num then
 		self:UnregisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
-		self.func.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
-		self.func.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
-		self.func.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, true)
-		self.func.SetAllSourceFilters(true)
-		self.func.SetSearch("")
+		C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
+		C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
+		C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, true)
+		C_MountJournal.SetAllSourceFilters(true)
+		C_MountJournal.SetSearch("")
 		self:RegisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 	end
 
 	wipe(self.indexByMountID)
-	for i = 1, self.func.GetNumDisplayedMounts() do
-		local _,_,_,_,_,_,_,_,_,_,_, mountID = self.func.GetDisplayedMountInfo(i)
+	for i = 1, C_MountJournal.GetNumDisplayedMounts() do
+		local _,_,_,_,_,_,_,_,_,_,_, mountID = C_MountJournal.GetDisplayedMountInfo(i)
 		self.indexByMountID[mountID] = i
 	end
+end
 
+
+-- UPDATE WHEN SET/UNSET FAVORITE
+function journal:MOUNT_JOURNAL_SEARCH_UPDATED()
+	self:updateIndexByMountID()
 	self:sortMounts()
 end
-journal.MOUNT_JOURNAL_SEARCH_UPDATED = journal.updateIndexByMountID -- UPDATE indexByMountID WHEN SET FAVORITE
 
 
 function journal:mountLearnedUpdate()
@@ -1173,10 +1217,8 @@ journal.COMPANION_UNLEARNED = journal.mountLearnedUpdate
 
 -- isUsable FLAG CHANGED
 function journal:MOUNT_JOURNAL_USABILITY_CHANGED()
-	if self.MountJournal:IsVisible() then
-		self:updateMountsList()
-		MountJournal_UpdateMountDisplay()
-	end
+	self:updateMountsList()
+	self:updateMountDisplay()
 end
 
 
@@ -1295,29 +1337,29 @@ do
 end
 
 
-function journal:listFromMapInit(level, value)
+function journal:listFromMapInit(btn, level, value)
 	local info = {}
 	info.notCheckable = true
 
 	if next(value) == nil then
 		info.disabled = true
 		info.text = EMPTY
-		self:ddAddButton(info, level)
+		btn:ddAddButton(info, level)
 	elseif level == 2 then
 		local function setListFrom(_, mapID)
-			if journal.navBar.mapID == mapID then return end
-			if not journal.currentList then
-				journal:createMountList(journal.navBar.mapID)
+			if self.navBar.mapID == mapID then return end
+			if not self.currentList then
+				self:createMountList(self.navBar.mapID)
 			end
-			journal.currentList.listFromID = mapID
-			journal:setEditMountsList()
-			journal:updateMountsList()
-			journal:updateMapSettings()
+			self.currentList.listFromID = mapID
+			self:setEditMountsList()
+			self:updateMountsList()
+			self:updateMapSettings()
 			-- mounts:setMountsList()
-			journal.existingLists:refresh()
+			self.existingLists:refresh()
 
-			journal.mountListUpdateAnim:Stop()
-			journal.mountListUpdateAnim:Play()
+			self.mountListUpdateAnim:Stop()
+			self.mountListUpdateAnim:Play()
 		end
 
 		info.list = {}
@@ -1328,7 +1370,7 @@ function journal:listFromMapInit(level, value)
 				arg1 = mapInfo.mapID,
 				func = setListFrom,
 			})
-			self:ddAddButton(info, level)
+			btn:ddAddButton(info, level)
 		end
 	else
 		for _, mapInfo in ipairs(value) do
@@ -1336,7 +1378,7 @@ function journal:listFromMapInit(level, value)
 			info.hasArrow = true
 			info.text = mapInfo.name
 			info.value = mapInfo.list
-			self:ddAddButton(info, level)
+			btn:ddAddButton(info, level)
 		end
 	end
 end
@@ -1370,19 +1412,151 @@ function journal:updateMapSettings()
 end
 
 
-function journal:setSecureFunc(obj, funcName, func)
-	if self.func[funcName] ~= nil then return end
+function journal:updateMountDisplay(forceSceneChange)
+	local info = self.mountDisplay.info
+	if self.selectedMountID then
+		local creatureName, spellID, icon, active, isUsable, sourceType = C_MountJournal.GetMountInfoByID(self.selectedMountID)
+		local needsFanfare = C_MountJournal.NeedsFanfare(self.selectedMountID)
 
-	self.func[funcName] = obj[funcName]
-	if func then
-		obj[funcName] = func
-	else
-		obj[funcName] = function(index, ...)
-			index = self.indexByMountID[self.displayedMounts[index]]
-			if index then
-				return self.func[funcName](index, ...)
+		if self.mountDisplay.lastDisplayed ~= self.selectedMountID or forceSceneChange then
+			self.mountDisplay.lastDisplayed = self.selectedMountID
+			local creatureDisplayID, descriptionText, sourceText, isSelfMount, _, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = C_MountJournal.GetMountInfoExtraByID(self.selectedMountID)
+			if not creatureDisplayID then
+				local allCreatureDisplays = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
+				if allCreatureDisplays and #allCreatureDisplays > 0 then
+					creatureDisplayID = allCreatureDisplays[random(#allCreatureDisplays)].creatureDisplayID
+				else
+					creatureDisplayID = 0
+				end
+			end
+
+			info.name:SetText(creatureName)
+			info.source:SetText(sourceText)
+			info.lore:SetText(descriptionText)
+
+			self.modelScene:TransitionToModelSceneID(modelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_MAINTAIN, forceSceneChange)
+			self.modelScene:PrepareForFanfare(needsFanfare)
+
+			local mountActor = self.modelScene:GetActorByTag("unwrapped")
+			if mountActor then
+				mountActor:SetModelByCreatureDisplayID(creatureDisplayID)
+
+				-- mount self idle animation
+				if isSelfMount then
+					mountActor:SetAnimationBlendOperation(LE_MODEL_BLEND_OPERATION_NONE)
+					mountActor:SetAnimation(618)
+				else
+					mountActor:SetAnimationBlendOperation(LE_MODEL_BLEND_OPERATION_ANIM)
+					mountActor:SetAnimation(0)
+				end
+				self.modelScene:AttachPlayerToMount(mountActor, animID, isSelfMount, disablePlayerMountPreview or not GetCVarBool("mountJournalShowPlayer"), spellVisualKitID)
 			end
 		end
+
+		if needsFanfare then
+			info.icon:SetTexture(COLLECTIONS_FANFARE_ICON)
+			info.new:Show()
+			info.newGlow:Show()
+		else
+			info.icon:SetTexture(icon)
+			info.new:Hide()
+			info.newGlow:Hide()
+		end
+
+		info:Show()
+		self.modelScene:Show()
+		self.mountDisplay.yesMountsTex:Show()
+		self.mountDisplay.noMountsTex:Hide()
+		self.mountDisplay.noMounts:Hide()
+
+		if needsFanfare then
+			self.summonButton:SetText(UNWRAP)
+			self.summonButton:Enable()
+		elseif active then
+			self.summonButton:SetText(BINDING_NAME_DISMOUNT)
+			self.summonButton:SetEnabled(isUsable)
+		else
+			self.summonButton:SetText(MOUNT)
+			self.summonButton:SetEnabled(isUsable)
+		end
+	else
+		info:Hide()
+		self.modelScene:Hide()
+		self.mountDisplay.yesMountsTex:Hide()
+		self.mountDisplay.noMountsTex:Show()
+		self.mountDisplay.noMounts:Show()
+		self.summonButton:Disable()
+	end
+end
+
+
+function journal:useMount(mountID)
+	local _,_,_, active = C_MountJournal.GetMountInfoByID(mountID)
+	if active then
+		C_MountJournal.Dismiss()
+	elseif C_MountJournal.NeedsFanfare(mountID) then
+		self.modelScene:StartUnwrapAnimation(function()
+			C_MountJournal.ClearFanfare(mountID)
+		end)
+	else
+		C_MountJournal.SummonByID(mountID)
+	end
+end
+
+
+do
+	local function getMountButtonByMountID(mountID)
+		local buttons = journal.scrollFrame.buttons
+		for i = 1, #buttons do
+			local button = buttons[i]
+			if mounts.config.gridToggle then
+				for j = 1, 3 do
+					local grid3Button = button.grid3List.mounts[j]
+					if grid3Button.mountID == mountID then
+						return grid3Button
+					end
+				end
+			else
+				if button.mountID == mountID then
+					return button
+				end
+			end
+		end
+	end
+
+
+	function journal:setSelectedMount(mountID, index, button)
+		self.selectedMountID = mountID
+		self.scrollFrame:update()
+		self:updateMountDisplay()
+
+		if not button then
+			button = getMountButtonByMountID(mountID)
+		end
+		if not button or self.scrollFrame:GetBottom() >= button:GetTop() then
+			if not index then
+				for i = 1, #self.displayedMounts do
+					if mountID == self.displayedMounts[i] then
+						index = i
+						break
+					end
+				end
+			end
+			if index then
+				if mounts.config.gridToggle then index = math.ceil(index / 3) end
+				HybridScrollFrame_ScrollToIndex(self.scrollFrame, index, function() return self.scrollFrame.buttonHeight end)
+			end
+		end
+
+		self:event("MOUNT_SELECT", mountID)
+	end
+end
+
+
+function journal:selectMount(index)
+	local mountID = self.displayedMounts[index]
+	if mountID then
+		self:setSelectedMount(mountID, index)
 	end
 end
 
@@ -1790,6 +1964,14 @@ function journal:filterDropDown_Initialize(btn, level, value)
 end
 
 
+function journal:setAllFilters(typeFilter, enabled)
+	local filter = mounts.filters[typeFilter]
+	for k in pairs(filter) do
+		filter[k] = enabled
+	end
+end
+
+
 function journal:clearBtnFilters()
 	self:setAllFilters("sources", true)
 	self:setAllFilters("types", true)
@@ -1847,14 +2029,6 @@ function journal:setBtnFilters(tab)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	self:updateBtnFilters()
 	self:updateMountsList()
-end
-
-
-function journal:setAllFilters(typeFilter, enabled)
-	local filter = mounts.filters[typeFilter]
-	for k in pairs(filter) do
-		filter[k] = enabled
-	end
 end
 
 
@@ -1979,7 +2153,7 @@ function journal:updateMountsList()
 
 	local numShowMounts = #self.displayedMounts
 	self.shownPanel.count:SetText(numShowMounts)
-	if filters.hideOnChar or self.mountCount.Count.num ~= numShowMounts then
+	if filters.hideOnChar or self.mountCount.count.num ~= numShowMounts then
 		self.shownPanel:Show()
 		self.leftInset:SetPoint("TOPLEFT", self.shownPanel, "BOTTOMLEFT", 0, -2)
 	else

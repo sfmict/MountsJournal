@@ -16,7 +16,6 @@ function MJMountAnimationPanelMixin:onLoad()
 	}
 
 	self.journal = MountsJournalFrame
-	self.modelScene = self.journal.modelScene
 	self.animations = MountsJournal.globalDB.mountAnimations
 	self.animationsList = {
 		{
@@ -94,7 +93,7 @@ function MJMountAnimationPanelMixin:replayAnimation()
 			self:SetScript("OnUpdate", self.onUpdate)
 		end
 	else
-		self.modelScene:GetActorByTag("unwrapped"):StopAnimationKit()
+		self.journal.modelScene:GetActorByTag("unwrapped"):StopAnimationKit()
 		self:ddSetSelectedValue(self.animationsList[1])
 		self:ddSetSelectedText(self.animationsList[1].name)
 	end
@@ -102,7 +101,7 @@ end
 
 
 function MJMountAnimationPanelMixin:onUpdate()
-	local actor = self.modelScene:GetActorByTag("unwrapped")
+	local actor = self.journal.modelScene:GetActorByTag("unwrapped")
 	if not actor:IsLoaded() then return end
 	self:SetScript("OnUpdate", nil)
 
@@ -168,7 +167,7 @@ end
 
 
 function MJMountAnimationPanelMixin:playAnimation(animation, isKit, loop)
-	local actor = self.modelScene:GetActorByTag("unwrapped")
+	local actor = self.journal.modelScene:GetActorByTag("unwrapped")
 	actor:StopAnimationKit()
 	actor:SetAnimation(0)
 	if isKit then
@@ -197,7 +196,6 @@ MJMountCustomAnimationMixin = {}
 
 function MJMountCustomAnimationMixin:onLoad()
 	self.journal = MountsJournalFrame
-	self.modelScene = self.journal.modelScene
 	self.animations = MountsJournal.globalDB.mountAnimations
 	if type(self.animations.current) ~= "number" then
 		self.animations.current = 0
@@ -309,7 +307,7 @@ end
 
 
 function MJMountCustomAnimationMixin:stop()
-	local actor = self.modelScene:GetActorByTag("unwrapped")
+	local actor = self.journal.modelScene:GetActorByTag("unwrapped")
 	actor:StopAnimationKit()
 	actor:SetAnimation(0)
 end

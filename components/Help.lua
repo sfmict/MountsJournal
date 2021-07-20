@@ -9,9 +9,9 @@ end
 
 
 function util.showHelpJournal()
-	if not journal.MountJournal or not journal.MountJournal:IsShown() then return end
+	if not journal.bgFrame or not journal.bgFrame:IsShown() then return end
 	local step = type(mounts.help.journal) == "number" and mounts.help.journal or 0
-	HelpTip:HideAll(journal.MountJournal)
+	HelpTip:HideAll(journal.bgFrame)
 	if step == 0 then
 		local helpTipInfo = {
 			text = L["ButtonsSelectedTooltipDescription"]:format(addon),
@@ -23,7 +23,7 @@ function util.showHelpJournal()
 			callbackArg = 1,
 			onAcknowledgeCallback = nextTip,
 		}
-		HelpTip:Show(journal.MountJournal, helpTipInfo, journal.scrollFrame)
+		HelpTip:Show(journal.bgFrame, helpTipInfo, journal.scrollFrame)
 	elseif step == 1 then
 		local helpTipInfo = {
 			text = L["ZoneSettingsTooltipDescription"]:gsub("\n*(.*)", "%1"),
@@ -34,7 +34,7 @@ function util.showHelpJournal()
 			callbackArg = 2,
 			onAcknowledgeCallback = nextTip,
 		}
-		HelpTip:Show(journal.MountJournal, helpTipInfo, journal.navBarBtn)
+		HelpTip:Show(journal.bgFrame, helpTipInfo, journal.navBarBtn)
 	elseif step == 2 then
 		local helpTipInfo = {
 			text = L["ProfilesTooltipDescription"],
@@ -45,7 +45,7 @@ function util.showHelpJournal()
 			callbackArg = 3,
 			onAcknowledgeCallback = nextTip,
 		}
-		HelpTip:Show(journal.MountJournal, helpTipInfo, journal.profilesMenu)
+		HelpTip:Show(journal.bgFrame, helpTipInfo, journal.profilesMenu)
 	elseif step == 3 then
 		local helpTipInfo = {
 			text = L["SettingsTooltipDescription"]:format(addon),
@@ -55,6 +55,6 @@ function util.showHelpJournal()
 			callbackArg = 4,
 			onAcknowledgeCallback = nextTip,
 		}
-		HelpTip:Show(journal.MountJournal, helpTipInfo, journal.btnConfig)
+		HelpTip:Show(journal.bgFrame, helpTipInfo, journal.bgFrame.btnConfig)
 	end
 end

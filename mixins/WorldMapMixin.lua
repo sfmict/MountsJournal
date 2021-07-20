@@ -222,7 +222,7 @@ MJDungeonRaidMixin = {}
 
 
 function MJDungeonRaidMixin:onLoad()
-	self.journal = MountsJournalFrame
+	self.navBar = self:GetParent():GetParent().navBar
 
 	self.list = {
 		{
@@ -282,7 +282,7 @@ function MJDungeonRaidMixin:initialize(level, value)
 			info.value = v.list
 		else
 			info.func = function()
-				self.journal.navBar:setMapID(v.mapID)
+				self.navBar:setMapID(v.mapID)
 			end
 		end
 		self:ddAddButton(info, level)

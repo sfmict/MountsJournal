@@ -47,7 +47,7 @@ function tags:init()
 	self.sortedTags = {}
 	self:setSortedTags()
 
-	self.mountOptionsMenu = MountJournal.mountOptionsMenu
+	self.mountOptionsMenu = {}
 	util.setMixin(self.mountOptionsMenu, MJDropDownButtonMixin)
 	self.mountOptionsMenu:ddSetInit(function(...) self:mountOptionsMenu_Init(...) end, "menu")
 end
@@ -80,10 +80,17 @@ function tags:resetFilter()
 end
 
 
+function tags:dragMount(index)
+	if InCombatLockdown() then return end
+	index = journal.indexByMountID[journal.displayedMounts[index]]
+	if index then C_MountJournal.Pickup(index) end
+end
+
+
 function tags:dragButtonClick(btn, mouseBtn)
 	local parent = btn:GetParent()
 	if mouseBtn ~= "LeftButton" then
-		self:showMountDropdown(parent.index, btn, 0, 0)
+		self:showMountDropdown(parent.index, parent.mountID, btn, 0, 0)
 	elseif IsModifiedClick("CHATLINK") then
 		local id = parent.spellID
 		if MacroFrame and MacroFrame:IsShown() then
@@ -94,16 +101,16 @@ function tags:dragButtonClick(btn, mouseBtn)
 			ChatEdit_InsertLink(spellLink)
 		end
 	else
-		C_MountJournal.Pickup(parent.index)
+		self:dragMount(parent.index)
 	end
 end
 
 
 do
 	local lastMountClick = 0
-	function tags:listItemClick(btn, mouseBtn)
+	function tags:listItemClick(btn, anchorTo, mouseBtn)
 		if mouseBtn ~= "LeftButton" then
-			self:showMountDropdown(btn.index, btn, 0, 0)
+			self:showMountDropdown(btn.index, btn.mountID, anchorTo, 0, 0)
 		elseif IsModifiedClick("CHATLINK") then
 			local id = btn.spellID
 			if MacroFrame and MacroFrame:IsShown() then
@@ -115,15 +122,10 @@ do
 			end
 		else
 			local time = GetTime()
-			if btn.mountID ~= MountJournal.selectedMountID then
-				MountJournal_SetSelected(btn.mountID, btn.spellID, btn)
+			if btn.mountID ~= journal.selectedMountID then
+				journal:setSelectedMount(btn.mountID, btn.index, btn)
 			elseif time - lastMountClick < .4 then
-				local _,_,_, active, isUsable, _,_,_,_,_,_, mountID = C_MountJournal.GetDisplayedMountInfo(btn.index)
-				if active then
-					C_MountJournal.Dismiss()
-				elseif isUsable then
-					C_MountJournal.SummonByID(mountID)
-				end
+				journal:useMount(btn.mountID)
 			end
 			lastMountClick = time
 		end
@@ -131,25 +133,21 @@ do
 end
 
 
-function tags:showMountDropdown(index, anchorTo, offsetX, offsetY)
+function tags:showMountDropdown(index, mountID, anchorTo, offsetX, offsetY)
 	if not index then return end
-	local _,_,_, active, isUsable, _,_,_,_,_,_, mountID = C_MountJournal.GetDisplayedMountInfo(index)
-	MountJournal.menuMountIndex = index
-	MountJournal.menuMountID = mountID
-	MountJournal.active = active
-	MountJournal.menuIsUsable = isUsable
+	self.menuMountIndex = journal.indexByMountID[journal.displayedMounts[index]]
+	self.menuMountID = mountID
 	self.mountOptionsMenu:dropDownToggle(1, nil, anchorTo, offsetX, offsetY)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 end
 
 
 function tags:mountOptionsMenu_Init(btn, level)
-	if not MountJournal.menuMountIndex then return end
 	local info = {}
-	local mountIndex, mountID = MountJournal.menuMountIndex, MountJournal.menuMountID
+	local mountIndex, mountID = self.menuMountIndex, self.menuMountID
 
 	if level == 1 then
-		local _,_,_, active, _,_, isFavorite, _,_,_, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+		local _,_,_, active, isUsable ,_, isFavorite, _,_,_, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 		local needsFanfare = C_MountJournal.NeedsFanfare(mountID)
 		info.notCheckable = true
 
@@ -159,31 +157,35 @@ function tags:mountOptionsMenu_Init(btn, level)
 			info.text = BINDING_NAME_DISMOUNT
 		else
 			info.text = MOUNT
-			info.disabled = not MountJournal.menuIsUsable
+			info.disabled = not isUsable
 		end
 
 		info.func = function()
 			if needsFanfare then
-				MountJournal_Select(mountIndex)
+				journal:setSelectedMount(mountID, mountIndex)
 			end
-			MountJournalMountButton_UseMount(mountID)
+			journal:useMount(mountID)
 		end
 
 		btn:ddAddButton(info, level)
 
 		if not needsFanfare then
-			local _, canFavorite = C_MountJournal.GetIsFavorite(mountIndex)
+			local canFavorite = mountIndex and select(2, C_MountJournal.GetIsFavorite(mountIndex))
 			info.disabled = not (isCollected and canFavorite)
 
 			if isFavorite then
 				info.text = BATTLE_PET_UNFAVORITE
 				info.func = function()
-					C_MountJournal.SetIsFavorite(mountIndex, false)
+					if mountIndex then
+						C_MountJournal.SetIsFavorite(mountIndex, false)
+					end
 				end
 			else
 				info.text = BATTLE_PET_FAVORITE
 				info.func = function()
-					C_MountJournal.SetIsFavorite(mountIndex, true)
+					if mountIndex then
+						C_MountJournal.SetIsFavorite(mountIndex, true)
+					end
 				end
 			end
 			btn:ddAddButton(info, level)
