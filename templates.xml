@@ -424,12 +424,12 @@
 						<Texture parentKey="yesMountsTex" file="Interface\PetBattles\MountJournal-BG" setAllPoints="true">
 							<TexCoords left="0" right="0.78515625" top="0" bottom="1"/>
 						</Texture>
-						<Texture parentKey="noMountsTex" file="Interface\PetBattles\MountJournal-NoMounts" setAllPoints="true" hidden="hidden">
+						<Texture parentKey="noMountsTex" file="Interface\PetBattles\MountJournal-NoMounts" setAllPoints="true" hidden="true">
 							<TexCoords left="0" right="0.78515625" top="0" bottom="1"/>
 						</Texture>
 					</Layer>
 					<Layer level="OVERLAY">
-						<FontString parentKey="noMounts" inherits="GameFontHighlightLarge" justifyH="CENTER" text="ERR_NO_RIDING_SKILL">
+						<FontString parentKey="noMounts" inherits="GameFontHighlightLarge" justifyH="CENTER" text="ERR_NO_RIDING_SKILL" hidden="true">
 							<Size x="280" y="80"/>
 							<Anchors>
 								<Anchor point="CENTER" x="0" y="0"/>
