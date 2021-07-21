@@ -100,7 +100,6 @@
 			</Button>
 
 			<Button parentKey="slotButton" scale=".69" inherits="MountEquipmentButtonTemplate,SecureActionButtonTemplate" mixin="MJMountEquipmentMixin">
-				<Size x="49" y="49"/>
 				<Anchors>
 					<Anchor point="RIGHT" relativeKey="$parent.summon1" relativePoint="LEFT" x="-20"/>
 				</Anchors>
@@ -545,6 +544,7 @@
 									<OnLoad method="onLoad"/>
 									<OnClick method="onClick"/>
 									<OnShow method="onShow"/>
+									<OnEvent method="onEvent"/>
 								</Scripts>
 							</Button>
 						</Frames>

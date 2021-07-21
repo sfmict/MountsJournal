@@ -6,6 +6,7 @@ MJSetPetMixin = {}
 
 
 function MJSetPetMixin:onLoad()
+	self.mounts = MountsJournal
 	self.journal = MountsJournalFrame
 
 	self:SetScript("OnEnter", function(self)
@@ -29,7 +30,13 @@ function MJSetPetMixin:onLoad()
 		self.highlight:Hide()
 		GameTooltip:Hide()
 	end)
+
+	self.journal:on("POST_INIT", function() self:updatePetForMount() end)
+	self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 end
+
+
+function MJSetPetMixin:onEvent(event, ...) self[event](self, ...) end
 
 
 function MJSetPetMixin:onShow()
@@ -94,6 +101,35 @@ function MJSetPetMixin:refresh()
 end
 
 
+function MJSetPetMixin:updatePetForMount()
+	local _, owned = C_PetJournal.GetNumPets()
+	if not self.owned or self.owned > owned then
+		local petForMount, needUpdate = self.mounts.defProfile.petForMount
+
+		for spellID, petID in pairs(petForMount) do
+			if type(petID) == "string" and not C_PetJournal.GetPetInfoByPetID(petID) then
+				needUpdate = true
+				petForMount[spellID] = nil
+			end
+		end
+		for _, profile in pairs(self.mounts.profiles) do
+			for spellID, petID in pairs(profile.petForMount) do
+				if type(petID) == "string" and not C_PetJournal.GetPetInfoByPetID(petID) then
+					needUpdate = true
+					profile.petForMount[spellID] = nil
+				end
+			end
+		end
+
+		if needUpdate then
+			self.journal:updateMountsList()
+		end
+	end
+	self.owned = owned
+end
+MJSetPetMixin.PET_JOURNAL_LIST_UPDATE = MJSetPetMixin.updatePetForMount
+
+
 MJCompanionsPanelMixin = {}
 
 
@@ -102,7 +138,6 @@ function MJCompanionsPanelMixin:onEvent(event, ...) self[event](self, ...) end
 
 function MJCompanionsPanelMixin:onLoad()
 	self.util = MountsJournalUtil
-	self.mounts = MountsJournal
 	self.journal = MountsJournalFrame
 
 	self:SetWidth(250)
@@ -270,28 +305,6 @@ function MJCompanionsPanelMixin:refresh()
 end
 
 
-function MJCompanionsPanelMixin:updatePetForMount()
-	local petForMount, needUpdate = self.mounts.defProfile.petForMount
-	for spellID, petID in pairs(petForMount) do
-		if type(petID) == "string" and not C_PetJournal.GetPetInfoByPetID(petID) then
-			needUpdate = true
-			petForMount[spellID] = nil
-		end
-	end
-	for _, profile in pairs(self.mounts.profiles) do
-		for spellID, petID in pairs(profile.petForMount) do
-			if type(petID) == "string" and not C_PetJournal.GetPetInfoByPetID(petID) then
-				needUpdate = true
-				profile.petForMount[spellID] = nil
-			end
-		end
-	end
-	if needUpdate then
-		self.journal:updateMountsList()
-	end
-end
-
-
 function MJCompanionsPanelMixin:setPetJournalFiltersBackup()
 	local backup = self.petJournalFiltersBackup
 	backup.collected = C_PetJournal.IsFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED)
@@ -327,7 +340,6 @@ end
 function MJCompanionsPanelMixin:petListUpdate(force)
 	self.needSort = true
 	local _, owned = C_PetJournal.GetNumPets()
-	if self.owned > owned then self:updatePetForMount() end
 
 	if not force then
 		if self.owned == owned then return end

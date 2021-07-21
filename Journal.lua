@@ -66,6 +66,7 @@ function journal:init()
 		self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 		self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 		self.scrollFrame:update()
+		self:updateMountDisplay(true)
 		util.showHelpJournal()
 	end)
 
@@ -519,10 +520,10 @@ function journal:init()
 
 	-- PLAYER SHOW BUTTON
 	local playerToggle = self.modelScene.playerToggle
-	playerToggle:SetChecked(GetCVarBool("mountJournalShowPlayer"))
 	function playerToggle:setPortrait() SetPortraitTexture(self.portrait, "player") end
 	playerToggle:SetScript("OnEvent", playerToggle.setPortrait)
 	playerToggle:SetScript("OnShow", function(self)
+		self:SetChecked(GetCVarBool("mountJournalShowPlayer"))
 		self:setPortrait()
 		self:RegisterUnitEvent("UNIT_PORTRAIT_UPDATE", "player")
 	end)
@@ -603,9 +604,11 @@ function journal:init()
 	self:setEditMountsList()
 	self:updateBtnFilters()
 	self:sortMounts()
-	self:updateMountDisplay()
 	self.bgFrame:GetScript("OnShow")(self.bgFrame)
-	C_Timer.After(0, function() self:selectMount(1) end)
+	self:selectMount(1)
+
+	-- POST INIT
+	self:event("POST_INIT"):off("POST_INIT")
 end
 
 
@@ -1482,7 +1485,7 @@ do
 		if not button then
 			button = getMountButtonByMountID(mountID)
 		end
-		if not button or self.scrollFrame:GetBottom() >= button:GetTop() then
+		if not button or (self.scrollFrame:GetBottom() or 0) >= (button:GetTop() or 0) then
 			if not index then
 				for i = 1, #self.displayedMounts do
 					if mountID == self.displayedMounts[i] then
