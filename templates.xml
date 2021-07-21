@@ -6,6 +6,7 @@
 	<Script file="mixins/ProfilesMixin.lua"/>
 	<Script file="mixins/CompanionMixin.lua"/>
 	<Script file="mixins/MountAnimationsMixin.lua"/>
+	<Script file="mixins/MountEquipmentMixin.lua"/>
 
 	<Frame name="MJMountJournalFrameTemplate" frameLevel="1000" enableMouse="true" inherits="PortraitFrameTemplate" virtual="true">
 		<Size x="703" y="606"/>
@@ -96,6 +97,21 @@
 				<Anchors>
 					<Anchor point="RIGHT" relativeKey="$parent.summon2" relativePoint="LEFT" x="-6" y="0"/>
 				</Anchors>
+			</Button>
+
+			<Button parentKey="slotButton" scale=".69" inherits="MountEquipmentButtonTemplate,SecureActionButtonTemplate" mixin="MJMountEquipmentMixin">
+				<Size x="49" y="49"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.summon1" relativePoint="LEFT" x="-20"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad inherit="prepend" method="onLoad"/>
+					<OnReceiveDrag/>
+					<OnShow method="onShow"/>
+					<OnHide method="onHide"/>
+					<OnEnter method="onEnter"/>
+					<OnEvent method="onEvent"/>
+				</Scripts>
 			</Button>
 
 			<CheckButton parentKey="navBarBtn">

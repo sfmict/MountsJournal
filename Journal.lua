@@ -170,15 +170,6 @@ function journal:init()
 		GameTooltip:Show()
 	end)
 
-	-- SLOT BUTTON
-	self.slotButton = self.MountJournal.SlotButton
-	hooksecurefunc("MountJournal_UpdateEquipmentPalette", function()
-		if not self.slotButtonBackup.grabbed then return end
-		local effectsSuppressed = C_MountJournal.AreMountEquipmentEffectsSuppressed()
-		local locked = not C_PlayerInfo.CanPlayerUseMountEquipment()
-		self.slotButton:DesaturateHierarchy((effectsSuppressed or locked) and 1 or 0)
-	end)
-
 	-- NAVBAR BUTTON
 	self.navBarBtn:HookScript("OnClick", function(btn)
 		local checked = btn:GetChecked()
@@ -629,7 +620,6 @@ function journal:ADDON_LOADED(addonName)
 		self.ADDON_LOADED = nil
 
 		self.mjFiltersBackup = {sources = {}}
-		self.slotButtonBackup = {points = {}}
 		self.MountJournal = MountJournal
 		hooksecurefunc(self.MountJournal, "SetShown", function(_, shown) self:setShown(shown) end)
 		CollectionsJournal:HookScript("OnHide", function() self:setShown(false) end)
@@ -713,7 +703,6 @@ function journal:setShown(shown)
 	if useDefaultJournal then
 		if self.isShow then
 			self:restoreMJFilters()
-			self:restoreSlotButton()
 			self.MountJournal:Show()
 		end
 		if self.bgFrame then self.bgFrame:Hide() end
@@ -722,7 +711,6 @@ function journal:setShown(shown)
 		if self.isShow then
 			self.MountJournal:Hide()
 			self:setMJFiltersBackup()
-			self:grabSlotButton()
 		end
 		self.bgFrame:SetShown(self.isShow)
 	end
@@ -734,7 +722,6 @@ function journal:PLAYER_REGEN_DISABLED()
 	self.MountJournal:Show()
 	if self.bgFrame then self.bgFrame:Hide() end
 	self:restoreMJFilters()
-	self:restoreSlotButton()
 end
 
 
@@ -746,68 +733,6 @@ end
 
 function journal:PLAYER_MOUNT_DISPLAY_CHANGED()
 	self.scrollFrame:update()
-end
-
-
-function journal:grabSlotButton()
-	local backup = self.slotButtonBackup
-	if backup.grabbed then return end
-	backup.grabbed = true
-	backup.parent = self.slotButton:GetParent()
-	backup.scale = self.slotButton:GetScale()
-	wipe(backup.points)
-	for i = 1, self.slotButton:GetNumPoints() do
-		backup.points[i] = {self.slotButton:GetPoint(i)}
-	end
-
-	self.slotButton:SetParent(self.bgFrame)
-	self.slotButton:SetScale(.69)
-	self.slotButton:ClearAllPoints()
-	self.slotButton:SetPoint("RIGHT", self.bgFrame.summon1, "LEFT", -20, 0)
-
-	self.slotButton.GetNumPoints = function()
-		return #backup.points
-	end
-	self.slotButton.GetPoint = function(_, i)
-		return unpack(backup.points[i])
-	end
-	self.slotButton.SetParent = function(_, parent)
-		backup.parent = parent
-	end
-	self.slotButton.SetScale = function(_, scale)
-		backup.scale = scale
-	end
-	self.slotButton.ClearAllPoints = function()
-		wipe(backup.points)
-	end
-	self.slotButton.SetPoint = function(_, point, ...)
-		for i = 1, #backup.points do
-			if backup.points[i][1] == point then
-				backup.points[i] = {point, ...}
-				return
-			end
-		end
-		tinsert(backup.points, {point, ...})
-	end
-end
-
-
-function journal:restoreSlotButton()
-	local backup = self.slotButtonBackup
-	if not backup.grabbed then return end
-	backup.grabbed = false
-	self.slotButton.GetNumPoints = nil
-	self.slotButton.GetPoint = nil
-	self.slotButton.SetParent = nil
-	self.slotButton.SetScale = nil
-	self.slotButton.ClearAllPoints = nil
-	self.slotButton.SetPoint = nil
-	self.slotButton:SetParent(backup.parent)
-	self.slotButton:SetScale(backup.scale)
-	self.slotButton:ClearAllPoints()
-	for i, v in ipairs(backup.points) do
-		self.slotButton:SetPoint(unpack(v))
-	end
 end
 
 
