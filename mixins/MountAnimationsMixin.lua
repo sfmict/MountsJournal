@@ -84,6 +84,8 @@ function MJMountAnimationPanelMixin:onLoad()
 			self:replayAnimation()
 		end
 	end)
+
+	self.journal:on("MOUNT_MODEL_UPDATED", function() self:replayAnimation() end)
 end
 
 
@@ -93,9 +95,12 @@ function MJMountAnimationPanelMixin:replayAnimation()
 			self:SetScript("OnUpdate", self.onUpdate)
 		end
 	else
-		self.journal.modelScene:GetActorByTag("unwrapped"):StopAnimationKit()
-		self:ddSetSelectedValue(self.animationsList[1])
-		self:ddSetSelectedText(self.animationsList[1].name)
+		local actor = self.journal.modelScene:GetActorByTag("unwrapped")
+		if actor then
+			actor:StopAnimationKit()
+			self:ddSetSelectedValue(self.animationsList[1])
+			self:ddSetSelectedText(self.animationsList[1].name)
+		end
 	end
 end
 
@@ -322,6 +327,15 @@ function MJMountCustomAnimationMixin:saveAnimation()
 			isKit = self.isKit:GetChecked(),
 			loop = self.loop:GetChecked(),
 		})
+		sort(self.animations, function(a1, a2)
+			if a1.name < a2.name then return true
+			elseif a1.name > a2.name then return false end
+
+			if not a1.isKit and a2.isKit then return true
+			elseif a1.isKit and not a2.isKit then return false end
+
+			return a1.animation < a2.animation
+		end)
 		self.nameBox:SetText("")
 	end
 end

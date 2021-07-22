@@ -534,7 +534,6 @@ function journal:init()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		SetCVar("mountJournalShowPlayer", btn:GetChecked() and 1 or 0)
 		self:updateMountDisplay(true)
-		self.modelScene.animationsCombobox:replayAnimation()
 	end)
 
 	-- SUMMON BUTTON
@@ -1403,6 +1402,8 @@ function journal:updateMountDisplay(forceSceneChange)
 				end
 				self.modelScene:AttachPlayerToMount(mountActor, animID, isSelfMount, disablePlayerMountPreview or not GetCVarBool("mountJournalShowPlayer"), spellVisualKitID)
 			end
+
+			self:event("MOUNT_MODEL_UPDATED")
 		end
 
 		if needsFanfare then
