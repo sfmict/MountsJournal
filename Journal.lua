@@ -1366,12 +1366,12 @@ end
 function journal:updateMountDisplay(forceSceneChange)
 	local info = self.mountDisplay.info
 	if self.selectedMountID then
-		local creatureName, spellID, icon, active, isUsable, sourceType = C_MountJournal.GetMountInfoByID(self.selectedMountID)
+		local creatureName, spellID, icon, active, isUsable = C_MountJournal.GetMountInfoByID(self.selectedMountID)
 		local needsFanfare = C_MountJournal.NeedsFanfare(self.selectedMountID)
 
 		if self.mountDisplay.lastDisplayed ~= self.selectedMountID or forceSceneChange then
 			self.mountDisplay.lastDisplayed = self.selectedMountID
-			local creatureDisplayID, descriptionText, sourceText, isSelfMount, _, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = C_MountJournal.GetMountInfoExtraByID(self.selectedMountID)
+			local creatureDisplayID, descriptionText, sourceText, isSelfMount, mountType, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = C_MountJournal.GetMountInfoExtraByID(self.selectedMountID)
 			if not creatureDisplayID then
 				local allCreatureDisplays = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
 				if allCreatureDisplays and #allCreatureDisplays > 0 then
@@ -1403,7 +1403,7 @@ function journal:updateMountDisplay(forceSceneChange)
 				self.modelScene:AttachPlayerToMount(mountActor, animID, isSelfMount, disablePlayerMountPreview or not GetCVarBool("mountJournalShowPlayer"), spellVisualKitID)
 			end
 
-			self:event("MOUNT_MODEL_UPDATED")
+			self:event("MOUNT_MODEL_UPDATE", mountType)
 		end
 
 		if needsFanfare then
@@ -1478,8 +1478,9 @@ do
 	end
 
 
-	function journal:setSelectedMount(mountID, index, button)
+	function journal:setSelectedMount(mountID, spellID, index, button)
 		self.selectedMountID = mountID
+		self.selectedSpellID = spellID
 		self.scrollFrame:update()
 		self:updateMountDisplay()
 
@@ -1501,7 +1502,7 @@ do
 			end
 		end
 
-		self:event("MOUNT_SELECT", mountID)
+		self:event("MOUNT_SELECT")
 	end
 end
 
@@ -1509,7 +1510,8 @@ end
 function journal:selectMount(index)
 	local mountID = self.displayedMounts[index]
 	if mountID then
-		self:setSelectedMount(mountID, index)
+		local _, spellID = C_MountJournal.GetMountInfoByID(mountID)
+		self:setSelectedMount(mountID, spellID, index)
 	end
 end
 
@@ -1948,6 +1950,7 @@ function journal:clearAllFilters()
 	self:setAllFilters("expansions", true)
 	self.tags:resetFilter()
 	self:clearBtnFilters()
+	self:setCountMounts()
 end
 
 

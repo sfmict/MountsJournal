@@ -77,17 +77,13 @@ function MJMountAnimationPanelMixin:onLoad()
 	self.customAnimationPanel = CreateFrame("FRAME", nil, self, "MJMountCustomAnimationPanel")
 	self.customAnimationPanel:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 0, 2)
 
-	self.journal:on("MOUNT_SELECT", function(_, mountID)
-		if mountID then
-			local _,_,_,_, mountType = C_MountJournal.GetMountInfoExtraByID(mountID)
+	self.journal:on("MOUNT_MODEL_UPDATE", function(_, mountType)
+		if mountType then
 			self.currentMountType = mountType == 231 and 2 or self.journal.mountTypes[mountType]
 			self:replayAnimation()
 		end
 	end)
-
-	self.journal:on("MOUNT_MODEL_UPDATED", function() self:replayAnimation() end)
 end
-
 
 function MJMountAnimationPanelMixin:replayAnimation()
 	if self.selectedValue == "custom" or self.selectedValue and (self.selectedValue.type == nil	or self.selectedValue.type >= self.currentMountType) then
@@ -96,18 +92,16 @@ function MJMountAnimationPanelMixin:replayAnimation()
 		end
 	else
 		local actor = self.journal.modelScene:GetActorByTag("unwrapped")
-		if actor then
-			actor:StopAnimationKit()
-			self:ddSetSelectedValue(self.animationsList[1])
-			self:ddSetSelectedText(self.animationsList[1].name)
-		end
+		if actor then actor:StopAnimationKit() end
+		self:ddSetSelectedValue(self.animationsList[1])
+		self:ddSetSelectedText(self.animationsList[1].name)
 	end
 end
 
 
 function MJMountAnimationPanelMixin:onUpdate()
 	local actor = self.journal.modelScene:GetActorByTag("unwrapped")
-	if not actor:IsLoaded() then return end
+	if actor and not actor:IsLoaded() then return end
 	self:SetScript("OnUpdate", nil)
 
 	C_Timer.After(0, function()
