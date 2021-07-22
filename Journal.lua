@@ -56,6 +56,15 @@ function journal:init()
 		favoritesFirst = true,
 	}
 
+	self.mountsWithMultipleModels = {}
+	for i = 1, #self.mountIDs do
+		local mountID = self.mountIDs[i]
+		local allCreatureDisplays = C_MountJournal.GetMountAllCreatureDisplayInfoByID(mountID)
+		if allCreatureDisplays and #allCreatureDisplays > 1 then
+			self.mountsWithMultipleModels[mountID] = true
+		end
+	end
+
 	-- BACKGROUND FRAME
 	self.bgFrame = CreateFrame("FRAME", "MountsJournalBackground", CollectionsJournal, "MJMountJournalFrameTemplate")
 	self.bgFrame:SetPoint("TOPLEFT", CollectionsJournal, "TOPLEFT", 0, 0)
@@ -103,6 +112,7 @@ function journal:init()
 	self.mountDisplay = self.bgFrame.mountDisplay
 	self.mountDescriptionToggle = self.mountDisplay.info.mountDescriptionToggle
 	self.modelScene = self.mountDisplay.modelScene
+	self.multipleMountBtn = self.modelScene.multipleMountBtn
 	self.mountListUpdateAnim = self.leftInset.updateAnimFrame.anim
 	self.scrollFrame = self.bgFrame.scrollFrame
 	self.summonButton = self.bgFrame.summonButton
@@ -466,11 +476,34 @@ function journal:init()
 	self.shownPanel.text:SetText(L["Shown:"])
 	self.shownPanel.clear:SetScript("OnClick", function() self:clearAllFilters() end)
 
-	-- MODEL SCENE
+	-- MODEL SCENE CAMERA
 	hooksecurefunc(self.modelScene, "SetActiveCamera", function(self)
 		journal:event("SET_ACTIVE_CAMERA", self.activeCamera)
 	end)
 
+	-- MODEL SCENE MULTIPLE BUTTON
+	self.multipleMountBtn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+	self.multipleMountBtn:ddSetInit(function(...) self:miltipleMountBtn_Initialize(...) end, "menu")
+	self.multipleMountBtn:SetScript("OnClick", function(btn, mouseBtn)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		if mouseBtn == "LeftButton" then
+			local allCreatureDisplays, index = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
+			for i = 1, #allCreatureDisplays do
+				if self.mountDisplay.creatureID == allCreatureDisplays[i].creatureDisplayID then
+					index = i
+					break
+				end
+			end
+			if index then
+				index = index >= #allCreatureDisplays and 1 or index + 1
+				self:updateMountDisplay(true, allCreatureDisplays[index].creatureDisplayID)
+			end
+		else
+			btn:dropDownToggle(1, nil, btn, 30, 30)
+		end
+	end)
+
+	-- MODEL SCENE CONTROl
 	local modelControl = self.modelScene.modelControl
 	modelControl.zoomIn.icon:SetTexCoord(.57812500, .82812500, .14843750, .27343750)
 	modelControl.zoomOut.icon:SetTexCoord(.29687500, .54687500, .00781250, .13281250)
@@ -709,12 +742,12 @@ function journal:setShown(shown)
 		end
 		if self.bgFrame then self.bgFrame:Hide() end
 	else
-		if self.init then self:init() end
 		if self.isShow then
+			if self.init then self:init() end
 			self.MountJournal:Hide()
 			self:setMJFiltersBackup()
 		end
-		self.bgFrame:SetShown(self.isShow)
+		if self.bgFrame then self.bgFrame:SetShown(self.isShow) end
 	end
 end
 
@@ -1363,7 +1396,7 @@ function journal:updateMapSettings()
 end
 
 
-function journal:updateMountDisplay(forceSceneChange)
+function journal:updateMountDisplay(forceSceneChange, creatureID)
 	local info = self.mountDisplay.info
 	if self.selectedMountID then
 		local creatureName, spellID, icon, active, isUsable = C_MountJournal.GetMountInfoByID(self.selectedMountID)
@@ -1372,25 +1405,30 @@ function journal:updateMountDisplay(forceSceneChange)
 		if self.mountDisplay.lastDisplayed ~= self.selectedMountID or forceSceneChange then
 			self.mountDisplay.lastDisplayed = self.selectedMountID
 			local creatureDisplayID, descriptionText, sourceText, isSelfMount, mountType, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = C_MountJournal.GetMountInfoExtraByID(self.selectedMountID)
-			if not creatureDisplayID then
-				local allCreatureDisplays = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
-				if allCreatureDisplays and #allCreatureDisplays > 0 then
-					creatureDisplayID = allCreatureDisplays[random(#allCreatureDisplays)].creatureDisplayID
-				else
-					creatureDisplayID = 0
+			if not creatureID then
+				if not creatureDisplayID then
+					local allCreatureDisplays = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
+					if allCreatureDisplays and #allCreatureDisplays > 0 then
+						creatureDisplayID = allCreatureDisplays[1].creatureDisplayID
+					else
+						creatureDisplayID = 0
+					end
 				end
+				creatureID = creatureDisplayID
 			end
+			self.mountDisplay.creatureID = creatureID
 
 			info.name:SetText(creatureName)
 			info.source:SetText(sourceText)
 			info.lore:SetText(descriptionText)
+			self.multipleMountBtn:SetShown(self.mountsWithMultipleModels[self.selectedMountID])
 
 			self.modelScene:TransitionToModelSceneID(modelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_MAINTAIN, forceSceneChange)
 			self.modelScene:PrepareForFanfare(needsFanfare)
 
 			local mountActor = self.modelScene:GetActorByTag("unwrapped")
 			if mountActor then
-				mountActor:SetModelByCreatureDisplayID(creatureDisplayID)
+				mountActor:SetModelByCreatureDisplayID(creatureID)
 
 				-- mount self idle animation
 				if isSelfMount then
@@ -1439,6 +1477,23 @@ function journal:updateMountDisplay(forceSceneChange)
 		self.mountDisplay.noMountsTex:Show()
 		self.mountDisplay.noMounts:Show()
 		self.summonButton:Disable()
+	end
+end
+
+
+function journal:miltipleMountBtn_Initialize(btn, level)
+	local info = {}
+
+	local allCreatureDisplays, index = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
+	for i = 1, #allCreatureDisplays do
+		local creatureID = allCreatureDisplays[i].creatureDisplayID
+
+		info.text = MODEL.." "..i
+		info.func = function()
+			self:updateMountDisplay(true, creatureID)
+		end
+		info.checked = self.mountDisplay.creatureID == creatureID
+		btn:ddAddButton(info, level)
 	end
 end
 
@@ -1544,6 +1599,14 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			self:updateMountsList()
 		end
 		info.checked = function() return mounts.filters.unusable end
+		btn:ddAddButton(info, level)
+
+		info.text = L["With multiple models"]
+		info.func = function(_,_,_, value)
+			mounts.filters.multipleModels = value
+			self:updateMountsList()
+		end
+		info.checked = function() return mounts.filters.multipleModels end
 		btn:ddAddButton(info, level)
 
 		info.text = L["hidden for character"]
@@ -1942,6 +2005,7 @@ function journal:clearAllFilters()
 	mounts.filters.collected = true
 	mounts.filters.notCollected = true
 	mounts.filters.unusable = true
+	mounts.filters.multipleModels = false
 	mounts.filters.hideOnChar = false
 	mounts.filters.onlyHideOnChar = false
 	self.searchBox:SetText("")
@@ -2078,6 +2142,8 @@ function journal:updateMountsList()
 		and (isCollected and filters.collected or not isCollected and filters.notCollected)
 		-- UNUSABLE
 		and (isUsable or not isCollected or filters.unusable)
+		-- MUTIPLE MODELS
+		and (not filters.multipleModels or self.mountsWithMultipleModels[mountID])
 		-- SOURCES
 		and sources[sourceType]
 		-- SEARCH

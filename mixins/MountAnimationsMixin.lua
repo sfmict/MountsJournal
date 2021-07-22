@@ -6,6 +6,15 @@ MJMountAnimationPanelMixin = {}
 
 
 function MJMountAnimationPanelMixin:onLoad()
+	self.Button:HookScript("OnEnter", function(btn)
+		local parent = btn:GetParent()
+		parent:GetScript("OnEnter")(parent)
+	end)
+	self.Button:HookScript("OnLeave", function(btn)
+		local parent = btn:GetParent()
+		parent:GetScript("OnLeave")(parent)
+	end)
+
 	StaticPopupDialogs[util.addonName.."DELETE_MOUNT_ANIMATION"] = {
 		text = addon..": "..L["Are you sure you want to delete animation %s?"],
 		button1 = DELETE,

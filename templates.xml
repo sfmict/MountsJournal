@@ -555,11 +555,53 @@
 							<Anchor point="BOTTOMRIGHT" x="-1" y="1"/>
 						</Anchors>
 						<Frames>
+							<Button parentKey="multipleMountBtn" alpha=".5" inherits="MJDropDownScriptButton">
+								<Size x="34" y="34"/>
+								<Anchors>
+									<Anchor point="BOTTOMLEFT" x="13" y="5.5"/>
+								</Anchors>
+								<Layers>
+									<Layer level="ARTWORK">
+										<Texture parentKey="icon" file="Interface/ICONS/INV_Jewelcrafting_DragonsEye02">
+											<Size x="45" y="45"/>
+											<Anchors>
+												<Anchor point="CENTER"/>
+											</Anchors>
+											<Color r=".8" g=".8" b=".8"/>
+										</Texture>
+										<MaskTexture parentKey="mask" file="Interface/CHARACTERFRAME/TempPortraitAlphaMask" hWrapMode="CLAMPTOBLACKADDITIVE" vWrapMode="CLAMPTOBLACKADDITIVE">
+											<Size x="34" y="34"/>
+											<Anchors>
+												<Anchor point="CENTER"/>
+											</Anchors>
+											<MaskedTextures>
+												<MaskedTexture childKey="icon"/>
+											</MaskedTextures>
+										</MaskTexture>
+									</Layer>
+								</Layers>
+								<Scripts>
+									<OnEnter>
+										self:SetAlpha(1)
+									</OnEnter>
+									<OnLeave>
+										self:SetAlpha(.5)
+									</OnLeave>
+									<OnMouseDown>
+										self.icon:SetPoint("CENTER", 1, -1)
+										self.mask:SetPoint("CENTER", 1, -1)
+									</OnMouseDown>
+									<OnMouseUp>
+										self.icon:SetPoint("CENTER")
+										self.mask:SetPoint("CENTER")
+									</OnMouseUp>
+								</Scripts>
+							</Button>
 							<Frame parentKey="modelControl" alpha=".5">
 								<Anchors>
-									<Anchor point="BOTTOM" x="-70" y="10"/>
+									<Anchor point="BOTTOM" x="-72" y="10"/>
 								</Anchors>
-								<Size x="149" y="23"/>
+								<Size x="150" y="23"/>
 								<Layers>
 									<Layer level="BACKGROUND">
 										<Texture parentKey="left" file="Interface/Common/UI-ModelControlPanel">
@@ -589,7 +631,7 @@
 								<Frames>
 									<Button inherits="MJModelControlButtonTemplate" parentKey="zoomIn">
 										<Anchors>
-											<Anchor point="LEFT" x="2" y="0"/>
+											<Anchor point="LEFT" x="3" y="0"/>
 										</Anchors>
 										<KeyValues>
 											<KeyValue key="cmd" value="ORBIT_CAMERA_MOUSE_MODE_ZOOM" type="global"/>
@@ -659,18 +701,24 @@
 									</Button>
 								</Frames>
 							</Frame>
-							<Frame parentKey="animationsCombobox" inherits="MJDropDownButtonTemplate" mixin="MJMountAnimationPanelMixin">
+							<Frame parentKey="animationsCombobox" alpha=".5" inherits="MJDropDownButtonTemplate" mixin="MJMountAnimationPanelMixin">
 								<Anchors>
-									<Anchor point="LEFT" relativeKey="$parent.modelControl" relativePoint="RIGHT" x="10" y="0"/>
+									<Anchor point="LEFT" relativeKey="$parent.modelControl" relativePoint="RIGHT" x="10" y="-.5"/>
 								</Anchors>
 								<Scripts>
 									<OnLoad method="onLoad"/>
+									<OnEnter>
+										self:SetAlpha(1)
+									</OnEnter>
+									<OnLeave>
+										self:SetAlpha(.5)
+									</OnLeave>
 								</Scripts>
 							</Frame>
-							<CheckButton parentKey="playerToggle" scale=".5">
+							<CheckButton parentKey="playerToggle" alpha=".5" scale=".5">
 								<Size x="77" y="77"/>
 								<Anchors>
-									<Anchor point="LEFT" relativeKey="$parent.animationsCombobox" relativePoint="RIGHT" x="11" y="1"/>
+									<Anchor point="LEFT" relativeKey="$parent.animationsCombobox" relativePoint="RIGHT" x="11" y="2"/>
 								</Anchors>
 								<Layers>
 									<Layer level="OVERLAY">
@@ -697,6 +745,14 @@
 										<Anchor point="CENTER"/>
 									</Anchors>
 								</CheckedTexture>
+								<Scripts>
+									<OnEnter>
+										self:SetAlpha(1)
+									</OnEnter>
+									<OnLeave>
+										self:SetAlpha(.5)
+									</OnLeave>
+								</Scripts>
 							</CheckButton>
 						</Frames>
 					</ModelScene>
