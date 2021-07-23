@@ -484,6 +484,7 @@ function journal:init()
 	-- MODEL SCENE MULTIPLE BUTTON
 	self.multipleMountBtn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	self.multipleMountBtn:ddSetInit(function(...) self:miltipleMountBtn_Initialize(...) end, "menu")
+	self.multipleMountBtn.MJNoGlobalMouseEvent = true
 	self.multipleMountBtn:SetScript("OnClick", function(btn, mouseBtn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		if mouseBtn == "LeftButton" then
