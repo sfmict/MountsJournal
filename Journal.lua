@@ -121,9 +121,7 @@ function journal:init()
 	-- MOUNT COUNT
 	self.mountCount.collectedLabel:SetText(L["Collected:"])
 	self:updateCountMounts()
-
-	self:RegisterEvent("COMPANION_LEARNED")
-	self:RegisterEvent("COMPANION_UNLEARNED")
+	self:RegisterEvent("NEW_MOUNT_ADDED")
 
 	-- ACHIEVEMENT
 	self:ACHIEVEMENT_EARNED()
@@ -488,6 +486,7 @@ function journal:init()
 	self.multipleMountBtn:SetScript("OnClick", function(btn, mouseBtn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		if mouseBtn == "LeftButton" then
+			btn:closeDropDownMenus()
 			local allCreatureDisplays, index = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
 			for i = 1, #allCreatureDisplays do
 				if self.mountDisplay.creatureID == allCreatureDisplays[i].creatureDisplayID then
@@ -1192,12 +1191,11 @@ function journal:MOUNT_JOURNAL_SEARCH_UPDATED()
 end
 
 
-function journal:mountLearnedUpdate()
+function journal:NEW_MOUNT_ADDED()
 	self:updateCountMounts()
 	self:updateIndexByMountID()
+	self:sortMounts()
 end
-journal.COMPANION_LEARNED = journal.mountLearnedUpdate
-journal.COMPANION_UNLEARNED = journal.mountLearnedUpdate
 
 
 -- isUsable FLAG CHANGED

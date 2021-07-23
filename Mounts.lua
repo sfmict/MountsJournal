@@ -290,9 +290,9 @@ function mounts:PLAYER_LOGIN()
 	-- INSTANCE INFO UPDATE
 	self:RegisterEvent("PLAYER_ENTERING_WORLD")
 
-	-- PROFESSION CHANGED OR MOUNT LEARNED
+	-- PROFESSION CHANGED OR MOUNT ADDED
 	self:RegisterEvent("SKILL_LINES_CHANGED")
-	self:RegisterEvent("COMPANION_LEARNED")
+	self:RegisterEvent("NEW_MOUNT_ADDED")
 
 	-- SPEC CHANGED
 	self:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
@@ -301,9 +301,6 @@ function mounts:PLAYER_LOGIN()
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
-
-	-- AUTO ADD MOUNT
-	self:RegisterEvent("NEW_MOUNT_ADDED")
 end
 
 
@@ -365,6 +362,17 @@ function mounts:setUsableRepairMounts()
 end
 
 
+function mounts:PLAYER_ENTERING_WORLD()
+	local _, instanceType, _,_,_,_,_, instanceID = GetInstanceInfo()
+	self.instanceID = instanceID
+	local pvp = instanceType == "arena" or instanceType == "pvp"
+	if self.pvp ~= pvp then
+		self.pvp = pvp
+		self:setDB()
+	end
+end
+
+
 function mounts:PLAYER_REGEN_DISABLED()
 	self:UnregisterEvent("UNIT_SPELLCAST_START")
 end
@@ -399,6 +407,12 @@ end
 
 
 function mounts:NEW_MOUNT_ADDED(mountID)
+	self:autoAddNewMount(mountID)
+	if self.herbalismMounts[mountID] then self:setHerbMount() end
+end
+
+
+function mounts:autoAddNewMount(mountID)
 	local _,_,_,_, mountTypeExtra = C_MountJournal.GetMountInfoExtraByID(mountID)
 	local mountType = util.mountTypes[mountTypeExtra]
 	if mountType == 1 then
@@ -434,17 +448,6 @@ function mounts:setModifier(modifier)
 	else
 		self.config.modifier = "ALT"
 		self.modifier = IsAltKeyDown
-	end
-end
-
-
-function mounts:PLAYER_ENTERING_WORLD()
-	local _, instanceType, _,_,_,_,_, instanceID = GetInstanceInfo()
-	self.instanceID = instanceID
-	local pvp = instanceType == "arena" or instanceType == "pvp"
-	if self.pvp ~= pvp then
-		self.pvp = pvp
-		self:setDB()
 	end
 end
 
@@ -621,7 +624,6 @@ function mounts:setHerbMount()
 	self.herbMount = false
 end
 mounts.SKILL_LINES_CHANGED = mounts.setHerbMount
-mounts.COMPANION_LEARNED = mounts.setHerbMount
 
 
 function mounts:summonListOr(ids)
