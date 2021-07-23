@@ -467,7 +467,11 @@ function mounts:setMountsList()
 			end
 			if not self.list then
 				while list and list.listFromID do
-					list = zoneMounts[list.listFromID]
+					if list.listFromID == self.defMountsListID then
+						list = self.db
+					else
+						list = zoneMounts[list.listFromID]
+					end
 				end
 				if list and (next(list.fly) or next(list.ground) or next(list.swimming)) then
 					self.list = list

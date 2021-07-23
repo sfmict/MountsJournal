@@ -1038,7 +1038,7 @@ function journal:setEditMountsList()
 	self.db = mounts.charDB.currentProfileName and mounts.profiles[mounts.charDB.currentProfileName] or mounts.defProfile
 	self.zoneMounts = self.db.zoneMountsFromProfile and mounts.defProfile.zoneMounts or self.db.zoneMounts
 	local mapID = self.navBar.mapID
-	if mapID == mounts.defMountsListID then
+	if mapID == self.navBar.defMapID then
 		self.currentList = self.db
 		self.listMapID = nil
 		self.list = self.currentList
@@ -1047,8 +1047,13 @@ function journal:setEditMountsList()
 		self.listMapID = mapID
 		self.list = self.currentList
 		while self.list and self.list.listFromID do
-			self.listMapID = self.list.listFromID
-			self.list = self.zoneMounts[self.listMapID]
+			if self.list.listFromID == self.navBar.defMapID then
+				self.listMapID = nil
+				self.list = self.db
+			else
+				self.listMapID = self.list.listFromID
+				self.list = self.zoneMounts[self.listMapID]
+			end
 		end
 	end
 	self.petForMount = self.db.petListFromProfile and mounts.defProfile.petForMount or self.db.petForMount
@@ -1260,7 +1265,7 @@ end
 
 
 function journal:setFlag(flag, enable)
-	if self.navBar.mapID == mounts.defMountsListID then return end
+	if self.navBar.mapID == self.navBar.defMapID then return end
 
 	if enable and not (self.currentList and self.currentList.flags) then
 		self:createMountList(self.navBar.mapID)
@@ -1320,47 +1325,57 @@ do
 end
 
 
-function journal:listFromMapInit(btn, level, value)
-	local info = {}
-	info.notCheckable = true
-
-	if next(value) == nil then
-		info.disabled = true
-		info.text = EMPTY
-		btn:ddAddButton(info, level)
-	elseif level == 2 then
-		local function setListFrom(_, mapID)
-			if self.navBar.mapID == mapID then return end
-			if not self.currentList then
-				self:createMountList(self.navBar.mapID)
-			end
-			self.currentList.listFromID = mapID
-			self:setEditMountsList()
-			self:updateMountsList()
-			self:updateMapSettings()
-			-- mounts:setMountsList()
-			self.existingLists:refresh()
-
-			self.mountListUpdateAnim:Stop()
-			self.mountListUpdateAnim:Play()
+do
+	local function setListFrom(_, mapID)
+		if journal.navBar.mapID == mapID then return end
+		if not journal.currentList then
+			journal:createMountList(journal.navBar.mapID)
 		end
+		journal.currentList.listFromID = mapID
+		journal:setEditMountsList()
+		journal:updateMountsList()
+		journal:updateMapSettings()
+		-- mounts:setMountsList()
+		journal.existingLists:refresh()
 
-		info.list = {}
-		for _, mapInfo in ipairs(value) do
-			tinsert(info.list, {
-				notCheckable = true,
-				text = mapInfo.name,
-				arg1 = mapInfo.mapID,
-				func = setListFrom,
-			})
+		journal.mountListUpdateAnim:Stop()
+		journal.mountListUpdateAnim:Play()
+	end
+
+
+	function journal:listFromMapInit(btn, level, value)
+		local info = {}
+		info.notCheckable = true
+
+		if next(value) == nil then
+			info.disabled = true
+			info.text = EMPTY
 			btn:ddAddButton(info, level)
-		end
-	else
-		for _, mapInfo in ipairs(value) do
+		elseif level == 2 then
+			info.list = {}
+			for _, mapInfo in ipairs(value) do
+				tinsert(info.list, {
+					notCheckable = true,
+					text = mapInfo.name,
+					arg1 = mapInfo.mapID,
+					func = setListFrom,
+				})
+				btn:ddAddButton(info, level)
+			end
+		else
 			info.keepShownOnClick = true
 			info.hasArrow = true
-			info.text = mapInfo.name
-			info.value = mapInfo.list
+			for _, mapInfo in ipairs(value) do
+				info.text = mapInfo.name
+				info.value = mapInfo.list
+				btn:ddAddButton(info, level)
+			end
+
+			info.keepShownOnClick = nil
+			info.hasArrow = nil
+			info.text = WORLD
+			info.arg1 = self.navBar.defMapID
+			info.func = setListFrom
 			btn:ddAddButton(info, level)
 		end
 	end
@@ -1377,14 +1392,14 @@ function journal:updateMapSettings()
 	mapSettings.WaterWalk:SetChecked(flags and flags.waterWalkOnly)
 	mapSettings.HerbGathering:SetChecked(flags and flags.herbGathering)
 
-	local optionsEnable = self.navBar.mapID ~= mounts.defMountsListID
+	local optionsEnable = self.navBar.mapID ~= self.navBar.defMapID
 	mapSettings.Flags:SetEnabled(optionsEnable)
 	mapSettings.listFromMap:SetEnabled(optionsEnable)
 
 	local relationText = mapSettings.relationMap.text
 	local relationClear = mapSettings.relationClear
 	if self.currentList and self.currentList.listFromID then
-		relationText:SetText(util.getMapFullNameInfo(self.currentList.listFromID).name)
+		relationText:SetText(self.currentList.listFromID == self.navBar.defMapID and WORLD or util.getMapFullNameInfo(self.currentList.listFromID).name)
 		relationText:SetTextColor(self.colors.gold:GetRGB())
 		relationClear:Show()
 	else
