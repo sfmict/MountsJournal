@@ -83,7 +83,7 @@ function MJMountAnimationPanelMixin:onLoad()
 		},
 	}
 
-	self.customAnimationPanel = CreateFrame("FRAME", nil, self, "MJMountCustomAnimationPanel")
+	self.customAnimationPanel = CreateFrame("FRAME", nil, self:GetParent(), "MJMountCustomAnimationPanel")
 	self.customAnimationPanel:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 0, 2)
 
 	self.journal:on("MOUNT_MODEL_UPDATE", function(_, mountType)
@@ -205,6 +205,7 @@ MJMountCustomAnimationMixin = {}
 function MJMountCustomAnimationMixin:onLoad()
 	self.journal = MountsJournalFrame
 	self.animations = MountsJournal.globalDB.mountAnimations
+	self.animationsCombobox = self:GetParent().animationsCombobox
 	if type(self.animations.current) ~= "number" then
 		self.animations.current = 0
 	end
@@ -310,7 +311,7 @@ end
 
 
 function MJMountCustomAnimationMixin:play()
-	self:GetParent():playAnimation(self.animations.current, self.animations.isKit, self.animations.loop)
+	self.animationsCombobox:playAnimation(self.animations.current, self.animations.isKit, self.animations.loop)
 end
 
 
