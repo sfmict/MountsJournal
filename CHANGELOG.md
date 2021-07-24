@@ -1,4 +1,4 @@
 # MountsJournal
 
-* Updated db.
-* World is added to the relation list.
+* Fixed restoration of filters.
+* Fixed sorting when set/unset a favorite if the journal is hidden.
