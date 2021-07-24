@@ -626,6 +626,11 @@ function journal:init()
 		end
 	end)
 
+	-- SET/UNSET FAVORITE
+	hooksecurefunc(C_MountJournal, "SetIsFavorite", function()
+		self:sortMounts()
+	end)
+
 	-- MODULES INIT
 	self:event("MODULES_INIT"):off("MODULES_INIT")
 
@@ -717,7 +722,6 @@ function journal:setShown(shown)
 	if shown ~= nil then
 		self.isShow = shown
 	end
-	local useDefaultJournal = mounts.config.useDefaultJournal
 	self.useMountsJournalButton:SetShown(self.isShow)
 
 	if self.isShow then
@@ -730,12 +734,13 @@ function journal:setShown(shown)
 
 	if InCombatLockdown() then
 		self.useMountsJournalButton:Disable()
+		self:restoreMJFilters()
 		return
 	else
 		self.useMountsJournalButton:Enable()
 	end
 
-	if useDefaultJournal then
+	if mounts.config.useDefaultJournal then
 		if self.isShow then
 			self:restoreMJFilters()
 			self.MountJournal:Show()
@@ -1171,6 +1176,7 @@ end
 
 
 function journal:updateIndexByMountID()
+	if not self.mjFiltersBackup.isBackuped then return end
 	if C_MountJournal.GetNumDisplayedMounts() ~= self.mountCount.count.num then
 		self:UnregisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 		C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
@@ -1187,13 +1193,7 @@ function journal:updateIndexByMountID()
 		self.indexByMountID[mountID] = i
 	end
 end
-
-
--- UPDATE WHEN SET/UNSET FAVORITE
-function journal:MOUNT_JOURNAL_SEARCH_UPDATED()
-	self:updateIndexByMountID()
-	self:sortMounts()
-end
+journal.MOUNT_JOURNAL_SEARCH_UPDATED = journal.updateIndexByMountID
 
 
 function journal:NEW_MOUNT_ADDED()
