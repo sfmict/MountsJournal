@@ -178,6 +178,7 @@ function MJMountAnimationPanelMixin:playAnimation(animation, isKit, loop)
 	local actor = self.journal.modelScene:GetActorByTag("unwrapped")
 	actor:StopAnimationKit()
 	actor:SetAnimation(0)
+	--max animation 2^31 - 1
 	if isKit then
 		actor:PlayAnimationKit(animation, loop)
 	else

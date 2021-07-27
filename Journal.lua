@@ -489,7 +489,7 @@ function journal:init()
 			btn:closeDropDownMenus()
 			local allCreatureDisplays, index = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
 			for i = 1, #allCreatureDisplays do
-				if self.mountDisplay.creatureID == allCreatureDisplays[i].creatureDisplayID then
+				if self.mountDisplay.LastCreatureID == allCreatureDisplays[i].creatureDisplayID then
 					index = i
 					break
 				end
@@ -1416,21 +1416,25 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 		local creatureName, spellID, icon, active, isUsable = C_MountJournal.GetMountInfoByID(self.selectedMountID)
 		local needsFanfare = C_MountJournal.NeedsFanfare(self.selectedMountID)
 
-		if self.mountDisplay.lastDisplayed ~= self.selectedMountID or forceSceneChange then
-			self.mountDisplay.lastDisplayed = self.selectedMountID
+		if self.mountDisplay.lastMountID ~= self.selectedMountID or forceSceneChange then
 			local creatureDisplayID, descriptionText, sourceText, isSelfMount, mountType, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = C_MountJournal.GetMountInfoExtraByID(self.selectedMountID)
 			if not creatureID then
-				if not creatureDisplayID then
-					local allCreatureDisplays = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
-					if allCreatureDisplays and #allCreatureDisplays > 0 then
-						creatureDisplayID = allCreatureDisplays[1].creatureDisplayID
-					else
-						creatureDisplayID = 0
+				if self.mountDisplay.lastMountID == self.selectedMountID then
+					creatureID = self.mountDisplay.LastCreatureID
+				else
+					if not creatureDisplayID then
+						local allCreatureDisplays = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
+						if allCreatureDisplays and #allCreatureDisplays > 0 then
+							creatureDisplayID = allCreatureDisplays[1].creatureDisplayID
+						else
+							creatureDisplayID = 0
+						end
 					end
+					creatureID = creatureDisplayID
 				end
-				creatureID = creatureDisplayID
 			end
-			self.mountDisplay.creatureID = creatureID
+			self.mountDisplay.lastMountID = self.selectedMountID
+			self.mountDisplay.LastCreatureID = creatureID
 
 			info.name:SetText(creatureName)
 			info.source:SetText(sourceText)
@@ -1506,7 +1510,7 @@ function journal:miltipleMountBtn_Initialize(btn, level)
 		info.func = function()
 			self:updateMountDisplay(true, creatureID)
 		end
-		info.checked = self.mountDisplay.creatureID == creatureID
+		info.checked = self.mountDisplay.LastCreatureID == creatureID
 		btn:ddAddButton(info, level)
 	end
 end
