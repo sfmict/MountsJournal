@@ -66,12 +66,13 @@ function journal:init()
 	end
 
 	-- BACKGROUND FRAME
-	self.bgFrame = CreateFrame("FRAME", "MountsJournalBackground", CollectionsJournal, "MJMountJournalFrameTemplate")
-	self.bgFrame:SetPoint("TOPLEFT", CollectionsJournal, "TOPLEFT", 0, 0)
+	self.bgFrame = CreateFrame("FRAME", "MountsJournalBackground", self.CollectionsJournal, "MJMountJournalFrameTemplate")
+	self.bgFrame:SetPoint("TOPLEFT", self.CollectionsJournal, "TOPLEFT", 0, 0)
 	self.bgFrame:SetTitle(MOUNTS)
 	self.bgFrame:SetPortraitToAsset("Interface/Icons/MountJournalPortrait")
 
 	self.bgFrame:SetScript("OnShow", function()
+		self.CollectionsJournal.NineSlice:Hide()
 		self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 		self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 		self.scrollFrame:update()
@@ -80,6 +81,7 @@ function journal:init()
 	end)
 
 	self.bgFrame:SetScript("OnHide", function()
+		self.CollectionsJournal.NineSlice:Show()
 		self:UnregisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 		self:UnregisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 		self.mountDisplay:Show()
@@ -88,9 +90,19 @@ function journal:init()
 		self.worldMap:Hide()
 	end)
 
+	self.bgFrame:RegisterForDrag("LeftButton")
+	for _, handler in ipairs({"OnMouseDown", "OnMouseUp", "OnDragStart", "OnDragStop"}) do
+		self.bgFrame:SetScript(handler, function(_, ...)
+			local func = self.CollectionsJournal:GetScript(handler)
+			if func then
+				func(self.CollectionsJournal, ...)
+			end
+		end)
+	end
+
 	self.bgFrame.CloseButton:SetScript("OnClick", function()
 		if not InCombatLockdown() then
-			HideUIPanel(CollectionsJournal)
+			HideUIPanel(self.CollectionsJournal)
 		end
 	end)
 
@@ -248,12 +260,9 @@ function journal:init()
 		self.existingLists:SetShown(btn:GetChecked())
 	end)
 
-
 	-- SCROLL FRAME
 	self.scrollFrame.scrollBar.doNotHide = true
-	self.scrollFrame.scrollBar:SetPoint("TOPLEFT", self.scrollFrame, "TOPRIGHT", 1, -12)
-	self.scrollFrame.scrollBar:SetPoint("BOTTOMLEFT", self.scrollFrame, "BOTTOMRIGHT", 4, 11)
-	HybridScrollFrame_CreateButtons(self.scrollFrame, "MJMountListPanelTemplate", 2, 0)
+	HybridScrollFrame_CreateButtons(self.scrollFrame, "MJMountListPanelTemplate", 1, 0)
 
 	local function typeClick(btn) self:mountToggle(btn) end
 	local function dragClick(btn, mouse) self.tags:dragButtonClick(btn, mouse) end
@@ -380,7 +389,7 @@ function journal:init()
 
 		local activeCamera = self.modelScene.activeCamera
 		if activeCamera then
-			activeCamera.yOffset = activeCamera.yOffset + (checked and 40 or -40)
+			activeCamera.yOffset = activeCamera.yOffset + (checked and activeCamera.offsetDelta or -activeCamera.offsetDelta)
 		end
 	end
 	setShownDescription(self.mountDescriptionToggle)
@@ -660,12 +669,13 @@ function journal:ADDON_LOADED(addonName)
 		self.ADDON_LOADED = nil
 
 		self.mjFiltersBackup = {sources = {}}
+		self.CollectionsJournal = CollectionsJournal
 		self.MountJournal = MountJournal
 		hooksecurefunc(self.MountJournal, "SetShown", function(_, shown) self:setShown(shown) end)
-		CollectionsJournal:HookScript("OnHide", function() self:setShown(false) end)
+		self.CollectionsJournal:HookScript("OnHide", function() self:setShown(false) end)
 
-		self.useMountsJournalButton = CreateFrame("CheckButton", nil, CollectionsJournal, "MJCheckButtonTemplate")
-		self.useMountsJournalButton:SetPoint("BOTTOMLEFT", 279, 1)
+		self.useMountsJournalButton = CreateFrame("CheckButton", nil, self.CollectionsJournal, "MJCheckButtonTemplate")
+		self.useMountsJournalButton:SetPoint("BOTTOMLEFT", 280, 1)
 		self.useMountsJournalButton:SetFrameLevel(1010)
 		self.useMountsJournalButton.Text:SetFontObject("GameFontNormal")
 		self.useMountsJournalButton.Text:SetText(addon)

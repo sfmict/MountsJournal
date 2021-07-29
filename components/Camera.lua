@@ -54,8 +54,9 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 		self:SetRoll(transitionalCameraInfo.roll)
 
 		if self.xOffset == nil then
+			self.offsetDelta = 50
 			self.xOffset = 0
-			self.yOffset = mounts.config.mountDescriptionToggle and 40 or 0
+			self.yOffset = mounts.config.mountDescriptionToggle and self.offsetDelta or 0
 			self.panningXOffset = 0
 			self.panningYOffset = self.yOffset
 			self:setMaxOffsets()
@@ -195,6 +196,6 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 		self:SetRoll(self.modelSceneCameraInfo.roll)
 		self:SetZoomDistance(self.modelSceneCameraInfo.zoomDistance)
 		self.xOffset = 0
-		self.yOffset = mounts.config.mountDescriptionToggle and 40 or 0
+		self.yOffset = mounts.config.mountDescriptionToggle and self.offsetDelta or 0
 	end
 end)

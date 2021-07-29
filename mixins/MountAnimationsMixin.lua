@@ -95,7 +95,7 @@ function MJMountAnimationPanelMixin:onLoad()
 end
 
 function MJMountAnimationPanelMixin:replayAnimation()
-	if self.selectedValue == "custom" or self.selectedValue and (self.selectedValue.type == nil	or self.selectedValue.type >= self.currentMountType) then
+	if self.selectedValue == "custom" or self.selectedValue and (self.selectedValue.type == nil or self.selectedValue.type >= self.currentMountType) then
 		if self.selectedValue.animation ~= 0 then
 			self:SetScript("OnUpdate", self.onUpdate)
 		end
