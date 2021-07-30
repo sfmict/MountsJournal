@@ -29,7 +29,6 @@ function journal:init()
 	self.init = nil
 
 	local texPath = "Interface/AddOns/MountsJournal/textures/"
-	self.searchText = ""
 	self.mountIDs = C_MountJournal.GetMountIDs()
 
 	-- FILTERS INIT
@@ -397,7 +396,6 @@ function journal:init()
 
 	-- SEARCH BOX
 	self.searchBox:HookScript("OnTextChanged", function(editBox)
-		self.searchText = editBox:GetText()
 		self:updateMountsList()
 	end)
 	self.searchBox:SetScript("OnHide", function(editBox)
@@ -675,7 +673,7 @@ function journal:ADDON_LOADED(addonName)
 		self.CollectionsJournal:HookScript("OnHide", function() self:setShown(false) end)
 
 		self.useMountsJournalButton = CreateFrame("CheckButton", nil, self.CollectionsJournal, "MJCheckButtonTemplate")
-		self.useMountsJournalButton:SetPoint("BOTTOMLEFT", 280, 1)
+		self.useMountsJournalButton:SetPoint("BOTTOMLEFT", 281, 1)
 		self.useMountsJournalButton:SetFrameLevel(1010)
 		self.useMountsJournalButton.Text:SetFontObject("GameFontNormal")
 		self.useMountsJournalButton.Text:SetText(addon)
@@ -2154,7 +2152,7 @@ end
 function journal:updateMountsList()
 	local filters, mountTypes, list, mountsDB, tags, GetMountInfoByID, GetMountInfoExtraByID = mounts.filters, self.mountTypes, self.list, mounts.mountsDB, self.tags, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID
 	local sources, types, selected, factions, pet, expansions = filters.sources, filters.types, filters.selected, filters.factions, filters.pet, filters.expansions
-	local text = util.cleanText(self.searchText)
+	local text = util.cleanText(self.searchBox:GetText())
 	wipe(self.displayedMounts)
 
 	for i = 1, #self.mountIDs do
