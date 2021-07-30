@@ -31,7 +31,9 @@ function MJSetPetMixin:onLoad()
 		GameTooltip:Hide()
 	end)
 
-	self.journal:on("POST_INIT", function() self:updatePetForMount() end)
+	self.journal:on("POST_INIT", function()
+		C_Timer.After(0, function() self:updatePetForMount() end)
+	end)
 	self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 end
 
