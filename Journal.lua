@@ -74,6 +74,8 @@ function journal:init()
 		self.CollectionsJournal.NineSlice:Hide()
 		self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 		self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
+		self:RegisterEvent("PLAYER_REGEN_DISABLED")
+		self:RegisterEvent("PLAYER_REGEN_ENABLED")
 		self.scrollFrame:update()
 		self:updateMountDisplay(true)
 		util.showHelpJournal()
@@ -83,6 +85,8 @@ function journal:init()
 		self.CollectionsJournal.NineSlice:Show()
 		self:UnregisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 		self:UnregisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
+		self:UnregisterEvent("PLAYER_REGEN_DISABLED")
+		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 		self.mountDisplay:Show()
 		self.navBarBtn:SetChecked(false)
 		self.mapSettings:Hide()
@@ -98,12 +102,6 @@ function journal:init()
 			end
 		end)
 	end
-
-	self.bgFrame.CloseButton:SetScript("OnClick", function()
-		if not InCombatLockdown() then
-			HideUIPanel(self.CollectionsJournal)
-		end
-	end)
 
 	self.mountCount = self.bgFrame.mountCount
 	self.achiev = self.bgFrame.achiev
@@ -128,6 +126,96 @@ function journal:init()
 	self.scrollFrame = self.bgFrame.scrollFrame
 	self.summonButton = self.bgFrame.summonButton
 	self.profilesMenu = self.bgFrame.profilesMenu
+
+	-- USE MountsJournal BUTTON
+	self.useMountsJournalButton:SetParent(self.CollectionsJournal)
+	self.useMountsJournalButton:SetFrameLevel(self.bgFrame:GetFrameLevel() + 10)
+	self.useMountsJournalButton:Enable()
+
+	-- SECURE FRAMES
+	self.s = CreateFrame("FRAME", nil, self, "SecureHandlerBaseTemplate")
+	self.s:SetFrameRef("useMountsJournalButton", self.useMountsJournalButton)
+	self.s:SetFrameRef("bgFrame", self.bgFrame)
+	self.s:SetFrameRef("MountJournal", self.MountJournal)
+	self.s:SetAttribute("useDefaultJournal", mounts.config.useDefaultJournal)
+	self.s:SetAttribute("isShow", true)
+	self.s:SetAttribute("update", [[
+		local useMountsJournalButton = self:GetFrameRef("useMountsJournalButton")
+		local bgFrame = self:GetFrameRef("bgFrame")
+		local MountJournal = self:GetFrameRef("MountJournal")
+		local isShow = self:GetAttribute("isShow")
+		if isShow then
+			useMountsJournalButton:Show()
+			if not self:GetAttribute("useDefaultJournal") then
+				bgFrame:Show()
+				MountJournal:Hide()
+			else
+				bgFrame:Hide()
+				MountJournal:Show()
+			end
+		else
+			useMountsJournalButton:Hide()
+			bgFrame:Hide()
+		end
+	]])
+	self.s:SetAttribute("setShown", [[
+		local frame = self:GetFrameRef("s")
+		frame:SetAttribute("isShow", false)
+		frame:Run(frame:GetAttribute("update"))
+	]])
+
+	local sMountsJournalButton = CreateFrame("BUTTON", nil, self.useMountsJournalButton, "SecureHandlerClickTemplate")
+	sMountsJournalButton:SetAllPoints()
+	sMountsJournalButton:SetHitRectInsets(self.useMountsJournalButton:GetHitRectInsets())
+	sMountsJournalButton:SetScript("OnEnter", function()
+		self.useMountsJournalButton.highlight:Show()
+	end)
+	sMountsJournalButton:SetScript("OnLeave", function()
+		self.useMountsJournalButton.highlight:Hide()
+	end)
+	sMountsJournalButton:SetScript("OnMouseDown", function()
+		self.useMountsJournalButton:GetPushedTexture():Show()
+	end)
+	sMountsJournalButton:SetScript("OnMouseUp", function()
+		self.useMountsJournalButton:GetPushedTexture():Hide()
+	end)
+	sMountsJournalButton:HookScript("OnClick", function()
+		self.useMountsJournalButton:Click()
+	end)
+	sMountsJournalButton:SetFrameRef("s", self.s)
+	sMountsJournalButton:SetAttribute("_onclick", [[
+		local frame = self:GetFrameRef("s")
+		frame:SetAttribute("useDefaultJournal", not frame:GetAttribute("useDefaultJournal"))
+		frame:Run(frame:GetAttribute("update"))
+	]])
+
+	local sMountJournal = CreateFrame("FRAME", nil, self.MountJournal, "SecureHandlerShowHideTemplate")
+	sMountJournal:SetFrameRef("s", self.s)
+	sMountJournal:SetAttribute("_onshow", [[
+		local frame = self:GetFrameRef("s")
+		frame:SetAttribute("isShow", true)
+		frame:Run(frame:GetAttribute("update"))
+	]])
+
+	local sPetJournal = CreateFrame("FRAME", nil, PetJournal, "SecureHandlerShowHideTemplate")
+	sPetJournal:SetFrameRef("s", self.s)
+	sPetJournal:SetAttribute("_onshow", self.s:GetAttribute("setShown"))
+
+	local sToyBox = CreateFrame("FRAME", nil, ToyBox, "SecureHandlerShowHideTemplate")
+	sToyBox:SetFrameRef("s", self.s)
+	sToyBox:SetAttribute("_onshow", self.s:GetAttribute("setShown"))
+
+	local sHeirloomsJournal = CreateFrame("FRAME", nil, HeirloomsJournal, "SecureHandlerShowHideTemplate")
+	sHeirloomsJournal:SetFrameRef("s", self.s)
+	sHeirloomsJournal:SetAttribute("_onshow", self.s:GetAttribute("setShown"))
+
+	local sWardrobeCollectionFrame = CreateFrame("FRAME", nil, WardrobeCollectionFrame, "SecureHandlerShowHideTemplate")
+	sWardrobeCollectionFrame:SetFrameRef("s", self.s)
+	sWardrobeCollectionFrame:SetAttribute("_onshow", self.s:GetAttribute("setShown"))
+
+	-- CLOSE BUTTON
+	self.bgFrame.closeButton:SetAttribute("type", "click")
+	self.bgFrame.closeButton:SetAttribute("clickbutton", self.CollectionsJournal.CloseButton)
 
 	-- MOUNT COUNT
 	self.mountCount.collectedLabel:SetText(L["Collected:"])
@@ -395,11 +483,17 @@ function journal:init()
 	self.mountDescriptionToggle:HookScript("OnClick", setShownDescription)
 
 	-- SEARCH BOX
-	self.searchBox:HookScript("OnTextChanged", function(editBox)
-		self:updateMountsList()
+	self.searchBox:HookScript("OnTextChanged", function(editBox, userInput)
+		if userInput then
+			self:updateMountsList()
+		end
 	end)
 	self.searchBox:SetScript("OnHide", function(editBox)
 		editBox:SetText("")
+		self:updateMountsList()
+	end)
+	self.searchBox.clearButton:HookScript("OnClick", function()
+		self:updateMountsList()
 	end)
 
 	-- FILTERS BUTTON
@@ -645,10 +739,10 @@ function journal:init()
 	self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 
 	-- UPDATES
+	self:setMJFiltersBackup()
 	self:setEditMountsList()
 	self:updateBtnFilters()
 	self:sortMounts()
-	self.bgFrame:GetScript("OnShow")(self.bgFrame)
 	self:selectMount(1)
 
 	-- POST INIT
@@ -669,23 +763,37 @@ function journal:ADDON_LOADED(addonName)
 		self.mjFiltersBackup = {sources = {}}
 		self.CollectionsJournal = CollectionsJournal
 		self.MountJournal = MountJournal
-		hooksecurefunc(self.MountJournal, "SetShown", function(_, shown) self:setShown(shown) end)
-		self.CollectionsJournal:HookScript("OnHide", function() self:setShown(false) end)
 
-		self.useMountsJournalButton = CreateFrame("CheckButton", nil, self.CollectionsJournal, "MJCheckButtonTemplate")
-		self.useMountsJournalButton:SetPoint("BOTTOMLEFT", 281, 1)
-		self.useMountsJournalButton:SetFrameLevel(1010)
+		self.useMountsJournalButton = CreateFrame("CheckButton", nil, self.MountJournal, "MJUseMountsJournalButtonTemplate")
+		self.useMountsJournalButton:SetPoint("BOTTOMLEFT", self.CollectionsJournal, "BOTTOMLEFT", 281, 1)
 		self.useMountsJournalButton.Text:SetFontObject("GameFontNormal")
 		self.useMountsJournalButton.Text:SetText(addon)
 		self.useMountsJournalButton:SetChecked(not mounts.config.useDefaultJournal)
 		self.useMountsJournalButton:SetScript("OnEnable", function(btn)
 			btn.Text:SetVertexColor(NORMAL_FONT_COLOR:GetRGB())
 		end)
-		self.useMountsJournalButton:SetScript("OnClick", function(btn)
-			if InCombatLockdown() then return end
-			mounts.config.useDefaultJournal = not btn:GetChecked()
-			self:setShown()
+		self.useMountsJournalButton:HookScript("OnClick", function(btn)
+			local checked = btn:GetChecked()
+			mounts.config.useDefaultJournal = not checked
+			if checked then
+				if self.init then
+					self:init()
+				else
+					self:setMJFiltersBackup()
+				end
+			else
+				self:restoreMJFilters()
+			end
 		end)
+
+		self:RegisterEvent("PLAYER_REGEN_DISABLED")
+		self:RegisterEvent("PLAYER_REGEN_ENABLED")
+
+		if InCombatLockdown() then
+			self.useMountsJournalButton:Disable()
+		elseif not mounts.config.useDefaultJournal then
+			self:init()
+		end
 	end
 end
 
@@ -726,56 +834,24 @@ end
 journal.PLAYER_LEAVING_WORLD = journal.restoreMJFilters
 
 
-function journal:setShown(shown)
-	if shown ~= nil then
-		self.isShow = shown
-	end
-	self.useMountsJournalButton:SetShown(self.isShow)
-
-	if self.isShow then
-		self:RegisterEvent("PLAYER_REGEN_DISABLED")
-		self:RegisterEvent("PLAYER_REGEN_ENABLED")
-	else
-		self:UnregisterEvent("PLAYER_REGEN_DISABLED")
-		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-	end
-
-	if InCombatLockdown() then
-		self.useMountsJournalButton:Disable()
-		self:restoreMJFilters()
-		return
-	else
-		self.useMountsJournalButton:Enable()
-	end
-
-	if mounts.config.useDefaultJournal then
-		if self.isShow then
-			self:restoreMJFilters()
-			self.MountJournal:Show()
-		end
-		if self.bgFrame then self.bgFrame:Hide() end
-	else
-		if self.isShow then
-			if self.init then self:init() end
-			self.MountJournal:Hide()
-			self:setMJFiltersBackup()
-		end
-		if self.bgFrame then self.bgFrame:SetShown(self.isShow) end
-	end
-end
-
-
 function journal:PLAYER_REGEN_DISABLED()
-	self.useMountsJournalButton:Disable()
-	self.MountJournal:Show()
-	if self.bgFrame then self.bgFrame:Hide() end
-	self:restoreMJFilters()
+	if self.init then
+		self.useMountsJournalButton:Disable()
+	else
+		self:updateMountsList()
+	end
 end
 
 
 function journal:PLAYER_REGEN_ENABLED()
-	self.useMountsJournalButton:Enable()
-	self.MountJournal:SetShown(true)
+	if self.init then
+		self.useMountsJournalButton:Enable()
+		if not mounts.config.useDefaultJournal then
+			self:init()
+		end
+	else
+		self:updateMountsList()
+	end
 end
 
 

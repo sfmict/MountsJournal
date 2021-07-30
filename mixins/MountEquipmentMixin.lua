@@ -10,6 +10,8 @@ function MJMountEquipmentMixin:onLoad()
 	hooksecurefunc("MountJournal_ClearPendingAndUpdate", function()
 		self:clearPendingApply()
 	end)
+	self.SetEnabled = function() end
+	self:updateMountEquipment()
 end
 
 
@@ -79,7 +81,9 @@ end
 
 function MJMountEquipmentMixin:updateMountEquipment()
 	local isUnlocked = C_PlayerInfo.CanPlayerUseMountEquipment()
-	self:SetShown(isUnlocked)
+	if not (self:IsShown() or InCombatLockdown()) then
+		self:SetShown(isUnlocked)
+	end
 
 	local itemID = C_MountJournal.GetAppliedMountEquipmentID()
 	self.currentItem = itemID and Item:CreateFromItemID(itemID)

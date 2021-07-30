@@ -8,9 +8,23 @@
 	<Script file="mixins/MountAnimationsMixin.lua"/>
 	<Script file="mixins/MountEquipmentMixin.lua"/>
 
-	<Frame name="MJMountJournalFrameTemplate" frameLevel="1000" enableMouse="true" inherits="PortraitFrameTemplate" virtual="true">
+	<CheckButton name="MJUseMountsJournalButtonTemplate" inherits="MJCheckButtonTemplate" virtual="true">
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture parentKey="highlight" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD" setAllPoints="true" hidden="true"/>
+			</Layer>
+		</Layers>
+	</CheckButton>
+
+	<Frame name="MJMountJournalFrameTemplate" frameLevel="1000" enableMouse="true" inherits="PortraitFrameTemplateNoCloseButton" virtual="true">
 		<Size x="703" y="606"/>
 		<Frames>
+
+			<Button parentKey="closeButton" inherits="UIPanelCloseButton,SecureActionButtonTemplate">
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" x="5.6" y="5"/>
+				</Anchors>
+			</Button>
 
 			<Frame parentKey="mountCount" useParentLevel="false" inherits="InsetFrameTemplate3">
 				<Size x="130" y="34"/>
@@ -99,7 +113,7 @@
 				</Anchors>
 			</Button>
 
-			<Button parentKey="slotButton" scale=".69" inherits="MountEquipmentButtonTemplate,SecureActionButtonTemplate" mixin="MJMountEquipmentMixin">
+			<Button parentKey="slotButton" scale=".69" inherits="MountEquipmentButtonTemplate,SecureActionButtonTemplate" mixin="MJMountEquipmentMixin" hidden="true">
 				<Anchors>
 					<Anchor point="RIGHT" relativeKey="$parent.summon1" relativePoint="LEFT" x="-20"/>
 				</Anchors>
