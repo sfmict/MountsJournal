@@ -86,7 +86,9 @@ function MJMountEquipmentMixin:updateMountEquipment()
 	end
 
 	local itemID = C_MountJournal.GetAppliedMountEquipmentID()
-	self.currentItem = itemID and Item:CreateFromItemID(itemID)
+	if not self.currentItem or self.currentItem:GetItemID() ~= itemID then
+		self.currentItem = itemID and Item:CreateFromItemID(itemID)
+	end
 
 	if isUnlocked then
 		local displayedItem = self:getDisplayedMountEquipment()

@@ -145,8 +145,7 @@ function journal:init()
 		local useMountsJournalButton = self:GetFrameRef("useMountsJournalButton")
 		local bgFrame = self:GetFrameRef("bgFrame")
 		local MountJournal = self:GetFrameRef("MountJournal")
-		local isShow = self:GetAttribute("isShow")
-		if isShow then
+		if self:GetAttribute("isShow") then
 			useMountsJournalButton:Show()
 			if not self:GetAttribute("useDefaultJournal") then
 				bgFrame:Show()
