@@ -71,20 +71,13 @@ function journal:init()
 	self.bgFrame:SetPortraitToAsset("Interface/Icons/MountJournalPortrait")
 
 	self.bgFrame:SetScript("OnShow", function()
-		self.bgFrame:SetScript("OnShow", function()
-			self.CollectionsJournal.NineSlice:Hide()
-			self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
-			self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
-			self:RegisterEvent("PLAYER_REGEN_DISABLED")
-			self:RegisterEvent("PLAYER_REGEN_ENABLED")
-			self:updateMountsList()
-			self:updateMountDisplay(true)
-			util.showHelpJournal()
-		end)
-
 		self.CollectionsJournal.NineSlice:Hide()
 		self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 		self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
+		self:RegisterEvent("PLAYER_REGEN_DISABLED")
+		self:RegisterEvent("PLAYER_REGEN_ENABLED")
+		self:updateMountsList()
+		self:updateMountDisplay(true)
 		util.showHelpJournal()
 	end)
 
@@ -138,6 +131,8 @@ function journal:init()
 	self.useMountsJournalButton:SetParent(self.CollectionsJournal)
 	self.useMountsJournalButton:SetFrameLevel(self.bgFrame:GetFrameLevel() + 10)
 	self.useMountsJournalButton:Enable()
+	self.useMountsJournalButton:SetScript("OnShow", nil)
+	self.useMountsJournalButton:SetScript("OnHide", nil)
 
 	-- SECURE FRAMES
 	self.s = CreateFrame("FRAME", nil, self, "SecureHandlerBaseTemplate")
@@ -261,9 +256,12 @@ function journal:init()
 	end)
 	summon1:SetScript("OnEnter", function(btn)
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-		GameTooltip:SetText(addon.." \""..SUMMONS.." 1\"", 1, 1, 1, 1)
+		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 1\"")
 		GameTooltip:AddLine(L["Normal mount summon"])
 		GameTooltip:AddLine("\nMacro: /click "..config.secureButtonNameMount)
+		if InCombatLockdown() then
+			GameTooltip_AddColoredLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT, RED_FONT_COLOR)
+		end
 		GameTooltip:Show()
 	end)
 
@@ -279,9 +277,12 @@ function journal:init()
 	end)
 	summon2:SetScript("OnEnter", function(btn)
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-		GameTooltip:SetText(addon.." \""..SUMMONS.." 2\"", 1, 1, 1, 1)
-		GameTooltip:AddLine(L["SecondMountTooltipDescription"]:gsub("^\n", ""):gsub("\n\n", "\n"), 1, .82, 0, 1, true)
+		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 2\"")
+		GameTooltip_AddNormalLine(GameTooltip, L["SecondMountTooltipDescription"]:gsub("^\n", ""):gsub("\n\n", "\n"))
 		GameTooltip:AddLine("\nMacro: /click "..config.secureButtonNameSecondMount)
+		if InCombatLockdown() then
+			GameTooltip_AddColoredLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT, RED_FONT_COLOR)
+		end
 		GameTooltip:Show()
 	end)
 
@@ -665,6 +666,7 @@ function journal:init()
 	-- PLAYER SHOW BUTTON
 	local playerToggle = self.modelScene.playerToggle
 	function playerToggle:setPortrait() SetPortraitTexture(self.portrait, "player") end
+	playerToggle:setPortrait()
 	playerToggle:SetScript("OnEvent", playerToggle.setPortrait)
 	playerToggle:SetScript("OnShow", function(self)
 		self:SetChecked(GetCVarBool("mountJournalShowPlayer"))
@@ -745,10 +747,13 @@ function journal:init()
 	-- MODULES INIT
 	self:event("MODULES_INIT"):off("MODULES_INIT")
 
-	-- ARROW BIND
-	self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
+	-- INIT
+	self.CollectionsJournal.NineSlice:Hide()
+	self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
+	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
+	util.showHelpJournal()
 
-	-- UPDATES
+	self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 	self:setMJFiltersBackup()
 	self:setEditMountsList()
 	self:updateBtnFilters()
@@ -779,9 +784,20 @@ function journal:ADDON_LOADED(addonName)
 		self.useMountsJournalButton.Text:SetFontObject("GameFontNormal")
 		self.useMountsJournalButton.Text:SetText(addon)
 		self.useMountsJournalButton:SetChecked(not mounts.config.useDefaultJournal)
+
+		self.useMountsJournalButton:SetScript("OnEnter", function(btn)
+			if not btn:IsEnabled() then
+				GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+				GameTooltip_SetTitle(GameTooltip, addon)
+				GameTooltip_AddColoredLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT, RED_FONT_COLOR)
+				GameTooltip:Show()
+			end
+		end)
+
 		self.useMountsJournalButton:SetScript("OnEnable", function(btn)
 			btn.Text:SetVertexColor(NORMAL_FONT_COLOR:GetRGB())
 		end)
+
 		self.useMountsJournalButton:HookScript("OnClick", function(btn)
 			local checked = btn:GetChecked()
 			mounts.config.useDefaultJournal = not checked
@@ -796,14 +812,23 @@ function journal:ADDON_LOADED(addonName)
 			end
 		end)
 
-		self:RegisterEvent("PLAYER_REGEN_DISABLED")
-		self:RegisterEvent("PLAYER_REGEN_ENABLED")
+		self.useMountsJournalButton:SetScript("OnShow", function(btn)
+			if InCombatLockdown() then
+				btn:Disable()
+			else
+				btn:Enable()
+				if not mounts.config.useDefaultJournal then
+					self:init()
+				end
+			end
+			self:RegisterEvent("PLAYER_REGEN_DISABLED")
+			self:RegisterEvent("PLAYER_REGEN_ENABLED")
+		end)
 
-		if InCombatLockdown() then
-			self.useMountsJournalButton:Disable()
-		elseif not mounts.config.useDefaultJournal then
-			self:init()
-		end
+		self.useMountsJournalButton:SetScript("OnHide", function()
+			self:UnregisterEvent("PLAYER_REGEN_DISABLED")
+			self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+		end)
 	end
 end
 

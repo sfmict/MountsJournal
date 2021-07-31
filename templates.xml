@@ -8,7 +8,7 @@
 	<Script file="mixins/MountAnimationsMixin.lua"/>
 	<Script file="mixins/MountEquipmentMixin.lua"/>
 
-	<CheckButton name="MJUseMountsJournalButtonTemplate" inherits="MJCheckButtonTemplate" virtual="true">
+	<CheckButton name="MJUseMountsJournalButtonTemplate" motionScriptsWhileDisabled="true" inherits="MJCheckButtonTemplate" virtual="true">
 		<Layers>
 			<Layer level="ARTWORK">
 				<Texture parentKey="highlight" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD" setAllPoints="true" hidden="true"/>
@@ -356,7 +356,7 @@
 				</Frames>
 			</Frame>
 
-			<Frame parentKey="shownPanel" inherits="InsetFrameTemplate">
+			<Frame parentKey="shownPanel" inherits="InsetFrameTemplate" hidden="true">
 				<Size y="26"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.filtersPanel" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
@@ -387,9 +387,9 @@
 
 			<Frame parentKey="leftInset" useParentLevel="true" inherits="InsetFrameTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.filtersPanel" relativePoint="BOTTOMLEFT" x="0" y="-2" />
-					<Anchor point="TOPRIGHT" relativeKey="$parent.filtersPanel" relativePoint="BOTTOMRIGHT" x="0" y="-2" />
-					<Anchor point="BOTTOM" x="0" y="26" />
+					<Anchor point="TOPLEFT" relativeKey="$parent.filtersPanel" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
+					<Anchor point="TOPRIGHT" relativeKey="$parent.filtersPanel" relativePoint="BOTTOMRIGHT" x="0" y="-2"/>
+					<Anchor point="BOTTOMLEFT" y="26"/>
 				</Anchors>
 				<Frames>
 					<Frame parentKey="updateAnimFrame" alpha="0" setAllPoints="true" useParentLevel="true" virtual="true">
@@ -412,16 +412,16 @@
 
 			<ScrollFrame parentKey="scrollFrame" inherits="MJHybridScrollFrameTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.leftInset" relativePoint="TOPLEFT" x="3" y="-3" />
-					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.leftInset" relativePoint="BOTTOMRIGHT" x="-26" y="3" />
+					<Anchor point="TOPLEFT" relativeKey="$parent.leftInset" relativePoint="TOPLEFT" x="3" y="-3"/>
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.leftInset" relativePoint="BOTTOMRIGHT" x="-26" y="3"/>
 				</Anchors>
 			</ScrollFrame>
 
 			<Frame parentKey="rightInset" useParentLevel="true" inherits="InsetFrameTemplate">
 				<Anchors>
-					<Anchor point="TOPRIGHT" relativeKey="$parent.navBarBtn" relativePoint="BOTTOMRIGHT" x="-4" y="0" />
-					<Anchor point="TOPLEFT" relativeKey="$parent.filtersPanel" relativePoint="TOPRIGHT" x="1" y="0" />
-					<Anchor point="BOTTOM" x="0" y="26" />
+					<Anchor point="TOPRIGHT" relativeKey="$parent.navBarBtn" relativePoint="BOTTOMRIGHT" x="-4" y="0"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.filtersPanel" relativePoint="TOPRIGHT" x="1" y="0"/>
+					<Anchor point="BOTTOM" x="0" y="26"/>
 				</Anchors>
 			</Frame>
 
@@ -788,7 +788,7 @@
 							<Anchor point="BOTTOMRIGHT" x="-5" y="0"/>
 						</Anchors>
 						<ScrollChild>
-							<Frame parentKey="Child" >
+							<Frame parentKey="Child">
 								<Anchors>
 									<Anchor point="TOPLEFT"/>
 								</Anchors>
@@ -978,8 +978,8 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self.trackBG:Show();
-						self.trackBG:SetVertexColor(0, 0, 0, 0.75);
+						self.trackBG:Show()
+						self.trackBG:SetVertexColor(0, 0, 0, 0.75)
 					</OnLoad>
 				</Scripts>
 			</Slider>
