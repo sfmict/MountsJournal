@@ -1633,13 +1633,18 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Frame parentKey="background" useParentLevel="true" inherits="TooltipBackdropTemplate">
+			<Frame parentKey="background" useParentLevel="true" inherits="BackdropTemplate">
 				<Size y="130"/>
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent.label" relativePoint="BOTTOM" x="0" y="-30"/>
 					<Anchor point="LEFT" x="0" y="0"/>
 					<Anchor point="RIGHT" x="0" y="0"/>
 				</Anchors>
+				<KeyValues>
+					<KeyValue key="backdropInfo" value="TOOLTIP_BACKDROP_STYLE_DEFAULT" type="global"/>
+					<KeyValue key="backdropColor" value="TOOLTIP_DEFAULT_BACKGROUND_COLOR" type="global"/>
+					<KeyValue key="backdropBorderColor" value="FRIENDS_GRAY_COLOR" type="global"/>
+				</KeyValues>
 			</Frame>
 			<EventFrame parentKey="scrollBar" inherits="WowTrimScrollBar">
 				<Anchors>

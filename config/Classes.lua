@@ -143,10 +143,9 @@ classConfig:SetScript("OnShow", function(self)
 	moveFallMF.defaultBtn:HookScript("OnClick", function()
 		self.macroEditBox:SetText(self.rightPanel.currentBtn.default)
 		self.macroEditBox:ClearFocus()
-		if self.currentMacrosConfig.macro then
-			moveFallMF.saveBtn:Enable()
-			moveFallMF.cancelBtn:Enable()
-		end
+		local enable = not not self.currentMacrosConfig.macro
+		moveFallMF.saveBtn:SetEnabled(enable)
+		moveFallMF.cancelBtn:SetEnabled(enable)
 	end)
 	moveFallMF.cancelBtn:HookScript("OnClick", function()
 		self.macroEditBox:SetText(self.currentMacrosConfig.macro or self.rightPanel.currentBtn.default)
@@ -170,10 +169,9 @@ classConfig:SetScript("OnShow", function(self)
 	combatMF.defaultBtn:HookScript("OnClick", function()
 		self.combatMacroEditBox:SetText(self.rightPanel.currentBtn.default)
 		self.combatMacroEditBox:ClearFocus()
-		if self.currentMacrosConfig.combatMacro then
-			combatMF.saveBtn:Enable()
-			combatMF.cancelBtn:Enable()
-		end
+		local enable = not not self.currentMacrosConfig.combatMacro
+		combatMF.saveBtn:SetEnabled(enable)
+		combatMF.cancelBtn:SetEnabled(enable)
 	end)
 	combatMF.cancelBtn:HookScript("OnClick", function()
 		self.combatMacroEditBox:SetText(self.currentMacrosConfig.combatMacro or self.rightPanel.currentBtn.default)
