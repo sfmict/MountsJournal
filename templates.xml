@@ -1640,11 +1640,6 @@
 					<Anchor point="LEFT" x="0" y="0"/>
 					<Anchor point="RIGHT" x="0" y="0"/>
 				</Anchors>
-				<KeyValues>
-					<KeyValue key="backdropInfo" value="TOOLTIP_BACKDROP_STYLE_DEFAULT" type="global"/>
-					<KeyValue key="backdropColor" value="TOOLTIP_DEFAULT_BACKGROUND_COLOR" type="global"/>
-					<KeyValue key="backdropBorderColor" value="FRIENDS_GRAY_COLOR" type="global"/>
-				</KeyValues>
 			</Frame>
 			<EventFrame parentKey="scrollBar" inherits="WowTrimScrollBar">
 				<Anchors>
@@ -1655,8 +1650,7 @@
 			<Frame parentKey="editFrame" inherits="ScrollingEditBoxTemplate"/>
 			<CheckButton parentKey="enable" inherits="MJCheckButtonTemplate">
 				<Anchors>
-					<Anchor point="LEFT" x="10"/>
-					<Anchor point="TOP" relativeKey="$parent.label" relativePoint="BOTTOM" y="-7"/>
+					<Anchor point="BOTTOMLEFT" relativeKey="$parent.background" relativePoint="TOPLEFT" x="10" y="-4"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>self.Text:SetText(ENABLE)</OnLoad>
@@ -1673,24 +1667,22 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Button parentKey="defaultBtn" inherits="UIPanelButtonTemplate">
+			<Button parentKey="defaultBtn" text="DEFAULT" inherits="UIPanelButtonTemplate">
 				<Size x="105" y="22"/>
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.background" relativePoint="TOPRIGHT" x="0" y="1"/>
 				</Anchors>
 				<Scripts>
-					<OnLoad>self:SetText(DEFAULT)</OnLoad>
 					<OnClick>PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)</OnClick>
 				</Scripts>
 			</Button>
-			<Button parentKey="cancelBtn" inherits="UIPanelButtonTemplate">
+			<Button parentKey="cancelBtn" text="CANCEL" inherits="UIPanelButtonTemplate">
 				<Size x="80" y="22"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT" relativeKey="$parent.background" relativePoint="BOTTOMRIGHT" x="0" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self:SetText(CANCEL)
 						self:Disable()
 					</OnLoad>
 					<OnClick>
@@ -1700,14 +1692,13 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Button parentKey="saveBtn" inherits="UIPanelButtonTemplate">
+			<Button parentKey="saveBtn" text="SAVE" inherits="UIPanelButtonTemplate">
 				<Size x="80" y="22"/>
 				<Anchors>
 					<Anchor point="RIGHT" relativeKey="$parent.cancelBtn" relativePoint="LEFT" x="0" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self:SetText(SAVE)
 						self:Disable()
 					</OnLoad>
 					<OnClick>
@@ -1730,6 +1721,10 @@
 		</Layers>
 		<Scripts>
 			<OnLoad>
+				self.background:SetBackdrop(TOOLTIP_BACKDROP_STYLE_DEFAULT)
+				self.background:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR:GetRGB())
+				self.background:SetBackdropBorderColor(FRIENDS_GRAY_COLOR:GetRGB())
+
 				local anchorsToFrame = {
 					CreateAnchor("TOPLEFT", self.background, "TOPLEFT", 5, -5),
 					CreateAnchor("BOTTOMRIGHT", self.background, "BOTTOMRIGHT", -5, 5),
