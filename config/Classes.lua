@@ -133,7 +133,7 @@ classConfig:SetScript("OnShow", function(self)
 	-- MOVE FALL MACRO
 	local moveFallMF = CreateFrame("FRAME", nil, rightPanelScroll.child, "MJMacroFrame")
 	self.moveFallMF = moveFallMF
-	self.macroEditBox = moveFallMF.scrollFrame.editBox
+	self.macroEditBox = moveFallMF.editFrame
 	moveFallMF:SetPoint("LEFT", 9, 0)
 	moveFallMF.label:SetText(L["HELP_MACRO_MOVE_FALL"])
 	moveFallMF.enable:HookScript("OnClick", function(btn)
@@ -143,8 +143,10 @@ classConfig:SetScript("OnShow", function(self)
 	moveFallMF.defaultBtn:HookScript("OnClick", function()
 		self.macroEditBox:SetText(self.rightPanel.currentBtn.default)
 		self.macroEditBox:ClearFocus()
-		self.currentMacrosConfig.macro = nil
-		util.refreshMacro()
+		if self.currentMacrosConfig.macro then
+			moveFallMF.saveBtn:Enable()
+			moveFallMF.cancelBtn:Enable()
+		end
 	end)
 	moveFallMF.cancelBtn:HookScript("OnClick", function()
 		self.macroEditBox:SetText(self.currentMacrosConfig.macro or self.rightPanel.currentBtn.default)
@@ -158,7 +160,7 @@ classConfig:SetScript("OnShow", function(self)
 	-- COMBAT MACRO
 	local combatMF = CreateFrame("FRAME", nil, rightPanelScroll.child, "MJMacroFrame")
 	self.combatMF = combatMF
-	self.combatMacroEditBox = combatMF.scrollFrame.editBox
+	self.combatMacroEditBox = combatMF.editFrame
 	combatMF:SetPoint("TOPLEFT", moveFallMF.background, "BOTTOMLEFT", 0, -50)
 	combatMF.label:SetText(L["HELP_MACRO_COMBAT"])
 	combatMF.enable:HookScript("OnClick", function(btn)
@@ -168,8 +170,10 @@ classConfig:SetScript("OnShow", function(self)
 	combatMF.defaultBtn:HookScript("OnClick", function()
 		self.combatMacroEditBox:SetText(self.rightPanel.currentBtn.default)
 		self.combatMacroEditBox:ClearFocus()
-		self.currentMacrosConfig.combatMacro = nil
-		util.refreshMacro()
+		if self.currentMacrosConfig.combatMacro then
+			combatMF.saveBtn:Enable()
+			combatMF.cancelBtn:Enable()
+		end
 	end)
 	combatMF.cancelBtn:HookScript("OnClick", function()
 		self.combatMacroEditBox:SetText(self.currentMacrosConfig.combatMacro or self.rightPanel.currentBtn.default)
@@ -334,7 +338,7 @@ end
 
 
 function classConfig:macroSave()
-	local text = self.macroEditBox:GetText()
+	local text = self.macroEditBox:GetEditBox():GetText()
 	if text == self.rightPanel.currentBtn.default then
 		self.currentMacrosConfig.macro = nil
 	else
@@ -345,7 +349,7 @@ end
 
 
 function classConfig:combatMacroSave()
-	local text = self.combatMacroEditBox:GetText()
+	local text = self.combatMacroEditBox:GetEditBox():GetText()
 	if text == self.rightPanel.currentBtn.default then
 		self.currentMacrosConfig.combatMacro = nil
 	else

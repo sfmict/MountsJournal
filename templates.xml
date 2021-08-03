@@ -1633,40 +1633,21 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<ScrollFrame parentKey="scrollFrame" inherits="UIPanelScrollFrameTemplate">
-				<Size y="120"/>
+			<Frame parentKey="background" useParentLevel="true" inherits="TooltipBackdropTemplate">
+				<Size y="130"/>
 				<Anchors>
-					<Anchor point="TOP" relativeKey="$parent.label" relativePoint="BOTTOM" x="0" y="-35"/>
-					<Anchor point="LEFT" x="5" y="0"/>
-					<Anchor point="RIGHT" x="-28" y="0"/>
-				</Anchors>
-				<ScrollChild>
-					<EditBox inherits="TooltipBackdropTemplate" parentKey="editBox" multiLine="true" letters="255" autoFocus="false" countInvisibleLetters="true">
-						<Size x="359"/>
-						<Scripts>
-							<OnLoad>
-								ScrollingEdit_OnCursorChanged(self, 0, 0, 0, 0)
-							</OnLoad>
-							<OnTextChanged>
-								self:GetParent():GetParent().limitText:SetFormattedText(MACROFRAME_CHAR_LIMIT, self:GetNumLetters())
-								ScrollingEdit_OnTextChanged(self, self:GetParent())
-							</OnTextChanged>
-							<OnCursorChanged function="ScrollingEdit_OnCursorChanged"/>
-							<OnUpdate>
-								ScrollingEdit_OnUpdate(self, elapsed, self:GetParent())
-							</OnUpdate>
-							<OnEscapePressed function="EditBox_ClearFocus"/>
-						</Scripts>
-						<FontString inherits="GameFontHighlightSmall"/>
-					</EditBox>
-				</ScrollChild>
-			</ScrollFrame>
-			<Frame parentKey="background" inherits="TooltipBackdropTemplate">
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.scrollFrame" x="-5" y="5"/>
-					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.scrollFrame" x="28" y="-5"/>
+					<Anchor point="TOP" relativeKey="$parent.label" relativePoint="BOTTOM" x="0" y="-30"/>
+					<Anchor point="LEFT" x="0" y="0"/>
+					<Anchor point="RIGHT" x="0" y="0"/>
 				</Anchors>
 			</Frame>
+			<EventFrame parentKey="scrollBar" inherits="WowTrimScrollBar">
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeKey="$parent.background" x="-4" y="-5"/>
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.background" x="-4" y="4"/>
+				</Anchors>
+			</EventFrame>
+			<Frame parentKey="editFrame" inherits="ScrollingEditBoxTemplate"/>
 			<CheckButton parentKey="enable" inherits="MJCheckButtonTemplate">
 				<Anchors>
 					<Anchor point="LEFT" x="10"/>
@@ -1683,7 +1664,7 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						self:GetParent().scrollFrame.editBox:SetFocus()
+						self:GetParent().editFrame:GetEditBox():SetFocus()
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -1703,8 +1684,15 @@
 					<Anchor point="TOPRIGHT" relativeKey="$parent.background" relativePoint="BOTTOMRIGHT" x="0" y="0"/>
 				</Anchors>
 				<Scripts>
-					<OnLoad>self:SetText(CANCEL)</OnLoad>
-					<OnClick>PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)</OnClick>
+					<OnLoad>
+						self:SetText(CANCEL)
+						self:Disable()
+					</OnLoad>
+					<OnClick>
+						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+						self:Disable()
+						self:GetParent().saveBtn:Disable()
+					</OnClick>
 				</Scripts>
 			</Button>
 			<Button parentKey="saveBtn" inherits="UIPanelButtonTemplate">
@@ -1713,8 +1701,15 @@
 					<Anchor point="RIGHT" relativeKey="$parent.cancelBtn" relativePoint="LEFT" x="0" y="0"/>
 				</Anchors>
 				<Scripts>
-					<OnLoad>self:SetText(SAVE)</OnLoad>
-					<OnClick>PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)</OnClick>
+					<OnLoad>
+						self:SetText(SAVE)
+						self:Disable()
+					</OnLoad>
+					<OnClick>
+						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+						self:Disable()
+						self:GetParent().cancelBtn:Disable()
+					</OnClick>
 				</Scripts>
 			</Button>
 		</Frames>
@@ -1728,6 +1723,29 @@
 				</FontString>
 			</Layer>
 		</Layers>
+		<Scripts>
+			<OnLoad>
+				local anchorsToFrame = {
+					CreateAnchor("TOPLEFT", self.background, "TOPLEFT", 5, -5),
+					CreateAnchor("BOTTOMRIGHT", self.background, "BOTTOMRIGHT", -5, 5),
+				}
+				local anchorsToBar = {
+					CreateAnchor("TOPLEFT", self.background, "TOPLEFT", 5, -5),
+					CreateAnchor("BOTTOMRIGHT", self.scrollBar, "BOTTOMLEFT", -4, 1),
+				}
+				local scrollBox = self.editFrame:GetScrollBox()
+				ScrollUtil.RegisterScrollBoxWithScrollBar(scrollBox, self.scrollBar)
+				ScrollUtil.AddManagedScrollBarVisibilityBehavior(scrollBox, self.scrollBar, anchorsToBar, anchorsToFrame)
+
+				self.editFrame:GetEditBox():HookScript("OnTextChanged", function(editBox, userInput)
+					self.limitText:SetFormattedText(MACROFRAME_CHAR_LIMIT, editBox:GetNumLetters())
+					if userInput then
+						self.saveBtn:Enable()
+						self.cancelBtn:Enable()
+					end
+				end)
+			</OnLoad>
+		</Scripts>
 	</Frame>
 
 	<Button name="MJNavButtonTemplate" motionScriptsWhileDisabled="true" virtual="true">
