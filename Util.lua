@@ -1,32 +1,16 @@
 local addon = ...
-local eventsMixin, eventsMeta = {}, {
-	__newindex = function(self, key, value)
-		if key == "onLoad" and type(value) == "function" then
-			rawset(self, key, function(self)
-				self:initEvents()
-				value(self)
-			end)
-		else
-			rawset(self, key, value)
-		end
-	end
-}
-
-
-function eventsMixin:initEvents()
-	self.initEvents = nil
-	self._events = {}
-end
+local type, strsplit, tinsert, tremove = type, strsplit, tinsert, tremove
+local events, eventsMixin = {}, {}
 
 
 function eventsMixin:on(event, func)
 	if type(event) ~= "string" or type(func) ~= "function" then return end
 	local event, name = strsplit(".", event, 2)
 
-	if not self._events[event] then
-		self._events[event] = {}
+	if not events[event] then
+		events[event] = {}
 	end
-	tinsert(self._events[event], {
+	tinsert(events[event], {
 		name = name,
 		func = func,
 	})
@@ -38,7 +22,7 @@ function eventsMixin:off(event, func)
 	if type(event) ~= "string" then return end
 	local event, name = strsplit(".", event, 2)
 
-	local handlerList = self._events[event]
+	local handlerList = events[event]
 	if handlerList then
 		if name ~= nil or type(func) == "function" then
 			local i = 1
@@ -52,10 +36,10 @@ function eventsMixin:off(event, func)
 				handler = handlerList[i]
 			end
 			if #handlerList == 0 then
-				self._events[event] = nil
+				events[event] = nil
 			end
 		else
-			self._events[event] = nil
+			events[event] = nil
 		end
 	end
 	return self
@@ -63,7 +47,7 @@ end
 
 
 function eventsMixin:event(event, ...)
-	local handlerList = self._events[event]
+	local handlerList = events[event]
 	if handlerList then
 		for i = 1, #handlerList do
 			handlerList[i].func(self, ...)
@@ -123,23 +107,21 @@ MountsJournalUtil.editBoxBackdrop = {
 }
 
 
-function MountsJournalUtil.createFromEventsMixin(...)
-	local mixin = CreateFromMixins(eventsMixin, ...)
-	setmetatable(mixin, eventsMeta)
-	return mixin
-end
-
-
-function MountsJournalUtil:setEventsMixin(frame)
-	self.setMixin(frame, eventsMixin)
-	frame:initEvents()
-end
-
-
-function MountsJournalUtil.setMixin(frame, mixin)
+function MountsJournalUtil.setMixin(obj, mixin)
 	for k, v in pairs(mixin) do
-		frame[k] = v
+		obj[k] = v
 	end
+	return obj
+end
+
+
+function MountsJournalUtil.createFromEventsMixin()
+	return MountsJournalUtil.setMixin({}, eventsMixin)
+end
+
+
+function MountsJournalUtil.setEventsMixin(frame)
+	MountsJournalUtil.setMixin(frame, eventsMixin)
 end
 
 
@@ -187,7 +169,7 @@ do
 		end
 	end
 
-	function MountsJournalUtil.createCheckboxChild(text, parent)
+	function MountsJournalUtil.setCheckboxChild(parent, child, lastChild)
 		if not parent.childs then
 			parent.childs = {}
 			hooksecurefunc(parent, "SetChecked", setEnabledChilds)
@@ -195,17 +177,22 @@ do
 			parent:HookScript("OnEnable", setEnabledChilds)
 			parent:HookScript("OnDisable", disableChilds)
 		end
-
-		local check = CreateFrame("CheckButton", nil, parent:GetParent(), "MJCheckButtonTemplate")
-		if #parent.childs == 0 then
-			check:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 20, -3)
-		else
-			check:SetPoint("TOPLEFT", parent.childs[#parent.childs], "BOTTOMLEFT", 0, -3)
-		end
-		check.Text:SetText(text)
-		tinsert(parent.childs, check)
-		return check
+		tinsert(parent.childs, child)
+		if lastChild then parent.lastChild = child end
 	end
+end
+
+
+function MountsJournalUtil.createCheckboxChild(text, parent)
+	local check = CreateFrame("CheckButton", nil, parent:GetParent(), "MJCheckButtonTemplate")
+	if parent.lastChild then
+		check:SetPoint("TOPLEFT", parent.lastChild, "BOTTOMLEFT", 0, -3)
+	else
+		check:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 20, -3)
+	end
+	check.Text:SetText(text)
+	MountsJournalUtil.setCheckboxChild(parent, check, true)
+	return check
 end
 
 

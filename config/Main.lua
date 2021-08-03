@@ -196,17 +196,9 @@ config:SetScript("OnShow", function(self)
 	self.useRepairMounts.Text:SetText(L["If item durability is less than"])
 	self.useRepairMounts.tooltipText = L["If item durability is less than"]
 	self.useRepairMounts.tooltipRequirement = L["UseRepairMountsDescription"]
-	self.useRepairMounts.setEnabledFunc = function(btn)
-		local checked = btn:GetChecked()
-		self.repairPecent:SetEnabled(checked)
-		self.repairMountsCombobox:SetEnabled(checked)
-	end
-	hooksecurefunc(self.useRepairMounts, "SetChecked", self.useRepairMounts.setEnabledFunc)
-	self.useRepairMounts:HookScript("OnClick", function(btn)
-		btn:setEnabledFunc()
-		applyEnable()
-	end)
+	self.useRepairMounts:HookScript("OnClick", function(btn) applyEnable() end)
 
+	-- combobox
 	self.repairPecent = CreateFrame("Editbox", nil, rightPanelScroll.child, "MJNumberTextBox")
 	self.repairPecent:SetPoint("LEFT", self.useRepairMounts.Text, "RIGHT", 3, 0)
 	self.repairPecent:SetScript("OnTextChanged", function(editBox, userInput)
@@ -229,7 +221,9 @@ config:SetScript("OnShow", function(self)
 			applyEnable()
 		end
 	end)
+	util.setCheckboxChild(self.useRepairMounts, self.repairPecent)
 
+	-- text
 	self.repairPecentText = self.repairPecent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	self.repairPecentText:SetPoint("LEFT", self.repairPecent, "RIGHT", 3, 0)
 	self.repairPecentText:SetText("%")
@@ -238,19 +232,13 @@ config:SetScript("OnShow", function(self)
 	self.repairFlyable = util.createCheckboxChild(L["In flyable zones"], self.useRepairMounts)
 	self.repairFlyable.tooltipText = L["In flyable zones"]
 	self.repairFlyable.tooltipRequirement = L["UseRepairMountsDescription"]
-	self.repairFlyable.checkFunc = function() return mounts.config.useRepairFlyable end
 	self.repairFlyable.setEnabledFunc = function(btn)
-		self.repairFlyablePercent:SetEnabled(btn:IsEnabled() and btn:GetChecked())
 		self.repairFlyablePercentText:SetTextColor(btn.Text:GetTextColor())
 	end
-	hooksecurefunc(self.repairFlyable, "SetChecked", self.repairFlyable.setEnabledFunc)
-	self.repairFlyable:HookScript("OnClick", function(btn)
-		btn:setEnabledFunc()
-		applyEnable()
-	end)
 	self.repairFlyable:HookScript("OnEnable", self.repairFlyable.setEnabledFunc)
 	self.repairFlyable:HookScript("OnDisable", self.repairFlyable.setEnabledFunc)
 
+	-- combobox
 	self.repairFlyablePercent = CreateFrame("Editbox", nil, rightPanelScroll.child, "MJNumberTextBox")
 	self.repairFlyablePercent:SetPoint("LEFT", self.repairFlyable.Text, "RIGHT", 3, 0)
 	self.repairFlyablePercent:SetScript("OnTextChanged", function(editBox, userInput)
@@ -273,7 +261,9 @@ config:SetScript("OnShow", function(self)
 			applyEnable()
 		end
 	end)
+	util.setCheckboxChild(self.repairFlyable, self.repairFlyablePercent)
 
+	-- text
 	self.repairFlyablePercentText = self.repairPecent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	self.repairFlyablePercentText:SetPoint("LEFT", self.repairFlyablePercent, "RIGHT", 3, 0)
 	self.repairFlyablePercentText:SetText("%")
@@ -311,6 +301,7 @@ config:SetScript("OnShow", function(self)
 			end
 		end
 	end)
+	util.setCheckboxChild(self.useRepairMounts, self.repairMountsCombobox)
 
 	-- USE MAGIC BROOM
 	self.useMagicBroom = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
@@ -398,9 +389,7 @@ config:SetScript("OnShow", function(self)
 			child:SetChecked(child:checkFunc())
 		end
 		self.useRepairMounts:SetChecked(mounts.config.useRepairMounts)
-		for _, child in ipairs(self.useRepairMounts.childs) do
-			child:SetChecked(child:checkFunc())
-		end
+		self.repairFlyable:SetChecked(mounts.config.useRepairFlyable)
 		self.repairPecent:SetNumber(tonumber(mounts.config.useRepairMountsDurability) or 0)
 		self.repairFlyablePercent:SetNumber(tonumber(mounts.config.useRepairFlyableDurability) or 0)
 		self.repairMountsCombobox:ddSetSelectedValue(mounts.config.repairSelectedMount)

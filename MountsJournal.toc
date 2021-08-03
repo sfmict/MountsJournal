@@ -8,19 +8,18 @@
 ## SavedVariablesPerCharacter: MountsJournalChar
 locales.xml
 Util.lua
-widgets/Binding.lua
-widgets/DropDown.xml
-widgets/DropDown.lua
+widgets\Binding.lua
+widgets\DropDown.xml
 templates.xml
 Mounts.lua
 db.lua
-config/Main.lua
-config/Classes.lua
-config/About.lua
+config\Main.lua
+config\Classes.lua
+config\About.lua
 Journal.lua
-components/Tags.lua
-components/Camera.lua
-components/Help.lua
+components\Tags.lua
+components\Camera.lua
+components\Help.lua
 #@do-not-package@
 _test.lua
 #@end-do-not-package@

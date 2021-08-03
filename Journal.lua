@@ -3,7 +3,7 @@ local C_MountJournal, C_PetJournal, C_Timer, wipe, tinsert, next, pairs, ipairs,
 local util, mounts, config = MountsJournalUtil, MountsJournal, MountsJournalConfig
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
 journal.mountTypes = util.mountTypes
-util:setEventsMixin(journal)
+util.setEventsMixin(journal)
 
 
 local COLLECTION_ACHIEVEMENT_CATEGORY = 15246
@@ -135,13 +135,17 @@ function journal:init()
 	self.useMountsJournalButton:SetScript("OnHide", nil)
 
 	-- SECURE FRAMES
-	self.s = CreateFrame("FRAME", nil, self, "SecureHandlerBaseTemplate")
+	self.s = CreateFrame("FRAME", nil, self, "SecureHandlerAttributeTemplate")
 	self.s:SetFrameRef("useMountsJournalButton", self.useMountsJournalButton)
 	self.s:SetFrameRef("bgFrame", self.bgFrame)
 	self.s:SetFrameRef("MountJournal", self.MountJournal)
 	self.s:SetAttribute("useDefaultJournal", mounts.config.useDefaultJournal)
 	self.s:SetAttribute("isShow", true)
-	self.s:SetAttribute("update", [[
+	self.s:SetAttribute("setShown", [[
+		local frame = self:GetFrameRef("s")
+		frame:SetAttribute("isShow", false)
+	]])
+	self.s:SetAttribute("_onattributechanged", [[
 		local useMountsJournalButton = self:GetFrameRef("useMountsJournalButton")
 		local bgFrame = self:GetFrameRef("bgFrame")
 		local MountJournal = self:GetFrameRef("MountJournal")
@@ -158,11 +162,6 @@ function journal:init()
 			useMountsJournalButton:Hide()
 			bgFrame:Hide()
 		end
-	]])
-	self.s:SetAttribute("setShown", [[
-		local frame = self:GetFrameRef("s")
-		frame:SetAttribute("isShow", false)
-		frame:Run(frame:GetAttribute("update"))
 	]])
 
 	local sMountsJournalButton = CreateFrame("BUTTON", nil, self.useMountsJournalButton, "SecureHandlerClickTemplate")
@@ -187,7 +186,6 @@ function journal:init()
 	sMountsJournalButton:SetAttribute("_onclick", [[
 		local frame = self:GetFrameRef("s")
 		frame:SetAttribute("useDefaultJournal", not frame:GetAttribute("useDefaultJournal"))
-		frame:Run(frame:GetAttribute("update"))
 	]])
 
 	local sMountJournal = CreateFrame("FRAME", nil, self.MountJournal, "SecureHandlerShowHideTemplate")
@@ -195,7 +193,6 @@ function journal:init()
 	sMountJournal:SetAttribute("_onshow", [[
 		local frame = self:GetFrameRef("s")
 		frame:SetAttribute("isShow", true)
-		frame:Run(frame:GetAttribute("update"))
 	]])
 
 	local sPetJournal = CreateFrame("FRAME", nil, PetJournal, "SecureHandlerShowHideTemplate")
@@ -300,7 +297,7 @@ function journal:init()
 	self.navBarBtn:SetScript("OnLeave", function() GameTooltip_Hide() end)
 
 	-- NAVBAR
-	self.navBar:on("MAP_CHANGE", function()
+	self:on("MAP_CHANGE", function()
 		self:setEditMountsList()
 		self:updateMountsList()
 		self:updateMapSettings()
@@ -710,7 +707,7 @@ function journal:init()
 	end)
 
 	-- PROFILES
-	self.profilesMenu:on("UPDATE_PROFILE", function(_, changeProfile)
+	self:on("UPDATE_PROFILE", function(_, changeProfile)
 		mounts:setDB()
 		self:setEditMountsList()
 		self:updateMountsList()

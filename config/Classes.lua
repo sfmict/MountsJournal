@@ -135,7 +135,7 @@ classConfig:SetScript("OnShow", function(self)
 	self.moveFallMF = moveFallMF
 	self.macroEditBox = moveFallMF.scrollFrame.editBox
 	moveFallMF:SetPoint("LEFT", 9, 0)
-	moveFallMF.lable:SetText(L["HELP_MACRO_MOVE_FALL"])
+	moveFallMF.label:SetText(L["HELP_MACRO_MOVE_FALL"])
 	moveFallMF.enable:HookScript("OnClick", function(btn)
 		self.currentMacrosConfig.macroEnable = btn:GetChecked()
 		util.refreshMacro()
@@ -159,8 +159,8 @@ classConfig:SetScript("OnShow", function(self)
 	local combatMF = CreateFrame("FRAME", nil, rightPanelScroll.child, "MJMacroFrame")
 	self.combatMF = combatMF
 	self.combatMacroEditBox = combatMF.scrollFrame.editBox
-	combatMF:SetPoint("TOPLEFT", moveFallMF, "BOTTOMLEFT", 0, -100)
-	combatMF.lable:SetText(L["HELP_MACRO_COMBAT"])
+	combatMF:SetPoint("TOPLEFT", moveFallMF.background, "BOTTOMLEFT", 0, -50)
+	combatMF.label:SetText(L["HELP_MACRO_COMBAT"])
 	combatMF.enable:HookScript("OnClick", function(btn)
 		self.currentMacrosConfig.combatMacroEnable = btn:GetChecked()
 		util.refreshMacro()
@@ -324,9 +324,9 @@ do
 					lastOptionFrame = optionFrame
 				end
 			end
-			self.moveFallMF:SetPoint("TOP", lastOptionFrame, "BOTTOM", 0, -70)
+			self.moveFallMF:SetPoint("TOP", lastOptionFrame, "BOTTOM", 0, -24)
 		else
-			self.moveFallMF:SetPoint("TOP", 0, -60)
+			self.moveFallMF:SetPoint("TOP", 0, -14)
 		end
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end

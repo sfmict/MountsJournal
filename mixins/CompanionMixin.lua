@@ -1,8 +1,9 @@
 local _, L = ...
+local util = MountsJournalUtil
 local petRandomIcon = "Interface/Icons/INV_Pet_Achievement_CaptureAPetFromEachFamily_Battle" -- select(3, GetSpellInfo(243819))
 
 
-MJSetPetMixin = {}
+MJSetPetMixin = util.createFromEventsMixin()
 
 
 function MJSetPetMixin:onLoad()
@@ -31,7 +32,7 @@ function MJSetPetMixin:onLoad()
 		GameTooltip:Hide()
 	end)
 
-	self.journal:on("POST_INIT", function()
+	self:on("POST_INIT", function()
 		C_Timer.After(0, function() self:updatePetForMount() end)
 	end)
 	self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
@@ -46,8 +47,8 @@ function MJSetPetMixin:onShow()
 	C_Timer.After(0, function()
 		self:SetScript("OnShow", self.refresh)
 		self:refresh()
-		self.journal:on("MOUNT_SELECT", function() self:refresh() end)
-		self.journal.profilesMenu:on("UPDATE_PROFILE", function() self:refresh() end)
+		self:on("MOUNT_SELECT", function() self:refresh() end)
+		self:on("UPDATE_PROFILE", function() self:refresh() end)
 	end)
 end
 
@@ -131,7 +132,7 @@ end
 MJSetPetMixin.PET_JOURNAL_LIST_UPDATE = MJSetPetMixin.updatePetForMount
 
 
-MJCompanionsPanelMixin = {}
+MJCompanionsPanelMixin = util.createFromEventsMixin()
 
 
 function MJCompanionsPanelMixin:onEvent(event, ...) self[event](self, ...) end
@@ -212,7 +213,7 @@ function MJCompanionsPanelMixin:onLoad()
 	self.listScroll.scrollBar.doNotHide = true
 	HybridScrollFrame_CreateButtons(self.listScroll, "MJPetListButton")
 
-	self.journal:on("MOUNT_SELECT", function() self:Hide() end)
+	self:on("MOUNT_SELECT", function() self:Hide() end)
 	self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 end
 
@@ -226,17 +227,17 @@ function MJCompanionsPanelMixin:onShow()
 		else
 			self:refresh()
 		end
-		self.journal.profilesMenu:on("UPDATE_PROFILE.CompanionsPanel", function() self:refresh() end)
+		self:on("UPDATE_PROFILE.CompanionsPanel", function() self:refresh() end)
 	end)
 	C_Timer.After(0, function()
 		self:petListUpdate(true)
-		self.journal.profilesMenu:on("UPDATE_PROFILE.CompanionsPanel", function() self:refresh() end)
+		self:on("UPDATE_PROFILE.CompanionsPanel", function() self:refresh() end)
 	end)
 end
 
 
 function MJCompanionsPanelMixin:onHide()
-	self.journal.profilesMenu:off("UPDATE_PROFILE.CompanionsPanel")
+	self:off("UPDATE_PROFILE.CompanionsPanel")
 	self:Hide()
 end
 

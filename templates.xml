@@ -867,6 +867,9 @@
 						<Anchors>
 							<Anchor point="BOTTOMLEFT" x="33" y="15"/>
 						</Anchors>
+						<Scripts>
+							<OnLoad>self.Text:SetWordWrap(true)</OnLoad>
+						</Scripts>
 					</Button>
 					<Frame parentKey="relationMap">
 						<Size x="210" y="30"/>
@@ -1617,40 +1620,28 @@
 		<Size x="28" y="18"/>
 	</EditBox>
 
-	<Frame name="MJMacroFrame" inherits="TooltipBackdropTemplate" virtual="true">
-		<Size x="395" y="150"/>
+	<Frame name="MJMacroFrame" virtual="true">
+		<Size x="395" y="1"/>
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString parentKey="lable" justifyH="LEFT" inherits="GameFontNormalSmall">
-					<Size x="330" y="20"/>
+				<FontString parentKey="label" justifyH="LEFT" inherits="GameFontNormal">
+					<Size x="330"/>
 					<Anchors>
-						<Anchor point="BOTTOM" relativePoint="TOP" x="0" y="30"/>
-					</Anchors>
-				</FontString>
-				<FontString parentKey="limitText" inherits="GameFontHighlightSmall">
-					<Size x="0" y="10"/>
-					<Anchors>
-						<Anchor point="BOTTOMLEFT" x="10" y="-10"/>
+						<Anchor point="TOP"/>
 					</Anchors>
 				</FontString>
 			</Layer>
 		</Layers>
 		<Frames>
-			<CheckButton parentKey="enable" inherits="MJCheckButtonTemplate">
-				<Anchors>
-					<Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" x="10" y="-3"/>
-				</Anchors>
-				<Scripts>
-					<OnLoad>self.Text:SetText(ENABLE)</OnLoad>
-				</Scripts>
-			</CheckButton>
 			<ScrollFrame parentKey="scrollFrame" inherits="UIPanelScrollFrameTemplate">
+				<Size y="120"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="5" y="-5"/>
-					<Anchor point="BOTTOMRIGHT" x="-28" y="5"/>
+					<Anchor point="TOP" relativeKey="$parent.label" relativePoint="BOTTOM" x="0" y="-35"/>
+					<Anchor point="LEFT" x="5" y="0"/>
+					<Anchor point="RIGHT" x="-28" y="0"/>
 				</Anchors>
 				<ScrollChild>
-					<EditBox parentKey="editBox" multiLine="true" letters="255" autoFocus="false" countInvisibleLetters="true">
+					<EditBox inherits="TooltipBackdropTemplate" parentKey="editBox" multiLine="true" letters="255" autoFocus="false" countInvisibleLetters="true">
 						<Size x="359"/>
 						<Scripts>
 							<OnLoad>
@@ -1670,10 +1661,25 @@
 					</EditBox>
 				</ScrollChild>
 			</ScrollFrame>
+			<Frame parentKey="background" inherits="TooltipBackdropTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.scrollFrame" x="-5" y="5"/>
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.scrollFrame" x="28" y="-5"/>
+				</Anchors>
+			</Frame>
+			<CheckButton parentKey="enable" inherits="MJCheckButtonTemplate">
+				<Anchors>
+					<Anchor point="LEFT" x="10"/>
+					<Anchor point="TOP" relativeKey="$parent.label" relativePoint="BOTTOM" y="-7"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad>self.Text:SetText(ENABLE)</OnLoad>
+				</Scripts>
+			</CheckButton>
 			<Button>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="5" y="-5"/>
-					<Anchor point="BOTTOMRIGHT" x="-28" y="5"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.background" x="5" y="-5"/>
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.background" x="-28" y="5"/>
 				</Anchors>
 				<Scripts>
 					<OnClick>
@@ -1684,7 +1690,7 @@
 			<Button parentKey="defaultBtn" inherits="UIPanelButtonTemplate">
 				<Size x="105" y="22"/>
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" x="0" y="0"/>
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.background" relativePoint="TOPRIGHT" x="0" y="1"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>self:SetText(DEFAULT)</OnLoad>
@@ -1694,7 +1700,7 @@
 			<Button parentKey="cancelBtn" inherits="UIPanelButtonTemplate">
 				<Size x="80" y="22"/>
 				<Anchors>
-					<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" x="0" y="0"/>
+					<Anchor point="TOPRIGHT" relativeKey="$parent.background" relativePoint="BOTTOMRIGHT" x="0" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>self:SetText(CANCEL)</OnLoad>
@@ -1712,6 +1718,16 @@
 				</Scripts>
 			</Button>
 		</Frames>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString parentKey="limitText" inherits="GameFontHighlightSmall">
+					<Size x="0" y="10"/>
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeKey="$parent.background" x="10" y="-10"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
 	</Frame>
 
 	<Button name="MJNavButtonTemplate" motionScriptsWhileDisabled="true" virtual="true">

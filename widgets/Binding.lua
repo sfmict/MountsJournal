@@ -7,7 +7,7 @@ binding:Hide()
 
 binding.unboundMessage = binding:CreateFontString(nil, "ARTWORK", "GameFontWhite")
 binding.unboundMessage:Hide()
-util:setEventsMixin(binding)
+util.setEventsMixin(binding)
 
 
 binding:SetScript("OnEvent", function(self)

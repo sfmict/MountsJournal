@@ -93,7 +93,7 @@
 				</Texture>
 			</Layer>
 		</Layers>
-		<ButtonText parentKey="Text">
+		<ButtonText parentKey="Text" wordwrap="false">
 			<Anchors>
 				<Anchor point="TOP" x="0" y="-4"/>
 				<Anchor point="BOTTOM" x="0" y="4"/>
@@ -285,11 +285,60 @@
 					<Anchor point="BOTTOMRIGHT" x="-30" y="3"/>
 				</Anchors>
 				<Frames>
-					<Slider parentKey="scrollBar" inherits="HybridScrollBarTrimTemplate">
+					<Slider parentKey="scrollBar">
+						<Size x="20" y="0"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="10" y="-18"/>
 							<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="10" y="15"/>
 						</Anchors>
+						<Layers>
+							<Layer level="BACKGROUND">
+								<Texture parentKey="trackBG">
+									<Anchors>
+										<Anchor point="TOPLEFT" x="1" y="0"/>
+										<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
+									</Anchors>
+									<Color r="0" g="0" b="0" a=".15"/>
+								</Texture>
+							</Layer>
+						</Layers>
+						<Frames>
+							<Button parentKey="UpButton">
+								<Size x="18" y="16"/>
+								<Anchors>
+									<Anchor point="BOTTOM" relativePoint="TOP" x="1" y="-2"/>
+								</Anchors>
+								<NormalTexture atlas="UI-ScrollBar-ScrollUpButton-Up"/>
+								<PushedTexture atlas="UI-ScrollBar-ScrollUpButton-Down"/>
+								<DisabledTexture atlas="UI-ScrollBar-ScrollUpButton-Disabled"/>
+								<HighlightTexture atlas="UI-ScrollBar-ScrollUpButton-Highlight"/>
+								<Scripts>
+									<OnLoad function="HybridScrollFrameScrollUp_OnLoad"/>
+									<OnClick  function="HybridScrollFrameScrollButton_OnClick"/>
+								</Scripts>
+							</Button>
+							<Button parentKey="DownButton">
+								<Size x="18" y="16"/>
+								<Anchors>
+									<Anchor point="TOP" relativePoint="BOTTOM" x="1" y="1"/>
+								</Anchors>
+								<NormalTexture atlas="UI-ScrollBar-ScrollDownButton-Up"/>
+								<PushedTexture atlas="UI-ScrollBar-ScrollDownButton-Down"/>
+								<DisabledTexture atlas="UI-ScrollBar-ScrollDownButton-Disabled"/>
+								<HighlightTexture atlas="UI-ScrollBar-ScrollDownButton-Highlight"/>
+								<Scripts>
+									<OnLoad function="HybridScrollFrameScrollDown_OnLoad"/>
+									<OnClick function="HybridScrollFrameScrollButton_OnClick"/>
+								</Scripts>
+							</Button>
+						</Frames>
+						<Scripts>
+							<OnValueChanged function="HybridScrollFrame_OnValueChanged"/>
+						</Scripts>
+						<ThumbTexture file="Interface\Buttons\UI-ScrollBar-Knob" parentKey="thumbTexture" alphaMode="ADD">
+							<Size x="21" y="24"/>
+							<TexCoords left=".125" right=".825" top=".125" bottom="0.825"/>
+						</ThumbTexture>
 					</Slider>
 				</Frames>
 			</ScrollFrame>
@@ -300,4 +349,6 @@
 			<OnHide>self:Hide()</OnHide>
 		</Scripts>
 	</Frame>
+
+	<Script file="DropDown.lua"/>
 </Ui>
