@@ -143,7 +143,9 @@ function journal:init()
 	self.s:SetAttribute("isShow", true)
 	self.s:SetAttribute("setShown", [[
 		local frame = self:GetFrameRef("s")
-		frame:SetAttribute("isShow", false)
+		if frame:GetAttribute("isShow") then
+			frame:SetAttribute("isShow", false)
+		end
 	]])
 	self.s:SetAttribute("_onattributechanged", [[
 		local useMountsJournalButton = self:GetFrameRef("useMountsJournalButton")
@@ -192,7 +194,9 @@ function journal:init()
 	sMountJournal:SetFrameRef("s", self.s)
 	sMountJournal:SetAttribute("_onshow", [[
 		local frame = self:GetFrameRef("s")
-		frame:SetAttribute("isShow", true)
+		if not frame:GetAttribute("isShow") then
+			frame:SetAttribute("isShow", true)
+		end
 	]])
 
 	local sPetJournal = CreateFrame("FRAME", nil, PetJournal, "SecureHandlerShowHideTemplate")

@@ -49,6 +49,7 @@ function tags:init()
 
 	self.mountOptionsMenu = {}
 	util.setMixin(self.mountOptionsMenu, MJDropDownButtonMixin)
+	journal.bgFrame:HookScript("OnHide", function() self.mountOptionsMenu:onHide() end)
 	self.mountOptionsMenu:ddSetInit(function(...) self:mountOptionsMenu_Init(...) end, "menu")
 end
 

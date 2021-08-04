@@ -1682,9 +1682,6 @@
 					<Anchor point="TOPRIGHT" relativeKey="$parent.background" relativePoint="BOTTOMRIGHT" x="0" y="0"/>
 				</Anchors>
 				<Scripts>
-					<OnLoad>
-						self:Disable()
-					</OnLoad>
 					<OnClick>
 						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 						self:Disable()
@@ -1698,9 +1695,6 @@
 					<Anchor point="RIGHT" relativeKey="$parent.cancelBtn" relativePoint="LEFT" x="0" y="0"/>
 				</Anchors>
 				<Scripts>
-					<OnLoad>
-						self:Disable()
-					</OnLoad>
 					<OnClick>
 						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 						self:Disable()

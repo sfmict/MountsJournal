@@ -198,7 +198,7 @@ config:SetScript("OnShow", function(self)
 	self.useRepairMounts.tooltipRequirement = L["UseRepairMountsDescription"]
 	self.useRepairMounts:HookScript("OnClick", function(btn) applyEnable() end)
 
-	-- combobox
+	-- editbox
 	self.repairPecent = CreateFrame("Editbox", nil, rightPanelScroll.child, "MJNumberTextBox")
 	self.repairPecent:SetPoint("LEFT", self.useRepairMounts.Text, "RIGHT", 3, 0)
 	self.repairPecent:SetScript("OnTextChanged", function(editBox, userInput)
@@ -238,7 +238,7 @@ config:SetScript("OnShow", function(self)
 	self.repairFlyable:HookScript("OnEnable", self.repairFlyable.setEnabledFunc)
 	self.repairFlyable:HookScript("OnDisable", self.repairFlyable.setEnabledFunc)
 
-	-- combobox
+	-- editbox
 	self.repairFlyablePercent = CreateFrame("Editbox", nil, rightPanelScroll.child, "MJNumberTextBox")
 	self.repairFlyablePercent:SetPoint("LEFT", self.repairFlyable.Text, "RIGHT", 3, 0)
 	self.repairFlyablePercent:SetScript("OnTextChanged", function(editBox, userInput)

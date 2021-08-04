@@ -291,8 +291,12 @@ do
 
 		self.moveFallMF.enable:SetChecked(self.currentMacrosConfig.macroEnable)
 		self.macroEditBox:SetText(self.currentMacrosConfig.macro or btn.default)
+		self.moveFallMF.saveBtn:Disable()
+		self.moveFallMF.cancelBtn:Disable()
 		self.combatMF.enable:SetChecked(self.currentMacrosConfig.combatMacroEnable)
 		self.combatMacroEditBox:SetText(self.currentMacrosConfig.combatMacro or btn.default)
+		self.combatMF.saveBtn:Disable()
+		self.combatMF.cancelBtn:Disable()
 
 		self.checkPool:ReleaseAll()
 		if classOptions[btn.key] then
