@@ -1641,7 +1641,7 @@
 					<Anchor point="RIGHT" x="0" y="0"/>
 				</Anchors>
 			</Frame>
-			<EventFrame parentKey="scrollBar" inherits="WowTrimScrollBar">
+			<EventFrame parentKey="scrollBar" enableMouse="true" inherits="WowTrimScrollBar">
 				<Anchors>
 					<Anchor point="TOPRIGHT" relativeKey="$parent.background" x="-4" y="-5"/>
 					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.background" x="-4" y="4"/>
@@ -1656,10 +1656,10 @@
 					<OnLoad>self.Text:SetText(ENABLE)</OnLoad>
 				</Scripts>
 			</CheckButton>
-			<Button>
+			<Button useParentLevel="true">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.background" x="5" y="-5"/>
-					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.background" x="-28" y="5"/>
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.background" x="-5" y="5"/>
 				</Anchors>
 				<Scripts>
 					<OnClick>
@@ -1726,12 +1726,12 @@
 				self.background:SetBackdropBorderColor(FRIENDS_GRAY_COLOR:GetRGB())
 
 				local anchorsToFrame = {
-					CreateAnchor("TOPLEFT", self.background, "TOPLEFT", 5, -5),
-					CreateAnchor("BOTTOMRIGHT", self.background, "BOTTOMRIGHT", -5, 5),
+					CreateAnchor("TOPLEFT", self.background, "TOPLEFT", 8, -8),
+					CreateAnchor("BOTTOMRIGHT", self.background, "BOTTOMRIGHT", -8, 8),
 				}
 				local anchorsToBar = {
-					CreateAnchor("TOPLEFT", self.background, "TOPLEFT", 5, -5),
-					CreateAnchor("BOTTOMRIGHT", self.scrollBar, "BOTTOMLEFT", -4, 1),
+					CreateAnchor("TOPLEFT", self.background, "TOPLEFT", 8, -8),
+					CreateAnchor("BOTTOMRIGHT", self.scrollBar, "BOTTOMLEFT", -3, 4),
 				}
 				local scrollBox = self.editFrame:GetScrollBox()
 				ScrollUtil.RegisterScrollBoxWithScrollBar(scrollBox, self.scrollBar)
