@@ -258,9 +258,9 @@ function journal:init()
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
 		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 1\"")
 		GameTooltip:AddLine(L["Normal mount summon"])
-		GameTooltip:AddLine("\nMacro: /click "..config.secureButtonNameMount)
+		GameTooltip_AddColoredLine(GameTooltip, "\nMacro: /click "..config.secureButtonNameMount, NIGHT_FAE_BLUE_COLOR, false)
 		if InCombatLockdown() then
-			GameTooltip_AddColoredLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT, RED_FONT_COLOR)
+			GameTooltip_AddErrorLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT)
 		end
 		GameTooltip:Show()
 	end)
@@ -279,9 +279,9 @@ function journal:init()
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
 		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 2\"")
 		GameTooltip_AddNormalLine(GameTooltip, L["SecondMountTooltipDescription"]:gsub("^\n", ""):gsub("\n\n", "\n"))
-		GameTooltip:AddLine("\nMacro: /click "..config.secureButtonNameSecondMount)
+		GameTooltip_AddColoredLine(GameTooltip, "\nMacro: /click "..config.secureButtonNameSecondMount, NIGHT_FAE_BLUE_COLOR, false)
 		if InCombatLockdown() then
-			GameTooltip_AddColoredLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT, RED_FONT_COLOR)
+			GameTooltip_AddErrorLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT)
 		end
 		GameTooltip:Show()
 	end)
@@ -301,7 +301,7 @@ function journal:init()
 	self.navBarBtn:SetScript("OnLeave", function() GameTooltip_Hide() end)
 
 	-- NAVBAR
-	self:on("MAP_CHANGE", function()
+	self:on("MAP_CHANGE", function(self)
 		self:setEditMountsList()
 		self:updateMountsList()
 		self:updateMapSettings()
@@ -667,6 +667,7 @@ function journal:init()
 	local playerToggle = self.modelScene.playerToggle
 	function playerToggle:setPortrait() SetPortraitTexture(self.portrait, "player") end
 	playerToggle:setPortrait()
+	playerToggle:SetChecked(GetCVarBool("mountJournalShowPlayer"))
 	playerToggle:SetScript("OnEvent", playerToggle.setPortrait)
 	playerToggle:SetScript("OnShow", function(self)
 		self:SetChecked(GetCVarBool("mountJournalShowPlayer"))
@@ -711,7 +712,7 @@ function journal:init()
 	end)
 
 	-- PROFILES
-	self:on("UPDATE_PROFILE", function(_, changeProfile)
+	self:on("UPDATE_PROFILE", function(self, changeProfile)
 		mounts:setDB()
 		self:setEditMountsList()
 		self:updateMountsList()
@@ -789,7 +790,7 @@ function journal:ADDON_LOADED(addonName)
 			if not btn:IsEnabled() then
 				GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
 				GameTooltip_SetTitle(GameTooltip, addon)
-				GameTooltip_AddColoredLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT, RED_FONT_COLOR)
+				GameTooltip_AddErrorLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT)
 				GameTooltip:Show()
 			end
 		end)
@@ -2307,7 +2308,7 @@ function journal:updateMountsList()
 		and expansions[mountsDB[mountID]]
 		-- TAGS
 		and tags:getFilterMount(mountID) then
-			tinsert(self.displayedMounts, mountID)
+			self.displayedMounts[#self.displayedMounts + 1] = mountID
 		end
 	end
 

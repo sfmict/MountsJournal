@@ -13,6 +13,7 @@ function eventsMixin:on(event, func)
 	tinsert(events[event], {
 		name = name,
 		func = func,
+		self = self,
 	})
 	return self
 end
@@ -50,7 +51,8 @@ function eventsMixin:event(event, ...)
 	local handlerList = events[event]
 	if handlerList then
 		for i = 1, #handlerList do
-			handlerList[i].func(self, ...)
+			local handler = handlerList[i]
+			handler.func(handler.self, ...)
 		end
 	end
 	return self

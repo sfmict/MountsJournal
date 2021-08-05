@@ -9,7 +9,6 @@ end
 
 
 function util.showHelpJournal()
-	if not journal.bgFrame or not journal.bgFrame:IsShown() then return end
 	local step = type(mounts.help.journal) == "number" and mounts.help.journal or 0
 	HelpTip:HideAll(journal.bgFrame)
 	if step == 0 then

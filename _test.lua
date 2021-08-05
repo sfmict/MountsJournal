@@ -43,6 +43,8 @@ end)
 test:RegisterEvent("ADDON_LOADED")
 -- test:RegisterAllEvents()
 
+test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
+
 -- test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 -- test:RegisterEvent("PET_JOURNAL_PET_DELETED")
 -- test:RegisterEvent("PET_JOURNAL_PETS_HEALED")
@@ -152,6 +154,8 @@ test:RegisterEvent("ADDON_LOADED")
 
 -- GROUP_ROSTER_UPDATE
 
+-- fprint(dumpe, getmetatable(CreateFrame("EventFrame", nil, UIParent)))
+
 function test:PLAYER_ENTERING_WORLD()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 	fprint(GetBuildInfo())
@@ -201,6 +205,7 @@ function test:PLAYER_ENTERING_WORLD()
 	-- 	LoadAddOn("Blizzard_Collections")
 	-- end
 	-- ShowUIPanel(CollectionsJournal)
+	-- CollectionsJournal_SetTab(CollectionsJournal, COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS) -- DISABLE
 	-- MountJournal.MountDisplay.InfoButton.petSelectionBtn:Click()
 
 	-- journal.navBarBtn:Click()

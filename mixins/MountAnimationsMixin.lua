@@ -86,9 +86,9 @@ function MJMountAnimationPanelMixin:onLoad()
 	self.customAnimationPanel = CreateFrame("FRAME", nil, self:GetParent(), "MJMountCustomAnimationPanel")
 	self.customAnimationPanel:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 0, 2)
 
-	self.journal:on("MOUNT_MODEL_UPDATE", function(_, mountType)
+	self.journal:on("MOUNT_MODEL_UPDATE", function(journal, mountType)
 		if mountType then
-			self.currentMountType = mountType == 231 and 2 or self.journal.mountTypes[mountType]
+			self.currentMountType = mountType == 231 and 2 or journal.mountTypes[mountType]
 			self:replayAnimation()
 		end
 	end)

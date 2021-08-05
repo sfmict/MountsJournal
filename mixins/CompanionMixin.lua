@@ -47,8 +47,8 @@ function MJSetPetMixin:onShow()
 	C_Timer.After(0, function()
 		self:SetScript("OnShow", self.refresh)
 		self:refresh()
-		self:on("MOUNT_SELECT", function() self:refresh() end)
-		self:on("UPDATE_PROFILE", function() self:refresh() end)
+		self:on("MOUNT_SELECT", self.refresh)
+		self:on("UPDATE_PROFILE", self.refresh)
 	end)
 end
 
@@ -213,7 +213,7 @@ function MJCompanionsPanelMixin:onLoad()
 	self.listScroll.scrollBar.doNotHide = true
 	HybridScrollFrame_CreateButtons(self.listScroll, "MJPetListButton")
 
-	self:on("MOUNT_SELECT", function() self:Hide() end)
+	self:on("MOUNT_SELECT", self.Hide)
 	self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 end
 
@@ -227,17 +227,17 @@ function MJCompanionsPanelMixin:onShow()
 		else
 			self:refresh()
 		end
-		self:on("UPDATE_PROFILE.CompanionsPanel", function() self:refresh() end)
+		self:on("UPDATE_PROFILE", self.refresh)
 	end)
 	C_Timer.After(0, function()
 		self:petListUpdate(true)
-		self:on("UPDATE_PROFILE.CompanionsPanel", function() self:refresh() end)
+		self:on("UPDATE_PROFILE", self.refresh)
 	end)
 end
 
 
 function MJCompanionsPanelMixin:onHide()
-	self:off("UPDATE_PROFILE.CompanionsPanel")
+	self:off("UPDATE_PROFILE", self.refresh)
 	self:Hide()
 end
 
@@ -356,11 +356,12 @@ function MJCompanionsPanelMixin:petListUpdate(force)
 	self.updatingList = true
 	self:setPetJournalFiltersBackup()
 
+	local GetPetInfoByIndex = C_PetJournal.GetPetInfoByIndex
 	wipe(self.petList)
 	for i = 1, owned do
-		local petID = C_PetJournal.GetPetInfoByIndex(i)
+		local petID = GetPetInfoByIndex(i)
 		if petID then
-			tinsert(self.petList, petID)
+			self.petList[#self.petList + 1] = petID
 		end
 	end
 
@@ -405,14 +406,15 @@ function MJCompanionsPanelMixin:updateFilters()
 	local GetPetInfoByPetID = C_PetJournal.GetPetInfoByPetID
 
 	wipe(self.petFiltredList)
-	for _, petID in ipairs(self.petList) do
+	for i = 1, #self.petList do
+		local petID = self.petList[i]
 		local _, customName, _,_,_,_,_, name, _, petType, _, sourceText = GetPetInfoByPetID(petID)
 		if self.typeFilter[petType]
 		and (text:len() == 0
 			or name:lower():find(text)
 			or sourceText:lower():find(text)
 			or customName and customName:lower():find(text)) then
-			tinsert(self.petFiltredList, petID)
+			self.petFiltredList[#self.petFiltredList + 1] = petID
 		end
 	end
 
