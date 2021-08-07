@@ -515,9 +515,24 @@ function journal:init()
 	end)
 
 	-- FILTERS BUTTONS
+	local function filterClick(btn)
+		self:setBtnFilters(btn:GetParent():GetParent().id)
+	end
+
+	local function filterEnter(btn)
+		GameTooltip:SetOwner(btn, "ANCHOR_BOTTOM")
+		GameTooltip:SetText(btn.tooltip)
+		GameTooltip:Show()
+	end
+
+	local function filterLeave()
+		GameTooltip:Hide()
+	end
+
 	local function CreateButtonFilter(id, parent, width, height, texture, tooltip)
 		local btn = CreateFrame("CheckButton", nil, parent, width == height and "MJFilterButtonSquareTemplate" or "MJFilterButtonRectangleTemplate")
 		btn.id = id
+		btn.tooltip = tooltip
 		btn:SetSize(width, height)
 		if id == 1 then
 			btn:SetPoint("LEFT", 5, 0)
@@ -531,17 +546,9 @@ function journal:init()
 		btn.icon:SetSize(texture.width, texture.height)
 		if texture.texCoord then btn.icon:SetTexCoord(unpack(texture.texCoord)) end
 
-		btn:SetScript("OnEnter", function(btn)
-			GameTooltip:SetOwner(btn, "ANCHOR_BOTTOM")
-			GameTooltip:SetText(tooltip)
-			GameTooltip:Show()
-		end)
-		btn:SetScript("OnLeave", function()
-			GameTooltip:Hide()
-		end)
-		btn:SetScript("OnClick", function(btn)
-			self:setBtnFilters(btn:GetParent():GetParent().id)
-		end)
+		btn:SetScript("OnClick", filterClick)
+		btn:SetScript("OnEnter", filterEnter)
+		btn:SetScript("OnLeave", filterLeave)
 	end
 
 	-- FILTERS TYPES BUTTONS

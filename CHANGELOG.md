@@ -1,4 +1,4 @@
 # MountsJournal
 
-* Fixed alpha of custom animation panel.
-* Now most things work in combat.
+* Minor interface update.
+* Optimization && visual bugs fixes.
