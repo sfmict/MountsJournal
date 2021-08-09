@@ -76,14 +76,12 @@ do
 
 		local function createOptionButton(tbl, mapID, flags)
 			local btnText = self.util.getMapFullNameInfo(mapID).name
+			if flags then
+				btnText = ("%s [%s%s%s]"):format(btnText, getTextBool(flags.groundOnly), getTextBool(flags.waterWalkOnly), getTextBool(flags.herbGathering))
+			end
 			if text:len() == 0 or btnText:lower():find(text) then
 				local optionButton = self.optionsButtonPool:Acquire()
-				if flags then
-					optionButton.isGray = not flags.enableFlags
-					btnText = ("%s [%s%s%s]"):format(btnText, getTextBool(flags.groundOnly), getTextBool(flags.waterWalkOnly), getTextBool(flags.herbGathering))
-				else
-					optionButton.isGray = nil
-				end
+				optionButton.isGray = flags and not flags.enableFlags
 				local color = optionButton.isGray and GRAY_FONT_COLOR or WHITE_FONT_COLOR
 				optionButton.text:SetTextColor(color:GetRGB())
 				optionButton:SetText(btnText)

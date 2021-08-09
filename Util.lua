@@ -1,5 +1,5 @@
 local addon = ...
-local type, strsplit, tinsert, tremove = type, strsplit, tinsert, tremove
+local type, select, strsplit, tremove = type, select, strsplit, tremove
 local events, eventsMixin = {}, {}
 
 
@@ -10,11 +10,11 @@ function eventsMixin:on(event, func)
 	if not events[event] then
 		events[event] = {}
 	end
-	tinsert(events[event], {
+	events[event][#events[event] + 1] = {
 		name = name,
 		func = func,
 		self = self,
-	})
+	}
 	return self
 end
 
@@ -179,7 +179,7 @@ do
 			parent:HookScript("OnEnable", setEnabledChilds)
 			parent:HookScript("OnDisable", disableChilds)
 		end
-		tinsert(parent.childs, child)
+		parent.childs[#parent.childs + 1] = child
 		if lastChild then parent.lastChild = child end
 	end
 end
@@ -233,4 +233,26 @@ end
 
 function MountsJournalUtil.cleanText(text)
 	return text:trim():lower():gsub("[%(%)%.%%%+%-%*%?%[%^%$]", "%%%1")
+end
+
+
+local function removeStr(text, ...)
+	for i = 1, select("#", ...) do
+		local str = select(i, ...)
+		local uText = ""
+		local s, e = text:find(str)
+		while s do
+			local p = s - 1
+			uText = uText..text:sub(0, text:sub(p, p) == "|" and e or p)
+			text = text:sub(e + 1)
+			s, e = text:find(str)
+		end
+		text = uText..text
+	end
+	return text
+end
+
+
+function MountsJournalUtil.find(text, str)
+	return removeStr(text, "|c%x%x%x%x%x%x%x%x", "|r"):lower():find(str)
 end

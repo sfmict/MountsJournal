@@ -94,6 +94,7 @@ function MJMountAnimationPanelMixin:onLoad()
 	end)
 end
 
+
 function MJMountAnimationPanelMixin:replayAnimation()
 	if self.selectedValue == "custom" or self.selectedValue and (self.selectedValue.type == nil or self.selectedValue.type >= self.currentMountType) then
 		if self.selectedValue.animation ~= 0 then
@@ -132,7 +133,6 @@ function MJMountAnimationPanelMixin:initialize(level)
 		if v.type == nil or v.type >= mountType then
 			tinsert(info.list, {
 				text = ("%s|cff808080.%d%s|r"):format(v.name, v.animation, v.isKit and ".k" or ""),
-				searchText = ("%s.%d%s"):format(v.name, v.animation, v.isKit and ".k" or ""),
 				value = v,
 				checked = function(btn) return self.selectedValue == btn.value end,
 				func = function(btn)
@@ -147,7 +147,6 @@ function MJMountAnimationPanelMixin:initialize(level)
 	for i, v in ipairs(self.animations) do
 		tinsert(info.list, {
 			text = ("%s|cff808080.%d%s|r"):format(v.name, v.animation, v.isKit and ".k" or ""),
-			searchText = ("%s.%d%s"):format(v.name, v.animation, v.isKit and ".k" or ""),
 			value = v,
 			arg1 = i,
 			checked = function(btn) return self.selectedValue == btn.value end,
@@ -177,11 +176,12 @@ end
 function MJMountAnimationPanelMixin:playAnimation(animation, isKit, loop)
 	local actor = self.journal.modelScene:GetActorByTag("unwrapped")
 	actor:StopAnimationKit()
-	actor:SetAnimation(0)
 	--max animation 2^31 - 1
 	if isKit then
 		actor:PlayAnimationKit(animation, loop)
 	else
+		actor:PlayAnimationKit(0)
+		actor:StopAnimationKit()
 		actor:SetAnimation(animation, 0)
 	end
 end

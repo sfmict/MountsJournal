@@ -1,5 +1,5 @@
 local addon = ...
-local C_MountJournal, C_Map, MapUtil, next, tinsert, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff = C_MountJournal, C_Map, MapUtil, next, tinsert, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff
+local C_MountJournal, C_Map, MapUtil, next, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff = C_MountJournal, C_Map, MapUtil, next, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 
@@ -580,7 +580,7 @@ do
 	function mounts:summon(ids)
 		for mountID in next, ids do
 			local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
-			if isUsable then tinsert(usableIDs, mountID) end
+			if isUsable then usableIDs[#usableIDs + 1] = mountID end
 		end
 		if #usableIDs ~= 0 then
 			C_MountJournal.SummonByID(usableIDs[random(#usableIDs)])
