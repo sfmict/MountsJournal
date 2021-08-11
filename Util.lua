@@ -232,7 +232,7 @@ end
 
 
 function MountsJournalUtil.cleanText(text)
-	return text:trim():lower():gsub("[%(%)%.%%%+%-%*%?%[%^%$]", "%%%1")
+	return text:trim():lower()
 end
 
 
@@ -240,19 +240,20 @@ local function removeStr(text, ...)
 	for i = 1, select("#", ...) do
 		local str = select(i, ...)
 		local uText = ""
-		local s, e = text:find(str)
+		local n = 1
+		local s, e = text:find(str, n)
 		while s do
 			local p = s - 1
-			uText = uText..text:sub(0, text:sub(p, p) == "|" and e or p)
-			text = text:sub(e + 1)
-			s, e = text:find(str)
+			uText = uText..text:sub(n, text:sub(p, p) == "|" and e or p)
+			n = e + 1
+			s, e = text:find(str, n)
 		end
-		text = uText..text
+		text = uText..text:sub(n)
 	end
 	return text
 end
 
 
 function MountsJournalUtil.find(text, str)
-	return removeStr(text, "|c%x%x%x%x%x%x%x%x", "|r"):lower():find(str)
+	return removeStr(text, "|c%x%x%x%x%x%x%x%x", "|r"):lower():find(str, 1, true)
 end

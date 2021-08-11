@@ -135,30 +135,28 @@ function journal:init()
 	self.useMountsJournalButton:SetScript("OnHide", nil)
 
 	-- SECURE FRAMES
-	self.s = CreateFrame("FRAME", nil, self, "SecureHandlerAttributeTemplate")
-	self.s:SetFrameRef("useMountsJournalButton", self.useMountsJournalButton)
-	self.s:SetFrameRef("bgFrame", self.bgFrame)
-	self.s:SetFrameRef("MountJournal", self.MountJournal)
-	self.s:SetAttribute("useDefaultJournal", mounts.config.useDefaultJournal)
-	self.s:SetAttribute("isShow", true)
-	self.s:SetAttribute("setShown", [[
-		local frame = self:GetFrameRef("s")
-		if frame:GetAttribute("isShow") then
-			frame:SetAttribute("isShow", false)
-		end
+	local sMountJournal = CreateFrame("FRAME", nil, self.MountJournal, "SecureHandlerShowHideTemplate")
+	sMountJournal:SetFrameRef("useMountsJournalButton", self.useMountsJournalButton)
+	sMountJournal:SetFrameRef("bgFrame", self.bgFrame)
+	sMountJournal:SetAttribute("useDefaultJournal", mounts.config.useDefaultJournal)
+	sMountJournal:SetAttribute("isShow", true)
+	sMountJournal:SetAttribute("_onshow", [[
+		self:SetAttribute("isShow", true)
+		self:RunAttribute("update")
 	]])
-	self.s:SetAttribute("_onattributechanged", [[
+	sMountJournal:SetAttribute("_onhide", [[
+		self:SetAttribute("isShow", false)
+		self:RunAttribute("update")
+	]])
+	sMountJournal:SetAttribute("update", [[
 		local useMountsJournalButton = self:GetFrameRef("useMountsJournalButton")
 		local bgFrame = self:GetFrameRef("bgFrame")
-		local MountJournal = self:GetFrameRef("MountJournal")
 		if self:GetAttribute("isShow") then
 			useMountsJournalButton:Show()
 			if not self:GetAttribute("useDefaultJournal") then
 				bgFrame:Show()
-				MountJournal:Hide()
 			else
 				bgFrame:Hide()
-				MountJournal:Show()
 			end
 		else
 			useMountsJournalButton:Hide()
@@ -184,36 +182,12 @@ function journal:init()
 	sMountsJournalButton:HookScript("OnClick", function()
 		self.useMountsJournalButton:Click()
 	end)
-	sMountsJournalButton:SetFrameRef("s", self.s)
+	sMountsJournalButton:SetFrameRef("s", sMountJournal)
 	sMountsJournalButton:SetAttribute("_onclick", [[
 		local frame = self:GetFrameRef("s")
 		frame:SetAttribute("useDefaultJournal", not frame:GetAttribute("useDefaultJournal"))
+		frame:RunAttribute("update")
 	]])
-
-	local sMountJournal = CreateFrame("FRAME", nil, self.MountJournal, "SecureHandlerShowHideTemplate")
-	sMountJournal:SetFrameRef("s", self.s)
-	sMountJournal:SetAttribute("_onshow", [[
-		local frame = self:GetFrameRef("s")
-		if not frame:GetAttribute("isShow") then
-			frame:SetAttribute("isShow", true)
-		end
-	]])
-
-	local sPetJournal = CreateFrame("FRAME", nil, PetJournal, "SecureHandlerShowHideTemplate")
-	sPetJournal:SetFrameRef("s", self.s)
-	sPetJournal:SetAttribute("_onshow", self.s:GetAttribute("setShown"))
-
-	local sToyBox = CreateFrame("FRAME", nil, ToyBox, "SecureHandlerShowHideTemplate")
-	sToyBox:SetFrameRef("s", self.s)
-	sToyBox:SetAttribute("_onshow", self.s:GetAttribute("setShown"))
-
-	local sHeirloomsJournal = CreateFrame("FRAME", nil, HeirloomsJournal, "SecureHandlerShowHideTemplate")
-	sHeirloomsJournal:SetFrameRef("s", self.s)
-	sHeirloomsJournal:SetAttribute("_onshow", self.s:GetAttribute("setShown"))
-
-	local sWardrobeCollectionFrame = CreateFrame("FRAME", nil, WardrobeCollectionFrame, "SecureHandlerShowHideTemplate")
-	sWardrobeCollectionFrame:SetFrameRef("s", self.s)
-	sWardrobeCollectionFrame:SetAttribute("_onshow", self.s:GetAttribute("setShown"))
 
 	-- CLOSE BUTTON
 	self.bgFrame.closeButton:SetAttribute("type", "click")
@@ -2293,8 +2267,8 @@ function journal:updateMountsList()
 		and sources[sourceType]
 		-- SEARCH
 		and (text:len() == 0
-			or name:lower():find(text)
-			or sourceText:lower():find(text)
+			or name:lower():find(text, 1, true)
+			or sourceText:lower():find(text, 1, true)
 			or tags:find(mountID, text))
 		-- TYPE
 		and types[mountTypes[mountType]]

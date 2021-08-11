@@ -308,7 +308,7 @@ function tags:find(mountID, text)
 
 		text = {(" "):split(text)}
 		for i = 1, #text do
-			if not str:find(text[i]) then return end
+			if not str:find(text[i], 1, true) then return end
 		end
 		return true
 	end
