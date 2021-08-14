@@ -78,7 +78,6 @@ function journal:init()
 		self:RegisterEvent("PLAYER_REGEN_ENABLED")
 		self:updateMountsList()
 		self:updateMountDisplay(true)
-		util.showHelpJournal()
 	end)
 
 	self.bgFrame:SetScript("OnHide", function()
@@ -114,18 +113,15 @@ function journal:init()
 	self.filtersToggle = self.filtersPanel.btnToggle
 	self.gridToggleButton = self.filtersPanel.gridToggleButton
 	self.searchBox = self.filtersPanel.searchBox
-	self.filtersButton = self.filtersPanel.filtersButton
 	self.filtersBar = self.filtersPanel.filtersBar
 	self.shownPanel = self.bgFrame.shownPanel
 	self.leftInset = self.bgFrame.leftInset
 	self.mountDisplay = self.bgFrame.mountDisplay
-	self.mountDescriptionToggle = self.mountDisplay.info.mountDescriptionToggle
 	self.modelScene = self.mountDisplay.modelScene
 	self.multipleMountBtn = self.modelScene.multipleMountBtn
 	self.mountListUpdateAnim = self.leftInset.updateAnimFrame.anim
 	self.scrollFrame = self.bgFrame.scrollFrame
 	self.summonButton = self.bgFrame.summonButton
-	self.profilesMenu = self.bgFrame.profilesMenu
 
 	-- USE MountsJournal BUTTON
 	self.useMountsJournalButton:SetParent(self.CollectionsJournal)
@@ -446,8 +442,9 @@ function journal:init()
 	end)
 
 	-- MOUNT DESCRIPTION TOGGLE
-	self.mountDescriptionToggle.vertical = true
-	self.mountDescriptionToggle:SetChecked(mounts.config.mountDescriptionToggle)
+	local mountDescriptionToggle = self.mountDisplay.info.mountDescriptionToggle
+	mountDescriptionToggle.vertical = true
+	mountDescriptionToggle:SetChecked(mounts.config.mountDescriptionToggle)
 
 	local function setShownDescription(btn)
 		local checked = btn:GetChecked()
@@ -460,8 +457,8 @@ function journal:init()
 			activeCamera.yOffset = activeCamera.yOffset + (checked and activeCamera.offsetDelta or -activeCamera.offsetDelta)
 		end
 	end
-	setShownDescription(self.mountDescriptionToggle)
-	self.mountDescriptionToggle:HookScript("OnClick", setShownDescription)
+	setShownDescription(mountDescriptionToggle)
+	mountDescriptionToggle:HookScript("OnClick", setShownDescription)
 
 	-- SEARCH BOX
 	self.searchBox:HookScript("OnTextChanged", function(editBox, userInput)
@@ -471,7 +468,7 @@ function journal:init()
 	end)
 	self.searchBox:SetScript("OnHide", function(editBox)
 		local text = editBox:GetText()
-		if text:len() > 0 then
+		if #text > 0 then
 			editBox:SetText("")
 			self:updateMountsList()
 		end
@@ -481,8 +478,9 @@ function journal:init()
 	end)
 
 	-- FILTERS BUTTON
-	self.filtersButton:ddSetInit(function(...) self:filterDropDown_Initialize(...) end, "menu")
-	self.filtersButton:SetScript("OnClick", function(self)
+	local filtersButton = self.filtersPanel.filtersButton
+	filtersButton:ddSetInit(function(...) self:filterDropDown_Initialize(...) end, "menu")
+	filtersButton:SetScript("OnClick", function(self)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		self:dropDownToggle(1, nil, self, 74, 15)
 	end)
@@ -732,7 +730,6 @@ function journal:init()
 	self.CollectionsJournal.NineSlice:Hide()
 	self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
-	util.showHelpJournal()
 
 	self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 	self:setMJFiltersBackup()
@@ -740,9 +737,6 @@ function journal:init()
 	self:updateBtnFilters()
 	self:sortMounts()
 	self:selectMount(1)
-
-	-- POST INIT
-	self:event("POST_INIT"):off("POST_INIT")
 end
 
 
@@ -1109,7 +1103,7 @@ function journal:setArrowSelectMount(enabled)
 					if mounts.config.gridToggle then
 						index = scroll.buttons[1].grid3List.mounts[1].index
 					else
-						index = scroll.buttons[1].index
+						index = scroll.buttons[1].defaultList.index
 					end
 					if not index then return end
 				else
@@ -1643,7 +1637,7 @@ do
 					end
 				end
 			else
-				if button.mountID == mountID then
+				if button.defaultList.mountID == mountID then
 					return button
 				end
 			end
@@ -2265,7 +2259,7 @@ function journal:updateMountsList()
 		-- SOURCES
 		and sources[sourceType]
 		-- SEARCH
-		and (text:len() == 0
+		and (#text == 0
 			or name:lower():find(text, 1, true)
 			or sourceText:lower():find(text, 1, true)
 			or tags:find(mountID, text))

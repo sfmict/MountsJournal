@@ -79,7 +79,7 @@ do
 			if flags then
 				btnText = ("%s [%s%s%s]"):format(btnText, getTextBool(flags.groundOnly), getTextBool(flags.waterWalkOnly), getTextBool(flags.herbGathering))
 			end
-			if text:len() == 0 or btnText:lower():find(text, 1, true) then
+			if #text == 0 or btnText:lower():find(text, 1, true) then
 				local optionButton = self.optionsButtonPool:Acquire()
 				optionButton.isGray = flags and not flags.enableFlags
 				local color = optionButton.isGray and GRAY_FONT_COLOR or WHITE_FONT_COLOR

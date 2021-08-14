@@ -5,6 +5,8 @@ journal:on("MODULES_INIT", function() tags:init() end)
 
 
 function tags:init()
+	self.init = nil
+
 	StaticPopupDialogs[util.addonName.."ADD_TAG"] = {
 		text = addon..": "..L["Add tag"],
 		button1 = ACCEPT,

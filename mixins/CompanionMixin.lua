@@ -32,9 +32,6 @@ function MJSetPetMixin:onLoad()
 		GameTooltip:Hide()
 	end)
 
-	self:on("POST_INIT", function()
-		C_Timer.After(0, function() self:updatePetForMount() end)
-	end)
 	self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 end
 
@@ -46,6 +43,7 @@ function MJSetPetMixin:onShow()
 	self:SetScript("OnShow", nil)
 	C_Timer.After(0, function()
 		self:SetScript("OnShow", self.refresh)
+		self:updatePetForMount()
 		self:refresh()
 		self:on("MOUNT_SELECT", self.refresh)
 		self:on("UPDATE_PROFILE", self.refresh)
@@ -148,6 +146,12 @@ function MJCompanionsPanelMixin:onLoad()
 
 	self.filtersPanel.buttons = {}
 	self.typeFilter = {}
+
+	local typeFilterClick = function()
+		self:updateTypeFilter()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end
+
 	for i = 1, C_PetJournal.GetNumPetTypes() do
 		local btn = CreateFrame("CheckButton", nil, self.filtersPanel, "MJFilterButtonSquareTemplate")
 		btn:SetSize(22, 22)
@@ -158,10 +162,7 @@ function MJCompanionsPanelMixin:onLoad()
 		else
 			btn:SetPoint("LEFT", self.filtersPanel.buttons[i - 1], "RIGHT")
 		end
-		btn:SetScript("OnClick", function()
-			self:updateTypeFilter()
-			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		end)
+		btn:SetScript("OnClick", typeFilterClick)
 		self.filtersPanel.buttons[i] = btn
 		self.typeFilter[i] = true
 	end
@@ -219,17 +220,18 @@ end
 
 
 function MJCompanionsPanelMixin:onShow()
-	self:SetScript("OnShow", function(self)
-		if self.force then
-			self:petListUpdate(self.force)
-		elseif self.needSort then
-			self:petListSort()
-		else
-			self:refresh()
-		end
-		self:on("UPDATE_PROFILE", self.refresh)
-	end)
+	self:SetScript("OnShow", nil)
 	C_Timer.After(0, function()
+		self:SetScript("OnShow", function(self)
+			if self.force then
+				self:petListUpdate(self.force)
+			elseif self.needSort then
+				self:petListSort()
+			else
+				self:refresh()
+			end
+			self:on("UPDATE_PROFILE", self.refresh)
+		end)
 		self:petListUpdate(true)
 		self:on("UPDATE_PROFILE", self.refresh)
 	end)
@@ -410,7 +412,7 @@ function MJCompanionsPanelMixin:updateFilters()
 		local petID = self.petList[i]
 		local _, customName, _,_,_,_,_, name, _, petType, _, sourceText = GetPetInfoByPetID(petID)
 		if self.typeFilter[petType]
-		and (text:len() == 0
+		and (#text == 0
 			or name:lower():find(text, 1, true)
 			or sourceText:lower():find(text, 1, true)
 			or customName and customName:lower():find(text, 1, true)) then

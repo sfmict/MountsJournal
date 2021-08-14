@@ -1,4 +1,3 @@
 # MountsJournal
 
-* Minor interface update.
-* Optimization && visual bugs fixes.
+* Fixed selection of mount with arrow buttons.

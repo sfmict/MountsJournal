@@ -542,7 +542,7 @@ function MJDropDownMenuSearchMixin:updateFilters()
 
 	wipe(self.filtredButtons)
 	for _, btn in ipairs(self.buttons) do
-		if text:len() == 0 or util.find(type(btn.text) == "function" and btn.text() or btn.text, text) then
+		if #text == 0 or util.find(type(btn.text) == "function" and btn.text() or btn.text, text) then
 			tinsert(self.filtredButtons, btn)
 		end
 	end

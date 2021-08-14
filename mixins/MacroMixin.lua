@@ -239,7 +239,7 @@ end
 
 
 function macroFrame:addLine(text, line)
-	if type(text) == "string" and text:len() > 0 then
+	if type(text) == "string" and #text > 0 then
 		return strjoin("\n", text, line)
 	else
 		return line
@@ -256,7 +256,7 @@ do
 			local name = GetSpellInfo(spellID)
 			if C_Spell.IsSpellDataCached(spellID) then
 				local subText = GetSpellSubtext(spellID)
-				if subText:len() > 0 then
+				if #subText > 0 then
 					name = name.."("..subText..")"
 				end
 				spellCache[spellID] = name
@@ -326,7 +326,7 @@ do
 		local classFunc = classFunc[class or self.class]
 		if type(classFunc) == "function" then
 			local text = classFunc(self, ...)
-			if type(text) == "string" and text:len() > 0 then
+			if type(text) == "string" and #text > 0 then
 				macro = self:addLine(macro, text)
 			end
 		end

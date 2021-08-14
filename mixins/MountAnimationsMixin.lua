@@ -325,7 +325,7 @@ end
 
 function MJMountCustomAnimationMixin:saveAnimation()
 	local name = self.nameBox:GetText()
-	if name:len() > 0 then
+	if #name > 0 then
 		tinsert(self.animations, {
 			name = name,
 			animation = self.animations.current or 0,

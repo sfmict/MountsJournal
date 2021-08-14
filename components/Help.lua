@@ -2,6 +2,12 @@ local addon, L = ...
 local util, mounts, journal = MountsJournalUtil, MountsJournal, MountsJournalFrame
 
 
+journal:on("MODULES_INIT", function(self)
+	util.showHelpJournal()
+	self.bgFrame:HookScript("OnShow", util.showHelpJournal)
+end)
+
+
 local function nextTip(t)
 	mounts.help.journal = t
 	util.showHelpJournal()
@@ -44,7 +50,7 @@ function util.showHelpJournal()
 			callbackArg = 3,
 			onAcknowledgeCallback = nextTip,
 		}
-		HelpTip:Show(journal.bgFrame, helpTipInfo, journal.profilesMenu)
+		HelpTip:Show(journal.bgFrame, helpTipInfo, journal.bgFrame.profilesMenu)
 	elseif step == 3 then
 		local helpTipInfo = {
 			text = L["SettingsTooltipDescription"]:format(addon),
