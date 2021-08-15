@@ -1,4 +1,5 @@
 local addon, L = ...
+local pairs, ipairs, next, select, tinsert, wipe, tconcat = pairs, ipairs, next, select, tinsert, wipe, table.concat
 local util, mounts, journal, tags = MountsJournalUtil, MountsJournal, MountsJournalFrame, {}
 journal.tags = tags
 journal:on("MODULES_INIT", function() tags:init() end)
@@ -126,7 +127,7 @@ do
 		else
 			local time = GetTime()
 			if btn.mountID ~= journal.selectedMountID then
-				journal:setSelectedMount(btn.mountID, btn.spellID, btn.index, btn)
+				journal:setSelectedMount(btn.mountID, btn.index, btn.spellID, btn)
 			elseif time - lastMountClick < .4 then
 				journal:useMount(btn.mountID)
 			end
@@ -165,7 +166,7 @@ function tags:mountOptionsMenu_Init(btn, level)
 
 		info.func = function()
 			if needsFanfare then
-				journal:setSelectedMount(self.menuMountID, self.menuSpellID, self.menuMountIndex)
+				journal:setSelectedMount(self.menuMountID, self.menuMountIndex, self.menuSpellID)
 			end
 			journal:useMount(self.menuMountID)
 		end
@@ -300,19 +301,23 @@ function tags:removeMountTag(mountID, tag)
 end
 
 
-function tags:find(mountID, text)
-	local mountTags = self.mountTags[mountID]
-	if mountTags then
-		local str = ""
-		for tag in next, mountTags do
-			str = str..tag:lower()
-		end
+do
+	local t = {}
+	function tags:find(mountID, text)
+		local mountTags = self.mountTags[mountID]
+		if mountTags then
+			for tag in next, mountTags do
+				t[#t + 1] = tag:lower()
+			end
+			local str = tconcat(t, "\n")
+			wipe(t)
 
-		text = {(" "):split(text)}
-		for i = 1, #text do
-			if not str:find(text[i], 1, true) then return end
+			text = {(" "):split(text)}
+			for i = 1, #text do
+				if not str:find(text[i], 1, true) then return end
+			end
+			return true
 		end
-		return true
 	end
 end
 

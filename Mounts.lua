@@ -396,6 +396,7 @@ function mounts:UNIT_SPELLCAST_START(_,_, spellID)
 		if duration ~= 0 then duration = start + duration - GetTime() end
 
 		C_Timer.After(duration, function()
+			if InCombatLockdown() then return end
 			if type(petID) == "number" then
 				C_PetJournal.SummonRandomPet(petID == 1)
 			elseif C_PetJournal.PetIsSummonable(petID) and C_PetJournal.GetSummonedPetGUID() ~= petID then

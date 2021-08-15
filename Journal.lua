@@ -174,11 +174,9 @@ function journal:init()
 	sMountsJournalButton:SetScript("OnMouseUp", function()
 		self.useMountsJournalButton:GetPushedTexture():Hide()
 	end)
-	sMountsJournalButton:HookScript("OnClick", function()
-		self.useMountsJournalButton:Click()
-	end)
 	sMountsJournalButton:SetFrameRef("s", sMountJournal)
 	sMountsJournalButton:SetAttribute("_onclick", [[
+		self:GetParent():CallMethod("Click")
 		local frame = self:GetFrameRef("s")
 		frame:SetAttribute("useDefaultJournal", not frame:GetAttribute("useDefaultJournal"))
 		frame:RunAttribute("update")
@@ -919,7 +917,6 @@ end
 function journal:defaultUpdateMountList(scrollFrame)
 	local offset = HybridScrollFrame_GetOffset(scrollFrame)
 	local numDisplayedMounts = #self.displayedMounts
-	local selectedSpellID
 
 	for i, btn in ipairs(scrollFrame.buttons) do
 		local index = offset + i
@@ -1006,7 +1003,6 @@ end
 function journal:grid3UpdateMountList(scrollFrame)
 	local offset = HybridScrollFrame_GetOffset(scrollFrame)
 	local numDisplayedMounts = #self.displayedMounts
-	local selectedSpellID = self.selectedSpellID
 
 	for i, btn in ipairs(scrollFrame.buttons) do
 		for j = 1, 3 do
@@ -1645,7 +1641,11 @@ do
 	end
 
 
-	function journal:setSelectedMount(mountID, spellID, index, button)
+	function journal:setSelectedMount(mountID, index, spellID, button)
+		if not spellID then
+			local _
+			_, spellID = C_MountJournal.GetMountInfoByID(mountID)
+		end
 		self.selectedMountID = mountID
 		self.selectedSpellID = spellID
 		self.scrollFrame:update()
@@ -1676,10 +1676,7 @@ end
 
 function journal:selectMount(index)
 	local mountID = self.displayedMounts[index]
-	if mountID then
-		local _, spellID = C_MountJournal.GetMountInfoByID(mountID)
-		self:setSelectedMount(mountID, spellID, index)
-	end
+	if mountID then self:setSelectedMount(mountID, index) end
 end
 
 
@@ -1868,7 +1865,6 @@ function journal:filterDropDown_Initialize(btn, level, value)
 					info.text = _G["BATTLE_PET_SOURCE_"..i]
 					info.func = function(_,_,_, value)
 						sources[i] = value
-						if not value then sources[0] = value end
 						self:updateBtnFilters()
 						self:updateMountsList()
 					end
@@ -2135,28 +2131,14 @@ function journal:setBtnFilters(tab)
 	local children = self.filtersBar[tab].childs
 	local filters = mounts.filters[tab]
 
-	if tab ~= "sources" then
-		for _, btn in ipairs(children) do
-			local checked = btn:GetChecked()
-			filters[btn.id] = checked
-			if not checked then i = i + 1 end
-		end
+	for _, btn in ipairs(children) do
+		local checked = btn:GetChecked()
+		filters[btn.id] = checked
+		if not checked then i = i + 1 end
+	end
 
-		if i == #filters then
-			self:setAllFilters(tab, true)
-		end
-	else
-		for _, btn in ipairs(children) do
-			local checked = btn:GetChecked()
-			filters[btn.id] = checked
-			if not checked then i = i + 1 end
-		end
-
-		if i == #children then
-			self:setAllFilters("sources", true)
-		else
-			filters[0] = false
-		end
+	if i == #children then
+		self:setAllFilters(tab, true)
 	end
 
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -2188,6 +2170,7 @@ function journal:updateBtnFilters()
 				filtersBar.sources:GetParent().filtred:Hide()
 			else
 				clearShow = true
+				filter[0] = false
 				for _, btn in ipairs(filtersBar.sources.childs) do
 					local checked = filter[btn.id]
 					btn:SetChecked(checked)
