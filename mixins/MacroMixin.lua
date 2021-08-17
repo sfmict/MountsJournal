@@ -240,7 +240,7 @@ end
 
 function macroFrame:addLine(text, line)
 	if type(text) == "string" and #text > 0 then
-		return strjoin("\n", text, line)
+		return text.."\n"..line
 	else
 		return line
 	end

@@ -301,23 +301,19 @@ function tags:removeMountTag(mountID, tag)
 end
 
 
-do
-	local t = {}
-	function tags:find(mountID, text)
-		local mountTags = self.mountTags[mountID]
-		if mountTags then
-			for tag in next, mountTags do
-				t[#t + 1] = tag:lower()
-			end
-			local str = tconcat(t, "\n")
-			wipe(t)
-
-			text = {(" "):split(text)}
-			for i = 1, #text do
-				if not str:find(text[i], 1, true) then return end
-			end
-			return true
+function tags:find(mountID, text)
+	local mountTags = self.mountTags[mountID]
+	if mountTags then
+		local str = ""
+		for tag in next, mountTags do
+			str = str..tag:lower().."\n"
 		end
+
+		text = {(" "):split(text)}
+		for i = 1, #text do
+			if not str:find(text[i], 1, true) then return end
+		end
+		return true
 	end
 end
 

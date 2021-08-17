@@ -236,24 +236,26 @@ function MountsJournalUtil.cleanText(text)
 end
 
 
-local function removeStr(text, ...)
-	for i = 1, select("#", ...) do
-		local str = select(i, ...)
-		local uText = ""
-		local n = 1
-		local s, e = text:find(str, n)
-		while s do
-			local p = s - 1
-			uText = uText..text:sub(n, text:sub(p, p) == "|" and e or p)
-			n = e + 1
-			s, e = text:find(str, n)
+do
+	local deleteStr = {
+		"|c%x%x%x%x%x%x%x%x",
+		"|r",
+	}
+
+	function MountsJournalUtil.find(text, str)
+		for i = 1, #deleteStr do
+			local ds = deleteStr[i]
+			local uText = ""
+			local n = 1
+			local s, e = text:find(ds, n)
+			while s do
+				local p = s - 1
+				uText = uText..text:sub(n, text:sub(p, p) == "|" and e or p)
+				n = e + 1
+				s, e = text:find(ds, n)
+			end
+			text = uText..text:sub(n)
 		end
-		text = uText..text:sub(n)
+		return text:lower():find(str, 1, true)
 	end
-	return text
-end
-
-
-function MountsJournalUtil.find(text, str)
-	return removeStr(text, "|c%x%x%x%x%x%x%x%x", "|r"):lower():find(str, 1, true)
 end
