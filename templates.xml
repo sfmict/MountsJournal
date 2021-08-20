@@ -3,9 +3,9 @@
 	<Script file="mixins/NavBarMixin.lua"/>
 	<Script file="mixins/WorldMapMixin.lua"/>
 	<Script file="mixins/ExistingListsMixin.lua"/>
-	<Script file="mixins/ProfilesMixin.lua"/>
+	<!-- <Script file="mixins/ProfilesMixin.lua"/> -->
 	<Script file="mixins/CompanionMixin.lua"/>
-	<Script file="mixins/MountAnimationsMixin.lua"/>
+	<!-- <Script file="mixins/MountAnimationsMixin.lua"/> -->
 	<Script file="mixins/MountEquipmentMixin.lua"/>
 
 	<CheckButton name="MJUseMountsJournalButtonTemplate" motionScriptsWhileDisabled="true" inherits="MJCheckButtonTemplate" virtual="true">
@@ -212,7 +212,7 @@
 					<Button parentKey="overflow">
 						<Size x="44" y="24"/>
 						<KeyValues>
-							<KeyValue key="MJNoGlobalMouseEvent" value="true" type="boolean"/>
+							<KeyValue key="SFNoGlobalMouseEvent" value="true" type="boolean"/>
 							<KeyValue key="xoffset" value="-18" type="number"/>
 						</KeyValues>
 						<NormalTexture file="Interface/HelpFrame/CS_HelpTextures">
@@ -324,13 +324,13 @@
 							<Anchor point="TOPLEFT" relativePoint="TOPLEFT" x="54" y="-4"/>
 						</Anchors>
 					</EditBox>
-					<Button parentKey="filtersButton" text="FILTER" inherits="MJDropDownStreatchButtonTemplate">
+				<!-- 	<Button parentKey="filtersButton" text="FILTER" inherits="MJDropDownStreatchButtonTemplate">
 						<Size y="22"/>
 						<Anchors>
 							<Anchor point="LEFT" relativeKey="$parent.searchBox" relativePoint="RIGHT" x="-1" y="0"/>
 							<Anchor point="TOPRIGHT" x="-3" y="-4"/>
 						</Anchors>
-					</Button>
+					</Button> -->
 					<Frame parentKey="filtersBar" inherits="BackdropTemplate">
 						<Size x="260" y="35"/>
 						<Anchors>
@@ -566,7 +566,7 @@
 							<Anchor point="BOTTOMRIGHT" x="-1" y="1"/>
 						</Anchors>
 						<Frames>
-							<Button parentKey="multipleMountBtn" alpha=".5" inherits="MJDropDownScriptButton">
+							<Button parentKey="multipleMountBtn" alpha=".5">
 								<Size x="34" y="34"/>
 								<Anchors>
 									<Anchor point="BOTTOMLEFT" x="13" y="5.5"/>
@@ -712,7 +712,7 @@
 									</Button>
 								</Frames>
 							</Frame>
-							<Frame parentKey="animationsCombobox" alpha=".5" inherits="MJDropDownButtonTemplate" mixin="MJMountAnimationPanelMixin">
+						<!-- 	<Frame parentKey="animationsCombobox" alpha=".5" inherits="MJDropDownButtonTemplate" mixin="MJMountAnimationPanelMixin">
 								<Anchors>
 									<Anchor point="LEFT" relativeKey="$parent.modelControl" relativePoint="RIGHT" x="10" y="-.5"/>
 								</Anchors>
@@ -725,11 +725,11 @@
 										self:SetAlpha(.5)
 									</OnLeave>
 								</Scripts>
-							</Frame>
+							</Frame> -->
 							<CheckButton parentKey="playerToggle" alpha=".5" scale=".5">
 								<Size x="77" y="77"/>
 								<Anchors>
-									<Anchor point="LEFT" relativeKey="$parent.animationsCombobox" relativePoint="RIGHT" x="11" y="2"/>
+									<Anchor point="LEFT" relativeKey="$parent.modelControl" relativePoint="RIGHT" x="301" y="1"/>
 								</Anchors>
 								<Layers>
 									<Layer level="OVERLAY">
@@ -777,11 +777,11 @@
 					<Anchor point="TOPRIGHT" relativeKey="$parent.rightInset"/>
 				</Anchors>
 				<Frames>
-					<Frame parentKey="navigation" inherits="MJDropDownButtonTemplate" frameStrata="DIALOG">
+				<!-- 	<Frame parentKey="navigation" inherits="MJDropDownButtonTemplate" frameStrata="DIALOG">
 						<Anchors>
 							<Anchor point="TOPLEFT" x="2" y="-5"/>
 						</Anchors>
-					</Frame>
+					</Frame> -->
 					<ScrollFrame parentKey="ScrollContainer">
 						<Anchors>
 							<Anchor point="TOPLEFT" x="4" y="-4"/>
@@ -830,7 +830,7 @@
 							<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT"/>
 						</Anchors>
 					</Frame>
-					<Button parentKey="dungeonRaidBtn" inherits="MJDropDownStreatchButtonTemplate" mixin="MJDungeonRaidMixin">
+<!-- 					<Button parentKey="dungeonRaidBtn" inherits="MJDropDownStreatchButtonTemplate" mixin="MJDungeonRaidMixin">
 						<Size x="130" y="24"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeKey="$parent.mapControl" relativePoint="TOPLEFT" x="3" y="-3"/>
@@ -839,16 +839,16 @@
 							<OnLoad method="onLoad"/>
 							<OnClick method="onClick"/>
 						</Scripts>
-					</Button>
+					</Button> -->
 					<CheckButton parentKey="existingListsToggle" inherits="MJArrowToggle">
 						<Anchors>
 							<Anchor point="TOPRIGHT" relativeKey="$parent.mapControl" relativePoint="TOPRIGHT" x="-3" y="-3"/>
 						</Anchors>
 					</CheckButton>
 					<Button parentKey="CurrentMap" inherits="UIPanelButtonTemplate">
-						<Size y="24"/>
+						<Size x="257" y="24"/>
 						<Anchors>
-							<Anchor point="LEFT" relativeKey="$parent.dungeonRaidBtn" relativePoint="RIGHT" x="-2"/>
+							<!-- <Anchor point="LEFT" relativeKey="$parent.dungeonRaidBtn" relativePoint="RIGHT" x="-2"/> -->
 							<Anchor point="RIGHT" relativeKey="$parent.existingListsToggle" relativePoint="LEFT" x="2"/>
 						</Anchors>
 					</Button>
@@ -862,7 +862,7 @@
 							<Anchor point="TOPLEFT" x="33" y="-15"/>
 						</Anchors>
 					</CheckButton>
-					<Button parentKey="listFromMap" inherits="MJDropDownStreatchButtonTemplate">
+				<!-- 	<Button parentKey="listFromMap" inherits="MJDropDownStreatchButtonTemplate">
 						<Size x="134" y="30"/>
 						<Anchors>
 							<Anchor point="BOTTOMLEFT" x="33" y="15"/>
@@ -870,12 +870,12 @@
 						<Scripts>
 							<OnLoad>self.Text:SetWordWrap(true)</OnLoad>
 						</Scripts>
-					</Button>
+					</Button> -->
 					<Frame parentKey="relationMap">
 						<Size x="210" y="30"/>
-						<Anchors>
+					<!-- 	<Anchors>
 							<Anchor point="LEFT" relativeKey="$parent.listFromMap" relativePoint="RIGHT" x="5" y="0"/>
-						</Anchors>
+						</Anchors> -->
 						<Layers>
 							<Layer level="BACKGROUND">
 								<Texture parentKey="icon" atlas="groupfinder-button-dungeons" scale=".7" useAtlasSize="true">
@@ -906,8 +906,8 @@
 					</Button>
 					<Frame parentKey="existingLists" inherits="TooltipBackdropTemplate" enableMouse="true" mixin="MJExistingListsMixin" hidden="true">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeKey="$parent.$parent.listFromMap" relativePoint="TOPRIGHT"/>
-							<Anchor point="BOTTOMLEFT" relativeKey="$parent.$parent.listFromMap" relativePoint="BOTTOMRIGHT"/>
+							<Anchor point="TOPLEFT" relativeKey="$parent.$parent" relativePoint="TOPRIGHT"/>
+							<Anchor point="BOTTOMLEFT" relativeKey="$parent.$parent" relativePoint="BOTTOMRIGHT"/>
 						</Anchors>
 						<Frames>
 							<EditBox inherits="SearchBoxTemplate" parentKey="searchBox" letters="40">
@@ -950,7 +950,7 @@
 				</Scripts>
 			</Button>
 
-			<Button parentKey="profilesMenu" inherits="MJDropDownStreatchButtonTemplate" mixin="MJProfilesMixin" virtual="true">
+<!-- 			<Button parentKey="profilesMenu" inherits="MJDropDownStreatchButtonTemplate" mixin="MJProfilesMixin" virtual="true">
 				<Size x="130" y="22"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.summonButton" relativePoint="RIGHT" x="4" y="0"/>
@@ -959,7 +959,7 @@
 					<OnLoad method="onLoad"/>
 					<OnClick method="onClick"/>
 				</Scripts>
-			</Button>
+			</Button> -->
 
 			<Button parentKey="btnConfig" inherits="UIPanelButtonTemplate">
 				<Size x="80" y="22"/>
@@ -1805,7 +1805,7 @@
 					</Anchors>
 				</HighlightTexture>
 				<KeyValues>
-					<KeyValue key="MJNoGlobalMouseEvent" value="true" type="boolean"/>
+					<KeyValue key="SFNoGlobalMouseEvent" value="true" type="boolean"/>
 				</KeyValues>
 				<Scripts>
 					<OnMouseDown>

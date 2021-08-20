@@ -120,10 +120,11 @@ config:SetScript("OnShow", function(self)
 	modifierText:SetText(L["Modifier"]..":")
 
 	-- MODIFIER COMBOBOX
-	local modifierCombobox = CreateFrame("FRAME", "MountsJournalModifier", leftPanel, "MJDropDownButtonTemplate")
+	local modifierCombobox = LibStub("LibSFDropDown"):CreateButton(leftPanel)
+	-- local modifierCombobox = CreateFrame("FRAME", "MountsJournalModifier", leftPanel, "MJDropDownButtonTemplate")
 	self.modifierCombobox = modifierCombobox
 	modifierCombobox:SetPoint("LEFT", modifierText, "RIGHT", 7, 0)
-	modifierCombobox:ddSetInit(function(self, level)
+	modifierCombobox:ddSetInitFunc(function(self, level)
 		local info = {}
 		for i, modifier in ipairs({"ALT", "CTRL", "SHIFT", "NONE"}) do
 			info.text = _G[modifier.."_KEY"]
@@ -269,10 +270,11 @@ config:SetScript("OnShow", function(self)
 	self.repairFlyablePercentText:SetText("%")
 
 	-- REPAIR MOUNTS COMBOBOX
-	self.repairMountsCombobox = CreateFrame("FRAME", "MountsJournalRepairCombobox", rightPanelScroll.child, "MJDropDownButtonTemplate")
-	self.repairMountsCombobox:SetWidth(230)
+	self.repairMountsCombobox = LibStub("LibSFDropDown"):CreateButton(rightPanelScroll.child, 230)
+	-- self.repairMountsCombobox = CreateFrame("FRAME", "MountsJournalRepairCombobox", rightPanelScroll.child, "MJDropDownButtonTemplate")
+	-- self.repairMountsCombobox:SetWidth(230)
 	self.repairMountsCombobox:SetPoint("TOPLEFT", self.repairFlyable, "BOTTOMLEFT", 0, -8)
-	self.repairMountsCombobox:ddSetInit(function(self, level)
+	self.repairMountsCombobox:ddSetInitFunc(function(self, level)
 		local info = {}
 
 		info.text = L["Random available mount"]

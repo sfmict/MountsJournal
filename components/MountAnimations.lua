@@ -2,15 +2,19 @@ local addon, L = ...
 local util = MountsJournalUtil
 
 
-MJMountAnimationPanelMixin = {}
+MountsJournalFrame:on("MODULES_INIT", function(journal)
+	local dd = LibStub("LibSFDropDown"):CreateButton(journal.modelScene)
+	dd:SetAlpha(.5)
+	dd:SetPoint("LEFT", journal.modelScene.modelControl, "RIGHT", 10, -.5)
+	journal.modelScene.animationsCombobox = dd
 
-
-function MJMountAnimationPanelMixin:onLoad()
-	self.Button:HookScript("OnEnter", function(btn)
+	dd:SetScript("OnEnter", function(self) self:SetAlpha(1) end)
+	dd:SetScript("OnLeave", function(self) self:SetAlpha(.5) end)
+	dd.Button:HookScript("OnEnter", function(btn)
 		local parent = btn:GetParent()
 		parent:GetScript("OnEnter")(parent)
 	end)
-	self.Button:HookScript("OnLeave", function(btn)
+	dd.Button:HookScript("OnLeave", function(btn)
 		local parent = btn:GetParent()
 		parent:GetScript("OnLeave")(parent)
 	end)
@@ -24,9 +28,8 @@ function MJMountAnimationPanelMixin:onLoad()
 		OnAccept = function(_, cb) cb() end,
 	}
 
-	self.journal = MountsJournalFrame
-	self.animations = MountsJournal.globalDB.mountAnimations
-	self.animationsList = {
+	dd.animations = MountsJournal.globalDB.mountAnimations
+	dd.animationsList = {
 		{
 			name = L["Default"],
 			animation = 0,
@@ -83,121 +86,116 @@ function MJMountAnimationPanelMixin:onLoad()
 		},
 	}
 
-	self.customAnimationPanel = CreateFrame("FRAME", nil, self:GetParent(), "MJMountCustomAnimationPanel")
-	self.customAnimationPanel:SetPoint("BOTTOMRIGHT", self, "TOPRIGHT", 0, 2)
+	dd.customAnimationPanel = CreateFrame("FRAME", nil, journal.modelScene, "MJMountCustomAnimationPanel")
+	dd.customAnimationPanel:SetPoint("BOTTOMRIGHT", dd, "TOPRIGHT", 0, 2)
 
-	self.journal:on("MOUNT_MODEL_UPDATE", function(journal, mountType)
+	journal:on("MOUNT_MODEL_UPDATE", function(journal, mountType)
 		if mountType then
-			self.currentMountType = mountType == 231 and 2 or journal.mountTypes[mountType]
-			self:replayAnimation()
+			dd.currentMountType = mountType == 231 and 2 or journal.mountTypes[mountType]
+			dd:replayAnimation()
 		end
 	end)
-end
 
-
-function MJMountAnimationPanelMixin:replayAnimation()
-	if self.selectedValue == "custom" or self.selectedValue and (self.selectedValue.type == nil or self.selectedValue.type >= self.currentMountType) then
-		if self.selectedValue.animation ~= 0 then
-			self:SetScript("OnUpdate", self.onUpdate)
-		end
-	else
-		local actor = self.journal.modelScene:GetActorByTag("unwrapped")
-		if actor then actor:StopAnimationKit() end
-		self:ddSetSelectedValue(self.animationsList[1])
-		self:ddSetSelectedText(self.animationsList[1].name)
-	end
-end
-
-
-function MJMountAnimationPanelMixin:onUpdate()
-	local actor = self.journal.modelScene:GetActorByTag("unwrapped")
-	if actor and not actor:IsLoaded() then return end
-	self:SetScript("OnUpdate", nil)
-
-	C_Timer.After(0, function()
-		if self.selectedValue == "custom" then
-			self.customAnimationPanel:play()
+	function dd:replayAnimation()
+		if self.selectedValue == "custom" or self.selectedValue and (self.selectedValue.type == nil or self.selectedValue.type >= self.currentMountType) then
+			if self.selectedValue.animation ~= 0 then
+				self:SetScript("OnUpdate", self.onUpdate)
+			end
 		else
-			self:playAnimation(self.selectedValue.animation, self.selectedValue.isKit, self.selectedValue.loop)
+			local actor = journal.modelScene:GetActorByTag("unwrapped")
+			if actor then actor:StopAnimationKit() end
+			self:ddSetSelectedValue(self.animationsList[1])
+			self:ddSetSelectedText(self.animationsList[1].name)
 		end
-	end)
-end
+	end
 
+	function dd:onUpdate()
+		local actor = journal.modelScene:GetActorByTag("unwrapped")
+		if actor and not actor:IsLoaded() then return end
+		self:SetScript("OnUpdate", nil)
 
-function MJMountAnimationPanelMixin:initialize(level)
-	local info = {}
-	local mountType = self.currentMountType or 1
+		C_Timer.After(0, function()
+			if self.selectedValue == "custom" then
+				self.customAnimationPanel:play()
+			else
+				self:playAnimation(self.selectedValue.animation, self.selectedValue.isKit, self.selectedValue.loop)
+			end
+		end)
+	end
 
-	info.list = {}
-	for _, v in ipairs(self.animationsList) do
-		if v.type == nil or v.type >= mountType then
+	function dd:initialize(level)
+		local info = {}
+		local mountType = self.currentMountType or 1
+
+		info.list = {}
+		for _, v in ipairs(self.animationsList) do
+			if v.type == nil or v.type >= mountType then
+				tinsert(info.list, {
+					text = ("%s|cff808080.%d%s|r"):format(v.name, v.animation, v.isKit and ".k" or ""),
+					value = v,
+					checked = function(btn) return self.selectedValue == btn.value end,
+					func = function(btn)
+						self.customAnimationPanel:Hide()
+						self:playAnimation(btn.value.animation, btn.value.isKit)
+						self:ddSetSelectedValue(btn.value, level)
+						self:ddSetSelectedText(btn.value.name)
+					end,
+				})
+			end
+		end
+		for i, v in ipairs(self.animations) do
 			tinsert(info.list, {
 				text = ("%s|cff808080.%d%s|r"):format(v.name, v.animation, v.isKit and ".k" or ""),
 				value = v,
+				arg1 = i,
 				checked = function(btn) return self.selectedValue == btn.value end,
 				func = function(btn)
 					self.customAnimationPanel:Hide()
-					self:playAnimation(btn.value.animation, btn.value.isKit)
+					self:playAnimation(btn.value.animation, btn.value.isKit, btn.value.loop)
 					self:ddSetSelectedValue(btn.value, level)
 					self:ddSetSelectedText(btn.value.name)
 				end,
+				remove = function(btn) self:deleteAnimation(btn.arg1) end,
 			})
 		end
-	end
-	for i, v in ipairs(self.animations) do
 		tinsert(info.list, {
-			text = ("%s|cff808080.%d%s|r"):format(v.name, v.animation, v.isKit and ".k" or ""),
-			value = v,
-			arg1 = i,
+			text = CUSTOM,
+			value = "custom",
 			checked = function(btn) return self.selectedValue == btn.value end,
 			func = function(btn)
-				self.customAnimationPanel:Hide()
-				self:playAnimation(btn.value.animation, btn.value.isKit, btn.value.loop)
+				self.customAnimationPanel:Show()
+				self.customAnimationPanel:play()
 				self:ddSetSelectedValue(btn.value, level)
-				self:ddSetSelectedText(btn.value.name)
 			end,
-			remove = function(btn) self:deleteAnimation(btn.arg1) end,
 		})
+		self:ddAddButton(info, level)
 	end
-	tinsert(info.list, {
-		text = CUSTOM,
-		value = "custom",
-		checked = function(btn) return self.selectedValue == btn.value end,
-		func = function(btn)
-			self.customAnimationPanel:Show()
-			self.customAnimationPanel:play()
-			self:ddSetSelectedValue(btn.value, level)
-		end,
-	})
-	self:ddAddButton(info, level)
-end
 
-
-function MJMountAnimationPanelMixin:playAnimation(animation, isKit, loop)
-	local actor = self.journal.modelScene:GetActorByTag("unwrapped")
-	actor:StopAnimationKit()
-	--max animation 2^31 - 1
-	if isKit then
-		actor:PlayAnimationKit(animation, loop)
-	else
-		actor:PlayAnimationKit(0)
+	function dd:playAnimation(animation, isKit, loop)
+		local actor = journal.modelScene:GetActorByTag("unwrapped")
 		actor:StopAnimationKit()
-		actor:SetAnimation(animation, 0)
-	end
-end
-
-
-function MJMountAnimationPanelMixin:deleteAnimation(id)
-	StaticPopup_Show(util.addonName.."DELETE_MOUNT_ANIMATION", NORMAL_FONT_COLOR_CODE..self.animations[id].name..FONT_COLOR_CODE_CLOSE, nil, function()
-		if self.selectedValue == self.animations[id] then
-			local value = self.animationsList[1]
-			self:playAnimation(value.animation, value.isKit, value.loop)
-			self:ddSetSelectedValue(value)
-			self:ddSetSelectedText(value.name)
+		--max animation 2^31 - 1
+		if isKit then
+			actor:PlayAnimationKit(animation, loop)
+		else
+			actor:PlayAnimationKit(0)
+			actor:StopAnimationKit()
+			actor:SetAnimation(animation, 0)
 		end
-		tremove(self.animations, id)
-	end)
-end
+	end
+
+	function dd:deleteAnimation(id)
+		StaticPopup_Show(util.addonName.."DELETE_MOUNT_ANIMATION", NORMAL_FONT_COLOR_CODE..self.animations[id].name..FONT_COLOR_CODE_CLOSE, nil, function()
+			if self.selectedValue == self.animations[id] then
+				local value = self.animationsList[1]
+				self:playAnimation(value.animation, value.isKit, value.loop)
+				self:ddSetSelectedValue(value)
+				self:ddSetSelectedText(value.name)
+			end
+			tremove(self.animations, id)
+		end)
+	end
+end)
 
 
 MJMountCustomAnimationMixin = {}

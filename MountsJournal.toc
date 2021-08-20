@@ -6,10 +6,11 @@
 ## Notes-ruRU: Улучшенный журнал средств передвижения.
 ## SavedVariables: MountsJournalDB
 ## SavedVariablesPerCharacter: MountsJournalChar
+embeds.xml
 locales.xml
 Util.lua
 widgets\Binding.lua
-widgets\DropDown.xml
+#widgets\DropDown.xml
 templates.xml
 Mounts.lua
 db.lua
@@ -19,6 +20,9 @@ config\About.lua
 Journal.lua
 components\Tags.lua
 components\Camera.lua
+components\MountAnimations.lua
+components\DungeonRaidButton.lua
+components\Profiles.lua
 components\Help.lua
 #@do-not-package@
 _test.lua

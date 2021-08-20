@@ -19,8 +19,11 @@ function MJNavBarMixin:onLoad()
 	self.overlay:SetFrameLevel(self:GetFrameLevel() + 50)
 	self.defMapID = MountsJournal.defMountsListID
 
-	self.dropDown = CreateFrame("FRAME", nil, self, "MJDropDownScriptButton")
-	self.dropDown:ddSetInit(function(...) self:dropDownInit(...) end, "menu")
+	self.dropDown = LibStub("LibSFDropDown"):SetMixin({})
+	self:SetScript("OnHide", function(self) self.dropDown:onHide() end)
+	-- self.dropDown = CreateFrame("FRAME", nil, self, "MJDropDownScriptButton")
+	self.dropDown:ddSetInitFunc(function(...) self:dropDownInit(...) end)
+	self.dropDown:ddSetDisplayMode("menu")
 
 	local homeData = {
 		name = WORLD,

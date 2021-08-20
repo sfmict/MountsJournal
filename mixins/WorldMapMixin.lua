@@ -7,7 +7,10 @@ function MJMapCanvasMixin:onLoad()
 	self.highlight = self.child.HighlightTexture
 	self.detailLayerPool = CreateFramePool("FRAME", self.child, "MapCanvasDetailLayerTemplate")
 	self.explorationLayerPool = CreateTexturePool(self.child.Exploration, "ARTWORK", 0)
-	self.navigation:ddSetInit(function(...) self:dropDownInit(...) end)
+	self.navigation = LibStub("LibSFDropDown"):CreateButton(self)
+	self.navigation:SetFrameLevel(self:GetFrameLevel() + 10)
+	self.navigation:SetPoint("TOPLEFT", 2, -5)
+	self.navigation:ddSetInitFunc(function(...) self:dropDownInit(...) end)
 end
 
 
@@ -218,85 +221,85 @@ end
 
 -- =======================================================================
 -- DUNGEON AND RAID MIXIN
-MJDungeonRaidMixin = {}
+-- MJDungeonRaidMixin = {}
 
 
-function MJDungeonRaidMixin:onLoad()
-	self.navBar = self:GetParent():GetParent().navBar
+-- function MJDungeonRaidMixin:onLoad()
+-- 	self.navBar = self:GetParent():GetParent().navBar
 
-	self.list = {
-		{
-			name = DUNGEONS,
-			list = {},
-		},
-		{
-			name = RAIDS,
-			list = {},
-		}
-	}
+-- 	self.list = {
+-- 		{
+-- 			name = DUNGEONS,
+-- 			list = {},
+-- 		},
+-- 		{
+-- 			name = RAIDS,
+-- 			list = {},
+-- 		}
+-- 	}
 
-	local currentTier = EJ_GetCurrentTier()
-	local mapExclude = {
-		[379] = true, -- Вершина Кун-Лай
-		[543] = true, -- Горгронд
-		[929] = true, -- Точка массированного вторжения: госпожа Фолнуна
-	}
-	for i = 1, EJ_GetNumTiers() do
-		EJ_SelectTier(i)
-		for _, v in ipairs(self.list) do
-			v.list[i] = {
-				name = _G["EXPANSION_NAME"..(i - 1)],
-				list = {},
-			}
-			local showRaid = v.name == RAIDS
-			local index = 1
-			local instanceID, instanceName = EJ_GetInstanceByIndex(index, showRaid)
-			while instanceID do
-				EJ_SelectInstance(instanceID)
-				local _,_,_,_,_,_, mapID = EJ_GetInstanceInfo()
-				if mapID and mapID > 0 and not mapExclude[mapID] then
-					tinsert(v.list[i].list, {name = instanceName, mapID = mapID})
-				end
-				index = index + 1
-				instanceID, instanceName = EJ_GetInstanceByIndex(index, showRaid)
-			end
-		end
-	end
-	EJ_SelectTier(currentTier)
+-- 	local currentTier = EJ_GetCurrentTier()
+-- 	local mapExclude = {
+-- 		[379] = true, -- Вершина Кун-Лай
+-- 		[543] = true, -- Горгронд
+-- 		[929] = true, -- Точка массированного вторжения: госпожа Фолнуна
+-- 	}
+-- 	for i = 1, EJ_GetNumTiers() do
+-- 		EJ_SelectTier(i)
+-- 		for _, v in ipairs(self.list) do
+-- 			v.list[i] = {
+-- 				name = _G["EXPANSION_NAME"..(i - 1)],
+-- 				list = {},
+-- 			}
+-- 			local showRaid = v.name == RAIDS
+-- 			local index = 1
+-- 			local instanceID, instanceName = EJ_GetInstanceByIndex(index, showRaid)
+-- 			while instanceID do
+-- 				EJ_SelectInstance(instanceID)
+-- 				local _,_,_,_,_,_, mapID = EJ_GetInstanceInfo()
+-- 				if mapID and mapID > 0 and not mapExclude[mapID] then
+-- 					tinsert(v.list[i].list, {name = instanceName, mapID = mapID})
+-- 				end
+-- 				index = index + 1
+-- 				instanceID, instanceName = EJ_GetInstanceByIndex(index, showRaid)
+-- 			end
+-- 		end
+-- 	end
+-- 	EJ_SelectTier(currentTier)
 
-	self:ddSetInit(self.initialize, "menu")
-end
-
-
-function MJDungeonRaidMixin:initialize(level, value)
-	local info = {}
-
-	info.isNotRadio = true
-	info.notCheckable = true
-
-	for _, v in ipairs(value) do
-		info.text = v.name
-		if v.list then
-			info.keepShownOnClick = true
-			info.hasArrow = true
-			info.value = v.list
-		else
-			info.func = function()
-				self.navBar:setMapID(v.mapID)
-			end
-		end
-		self:ddAddButton(info, level)
-	end
-
-	if #value == 0 then
-		info.text = EMPTY
-		info.disabled = true
-		self:ddAddButton(info, level)
-	end
-end
+-- 	self:ddSetInit(self.initialize, "menu")
+-- end
 
 
-function MJDungeonRaidMixin:onClick()
-	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	self:dropDownToggle(1, self.list, self, 111, 15)
-end
+-- function MJDungeonRaidMixin:initialize(level, value)
+-- 	local info = {}
+
+-- 	info.isNotRadio = true
+-- 	info.notCheckable = true
+
+-- 	for _, v in ipairs(value) do
+-- 		info.text = v.name
+-- 		if v.list then
+-- 			info.keepShownOnClick = true
+-- 			info.hasArrow = true
+-- 			info.value = v.list
+-- 		else
+-- 			info.func = function()
+-- 				self.navBar:setMapID(v.mapID)
+-- 			end
+-- 		end
+-- 		self:ddAddButton(info, level)
+-- 	end
+
+-- 	if #value == 0 then
+-- 		info.text = EMPTY
+-- 		info.disabled = true
+-- 		self:ddAddButton(info, level)
+-- 	end
+-- end
+
+
+-- function MJDungeonRaidMixin:onClick()
+-- 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+-- 	self:dropDownToggle(1, self.list, self, 111, 15)
+-- end

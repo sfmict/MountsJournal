@@ -279,7 +279,7 @@ function journal:init()
 
 	-- MAP SETTINGS
 	self.mapSettings:SetScript("OnShow", function() self:updateMapSettings() end)
-	self.mapSettings.dungeonRaidBtn:SetText(L["Dungeons and Raids"])
+	-- self.mapSettings.dungeonRaidBtn:SetText(L["Dungeons and Raids"])
 	self.mapSettings.CurrentMap:SetText(L["Current Location"])
 	self.mapSettings.CurrentMap:SetScript("OnClick", function()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -299,10 +299,13 @@ function journal:init()
 	self.mapSettings.HerbGathering.tooltipText = L["Herb Gathering"]
 	self.mapSettings.HerbGathering.tooltipRequirement = L["HerbGatheringFlagDescription"]
 	self.mapSettings.HerbGathering:HookScript("OnClick", function(check) self:setFlag("herbGathering", check:GetChecked()) end)
-	self.mapSettings.listFromMap.Text:SetText(L["ListMountsFromZone"])
+	self.mapSettings.listFromMap = LibStub("LibSFDropDown"):CreateStreatchButton(self.mapSettings, 134, 30, true)
+	self.mapSettings.listFromMap:SetPoint("BOTTOMLEFT", 33, 15)
+	self.mapSettings.listFromMap:SetText(L["ListMountsFromZone"])
 	self.mapSettings.listFromMap.maps = {}
 	self.mapSettings.listFromMap:SetScript("OnClick", function(btn) self:listFromMapClick(btn) end)
-	self.mapSettings.listFromMap:ddSetInit(function(...) self:listFromMapInit(...) end, "menu")
+	self.mapSettings.listFromMap:ddSetInitFunc(function(...) self:listFromMapInit(...) end)
+	self.mapSettings.relationMap:SetPoint("LEFT", self.mapSettings.listFromMap, "RIGHT", 5, 0)
 	self.mapSettings.relationClear:SetScript("OnClick", function()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		self.currentList.listFromID = nil
@@ -476,12 +479,16 @@ function journal:init()
 	end)
 
 	-- FILTERS BUTTON
-	local filtersButton = self.filtersPanel.filtersButton
-	filtersButton:ddSetInit(function(...) self:filterDropDown_Initialize(...) end, "menu")
-	filtersButton:SetScript("OnClick", function(self)
-		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		self:dropDownToggle(1, nil, self, 74, 15)
-	end)
+	local filtersButton = LibStub("LibSFDropDown"):CreateStreatchButton(self.filtersPanel, nil, 22)
+	filtersButton:SetPoint("LEFT", self.searchBox, "RIGHT", -1, 0)
+	filtersButton:SetPoint("TOPRIGHT", -3, -4)
+	filtersButton:SetText(FILTER)
+	-- local filtersButton = self.filtersPanel.filtersButton
+	filtersButton:ddSetInitFunc(function(...) self:filterDropDown_Initialize(...) end)
+	-- filtersButton:SetScript("OnClick", function(self)
+	-- 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	-- 	self:dropDownToggle(1, nil, self, 74, 15)
+	-- end)
 
 	-- FILTERS BUTTONS
 	local function filterClick(btn)
@@ -568,9 +575,11 @@ function journal:init()
 	end)
 
 	-- MODEL SCENE MULTIPLE BUTTON
+	LibStub("LibSFDropDown"):SetMixin(self.multipleMountBtn)
 	self.multipleMountBtn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-	self.multipleMountBtn:ddSetInit(function(...) self:miltipleMountBtn_Initialize(...) end, "menu")
-	self.multipleMountBtn.MJNoGlobalMouseEvent = true
+	self.multipleMountBtn:ddSetInitFunc(function(...) self:miltipleMountBtn_Initialize(...) end)
+	self.multipleMountBtn:ddSetDisplayMode("menu")
+	self.multipleMountBtn:ddHideWhenButtonHidden(true)
 	self.multipleMountBtn:SetScript("OnClick", function(btn, mouseBtn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		if mouseBtn == "LeftButton" then
@@ -918,9 +927,9 @@ function journal:defaultUpdateMountList(scrollFrame)
 	local offset = HybridScrollFrame_GetOffset(scrollFrame)
 	local numDisplayedMounts = #self.displayedMounts
 
-	for i, btn in ipairs(scrollFrame.buttons) do
+	for i = 1, #scrollFrame.buttons do
 		local index = offset + i
-		local dlist = btn.defaultList
+		local dlist = scrollFrame.buttons[i].defaultList
 
 		if index <= numDisplayedMounts then
 			local mountID = self.displayedMounts[index]
@@ -1004,7 +1013,8 @@ function journal:grid3UpdateMountList(scrollFrame)
 	local offset = HybridScrollFrame_GetOffset(scrollFrame)
 	local numDisplayedMounts = #self.displayedMounts
 
-	for i, btn in ipairs(scrollFrame.buttons) do
+	for i = 1, #scrollFrame.buttons do
+		local btn = scrollFrame.buttons[i]
 		for j = 1, 3 do
 			local index = (offset + i - 1) * 3 + j
 			local g3btn = btn.grid3List.mounts[j]
@@ -1410,7 +1420,7 @@ do
 		end
 
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		btn:dropDownToggle(1, btn.maps, btn, 115, 15)
+		btn:dropDownToggle(1, btn.maps, btn, 116, 21)
 	end
 end
 

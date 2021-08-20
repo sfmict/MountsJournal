@@ -1,5 +1,11 @@
 package-as: MountsJournal
 
+externals:
+	libs/LibStub: https://repos.curseforge.com/wow/libstub/trunk
+	libs/LibSFDropDown: https://github.com/sfmict/LibSFDropDown
+
+enable-nolib-creation: no
+
 manual-changelog:
 	filename: CHANGELOG.md
 	markup-type: markdown
@@ -9,3 +15,5 @@ ignore:
 	- README.md
 	- CHANGELOG.md
 	- _config.yml
+	- libs/LibStub/LibStub.toc
+	- libs/LibStub/tests
