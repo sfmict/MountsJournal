@@ -51,9 +51,7 @@ function tags:init()
 	self:setSortedTags()
 
 	self.mountOptionsMenu = LibStub("LibSFDropDown"):SetMixin({})
-	-- self.mountOptionsMenu = {}
-	-- util.setMixin(self.mountOptionsMenu, MJDropDownButtonMixin)
-	journal.bgFrame:HookScript("OnHide", function() self.mountOptionsMenu:onHide() end)
+	self.mountOptionsMenu:ddHideWhenButtonHidden(journal.bgFrame)
 	self.mountOptionsMenu:ddSetInitFunc(function(...) self:mountOptionsMenu_Init(...) end)
 	self.mountOptionsMenu:ddSetDisplayMode("menu")
 end
@@ -83,6 +81,13 @@ function tags:resetFilter()
 	self.filter.noTag = true
 	self.filter.withAllTags = false
 	self:setAllFilterTags(true)
+end
+
+
+function tags:hideDropDown(mouseBtn)
+	if mouseBtn == "LeftButton" then
+		self.mountOptionsMenu:closeDropDownMenus()
+	end
 end
 
 

@@ -121,7 +121,6 @@ config:SetScript("OnShow", function(self)
 
 	-- MODIFIER COMBOBOX
 	local modifierCombobox = LibStub("LibSFDropDown"):CreateButton(leftPanel)
-	-- local modifierCombobox = CreateFrame("FRAME", "MountsJournalModifier", leftPanel, "MJDropDownButtonTemplate")
 	self.modifierCombobox = modifierCombobox
 	modifierCombobox:SetPoint("LEFT", modifierText, "RIGHT", 7, 0)
 	modifierCombobox:ddSetInitFunc(function(self, level)
@@ -271,8 +270,6 @@ config:SetScript("OnShow", function(self)
 
 	-- REPAIR MOUNTS COMBOBOX
 	self.repairMountsCombobox = LibStub("LibSFDropDown"):CreateButton(rightPanelScroll.child, 230)
-	-- self.repairMountsCombobox = CreateFrame("FRAME", "MountsJournalRepairCombobox", rightPanelScroll.child, "MJDropDownButtonTemplate")
-	-- self.repairMountsCombobox:SetWidth(230)
 	self.repairMountsCombobox:SetPoint("TOPLEFT", self.repairFlyable, "BOTTOMLEFT", 0, -8)
 	self.repairMountsCombobox:ddSetInitFunc(function(self, level)
 		local info = {}

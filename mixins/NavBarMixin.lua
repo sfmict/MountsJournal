@@ -20,8 +20,7 @@ function MJNavBarMixin:onLoad()
 	self.defMapID = MountsJournal.defMountsListID
 
 	self.dropDown = LibStub("LibSFDropDown"):SetMixin({})
-	self:SetScript("OnHide", function(self) self.dropDown:onHide() end)
-	-- self.dropDown = CreateFrame("FRAME", nil, self, "MJDropDownScriptButton")
+	self.dropDown:ddHideWhenButtonHidden(self)
 	self.dropDown:ddSetInitFunc(function(...) self:dropDownInit(...) end)
 	self.dropDown:ddSetDisplayMode("menu")
 

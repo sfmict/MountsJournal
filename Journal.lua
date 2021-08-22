@@ -329,6 +329,7 @@ function journal:init()
 	self.scrollFrame.scrollBar.doNotHide = true
 	HybridScrollFrame_CreateButtons(self.scrollFrame, "MJMountListPanelTemplate", 1, 0)
 
+	local function mouseDown(btn, mouse) self.tags:hideDropDown(mouse) end
 	local function typeClick(btn) self:mountToggle(btn) end
 	local function dragClick(btn, mouse) self.tags:dragButtonClick(btn, mouse) end
 	local function btnClick(btn, mouse) self.tags:listItemClick(btn:GetParent(), btn, mouse) end
@@ -337,13 +338,16 @@ function journal:init()
 	local function grid3Drag(btn) self.tags:dragMount(btn.index) end
 
 	for _, child in ipairs(self.scrollFrame.buttons) do
+		child.defaultList.dragButton:SetScript("OnMouseDown", mouseDown)
 		child.defaultList.dragButton:SetScript("OnClick", dragClick)
 		child.defaultList.dragButton:SetScript("OnDragStart", drag)
+		child.defaultList.btn:SetScript("OnMouseDown", mouseDown)
 		child.defaultList.btn:SetScript("OnClick", btnClick)
 		child.defaultList.fly:SetScript("OnClick", typeClick)
 		child.defaultList.ground:SetScript("OnClick", typeClick)
 		child.defaultList.swimming:SetScript("OnClick", typeClick)
 		for i, btn in ipairs(child.grid3List.mounts) do
+			btn:SetScript("OnMouseDown", mouseDown)
 			btn:SetScript("OnClick", grid3Click)
 			btn:SetScript("OnDragStart", grid3Drag)
 			btn.fly:SetScript("OnClick", typeClick)
@@ -483,12 +487,7 @@ function journal:init()
 	filtersButton:SetPoint("LEFT", self.searchBox, "RIGHT", -1, 0)
 	filtersButton:SetPoint("TOPRIGHT", -3, -4)
 	filtersButton:SetText(FILTER)
-	-- local filtersButton = self.filtersPanel.filtersButton
 	filtersButton:ddSetInitFunc(function(...) self:filterDropDown_Initialize(...) end)
-	-- filtersButton:SetScript("OnClick", function(self)
-	-- 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	-- 	self:dropDownToggle(1, nil, self, 74, 15)
-	-- end)
 
 	-- FILTERS BUTTONS
 	local function filterClick(btn)
@@ -579,7 +578,7 @@ function journal:init()
 	self.multipleMountBtn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	self.multipleMountBtn:ddSetInitFunc(function(...) self:miltipleMountBtn_Initialize(...) end)
 	self.multipleMountBtn:ddSetDisplayMode("menu")
-	self.multipleMountBtn:ddHideWhenButtonHidden(true)
+	self.multipleMountBtn:ddHideWhenButtonHidden()
 	self.multipleMountBtn:SetScript("OnClick", function(btn, mouseBtn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		if mouseBtn == "LeftButton" then

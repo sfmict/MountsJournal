@@ -10,7 +10,6 @@ embeds.xml
 locales.xml
 Util.lua
 widgets\Binding.lua
-#widgets\DropDown.xml
 templates.xml
 Mounts.lua
 db.lua

@@ -147,7 +147,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 	end
 
 	dd.mounts = MountsJournal
-	dd.journal = MountsJournalFrame
+	dd.journal = journal
 	dd.profiles = dd.mounts.profiles
 	dd.charDB = dd.mounts.charDB
 	dd.profileNames = {}
