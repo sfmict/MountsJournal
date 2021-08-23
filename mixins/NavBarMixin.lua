@@ -24,12 +24,28 @@ function MJNavBarMixin:onLoad()
 	self.dropDown:ddSetInitFunc(function(...) self:dropDownInit(...) end)
 	self.dropDown:ddSetDisplayMode("menu")
 
+	self.navBtnClick = function(_, mapID)
+		self:setMapID(mapID or self.defMapID)
+	end
 	local homeData = {
 		name = WORLD,
 		OnClick = function() self:setDefMap() end,
 	}
 	NavBar_Initialize(self, "MJNavButtonTemplate", homeData, self.home, self.overflow)
 	self.overflow:SetScript("OnMouseDown", function(btn) self:dropDownToggleClick(btn) end)
+	self.overflow.listFunc = function(self)
+		local navBar = self:GetParent()
+		local list = {}
+		for _, button in ipairs(navBar.navList) do
+			if button:IsShown() then break end
+			local data = {
+				text = button:GetText(),
+				id = button.id,
+			}
+			tinsert(list, data)
+		end
+		return list
+	end
 	self:setDefMap()
 end
 
@@ -68,7 +84,6 @@ function MJNavBarMixin:getDropDownList()
 					local data = {
 						text = childInfo.name,
 						id = childInfo.mapID,
-						func = function(_, mapID) self:GetParent():setMapID(mapID) end,
 					}
 					tinsert(list, data)
 				end
@@ -91,17 +106,13 @@ function MJNavBarMixin:dropDownInit(btn, level)
 	local navButton = btn.buttonOwner
 	if not (navButton and navButton.listFunc) then return end
 
-	local info = {
-		func = NavBar_DropDown_Click,
-		owner = navButton,
-		notCheckable = true,
-	}
 	local list = navButton:listFunc()
 	if list then
+		local info = {notCheckable = true}
 		for i, entry in ipairs(list) do
 			info.text = entry.text
 			info.arg1 = entry.id
-			info.arg2 = entry.func
+			info.func = self.navBtnClick
 			btn:ddAddButton(info, level)
 		end
 	end
