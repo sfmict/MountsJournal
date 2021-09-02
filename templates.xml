@@ -210,7 +210,7 @@
 					<Button parentKey="overflow">
 						<Size x="44" y="24"/>
 						<KeyValues>
-							<KeyValue key="SFNoGlobalMouseEvent" value="true" type="boolean"/>
+							<KeyValue key="LibSFDropDownNoGMEvent" value="true" type="boolean"/>
 							<KeyValue key="xoffset" value="-18" type="number"/>
 						</KeyValues>
 						<NormalTexture file="Interface/HelpFrame/CS_HelpTextures">
@@ -1209,7 +1209,7 @@
 			</CheckButton>
 		</Frames>
 		<KeyValues>
-			<KeyValue key="SFNoGlobalMouseEvent" value="true" type="boolean"/>
+			<KeyValue key="LibSFDropDownNoGMEvent" value="true" type="boolean"/>
 		</KeyValues>
 		<Scripts>
 			<OnEnter>
@@ -1264,7 +1264,7 @@
 							</Layer>
 						</Layers>
 						<KeyValues>
-							<KeyValue key="SFNoGlobalMouseEvent" value="true" type="boolean"/>
+							<KeyValue key="LibSFDropDownNoGMEvent" value="true" type="boolean"/>
 						</KeyValues>
 						<Scripts>
 							<OnEnter>
@@ -1334,7 +1334,7 @@
 						</Layers>
 						<HighlightTexture parentKey="highlight" atlas="PetList-ButtonHighlight"/>
 						<KeyValues>
-							<KeyValue key="SFNoGlobalMouseEvent" value="true" type="boolean"/>
+							<KeyValue key="LibSFDropDownNoGMEvent" value="true" type="boolean"/>
 						</KeyValues>
 						<Scripts>
 							<OnLoad>
@@ -1752,7 +1752,7 @@
 					</Anchors>
 				</HighlightTexture>
 				<KeyValues>
-					<KeyValue key="SFNoGlobalMouseEvent" value="true" type="boolean"/>
+					<KeyValue key="LibSFDropDownNoGMEvent" value="true" type="boolean"/>
 				</KeyValues>
 				<Scripts>
 					<OnMouseDown>

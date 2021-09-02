@@ -19,7 +19,7 @@ function MJNavBarMixin:onLoad()
 	self.overlay:SetFrameLevel(self:GetFrameLevel() + 50)
 	self.defMapID = MountsJournal.defMountsListID
 
-	self.dropDown = LibStub("LibSFDropDown"):SetMixin({})
+	self.dropDown = LibStub("LibSFDropDown-1.0"):SetMixin({})
 	self.dropDown:ddHideWhenButtonHidden(self)
 	self.dropDown:ddSetInitFunc(function(...) self:dropDownInit(...) end)
 	self.dropDown:ddSetDisplayMode("menu")
@@ -98,7 +98,7 @@ end
 function MJNavBarMixin:dropDownToggleClick(btn)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	self.dropDown.buttonOwner = btn
-	self.dropDown:dropDownToggle(1, nil, btn, 20, 3)
+	self.dropDown:ddToggle(1, nil, btn, 20, 3)
 end
 
 

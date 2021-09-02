@@ -299,7 +299,7 @@ function journal:init()
 	self.mapSettings.HerbGathering.tooltipText = L["Herb Gathering"]
 	self.mapSettings.HerbGathering.tooltipRequirement = L["HerbGatheringFlagDescription"]
 	self.mapSettings.HerbGathering:HookScript("OnClick", function(check) self:setFlag("herbGathering", check:GetChecked()) end)
-	self.mapSettings.listFromMap = LibStub("LibSFDropDown"):CreateStreatchButton(self.mapSettings, 134, 30, true)
+	self.mapSettings.listFromMap = LibStub("LibSFDropDown-1.0"):CreateStreatchButton(self.mapSettings, 134, 30, true)
 	self.mapSettings.listFromMap:SetPoint("BOTTOMLEFT", 33, 15)
 	self.mapSettings.listFromMap:SetText(L["ListMountsFromZone"])
 	self.mapSettings.listFromMap.maps = {}
@@ -483,7 +483,7 @@ function journal:init()
 	end)
 
 	-- FILTERS BUTTON
-	local filtersButton = LibStub("LibSFDropDown"):CreateStreatchButton(self.filtersPanel, nil, 22)
+	local filtersButton = LibStub("LibSFDropDown-1.0"):CreateStreatchButton(self.filtersPanel, nil, 22)
 	filtersButton:SetPoint("LEFT", self.searchBox, "RIGHT", -1, 0)
 	filtersButton:SetPoint("TOPRIGHT", -3, -4)
 	filtersButton:SetText(FILTER)
@@ -574,15 +574,16 @@ function journal:init()
 	end)
 
 	-- MODEL SCENE MULTIPLE BUTTON
-	LibStub("LibSFDropDown"):SetMixin(self.multipleMountBtn)
+	LibStub("LibSFDropDown-1.0"):SetMixin(self.multipleMountBtn)
 	self.multipleMountBtn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	self.multipleMountBtn:ddSetInitFunc(function(...) self:miltipleMountBtn_Initialize(...) end)
 	self.multipleMountBtn:ddSetDisplayMode("menu")
 	self.multipleMountBtn:ddHideWhenButtonHidden()
+	self.multipleMountBtn:ddSetNoGlobalMouseEvent(true)
 	self.multipleMountBtn:SetScript("OnClick", function(btn, mouseBtn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		if mouseBtn == "LeftButton" then
-			btn:closeDropDownMenus()
+			btn:ddCloseMenus()
 			local allCreatureDisplays, index = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
 			for i = 1, #allCreatureDisplays do
 				if self.mountDisplay.LastCreatureID == allCreatureDisplays[i].creatureDisplayID then
@@ -595,7 +596,7 @@ function journal:init()
 				self:updateMountDisplay(true, allCreatureDisplays[index].creatureDisplayID)
 			end
 		else
-			btn:dropDownToggle(1, nil, btn, 30, 30)
+			btn:ddToggle(1, nil, btn, 30, 30)
 		end
 	end)
 
@@ -1419,7 +1420,7 @@ do
 		end
 
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		btn:dropDownToggle(1, btn.maps, btn, 116, 21)
+		btn:ddToggle(1, btn.maps, btn, 116, 21)
 	end
 end
 

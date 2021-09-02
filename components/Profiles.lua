@@ -3,7 +3,7 @@ local util = MountsJournalUtil
 
 
 MountsJournalFrame:on("MODULES_INIT", function(journal)
-	local dd = LibStub("LibSFDropDown"):CreateStreatchButton(journal.bgFrame, 130, 22)
+	local dd = LibStub("LibSFDropDown-1.0"):CreateStreatchButton(journal.bgFrame, 130, 22)
 	dd:SetPoint("LEFT", journal.summonButton, "RIGHT", 4, 0)
 	util.setEventsMixin(dd)
 	journal.bgFrame.profilesMenu = dd
@@ -376,6 +376,6 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		wipe(self.profileNames)
 		for k in pairs(self.profiles) do tinsert(self.profileNames, k) end
 		sort(self.profileNames)
-		self:dropDownToggle(1, nil, self, 112, 17)
+		self:ddToggle(1, nil, self, 112, 17)
 	end)
 end)

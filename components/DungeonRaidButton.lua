@@ -2,7 +2,7 @@ local _, L = ...
 
 
 MountsJournalFrame:on("MODULES_INIT", function(journal)
-	local dd = LibStub("LibSFDropDown"):CreateStreatchButton(journal.mapSettings, nil, 24)
+	local dd = LibStub("LibSFDropDown-1.0"):CreateStreatchButton(journal.mapSettings, nil, 24)
 	dd:SetPoint("TOPLEFT", journal.mapSettings.mapControl, "TOPLEFT", 3, -3)
 	dd:SetPoint("RIGHT", journal.mapSettings.CurrentMap, "LEFT", 2, 0)
 	dd:SetText(L["Dungeons and Raids"])
@@ -76,6 +76,6 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 
 	dd:SetScript("OnClick", function(self)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		self:dropDownToggle(1, self.list, self, 112, 18)
+		self:ddToggle(1, self.list, self, 112, 18)
 	end)
 end)

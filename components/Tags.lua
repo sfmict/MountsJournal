@@ -50,7 +50,7 @@ function tags:init()
 	self.sortedTags = {}
 	self:setSortedTags()
 
-	self.mountOptionsMenu = LibStub("LibSFDropDown"):SetMixin({})
+	self.mountOptionsMenu = LibStub("LibSFDropDown-1.0"):SetMixin({})
 	self.mountOptionsMenu:ddHideWhenButtonHidden(journal.bgFrame)
 	self.mountOptionsMenu:ddSetInitFunc(function(...) self:mountOptionsMenu_Init(...) end)
 	self.mountOptionsMenu:ddSetDisplayMode("menu")
@@ -86,7 +86,7 @@ end
 
 function tags:hideDropDown(mouseBtn)
 	if mouseBtn == "LeftButton" then
-		self.mountOptionsMenu:closeDropDownMenus()
+		self.mountOptionsMenu:ddCloseMenus()
 	end
 end
 
@@ -148,7 +148,7 @@ function tags:showMountDropdown(btn, anchorTo, offsetX, offsetY)
 	self.menuMountID = btn.mountID
 	self.menuSpellID = btn.spellID
 	self.menuMountIndex = btn.index
-	self.mountOptionsMenu:dropDownToggle(1, nil, anchorTo, offsetX, offsetY)
+	self.mountOptionsMenu:ddToggle(1, nil, anchorTo, offsetX, offsetY)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 end
 

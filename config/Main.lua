@@ -120,7 +120,7 @@ config:SetScript("OnShow", function(self)
 	modifierText:SetText(L["Modifier"]..":")
 
 	-- MODIFIER COMBOBOX
-	local modifierCombobox = LibStub("LibSFDropDown"):CreateButton(leftPanel)
+	local modifierCombobox = LibStub("LibSFDropDown-1.0"):CreateButton(leftPanel)
 	self.modifierCombobox = modifierCombobox
 	modifierCombobox:SetPoint("LEFT", modifierText, "RIGHT", 7, 0)
 	modifierCombobox:ddSetInitFunc(function(self, level)
@@ -269,7 +269,7 @@ config:SetScript("OnShow", function(self)
 	self.repairFlyablePercentText:SetText("%")
 
 	-- REPAIR MOUNTS COMBOBOX
-	self.repairMountsCombobox = LibStub("LibSFDropDown"):CreateButton(rightPanelScroll.child, 230)
+	self.repairMountsCombobox = LibStub("LibSFDropDown-1.0"):CreateButton(rightPanelScroll.child, 230)
 	self.repairMountsCombobox:SetPoint("TOPLEFT", self.repairFlyable, "BOTTOMLEFT", 0, -8)
 	self.repairMountsCombobox:ddSetInitFunc(function(self, level)
 		local info = {}
@@ -284,8 +284,9 @@ config:SetScript("OnShow", function(self)
 		end
 		self:ddAddButton(info, level)
 
+		info.tooltipWhileDisabled = true
 		for i, mountID in ipairs(mounts.repairMounts) do
-			local name, _, icon, _,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+			local name, spellID, icon, _,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 			if not shouldHideOnChar then
 				info.text = name
 				info.icon = icon
@@ -295,6 +296,9 @@ config:SetScript("OnShow", function(self)
 				info.func = function(btn)
 					self:ddSetSelectedValue(btn.value)
 					config.applyBtn:Enable()
+				end
+				info.OnTooltipShow = function(btn, tooltip)
+					tooltip:SetMountBySpellID(spellID)
 				end
 				self:ddAddButton(info, level)
 			end
