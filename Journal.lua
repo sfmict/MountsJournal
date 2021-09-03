@@ -757,7 +757,7 @@ function journal:ADDON_LOADED(addonName)
 		self:UnregisterEvent("ADDON_LOADED")
 		self.ADDON_LOADED = nil
 
-		self.mjFiltersBackup = {sources = {}}
+		self.mjFiltersBackup = {sources = {}, types = {}}
 		self.CollectionsJournal = CollectionsJournal
 		self.MountJournal = MountJournal
 
@@ -826,6 +826,10 @@ function journal:setMJFiltersBackup()
 			backup.sources[i] = C_MountJournal.IsSourceChecked(i)
 		end
 	end
+	for i = 1, Enum.MountTypeMeta.NumValues do
+		if not C_MountJournal.IsValidTypeFilter(i) then break end
+		backup.types[i] = C_MountJournal.IsTypeChecked(i)
+	end
 	backup.isBackuped = true
 	self:RegisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 	self:RegisterEvent("PLAYER_LEAVING_WORLD")
@@ -845,6 +849,10 @@ function journal:restoreMJFilters()
 		if C_MountJournal.IsValidSourceFilter(i) then
 			C_MountJournal.SetSourceFilter(i, backup.sources[i])
 		end
+	end
+	for i = 1, Enum.MountTypeMeta.NumValues do
+		if not C_MountJournal.IsValidTypeFilter(i) then break end
+		C_MountJournal.SetTypeFilter(i, backup.types[i])
 	end
 	backup.isBackuped = false
 end
@@ -1282,6 +1290,7 @@ function journal:updateIndexByMountID()
 		C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
 		C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
 		C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, true)
+		C_MountJournal.SetAllTypeFilters(true)
 		C_MountJournal.SetAllSourceFilters(true)
 		C_MountJournal.SetSearch("")
 		self:RegisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")

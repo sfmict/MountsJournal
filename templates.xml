@@ -1096,9 +1096,7 @@
 		<HighlightTexture parentKey="highlight" file="Interface/AddOns/MountsJournal/textures/button" alpha=".8">
 			<TexCoords left=".00390625" right=".8203125" top=".19140625" bottom=".37109375"/>
 		</HighlightTexture>
-		<CheckedTexture file="Interface/BUTTONS/ListButtons" alpha=".8">
-			<TexCoords left=".00390625" right=".8203125" top=".37890625" bottom=".55859375"/>
-		</CheckedTexture>
+		<CheckedTexture atlas="PetList-ButtonSelect" alpha=".8"/>
 	</CheckButton>
 
 	<CheckButton name="MJFilterButtonSquareTemplate" inherits="MJFilterButtonTemplate" virtual="true">
