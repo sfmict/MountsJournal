@@ -72,7 +72,7 @@ function journal:init()
 
 	self.bgFrame:SetScript("OnShow", function()
 		self.CollectionsJournal.NineSlice:Hide()
-		self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
+		self:RegisterEvent("COMPANION_UPDATE")
 		self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 		self:RegisterEvent("PLAYER_REGEN_DISABLED")
 		self:RegisterEvent("PLAYER_REGEN_ENABLED")
@@ -82,7 +82,7 @@ function journal:init()
 
 	self.bgFrame:SetScript("OnHide", function()
 		self.CollectionsJournal.NineSlice:Show()
-		self:UnregisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
+		self:UnregisterEvent("COMPANION_UPDATE")
 		self:UnregisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 		self:UnregisterEvent("PLAYER_REGEN_DISABLED")
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
@@ -299,7 +299,7 @@ function journal:init()
 	self.mapSettings.HerbGathering.tooltipText = L["Herb Gathering"]
 	self.mapSettings.HerbGathering.tooltipRequirement = L["HerbGatheringFlagDescription"]
 	self.mapSettings.HerbGathering:HookScript("OnClick", function(check) self:setFlag("herbGathering", check:GetChecked()) end)
-	self.mapSettings.listFromMap = LibStub("LibSFDropDown-1.0"):CreateStreatchButton(self.mapSettings, 134, 30, true)
+	self.mapSettings.listFromMap = LibStub("LibSFDropDown-1.1"):CreateStretchButton(self.mapSettings, 134, 30, true)
 	self.mapSettings.listFromMap:SetPoint("BOTTOMLEFT", 33, 15)
 	self.mapSettings.listFromMap:SetText(L["ListMountsFromZone"])
 	self.mapSettings.listFromMap.maps = {}
@@ -483,7 +483,7 @@ function journal:init()
 	end)
 
 	-- FILTERS BUTTON
-	local filtersButton = LibStub("LibSFDropDown-1.0"):CreateStreatchButton(self.filtersPanel, nil, 22)
+	local filtersButton = LibStub("LibSFDropDown-1.1"):CreateStretchButton(self.filtersPanel, nil, 22)
 	filtersButton:SetPoint("LEFT", self.searchBox, "RIGHT", -1, 0)
 	filtersButton:SetPoint("TOPRIGHT", -3, -4)
 	filtersButton:SetText(FILTER)
@@ -574,7 +574,7 @@ function journal:init()
 	end)
 
 	-- MODEL SCENE MULTIPLE BUTTON
-	LibStub("LibSFDropDown-1.0"):SetMixin(self.multipleMountBtn)
+	LibStub("LibSFDropDown-1.1"):SetMixin(self.multipleMountBtn)
 	self.multipleMountBtn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	self.multipleMountBtn:ddSetInitFunc(function(...) self:miltipleMountBtn_Initialize(...) end)
 	self.multipleMountBtn:ddSetDisplayMode("menu")
@@ -735,7 +735,7 @@ function journal:init()
 
 	-- INIT
 	self.CollectionsJournal.NineSlice:Hide()
-	self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
+	self:RegisterEvent("COMPANION_UPDATE")
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 
 	self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
@@ -744,6 +744,9 @@ function journal:init()
 	self:updateBtnFilters()
 	self:sortMounts()
 	self:selectMount(1)
+	if not self.selectedMountID then
+		self:updateMountDisplay()
+	end
 end
 
 
@@ -880,8 +883,11 @@ function journal:PLAYER_REGEN_ENABLED()
 end
 
 
-function journal:PLAYER_MOUNT_DISPLAY_CHANGED()
-	self.scrollFrame:update()
+function journal:COMPANION_UPDATE(companionType)
+	if companionType == "MOUNT" then
+		self.scrollFrame:update()
+		self:updateMountDisplay()
+	end
 end
 
 
@@ -2270,14 +2276,14 @@ function journal:updateMountsList()
 		-- FACTION
 		and factions[(mountFaction or 2) + 1]
 		-- SELECTED
-		and (list
-			and (selected[1] and list.fly[mountID]
-				or selected[2] and list.ground[mountID]
-				or selected[3] and list.swimming[mountID])
-			or selected[4] and not (list
-				and (list.fly[mountID]
-					or list.ground[mountID]
-					or list.swimming[mountID])))
+		and (list and
+			(selected[1] and list.fly[mountID]
+			or selected[2] and list.ground[mountID]
+			or selected[3] and list.swimming[mountID])
+			or selected[4] and not (list and
+				(list.fly[mountID]
+				or list.ground[mountID]
+				or list.swimming[mountID])))
 		-- PET
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
 		-- EXPANSIONS
