@@ -279,7 +279,6 @@ function journal:init()
 
 	-- MAP SETTINGS
 	self.mapSettings:SetScript("OnShow", function() self:updateMapSettings() end)
-	-- self.mapSettings.dungeonRaidBtn:SetText(L["Dungeons and Raids"])
 	self.mapSettings.CurrentMap:SetText(L["Current Location"])
 	self.mapSettings.CurrentMap:SetScript("OnClick", function()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -1475,8 +1474,8 @@ do
 					arg1 = mapInfo.mapID,
 					func = setListFrom,
 				})
-				btn:ddAddButton(info, level)
 			end
+			btn:ddAddButton(info, level)
 		else
 			info.keepShownOnClick = true
 			info.hasArrow = true
