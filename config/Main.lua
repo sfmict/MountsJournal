@@ -199,9 +199,9 @@ config:SetScript("OnShow", function(self)
 	self.useRepairMounts:HookScript("OnClick", function(btn) applyEnable() end)
 
 	-- editbox
-	self.repairPecent = CreateFrame("Editbox", nil, rightPanelScroll.child, "MJNumberTextBox")
-	self.repairPecent:SetPoint("LEFT", self.useRepairMounts.Text, "RIGHT", 3, 0)
-	self.repairPecent:SetScript("OnTextChanged", function(editBox, userInput)
+	self.repairPercent = CreateFrame("Editbox", nil, rightPanelScroll.child, "MJNumberTextBox")
+	self.repairPercent:SetPoint("LEFT", self.useRepairMounts.Text, "RIGHT", 3, 0)
+	self.repairPercent:SetScript("OnTextChanged", function(editBox, userInput)
 		if userInput then
 			local value = tonumber(editBox:GetText()) or 0
 			if value < 0 then
@@ -212,7 +212,7 @@ config:SetScript("OnShow", function(self)
 			applyEnable()
 		end
 	end)
-	self.repairPecent:SetScript("OnMouseWheel", function(editBox, delta)
+	self.repairPercent:SetScript("OnMouseWheel", function(editBox, delta)
 		if editBox:IsEnabled() then
 			local value = (tonumber(editBox:GetText()) or 0) + (delta > 0 and 1 or -1)
 			if value >= 0 and value <= 100 then
@@ -221,12 +221,12 @@ config:SetScript("OnShow", function(self)
 			applyEnable()
 		end
 	end)
-	util.setCheckboxChild(self.useRepairMounts, self.repairPecent)
+	util.setCheckboxChild(self.useRepairMounts, self.repairPercent)
 
 	-- text
-	self.repairPecentText = self.repairPecent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	self.repairPecentText:SetPoint("LEFT", self.repairPecent, "RIGHT", 3, 0)
-	self.repairPecentText:SetText("%")
+	self.repairPercentText = self.repairPercent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	self.repairPercentText:SetPoint("LEFT", self.repairPercent, "RIGHT", 3, 0)
+	self.repairPercentText:SetText("%")
 
 	-- USE REPAIR MOUNTS IN FLYABLE ZONES
 	self.repairFlyable = util.createCheckboxChild(L["In flyable zones"], self.useRepairMounts)
@@ -264,7 +264,7 @@ config:SetScript("OnShow", function(self)
 	util.setCheckboxChild(self.repairFlyable, self.repairFlyablePercent)
 
 	-- text
-	self.repairFlyablePercentText = self.repairPecent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	self.repairFlyablePercentText = self.repairPercent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	self.repairFlyablePercentText:SetPoint("LEFT", self.repairFlyablePercent, "RIGHT", 3, 0)
 	self.repairFlyablePercentText:SetText("%")
 
@@ -393,7 +393,7 @@ config:SetScript("OnShow", function(self)
 		end
 		self.useRepairMounts:SetChecked(mounts.config.useRepairMounts)
 		self.repairFlyable:SetChecked(mounts.config.useRepairFlyable)
-		self.repairPecent:SetNumber(tonumber(mounts.config.useRepairMountsDurability) or 0)
+		self.repairPercent:SetNumber(tonumber(mounts.config.useRepairMountsDurability) or 0)
 		self.repairFlyablePercent:SetNumber(tonumber(mounts.config.useRepairFlyableDurability) or 0)
 		self.repairMountsCombobox:ddSetSelectedValue(mounts.config.repairSelectedMount)
 		if mounts.config.repairSelectedMount then
@@ -469,7 +469,7 @@ config.okay = function(self)
 	mounts.config.herbMountsOnZones = self.herbMountsOnZones:GetChecked()
 	mounts:setHerbMount()
 	mounts.config.useRepairMounts = self.useRepairMounts:GetChecked()
-	mounts.config.useRepairMountsDurability = tonumber(self.repairPecent:GetText()) or 0
+	mounts.config.useRepairMountsDurability = tonumber(self.repairPercent:GetText()) or 0
 	mounts.config.useRepairFlyable = self.repairFlyable:GetChecked()
 	mounts.config.useRepairFlyableDurability = tonumber(self.repairFlyablePercent:GetText()) or 0
 	mounts:UPDATE_INVENTORY_DURABILITY()

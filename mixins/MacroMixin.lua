@@ -342,12 +342,12 @@ function macroFrame:getMacro()
 	
 	-- MAGIC BROOM IS USABLE
 	self.magicBroom = self.mounts.config.useMagicBroom
-							and GetItemCount(37011) > 0
-							and self.sFlags.groundSpellKnown
-							and not self.sFlags.isIndoors
-							and not self.sFlags.herb
-							and not self.sFlags.swimming
-							and self.broomName
+	                  and GetItemCount(37011) > 0
+	                  and self.sFlags.groundSpellKnown
+	                  and not self.sFlags.isIndoors
+	                  and not self.sFlags.herb
+	                  and not self.sFlags.swimming
+	                  and self.broomName
 
 	-- CLASS OPTIONS
 	local macro = self:getClassOptionMacro()
@@ -362,9 +362,10 @@ function macroFrame:getMacro()
 			macro = "/dismount"
 		end
 	-- CLASSMACRO
-	elseif self.macro
-		and (self.class == "DRUID" and self.classConfig.useMacroAlways
-			  or not self.magicBroom and (self.sFlags.isIndoors or GetUnitSpeed("player") > 0 or IsFalling())) then
+	elseif self.macro and
+		(self.class == "DRUID" and self.classConfig.useMacroAlways
+		or not self.magicBroom and (self.sFlags.isIndoors or GetUnitSpeed("player") > 0 or IsFalling()))
+	then
 		macro = self.macro
 	-- MOUNT
 	else

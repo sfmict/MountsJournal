@@ -31,8 +31,6 @@ function MJSetPetMixin:onLoad()
 		self.highlight:Hide()
 		GameTooltip:Hide()
 	end)
-
-	self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 end
 
 
@@ -47,6 +45,7 @@ function MJSetPetMixin:onShow()
 		self:refresh()
 		self:on("MOUNT_SELECT", self.refresh)
 		self:on("UPDATE_PROFILE", self.refresh)
+		self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 	end)
 end
 

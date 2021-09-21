@@ -681,23 +681,23 @@ do
 		local isSubmerged = IsSubmerged()
 		local isFloating = self:isFloating()
 		local isFlyableLocation = flySpellKnown
-										  and (IsFlyableArea() or isFlyableOverride[self.instanceID])
-										  and self:isFlyLocation(self.instanceID)
-										  and not (self.mapFlags and self.mapFlags.groundOnly)
+		                          and (IsFlyableArea() or isFlyableOverride[self.instanceID])
+		                          and self:isFlyLocation(self.instanceID)
+		                          and not (self.mapFlags and self.mapFlags.groundOnly)
 
 		flags.isIndoors = IsIndoors()
 		flags.inVehicle = UnitInVehicle("player")
 		flags.isMounted = IsMounted()
 		flags.groundSpellKnown = groundSpellKnown
 		flags.swimming = isSubmerged
-							  and not (modifier or isFloating)
+		                 and not (modifier or isFloating)
 		flags.fly = isFlyableLocation
-						and (not modifier or isSubmerged)
+		            and (not modifier or isSubmerged)
 		flags.waterWalk = isFloating
-								or not isFlyableLocation and modifier
-								or self:isWaterWalkLocation()
+		                  or not isFlyableLocation and modifier
+		                  or self:isWaterWalkLocation()
 		flags.herb = self.herbMount and (not self.config.herbMountsOnZones
-													or self.mapFlags and self.mapFlags.herbGathering)
+		                                 or self.mapFlags and self.mapFlags.herbGathering)
 	end
 end
 
