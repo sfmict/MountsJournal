@@ -1,4 +1,4 @@
 # MountsJournal
 
-* Fixed selection of mount with arrow buttons.
-* Fixed: the addon no longer summons a pet in combat.
+* Upadted to 9.1.5.
+* Added option "Use Underlight Angler".

@@ -454,9 +454,8 @@ end
 
 
 function mounts:setMountsList()
-	local mapInfo = C_Map.GetMapInfo(MapUtil.GetDisplayableMapForPlayer())
+	local mapInfo = self.mapInfo
 	local zoneMounts = self.zoneMounts
-	self.mapID = mapInfo.mapID
 	self.mapFlags = nil
 	self.list = nil
 
@@ -675,24 +674,26 @@ do
 		[1220] = true,
 	}
 	function mounts:setFlags()
+		self.mapInfo = C_Map.GetMapInfo(MapUtil.GetDisplayableMapForPlayer())
 		local flags = self.sFlags
 		local groundSpellKnown, flySpellKnown = self:getSpellKnown()
 		local modifier = self.modifier() or flags.forceModifier
-		local isSubmerged = IsSubmerged()
 		local isFloating = self:isFloating()
 		local isFlyableLocation = flySpellKnown
 		                          and (IsFlyableArea() or isFlyableOverride[self.instanceID])
 		                          and self:isFlyLocation(self.instanceID)
 		                          and not (self.mapFlags and self.mapFlags.groundOnly)
 
+		flags.isSubmerged = IsSubmerged()
 		flags.isIndoors = IsIndoors()
 		flags.inVehicle = UnitInVehicle("player")
 		flags.isMounted = IsMounted()
 		flags.groundSpellKnown = groundSpellKnown
-		flags.swimming = isSubmerged
+		flags.swimming = flags.isSubmerged
 		                 and not (modifier or isFloating)
+		flags.isVashjir = self.mapVashjir[self.mapInfo.mapID]
 		flags.fly = isFlyableLocation
-		            and (not modifier or isSubmerged)
+		            and (not modifier or flags.isSubmerged)
 		flags.waterWalk = isFloating
 		                  or not isFlyableLocation and modifier
 		                  or self:isWaterWalkLocation()
@@ -710,12 +711,12 @@ end
 function mounts:init()
 	SLASH_MOUNTSJOURNAL1 = "/mount"
 	SlashCmdList["MOUNTSJOURNAL"] = function(msg)
-		self:setMountsList()
 		local flags = self.sFlags
 		if msg ~= "doNotSetFlags" then
 			flags.forceModifier = nil
 			self:setFlags()
 		end
+		self:setMountsList()
 		if flags.inVehicle then
 			VehicleExit()
 		elseif flags.isMounted then
@@ -730,7 +731,7 @@ function mounts:init()
 		and not self:summonTarget()
 		-- swimming
 		and not (flags.swimming
-			and (self.mapVashjir[self.mapID]
+			and (flags.isVashjir
 				and self:summon(self.swimmingVashjir)
 				or self:summon(self.list.swimming)))
 		-- fly

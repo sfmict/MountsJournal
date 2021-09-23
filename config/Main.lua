@@ -311,10 +311,10 @@ config:SetScript("OnShow", function(self)
 	self.useMagicBroom:SetPoint("TOPLEFT", self.repairMountsCombobox, "BOTTOMLEFT", -20, -20)
 	local magicBroom = Item:CreateFromItemID(37011)
 	if magicBroom:IsItemDataCached() then
-		self.useMagicBroom.Text:SetText(L["UseMagicBroom"]:format(magicBroom:GetItemLink()))
+		self.useMagicBroom.Text:SetText(L["Use %s"]:format(magicBroom:GetItemLink()))
 	else
 		magicBroom:ContinueOnItemLoad(function()
-			self.useMagicBroom.Text:SetText(L["UseMagicBroom"]:format(magicBroom:GetItemLink()))
+			self.useMagicBroom.Text:SetText(L["Use %s"]:format(magicBroom:GetItemLink()))
 		end)
 	end
 	util.setHyperlinkTooltip(self.useMagicBroom)
@@ -322,9 +322,26 @@ config:SetScript("OnShow", function(self)
 	self.useMagicBroom.tooltipRequirement = L["UseMagicBroomDescription"]
 	self.useMagicBroom:HookScript("OnClick", applyEnable)
 
+	-- USE UNDERLIGHT ANGLER
+	self.useUnderlightAngler = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.useUnderlightAngler:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 0, -15)
+	local underlightAngler = Item:CreateFromItemID(133755)
+	if underlightAngler:IsItemDataCached() then
+		self.useUnderlightAngler.Text:SetText(L["Use %s"]:format(underlightAngler:GetItemLink()))
+		self.useUnderlightAngler.tooltipText = L["Use %s"]:format(underlightAngler:GetItemName())
+	else
+		underlightAngler:ContinueOnItemLoad(function()
+			self.useUnderlightAngler.Text:SetText(L["Use %s"]:format(underlightAngler:GetItemLink()))
+			self.useUnderlightAngler.tooltipText = L["Use %s"]:format(underlightAngler:GetItemName())
+		end)
+	end
+	util.setHyperlinkTooltip(self.useUnderlightAngler)
+	self.useUnderlightAngler.tooltipRequirement = L["UseUnderlightAnglerDescription"]
+	self.useUnderlightAngler:HookScript("OnClick", applyEnable)
+
 	-- NO PET IN RAID
 	self.noPetInRaid = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.noPetInRaid:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 0, -15)
+	self.noPetInRaid:SetPoint("TOPLEFT", self.useUnderlightAngler, "BOTTOMLEFT", 0, -15)
 	self.noPetInRaid.Text:SetSize(245, 25)
 	self.noPetInRaid.Text:SetText(L["NoPetInRaid"])
 	self.noPetInRaid:HookScript("OnClick", applyEnable)
@@ -403,6 +420,7 @@ config:SetScript("OnShow", function(self)
 			self.repairMountsCombobox:ddSetSelectedText(L["Random available mount"], 413588)
 		end
 		self.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
+		self.useUnderlightAngler:SetChecked(mounts.config.useUnderlightAngler)
 		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
 		self.copyMountTarget:SetChecked(mounts.config.copyMountTarget)
@@ -476,6 +494,7 @@ config.okay = function(self)
 	mounts.config.repairSelectedMount = self.repairMountsCombobox.selectedValue
 	mounts:setUsableRepairMounts()
 	mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
+	mounts.config.useUnderlightAngler = self.useUnderlightAngler:GetChecked()
 	mounts.config.noPetInRaid = self.noPetInRaid:GetChecked()
 	mounts.config.noPetInGroup = self.noPetInGroup:GetChecked()
 	mounts.config.copyMountTarget = self.copyMountTarget:GetChecked()
