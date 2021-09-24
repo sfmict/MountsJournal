@@ -192,7 +192,7 @@ function MountsJournalUtil.createCheckboxChild(text, parent)
 	else
 		check:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 20, -3)
 	end
-	check.Text:SetText(text)
+	if text then check.Text:SetText(text) end
 	MountsJournalUtil.setCheckboxChild(parent, check, true)
 	return check
 end

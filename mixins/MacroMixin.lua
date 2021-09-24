@@ -11,8 +11,9 @@ macroFrame:RegisterEvent("PLAYER_LOGIN")
 function macroFrame:PLAYER_LOGIN()
 	self.PLAYER_LOGIN = nil
 	self.mounts = MountsJournal
+	self.config = self.mounts.config
 	self.sFlags = self.mounts.sFlags
-	self.macrosConfig = self.mounts.config.macrosConfig
+	self.macrosConfig = self.config.macrosConfig
 	self.charMacrosConfig = self.mounts.charDB.macrosConfig
 	self.class = select(2, UnitClass("player"))
 
@@ -373,7 +374,7 @@ end
 
 
 function macroFrame:autoEquip()
-	if self.mounts.config.useUnderlightAngler and not InCombatLockdown() then
+	if self.config.useUnderlightAngler and self.config.autoUseUnderlightAngler and not InCombatLockdown() then
 		local weaponID = GetInventoryItemID("player", 16)
 		if IsSubmerged() then
 			if weaponID ~= 133755 then
@@ -401,7 +402,7 @@ function macroFrame:getMacro()
 	self.mounts:setFlags()
 
 	-- UNDERLIGHT ANGLER
-	if self.mounts.config.useUnderlightAngler then
+	if self.config.useUnderlightAngler then
 		self.weaponID = GetInventoryItemID("player", 16)
 		if GetItemCount(133755) > 0
 		and (self.sFlags.swimming and not self.sFlags.isVashjir and self.fishingRodName
@@ -412,7 +413,7 @@ function macroFrame:getMacro()
 	end
 
 	-- MAGIC BROOM IS USABLE
-	self.magicBroom = self.mounts.config.useMagicBroom
+	self.magicBroom = self.config.useMagicBroom
 	                  and GetItemCount(37011) > 0
 	                  and self.sFlags.groundSpellKnown
 	                  and not self.sFlags.isIndoors
@@ -450,7 +451,7 @@ end
 function macroFrame:getCombatMacro()
 	local macro
 
-	if self.mounts.config.useUnderlightAngler then
+	if self.config.useUnderlightAngler then
 		self.weaponID = GetInventoryItemID("player", 16)
 		macro = self:getFishingRodMacro()
 	end
