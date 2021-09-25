@@ -349,24 +349,20 @@ function macroFrame:getFishingRodMacro()
 	local macro
 
 	if self.weaponID == 133755 then
-		if self.charMacrosConfig.itemSlot16 then
-			local name = C_Item.GetItemNameByID(self.charMacrosConfig.itemSlot16)
-			if name then
-				macro = "/equipslot 16 "..name
-				self.charMacrosConfig.itemSlot16 = nil
-			end
+		local link = self.charMacrosConfig.itemSlot16
+		if link then
+			macro = "/equipslot 16 "..link:match("%[(.+)%]")
+			self.charMacrosConfig.itemSlot16 = nil
 		end
-		if self.charMacrosConfig.itemSlot17 then
-			local name = C_Item.GetItemNameByID(self.charMacrosConfig.itemSlot17)
-			if name then
-				macro = self:addLine(macro, "/equipslot 17 "..name)
-				self.charMacrosConfig.itemSlot17 = nil
-			end
+		link = self.charMacrosConfig.itemSlot17
+		if link then
+			macro = self:addLine(macro, "/equipslot 17 "..link:match("%[(.+)%]"))
+			self.charMacrosConfig.itemSlot17 = nil
 		end
 	else
 		macro = "/equipslot [swimming,nocombat]16 "..self.fishingRodName
-		self.charMacrosConfig.itemSlot16 = self.weaponID
-		self.charMacrosConfig.itemSlot17 = GetInventoryItemID("player", 17)
+		self.charMacrosConfig.itemSlot16 = GetInventoryItemLink("player", 16)
+		self.charMacrosConfig.itemSlot17 = GetInventoryItemLink("player", 17)
 	end
 
 	return macro or ""
@@ -378,8 +374,8 @@ function macroFrame:autoEquip()
 		local weaponID = GetInventoryItemID("player", 16)
 		if IsSubmerged() then
 			if weaponID ~= 133755 then
-				self.charMacrosConfig.itemSlot16 = weaponID
-				self.charMacrosConfig.itemSlot17 = GetInventoryItemID("player", 17)
+				self.charMacrosConfig.itemSlot16 = GetInventoryItemLink("player", 16)
+				self.charMacrosConfig.itemSlot17 = GetInventoryItemLink("player", 17)
 				EquipItemByName(133755, 16)
 			end
 		elseif IsMounted() and weaponID == 133755 then
