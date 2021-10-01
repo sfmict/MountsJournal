@@ -323,29 +323,35 @@ config:SetScript("OnShow", function(self)
 	self.useMagicBroom:HookScript("OnClick", applyEnable)
 
 	-- USE UNDERLIGHT ANGLER
-	self.useUnderlightAngler = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.useUnderlightAngler:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 0, -15)
-	local underlightAngler = Item:CreateFromItemID(133755)
-	if underlightAngler:IsItemDataCached() then
-		self.useUnderlightAngler.Text:SetText(L["Use %s"]:format(underlightAngler:GetItemLink()))
-		self.useUnderlightAngler.tooltipText = L["Use %s"]:format(underlightAngler:GetItemName())
-	else
-		underlightAngler:ContinueOnItemLoad(function()
+	if C_Item.DoesItemExistByID(133755) then
+		self.useUnderlightAngler = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+		self.useUnderlightAngler:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 0, -15)
+		local underlightAngler = Item:CreateFromItemID(133755)
+		if underlightAngler:IsItemDataCached() then
 			self.useUnderlightAngler.Text:SetText(L["Use %s"]:format(underlightAngler:GetItemLink()))
 			self.useUnderlightAngler.tooltipText = L["Use %s"]:format(underlightAngler:GetItemName())
-		end)
-	end
-	util.setHyperlinkTooltip(self.useUnderlightAngler)
-	self.useUnderlightAngler.tooltipRequirement = L["UseUnderlightAnglerDescription"]
-	self.useUnderlightAngler:HookScript("OnClick", applyEnable)
+		else
+			underlightAngler:ContinueOnItemLoad(function()
+				self.useUnderlightAngler.Text:SetText(L["Use %s"]:format(underlightAngler:GetItemLink()))
+				self.useUnderlightAngler.tooltipText = L["Use %s"]:format(underlightAngler:GetItemName())
+			end)
+		end
+		util.setHyperlinkTooltip(self.useUnderlightAngler)
+		self.useUnderlightAngler.tooltipRequirement = L["UseUnderlightAnglerDescription"]
+		self.useUnderlightAngler:HookScript("OnClick", applyEnable)
 
-	-- AUTO USE UNDERLIGHT ANGLER
-	self.autoUseUnderlightAngler = util.createCheckboxChild(L["Use automatically"], self.useUnderlightAngler)
-	self.autoUseUnderlightAngler:HookScript("OnClick", applyEnable)
+		-- AUTO USE UNDERLIGHT ANGLER
+		self.autoUseUnderlightAngler = util.createCheckboxChild(L["Use automatically"], self.useUnderlightAngler)
+		self.autoUseUnderlightAngler:HookScript("OnClick", applyEnable)
+	end
 
 	-- NO PET IN RAID
 	self.noPetInRaid = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.noPetInRaid:SetPoint("TOPLEFT", self.autoUseUnderlightAngler, "BOTTOMLEFT", -20, -15)
+	if self.autoUseUnderlightAngler then
+		self.noPetInRaid:SetPoint("TOPLEFT", self.autoUseUnderlightAngler, "BOTTOMLEFT", -20, -15)
+	else
+		self.noPetInRaid:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 0, -15)
+	end
 	self.noPetInRaid.Text:SetSize(245, 25)
 	self.noPetInRaid.Text:SetText(L["NoPetInRaid"])
 	self.noPetInRaid:HookScript("OnClick", applyEnable)
@@ -424,8 +430,10 @@ config:SetScript("OnShow", function(self)
 			self.repairMountsCombobox:ddSetSelectedText(L["Random available mount"], 413588)
 		end
 		self.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
-		self.useUnderlightAngler:SetChecked(mounts.config.useUnderlightAngler)
-		self.autoUseUnderlightAngler:SetChecked(mounts.config.autoUseUnderlightAngler)
+		if self.useUnderlightAngler then
+			self.useUnderlightAngler:SetChecked(mounts.config.useUnderlightAngler)
+			self.autoUseUnderlightAngler:SetChecked(mounts.config.autoUseUnderlightAngler)
+		end
 		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
 		self.copyMountTarget:SetChecked(mounts.config.copyMountTarget)
@@ -499,8 +507,10 @@ config.okay = function(self)
 	mounts.config.repairSelectedMount = self.repairMountsCombobox.selectedValue
 	mounts:setUsableRepairMounts()
 	mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
-	mounts.config.useUnderlightAngler = self.useUnderlightAngler:GetChecked()
-	mounts.config.autoUseUnderlightAngler = self.autoUseUnderlightAngler:GetChecked()
+	if self.useUnderlightAngler then
+		mounts.config.useUnderlightAngler = self.useUnderlightAngler:GetChecked()
+		mounts.config.autoUseUnderlightAngler = self.autoUseUnderlightAngler:GetChecked()
+	end
 	mounts.config.noPetInRaid = self.noPetInRaid:GetChecked()
 	mounts.config.noPetInGroup = self.noPetInGroup:GetChecked()
 	mounts.config.copyMountTarget = self.copyMountTarget:GetChecked()

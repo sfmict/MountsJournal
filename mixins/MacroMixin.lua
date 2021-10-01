@@ -1,4 +1,4 @@
-local type, pairs, GetItemCount, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, GetInventoryItemID, EquipItemByName, IsMounted, IsSubmerged = type, pairs, GetItemCount, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, GetInventoryItemID, EquipItemByName, IsMounted, IsSubmerged
+local type, pairs, GetItemCount, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged = type, pairs, GetItemCount, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged
 local macroFrame = CreateFrame("FRAME")
 
 
@@ -16,20 +16,21 @@ function macroFrame:PLAYER_LOGIN()
 	self.macrosConfig = self.config.macrosConfig
 	self.charMacrosConfig = self.mounts.charDB.macrosConfig
 	self.class = select(2, UnitClass("player"))
-
-	local function setItemName(name, itemID)
-		local item = Item:CreateFromItemID(itemID)
-		if item:IsItemDataCached() then
-			self[name] = item:GetItemName()
-		else
-			item:ContinueOnItemLoad(function()
-				self[name] = item:GetItemName()
-			end)
+	self.fishingRodID = 133755
+	self.broomID = 37011
+	self.itemName = setmetatable({}, {__index = function(self, itemID)
+		if C_Item.DoesItemExistByID(itemID) then
+			local item = Item:CreateFromItemID(itemID)
+			if item:IsItemDataCached() then
+				self[itemID] = item:GetItemName()
+			else
+				item:ContinueOnItemLoad(function()
+					self[itemID] = item:GetItemName()
+				end)
+			end
+			return self[itemID]
 		end
-	end
-
-	setItemName("fishingRodName", 133755)
-	setItemName("broomName", 37011)
+	end})
 
 	local function loadFunc(name, funcStr)
 		local loadedFunc, err = loadstring(funcStr)
@@ -204,7 +205,7 @@ function macroFrame:PLAYER_LOGIN()
 	]]
 	defMacro = defMacro..[[
 			if self.magicBroom then
-				macro = self:addLine(macro, "/use "..self.broomName) -- MAGIC BROOM
+				macro = self:addLine(macro, "/use "..self.itemName[self.broomID]) -- MAGIC BROOM
 				self.lastUseTime = GetTime()
 			else
 				macro = self:addLine(macro, "/mount doNotSetFlags")
@@ -348,7 +349,7 @@ end
 function macroFrame:getFishingRodMacro()
 	local macro
 
-	if self.weaponID == 133755 then
+	if self.weaponID == self.fishingRodID then
 		local link = self.charMacrosConfig.itemSlot16
 		if link then
 			macro = "/equipslot 16 "..link:match("%[(.+)%]")
@@ -360,7 +361,7 @@ function macroFrame:getFishingRodMacro()
 			self.charMacrosConfig.itemSlot17 = nil
 		end
 	else
-		macro = "/equipslot [swimming,nocombat]16 "..self.fishingRodName
+		macro = "/equipslot [swimming,nocombat]16 "..self.itemName[self.fishingRodID]
 		self.charMacrosConfig.itemSlot16 = GetInventoryItemLink("player", 16)
 		self.charMacrosConfig.itemSlot17 = GetInventoryItemLink("player", 17)
 	end
@@ -373,12 +374,12 @@ function macroFrame:autoEquip()
 	if self.config.useUnderlightAngler and self.config.autoUseUnderlightAngler and not InCombatLockdown() then
 		local weaponID = GetInventoryItemID("player", 16)
 		if IsSubmerged() then
-			if weaponID ~= 133755 then
+			if weaponID ~= self.fishingRodID then
 				self.charMacrosConfig.itemSlot16 = GetInventoryItemLink("player", 16)
 				self.charMacrosConfig.itemSlot17 = GetInventoryItemLink("player", 17)
-				EquipItemByName(133755, 16)
+				EquipItemByName(self.fishingRodID, 16)
 			end
-		elseif IsMounted() and weaponID == 133755 then
+		elseif IsMounted() and weaponID == self.fishingRodID then
 			if self.charMacrosConfig.itemSlot16 then
 				EquipItemByName(self.charMacrosConfig.itemSlot16, 16)
 				self.charMacrosConfig.itemSlot16 = nil
@@ -398,11 +399,10 @@ function macroFrame:getMacro()
 	self.mounts:setFlags()
 
 	-- UNDERLIGHT ANGLER
-	if self.config.useUnderlightAngler then
+	if self.config.useUnderlightAngler and GetItemCount(self.fishingRodID) > 0 then
 		self.weaponID = GetInventoryItemID("player", 16)
-		if GetItemCount(133755) > 0
-		and (self.sFlags.swimming and not self.sFlags.isVashjir and self.fishingRodName
-			or self.weaponID == 133755 and not self.sFlags.isSubmerged and GetUnitSpeed("player") > 0 and (self.charMacrosConfig.itemSlot16 or self.charMacrosConfig.itemSlot17))
+		if self.sFlags.swimming and not self.sFlags.isVashjir and self.itemName[self.fishingRodID]
+		or self.weaponID == self.fishingRodID and not self.sFlags.isSubmerged and GetUnitSpeed("player") > 0 and (self.charMacrosConfig.itemSlot16 or self.charMacrosConfig.itemSlot17)
 		then
 			return self:getFishingRodMacro()
 		end
@@ -410,12 +410,12 @@ function macroFrame:getMacro()
 
 	-- MAGIC BROOM IS USABLE
 	self.magicBroom = self.config.useMagicBroom
-	                  and GetItemCount(37011) > 0
+	                  and GetItemCount(self.broomID) > 0
 	                  and self.sFlags.groundSpellKnown
 	                  and not self.sFlags.isIndoors
 	                  and not self.sFlags.herb
 	                  and not self.sFlags.swimming
-	                  and self.broomName
+	                  and self.itemName[self.broomID]
 
 	-- CLASS OPTIONS
 	local macro = self:getClassOptionMacro()
