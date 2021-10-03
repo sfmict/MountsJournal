@@ -1,4 +1,4 @@
-local type, pairs, GetItemCount, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged = type, pairs, GetItemCount, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged
+local type, pairs, rawget, GetItemCount, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged = type, pairs, rawget, GetItemCount, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged
 local macroFrame = CreateFrame("FRAME")
 
 
@@ -28,7 +28,7 @@ function macroFrame:PLAYER_LOGIN()
 					self[itemID] = item:GetItemName()
 				end)
 			end
-			return self[itemID]
+			return rawget(self, itemID)
 		end
 	end})
 
@@ -427,7 +427,7 @@ function macroFrame:getMacro()
 	-- DISMOUNT
 	elseif self.sFlags.isMounted then
 		if not self.lastUseTime or GetTime() - self.lastUseTime > .5 then
-			macro = self:addLine(macro, "/dismount") 
+			macro = "/dismount"
 		end
 	-- CLASSMACRO
 	elseif self.macro and
@@ -437,7 +437,7 @@ function macroFrame:getMacro()
 		macro = self.macro
 	-- MOUNT
 	else
-		macro = self:addLine(macro, self:getDefMacro())
+		macro = self:getDefMacro()
 	end
 
 	return macro or ""
@@ -447,7 +447,7 @@ end
 function macroFrame:getCombatMacro()
 	local macro
 
-	if self.config.useUnderlightAngler then
+	if self.config.useUnderlightAngler and self.itemName[self.fishingRodID] then
 		self.weaponID = GetInventoryItemID("player", 16)
 		macro = self:getFishingRodMacro()
 	end
@@ -457,7 +457,7 @@ function macroFrame:getCombatMacro()
 	elseif self.macro and self.class == "DRUID" and self.classConfig.useMacroAlways then
 		macro = self:addLine(macro, self.macro)
 	else
-		macro = self:addLine("/mount")
+		macro = self:addLine(macro, "/mount")
 	end
 
 	return macro

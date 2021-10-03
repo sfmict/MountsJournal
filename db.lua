@@ -938,6 +938,7 @@ MountsJournal.mountsDB = {
 	[1514] = 9, -- 356501 Буйный терзатель
 	[1520] = 9, -- 358319 Искаженный вестник смерти
 	[1521] = 9, -- 359013 Гиппогриф Валь'шары
+	[1532] = 9, -- 359318 Парящая книга заклинаний
 }
 setmetatable(MountsJournal.mountsDB, {__index = function(self, key)
 	self[key] = EJ_GetNumTiers()

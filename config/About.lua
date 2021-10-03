@@ -74,6 +74,7 @@ aboutConfig:SetScript("OnShow", function(self)
 		{"deDE", "Flammenengel92, Asraael"},
 		{"zhTW", "BNS333"},
 		{"frFR", "Asraael"},
+		{"zhCN", "萌丶汉丶纸"},
 	}
 
 	for _, l in ipairs(langs) do
