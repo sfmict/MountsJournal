@@ -41,6 +41,12 @@ classConfig:SetScript("OnShow", function(self)
 	local _, playerClassName = UnitClass("player")
 	local firstClassFrame
 	local lastClassFrame
+
+	local function classClickFunc(btn)
+		self.currentMacrosConfig = self.macrosConfig[btn.key]
+		self:showClassSettings(btn)
+	end
+
 	for i = 1, GetNumClasses() do
 		local localized, className = GetClassInfo(i)
 		local classColor = C_ClassColor.GetClassColor(className)
@@ -64,10 +70,7 @@ classConfig:SetScript("OnShow", function(self)
 		classFrame.check:SetVertexColor(classColor:GetRGB())
 		classFrame.highlight:SetVertexColor(classColor:GetRGB())
 		classFrame.icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[className]))
-		classFrame:SetScript("OnClick", function(btn)
-			self.currentMacrosConfig = self.macrosConfig[btn.key]
-			self:showClassSettings(btn)
-		end)
+		classFrame:SetScript("OnClick", classClickFunc)
 
 		if playerClassName == className then
 			firstClassFrame = classFrame

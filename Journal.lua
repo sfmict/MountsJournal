@@ -1144,9 +1144,14 @@ function journal:setArrowSelectMount(enabled)
 				scroll:SetScript("OnUpdate", nil)
 			end
 		end)
+
+		self.scrollFrame:SetScript("OnHide", function(scroll)
+			scroll:SetScript("OnUpdate", nil)
+		end)
 	else
 		self.scrollFrame:SetScript("OnKeyDown", nil)
 		self.scrollFrame:SetScript("OnKeyUp", nil)
+		self.scrollFrame:SetScript("OnHide", nil)
 		self.scrollFrame:SetScript("OnUpdate", nil)
 	end
 end
