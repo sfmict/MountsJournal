@@ -346,19 +346,23 @@ do
 end
 
 
-function macroFrame:getFishingRodMacro()
+function macroFrame:getFishingRodMacro(dontClean)
 	local macro
 
 	if self.weaponID == self.fishingRodID then
 		local link = self.charMacrosConfig.itemSlot16
 		if link then
 			macro = "/equipslot 16 "..link:match("%[(.+)%]")
-			self.charMacrosConfig.itemSlot16 = nil
+			if not dontClean then
+				self.charMacrosConfig.itemSlot16 = nil
+			end
 		end
 		link = self.charMacrosConfig.itemSlot17
 		if link then
 			macro = self:addLine(macro, "/equipslot 17 "..link:match("%[(.+)%]"))
-			self.charMacrosConfig.itemSlot17 = nil
+			if not dontClean then
+				self.charMacrosConfig.itemSlot17 = nil
+			end
 		end
 	else
 		macro = "/equipslot [swimming,nocombat]16 "..self.itemName[self.fishingRodID]
@@ -449,7 +453,7 @@ function macroFrame:getCombatMacro()
 
 	if self.config.useUnderlightAngler and self.itemName[self.fishingRodID] then
 		self.weaponID = GetInventoryItemID("player", 16)
-		macro = self:getFishingRodMacro()
+		macro = self:getFishingRodMacro(true)
 	end
 
 	if self.combatMacro then
