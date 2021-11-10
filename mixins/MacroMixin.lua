@@ -219,6 +219,7 @@ function macroFrame:PLAYER_LOGIN()
 
 	self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
+	self:RegisterEvent("PLAYER_EQUIPMENT_CHANGED")
 
 	self:refresh()
 	self:getClassMacro(self.class, function() self:refresh() end)
@@ -346,23 +347,25 @@ do
 end
 
 
-function macroFrame:getFishingRodMacro(dontClean)
+function macroFrame:PLAYER_EQUIPMENT_CHANGED(slot, isEmpty)
+	if slot == 16 and self.fishingRodID ~= GetInventoryItemID("player", 16)
+	or slot == 17 and not isEmpty then
+		self.charMacrosConfig["itemSlot"..slot] = nil
+	end
+end
+
+
+function macroFrame:getFishingRodMacro()
 	local macro
 
 	if self.weaponID == self.fishingRodID then
 		local link = self.charMacrosConfig.itemSlot16
 		if link then
 			macro = "/equipslot 16 "..link:match("%[(.+)%]")
-			if not dontClean then
-				self.charMacrosConfig.itemSlot16 = nil
-			end
 		end
 		link = self.charMacrosConfig.itemSlot17
 		if link then
 			macro = self:addLine(macro, "/equipslot 17 "..link:match("%[(.+)%]"))
-			if not dontClean then
-				self.charMacrosConfig.itemSlot17 = nil
-			end
 		end
 	else
 		macro = "/equipslot [swimming,nocombat]16 "..self.itemName[self.fishingRodID]
@@ -386,11 +389,9 @@ function macroFrame:autoEquip()
 		elseif IsMounted() and weaponID == self.fishingRodID then
 			if self.charMacrosConfig.itemSlot16 then
 				EquipItemByName(self.charMacrosConfig.itemSlot16, 16)
-				self.charMacrosConfig.itemSlot16 = nil
 			end
 			if self.charMacrosConfig.itemSlot17 then
 				EquipItemByName(self.charMacrosConfig.itemSlot17, 17)
-				self.charMacrosConfig.itemSlot17 = nil
 			end
 		end
 	end
@@ -453,7 +454,7 @@ function macroFrame:getCombatMacro()
 
 	if self.config.useUnderlightAngler and self.itemName[self.fishingRodID] then
 		self.weaponID = GetInventoryItemID("player", 16)
-		macro = self:getFishingRodMacro(true)
+		macro = self:getFishingRodMacro()
 	end
 
 	if self.combatMacro then
