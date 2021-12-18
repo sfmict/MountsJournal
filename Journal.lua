@@ -2300,6 +2300,7 @@ function journal:resetToDefaultFilters()
 		filters.tags.tags[tag][2] = value
 	end
 
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	self.searchBox:SetText("")
 	self:updateBtnFilters()
 	self:updateMountsList()
