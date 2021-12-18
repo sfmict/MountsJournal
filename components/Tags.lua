@@ -46,6 +46,7 @@ function tags:init()
 	}
 
 	self.filter = mounts.filters.tags
+	self.defFilter = mounts.defFilters.tags
 	self.mountTags = mounts.globalDB.mountTags
 	self.sortedTags = {}
 	self:setSortedTags()
@@ -74,13 +75,6 @@ function tags:setAllFilterTags(enabled)
 	for _, value in pairs(self.filter.tags) do
 		value[2] = enabled
 	end
-end
-
-
-function tags:resetFilter()
-	self.filter.noTag = true
-	self.filter.withAllTags = false
-	self:setAllFilterTags(true)
 end
 
 
@@ -234,7 +228,7 @@ function tags:mountOptionsMenu_Init(btn, level)
 						if value then
 							self:addMountTag(self.menuMountID, tag)
 						else
-							self:removeMountTag(self.menuMountID, tag)
+							self:removeMountTag(self.menuMountID, tag, true)
 						end
 					end,
 					checked = function() return self:getTagInMount(self.menuMountID, tag) end,
@@ -266,6 +260,7 @@ function tags:deleteTag(tag)
 			self:removeMountTag(mountID, tag)
 		end
 		self.filter.tags[tag] = nil
+		self.defFilter.tags[tag] = nil
 		self:setSortedTags()
 		journal:updateMountsList()
 	end)
@@ -296,15 +291,17 @@ function tags:addMountTag(mountID, tag)
 		self.mountTags[mountID] = {}
 	end
 	self.mountTags[mountID][tag] = true
+	journal:updateMountsList()
 end
 
 
-function tags:removeMountTag(mountID, tag)
+function tags:removeMountTag(mountID, tag, needUpdate)
 	local mountTags = self.mountTags[mountID]
 	if mountTags then
 		mountTags[tag] = nil
 		if next(mountTags) == nil then self.mountTags[mountID] = nil end
 	end
+	if needUpdate then journal:updateMountsList() end
 end
 
 

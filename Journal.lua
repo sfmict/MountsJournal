@@ -32,28 +32,35 @@ function journal:init()
 	self.mountIDs = C_MountJournal.GetMountIDs()
 
 	-- FILTERS INIT
-	if mounts.filters.collected == nil then mounts.filters.collected = true end
-	if mounts.filters.notCollected == nil then mounts.filters.notCollected = true end
-	if mounts.filters.unusable == nil then mounts.filters.unusable = true end
 	local filtersMeta = {__index = function(self, key)
 		self[key] = true
 		return self[key]
 	end}
-	mounts.filters.types = setmetatable(mounts.filters.types or {}, filtersMeta)
-	mounts.filters.selected = setmetatable(mounts.filters.selected or {}, filtersMeta)
-	mounts.filters.sources = setmetatable(mounts.filters.sources or {}, filtersMeta)
-	mounts.filters.factions = setmetatable(mounts.filters.factions or {}, filtersMeta)
-	mounts.filters.pet = setmetatable(mounts.filters.pet or {}, filtersMeta)
-	mounts.filters.expansions = setmetatable(mounts.filters.expansions or {}, filtersMeta)
-	mounts.filters.tags = mounts.filters.tags or {
-		noTag = true,
-		withAllTags = false,
-		tags = {},
-	}
+
+	local function checkFilters(filters)
+		if filters.collected == nil then filters.collected = true end
+		if filters.notCollected == nil then filters.notCollected = true end
+		if filters.unusable == nil then filters.unusable = true end
+		filters.types = setmetatable(filters.types or {}, filtersMeta)
+		filters.selected = setmetatable(filters.selected or {}, filtersMeta)
+		filters.sources = setmetatable(filters.sources or {}, filtersMeta)
+		filters.factions = setmetatable(filters.factions or {}, filtersMeta)
+		filters.pet = setmetatable(filters.pet or {}, filtersMeta)
+		filters.expansions = setmetatable(filters.expansions or {}, filtersMeta)
+		filters.tags = filters.tags or {
+			noTag = true,
+			withAllTags = false,
+			tags = {},
+		}
+	end
+
+	checkFilters(mounts.filters)
 	mounts.filters.sorting = mounts.filters.sorting or {
 		by = "name",
 		favoritesFirst = true,
 	}
+	checkFilters(mounts.defFilters)
+	setmetatable(mounts.defFilters.tags.tags, filtersMeta)
 
 	self.mountsWithMultipleModels = {}
 	for i = 1, #self.mountIDs do
@@ -396,7 +403,7 @@ function journal:init()
 			tab:SetScript("OnClick", tabClick)
 
 			frame[tab.id] = tab.content
-			tinsert(frame.tabs, tab)
+			frame.tabs[i] = tab
 		end
 
 		if #frame.tabs ~= 0 then
@@ -514,7 +521,7 @@ function journal:init()
 		else
 			btn:SetPoint("LEFT", parent.childs[#parent.childs], "RIGHT")
 		end
-		tinsert(parent.childs, btn)
+		parent.childs[#parent.childs + 1] = btn
 
 		btn.icon:SetTexture(texture.path)
 		btn.icon:SetSize(texture.width, texture.height)
@@ -565,7 +572,7 @@ function journal:init()
 
 	-- SHOWN PANEL
 	self.shownPanel.text:SetText(L["Shown:"])
-	self.shownPanel.clear:SetScript("OnClick", function() self:clearAllFilters() end)
+	self.shownPanel.clear:SetScript("OnClick", function() self:resetToDefaultFilters() end)
 
 	-- MODEL SCENE CAMERA
 	hooksecurefunc(self.modelScene, "SetActiveCamera", function(self)
@@ -1472,13 +1479,13 @@ do
 			btn:ddAddButton(info, level)
 		elseif level == 2 then
 			info.list = {}
-			for _, mapInfo in ipairs(value) do
-				tinsert(info.list, {
+			for i, mapInfo in ipairs(value) do
+				info.list[i] = {
 					notCheckable = true,
 					text = mapInfo.name,
 					arg1 = mapInfo.mapID,
 					func = setListFrom,
-				})
+				}
 			end
 			btn:ddAddButton(info, level)
 		else
@@ -1765,6 +1772,8 @@ function journal:filterDropDown_Initialize(btn, level, value)
 		info.checked = function() return mounts.filters.onlyHideOnChar end
 		btn:ddAddButton(info, level)
 
+		btn:ddAddSpace(level)
+
 		info.indent = nil
 		info.checked = nil
 		info.isNotRadio = nil
@@ -1800,8 +1809,22 @@ function journal:filterDropDown_Initialize(btn, level, value)
 		info.value = 7
 		btn:ddAddButton(info, level)
 
+		btn:ddAddSpace(level)
+
 		info.text = L["sorting"]
 		info.value = 8
+		btn:ddAddButton(info, level)
+
+		btn:ddAddSpace(level)
+
+		info.keepShownOnClick = nil
+		info.hasArrow = nil
+		info.text = L["Set current filters as default"]
+		info.func = function() self:saveDefaultFilters() end
+		btn:ddAddButton(info, level)
+
+		info.text = L["Restore default filters"]
+		info.func = function() self:restoreDefaultFilters() end
 		btn:ddAddButton(info, level)
 	else
 		info.notCheckable = true
@@ -2032,7 +2055,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			else
 				info.list = {}
 				for i, tag in ipairs(self.tags.sortedTags) do
-					tinsert(info.list, {
+					info.list[i] = {
 						keepShownOnClick = true,
 						isNotRadio = true,
 						text = function() return self.tags.sortedTags[i] end,
@@ -2047,7 +2070,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 						order = function(btn, step)
 							self.tags:setOrderTag(btn._text, step)
 						end,
-					})
+					}
 				end
 				btn:ddAddButton(info, level)
 				info.list = nil
@@ -2120,6 +2143,109 @@ function journal:filterDropDown_Initialize(btn, level, value)
 end
 
 
+function journal:saveDefaultFilters()
+	local filters = mounts.filters
+	local defFilters = mounts.defFilters
+
+	defFilters.collected = filters.collected
+	defFilters.notCollected = filters.notCollected
+	defFilters.unusable = filters.unusable
+	defFilters.multipleModels = filters.multipleModels
+	defFilters.hideOnChar = filters.hideOnChar
+	defFilters.onlyHideOnChar = filters.onlyHideOnChar
+
+	for i = 1, #filters.types do
+		defFilters.types[i] = filters.types[i]
+	end
+	for i = 1, #filters.selected do
+		defFilters.selected[i] = filters.selected[i]
+	end
+	for i = 1, #filters.sources do
+		defFilters.sources[i] = filters.sources[i]
+	end
+	for i = 1, #filters.factions do
+		defFilters.factions[i] = filters.factions[i]
+	end
+	for i = 1, #filters.pet do
+		defFilters.pet[i] = filters.pet[i]
+	end
+	for i = 1, #filters.expansions do
+		defFilters.expansions[i] = filters.expansions[i]
+	end
+
+	defFilters.tags.noTag = filters.tags.noTag
+	defFilters.tags.withAllTags = filters.tags.withAllTags
+	for tag, value in pairs(filters.tags.tags) do
+		defFilters.tags.tags[tag] = value[2]
+	end
+
+	self:setShownCountMounts()
+end
+
+
+function journal:restoreDefaultFilters()
+	local defFilters = mounts.defFilters
+
+	defFilters.collected = true
+	defFilters.notCollected = true
+	defFilters.unusable = true
+	defFilters.multipleModels = false
+	defFilters.hideOnChar = false
+	defFilters.onlyHideOnChar = false
+	defFilters.tags.noTag = true
+	defFilters.tags.withAllTags = false
+	wipe(defFilters.types)
+	wipe(defFilters.selected)
+	wipe(defFilters.sources)
+	wipe(defFilters.factions)
+	wipe(defFilters.pet)
+	wipe(defFilters.expansions)
+	wipe(defFilters.tags.tags)
+
+	self:setShownCountMounts()
+end
+
+
+function journal:isDefaultFilters()
+	local filters = mounts.filters
+	local defFilters = mounts.defFilters
+
+	if defFilters.collected ~= filters.collected
+	or defFilters.notCollected ~= filters.notCollected
+	or defFilters.unusable ~= filters.unusable
+	or not defFilters.multipleModels ~= not filters.multipleModels
+	or not defFilters.hideOnChar ~= not filters.hideOnChar
+	or not defFilters.onlyHideOnChar ~= not filters.onlyHideOnChar
+	or defFilters.tags.noTag ~= filters.tags.noTag
+	or defFilters.tags.withAllTags ~= filters.tags.withAllTags
+	then return end
+
+	for i = 1, #filters.types do
+		if defFilters.types[i] ~= filters.types[i] then return end
+	end
+	for i = 1, #filters.selected do
+		if defFilters.selected[i] ~= filters.selected[i] then return end
+	end
+	for i = 1, #filters.sources do
+		if defFilters.sources[i] ~= filters.sources[i] then return end
+	end
+	for i = 1, #filters.factions do
+		if defFilters.factions[i] ~= filters.factions[i] then return end
+	end
+	for i = 1, #filters.pet do
+		if defFilters.pet[i] ~= filters.pet[i] then return end
+	end
+	for i = 1, #filters.expansions do
+		if defFilters.expansions[i] ~= filters.expansions[i] then return end
+	end
+	for tag, value in pairs(filters.tags.tags) do
+		if defFilters.tags.tags[tag] ~= value[2] then return end
+	end
+
+	return true
+end
+
+
 function journal:setAllFilters(typeFilter, enabled)
 	local filter = mounts.filters[typeFilter]
 	for k in pairs(filter) do
@@ -2138,19 +2264,45 @@ function journal:clearBtnFilters()
 end
 
 
-function journal:clearAllFilters()
-	mounts.filters.collected = true
-	mounts.filters.notCollected = true
-	mounts.filters.unusable = true
-	mounts.filters.multipleModels = false
-	mounts.filters.hideOnChar = false
-	mounts.filters.onlyHideOnChar = false
+function journal:resetToDefaultFilters()
+	local filters = mounts.filters
+	local defFilters = mounts.defFilters
+
+	filters.collected = defFilters.collected
+	filters.notCollected = defFilters.notCollected
+	filters.unusable = defFilters.unusable
+	filters.multipleModels = defFilters.multipleModels
+	filters.hideOnChar = defFilters.hideOnChar
+	filters.onlyHideOnChar = defFilters.onlyHideOnChar
+
+	for i = 1, #defFilters.types do
+		filters.types[i] = defFilters.types[i]
+	end
+	for i = 1, #defFilters.selected do
+		filters.selected[i] = defFilters.selected[i]
+	end
+	for i = 1, #defFilters.sources do
+		filters.sources[i] = defFilters.sources[i]
+	end
+	for i = 1, #defFilters.factions do
+		filters.factions[i] = defFilters.factions[i]
+	end
+	for i = 1, #defFilters.pet do
+		filters.pet[i] = defFilters.pet[i]
+	end
+	for i = 1, #defFilters.expansions do
+		filters.expansions[i] = defFilters.expansions[i]
+	end
+
+	filters.tags.noTag = defFilters.tags.noTag
+	filters.tags.withAllTags = defFilters.tags.withAllTags
+	for tag, value in pairs(defFilters.tags.tags) do
+		filters.tags.tags[tag][2] = value
+	end
+
 	self.searchBox:SetText("")
-	self:setAllFilters("factions", true)
-	self:setAllFilters("pet", true)
-	self:setAllFilters("expansions", true)
-	self.tags:resetFilter()
-	self:clearBtnFilters()
+	self:updateBtnFilters()
+	self:updateMountsList()
 	self:setCountMounts()
 end
 
@@ -2247,6 +2399,19 @@ function journal:updateBtnFilters()
 end
 
 
+function journal:setShownCountMounts()
+	self.shownPanel.count:SetText(#self.displayedMounts)
+	if self:isDefaultFilters() then
+		self.shownPanel:Hide()
+		self.leftInset:SetPoint("TOPLEFT", self.filtersPanel, "BOTTOMLEFT", 0, -2)
+	else
+		self.shownPanel:Show()
+		self.leftInset:SetPoint("TOPLEFT", self.shownPanel, "BOTTOMLEFT", 0, -2)
+	end
+	self.leftInset:GetHeight()
+end
+
+
 function journal:updateMountsList()
 	local filters, mountTypes, list, mountsDB, tags, GetMountInfoByID, GetMountInfoExtraByID = mounts.filters, self.mountTypes, self.list, mounts.mountsDB, self.tags, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID
 	local sources, types, selected, factions, pet, expansions = filters.sources, filters.types, filters.selected, filters.factions, filters.pet, filters.expansions
@@ -2298,16 +2463,6 @@ function journal:updateMountsList()
 		end
 	end
 
-	local numShowMounts = #self.displayedMounts
-	self.shownPanel.count:SetText(numShowMounts)
-	if filters.hideOnChar or self.mountCount.count.num ~= numShowMounts then
-		self.shownPanel:Show()
-		self.leftInset:SetPoint("TOPLEFT", self.shownPanel, "BOTTOMLEFT", 0, -2)
-	else
-		self.shownPanel:Hide()
-		self.leftInset:SetPoint("TOPLEFT", self.filtersPanel, "BOTTOMLEFT", 0, -2)
-	end
-	self.leftInset:GetHeight()
-
+	self:setShownCountMounts()
 	self.scrollFrame:update()
 end

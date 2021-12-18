@@ -21,6 +21,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.globalDB = MountsJournalDB
 		self.globalDB.mountTags = self.globalDB.mountTags or {}
 		self.globalDB.filters = self.globalDB.filters or {}
+		self.globalDB.defFilters = self.globalDB.defFilters or {}
 		self.globalDB.config = self.globalDB.config or {}
 		self.globalDB.mountAnimations = self.globalDB.mountAnimations or {}
 		self.globalDB.defProfile = self.globalDB.defProfile or {}
@@ -35,6 +36,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.defProfile.petForMount = self.defProfile.petForMount or {}
 		self.profiles = self.globalDB.mountsProfiles
 		self.filters = self.globalDB.filters
+		self.defFilters = self.globalDB.defFilters
 		self.help = self.globalDB.help
 		self.config = self.globalDB.config
 		if self.config.mountDescriptionToggle == nil then
