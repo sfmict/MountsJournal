@@ -1161,6 +1161,12 @@
 				<Texture file="Interface/Buttons/CheckButtonHilight" parentKey="selectedTexture" alphaMode="ADD"/>
 			</Layer>
 			<Layer level="OVERLAY" textureSubLevel="1">
+				<Texture file="Interface/BUTTONS/UI-GroupLoot-Pass-Up" parentKey="hidden" hidden="true">
+					<Size x="25" y="25"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
 				<Texture parentKey="highlight" file="Interface/Buttons/ButtonHilight-Square" setAllPoints="true=" alphaMode="ADD" hidden="true"/>
 			</Layer>
 			<Layer level="OVERLAY" textureSubLevel="2">
@@ -1241,17 +1247,25 @@
 							<Anchor point="LEFT" x="0" y="0"/>
 						</Anchors>
 						<Layers>
-							<Layer level="ARTWORK">
+							<Layer level="ARTWORK" textureSubLevel="1">
 								<Texture parentKey="icon">
 									<Size x="38" y="38"/>
 									<Anchors>
 										<Anchor point="CENTER"/>
 									</Anchors>
 								</Texture>
-								<Texture file="Interface\Buttons\CheckButtonHilight" parentKey="activeTexture" alphaMode="ADD"/>
+							</Layer>
+							<Layer level="ARTWORK" textureSubLevel="2">
+								<Texture file="Interface\Buttons\CheckButtonHilight" parentKey="activeTexture" alphaMode="ADD" setAllPoints="true"/>
 							</Layer>
 							<Layer level="OVERLAY" textureSubLevel="1">
-								<Texture parentKey="highlight" file="Interface/Buttons/ButtonHilight-Square" setAllPoints="true=" alphaMode="ADD" hidden="true"/>
+								<Texture file="Interface/BUTTONS/UI-GroupLoot-Pass-Up" parentKey="hidden" hidden="true">
+									<Size x="25" y="25"/>
+									<Anchors>
+										<Anchor point="CENTER"/>
+									</Anchors>
+								</Texture>
+								<Texture parentKey="highlight" file="Interface/Buttons/ButtonHilight-Square" setAllPoints="true" alphaMode="ADD" hidden="true"/>
 							</Layer>
 							<Layer level="OVERLAY" textureSubLevel="2">
 								<Texture parentKey="favorite" atlas="PetJournal-FavoritesIcon" useAtlasSize="true">

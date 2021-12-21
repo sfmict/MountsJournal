@@ -962,6 +962,7 @@ function journal:defaultUpdateMountList(scrollFrame)
 
 			dlist.dragButton.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
 			dlist.dragButton.icon:SetVertexColor(1, 1, 1)
+			dlist.dragButton.hidden:SetShown(self:isMountHidden(mountID))
 			dlist.dragButton.favorite:SetShown(isFavorite)
 			dlist.dragButton.activeTexture:SetShown(active)
 
@@ -1011,7 +1012,9 @@ function journal:defaultUpdateMountList(scrollFrame)
 			dlist.dragButton.icon:SetVertexColor(1, 1, 1)
 			dlist.dragButton.icon:SetAlpha(.5)
 			dlist.dragButton.icon:SetDesaturated(true)
+			dlist.dragButton.hidden:Hide()
 			dlist.dragButton.favorite:Hide()
+			dlist.dragButton.activeTexture:Hide()
 
 			dlist.btn:Disable()
 			dlist.btn.name:SetText("")
@@ -1052,6 +1055,7 @@ function journal:grid3UpdateMountList(scrollFrame)
 				g3btn.icon:SetVertexColor(1, 1, 1)
 				g3btn:Enable()
 				g3btn.selectedTexture:SetShown(mountID == self.selectedMountID)
+				g3btn.hidden:SetShown(self:isMountHidden(mountID))
 				g3btn.favorite:SetShown(isFavorite)
 
 				if isUsable or needsFanfare then
@@ -1080,6 +1084,7 @@ function journal:grid3UpdateMountList(scrollFrame)
 				g3btn.selected = false
 				g3btn:Disable()
 				g3btn.selectedTexture:Hide()
+				g3btn.hidden:Hide()
 				g3btn.favorite:Hide()
 			end
 
@@ -1727,7 +1732,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			mounts.filters.collected = value
 			self:updateMountsList()
 		end
-		info.checked = function() return mounts.filters.collected end
+		info.checked = mounts.filters.collected
 		btn:ddAddButton(info, level)
 
 		info.text = NOT_COLLECTED
@@ -1735,7 +1740,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			mounts.filters.notCollected = value
 			self:updateMountsList()
 		end
-		info.checked = function() return mounts.filters.notCollected end
+		info.checked = mounts.filters.notCollected
 		btn:ddAddButton(info, level)
 
 		info.text = MOUNT_JOURNAL_FILTER_UNUSABLE
@@ -1743,7 +1748,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			mounts.filters.unusable = value
 			self:updateMountsList()
 		end
-		info.checked = function() return mounts.filters.unusable end
+		info.checked = mounts.filters.unusable
 		btn:ddAddButton(info, level)
 
 		info.text = L["With multiple models"]
@@ -1751,30 +1756,54 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			mounts.filters.multipleModels = value
 			self:updateMountsList()
 		end
-		info.checked = function() return mounts.filters.multipleModels end
+		info.checked = mounts.filters.multipleModels
 		btn:ddAddButton(info, level)
 
 		info.text = L["hidden for character"]
 		info.func = function(_,_,_, value)
 			mounts.filters.hideOnChar = value
+			btn:ddRefresh(level)
 			self:setCountMounts()
 			self:updateMountsList()
 		end
-		info.checked = function() return mounts.filters.hideOnChar end
+		info.checked = mounts.filters.hideOnChar
 		btn:ddAddButton(info, level)
 
+		info.indent = 16
+		info.disabled = function() return not mounts.filters.hideOnChar end
 		info.text = L["only hidden"]
-		info.indent = 8
 		info.func = function(_,_,_, value)
 			mounts.filters.onlyHideOnChar = value
 			self:updateMountsList()
 		end
-		info.checked = function() return mounts.filters.onlyHideOnChar end
+		info.checked = mounts.filters.onlyHideOnChar
+		btn:ddAddButton(info, level)
+
+		info.indent = nil
+		info.disabled = nil
+		info.text = L["Hidden by player"]
+		info.func = function(_,_,_, value)
+			mounts.filters.hiddenByPlayer = value
+			btn:ddRefresh(level)
+			self:updateMountsList()
+		end
+		info.checked = mounts.filters.hiddenByPlayer
+		btn:ddAddButton(info, level)
+
+		info.indent = 16
+		info.disabled = function() return not mounts.filters.hiddenByPlayer end
+		info.text = L["only hidden"]
+		info.func = function(_,_,_, value)
+			mounts.filters.onlyHiddenByPlayer = value
+			self:updateMountsList()
+		end
+		info.checked = mounts.filters.onlyHiddenByPlayer
 		btn:ddAddButton(info, level)
 
 		btn:ddAddSpace(level)
 
 		info.indent = nil
+		info.disabled = nil
 		info.checked = nil
 		info.isNotRadio = nil
 		info.func = nil
@@ -2153,6 +2182,8 @@ function journal:saveDefaultFilters()
 	defFilters.multipleModels = filters.multipleModels
 	defFilters.hideOnChar = filters.hideOnChar
 	defFilters.onlyHideOnChar = filters.onlyHideOnChar
+	defFilters.hiddenByPlayer = filters.hiddenByPlayer
+	defFilters.onlyHiddenByPlayer = filters.onlyHiddenByPlayer
 
 	for i = 1, #filters.types do
 		defFilters.types[i] = filters.types[i]
@@ -2192,6 +2223,8 @@ function journal:restoreDefaultFilters()
 	defFilters.multipleModels = false
 	defFilters.hideOnChar = false
 	defFilters.onlyHideOnChar = false
+	defFilters.hiddenByPlayer = false
+	defFilters.onlyHiddenByPlayer = false
 	defFilters.tags.noTag = true
 	defFilters.tags.withAllTags = false
 	wipe(defFilters.types)
@@ -2216,6 +2249,8 @@ function journal:isDefaultFilters()
 	or not defFilters.multipleModels ~= not filters.multipleModels
 	or not defFilters.hideOnChar ~= not filters.hideOnChar
 	or not defFilters.onlyHideOnChar ~= not filters.onlyHideOnChar
+	or not defFilters.hiddenByPlayer ~= not filters.hiddenByPlayer
+	or not defFilters.onlyHiddenByPlayer ~= not filters.onlyHiddenByPlayer
 	or defFilters.tags.noTag ~= filters.tags.noTag
 	or defFilters.tags.withAllTags ~= filters.tags.withAllTags
 	then return end
@@ -2274,6 +2309,8 @@ function journal:resetToDefaultFilters()
 	filters.multipleModels = defFilters.multipleModels
 	filters.hideOnChar = defFilters.hideOnChar
 	filters.onlyHideOnChar = defFilters.onlyHideOnChar
+	filters.hiddenByPlayer = defFilters.hiddenByPlayer
+	filters.onlyHiddenByPlayer = defFilters.onlyHiddenByPlayer
 
 	for i = 1, #defFilters.types do
 		filters.types[i] = defFilters.types[i]
@@ -2400,6 +2437,11 @@ function journal:updateBtnFilters()
 end
 
 
+function journal:isMountHidden(mountID)
+	return mounts.globalDB.hiddenMounts and mounts.globalDB.hiddenMounts[mountID]
+end
+
+
 function journal:setShownCountMounts()
 	self.shownPanel.count:SetText(#self.displayedMounts)
 	if self:isDefaultFilters() then
@@ -2424,10 +2466,14 @@ function journal:updateMountsList()
 		local name, spellID, _,_, isUsable, sourceType, _,_, mountFaction, shouldHideOnChar, isCollected = GetMountInfoByID(mountID)
 		local _,_, sourceText, _, mountType = GetMountInfoExtraByID(mountID)
 		local petID = self.petForMount[spellID]
+		local isMountHidden = self:isMountHidden(mountID)
 
 		-- HIDDEN FOR CHARACTER
-		if (not filters.onlyHideOnChar or shouldHideOnChar)
-		and (not shouldHideOnChar or filters.hideOnChar)
+		if (not shouldHideOnChar or filters.hideOnChar)
+		and (not (filters.hideOnChar and filters.onlyHideOnChar) or shouldHideOnChar)
+		-- HIDDEN BY PLAYER
+		and (not isMountHidden or filters.hiddenByPlayer)
+		and (not (filters.hiddenByPlayer and filters.onlyHiddenByPlayer) or isMountHidden)
 		-- COLLECTED
 		and (isCollected and filters.collected or not isCollected and filters.notCollected)
 		-- UNUSABLE

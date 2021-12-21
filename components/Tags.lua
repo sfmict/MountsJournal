@@ -204,9 +204,29 @@ function tags:mountOptionsMenu_Init(btn, level)
 		end
 
 		info.disabled = nil
-		info.keepShownOnClick = nil
 		info.hasArrow = nil
+		info.notCheckable = nil
+		info.isNotRadio = true
+		info.text = HIDE
+		info.func = function(_,_,_, checked)
+			if checked then
+				mounts.globalDB.hiddenMounts = mounts.globalDB.hiddenMounts or {}
+				mounts.globalDB.hiddenMounts[self.menuMountID] = true
+			elseif mounts.globalDB.hiddenMounts then
+				mounts.globalDB.hiddenMounts[self.menuMountID] = nil
+				if not next(mounts.globalDB.hiddenMounts) then
+					mounts.globalDB.hiddenMounts = nil
+				end
+			end
+			journal:updateMountsList()
+		end
+		info.checked = journal:isMountHidden(self.menuMountID)
+		btn:ddAddButton(info, level)
+
+		info.keepShownOnClick = nil
 		info.func = nil
+		info.isNotRadio = nil
+		info.notCheckable = true
 		info.text = CANCEL
 		btn:ddAddButton(info, level)
 	else
@@ -219,8 +239,8 @@ function tags:mountOptionsMenu_Init(btn, level)
 			btn:ddAddButton(info, level)
 		else
 			info.list = {}
-			for _, tag in ipairs(self.sortedTags) do
-				tinsert(info.list, {
+			for i, tag in ipairs(self.sortedTags) do
+				info.list[i] = {
 					isNotRadio = true,
 					keepShownOnClick = true,
 					text = tag,
@@ -232,7 +252,7 @@ function tags:mountOptionsMenu_Init(btn, level)
 						end
 					end,
 					checked = function() return self:getTagInMount(self.menuMountID, tag) end,
-				})
+				}
 			end
 			btn:ddAddButton(info, level)
 		end
