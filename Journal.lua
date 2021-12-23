@@ -2076,9 +2076,10 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			end
 			btn:ddAddButton(info, level)
 
+			info.func = nil
 			if #self.tags.sortedTags == 0 then
-				info.text = EMPTY
 				info.disabled = true
+				info.text = EMPTY
 				btn:ddAddButton(info, level)
 				info.disabled = nil
 			else

@@ -127,19 +127,23 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		local info = {}
 		local mountType = self.currentMountType or 1
 
+		local function checked(btn) return self.selectedValue == btn.value end
+		local function func(btn)
+			self.customAnimationPanel:Hide()
+			self:playAnimation(btn.value.animation, btn.value.isKit, btn.value.loop)
+			self:ddSetSelectedValue(btn.value, level)
+			self:ddSetSelectedText(btn.value.name)
+		end
+		local function remove(btn) self:deleteAnimation(btn.arg1) end
+
 		info.list = {}
 		for _, v in ipairs(self.animationsList) do
 			if v.type == nil or v.type >= mountType then
 				tinsert(info.list, {
 					text = ("%s|cff808080.%d%s|r"):format(v.name, v.animation, v.isKit and ".k" or ""),
 					value = v,
-					checked = function(btn) return self.selectedValue == btn.value end,
-					func = function(btn)
-						self.customAnimationPanel:Hide()
-						self:playAnimation(btn.value.animation, btn.value.isKit)
-						self:ddSetSelectedValue(btn.value, level)
-						self:ddSetSelectedText(btn.value.name)
-					end,
+					checked = checked,
+					func = func,
 				})
 			end
 		end
@@ -148,20 +152,15 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 				text = ("%s|cff808080.%d%s|r"):format(v.name, v.animation, v.isKit and ".k" or ""),
 				value = v,
 				arg1 = i,
-				checked = function(btn) return self.selectedValue == btn.value end,
-				func = function(btn)
-					self.customAnimationPanel:Hide()
-					self:playAnimation(btn.value.animation, btn.value.isKit, btn.value.loop)
-					self:ddSetSelectedValue(btn.value, level)
-					self:ddSetSelectedText(btn.value.name)
-				end,
-				remove = function(btn) self:deleteAnimation(btn.arg1) end,
+				checked = checked,
+				func = func,
+				remove = remove,
 			})
 		end
 		tinsert(info.list, {
 			text = CUSTOM,
 			value = "custom",
-			checked = function(btn) return self.selectedValue == btn.value end,
+			checked = checked,
 			func = function(btn)
 				self.customAnimationPanel:Show()
 				self.customAnimationPanel:play()
@@ -185,14 +184,20 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 	end
 
 	function dd:deleteAnimation(id)
-		StaticPopup_Show(util.addonName.."DELETE_MOUNT_ANIMATION", NORMAL_FONT_COLOR_CODE..self.animations[id].name..FONT_COLOR_CODE_CLOSE, nil, function()
-			if self.selectedValue == self.animations[id] then
+		local animation = self.animations[id]
+		StaticPopup_Show(util.addonName.."DELETE_MOUNT_ANIMATION", NORMAL_FONT_COLOR_CODE..animation.name..FONT_COLOR_CODE_CLOSE, nil, function()
+			if self.selectedValue == animation then
 				local value = self.animationsList[1]
 				self:playAnimation(value.animation, value.isKit, value.loop)
 				self:ddSetSelectedValue(value)
 				self:ddSetSelectedText(value.name)
 			end
-			tremove(self.animations, id)
+			for i = 1, #self.animations do
+				if self.animations[i] == animation then
+					tremove(self.animations, i)
+					break
+				end
+			end
 		end)
 	end
 end)
