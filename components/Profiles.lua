@@ -26,13 +26,8 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 					StaticPopup_Show(util.addonName.."PROFILE_EXISTS", nil, nil, data)
 					return
 				end
-				dd.profiles[text] = data and util:copyTable(data) or {
-					fly = {},
-					ground = {},
-					swimming = {},
-					zoneMounts = {},
-					petForMount = {},
-				}
+				dd.profiles[text] = data and util:copyTable(data) or {}
+				dd.mounts:checkProfile(dd.profiles[text])
 				dd:setProfile(text)
 			end
 		end,

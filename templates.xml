@@ -906,6 +906,43 @@
 				</Anchors>
 			</Button>
 
+			<Frame parentKey="mountsWeight" hidden="true">
+				<Size x="250" y="31"/>
+				<Frames>
+					<Slider parentKey="slider" inherits="HorizontalSliderTemplate">
+						<Size y="17"/>
+						<Anchors>
+							<Anchor point="BOTTOMLEFT" x="0" y="2"/>
+							<Anchor point="RIGHT" x="-30" y="0"/>
+						</Anchors>
+						<HitRectInsets>
+							<AbsInset left="0" right="0" top="0" bottom="0"/>
+						</HitRectInsets>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString parentKey="text" inherits="GameFontNormalSmall">
+									<Anchors>
+										<Anchor point="BOTTOM" relativePoint="TOP"/>
+									</Anchors>
+								</FontString>
+								<FontString parentKey="label" inherits="GameFontHighlightSmall">
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT" x="2" y="1"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnLoad inherit="prepend">
+								hooksecurefunc(self, "SetValue", function(self, value)
+									self.label:SetText(value.."%")
+								end)
+							</OnLoad>
+						</Scripts>
+					</Slider>
+				</Frames>
+			</Frame>
+
 		</Frames>
 	</Frame>
 
@@ -1158,6 +1195,18 @@
 				<Texture parentKey="icon" setAllPoints="true"/>
 			</Layer>
 			<Layer level="ARTWORK">
+				<FontString inherits="GameFontNormal" parentKey="mountWeight">
+					<Anchors>
+						<Anchor point="BOTTOM" x="0" y="3"/>
+					</Anchors>
+				</FontString>
+				<Texture parentKey="mountWeightBG">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.mountWeight" x="-1"/>
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.mountWeight" x="1"/>
+					</Anchors>
+					<Color r="0" g="0" b="0" a=".7"/>
+				</Texture>
 				<Texture file="Interface/Buttons/CheckButtonHilight" parentKey="selectedTexture" alphaMode="ADD"/>
 			</Layer>
 			<Layer level="OVERLAY" textureSubLevel="1">
@@ -1256,6 +1305,18 @@
 								</Texture>
 							</Layer>
 							<Layer level="ARTWORK" textureSubLevel="2">
+								<FontString inherits="GameFontNormal" parentKey="mountWeight">
+									<Anchors>
+										<Anchor point="BOTTOM" x="0" y="3"/>
+									</Anchors>
+								</FontString>
+								<Texture parentKey="mountWeightBG">
+									<Anchors>
+										<Anchor point="TOPLEFT" relativeKey="$parent.mountWeight" x="-1"/>
+										<Anchor point="BOTTOMRIGHT" relativeKey="$parent.mountWeight" x="1"/>
+									</Anchors>
+									<Color r="0" g="0" b="0" a=".7"/>
+								</Texture>
 								<Texture file="Interface\Buttons\CheckButtonHilight" parentKey="activeTexture" alphaMode="ADD" setAllPoints="true"/>
 							</Layer>
 							<Layer level="OVERLAY" textureSubLevel="1">

@@ -29,12 +29,11 @@ function mounts:ADDON_LOADED(addonName)
 		self.globalDB.help = self.globalDB.help or {}
 
 		self.defProfile = self.globalDB.defProfile
-		self.defProfile.fly = self.defProfile.fly or {}
-		self.defProfile.ground = self.defProfile.ground or {}
-		self.defProfile.swimming = self.defProfile.swimming or {}
-		self.defProfile.zoneMounts = self.defProfile.zoneMounts or {}
-		self.defProfile.petForMount = self.defProfile.petForMount or {}
+		self:checkProfile(self.defProfile)
 		self.profiles = self.globalDB.mountsProfiles
+		for name, profile in pairs(self.profiles) do
+			self:checkProfile(profile)
+		end
 		self.filters = self.globalDB.filters
 		self.defFilters = self.globalDB.defFilters
 		self.help = self.globalDB.help
@@ -122,7 +121,17 @@ function mounts:ADDON_LOADED(addonName)
 end
 
 
-function mounts:compareVersion(v1, v2)
+function mounts:checkProfile(profile)
+	profile.fly = profile.fly or {}
+	profile.ground = profile.ground or {}
+	profile.swimming = profile.swimming or {}
+	profile.zoneMounts = profile.zoneMounts or {}
+	profile.petForMount = profile.petForMount or {}
+	profile.mountsWeight = profile.mountsWeight or {}
+end
+
+
+local function compareVersion(v1, v2)
 	v1 = v1:gsub("%D*([%d%.]+).*", "%1")
 	v2 = v2:gsub("%D*([%d%.]+).*", "%1")
 	v1 = {("."):split(v1)}
@@ -144,7 +153,7 @@ function mounts:setOldChanges()
 	--@end-do-not-package@
 
 	--IF < 8.3.2 GLOBAL
-	if self:compareVersion("8.3.2", self.globalDB.lastAddonVersion or "") then
+	if compareVersion("8.3.2", self.globalDB.lastAddonVersion or "") then
 		self.config.waterWalkAll = nil
 		self.config.waterWalkList = nil
 		self.config.waterWalkInstance = nil
@@ -189,7 +198,7 @@ function mounts:setOldChanges()
 	end
 
 	--IF < 9.0.8 GLOBAL
-	if self:compareVersion("9.0.8", self.globalDB.lastAddonVersion or "") then
+	if compareVersion("9.0.8", self.globalDB.lastAddonVersion or "") then
 		local function updateTable(to, from)
 			for k, v in next, from do
 				if type(v) ~= "table" then
@@ -228,7 +237,7 @@ function mounts:setOldChanges()
 	self.globalDB.lastAddonVersion = currentVersion
 
 	-- IF < 8.3.2 CHAR
-	if self:compareVersion("8.3.2", self.charDB.lastAddonVersion or "") then
+	if compareVersion("8.3.2", self.charDB.lastAddonVersion or "") then
 		local function setMounts(tbl)
 			if #tbl > 0 then
 				local newTbl = {}
@@ -521,6 +530,7 @@ function mounts:setDB()
 	self.db = currentProfileName and self.profiles[currentProfileName] or self.defProfile
 	self.zoneMounts = self.db.zoneMountsFromProfile and self.defProfile.zoneMounts or self.db.zoneMounts
 	self.petForMount = self.db.petListFromProfile and self.defProfile.petForMount or self.db.petForMount
+	self.mountsWeight = self.db.mountsWeight
 
 	-- self:setMountsList()
 end
@@ -580,12 +590,21 @@ end
 do
 	local usableIDs = {}
 	function mounts:summon(ids)
+		local weight = 0
 		for mountID in next, ids do
 			local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
-			if isUsable then usableIDs[#usableIDs + 1] = mountID end
+			if isUsable then
+				weight = weight + (self.mountsWeight[mountID] or 100)
+				usableIDs[weight] = mountID
+			end
 		end
-		if #usableIDs ~= 0 then
-			C_MountJournal.SummonByID(usableIDs[random(#usableIDs)])
+		if next(usableIDs) then
+			for i = random(weight), weight do
+				if usableIDs[i] then
+					C_MountJournal.SummonByID(usableIDs[i])
+					break
+				end
+			end
 			wipe(usableIDs)
 			return true
 		else

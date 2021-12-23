@@ -1,3 +1,3 @@
 # MountsJournal
 
-* Added the ability to hide mounts.
+* Added "Chance of summoning" option.

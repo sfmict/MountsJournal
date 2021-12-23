@@ -943,6 +943,15 @@ do
 end
 
 
+local function getColorWeight(weight)
+	if weight > 50 then
+		return "|cff"..("%02x"):format((1 - (weight - 50) / 50) * 255).."ff00"..weight.."%|r"
+	else
+		return "|cffff"..("%02x"):format(weight / 50 * 255).."00"..weight.."%|r"
+	end
+end
+
+
 function journal:defaultUpdateMountList(scrollFrame)
 	local offset = HybridScrollFrame_GetOffset(scrollFrame)
 	local numDisplayedMounts = #self.displayedMounts
@@ -965,6 +974,16 @@ function journal:defaultUpdateMountList(scrollFrame)
 			dlist.dragButton.hidden:SetShown(self:isMountHidden(mountID))
 			dlist.dragButton.favorite:SetShown(isFavorite)
 			dlist.dragButton.activeTexture:SetShown(active)
+
+			local mountWeight = self.mountsWeight[mountID]
+			if mountWeight then
+				dlist.dragButton.mountWeight:SetText(getColorWeight(mountWeight))
+				dlist.dragButton.mountWeight:Show()
+				dlist.dragButton.mountWeightBG:Show()
+			else
+				dlist.dragButton.mountWeight:Hide()
+				dlist.dragButton.mountWeightBG:Hide()
+			end
 
 			dlist.btn:Enable()
 			dlist.btn.name:SetText(creatureName)
@@ -1057,6 +1076,16 @@ function journal:grid3UpdateMountList(scrollFrame)
 				g3btn.selectedTexture:SetShown(mountID == self.selectedMountID)
 				g3btn.hidden:SetShown(self:isMountHidden(mountID))
 				g3btn.favorite:SetShown(isFavorite)
+
+				local mountWeight = self.mountsWeight[mountID]
+				if mountWeight then
+					g3btn.mountWeight:SetText(getColorWeight(mountWeight))
+					g3btn.mountWeight:Show()
+					g3btn.mountWeightBG:Show()
+				else
+					g3btn.mountWeight:Hide()
+					g3btn.mountWeightBG:Hide()
+				end
 
 				if isUsable or needsFanfare then
 					g3btn.icon:SetDesaturated()
@@ -1192,6 +1221,7 @@ function journal:setEditMountsList()
 		end
 	end
 	self.petForMount = self.db.petListFromProfile and mounts.defProfile.petForMount or self.db.petForMount
+	self.mountsWeight = self.db.mountsWeight
 end
 
 
