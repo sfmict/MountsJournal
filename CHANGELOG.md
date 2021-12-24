@@ -1,3 +1,3 @@
 # MountsJournal
 
-* Added "Chance of summoning" option.
+* Added option and filter "Chance of summoning".

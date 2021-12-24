@@ -55,26 +55,6 @@ function tags:init()
 	self.mountOptionsMenu:ddHideWhenButtonHidden(journal.bgFrame)
 	self.mountOptionsMenu:ddSetInitFunc(function(...) self:mountOptionsMenu_Init(...) end)
 	self.mountOptionsMenu:ddSetDisplayMode("menu")
-
-	local function OnEnter() self.mountOptionsMenu:ddCloseMenus(2) end
-	self.weightFrame = journal.bgFrame.mountsWeight
-	self.weightFrame:SetScript("OnEnter", OnEnter)
-	self.weightFrame.slider.text:SetText(L["Chance of summoning"])
-	self.weightFrame.slider:SetMinMaxValues(1, 100)
-	self.weightFrame.slider:HookScript("OnEnter", OnEnter)
-	self.weightFrame.slider:SetScript("OnValueChanged", function(slider, value, userInput)
-		if not userInput then return end
-		value = math.floor(value + .5)
-		slider:SetValue(value)
-
-		local mountsWeight = journal.mountsWeight
-		if value == 100 then value = nil end
-
-		if mountsWeight[self.menuMountID] ~= value then
-			mountsWeight[self.menuMountID] = value
-			journal.scrollFrame:update()
-		end
-	end)
 end
 
 
@@ -198,9 +178,18 @@ function tags:mountOptionsMenu_Init(btn, level)
 			if isCollected then
 				info.text = nil
 				info.disabled = nil
-				info.customFrame = self.weightFrame
+				info.customFrame = journal.weightFrame
 				info.OnLoad = function(frame)
-					frame.slider:SetValue(journal.mountsWeight[self.menuMountID] or 100)
+					local mountsWeight = journal.mountsWeight
+					frame.level = level + 1
+					frame.slider:SetValue(mountsWeight[self.menuMountID] or 100)
+					frame.setFunc = function(value)
+						if value == 100 then value = nil end
+						if mountsWeight[self.menuMountID] ~= value then
+							mountsWeight[self.menuMountID] = value
+							journal.scrollFrame:update()
+						end
+					end
 				end
 				btn:ddAddButton(info, level)
 				info.customFrame = nil

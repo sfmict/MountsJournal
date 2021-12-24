@@ -47,6 +47,10 @@ function journal:init()
 		filters.factions = setmetatable(filters.factions or {}, filtersMeta)
 		filters.pet = setmetatable(filters.pet or {}, filtersMeta)
 		filters.expansions = setmetatable(filters.expansions or {}, filtersMeta)
+		filters.mountsWeight = filters.mountsWeight or {
+			-- sign = nil,
+			weight = 100,
+		}
 		filters.tags = filters.tags or {
 			noTag = true,
 			withAllTags = false,
@@ -129,6 +133,7 @@ function journal:init()
 	self.mountListUpdateAnim = self.leftInset.updateAnimFrame.anim
 	self.scrollFrame = self.bgFrame.scrollFrame
 	self.summonButton = self.bgFrame.summonButton
+	self.weightFrame = self.bgFrame.mountsWeight
 
 	-- USE MountsJournal BUTTON
 	self.useMountsJournalButton:SetParent(self.CollectionsJournal)
@@ -494,6 +499,26 @@ function journal:init()
 	filtersButton:SetPoint("TOPRIGHT", -3, -4)
 	filtersButton:SetText(FILTER)
 	filtersButton:ddSetInitFunc(function(...) self:filterDropDown_Initialize(...) end)
+
+	-- MOUNTS WEIGHT SLIDER
+	self.weightFrame:SetScript("OnEnter", function(self)
+		filtersButton:ddCloseMenus(self.level)
+	end)
+	self.weightFrame.slider.text:SetText(L["Chance of summoning"])
+	self.weightFrame.slider:SetMinMaxValues(1, 100)
+	self.weightFrame.slider:HookScript("OnEnter", function(self)
+		local parent = self:GetParent()
+		parent:GetScript("OnEnter")(parent)
+	end)
+	self.weightFrame.slider:HookScript("OnMouseUp", function()
+		journal:updateMountsList()
+	end)
+	self.weightFrame.slider:SetScript("OnValueChanged", function(slider, value, userInput)
+		if not userInput then return end
+		value = math.floor(value + .5)
+		slider:SetValue(value)
+		slider:GetParent().setFunc(value)
+	end)
 
 	-- FILTERS BUTTONS
 	local function filterClick(btn)
@@ -945,9 +970,9 @@ end
 
 local function getColorWeight(weight)
 	if weight > 50 then
-		return "|cff"..("%02x"):format((1 - (weight - 50) / 50) * 255).."ff00"..weight.."%|r"
+		return ("|cff%02xff00%d%%|r"):format((100 - weight) * 5.1, weight)
 	else
-		return "|cffff"..("%02x"):format(weight / 50 * 255).."00"..weight.."%|r"
+		return ("|cffff%02x00%d%%|r"):format(weight * 5.1, weight)
 	end
 end
 
@@ -1034,6 +1059,8 @@ function journal:defaultUpdateMountList(scrollFrame)
 			dlist.dragButton.hidden:Hide()
 			dlist.dragButton.favorite:Hide()
 			dlist.dragButton.activeTexture:Hide()
+			dlist.dragButton.mountWeight:Hide()
+			dlist.dragButton.mountWeightBG:Hide()
 
 			dlist.btn:Disable()
 			dlist.btn.name:SetText("")
@@ -1115,6 +1142,8 @@ function journal:grid3UpdateMountList(scrollFrame)
 				g3btn.selectedTexture:Hide()
 				g3btn.hidden:Hide()
 				g3btn.favorite:Hide()
+				g3btn.mountWeight:Hide()
+				g3btn.mountWeightBG:Hide()
 			end
 
 			self:updateMountToggleButton(g3btn)
@@ -1864,14 +1893,18 @@ function journal:filterDropDown_Initialize(btn, level, value)
 		info.value = 6
 		btn:ddAddButton(info, level)
 
-		info.text = L["tags"]
+		info.text = L["Chance of summoning"]
 		info.value = 7
+		btn:ddAddButton(info, level)
+
+		info.text = L["tags"]
+		info.value = 8
 		btn:ddAddButton(info, level)
 
 		btn:ddAddSpace(level)
 
 		info.text = L["sorting"]
-		info.value = 8
+		info.value = 9
 		btn:ddAddButton(info, level)
 
 		btn:ddAddSpace(level)
@@ -1907,7 +1940,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			end
 			btn:ddAddButton(info, level)
 
-			info.notCheckable = false
+			info.notCheckable = nil
 			local types = mounts.filters.types
 			for i = 1, 3 do
 				info.text = L["MOUNT_TYPE_"..i]
@@ -1938,7 +1971,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			end
 			btn:ddAddButton(info, level)
 
-			info.notCheckable = false
+			info.notCheckable = nil
 			local selected = mounts.filters.selected
 			for i = 1, 4 do
 				info.text = L["MOUNT_TYPE_"..i]
@@ -1969,7 +2002,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			end
 			btn:ddAddButton(info, level)
 
-			info.notCheckable = false
+			info.notCheckable = nil
 			local sources = mounts.filters.sources
 			for i = 1, C_PetJournal.GetNumPetSources() do
 				if C_MountJournal.IsValidSourceFilter(i) then
@@ -2000,7 +2033,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			end
 			btn:ddAddButton(info, level)
 
-			info.notCheckable = false
+			info.notCheckable = nil
 			local factions = mounts.filters.factions
 			for i = 1, 3 do
 				info.text = L["MOUNT_FACTION_"..i]
@@ -2028,7 +2061,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			end
 			btn:ddAddButton(info, level)
 
-			info.notCheckable = false
+			info.notCheckable = nil
 			local pet = mounts.filters.pet
 			for i = 1, 4 do
 				info.text = L["PET_"..i]
@@ -2056,7 +2089,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			end
 			btn:ddAddButton(info, level)
 
-			info.notCheckable = false
+			info.notCheckable = nil
 			local expansions = mounts.filters.expansions
 			for i = 1, EJ_GetNumTiers() do
 				info.text = _G["EXPANSION_NAME"..(i - 1)]
@@ -2067,10 +2100,55 @@ function journal:filterDropDown_Initialize(btn, level, value)
 				info.checked = function() return expansions[i] end
 				btn:ddAddButton(info, level)
 			end
-		elseif value == 7 then -- TAGS
+		elseif value == 7 then -- CHANCE OF SUMMONING
+			local filterWeight = mounts.filters.mountsWeight
+
+			info.notCheckable = nil
+			info.isNotRadio = nil
+
+			info.text = L["Any"]
+			info.func = function(button)
+				filterWeight.sign = button.value
+				btn:ddRefresh(level)
+				self:updateMountsList()
+			end
+			info.checked = function() return not filterWeight.sign end
+			btn:ddAddButton(info, level)
+
+			info.text = L["> (more than)"]
+			info.value = ">"
+			info.checked = function() return filterWeight.sign == ">" end
+			btn:ddAddButton(info, level)
+
+			info.text = L["< (less than)"]
+			info.value = "<"
+			info.checked = function() return filterWeight.sign == "<" end
+			btn:ddAddButton(info, level)
+
+			info.text = L["= (equal to)"]
+			info.value = "="
+			info.checked = function() return filterWeight.sign == "=" end
+			btn:ddAddButton(info, level)
+
+			info.text = nil
+			info.value = nil
+			info.func = nil
+			info.checked = nil
+			info.customFrame = self.weightFrame
+			info.OnLoad = function(frame)
+				frame.level = level + 1
+				frame.slider:SetValue(filterWeight.weight)
+				frame.setFunc = function(value)
+					if filterWeight.weight ~= value then
+						filterWeight.weight = value
+					end
+				end
+			end
+			btn:ddAddButton(info, level)
+		elseif value == 8 then -- TAGS
 			local filterTags = self.tags.filter
 
-			info.notCheckable = false
+			info.notCheckable = nil
 			info.text = L["No tag"]
 			info.func = function(_,_,_, value)
 				filterTags.noTag = value
@@ -2215,6 +2293,10 @@ function journal:saveDefaultFilters()
 	defFilters.onlyHideOnChar = filters.onlyHideOnChar
 	defFilters.hiddenByPlayer = filters.hiddenByPlayer
 	defFilters.onlyHiddenByPlayer = filters.onlyHiddenByPlayer
+	defFilters.mountsWeight.sign = filters.mountsWeight.sign
+	defFilters.mountsWeight.weight = filters.mountsWeight.weight
+	defFilters.tags.noTag = filters.tags.noTag
+	defFilters.tags.withAllTags = filters.tags.withAllTags
 
 	for i = 1, #filters.types do
 		defFilters.types[i] = filters.types[i]
@@ -2234,9 +2316,6 @@ function journal:saveDefaultFilters()
 	for i = 1, #filters.expansions do
 		defFilters.expansions[i] = filters.expansions[i]
 	end
-
-	defFilters.tags.noTag = filters.tags.noTag
-	defFilters.tags.withAllTags = filters.tags.withAllTags
 	for tag, value in pairs(filters.tags.tags) do
 		defFilters.tags.tags[tag] = value[2]
 	end
@@ -2256,6 +2335,8 @@ function journal:restoreDefaultFilters()
 	defFilters.onlyHideOnChar = false
 	defFilters.hiddenByPlayer = false
 	defFilters.onlyHiddenByPlayer = false
+	defFilters.mountsWeight.sign = nil
+	defFilters.mountsWeight.weight = 100
 	defFilters.tags.noTag = true
 	defFilters.tags.withAllTags = false
 	wipe(defFilters.types)
@@ -2282,6 +2363,8 @@ function journal:isDefaultFilters()
 	or not defFilters.onlyHideOnChar ~= not filters.onlyHideOnChar
 	or not defFilters.hiddenByPlayer ~= not filters.hiddenByPlayer
 	or not defFilters.onlyHiddenByPlayer ~= not filters.onlyHiddenByPlayer
+	or defFilters.mountsWeight.sign ~= filters.mountsWeight.sign
+	or defFilters.mountsWeight.weight ~= filters.mountsWeight.weight
 	or defFilters.tags.noTag ~= filters.tags.noTag
 	or defFilters.tags.withAllTags ~= filters.tags.withAllTags
 	then return end
@@ -2342,6 +2425,10 @@ function journal:resetToDefaultFilters()
 	filters.onlyHideOnChar = defFilters.onlyHideOnChar
 	filters.hiddenByPlayer = defFilters.hiddenByPlayer
 	filters.onlyHiddenByPlayer = defFilters.onlyHiddenByPlayer
+	filters.mountsWeight.sign = defFilters.mountsWeight.sign
+	filters.mountsWeight.weight = defFilters.mountsWeight.weight
+	filters.tags.noTag = defFilters.tags.noTag
+	filters.tags.withAllTags = defFilters.tags.withAllTags
 
 	for i = 1, #defFilters.types do
 		filters.types[i] = defFilters.types[i]
@@ -2361,9 +2448,6 @@ function journal:resetToDefaultFilters()
 	for i = 1, #defFilters.expansions do
 		filters.expansions[i] = defFilters.expansions[i]
 	end
-
-	filters.tags.noTag = defFilters.tags.noTag
-	filters.tags.withAllTags = defFilters.tags.withAllTags
 	for tag, value in pairs(defFilters.tags.tags) do
 		filters.tags.tags[tag][2] = value
 	end
@@ -2473,6 +2557,23 @@ function journal:isMountHidden(mountID)
 end
 
 
+function journal:getFilterWeight(mountID)
+	local filter = mounts.filters.mountsWeight
+	if not filter.sign then
+		return true
+	else
+		local mountWeight = self.mountsWeight[mountID] or 100
+		if filter.sign == ">" then
+			return mountWeight > filter.weight
+		elseif filter.sign == "<" then
+			return mountWeight < filter.weight
+		else
+			return mountWeight == filter.weight
+		end
+	end
+end
+
+
 function journal:setShownCountMounts()
 	self.shownPanel.count:SetText(#self.displayedMounts)
 	if self:isDefaultFilters() then
@@ -2535,6 +2636,8 @@ function journal:updateMountsList()
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
 		-- EXPANSIONS
 		and expansions[mountsDB[mountID]]
+		-- MOUNTS WEIGHT
+		and self:getFilterWeight(mountID)
 		-- TAGS
 		and tags:getFilterMount(mountID) then
 			self.displayedMounts[#self.displayedMounts + 1] = mountID
