@@ -51,7 +51,7 @@ function tags:init()
 	self.sortedTags = {}
 	self:setSortedTags()
 
-	self.mountOptionsMenu = LibStub("LibSFDropDown-1.1"):SetMixin({})
+	self.mountOptionsMenu = LibStub("LibSFDropDown-1.2"):SetMixin({})
 	self.mountOptionsMenu:ddHideWhenButtonHidden(journal.bgFrame)
 	self.mountOptionsMenu:ddSetInitFunc(function(...) self:mountOptionsMenu_Init(...) end)
 	self.mountOptionsMenu:ddSetDisplayMode("menu")

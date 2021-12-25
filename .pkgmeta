@@ -17,3 +17,6 @@ ignore:
 	- _config.yml
 	- libs/LibStub/LibStub.toc
 	- libs/LibStub/tests
+	- libs/LibSFDropDown/LibSFDropDown.toc
+	- libs/LibSFDropDown/LibSFDropDown_TBC.toc
+	- libs/LibSFDropDown/LibSFDropDown_Vanilla.toc
