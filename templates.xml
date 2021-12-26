@@ -913,7 +913,7 @@
 						<Size y="17"/>
 						<Anchors>
 							<Anchor point="BOTTOMLEFT" x="0" y="2"/>
-							<Anchor point="RIGHT" x="-30" y="0"/>
+							<Anchor point="RIGHT" x="-40" y="0"/>
 						</Anchors>
 						<HitRectInsets>
 							<AbsInset left="0" right="0" top="0" bottom="0"/>
@@ -925,21 +925,31 @@
 										<Anchor point="BOTTOM" relativePoint="TOP"/>
 									</Anchors>
 								</FontString>
-								<FontString parentKey="label" inherits="GameFontHighlightSmall">
-									<Anchors>
-										<Anchor point="LEFT" relativePoint="RIGHT" x="2" y="1"/>
-									</Anchors>
-								</FontString>
 							</Layer>
 						</Layers>
 						<Scripts>
 							<OnLoad inherit="prepend">
 								hooksecurefunc(self, "SetValue", function(self, value)
-									self.label:SetText(value.."%")
+									self:GetParent().edit:SetNumber(value)
 								end)
 							</OnLoad>
 						</Scripts>
 					</Slider>
+					<EditBox parentKey="edit" inherits="MJNumberTextBox">
+						<Size x="28" y="17"/>
+						<Anchors>
+							<Anchor point="LEFT" relativeKey="$parent.slider" relativePoint="RIGHT" x="3"/>
+						</Anchors>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString parentKey="label" text="%" inherits="GameFontHighlightSmall">
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT" x="2"/>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+					</EditBox>
 				</Frames>
 			</Frame>
 

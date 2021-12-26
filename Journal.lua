@@ -501,15 +501,16 @@ function journal:init()
 	filtersButton:ddSetInitFunc(function(...) self:filterDropDown_Initialize(...) end)
 
 	-- MOUNTS WEIGHT SLIDER
+	local weightControl_OnEnter = function(self)
+		local parent = self:GetParent()
+		parent:GetScript("OnEnter")(parent)
+	end
 	self.weightFrame:SetScript("OnEnter", function(self)
 		filtersButton:ddCloseMenus(self.level)
 	end)
 	self.weightFrame.slider.text:SetText(L["Chance of summoning"])
 	self.weightFrame.slider:SetMinMaxValues(1, 100)
-	self.weightFrame.slider:HookScript("OnEnter", function(self)
-		local parent = self:GetParent()
-		parent:GetScript("OnEnter")(parent)
-	end)
+	self.weightFrame.slider:HookScript("OnEnter", weightControl_OnEnter)
 	self.weightFrame.slider:HookScript("OnMouseUp", function()
 		journal:updateMountsList()
 	end)
@@ -518,6 +519,31 @@ function journal:init()
 		value = math.floor(value + .5)
 		slider:SetValue(value)
 		slider:GetParent().setFunc(value)
+	end)
+	self.weightFrame.edit:HookScript("OnEnter", weightControl_OnEnter)
+	self.weightFrame.edit:SetScript("OnEnterPressed", function(editBox)
+		local value = tonumber(editBox:GetText()) or 0
+		if value < 1 then
+			value = 1
+		elseif value > 100 then
+			value = 100
+		end
+		local slider = editBox:GetParent().slider
+		slider:GetScript("OnValueChanged")(slider, value, true)
+		journal:updateMountsList()
+		editBox:ClearFocus()
+	end)
+	self.weightFrame.edit:SetScript("OnEditFocusLost", function(editBox)
+		editBox:SetNumber(math.floor(editBox:GetParent().slider:GetValue() + .5))
+	end)
+	self.weightFrame.edit:SetScript("OnMouseWheel", function(editBox, delta)
+		local value = (tonumber(editBox:GetText()) or 0) + (delta > 0 and 1 or -1)
+		if value >= 1 and value <= 100 then
+			editBox:SetNumber(value)
+			local slider = editBox:GetParent().slider
+			slider:GetScript("OnValueChanged")(slider, value, true)
+			journal:updateMountsList()
+		end
 	end)
 
 	-- FILTERS BUTTONS

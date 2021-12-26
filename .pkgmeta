@@ -20,3 +20,4 @@ ignore:
 	- libs/LibSFDropDown/LibSFDropDown.toc
 	- libs/LibSFDropDown/LibSFDropDown_TBC.toc
 	- libs/LibSFDropDown/LibSFDropDown_Vanilla.toc
+	- libs/LibSFDropDown/CHANGELOG.md
