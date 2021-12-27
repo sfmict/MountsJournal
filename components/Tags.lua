@@ -193,6 +193,7 @@ function tags:mountOptionsMenu_Init(btn, level)
 				end
 				btn:ddAddButton(info, level)
 				info.customFrame = nil
+				info.OnLoad = nil
 			end
 
 			local canFavorite = realIndex and select(2, C_MountJournal.GetIsFavorite(realIndex))
