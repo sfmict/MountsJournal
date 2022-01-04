@@ -3,7 +3,7 @@ local util = MountsJournalUtil
 
 
 MountsJournalFrame:on("MODULES_INIT", function(journal)
-	local dd = LibStub("LibSFDropDown-1.2"):CreateButton(journal.modelScene)
+	local dd = LibStub("LibSFDropDown-1.3"):CreateButtonOriginal(journal.modelScene)
 	dd:SetAlpha(.5)
 	dd:SetPoint("LEFT", journal.modelScene.modelControl, "RIGHT", 10, -.5)
 	journal.modelScene.animationsCombobox = dd

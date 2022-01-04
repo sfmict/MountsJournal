@@ -310,7 +310,7 @@ function journal:init()
 	self.mapSettings.HerbGathering.tooltipText = L["Herb Gathering"]
 	self.mapSettings.HerbGathering.tooltipRequirement = L["HerbGatheringFlagDescription"]
 	self.mapSettings.HerbGathering:HookScript("OnClick", function(check) self:setFlag("herbGathering", check:GetChecked()) end)
-	self.mapSettings.listFromMap = LibStub("LibSFDropDown-1.2"):CreateStretchButton(self.mapSettings, 134, 30, true)
+	self.mapSettings.listFromMap = LibStub("LibSFDropDown-1.3"):CreateStretchButtonOriginal(self.mapSettings, 134, 30, true)
 	self.mapSettings.listFromMap:SetPoint("BOTTOMLEFT", 33, 15)
 	self.mapSettings.listFromMap:SetText(L["ListMountsFromZone"])
 	self.mapSettings.listFromMap.maps = {}
@@ -494,7 +494,7 @@ function journal:init()
 	end)
 
 	-- FILTERS BUTTON
-	local filtersButton = LibStub("LibSFDropDown-1.2"):CreateStretchButton(self.filtersPanel, nil, 22)
+	local filtersButton = LibStub("LibSFDropDown-1.3"):CreateStretchButtonOriginal(self.filtersPanel, nil, 22)
 	filtersButton:SetPoint("LEFT", self.searchBox, "RIGHT", -1, 0)
 	filtersButton:SetPoint("TOPRIGHT", -3, -4)
 	filtersButton:SetText(FILTER)
@@ -631,7 +631,7 @@ function journal:init()
 	end)
 
 	-- MODEL SCENE MULTIPLE BUTTON
-	LibStub("LibSFDropDown-1.2"):SetMixin(self.multipleMountBtn)
+	LibStub("LibSFDropDown-1.3"):SetMixin(self.multipleMountBtn)
 	self.multipleMountBtn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	self.multipleMountBtn:ddSetInitFunc(function(...) self:miltipleMountBtn_Initialize(...) end)
 	self.multipleMountBtn:ddSetDisplayMode("menu")
