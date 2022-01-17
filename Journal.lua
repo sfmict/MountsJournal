@@ -28,6 +28,7 @@ journal.indexByMountID = setmetatable({}, metaMounts)
 function journal:init()
 	self.init = nil
 
+	local lsfdd = LibStub("LibSFDropDown-1.4")
 	local texPath = "Interface/AddOns/MountsJournal/textures/"
 	self.mountIDs = C_MountJournal.GetMountIDs()
 
@@ -310,7 +311,7 @@ function journal:init()
 	self.mapSettings.HerbGathering.tooltipText = L["Herb Gathering"]
 	self.mapSettings.HerbGathering.tooltipRequirement = L["HerbGatheringFlagDescription"]
 	self.mapSettings.HerbGathering:HookScript("OnClick", function(check) self:setFlag("herbGathering", check:GetChecked()) end)
-	self.mapSettings.listFromMap = LibStub("LibSFDropDown-1.3"):CreateStretchButtonOriginal(self.mapSettings, 134, 30, true)
+	self.mapSettings.listFromMap = lsfdd:CreateStretchButtonOriginal(self.mapSettings, 134, 30, true)
 	self.mapSettings.listFromMap:SetPoint("BOTTOMLEFT", 33, 15)
 	self.mapSettings.listFromMap:SetText(L["ListMountsFromZone"])
 	self.mapSettings.listFromMap.maps = {}
@@ -494,7 +495,7 @@ function journal:init()
 	end)
 
 	-- FILTERS BUTTON
-	local filtersButton = LibStub("LibSFDropDown-1.3"):CreateStretchButtonOriginal(self.filtersPanel, nil, 22)
+	local filtersButton = lsfdd:CreateStretchButtonOriginal(self.filtersPanel, nil, 22)
 	filtersButton:SetPoint("LEFT", self.searchBox, "RIGHT", -1, 0)
 	filtersButton:SetPoint("TOPRIGHT", -3, -4)
 	filtersButton:SetText(FILTER)
@@ -631,12 +632,27 @@ function journal:init()
 	end)
 
 	-- MODEL SCENE MULTIPLE BUTTON
-	LibStub("LibSFDropDown-1.3"):SetMixin(self.multipleMountBtn)
+	lsfdd:SetMixin(self.multipleMountBtn)
 	self.multipleMountBtn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-	self.multipleMountBtn:ddSetInitFunc(function(...) self:miltipleMountBtn_Initialize(...) end)
 	self.multipleMountBtn:ddSetDisplayMode("menu")
 	self.multipleMountBtn:ddHideWhenButtonHidden()
 	self.multipleMountBtn:ddSetNoGlobalMouseEvent(true)
+	self.multipleMountBtn:ddSetInitFunc(function(btn, level)
+		local info = {}
+		local allCreatureDisplays = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
+		local func = function(_, creatureID)
+			self:updateMountDisplay(true, creatureID)
+		end
+
+		for i = 1, #allCreatureDisplays do
+			local creatureID = allCreatureDisplays[i].creatureDisplayID
+			info.text = MODEL.." "..i
+			info.arg1 = creatureID
+			info.func = func
+			info.checked = self.mountDisplay.lastCreatureID == creatureID
+			btn:ddAddButton(info, level)
+		end
+	end)
 	self.multipleMountBtn:SetScript("OnClick", function(btn, mouseBtn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		if mouseBtn == "LeftButton" then
@@ -1711,23 +1727,6 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 		self.mountDisplay.noMountsTex:Show()
 		self.mountDisplay.noMounts:Show()
 		self.summonButton:Disable()
-	end
-end
-
-
-function journal:miltipleMountBtn_Initialize(btn, level)
-	local info = {}
-
-	local allCreatureDisplays, index = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
-	for i = 1, #allCreatureDisplays do
-		local creatureID = allCreatureDisplays[i].creatureDisplayID
-
-		info.text = MODEL.." "..i
-		info.func = function()
-			self:updateMountDisplay(true, creatureID)
-		end
-		info.checked = self.mountDisplay.lastCreatureID == creatureID
-		btn:ddAddButton(info, level)
 	end
 end
 

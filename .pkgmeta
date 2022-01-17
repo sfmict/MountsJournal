@@ -2,7 +2,9 @@ package-as: MountsJournal
 
 externals:
 	libs/LibStub: https://repos.curseforge.com/wow/libstub/trunk
-	libs/LibSFDropDown: https://github.com/sfmict/LibSFDropDown
+	libs/LibSFDropDown:
+		site: https://www.curseforge.com/wow/addons/libsfdropdown
+		source: https://github.com/sfmict/LibSFDropDown
 
 enable-nolib-creation: no
 

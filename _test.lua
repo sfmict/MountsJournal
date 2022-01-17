@@ -222,6 +222,7 @@ function test:PLAYER_ENTERING_WORLD()
 	-- journal.navBar:setMapID(980)
 
 	-- CONFIG OPEN
+	-- local config = HidingBarConfigAddon
 	-- local config = MountsJournalConfig
 	-- local config = MountsJournalConfigClasses
 	-- local config = MountsJournalConfigAbout

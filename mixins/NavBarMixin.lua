@@ -19,7 +19,7 @@ function MJNavBarMixin:onLoad()
 	self.overlay:SetFrameLevel(self:GetFrameLevel() + 50)
 	self.defMapID = MountsJournal.defMountsListID
 
-	self.dropDown = LibStub("LibSFDropDown-1.3"):SetMixin({})
+	self.dropDown = LibStub("LibSFDropDown-1.4"):SetMixin({})
 	self.dropDown:ddHideWhenButtonHidden(self)
 	self.dropDown:ddSetInitFunc(function(...) self:dropDownInit(...) end)
 	self.dropDown:ddSetDisplayMode("menu")
