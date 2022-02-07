@@ -1,4 +1,4 @@
-local _, L = ...
+local addon, L = ...
 
 
 MountsJournalFrame:on("MODULES_INIT", function(journal)
@@ -47,6 +47,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 	end
 	EJ_SelectTier(currentTier)
 
+	dd:ddSetDisplayMode(addon)
 	dd:ddSetInitFunc(function(self, level, value)
 		local info = {}
 

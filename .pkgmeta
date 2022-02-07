@@ -4,18 +4,14 @@ externals:
 	libs/LibStub: https://repos.curseforge.com/wow/libstub/trunk
 	libs/LibSFDropDown:
 		site: https://www.curseforge.com/wow/addons/libsfdropdown
-		source: https://github.com/sfmict/LibSFDropDown
+		url: https://github.com/sfmict/LibSFDropDown
+		tag: latest
 
 enable-nolib-creation: no
-
-manual-changelog:
-	filename: CHANGELOG.md
-	markup-type: markdown
 
 ignore:
 	- _test.lua
 	- README.md
-	- CHANGELOG.md
 	- _config.yml
 	- libs/LibStub/LibStub.toc
 	- libs/LibStub/tests
@@ -23,3 +19,4 @@ ignore:
 	- libs/LibSFDropDown/LibSFDropDown_TBC.toc
 	- libs/LibSFDropDown/LibSFDropDown_Vanilla.toc
 	- libs/LibSFDropDown/CHANGELOG.md
+	- libs/LibSFDropDown/README.md

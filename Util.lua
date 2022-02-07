@@ -59,6 +59,22 @@ function eventsMixin:event(event, ...)
 end
 
 
+local scale = WorldFrame:GetWidth() / GetPhysicalScreenSize() / UIParent:GetScale()
+local menuBackdrop = {
+	bgFile = "Interface/ChatFrame/ChatFrameBackground",
+	edgeFile = "Interface/ChatFrame/ChatFrameBackground",
+	tile = true, edgeSize = 1 * scale, tileSize = 5 * scale,
+}
+local lsfdd = LibStub("LibSFDropDown-1.4")
+	lsfdd:CreateMenuStyle(addon, function(parent)
+	local f = CreateFrame("FRAME", nil, parent, "BackdropTemplate")
+	f:SetBackdrop(menuBackdrop)
+	f:SetBackdropColor(.06, .06, .10, .9)
+	f:SetBackdropBorderColor(.5, .5, .5, .8)
+	return f
+end)
+
+
 MountsJournalUtil = {}
 MountsJournalUtil.addonName = ("%s_ADDON_"):format(addon:upper())
 
@@ -87,7 +103,7 @@ MountsJournalUtil.mountTypes = setmetatable({
 
 MountsJournalUtil.filterButtonBackdrop = {
 	edgeFile = "Interface/AddOns/MountsJournal/textures/border",
-	edgeSize = 8,
+	edgeSize = 8 * scale,
 }
 
 
@@ -96,8 +112,8 @@ MountsJournalUtil.optionsPanelBackdrop = {
 	edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
 	tile = true,
 	tileEdge = true,
-	tileSize = 14,
-	edgeSize = 14,
+	tileSize = 14 * scale,
+	edgeSize = 14 * scale,
 	insets = {left = 4, right = 4, top = 4, bottom = 4}
 }
 
@@ -105,7 +121,7 @@ MountsJournalUtil.optionsPanelBackdrop = {
 MountsJournalUtil.editBoxBackdrop = {
 	bgFile = "Interface/ChatFrame/ChatFrameBackground",
 	edgeFile = "Interface/ChatFrame/ChatFrameBackground",
-	tile = true, edgeSize = 1, tileSize = 5,
+	tile = true, edgeSize = 1 * scale, tileSize = 5 * scale,
 }
 
 

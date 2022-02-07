@@ -1,3 +1,4 @@
+local addon = ...
 local util = MountsJournalUtil
 local mapValidTypes = {
 	[Enum.UIMapType.World] = true,
@@ -22,7 +23,7 @@ function MJNavBarMixin:onLoad()
 	self.dropDown = LibStub("LibSFDropDown-1.4"):SetMixin({})
 	self.dropDown:ddHideWhenButtonHidden(self)
 	self.dropDown:ddSetInitFunc(function(...) self:dropDownInit(...) end)
-	self.dropDown:ddSetDisplayMode("menu")
+	self.dropDown:ddSetDisplayMode(addon)
 
 	self.navBtnClick = function(_, mapID)
 		self:setMapID(mapID or self.defMapID)

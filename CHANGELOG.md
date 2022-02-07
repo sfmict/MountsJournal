@@ -1,3 +1,0 @@
-# MountsJournal
-
-* Library update.

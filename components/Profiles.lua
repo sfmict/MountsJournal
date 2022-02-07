@@ -147,7 +147,8 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 	dd.charDB = dd.mounts.charDB
 	dd.profileNames = {}
 	dd:SetText(dd.charDB.currentProfileName or DEFAULT)
-	
+
+	dd:ddSetDisplayMode(addon)
 	dd:ddSetInitFunc(function(self, level, value)
 		local info = {}
 
