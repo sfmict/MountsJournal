@@ -31,7 +31,7 @@ function util.showHelpJournal()
 		HelpTip:Show(journal.bgFrame, helpTipInfo, journal.scrollFrame)
 	elseif step == 1 then
 		local helpTipInfo = {
-			text = L["ZoneSettingsTooltipDescription"]:gsub("\n*(.*)", "%1"),
+			text = L["ZoneSettingsTooltipDescription"],
 			buttonStyle = HelpTip.ButtonStyle.Next,
 			targetPoint = HelpTip.Point.RightEdgeCenter,
 			alignment = HelpTip.Alignment.Top,

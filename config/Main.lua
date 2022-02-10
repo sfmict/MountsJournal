@@ -112,7 +112,7 @@ config:SetScript("OnShow", function(self)
 	local helpPlate = CreateFrame("FRAME", nil, leftPanel, "MJHelpPlate")
 	helpPlate:SetPoint("TOP", self.bindMount, "BOTTOM", 0, -20)
 	helpPlate.tooltip = L["SecondMountTooltipTitle"]:format(SUMMONS)
-	helpPlate.tooltipDescription = L["SecondMountTooltipDescription"]
+	helpPlate.tooltipDescription = "\n"..L["SecondMountTooltipDescription"]
 
 	-- MODIFIER TEXT
 	local modifierText = leftPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")

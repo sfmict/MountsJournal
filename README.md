@@ -13,8 +13,8 @@ Addon makes it possible to sort mounts on waterfowl, flying, ground and allows t
 
 * Sorting mounts for use in fly, ground and water areas.
 * One-button mount summoning in all areas.
-*  Auto summoning Chauffeured Chopper, when no riding skill.
-*  Auto summoning Vashj'ir SeaHorse in Vashj'ir.
+* Auto summoning Chauffeured Chopper, when no riding skill.
+* Auto summoning Vashj'ir SeaHorse in Vashj'ir.
 * Filter Hidden For Character.
 * Filter mounts by type.
 * Filter mounts by selected.

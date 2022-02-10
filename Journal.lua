@@ -258,7 +258,7 @@ function journal:init()
 	summon2:SetScript("OnEnter", function(btn)
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
 		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 2\"")
-		GameTooltip_AddNormalLine(GameTooltip, L["SecondMountTooltipDescription"]:gsub("^\n", ""):gsub("\n\n", "\n"))
+		GameTooltip_AddNormalLine(GameTooltip, L["SecondMountTooltipDescription"]:gsub("\n\n", "\n"))
 		GameTooltip_AddColoredLine(GameTooltip, "\nMacro: /click "..config.secureButtonNameSecondMount, NIGHT_FAE_BLUE_COLOR, false)
 		if InCombatLockdown() then
 			GameTooltip_AddErrorLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT)
@@ -298,7 +298,7 @@ function journal:init()
 		self.navBar:setCurrentMap()
 	end)
 	self.mapSettings.hint.tooltip = L["ZoneSettingsTooltip"]
-	self.mapSettings.hint.tooltipDescription = L["ZoneSettingsTooltipDescription"]
+	self.mapSettings.hint.tooltipDescription = "\n"..L["ZoneSettingsTooltipDescription"]
 	self.mapSettings.Flags.Text:SetText(L["Enable Flags"])
 	self.mapSettings.Flags:HookScript("OnClick", function(check) self:setFlag("enableFlags", check:GetChecked()) end)
 	self.mapSettings.Ground = util.createCheckboxChild(L["Ground Mounts Only"], self.mapSettings.Flags)
