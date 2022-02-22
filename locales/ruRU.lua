@@ -44,6 +44,7 @@ L["With multiple models"] = "Только с несколькими моделя
 L["hidden for character"] = "Скрытые для персонажа"
 L["only hidden"] = "Только скрытые"
 L["Hidden by player"] = "Скрытые игроком"
+L["Only new"] = "Только новые"
 L["types"] = "Типы"
 L["selected"] = "Выбранные"
 L["MOUNT_TYPE_1"] = "Летающие"

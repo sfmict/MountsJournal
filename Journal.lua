@@ -725,17 +725,16 @@ function journal:init()
 
 	-- PLAYER SHOW BUTTON
 	local playerToggle = self.modelScene.playerToggle
-	function playerToggle:setPortrait() SetPortraitTexture(self.portrait, "player") end
-	playerToggle:setPortrait()
 	playerToggle:SetChecked(GetCVarBool("mountJournalShowPlayer"))
-	playerToggle:SetScript("OnEvent", playerToggle.setPortrait)
+	SetPortraitTexture(playerToggle.portrait, "player")
+	playerToggle:RegisterEvent("PORTRAITS_UPDATED")
+	playerToggle:SetScript("OnEvent", function(self)
+		SetPortraitTexture(self.portrait, "player")
+		self:UnregisterEvent("PORTRAITS_UPDATED")
+		self:SetScript("OnEvent", nil)
+	end)
 	playerToggle:SetScript("OnShow", function(self)
 		self:SetChecked(GetCVarBool("mountJournalShowPlayer"))
-		self:setPortrait()
-		self:RegisterUnitEvent("UNIT_PORTRAIT_UPDATE", "player")
-	end)
-	playerToggle:SetScript("OnHide", function(self)
-		self:UnregisterEvent("UNIT_PORTRAIT_UPDATE")
 	end)
 	playerToggle:SetScript("OnClick", function(btn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -1354,16 +1353,12 @@ function journal:sortMounts()
 
 	sort(self.mountIDs, function(a, b)
 		if not mCache[a] then setMCache(a) end
-		local nameA = mCache[a][1]
-		local isCollectedA = mCache[a][3]
-		local needFanfareA = mCache[a][4]
-
 		if not mCache[b] then setMCache(b) end
-		local nameB = mCache[b][1]
-		local isCollectedB = mCache[b][3]
-		local needFanfareB = mCache[b][4]
 
 		-- FANFARE
+		local needFanfareA = mCache[a][4]
+		local needFanfareB = mCache[b][4]
+
 		if needFanfareA and not needFanfareB then return true
 		elseif not needFanfareA and needFanfareB then return false end
 
@@ -1377,10 +1372,16 @@ function journal:sortMounts()
 		end
 
 		-- COLLECTED
+		local isCollectedA = mCache[a][3]
+		local isCollectedB = mCache[b][3]
+
 		if isCollectedA and not isCollectedB then return true
 		elseif not isCollectedA and isCollectedB then return false end
 
 		-- TYPE
+		local nameA = mCache[a][1]
+		local nameB = mCache[b][1]
+
 		if fSort.by == "type" then
 			local typeA = mCache[a][5]
 			local typeB = mCache[b][5]
@@ -1886,10 +1887,18 @@ function journal:filterDropDown_Initialize(btn, level, value)
 		info.checked = mounts.filters.onlyHiddenByPlayer
 		btn:ddAddButton(info, level)
 
-		btn:ddAddSpace(level)
-
 		info.indent = nil
 		info.disabled = nil
+		info.text = L["Only new"]
+		info.func = function(_,_,_, value)
+			mounts.filters.onlyNew = value
+			self:updateMountsList()
+		end
+		info.checked = mounts.filters.onlyNew
+		btn:ddAddButton(info, level)
+
+		btn:ddAddSpace(level)
+
 		info.checked = nil
 		info.isNotRadio = nil
 		info.func = nil
@@ -1938,6 +1947,10 @@ function journal:filterDropDown_Initialize(btn, level, value)
 
 		info.keepShownOnClick = nil
 		info.hasArrow = nil
+		info.text = RESET
+		info.func = function() self:resetToDefaultFilters() end
+		btn:ddAddButton(info, level)
+
 		info.text = L["Set current filters as default"]
 		info.func = function() self:saveDefaultFilters() end
 		btn:ddAddButton(info, level)
@@ -2295,7 +2308,6 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			info.checked = fSort.reverse
 			btn:ddAddButton(info, level)
 
-			info.isNotRadio = true
 			info.text = L["Favorites First"]
 			info.func = function(_,_,_, value)
 				fSort.favoritesFirst = value
@@ -2320,6 +2332,7 @@ function journal:saveDefaultFilters()
 	defFilters.onlyHideOnChar = filters.onlyHideOnChar
 	defFilters.hiddenByPlayer = filters.hiddenByPlayer
 	defFilters.onlyHiddenByPlayer = filters.onlyHiddenByPlayer
+	defFilters.onlyNew = filters.onlyNew
 	defFilters.mountsWeight.sign = filters.mountsWeight.sign
 	defFilters.mountsWeight.weight = filters.mountsWeight.weight
 	defFilters.tags.noTag = filters.tags.noTag
@@ -2362,6 +2375,7 @@ function journal:restoreDefaultFilters()
 	defFilters.onlyHideOnChar = false
 	defFilters.hiddenByPlayer = false
 	defFilters.onlyHiddenByPlayer = false
+	defFilters.onlyNew = false
 	defFilters.mountsWeight.sign = nil
 	defFilters.mountsWeight.weight = 100
 	defFilters.tags.noTag = true
@@ -2390,6 +2404,7 @@ function journal:isDefaultFilters()
 	or not defFilters.onlyHideOnChar ~= not filters.onlyHideOnChar
 	or not defFilters.hiddenByPlayer ~= not filters.hiddenByPlayer
 	or not defFilters.onlyHiddenByPlayer ~= not filters.onlyHiddenByPlayer
+	or not defFilters.onlyNew ~= not filters.onlyNew
 	or defFilters.mountsWeight.sign ~= filters.mountsWeight.sign
 	or defFilters.mountsWeight.weight ~= filters.mountsWeight.weight
 	or defFilters.tags.noTag ~= filters.tags.noTag
@@ -2452,6 +2467,7 @@ function journal:resetToDefaultFilters()
 	filters.onlyHideOnChar = defFilters.onlyHideOnChar
 	filters.hiddenByPlayer = defFilters.hiddenByPlayer
 	filters.onlyHiddenByPlayer = defFilters.onlyHiddenByPlayer
+	filters.onlyNew = defFilters.onlyNew
 	filters.mountsWeight.sign = defFilters.mountsWeight.sign
 	filters.mountsWeight.weight = defFilters.mountsWeight.weight
 	filters.tags.noTag = defFilters.tags.noTag
@@ -2615,7 +2631,7 @@ end
 
 
 function journal:updateMountsList()
-	local filters, mountTypes, list, mountsDB, tags, GetMountInfoByID, GetMountInfoExtraByID = mounts.filters, self.mountTypes, self.list, mounts.mountsDB, self.tags, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID
+	local filters, mountTypes, list, newMounts, mountsDB, tags, GetMountInfoByID, GetMountInfoExtraByID = mounts.filters, self.mountTypes, self.list, mounts.newMounts, mounts.mountsDB, self.tags, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID
 	local sources, types, selected, factions, pet, expansions = filters.sources, filters.types, filters.selected, filters.factions, filters.pet, filters.expansions
 	local text = util.cleanText(self.searchBox:GetText())
 	wipe(self.displayedMounts)
@@ -2639,6 +2655,10 @@ function journal:updateMountsList()
 		and (isUsable or not isCollected or filters.unusable)
 		-- MUTIPLE MODELS
 		and (not filters.multipleModels or self.mountsWithMultipleModels[mountID])
+		-- EXPANSIONS
+		and expansions[mountsDB[mountID]]
+		-- ONLY NEW
+		and (not filters.onlyNew or newMounts[mountID])
 		-- SOURCES
 		and sources[sourceType]
 		-- SEARCH
@@ -2661,8 +2681,6 @@ function journal:updateMountsList()
 				or list.swimming[mountID])))
 		-- PET
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
-		-- EXPANSIONS
-		and expansions[mountsDB[mountID]]
 		-- MOUNTS WEIGHT
 		and self:getFilterWeight(mountID)
 		-- TAGS

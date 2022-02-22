@@ -598,7 +598,7 @@ do
 				usableIDs[weight] = mountID
 			end
 		end
-		if next(usableIDs) then
+		if weight > 0 then
 			for i = random(weight), weight do
 				if usableIDs[i] then
 					C_MountJournal.SummonByID(usableIDs[i])
