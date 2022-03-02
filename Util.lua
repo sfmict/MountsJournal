@@ -69,7 +69,7 @@ local lsfdd = LibStub("LibSFDropDown-1.4")
 	lsfdd:CreateMenuStyle(addon, function(parent)
 	local f = CreateFrame("FRAME", nil, parent, "BackdropTemplate")
 	f:SetBackdrop(menuBackdrop)
-	f:SetBackdropColor(.06, .06, .10, .9)
+	f:SetBackdropColor(.06, .06, .1, .9)
 	f:SetBackdropBorderColor(.5, .5, .5, .8)
 	return f
 end)
