@@ -72,9 +72,11 @@ aboutConfig:SetScript("OnShow", function(self)
 
 	local langs, last = {
 		{"deDE", "Flammenengel92, Asraael"},
-		{"zhTW", "BNS333"},
+		{"esMX", "Pedrorco"},
 		{"frFR", "Asraael"},
+		{"ptBR", "LutzPS"},
 		{"zhCN", "萌丶汉丶纸"},
+		{"zhTW", "BNS333"},
 	}
 
 	for _, l in ipairs(langs) do

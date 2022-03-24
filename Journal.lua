@@ -2393,6 +2393,7 @@ end
 
 
 function journal:isDefaultFilters()
+	if #self.searchBox:GetText() ~= 0 then return end
 	local filters = mounts.filters
 	local defFilters = mounts.defFilters
 
@@ -2671,14 +2672,12 @@ function journal:updateMountsList()
 		-- FACTION
 		and factions[(mountFaction or 2) + 1]
 		-- SELECTED
-		and (list and
-			(selected[1] and list.fly[mountID]
-			or selected[2] and list.ground[mountID]
-			or selected[3] and list.swimming[mountID])
-			or selected[4] and not (list and
-				(list.fly[mountID]
-				or list.ground[mountID]
-				or list.swimming[mountID])))
+		and (list and (selected[1] and list.fly[mountID]
+		            or selected[2] and list.ground[mountID]
+		            or selected[3] and list.swimming[mountID])
+		  or selected[4] and not (list and (list.fly[mountID]
+		                                 or list.ground[mountID]
+		                                 or list.swimming[mountID])))
 		-- PET
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
 		-- MOUNTS WEIGHT

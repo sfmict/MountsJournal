@@ -394,26 +394,34 @@ function mounts:PLAYER_REGEN_ENABLED()
 end
 
 
-function mounts:UNIT_SPELLCAST_START(_,_, spellID)
-	local petID = self.petForMount[spellID]
-	if petID then
-		local groupType = util.getGroupType()
-		if self.config.noPetInRaid and groupType == "raid"
-		or self.config.noPetInGroup and groupType == "group" then
-			return
+do
+	local function summonPet(petID)
+		if InCombatLockdown() then return end
+		if type(petID) == "number" then
+			C_PetJournal.SummonRandomPet(petID == 1)
+		elseif C_PetJournal.PetIsSummonable(petID) and C_PetJournal.GetSummonedPetGUID() ~= petID then
+			C_PetJournal.SummonPetByGUID(petID)
 		end
+	end
 
-		local start, duration = GetSpellCooldown(61304)
-		if duration ~= 0 then duration = start + duration - GetTime() end
 
-		C_Timer.After(duration, function()
-			if InCombatLockdown() then return end
-			if type(petID) == "number" then
-				C_PetJournal.SummonRandomPet(petID == 1)
-			elseif C_PetJournal.PetIsSummonable(petID) and C_PetJournal.GetSummonedPetGUID() ~= petID then
-				C_PetJournal.SummonPetByGUID(petID)
+	function mounts:UNIT_SPELLCAST_START(_,_, spellID)
+		local petID = self.petForMount[spellID]
+		if petID then
+			local groupType = util.getGroupType()
+			if self.config.noPetInRaid and groupType == "raid"
+			or self.config.noPetInGroup and groupType == "group" then
+				return
 			end
-		end)
+
+			local start, duration = GetSpellCooldown(61304)
+
+			if duration == 0 then
+				summonPet(petID)
+			else
+				C_Timer.After(duration, function() summonPet(petID) end)
+			end
+		end
 	end
 end
 
