@@ -913,7 +913,6 @@
 						<Size y="17"/>
 						<Anchors>
 							<Anchor point="BOTTOMLEFT" x="0" y="2"/>
-							<Anchor point="RIGHT" x="-40" y="0"/>
 						</Anchors>
 						<HitRectInsets>
 							<AbsInset left="0" right="0" top="0" bottom="0"/>
@@ -951,6 +950,12 @@
 						</Layers>
 					</EditBox>
 				</Frames>
+				<Scripts>
+					<OnLoad>
+						local width = self.edit.label:GetStringWidth()
+						self.slider:SetPoint("RIGHT", -width - 32, 0)
+					</OnLoad>
+				</Scripts>
 			</Frame>
 
 		</Frames>

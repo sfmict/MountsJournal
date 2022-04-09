@@ -514,14 +514,22 @@ function journal:init()
 	self.weightFrame.slider.text:SetText(L["Chance of summoning"])
 	self.weightFrame.slider:SetMinMaxValues(1, 100)
 	self.weightFrame.slider:HookScript("OnEnter", weightControl_OnEnter)
-	self.weightFrame.slider:HookScript("OnMouseUp", function()
+	self.weightFrame.slider:HookScript("OnMouseUp", function(slider)
 		journal:updateMountsList()
+		slider.isModified = nil
+	end)
+	self.weightFrame.slider:HookScript("OnHide", function(slider)
+		if slider.isModified then
+			journal:updateMountsList()
+			slider.isModified = nil
+		end
 	end)
 	self.weightFrame.slider:SetScript("OnValueChanged", function(slider, value, userInput)
 		if not userInput then return end
 		value = math.floor(value + .5)
 		slider:SetValue(value)
 		slider:GetParent().setFunc(value)
+		slider.isModified = true
 	end)
 	self.weightFrame.edit:HookScript("OnEnter", weightControl_OnEnter)
 	self.weightFrame.edit:SetScript("OnEnterPressed", function(editBox)

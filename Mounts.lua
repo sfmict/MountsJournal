@@ -31,7 +31,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.defProfile = self.globalDB.defProfile
 		self:checkProfile(self.defProfile)
 		self.profiles = self.globalDB.mountsProfiles
-		for name, profile in pairs(self.profiles) do
+		for name, profile in next, self.profiles do
 			self:checkProfile(profile)
 		end
 		self.filters = self.globalDB.filters
@@ -357,7 +357,8 @@ end
 function mounts:setUsableRepairMounts()
 	wipe(self.usableRepairMounts)
 	if not self.config.repairSelectedMount then
-		for _, mountID in ipairs(self.repairMounts) do
+		for i = 1, #self.repairMounts do
+			local mountID = self.repairMounts[i]
 			local _,_,_,_,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 			if isCollected and not shouldHideOnChar then
 				self.usableRepairMounts[mountID] = true
@@ -419,7 +420,7 @@ do
 			if duration == 0 then
 				summonPet(petID)
 			else
-				C_Timer.After(duration, function() summonPet(petID) end)
+				C_Timer.After(start + duration - GetTime(), function() summonPet(petID) end)
 			end
 		end
 	end

@@ -229,9 +229,11 @@ function MJCompanionsPanelMixin:onShow()
 			else
 				self:refresh()
 			end
+			self:scrollToSelectedPet()
 			self:on("UPDATE_PROFILE", self.refresh)
 		end)
 		self:petListUpdate(true)
+		self:scrollToSelectedPet()
 		self:on("UPDATE_PROFILE", self.refresh)
 	end)
 end
@@ -240,6 +242,28 @@ end
 function MJCompanionsPanelMixin:onHide()
 	self:off("UPDATE_PROFILE", self.refresh)
 	self:Hide()
+end
+
+
+function MJCompanionsPanelMixin:scrollToSelectedPet()
+	local selectedPetID = self.journal.petForMount[self.journal.selectedSpellID]
+	if type(selectedPetID) ~= "string" then return end
+	local scrollFrame = self.listScroll
+
+	for i = 1, #self.petFiltredList do
+		if selectedPetID == self.petFiltredList[i] then
+			local curHeight = scrollFrame.scrollBar:GetValue()
+			local maxHeight = i * scrollFrame.buttonHeight
+			local minHeight = maxHeight - math.floor(scrollFrame:GetHeight() + .5)
+
+			if curHeight < minHeight then
+				scrollFrame.scrollBar:SetValue(minHeight)
+			elseif curHeight >= maxHeight then
+				scrollFrame.scrollBar:SetValue(maxHeight - scrollFrame.buttonHeight)
+			end
+			break
+		end
+	end
 end
 
 
