@@ -85,7 +85,7 @@ MountsJournalUtil.mountTypes = setmetatable({
 	[247] = 1,
 	[248] = 1,
 	[398] = 1,
-	[407] = 1,
+	[407] = {1, 3},
 	[230] = 2,
 	[241] = 2,
 	[284] = 2,
@@ -164,7 +164,7 @@ function MountsJournalUtil.getMapFullNameInfo(mapID)
 		if mapGroupInfo then
 			for _, mapGroupMemberInfo in ipairs(mapGroupInfo) do
 				if mapGroupMemberInfo.mapID == mapID then
-					mapInfo.name = ("%s(%s)"):format(mapInfo.name, mapGroupMemberInfo.name)
+					mapInfo.name = ("%s (%s)"):format(mapInfo.name, mapGroupMemberInfo.name)
 					break
 				end
 			end

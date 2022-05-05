@@ -74,9 +74,11 @@ do
 		end
 		self.optionsButtonPool:ReleaseAll()
 
-		local function createOptionButton(tbl, mapID, flags)
+		local function createOptionButton(tbl, mapID, groupID, flags)
 			local btnText = self.util.getMapFullNameInfo(mapID).name
-			if flags then
+			if groupID then
+				btnText = ("[%d] %s"):format(groupID, btnText)
+			elseif flags then
 				btnText = ("%s [%s%s%s]"):format(btnText, getTextBool(flags.groundOnly), getTextBool(flags.waterWalkOnly), getTextBool(flags.herbGathering))
 			end
 			if #text == 0 or btnText:lower():find(text, 1, true) then
@@ -98,7 +100,7 @@ do
 
 		for mapID, mapConfig in pairs(self.journal.zoneMounts) do
 			if mapConfig.listFromID then
-				createOptionButton(self.lists[2].childs, mapID)
+				createOptionButton(self.lists[2].childs, mapID, mapConfig.listFromID)
 			elseif next(mapConfig.fly) or next(mapConfig.ground) or next(mapConfig.swimming) then
 				createOptionButton(self.lists[1].childs, mapID)
 			end
@@ -112,7 +114,7 @@ do
 			end
 
 			if flags then
-				createOptionButton(self.lists[3].childs, mapID, mapConfig.flags)
+				createOptionButton(self.lists[3].childs, mapID, nil, mapConfig.flags)
 			end
 		end
 

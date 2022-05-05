@@ -433,9 +433,7 @@ function mounts:NEW_MOUNT_ADDED(mountID)
 end
 
 
-function mounts:autoAddNewMount(mountID)
-	local _,_,_,_, mountTypeExtra = C_MountJournal.GetMountInfoExtraByID(mountID)
-	local mountType = util.mountTypes[mountTypeExtra]
+function mounts:addMountToList(list, mountType, mountID)
 	if mountType == 1 then
 		mountType = "fly"
 	elseif mountType == 2 then
@@ -443,15 +441,33 @@ function mounts:autoAddNewMount(mountID)
 	else
 		mountType = "swimming"
 	end
+	list[mountType][mountID] = true
+end
 
+
+function mounts:addMountToAllProfiles(mountType, mountID)
 	if self.defProfile.autoAddNewMount then
-		self.defProfile[mountType][mountID] = true
+		self:addMountToList(self.defProfile, mountType, mountID)
 	end
 
 	for _, profile in next, self.profiles do
 		if profile.autoAddNewMount then
-			profile[mountType][mountID] = true
+			self:addMountToList(profile, mountType, mountID)
 		end
+	end
+end
+
+
+function mounts:autoAddNewMount(mountID)
+	local _,_,_,_, mountTypeExtra = C_MountJournal.GetMountInfoExtraByID(mountID)
+	local mountType = util.mountTypes[mountTypeExtra]
+
+	if type(mountType) == "table" then
+		for i = 1, #mountType do
+			self:addMountToAllProfiles(mountType[i], mountID)
+		end
+	else
+		self:addMountToAllProfiles(mountType, mountID)
 	end
 end
 

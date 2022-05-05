@@ -2626,6 +2626,19 @@ function journal:getFilterWeight(mountID)
 end
 
 
+function journal:getFilterType(mountType)
+	local types = mounts.filters.types
+	local mType = self.mountTypes[mountType]
+	if type(mType) == "table" then
+		for i = 1, #mType do
+			if types[mType[i]] then return true end
+		end
+	else
+		return types[mType]
+	end
+end
+
+
 function journal:setShownCountMounts()
 	self.shownPanel.count:SetText(#self.displayedMounts)
 	if self:isDefaultFilters() then
@@ -2640,8 +2653,8 @@ end
 
 
 function journal:updateMountsList()
-	local filters, mountTypes, list, newMounts, mountsDB, tags, GetMountInfoByID, GetMountInfoExtraByID = mounts.filters, self.mountTypes, self.list, mounts.newMounts, mounts.mountsDB, self.tags, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID
-	local sources, types, selected, factions, pet, expansions = filters.sources, filters.types, filters.selected, filters.factions, filters.pet, filters.expansions
+	local filters, list, newMounts, mountsDB, tags, GetMountInfoByID, GetMountInfoExtraByID = mounts.filters, self.list, mounts.newMounts, mounts.mountsDB, self.tags, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID
+	local sources, selected, factions, pet, expansions = filters.sources, filters.selected, filters.factions, filters.pet, filters.expansions
 	local text = util.cleanText(self.searchBox:GetText())
 	wipe(self.displayedMounts)
 
@@ -2676,7 +2689,7 @@ function journal:updateMountsList()
 			or sourceText:lower():find(text, 1, true)
 			or tags:find(mountID, text))
 		-- TYPE
-		and types[mountTypes[mountType]]
+		and self:getFilterType(mountType)
 		-- FACTION
 		and factions[(mountFaction or 2) + 1]
 		-- SELECTED

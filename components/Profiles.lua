@@ -1,5 +1,5 @@
 local addon, L = ...
-local util = MountsJournalUtil
+local util, mounts = MountsJournalUtil, MountsJournal
 
 
 MountsJournalFrame:on("MODULES_INIT", function(journal)
@@ -112,16 +112,13 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 				if isCollected then
 					local _,_,_,_, mountType = C_MountJournal.GetMountInfoExtraByID(mountID)
 					mountType = self.journal.mountTypes[mountType]
-					if mountType then
-						if mountType == 1 then
-							mountType = "fly"
-						elseif mountType == 2 then
-							mountType = "ground"
-						else
-							mountType = "swimming"
-						end
 
-						self.journal.list[mountType][mountID] = true
+					if type(mountType) == "table" then
+						for i = 1, #mountType do
+							mounts:addMountToList(self.journal.list, mountType[i], mountID)
+						end
+					else
+						mounts:addMountToList(self.journal.list, mountType, mountID)
 					end
 				end
 			end

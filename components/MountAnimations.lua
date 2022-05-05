@@ -91,7 +91,12 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 
 	journal:on("MOUNT_MODEL_UPDATE", function(journal, mountType)
 		if mountType then
-			dd.currentMountType = mountType == 231 and 2 or journal.mountTypes[mountType]
+			if mountType == 231 then
+				dd.currentMountType = 2
+			else
+				mountType = journal.mountTypes[mountType]
+				dd.currentMountType = type(mountType) == "table" and mountType[1] or mountType
+			end
 			dd:replayAnimation()
 		end
 	end)
