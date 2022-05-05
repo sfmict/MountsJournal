@@ -83,7 +83,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 	end
 
 	function dd:deleteProfile(profileName)
-		StaticPopup_Show(util.addonName.."DELETE_PROFILE", NORMAL_FONT_COLOR_CODE..profileName..FONT_COLOR_CODE_CLOSE, nil, function()
+		StaticPopup_Show(util.addonName.."DELETE_PROFILE", NORMAL_FONT_COLOR:WrapTextInColorCode(profileName), nil, function()
 			self.profiles[profileName] = nil
 			if self.charDB.currentProfileName == profileName then
 				self:setProfile()
@@ -101,15 +101,15 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		end
 	end
 
-	function dd:selectAllMounts()
-		StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR_CODE..L["Select all mounts by type in selected zone"]..FONT_COLOR_CODE_CLOSE, nil, function()
+	function dd:selectAllMounts(actionText, onlyFavorites)
+		StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(actionText), nil, function()
 			if not self.journal.list then
 				self.journal:createMountList(self.journal.listMapID)
 			end
 
 			for _, mountID in ipairs(self.journal.mountIDs) do
-				local _,_,_,_,_,_,_,_,_,_, isCollected = C_MountJournal.GetMountInfoByID(mountID)
-				if isCollected then
+				local _,_,_,_,_,_, isFavorite, _,_,_, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+				if isCollected and (not onlyFavorites or isFavorite) then
 					self.mounts:addMountToList(self.journal.list, mountID)
 				end
 			end
@@ -118,7 +118,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 	end
 
 	function dd:unselectAllMounts()
-		StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR_CODE..L["Unselect all mounts in selected zone"]..FONT_COLOR_CODE_CLOSE, nil, function()
+		StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(L["Unselect all mounts in selected zone"]), nil, function()
 			if self.journal.list then
 				wipe(self.journal.list.fly)
 				wipe(self.journal.list.ground)
@@ -246,8 +246,12 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 			info.notCheckable = true
 			info.keepShownOnClick = nil
 
+			info.text = L["Select all favorite mounts by type in the selected zone"]
+			info.func = function(btn) self:selectAllMounts(btn.text, true) end
+			self:ddAddButton(info, level)
+
 			info.text = L["Select all mounts by type in selected zone"]
-			info.func = function() self:selectAllMounts() end
+			info.func = function(btn) self:selectAllMounts(btn.text) end
 			self:ddAddButton(info, level)
 
 			info.text = L["Unselect all mounts in selected zone"]
