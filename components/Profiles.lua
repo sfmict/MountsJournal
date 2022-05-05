@@ -1,5 +1,5 @@
 local addon, L = ...
-local util, mounts = MountsJournalUtil, MountsJournal
+local util = MountsJournalUtil
 
 
 MountsJournalFrame:on("MODULES_INIT", function(journal)
@@ -110,16 +110,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 			for _, mountID in ipairs(self.journal.mountIDs) do
 				local _,_,_,_,_,_,_,_,_,_, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 				if isCollected then
-					local _,_,_,_, mountType = C_MountJournal.GetMountInfoExtraByID(mountID)
-					mountType = self.journal.mountTypes[mountType]
-
-					if type(mountType) == "table" then
-						for i = 1, #mountType do
-							mounts:addMountToList(self.journal.list, mountType[i], mountID)
-						end
-					else
-						mounts:addMountToList(self.journal.list, mountType, mountID)
-					end
+					self.mounts:addMountToList(self.journal.list, mountID)
 				end
 			end
 			self:event("UPDATE_PROFILE")

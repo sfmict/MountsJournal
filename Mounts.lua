@@ -433,41 +433,44 @@ function mounts:NEW_MOUNT_ADDED(mountID)
 end
 
 
-function mounts:addMountToList(list, mountType, mountID)
-	if mountType == 1 then
-		mountType = "fly"
-	elseif mountType == 2 then
-		mountType = "ground"
-	else
-		mountType = "swimming"
-	end
-	list[mountType][mountID] = true
-end
+do
+	local function addMount(list, mountType, mountID)
+		if mountType == 1 then
+			mountType = "fly"
+		elseif mountType == 2 then
+			mountType = "ground"
+		else
+			mountType = "swimming"
+		end
 
-
-function mounts:addMountToAllProfiles(mountType, mountID)
-	if self.defProfile.autoAddNewMount then
-		self:addMountToList(self.defProfile, mountType, mountID)
+		list[mountType][mountID] = true
 	end
 
-	for _, profile in next, self.profiles do
-		if profile.autoAddNewMount then
-			self:addMountToList(profile, mountType, mountID)
+
+	function mounts:addMountToList(list, mountID)
+		local _,_,_,_, mountTypeExtra = C_MountJournal.GetMountInfoExtraByID(mountID)
+		local mountType = util.mountTypes[mountTypeExtra]
+
+		if type(mountType) == "table" then
+			for i = 1, #mountType do
+				addMount(list, mountType[i], mountID)
+			end
+		else
+			addMount(list, mountType, mountID)
 		end
 	end
 end
 
 
 function mounts:autoAddNewMount(mountID)
-	local _,_,_,_, mountTypeExtra = C_MountJournal.GetMountInfoExtraByID(mountID)
-	local mountType = util.mountTypes[mountTypeExtra]
+	if self.defProfile.autoAddNewMount then
+		self:addMountToList(self.defProfile, mountID)
+	end
 
-	if type(mountType) == "table" then
-		for i = 1, #mountType do
-			self:addMountToAllProfiles(mountType[i], mountID)
+	for _, profile in next, self.profiles do
+		if profile.autoAddNewMount then
+			self:addMountToList(profile, mountID)
 		end
-	else
-		self:addMountToAllProfiles(mountType, mountID)
 	end
 end
 
