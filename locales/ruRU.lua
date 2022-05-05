@@ -132,7 +132,7 @@ L["Select all favorite mounts by type in the selected zone"] = "Выбрать �
 L["Select all mounts by type in selected zone"] = "Выбрать всех маунтов по типу в выбранной зоне"
 L["Unselect all mounts in selected zone"] = "Отменить выбор всех маунтов в выбранной зоне"
 L["Are you sure you want to delete profile %s?"] = "Вы уверены, что хотите удалить профиль \"%s\"?"
-L["Are you sure you want %s?"] = "Вы уверен, что хотите \"%s\"?"
+L["Are you sure you want %s?"] = "Вы уверены, что хотите \"%s\"?"
 -- TAGS
 L["tags"] = "Теги"
 L["No tag"] = "Без тегов"
