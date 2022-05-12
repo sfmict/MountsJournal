@@ -1355,7 +1355,8 @@ function journal:sortMounts()
 		end
 		if fSort.by == "type" then
 			local _,_,_,_, mType = C_MountJournal.GetMountInfoExtraByID(mountID)
-			mCache[mountID][5] = self.mountTypes[mType]
+			mType = self.mountTypes[mType]
+			mCache[mountID][5] = type(mType) == "number" and mType or mType[1]
 		end
 	end
 
@@ -1387,9 +1388,6 @@ function journal:sortMounts()
 		elseif not isCollectedA and isCollectedB then return false end
 
 		-- TYPE
-		local nameA = mCache[a][1]
-		local nameB = mCache[b][1]
-
 		if fSort.by == "type" then
 			local typeA = mCache[a][5]
 			local typeB = mCache[b][5]
@@ -1402,11 +1400,17 @@ function journal:sortMounts()
 			elseif mounts.mountsDB[a] > mounts.mountsDB[b] then return fSort.reverse end
 		-- NAME
 		elseif fSort.by == "name" then
+			local nameA = mCache[a][1]
+			local nameB = mCache[b][1]
+
 			if nameA < nameB then return not fSort.reverse
 			elseif nameA > nameB then return fSort.reverse end
 		end
 
 		if fSort.by ~= "name" then
+			local nameA = mCache[a][1]
+			local nameB = mCache[b][1]
+
 			if nameA < nameB then return true
 			elseif nameA > nameB then return false end
 		end
