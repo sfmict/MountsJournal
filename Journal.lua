@@ -1361,6 +1361,7 @@ function journal:sortMounts()
 	end
 
 	sort(self.mountIDs, function(a, b)
+		if a == b then return false end
 		if not mCache[a] then setMCache(a) end
 		if not mCache[b] then setMCache(b) end
 
@@ -1398,22 +1399,16 @@ function journal:sortMounts()
 		elseif fSort.by == "expansion" then
 			if mounts.mountsDB[a] < mounts.mountsDB[b] then return not fSort.reverse
 			elseif mounts.mountsDB[a] > mounts.mountsDB[b] then return fSort.reverse end
+		end
+
 		-- NAME
-		elseif fSort.by == "name" then
-			local nameA = mCache[a][1]
-			local nameB = mCache[b][1]
+		local nameA = mCache[a][1]
+		local nameB = mCache[b][1]
+		local reverse = fSort.by == "name" and fSort.reverse
 
-			if nameA < nameB then return not fSort.reverse
-			elseif nameA > nameB then return fSort.reverse end
-		end
+		if nameA < nameB then return not reverse
+		elseif nameA > nameB then return reverse end
 
-		if fSort.by ~= "name" then
-			local nameA = mCache[a][1]
-			local nameB = mCache[b][1]
-
-			if nameA < nameB then return true
-			elseif nameA > nameB then return false end
-		end
 		return a < b
 	end)
 
