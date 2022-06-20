@@ -626,8 +626,8 @@ function journal:init()
 		mounts.cameraConfig.xInitialAcceleration = value
 	end)
 	self.xInitialAcceleration:setStep(.1)
-	self.xInitialAcceleration.slider:SetMinMaxValues(.1, 1)
-	self.xInitialAcceleration.slider.text:SetText(L["Initial x-axis accseleration"])
+	self.xInitialAcceleration:setMinMax(.1, 1)
+	self.xInitialAcceleration:setText(L["Initial x-axis accseleration"])
 
 	-- CAMERA X ACCELERATION
 	self.xAcceleration = CreateFrame("FRAME", nil, nil, "MJSliderFrameTemplate")
@@ -635,18 +635,17 @@ function journal:init()
 		mounts.cameraConfig.xAcceleration = value
 	end)
 	self.xAcceleration:setStep(.1)
-	self.xAcceleration.slider:SetMinMaxValues(-2, -.1)
-	self.xAcceleration.slider:SetValue(mounts.cameraConfig.xAcceleration)
-	self.xAcceleration.slider.text:SetText(L["X-axis accseleration"])
-	self.xAcceleration.edit:SetMaxLetters(4)
+	self.xAcceleration:setMinMax(-2, -.1)
+	self.xAcceleration:setText(L["X-axis accseleration"])
+	self.xAcceleration:setMaxLetters(4)
 
 	-- CAMERA X MIN ACCELERATION
 	self.xMinSpeed = CreateFrame("FRAME", nil, nil, "MJSliderFrameTemplate")
 	self.xMinSpeed:setOnChanged(function(frame, value)
 		mounts.cameraConfig.xMinSpeed = value
 	end)
-	self.xMinSpeed.slider:SetMinMaxValues(0, 10)
-	self.xMinSpeed.slider.text:SetText(L["Minimum x-axis speed"])
+	self.xMinSpeed:setMinMax(0, 10)
+	self.xMinSpeed:setText(L["Minimum x-axis speed"])
 
 	-- CAMERA Y INITIAL ACCELERATION
 	self.yInitialAcceleration = CreateFrame("FRAME", nil, nil, "MJSliderFrameTemplate")
@@ -654,8 +653,8 @@ function journal:init()
 		mounts.cameraConfig.yInitialAcceleration = value
 	end)
 	self.yInitialAcceleration:setStep(.1)
-	self.yInitialAcceleration.slider:SetMinMaxValues(.1, 1)
-	self.yInitialAcceleration.slider.text:SetText(L["Initial y-axis accseleration"])
+	self.yInitialAcceleration:setMinMax(.1, 1)
+	self.yInitialAcceleration:setText(L["Initial y-axis accseleration"])
 
 	-- CAMERA Y ACCELERATION
 	self.yAcceleration = CreateFrame("FRAME", nil, nil, "MJSliderFrameTemplate")
@@ -663,18 +662,17 @@ function journal:init()
 		mounts.cameraConfig.yAcceleration = value
 	end)
 	self.yAcceleration:setStep(.1)
-	self.yAcceleration.slider:SetMinMaxValues(-2, -.1)
-	self.yAcceleration.slider:SetValue(mounts.cameraConfig.yAcceleration)
-	self.yAcceleration.slider.text:SetText(L["Y-axis accseleration"])
-	self.yAcceleration.edit:SetMaxLetters(4)
+	self.yAcceleration:setMinMax(-2, -.1)
+	self.yAcceleration:setText(L["Y-axis accseleration"])
+	self.yAcceleration:setMaxLetters(4)
 
 	-- CAMERA Y MIN ACCELERATION
 	self.yMinSpeed = CreateFrame("FRAME", nil, nil, "MJSliderFrameTemplate")
 	self.yMinSpeed:setOnChanged(function(frame, value)
 		mounts.cameraConfig.yMinSpeed = value
 	end)
-	self.yMinSpeed.slider:SetMinMaxValues(0, 10)
-	self.yMinSpeed.slider.text:SetText(L["Minimum y-axis speed"])
+	self.yMinSpeed:setMinMax(0, 10)
+	self.yMinSpeed:setText(L["Minimum y-axis speed"])
 
 	-- MODEL SCENE SETTINGS
 	local mssBtn = self.mountDisplay.modelSceneSettingsButton
@@ -688,7 +686,7 @@ function journal:init()
 
 		info.keepShownOnClick = true
 		info.isNotRadio = true
-		info.text = L["Enable x-axis accseleration"]
+		info.text = L["Enable Acceleration around the X-axis"]
 		info.checked = mounts.cameraConfig.xAccelerationEnabled
 		info.func = function(_,_,_, checked)
 			mounts.cameraConfig.xAccelerationEnabled = checked
@@ -716,7 +714,7 @@ function journal:init()
 		btn:ddAddSpace()
 
 		info.customFrame = nil
-		info.text = L["Enable y-axis accseleration"]
+		info.text = L["Enable Acceleration around the Y-axis"]
 		info.checked = mounts.cameraConfig.yAccelerationEnabled
 		info.func = function(_,_,_, checked)
 			mounts.cameraConfig.yAccelerationEnabled = checked

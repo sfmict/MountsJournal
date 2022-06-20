@@ -45,6 +45,11 @@ test:RegisterEvent("ADDON_LOADED")
 
 test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 
+-- test:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
+-- function test:COMBAT_LOG_EVENT_UNFILTERED()
+-- 	fprint(CombatLogGetCurrentEventInfo())
+-- end
+
 -- test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 -- test:RegisterEvent("PET_JOURNAL_PET_DELETED")
 -- test:RegisterEvent("PET_JOURNAL_PETS_HEALED")

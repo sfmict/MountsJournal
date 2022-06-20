@@ -2541,16 +2541,13 @@
 					<Anchor point="RIGHT" x="-1" y="-4"/>
 				</Anchors>
 				<Scripts>
-					<OnLoad inherit="prepend">
-						hooksecurefunc(self, "SetMaxLetters", function(self, value)
-							self:SetWidth(value * 7 + 7)
-						end)
-					</OnLoad>
 					<OnTextChanged>
 						if userInput then
 							local int, dec = self:GetText():gsub(",", "."):match("(%-?%d*)(%.?%d*)")
 							if int == "" and dec ~= "" then int = "0" end
 							self:SetText(int..dec)
+						else
+							self.curValue = self:GetText()
 						end
 					</OnTextChanged>
 					<OnEnterPressed>
@@ -2558,21 +2555,22 @@
 						local slider = parent.slider
 						local value = tonumber(self:GetText()) or 0
 						if not parent.noLimit then
-							local min, max = slider:GetMinMaxValues()
-							if min > value then value = min
-							elseif value > max then value = max end
+							if paren.min > value then value = parent.min
+							elseif value > paren.max then value = parent.max end
 						end
 						slider:GetScript("OnValueChanged")(slider, value, true)
 						self:ClearFocus()
 					</OnEnterPressed>
 					<OnEditFocusLost>
-						local parent = self:GetParent()
-						local step = 1 / (parent.step or 1)
-						self:SetNumber(math.floor(parent.slider:GetValue() * step + .5) / step)
+						self:SetText(self.curValue)
 					</OnEditFocusLost>
 					<OnMouseWheel>
-						local slider = self:GetParent().slider
-						slider:GetScript("OnMouseWheel")(slider, delta)
+						local parent = self:GetParent()
+						local value = (tonumber(self:GetText()) or 0) + parent.step * delta
+						if value >= parent.min and parent.max >= value then
+							local slider = parent.slider
+							slider:GetScript("OnValueChanged")(slider, value, true)
+						end
 					</OnMouseWheel>
 				</Scripts>
 			</EditBox>
@@ -2603,20 +2601,14 @@
 					<OnValueChanged>
 						if not userInput then return end
 						local parent = self:GetParent()
-						local step = 1 / (parent.step or 1)
+						local step = 1 / parent.step
 						value = math.floor(value * step + .5) / step
 						self:SetValue(value)
 						parent:onValueChanged(value)
 					</OnValueChanged>
 					<OnMouseWheel>
-						local parent = self:GetParent()
-						local step = (parent.step or 1) * delta
-						local value = self:GetValue() + step
-						local min, max = self:GetMinMaxValues()
-						if value >= min and max >= value then
-							parent.edit:SetNumber(value)
-							self:GetScript("OnValueChanged")(self, value, true)
-						end
+						local edit = self:GetParent().edit
+						edit:GetScript("OnMouseWheel")(edit, delta)
 					</OnMouseWheel>
 				</Scripts>
 			</Slider>
@@ -2626,8 +2618,21 @@
 				self.setOnChanged = function(self, func)
 					self.onValueChanged = func
 				end
+				self.step = 1
 				self.setStep = function(self, step)
 					self.step = step
+				end
+				self.setMinMax = function(self, min, max)
+					self.min = min
+					self.max = max
+					self.slider:SetMinMaxValues(min, max)
+				end
+				self.setText = function(self, text)
+					self.slider.text:SetText(text)
+				end
+				self.setMaxLetters = function(self, value)
+					self.edit:SetWidth(value * 7 + 7)
+					self.edit:SetMaxLetters(value)
 				end
 			</OnLoad>
 		</Scripts>

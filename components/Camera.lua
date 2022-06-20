@@ -5,6 +5,7 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 	local ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, ORBIT_CAMERA_MOUSE_PAN_VERTICAL = ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, ORBIT_CAMERA_MOUSE_PAN_VERTICAL
 	local GetScaledCursorDelta, GetScaledCursorPosition = GetScaledCursorDelta, GetScaledCursorPosition
 	local DeltaLerp, Vector3D_CalculateNormalFromYawPitch, Vector3D_ScaleBy, Vector3D_Add = DeltaLerp, Vector3D_CalculateNormalFromYawPitch, Vector3D_ScaleBy, Vector3D_Add
+	local pi2 = math.pi * 2
 
 	function activeCamera:setMaxOffsets()
 		local w, h = self:GetOwningScene():GetSize()
@@ -119,7 +120,7 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 				local accX = deltaX / elapsed
 				local min = 50 * mounts.cameraConfig.xMinSpeed
 
-				if self.accX > 0 and accX < 0 or self.accX < 0 and accX > 0 then
+				if self.accX >= 0 and accX < 0 or self.accX < 0 and accX >= 0 then
 					accX = 0
 				end
 
@@ -236,19 +237,20 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 		return self.deltaModifierForCameraMode[mode]
 	end
 
-	local function normalizeRad(angle, defAngle)
-		local pi2 = math.pi * 2
-		angle = math.fmod((angle or 0) - defAngle, pi2)
-		if angle > math.pi then angle = angle - pi2
-		elseif angle < -math.pi then angle = angle + pi2 end
-		return angle + defAngle
+	function activeCamera:SetYaw(yaw)
+		self.yaw = yaw % pi2
+	end
+
+	function activeCamera:SetPitch(pitch)
+		self.pitch = pitch % pi2
+	end
+
+	function activeCamera:SetRoll(roll)
+		self.roll = roll % pi2
 	end
 
 	function activeCamera:resetPosition()
 		self.acceleration = nil
-		self.interpolatedYaw = normalizeRad(self.interpolatedYaw, self.modelSceneCameraInfo.yaw)
-		self.interpolatedPitch = normalizeRad(self.interpolatedPitch, self.modelSceneCameraInfo.pitch)
-		self.interpolatedRoll = normalizeRad(self.interpolatedRoll, self.modelSceneCameraInfo.roll)
 		self:SetYaw(self.modelSceneCameraInfo.yaw)
 		self:SetPitch(self.modelSceneCameraInfo.pitch)
 		self:SetRoll(self.modelSceneCameraInfo.roll)
