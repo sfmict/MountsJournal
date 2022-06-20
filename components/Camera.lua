@@ -96,9 +96,66 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 
 	function activeCamera:OnUpdate(elapsed)
 		if self:IsLeftMouseButtonDown() then
+			self.acceleration = true
 			local deltaX, deltaY = GetScaledCursorDelta()
+
+			self.accX = deltaX / elapsed * mounts.cameraConfig.xInitialAcceleration
+			local xMinInit = 400 * mounts.cameraConfig.xInitialAcceleration
+			if self.accX > -xMinInit and self.accX < xMinInit then self.accX = nil end
+
+			self.accY = deltaY / elapsed * mounts.cameraConfig.yInitialAcceleration
+			local yMinInit = 400 * mounts.cameraConfig.yInitialAcceleration
+			if self.accY > -yMinInit and self.accY < yMinInit then self.accY = nil end
+
 			self:HandleMouseMovement(self.buttonModes.leftX, deltaX * self:GetDeltaModifierForCameraMode(self.buttonModes.leftX), not self.buttonModes.leftXinterpolate)
 			self:HandleMouseMovement(self.buttonModes.leftY, deltaY * self:GetDeltaModifierForCameraMode(self.buttonModes.leftY), not self.buttonModes.leftYinterpolate)
+		elseif self.acceleration then
+			if not mounts.cameraConfig.xAccelerationEnabled then self.accX = nil end
+			if not mounts.cameraConfig.yAccelerationEnabled then self.accY = nil end
+
+			if self.accX then
+				local deltaX = self.accX * elapsed
+				deltaX = deltaX + elapsed * deltaX * mounts.cameraConfig.xAcceleration
+				local accX = deltaX / elapsed
+				local min = 50 * mounts.cameraConfig.xMinSpeed
+
+				if self.accX > 0 and accX < 0 or self.accX < 0 and accX > 0 then
+					accX = 0
+				end
+
+				if math.abs(accX) < min then
+					accX = min * (self.accX < 0 and -1 or 1)
+				end
+
+				if accX < 5 and accX > -5 then
+					self.accX = nil
+				else
+					self.accX = accX
+					self:HandleMouseMovement(self.buttonModes.leftX, deltaX * self:GetDeltaModifierForCameraMode(self.buttonModes.leftX), not self.buttonModes.leftXinterpolate)
+				end
+			end
+
+			if self.accY then
+				local deltaY = self.accY * elapsed
+				deltaY = deltaY + elapsed * deltaY * mounts.cameraConfig.yAcceleration
+				local accY = deltaY / elapsed
+				local min = 50 * mounts.cameraConfig.yMinSpeed
+
+				if self.accY > 0 and accY < 0 or self.accY < 0 and accY > 0 then
+					accY = 0
+				end
+
+				if math.abs(accY) < min then
+					accY = min * (self.accY < 0 and -1 or 1)
+				end
+
+				if accY < 5 and accY > -5 then
+					self.accY = nil
+				else
+					self.accY = accY
+					self:HandleMouseMovement(self.buttonModes.leftY, deltaY * self:GetDeltaModifierForCameraMode(self.buttonModes.leftY), not self.buttonModes.leftYinterpolate)
+				end
+			end
 		end
 
 		if self:IsRightMouseButtonDown() then
@@ -188,6 +245,7 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 	end
 
 	function activeCamera:resetPosition()
+		self.acceleration = nil
 		self.interpolatedYaw = normalizeRad(self.interpolatedYaw, self.modelSceneCameraInfo.yaw)
 		self.interpolatedPitch = normalizeRad(self.interpolatedPitch, self.modelSceneCameraInfo.pitch)
 		self.interpolatedRoll = normalizeRad(self.interpolatedRoll, self.modelSceneCameraInfo.roll)

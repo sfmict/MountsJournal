@@ -51,6 +51,22 @@ function mounts:ADDON_LOADED(addonName)
 			local _, className = GetClassInfo(i)
 			self.config.macrosConfig[className] = self.config.macrosConfig[className] or {}
 		end
+		self.config.camera = self.config.camera or {}
+		self.cameraConfig = self.config.camera
+		if self.cameraConfig.xAccelerationEnabled == nil then
+			self.cameraConfig.xAccelerationEnabled = true
+		end
+		self.cameraConfig.xInitialAcceleration = self.cameraConfig.xInitialAcceleration or .5
+		self.cameraConfig.xAcceleration = self.cameraConfig.xAcceleration or -1
+		self.cameraConfig.xMinAcceleration = nil
+		self.cameraConfig.xMinSpeed = self.cameraConfig.xMinSpeed or 0
+		if self.cameraConfig.yAccelerationEnabled == nil then
+			self.cameraConfig.yAccelerationEnabled = true
+		end
+		self.cameraConfig.yInitialAcceleration = self.cameraConfig.yInitialAcceleration or .5
+		self.cameraConfig.yAcceleration = self.cameraConfig.yAcceleration or -1
+		self.cameraConfig.yMinAcceleration = nil
+		self.cameraConfig.yMinSpeed = self.cameraConfig.yMinSpeed or 0
 
 		MountsJournalChar = MountsJournalChar or {}
 		self.charDB = MountsJournalChar

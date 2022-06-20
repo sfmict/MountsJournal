@@ -508,6 +508,10 @@ function journal:init()
 		local parent = self:GetParent()
 		parent:GetScript("OnEnter")(parent)
 	end
+	self.weightFrame:setOnChanged(function(frame, value)
+		frame.setFunc(value)
+		frame.slider.isModified = true
+	end)
 	self.weightFrame:SetScript("OnEnter", function(self)
 		filtersButton:ddCloseMenus(self.level)
 	end)
@@ -524,37 +528,12 @@ function journal:init()
 			slider.isModified = nil
 		end
 	end)
-	self.weightFrame.slider:SetScript("OnValueChanged", function(slider, value, userInput)
-		if not userInput then return end
-		value = math.floor(value + .5)
-		slider:SetValue(value)
-		slider:GetParent().setFunc(value)
-		slider.isModified = true
+	self.weightFrame.slider:HookScript("OnMouseWheel", function()
+		journal:updateMountsList()
 	end)
 	self.weightFrame.edit:HookScript("OnEnter", weightControl_OnEnter)
-	self.weightFrame.edit:SetScript("OnEnterPressed", function(editBox)
-		local value = tonumber(editBox:GetText()) or 0
-		if value < 1 then
-			value = 1
-		elseif value > 100 then
-			value = 100
-		end
-		local slider = editBox:GetParent().slider
-		slider:GetScript("OnValueChanged")(slider, value, true)
+	self.weightFrame.edit:HookScript("OnEnterPressed", function()
 		journal:updateMountsList()
-		editBox:ClearFocus()
-	end)
-	self.weightFrame.edit:SetScript("OnEditFocusLost", function(editBox)
-		editBox:SetNumber(math.floor(editBox:GetParent().slider:GetValue() + .5))
-	end)
-	self.weightFrame.edit:SetScript("OnMouseWheel", function(editBox, delta)
-		local value = (tonumber(editBox:GetText()) or 0) + (delta > 0 and 1 or -1)
-		if value >= 1 and value <= 100 then
-			editBox:SetNumber(value)
-			local slider = editBox:GetParent().slider
-			slider:GetScript("OnValueChanged")(slider, value, true)
-			journal:updateMountsList()
-		end
 	end)
 
 	-- FILTERS BUTTONS
@@ -641,12 +620,140 @@ function journal:init()
 		journal:event("SET_ACTIVE_CAMERA", self.activeCamera)
 	end)
 
+	-- CAMERA X INITIAL ACCELERATION
+	self.xInitialAcceleration = CreateFrame("FRAME", nil, nil, "MJSliderFrameTemplate")
+	self.xInitialAcceleration:setOnChanged(function(frame, value)
+		mounts.cameraConfig.xInitialAcceleration = value
+	end)
+	self.xInitialAcceleration:setStep(.1)
+	self.xInitialAcceleration.slider:SetMinMaxValues(.1, 1)
+	self.xInitialAcceleration.slider.text:SetText(L["Initial x-axis accseleration"])
+
+	-- CAMERA X ACCELERATION
+	self.xAcceleration = CreateFrame("FRAME", nil, nil, "MJSliderFrameTemplate")
+	self.xAcceleration:setOnChanged(function(frame, value)
+		mounts.cameraConfig.xAcceleration = value
+	end)
+	self.xAcceleration:setStep(.1)
+	self.xAcceleration.slider:SetMinMaxValues(-2, -.1)
+	self.xAcceleration.slider:SetValue(mounts.cameraConfig.xAcceleration)
+	self.xAcceleration.slider.text:SetText(L["X-axis accseleration"])
+	self.xAcceleration.edit:SetMaxLetters(4)
+
+	-- CAMERA X MIN ACCELERATION
+	self.xMinSpeed = CreateFrame("FRAME", nil, nil, "MJSliderFrameTemplate")
+	self.xMinSpeed:setOnChanged(function(frame, value)
+		mounts.cameraConfig.xMinSpeed = value
+	end)
+	self.xMinSpeed.slider:SetMinMaxValues(0, 10)
+	self.xMinSpeed.slider.text:SetText(L["Minimum x-axis speed"])
+
+	-- CAMERA Y INITIAL ACCELERATION
+	self.yInitialAcceleration = CreateFrame("FRAME", nil, nil, "MJSliderFrameTemplate")
+	self.yInitialAcceleration:setOnChanged(function(frame, value)
+		mounts.cameraConfig.yInitialAcceleration = value
+	end)
+	self.yInitialAcceleration:setStep(.1)
+	self.yInitialAcceleration.slider:SetMinMaxValues(.1, 1)
+	self.yInitialAcceleration.slider.text:SetText(L["Initial y-axis accseleration"])
+
+	-- CAMERA Y ACCELERATION
+	self.yAcceleration = CreateFrame("FRAME", nil, nil, "MJSliderFrameTemplate")
+	self.yAcceleration:setOnChanged(function(frame, value)
+		mounts.cameraConfig.yAcceleration = value
+	end)
+	self.yAcceleration:setStep(.1)
+	self.yAcceleration.slider:SetMinMaxValues(-2, -.1)
+	self.yAcceleration.slider:SetValue(mounts.cameraConfig.yAcceleration)
+	self.yAcceleration.slider.text:SetText(L["Y-axis accseleration"])
+	self.yAcceleration.edit:SetMaxLetters(4)
+
+	-- CAMERA Y MIN ACCELERATION
+	self.yMinSpeed = CreateFrame("FRAME", nil, nil, "MJSliderFrameTemplate")
+	self.yMinSpeed:setOnChanged(function(frame, value)
+		mounts.cameraConfig.yMinSpeed = value
+	end)
+	self.yMinSpeed.slider:SetMinMaxValues(0, 10)
+	self.yMinSpeed.slider.text:SetText(L["Minimum y-axis speed"])
+
+	-- MODEL SCENE SETTINGS
+	local mssBtn = self.mountDisplay.modelSceneSettingsButton
+	lsfdd:SetMixin(mssBtn)
+	mssBtn:ddSetDisplayMode(addon)
+	mssBtn:ddHideWhenButtonHidden()
+	mssBtn:ddSetNoGlobalMouseEvent(true)
+
+	mssBtn:ddSetInitFunc(function(btn, level)
+		local info = {}
+
+		info.keepShownOnClick = true
+		info.isNotRadio = true
+		info.text = L["Enable x-axis accseleration"]
+		info.checked = mounts.cameraConfig.xAccelerationEnabled
+		info.func = function(_,_,_, checked)
+			mounts.cameraConfig.xAccelerationEnabled = checked
+		end
+		btn:ddAddButton(info)
+
+		info.customFrame = self.xInitialAcceleration
+		info.OnLoad = function(frame)
+			frame.slider:SetValue(mounts.cameraConfig.xInitialAcceleration)
+		end
+		btn:ddAddButton(info)
+
+		info.customFrame = self.xAcceleration
+		info.OnLoad = function(frame)
+			frame.slider:SetValue(mounts.cameraConfig.xAcceleration)
+		end
+		btn:ddAddButton(info)
+
+		info.customFrame = self.xMinSpeed
+		info.OnLoad = function(frame)
+			frame.slider:SetValue(mounts.cameraConfig.xMinSpeed)
+		end
+		btn:ddAddButton(info)
+
+		btn:ddAddSpace()
+
+		info.customFrame = nil
+		info.text = L["Enable y-axis accseleration"]
+		info.checked = mounts.cameraConfig.yAccelerationEnabled
+		info.func = function(_,_,_, checked)
+			mounts.cameraConfig.yAccelerationEnabled = checked
+		end
+		btn:ddAddButton(info)
+
+		info.customFrame = self.yInitialAcceleration
+		info.OnLoad = function(frame)
+			frame.slider:SetValue(mounts.cameraConfig.yInitialAcceleration)
+		end
+		btn:ddAddButton(info)
+
+		info.customFrame = self.yAcceleration
+		info.OnLoad = function(frame)
+			frame.slider:SetValue(mounts.cameraConfig.yAcceleration)
+		end
+		btn:ddAddButton(info)
+
+		info.customFrame = self.yMinSpeed
+		info.OnLoad = function(frame)
+			frame.slider:SetValue(mounts.cameraConfig.yMinSpeed)
+		end
+		btn:ddAddButton(info)
+	end)
+
+	mssBtn:SetScript("OnClick", function(btn)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		btn:ddToggle(1, nil, btn, 0, 0)
+	end)
+
 	-- MODEL SCENE MULTIPLE BUTTON
 	lsfdd:SetMixin(self.multipleMountBtn)
 	self.multipleMountBtn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	self.multipleMountBtn:ddSetDisplayMode(addon)
 	self.multipleMountBtn:ddHideWhenButtonHidden()
 	self.multipleMountBtn:ddSetNoGlobalMouseEvent(true)
+
 	self.multipleMountBtn:ddSetInitFunc(function(btn, level)
 		local info = {}
 		local allCreatureDisplays = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
@@ -663,6 +770,7 @@ function journal:init()
 			btn:ddAddButton(info, level)
 		end
 	end)
+
 	self.multipleMountBtn:SetScript("OnClick", function(btn, mouseBtn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		if mouseBtn == "LeftButton" then
@@ -736,13 +844,13 @@ function journal:init()
 	playerToggle:SetChecked(GetCVarBool("mountJournalShowPlayer"))
 	SetPortraitTexture(playerToggle.portrait, "player")
 	playerToggle:RegisterEvent("PORTRAITS_UPDATED")
-	playerToggle:SetScript("OnEvent", function(self)
-		SetPortraitTexture(self.portrait, "player")
-		self:UnregisterEvent("PORTRAITS_UPDATED")
-		self:SetScript("OnEvent", nil)
-	end)
-	playerToggle:SetScript("OnShow", function(self)
-		self:SetChecked(GetCVarBool("mountJournalShowPlayer"))
+	playerToggle:SetScript("OnEvent", function(playerToggle)
+		SetPortraitTexture(playerToggle.portrait, "player")
+		if playerToggle.portrait:GetTexture() then
+			playerToggle:UnregisterEvent("PORTRAITS_UPDATED")
+			playerToggle:SetScript("OnEvent", nil)
+			self:updateMountDisplay(true)
+		end
 	end)
 	playerToggle:SetScript("OnClick", function(btn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
