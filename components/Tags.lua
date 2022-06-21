@@ -182,7 +182,7 @@ function tags:mountOptionsMenu_Init(btn, level)
 				info.OnLoad = function(frame)
 					local mountsWeight = journal.mountsWeight
 					frame.level = level + 1
-					frame.slider:SetValue(mountsWeight[self.menuMountID] or 100)
+					frame:setValue(mountsWeight[self.menuMountID] or 100)
 					frame.setFunc = function(value)
 						if value == 100 then value = nil end
 						if mountsWeight[self.menuMountID] ~= value then

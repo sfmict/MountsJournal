@@ -512,11 +512,11 @@ function journal:init()
 		frame.setFunc(value)
 		frame.slider.isModified = true
 	end)
+	self.weightFrame:setMinMax(1, 100)
+	self.weightFrame:setText(L["Chance of summoning"])
 	self.weightFrame:SetScript("OnEnter", function(self)
 		filtersButton:ddCloseMenus(self.level)
 	end)
-	self.weightFrame.slider.text:SetText(L["Chance of summoning"])
-	self.weightFrame.slider:SetMinMaxValues(1, 100)
 	self.weightFrame.slider:HookScript("OnEnter", weightControl_OnEnter)
 	self.weightFrame.slider:HookScript("OnMouseUp", function(slider)
 		journal:updateMountsList()
@@ -695,19 +695,19 @@ function journal:init()
 
 		info.customFrame = self.xInitialAcceleration
 		info.OnLoad = function(frame)
-			frame.slider:SetValue(mounts.cameraConfig.xInitialAcceleration)
+			frame:setValue(mounts.cameraConfig.xInitialAcceleration)
 		end
 		btn:ddAddButton(info)
 
 		info.customFrame = self.xAcceleration
 		info.OnLoad = function(frame)
-			frame.slider:SetValue(mounts.cameraConfig.xAcceleration)
+			frame:setValue(mounts.cameraConfig.xAcceleration)
 		end
 		btn:ddAddButton(info)
 
 		info.customFrame = self.xMinSpeed
 		info.OnLoad = function(frame)
-			frame.slider:SetValue(mounts.cameraConfig.xMinSpeed)
+			frame:setValue(mounts.cameraConfig.xMinSpeed)
 		end
 		btn:ddAddButton(info)
 
@@ -723,19 +723,19 @@ function journal:init()
 
 		info.customFrame = self.yInitialAcceleration
 		info.OnLoad = function(frame)
-			frame.slider:SetValue(mounts.cameraConfig.yInitialAcceleration)
+			frame:setValue(mounts.cameraConfig.yInitialAcceleration)
 		end
 		btn:ddAddButton(info)
 
 		info.customFrame = self.yAcceleration
 		info.OnLoad = function(frame)
-			frame.slider:SetValue(mounts.cameraConfig.yAcceleration)
+			frame:setValue(mounts.cameraConfig.yAcceleration)
 		end
 		btn:ddAddButton(info)
 
 		info.customFrame = self.yMinSpeed
 		info.OnLoad = function(frame)
-			frame.slider:SetValue(mounts.cameraConfig.yMinSpeed)
+			frame:setValue(mounts.cameraConfig.yMinSpeed)
 		end
 		btn:ddAddButton(info)
 	end)
@@ -2290,7 +2290,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			info.customFrame = self.weightFrame
 			info.OnLoad = function(frame)
 				frame.level = level + 1
-				frame.slider:SetValue(filterWeight.weight)
+				frame:setValue(filterWeight.weight)
 				frame.setFunc = function(value)
 					if filterWeight.weight ~= value then
 						filterWeight.weight = value

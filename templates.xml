@@ -2546,8 +2546,6 @@
 							local int, dec = self:GetText():gsub(",", "."):match("(%-?%d*)(%.?%d*)")
 							if int == "" and dec ~= "" then int = "0" end
 							self:SetText(int..dec)
-						else
-							self.curValue = self:GetText()
 						end
 					</OnTextChanged>
 					<OnEnterPressed>
@@ -2555,22 +2553,26 @@
 						local slider = parent.slider
 						local value = tonumber(self:GetText()) or 0
 						if not parent.noLimit then
-							if paren.min > value then value = parent.min
-							elseif value > paren.max then value = parent.max end
+							local min, max = slider:GetMinMaxValues()
+							if min > value then value = min
+							elseif value > max then value = max end
 						end
 						slider:GetScript("OnValueChanged")(slider, value, true)
 						self:ClearFocus()
 					</OnEnterPressed>
 					<OnEditFocusLost>
-						self:SetText(self.curValue)
+						self:SetNumber(self.curValue)
 					</OnEditFocusLost>
 					<OnMouseWheel>
 						local parent = self:GetParent()
+						local slider = parent.slider
 						local value = (tonumber(self:GetText()) or 0) + parent.step * delta
-						if value >= parent.min and parent.max >= value then
-							local slider = parent.slider
-							slider:GetScript("OnValueChanged")(slider, value, true)
+						if not parent.noLimit then
+							local min, max = slider:GetMinMaxValues()
+							if min > value then value = min
+							elseif value > max then value = max end
 						end
+						slider:GetScript("OnValueChanged")(slider, value, true)
 					</OnMouseWheel>
 				</Scripts>
 			</EditBox>
@@ -2580,7 +2582,7 @@
 					<Anchor point="BOTTOMLEFT" x="0" y="2"/>
 					<Anchor point="RIGHT" relativeKey="$parent.edit" relativePoint="LEFT" x="-4"/>
 				</Anchors>
-				<HitRectInsets left="0" right="0" top="0" bottom="0"/>
+				<HitRectInsets left="0" right="0" top="-4" bottom="-4"/>
 				<Layers>
 					<Layer level="ARTWORK">
 						<FontString parentKey="text" inherits="GameFontNormalSmall">
@@ -2594,6 +2596,7 @@
 					<OnLoad inherit="prepend">
 						hooksecurefunc(self, "SetValue", function(self, value)
 							local edit = self:GetParent().edit
+							edit.curValue = value
 							edit:SetNumber(value)
 							edit:SetCursorPosition(0)
 						end)
@@ -2623,9 +2626,10 @@
 					self.step = step
 				end
 				self.setMinMax = function(self, min, max)
-					self.min = min
-					self.max = max
 					self.slider:SetMinMaxValues(min, max)
+				end
+				self.setValue = function(self, value)
+					self.slider:SetValue(value)
 				end
 				self.setText = function(self, text)
 					self.slider.text:SetText(text)
@@ -2633,6 +2637,14 @@
 				self.setMaxLetters = function(self, value)
 					self.edit:SetWidth(value * 7 + 7)
 					self.edit:SetMaxLetters(value)
+				end
+				self.disable = function(self)
+					self.edit:Disable()
+					self.slider:Disable()
+				end
+				self.enable = function(self)
+					self.edit:Enable()
+					self.slider:Enable()
 				end
 			</OnLoad>
 		</Scripts>
