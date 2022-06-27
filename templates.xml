@@ -695,7 +695,7 @@
 										<KeyValues>
 											<KeyValue key="cmd" value="ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION" type="global"/>
 											<KeyValue key="delta" value="-3" type="number"/>
-											<KeyValue key="snapToValue" value="false" type="boolean"/>
+											<KeyValue key="snapToValue" value="true" type="boolean"/>
 										</KeyValues>
 									</Button>
 									<Button inherits="MJModelControlButtonTemplate" parentKey="rotateRightButton">
@@ -705,7 +705,7 @@
 										<KeyValues>
 											<KeyValue key="cmd" value="ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION" type="global"/>
 											<KeyValue key="delta" value="3" type="number"/>
-											<KeyValue key="snapToValue" value="false" type="boolean"/>
+											<KeyValue key="snapToValue" value="true" type="boolean"/>
 										</KeyValues>
 									</Button>
 									<Button inherits="MJModelControlButtonTemplate" parentKey="rotateUpButton">
@@ -715,7 +715,7 @@
 										<KeyValues>
 											<KeyValue key="cmd" value="ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION" type="global"/>
 											<KeyValue key="delta" value="3" type="number"/>
-											<KeyValue key="snapToValue" value="false" type="boolean"/>
+											<KeyValue key="snapToValue" value="true" type="boolean"/>
 										</KeyValues>
 									</Button>
 									<Button inherits="MJModelControlButtonTemplate" parentKey="rotateDownButton">
@@ -725,7 +725,7 @@
 										<KeyValues>
 											<KeyValue key="cmd" value="ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION" type="global"/>
 											<KeyValue key="delta" value="-3" type="number"/>
-											<KeyValue key="snapToValue" value="false" type="boolean"/>
+											<KeyValue key="snapToValue" value="true" type="boolean"/>
 										</KeyValues>
 									</Button>
 									<Button inherits="MJModelControlButtonTemplate" parentKey="reset">

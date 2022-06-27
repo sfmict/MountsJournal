@@ -789,7 +789,7 @@ function journal:init()
 		end
 	end)
 
-	-- MODEL SCENE CONTROl
+	-- MODEL SCENE CONTROL
 	local modelControl = self.modelScene.modelControl
 	modelControl.zoomIn.icon:SetTexCoord(.57812500, .82812500, .14843750, .27343750)
 	modelControl.zoomOut.icon:SetTexCoord(.29687500, .54687500, .00781250, .13281250)
