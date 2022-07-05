@@ -144,6 +144,7 @@ function journal:init()
 
 	-- SECURE FRAMES
 	local sMountJournal = CreateFrame("FRAME", nil, self.MountJournal, "SecureHandlerShowHideTemplate")
+	sMountJournal:SetFrameRef("randomButton", self.MountJournal.SummonRandomFavoriteButton)
 	sMountJournal:SetFrameRef("useMountsJournalButton", self.useMountsJournalButton)
 	sMountJournal:SetFrameRef("bgFrame", self.bgFrame)
 	sMountJournal:SetAttribute("useDefaultJournal", mounts.config.useDefaultJournal)
@@ -157,16 +158,20 @@ function journal:init()
 		self:RunAttribute("update")
 	]])
 	sMountJournal:SetAttribute("update", [[
+		local randomButton = self:GetFrameRef("randomButton")
 		local useMountsJournalButton = self:GetFrameRef("useMountsJournalButton")
 		local bgFrame = self:GetFrameRef("bgFrame")
 		if self:GetAttribute("isShow") then
 			useMountsJournalButton:Show()
 			if not self:GetAttribute("useDefaultJournal") then
+				randomButton:Hide()
 				bgFrame:Show()
 			else
+				randomButton:Show()
 				bgFrame:Hide()
 			end
 		else
+			randomButton:Show()
 			useMountsJournalButton:Hide()
 			bgFrame:Hide()
 		end
@@ -226,6 +231,7 @@ function journal:init()
 	-- MACRO BUTTONS
 	local summon1 = self.bgFrame.summon1
 	summon1:SetNormalTexture(413588)
+	summon1.icon = summon1:GetNormalTexture()
 	summon1:SetAttribute("clickbutton", _G[config.secureButtonNameMount])
 	summon1:SetScript("OnDragStart", function()
 		if InCombatLockdown() then return end
@@ -247,6 +253,7 @@ function journal:init()
 
 	local summon2 = self.bgFrame.summon2
 	summon2:SetNormalTexture(631718)
+	summon2.icon = summon2:GetNormalTexture()
 	summon2:SetAttribute("clickbutton", _G[config.secureButtonNameSecondMount])
 	summon2:SetScript("OnDragStart", function()
 		if InCombatLockdown() then return end
@@ -496,12 +503,12 @@ function journal:init()
 	end)
 
 	-- FILTERS BUTTON
-	local filtersButton = lsfdd:CreateStretchButtonOriginal(self.filtersPanel, nil, 22)
-	filtersButton:SetPoint("LEFT", self.searchBox, "RIGHT", -1, 0)
-	filtersButton:SetPoint("TOPRIGHT", -3, -4)
-	filtersButton:SetText(FILTER)
-	filtersButton:ddSetDisplayMode(addon)
-	filtersButton:ddSetInitFunc(function(...) self:filterDropDown_Initialize(...) end)
+	self.filtersButton = lsfdd:CreateStretchButtonOriginal(self.filtersPanel, nil, 22)
+	self.filtersButton:SetPoint("LEFT", self.searchBox, "RIGHT", -1, 0)
+	self.filtersButton:SetPoint("TOPRIGHT", -3, -4)
+	self.filtersButton:SetText(FILTER)
+	self.filtersButton:ddSetDisplayMode(addon)
+	self.filtersButton:ddSetInitFunc(function(...) self:filterDropDown_Initialize(...) end)
 
 	-- MOUNTS WEIGHT SLIDER
 	local weightControl_OnEnter = function(self)
@@ -514,8 +521,8 @@ function journal:init()
 	end)
 	self.weightFrame:setMinMax(1, 100)
 	self.weightFrame:setText(L["Chance of summoning"])
-	self.weightFrame:SetScript("OnEnter", function(self)
-		filtersButton:ddCloseMenus(self.level)
+	self.weightFrame:SetScript("OnEnter", function(frame)
+		self.filtersButton:ddCloseMenus(frame.level)
 	end)
 	self.weightFrame.slider:HookScript("OnEnter", weightControl_OnEnter)
 	self.weightFrame.slider:HookScript("OnMouseUp", function(slider)
@@ -922,12 +929,14 @@ function journal:init()
 	self:event("MODULES_INIT"):off("MODULES_INIT")
 
 	-- INIT
+	self.MountJournal.SummonRandomFavoriteButton:Hide()
 	self.CollectionsJournal.NineSlice:Hide()
 	self:RegisterEvent("COMPANION_UPDATE")
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 
 	self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 	self:setMJFiltersBackup()
+	self:hideFrames()
 	self:setEditMountsList()
 	self:updateBtnFilters()
 	self:sortMounts()
@@ -949,6 +958,7 @@ function journal:ADDON_LOADED(addonName)
 		self.ADDON_LOADED = nil
 
 		self.mjFiltersBackup = {sources = {}, types = {}}
+		self.frameState = {}
 		self.CollectionsJournal = CollectionsJournal
 		self.MountJournal = MountJournal
 
@@ -979,9 +989,11 @@ function journal:ADDON_LOADED(addonName)
 					self:init()
 				else
 					self:setMJFiltersBackup()
+					self:hideFrames()
 				end
 			else
 				self:restoreMJFilters()
+				self:restoreFrames()
 			end
 		end)
 
@@ -1048,6 +1060,44 @@ function journal:restoreMJFilters()
 	backup.isBackuped = false
 end
 journal.PLAYER_LEAVING_WORLD = journal.restoreMJFilters
+
+
+do
+	local function SetShown(self, shown)
+		journal.frameState[self] = shown
+	end
+
+	local function Show(self)
+		journal.frameState[self] = true
+	end
+
+	local function Hide(self)
+		journal.frameState[self] = false
+	end
+
+	function journal:hideFrames()
+		for _, frame in ipairs({self.MountJournal:GetChildren()}) do
+			if not frame:IsProtected() then
+				self.frameState[frame] = frame:IsShown()
+				frame:Hide()
+				frame.SetShown = SetShown
+				frame.Show = Show
+				frame.Hide = Hide
+			end
+		end
+	end
+end
+
+
+function journal:restoreFrames()
+	for frame, shown in pairs(self.frameState) do
+		self.frameState[frame] = nil
+		frame.SetShown = nil
+		frame.Show = nil
+		frame.Hide = nil
+		frame:SetShown(shown)
+	end
+end
 
 
 function journal:PLAYER_REGEN_DISABLED()
@@ -1175,7 +1225,7 @@ function journal:defaultUpdateMountList(scrollFrame)
 			dlist.btn.selectedTexture:SetShown(mountID == self.selectedMountID)
 
 			if isFactionSpecific then
-				dlist.btn.factionIcon:SetAtlas(faction == 0 and "MountJournalIcons-Horde" or "MountJournalIcons-Alliance", true)
+				dlist.btn.factionIcon:SetAtlas(faction == 0 and "MountJournalIcons-Horde" or "MountJournalIcons-Alliance")
 				dlist.btn.factionIcon:Show()
 			else
 				dlist.btn.factionIcon:Hide()

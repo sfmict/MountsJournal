@@ -218,7 +218,7 @@ function test:PLAYER_ENTERING_WORLD()
 	-- end
 	-- ShowUIPanel(CollectionsJournal)
 	-- CollectionsJournal_SetTab(CollectionsJournal, COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS) -- DISABLE
-	-- MountJournal.MountDisplay.InfoButton.petSelectionBtn:Click()
+	-- journal.mountDisplay.info.petSelectionBtn:Click()
 
 	-- journal.navBarBtn:Click()
 	-- journal.mapSettings.existingListsToggle:Click()

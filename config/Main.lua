@@ -72,12 +72,12 @@ config:SetScript("OnShow", function(self)
 	subtitle:SetText(L["ConfigPanelTitle"])
 
 	-- LEFT PANEL
-	local leftPanel = CreateFrame("FRAME", nil, self, "MJOptionsPanel")
-	leftPanel:SetPoint("TOPLEFT", self, 8, -67)
-	leftPanel:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", 300, 32)
+	self.leftPanel = CreateFrame("FRAME", nil, self, "MJOptionsPanel")
+	self.leftPanel:SetPoint("TOPLEFT", self, 8, -67)
+	self.leftPanel:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", 300, 32)
 
 	-- WATER JUMP
-	self.waterJump = CreateFrame("CheckButton", nil, leftPanel, "MJCheckButtonTemplate")
+	self.waterJump = CreateFrame("CheckButton", nil, self.leftPanel, "MJCheckButtonTemplate")
 	self.waterJump:SetPoint("TOPLEFT", subtitle, "BOTTOMLEFT", 8, -20)
 	self.waterJump.Text:SetText(L["Handle a jump in water"])
 	self.waterJump.tooltipText = L["Handle a jump in water"]
@@ -85,42 +85,42 @@ config:SetScript("OnShow", function(self)
 	self.waterJump:HookScript("OnClick", applyEnable)
 
 	-- SUMMON 1
-	local summon1 = leftPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+	local summon1 = self.leftPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 	summon1:SetPoint("TOPLEFT", self.waterJump, "BOTTOMLEFT", 0, -20)
 	summon1:SetText(SUMMONS.." 1")
 
 	-- CREATE MACRO
-	local createMacroBtn = CreateFrame("BUTTON", nil, leftPanel, "UIPanelButtonTemplate")
-	createMacroBtn:SetSize(258, 30)
-	createMacroBtn:SetPoint("TOPLEFT", summon1, "BOTTOMLEFT", 0, -5)
-	createMacroBtn:SetText(L["CreateMacro"])
-	createMacroBtn:SetScript("OnClick", function() self:createMacro(self.macroName, self.secureButtonNameMount, 413588, true) end)
+	self.createMacroBtn = CreateFrame("BUTTON", nil, self.leftPanel, "UIPanelButtonTemplate")
+	self.createMacroBtn:SetSize(258, 30)
+	self.createMacroBtn:SetPoint("TOPLEFT", summon1, "BOTTOMLEFT", 0, -5)
+	self.createMacroBtn:SetText(L["CreateMacro"])
+	self.createMacroBtn:SetScript("OnClick", function() self:createMacro(self.macroName, self.secureButtonNameMount, 413588, true) end)
 
-	setTooltip(createMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
+	setTooltip(self.createMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
 
 	-- OR TEXT
-	local macroOrBind = leftPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	macroOrBind:SetPoint("TOP", createMacroBtn, "BOTTOM", 0, -3)
+	local macroOrBind = self.leftPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	macroOrBind:SetPoint("TOP", self.createMacroBtn, "BOTTOM", 0, -3)
 	macroOrBind:SetText(L["or key bind"])
 
 	-- BIND MOUNT
-	self.bindMount:SetParent(leftPanel)
+	self.bindMount:SetParent(self.leftPanel)
 	self.bindMount:SetSize(258, 22)
-	self.bindMount:SetPoint("TOPLEFT", createMacroBtn, "BOTTOMLEFT", 0, -20)
+	self.bindMount:SetPoint("TOPLEFT", self.createMacroBtn, "BOTTOMLEFT", 0, -20)
 
 	-- HELP PLATE
-	local helpPlate = CreateFrame("FRAME", nil, leftPanel, "MJHelpPlate")
+	local helpPlate = CreateFrame("FRAME", nil, self.leftPanel, "MJHelpPlate")
 	helpPlate:SetPoint("TOP", self.bindMount, "BOTTOM", 0, -20)
 	helpPlate.tooltip = L["SecondMountTooltipTitle"]:format(SUMMONS)
 	helpPlate.tooltipDescription = "\n"..L["SecondMountTooltipDescription"]
 
 	-- MODIFIER TEXT
-	local modifierText = leftPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	local modifierText = self.leftPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	modifierText:SetPoint("TOPLEFT", self.bindMount, "BOTTOMLEFT", 0, -80)
 	modifierText:SetText(L["Modifier"]..":")
 
 	-- MODIFIER COMBOBOX
-	local modifierCombobox = LibStub("LibSFDropDown-1.4"):CreateButton(leftPanel)
+	local modifierCombobox = LibStub("LibSFDropDown-1.4"):CreateButton(self.leftPanel)
 	self.modifierCombobox = modifierCombobox
 	modifierCombobox:SetPoint("LEFT", modifierText, "RIGHT", 7, 0)
 	modifierCombobox:ddSetInitFunc(function(self, level)
@@ -138,28 +138,28 @@ config:SetScript("OnShow", function(self)
 	end)
 
 	-- SUMMON 2
-	local summon2 = leftPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+	local summon2 = self.leftPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 	summon2:SetPoint("TOPLEFT", modifierText, "BOTTOMLEFT", 0, -20)
 	summon2:SetText(SUMMONS.." 2")
 
 	-- CREATE SECOND MACRO
-	local createSecondMacroBtn = CreateFrame("BUTTON", nil, leftPanel, "UIPanelButtonTemplate")
-	createSecondMacroBtn:SetSize(258, 30)
-	createSecondMacroBtn:SetPoint("TOPLEFT", summon2, "BOTTOMLEFT", 0, -5)
-	createSecondMacroBtn:SetText(L["CreateMacro"])
-	createSecondMacroBtn:SetScript("OnClick", function() self:createMacro(self.secondMacroName, self.secureButtonNameSecondMount, 631718, true) end)
+	self.createSecondMacroBtn = CreateFrame("BUTTON", nil, self.leftPanel, "UIPanelButtonTemplate")
+	self.createSecondMacroBtn:SetSize(258, 30)
+	self.createSecondMacroBtn:SetPoint("TOPLEFT", summon2, "BOTTOMLEFT", 0, -5)
+	self.createSecondMacroBtn:SetText(L["CreateMacro"])
+	self.createSecondMacroBtn:SetScript("OnClick", function() self:createMacro(self.secondMacroName, self.secureButtonNameSecondMount, 631718, true) end)
 
-	setTooltip(createSecondMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
+	setTooltip(self.createSecondMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
 
 	-- OR TEXT SECOND
-	local macroOrBindSecond = leftPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	macroOrBindSecond:SetPoint("TOP", createSecondMacroBtn, "BOTTOM", 0, -3)
+	local macroOrBindSecond = self.leftPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	macroOrBindSecond:SetPoint("TOP", self.createSecondMacroBtn, "BOTTOM", 0, -3)
 	macroOrBindSecond:SetText(L["or key bind"])
 
 	-- BIND SECOND MOUNT
-	self.bindSecondMount:SetParent(leftPanel)
+	self.bindSecondMount:SetParent(self.leftPanel)
 	self.bindSecondMount:SetSize(258, 22)
-	self.bindSecondMount:SetPoint("TOP", createSecondMacroBtn, "BOTTOM", 0, -20)
+	self.bindSecondMount:SetPoint("TOP", self.createSecondMacroBtn, "BOTTOM", 0, -20)
 
 	-- UNBOUND MESSAGE
 	binding.unboundMessage:SetParent(self)
@@ -167,17 +167,17 @@ config:SetScript("OnShow", function(self)
 	binding.unboundMessage:SetPoint("BOTTOMLEFT", self, "BOTTOMLEFT", 14, 14)
 
 	-- RIGHT PANEL
-	local rightPanel = CreateFrame("FRAME", nil, self, "MJOptionsPanel")
-	rightPanel:SetPoint("TOPLEFT", leftPanel, "TOPRIGHT", 4, 0)
-	rightPanel:SetPoint("BOTTOMRIGHT", self, -8, 32)
+	self.rightPanel = CreateFrame("FRAME", nil, self, "MJOptionsPanel")
+	self.rightPanel:SetPoint("TOPLEFT", self.leftPanel, "TOPRIGHT", 4, 0)
+	self.rightPanel:SetPoint("BOTTOMRIGHT", self, -8, 32)
 
-	local rightPanelScroll = CreateFrame("ScrollFrame", nil, rightPanel, "MJPanelScrollFrameTemplate")
-	rightPanelScroll:SetPoint("TOPLEFT", rightPanel, 4, -6)
-	rightPanelScroll:SetPoint("BOTTOMRIGHT", rightPanel, -26, 5)
+	self.rightPanelScroll = CreateFrame("ScrollFrame", nil, self.rightPanel, "MJPanelScrollFrameTemplate")
+	self.rightPanelScroll:SetPoint("TOPLEFT", self.rightPanel, 4, -6)
+	self.rightPanelScroll:SetPoint("BOTTOMRIGHT", self.rightPanel, -26, 5)
 
 	-- USE HERBALISM MOUNTS
-	self.useHerbMounts = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.useHerbMounts:SetPoint("TOPLEFT", rightPanelScroll.child, 9, -9)
+	self.useHerbMounts = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.useHerbMounts:SetPoint("TOPLEFT", self.rightPanelScroll.child, 9, -9)
 	self.useHerbMounts.Text:SetText(L["UseHerbMounts"])
 	self.useHerbMounts.tooltipText = L["UseHerbMounts"]
 	self.useHerbMounts.tooltipRequirement = L["UseHerbMountsDescription"]
@@ -191,7 +191,7 @@ config:SetScript("OnShow", function(self)
 	self.herbMountsOnZones:HookScript("OnClick", applyEnable)
 
 	-- USE REPAIR MOUNTS
-	self.useRepairMounts = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.useRepairMounts = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.useRepairMounts:SetPoint("TOPLEFT", self.herbMountsOnZones, "BOTTOMLEFT", -20, -15)
 	self.useRepairMounts.Text:SetText(L["If item durability is less than"])
 	self.useRepairMounts.tooltipText = L["If item durability is less than"]
@@ -199,7 +199,7 @@ config:SetScript("OnShow", function(self)
 	self.useRepairMounts:HookScript("OnClick", function(btn) applyEnable() end)
 
 	-- editbox
-	self.repairPercent = CreateFrame("Editbox", nil, rightPanelScroll.child, "MJNumberTextBox")
+	self.repairPercent = CreateFrame("Editbox", nil, self.rightPanelScroll.child, "MJNumberTextBox")
 	self.repairPercent:SetPoint("LEFT", self.useRepairMounts.Text, "RIGHT", 3, 0)
 	self.repairPercent:SetScript("OnTextChanged", function(editBox, userInput)
 		if userInput then
@@ -239,7 +239,7 @@ config:SetScript("OnShow", function(self)
 	self.repairFlyable:HookScript("OnDisable", self.repairFlyable.setEnabledFunc)
 
 	-- editbox
-	self.repairFlyablePercent = CreateFrame("Editbox", nil, rightPanelScroll.child, "MJNumberTextBox")
+	self.repairFlyablePercent = CreateFrame("Editbox", nil, self.rightPanelScroll.child, "MJNumberTextBox")
 	self.repairFlyablePercent:SetPoint("LEFT", self.repairFlyable.Text, "RIGHT", 3, 0)
 	self.repairFlyablePercent:SetScript("OnTextChanged", function(editBox, userInput)
 		if userInput then
@@ -269,7 +269,7 @@ config:SetScript("OnShow", function(self)
 	self.repairFlyablePercentText:SetText("%")
 
 	-- REPAIR MOUNTS COMBOBOX
-	self.repairMountsCombobox = LibStub("LibSFDropDown-1.4"):CreateButton(rightPanelScroll.child, 230)
+	self.repairMountsCombobox = LibStub("LibSFDropDown-1.4"):CreateButton(self.rightPanelScroll.child, 230)
 	self.repairMountsCombobox:SetPoint("TOPLEFT", self.repairFlyable, "BOTTOMLEFT", 0, -8)
 	self.repairMountsCombobox:ddSetInitFunc(function(self, level)
 		local info = {}
@@ -307,7 +307,7 @@ config:SetScript("OnShow", function(self)
 	util.setCheckboxChild(self.useRepairMounts, self.repairMountsCombobox)
 
 	-- USE MAGIC BROOM
-	self.useMagicBroom = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.useMagicBroom = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.useMagicBroom:SetPoint("TOPLEFT", self.repairMountsCombobox, "BOTTOMLEFT", -20, -20)
 	local magicBroom = Item:CreateFromItemID(37011)
 	if magicBroom:IsItemDataCached() then
@@ -324,7 +324,7 @@ config:SetScript("OnShow", function(self)
 
 	-- USE UNDERLIGHT ANGLER
 	if C_Item.DoesItemExistByID(133755) then
-		self.useUnderlightAngler = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+		self.useUnderlightAngler = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
 		self.useUnderlightAngler:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 0, -15)
 		local underlightAngler = Item:CreateFromItemID(133755)
 		if underlightAngler:IsItemDataCached() then
@@ -346,7 +346,7 @@ config:SetScript("OnShow", function(self)
 	end
 
 	-- NO PET IN RAID
-	self.noPetInRaid = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.noPetInRaid = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
 	if self.autoUseUnderlightAngler then
 		self.noPetInRaid:SetPoint("TOPLEFT", self.autoUseUnderlightAngler, "BOTTOMLEFT", -20, -15)
 	else
@@ -357,32 +357,32 @@ config:SetScript("OnShow", function(self)
 	self.noPetInRaid:HookScript("OnClick", applyEnable)
 
 	-- NO PET IN GROUP
-	self.noPetInGroup = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.noPetInGroup = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.noPetInGroup:SetPoint("TOPLEFT", self.noPetInRaid, "BOTTOMLEFT", 0, -3)
 	self.noPetInGroup.Text:SetSize(245, 25)
 	self.noPetInGroup.Text:SetText(L["NoPetInGroup"])
 	self.noPetInGroup:HookScript("OnClick", applyEnable)
 
 	-- COPY MOUNT TARGET
-	self.copyMountTarget = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.copyMountTarget = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.copyMountTarget:SetPoint("TOPLEFT", self.noPetInGroup, "BOTTOMLEFT", 0, -15)
 	self.copyMountTarget.Text:SetSize(245, 25)
 	self.copyMountTarget.Text:SetText(L["CopyMountTarget"])
 	self.copyMountTarget:HookScript("OnClick", applyEnable)
 
 	-- ARROW BUTTONS
-	self.arrowButtons = CreateFrame("CheckButton", nil, rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.arrowButtons = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.arrowButtons:SetPoint("TOPLEFT", self.copyMountTarget, "BOTTOMLEFT", 0, -15)
 	self.arrowButtons.Text:SetSize(245, 25)
 	self.arrowButtons.Text:SetText(L["Enable arrow buttons to browse mounts"])
 	self.arrowButtons:HookScript("OnClick", applyEnable)
 
 	-- RESET HELP
-	local resetHelp = CreateFrame("BUTTON", nil, rightPanelScroll.child, "UIPanelButtonTemplate")
-	resetHelp:SetSize(128, 22)
-	resetHelp:SetPoint("TOPLEFT", self.arrowButtons, "BOTTOMLEFT", 0, -15)
-	resetHelp:SetText(RESET_TUTORIALS)
-	resetHelp:SetScript("OnClick", function(btn)
+	self.resetHelp = CreateFrame("BUTTON", nil, self.rightPanelScroll.child, "UIPanelButtonTemplate")
+	self.resetHelp:SetSize(128, 22)
+	self.resetHelp:SetPoint("TOPLEFT", self.arrowButtons, "BOTTOMLEFT", 0, -15)
+	self.resetHelp:SetText(RESET_TUTORIALS)
+	self.resetHelp:SetScript("OnClick", function(btn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		mounts.help.journal = 0
 		util.showHelpJournal()
@@ -438,7 +438,7 @@ config:SetScript("OnShow", function(self)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
 		self.copyMountTarget:SetChecked(mounts.config.copyMountTarget)
 		self.arrowButtons:SetChecked(mounts.config.arrowButtonsBrowse)
-		resetHelp:Enable()
+		self.resetHelp:Enable()
 		self.applyBtn:Disable()
 	end)
 	self:GetScript("OnShow")(self)

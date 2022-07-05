@@ -33,9 +33,9 @@ classConfig:SetScript("OnShow", function(self)
 	subtitle:SetJustifyV("TOP")
 
 	-- LEFT PANEL
-	local leftPanel = CreateFrame("FRAME", nil, self, "MJOptionsPanel")
-	leftPanel:SetPoint("TOPLEFT", 8, -67)
-	leftPanel:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", 181, 8)
+	self.leftPanel = CreateFrame("FRAME", nil, self, "MJOptionsPanel")
+	self.leftPanel:SetPoint("TOPLEFT", 8, -67)
+	self.leftPanel:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", 181, 8)
 
 	-- CLASS BUTTONS
 	local _, playerClassName = UnitClass("player")
@@ -50,12 +50,12 @@ classConfig:SetScript("OnShow", function(self)
 	for i = 1, GetNumClasses() do
 		local localized, className = GetClassInfo(i)
 		local classColor = C_ClassColor.GetClassColor(className)
-		local classFrame = CreateFrame("BUTTON", nil, self, "MJClassButtonTemplate")
+		local classFrame = CreateFrame("BUTTON", nil, self.leftPanel, "MJClassButtonTemplate")
 
 		if lastClassFrame then
 			classFrame:SetPoint("TOPLEFT", lastClassFrame, "BOTTOMLEFT", 0, 0)
 		else
-			classFrame:SetPoint("TOPLEFT", leftPanel, 3, -3)
+			classFrame:SetPoint("TOPLEFT", self.leftPanel, 3, -3)
 		end
 		lastClassFrame = classFrame
 		classFrame.key = className
@@ -79,7 +79,7 @@ classConfig:SetScript("OnShow", function(self)
 
 	-- CURRENT CHARACTER
 	local classColor = C_ClassColor.GetClassColor(playerClassName)
-	local classFrame = CreateFrame("BUTTON", nil, self, "MJClassButtonTemplate")
+	local classFrame = CreateFrame("BUTTON", nil, self.leftPanel, "MJClassButtonTemplate")
 	classFrame:SetPoint("TOPLEFT", lastClassFrame, "BOTTOMLEFT", 0, -20)
 	classFrame.key = playerClassName
 	classFrame.default = util.getClassMacro(playerClassName, function()
@@ -104,10 +104,10 @@ classConfig:SetScript("OnShow", function(self)
 	end
 
 	-- CURRENT CHARACTER ENABLE
-	local charCheck = CreateFrame("CHECKBUTTON", nil, classFrame, "MJBaseCheckButtonTemplate")
-	charCheck:SetPoint("RIGHT", -5, -1)
-	charCheck:SetChecked(self.charMacrosConfig.enable)
-	charCheck:HookScript("OnClick", function(btn)
+	self.charCheck = CreateFrame("CHECKBUTTON", nil, classFrame, "MJBaseCheckButtonTemplate")
+	self.charCheck:SetPoint("RIGHT", -5, -1)
+	self.charCheck:SetChecked(self.charMacrosConfig.enable)
+	self.charCheck:HookScript("OnClick", function(btn)
 		self.charMacrosConfig.enable = btn:GetChecked()
 		util.refreshMacro()
 	end)
@@ -116,15 +116,15 @@ classConfig:SetScript("OnShow", function(self)
 	local rightPanel = CreateFrame("FRAME", nil, self, "MJOptionsPanel")
 	self.rightPanel = rightPanel
 	rightPanel:SetPoint("TOPRIGHT", -8, -67)
-	rightPanel:SetPoint("BOTTOMLEFT", leftPanel, "BOTTOMRIGHT", 0, 0)
+	rightPanel:SetPoint("BOTTOMLEFT", self.leftPanel, "BOTTOMRIGHT", 0, 0)
 
 	-- RIGHT PANEL SCROLL
-	local rightPanelScroll = CreateFrame("ScrollFrame", nil, rightPanel, "MJPanelScrollFrameTemplate")
-	rightPanelScroll:SetPoint("TOPLEFT", rightPanel, 4, -6)
-	rightPanelScroll:SetPoint("BOTTOMRIGHT", rightPanel, -26, 5)
+	self.rightPanelScroll = CreateFrame("ScrollFrame", nil, rightPanel, "MJPanelScrollFrameTemplate")
+	self.rightPanelScroll:SetPoint("TOPLEFT", rightPanel, 4, -6)
+	self.rightPanelScroll:SetPoint("BOTTOMRIGHT", rightPanel, -26, 5)
 
 	-- CLASS FEATURE
-	self.checkPool = CreateFramePool("CHECKBUTTON", rightPanelScroll.child, "MJCheckButtonTemplate", function(_, frame)
+	self.checkPool = CreateFramePool("CHECKBUTTON", self.rightPanelScroll.child, "MJCheckButtonTemplate", function(_, frame)
 		frame:Hide()
 		frame:ClearAllPoints()
 		frame:Enable()
@@ -134,7 +134,7 @@ classConfig:SetScript("OnShow", function(self)
 	end)
 
 	-- MOVE FALL MACRO
-	local moveFallMF = CreateFrame("FRAME", nil, rightPanelScroll.child, "MJMacroFrame")
+	local moveFallMF = CreateFrame("FRAME", nil, self.rightPanelScroll.child, "MJMacroFrame")
 	self.moveFallMF = moveFallMF
 	self.macroEditBox = moveFallMF.editFrame
 	moveFallMF:SetPoint("LEFT", 9, 0)
@@ -160,7 +160,7 @@ classConfig:SetScript("OnShow", function(self)
 	end)
 
 	-- COMBAT MACRO
-	local combatMF = CreateFrame("FRAME", nil, rightPanelScroll.child, "MJMacroFrame")
+	local combatMF = CreateFrame("FRAME", nil, self.rightPanelScroll.child, "MJMacroFrame")
 	self.combatMF = combatMF
 	self.combatMacroEditBox = combatMF.editFrame
 	combatMF:SetPoint("TOPLEFT", moveFallMF.background, "BOTTOMLEFT", 0, -50)
@@ -267,7 +267,7 @@ do
 	end
 
 
-	local function createOption(self, option, className)
+	function classConfig:createOption(option, className)
 		local optionFrame = self.checkPool:Acquire()
 		optionFrame:SetChecked(self.currentMacrosConfig[option.key])
 		optionFrame.Text:SetText((option.text or L[(className.."_"..option.key):upper()]):format(option.hlink))
@@ -305,7 +305,7 @@ do
 		if classOptions[btn.key] then
 			local lastOptionFrame
 			for _, option in ipairs(classOptions[btn.key]) do
-				local optionFrame = createOption(self, option, btn.key)
+				local optionFrame = self:createOption(option, btn.key)
 				if lastOptionFrame then
 					optionFrame:SetPoint("LEFT", 9, 0)
 					optionFrame:SetPoint("TOP", lastOptionFrame, "BOTTOM", 0, 0)
@@ -318,7 +318,7 @@ do
 					local isEnabled = optionFrame:GetChecked()
 					local lastSubOptionFrame
 					for _, subOption in ipairs(option.childs) do
-						local subOptionFrame = createOption(self, subOption, btn.key)
+						local subOptionFrame = self:createOption(subOption, btn.key)
 						subOptionFrame:SetEnabled(isEnabled)
 						if lastSubOptionFrame then
 							subOptionFrame:SetPoint("TOPLEFT", lastOptionFrame, "BOTTOMLEFT", 0, 0)

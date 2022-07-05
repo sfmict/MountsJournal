@@ -17,6 +17,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 			list = {},
 		}
 	}
+	journal.mapSettings.dnr = dd
 
 	local currentTier = EJ_GetCurrentTier()
 	local mapExclude = {
