@@ -361,11 +361,11 @@ function macroFrame:getFishingRodMacro()
 	if self.weaponID == self.fishingRodID then
 		local link = self.charMacrosConfig.itemSlot16
 		if link then
-			macro = "/equipslot 16 "..link:match("%[(.+)%]")
+			macro = "/equipslot 16 "..link:match("(item:.-)|h")
 		end
 		link = self.charMacrosConfig.itemSlot17
 		if link then
-			macro = self:addLine(macro, "/equipslot 17 "..link:match("%[(.+)%]"))
+			macro = self:addLine(macro, "/equipslot 17 "..link:match("(item:.-)|h"))
 		end
 	else
 		macro = "/equipslot [swimming,nocombat]16 "..self.itemName[self.fishingRodID]
