@@ -44,6 +44,9 @@ function mounts:ADDON_LOADED(addonName)
 		if self.config.arrowButtonsBrowse == nil then
 			self.config.arrowButtonsBrowse = true
 		end
+		if self.config.openHyperlinks == nil then
+			self.config.openHyperlinks = true
+		end
 		self.config.useRepairMountsDurability = self.config.useRepairMountsDurability or 41
 		self.config.useRepairFlyableDurability = self.config.useRepairFlyableDurability or 31
 		self.config.macrosConfig = self.config.macrosConfig or {}
