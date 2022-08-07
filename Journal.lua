@@ -213,14 +213,14 @@ function journal:init()
 	self:ACHIEVEMENT_EARNED()
 	self.achiev:SetScript("OnClick", function()
 		ToggleAchievementFrame()
-		local i = 1
+		local i, categoryID = 1, COLLECTION_ACHIEVEMENT_CATEGORY
 		local button = _G["AchievementFrameCategoriesContainerButton"..i]
 		while button do
-			if button.categoryID == COLLECTION_ACHIEVEMENT_CATEGORY then
+			if button.categoryID == categoryID then
 				button:Click()
-			elseif button.categoryID == MOUNT_ACHIEVEMENT_CATEGORY then
-				button:Click()
-				return
+				if categoryID == MOUNT_ACHIEVEMENT_CATEGORY then return end
+				i = 1
+				categoryID = MOUNT_ACHIEVEMENT_CATEGORY
 			end
 			i = i + 1
 			button = _G["AchievementFrameCategoriesContainerButton"..i]
@@ -1065,10 +1065,12 @@ journal.PLAYER_LEAVING_WORLD = journal.restoreMJFilters
 do
 	local function SetShown(self, shown)
 		journal.frameState[self] = shown
+		journal.Hide(self)
 	end
 
 	local function Show(self)
 		journal.frameState[self] = true
+		journal.Hide(self)
 	end
 
 	local function Hide(self)
@@ -1080,9 +1082,9 @@ do
 			if not frame:IsProtected() then
 				self.frameState[frame] = frame:IsShown()
 				frame:Hide()
-				frame.SetShown = SetShown
-				frame.Show = Show
-				frame.Hide = Hide
+				hooksecurefunc(frame, "SetShown", SetShown)
+				hooksecurefunc(frame, "Show", Show)
+				hooksecurefunc(frame, "Hide", Hide)
 			end
 		end
 	end

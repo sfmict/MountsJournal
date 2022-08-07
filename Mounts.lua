@@ -425,6 +425,7 @@ do
 	end
 
 
+	local timer
 	function mounts:UNIT_SPELLCAST_START(_,_, spellID)
 		local petID = self.petForMount[spellID]
 		if petID then
@@ -434,12 +435,17 @@ do
 				return
 			end
 
+			if timer and not timer:IsCancelled() then
+				timer:Cancel()
+				timer = nil
+			end
+
 			local start, duration = GetSpellCooldown(61304)
 
 			if duration == 0 then
 				summonPet(petID)
 			else
-				C_Timer.After(start + duration - GetTime(), function() summonPet(petID) end)
+				timer = C_Timer.NewTicker(start + duration - GetTime(), function() summonPet(petID) end, 1)
 			end
 		end
 	end
