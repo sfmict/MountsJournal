@@ -196,7 +196,7 @@ config:SetScript("OnShow", function(self)
 	self.useRepairMounts.Text:SetText(L["If item durability is less than"])
 	self.useRepairMounts.tooltipText = L["If item durability is less than"]
 	self.useRepairMounts.tooltipRequirement = L["UseRepairMountsDescription"]
-	self.useRepairMounts:HookScript("OnClick", function(btn) applyEnable() end)
+	self.useRepairMounts:HookScript("OnClick",  applyEnable)
 
 	-- editbox
 	self.repairPercent = CreateFrame("Editbox", nil, self.rightPanelScroll.child, "MJNumberTextBox")
@@ -237,6 +237,7 @@ config:SetScript("OnShow", function(self)
 	end
 	self.repairFlyable:HookScript("OnEnable", self.repairFlyable.setEnabledFunc)
 	self.repairFlyable:HookScript("OnDisable", self.repairFlyable.setEnabledFunc)
+	self.repairFlyable:HookScript("OnClick", applyEnable)
 
 	-- editbox
 	self.repairFlyablePercent = CreateFrame("Editbox", nil, self.rightPanelScroll.child, "MJNumberTextBox")
