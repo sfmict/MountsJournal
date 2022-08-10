@@ -2639,26 +2639,26 @@ function journal:resetToDefaultFilters()
 	filters.tags.noTag = defFilters.tags.noTag
 	filters.tags.withAllTags = defFilters.tags.withAllTags
 
-	for i = 1, #defFilters.types do
+	for i = 1, #filters.types do
 		filters.types[i] = defFilters.types[i]
 	end
-	for i = 1, #defFilters.selected do
+	for i = 1, #filters.selected do
 		filters.selected[i] = defFilters.selected[i]
 	end
-	for i = 1, #defFilters.sources do
+	for i = 1, #filters.sources do
 		filters.sources[i] = defFilters.sources[i]
 	end
-	for i = 1, #defFilters.factions do
+	for i = 1, #filters.factions do
 		filters.factions[i] = defFilters.factions[i]
 	end
-	for i = 1, #defFilters.pet do
+	for i = 1, #filters.pet do
 		filters.pet[i] = defFilters.pet[i]
 	end
-	for i = 1, #defFilters.expansions do
+	for i = 1, #filters.expansions do
 		filters.expansions[i] = defFilters.expansions[i]
 	end
-	for tag, value in pairs(defFilters.tags.tags) do
-		filters.tags.tags[tag][2] = value
+	for tag, value in pairs(filters.tags.tags) do
+		value[2] = defFilters.tags.tags[tag]
 	end
 
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
