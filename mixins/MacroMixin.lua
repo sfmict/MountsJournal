@@ -169,24 +169,24 @@ function macroFrame:PLAYER_LOGIN()
 				local spellID = getFormSpellID()
 
 				if self.classConfig.useDruidFormSpecialization then
-					self.lastDruidFormSpellID = specializationSpellIDs[GetSpecialization()]
+					self.charMacrosConfig.lastDruidFormSpellID = specializationSpellIDs[GetSpecialization()]
 				end
 
-				if self.lastDruidFormSpellID
+				if self.charMacrosConfig.lastDruidFormSpellID
 				and spellID ~= 24858
 				and (self.sFlags.isMounted
 					  or self.sFlags.inVehicle
 					  or spellID == 783
 					  or self.sFlags.isIndoors and spellID == 768) then
-					return self:addLine(self:getDismountMacro(), "/cast "..self:getSpellName(self.lastDruidFormSpellID))
+					return self:addLine(self:getDismountMacro(), "/cast "..self:getSpellName(self.charMacrosConfig.lastDruidFormSpellID))
 				end
 
 				if not self.classConfig.useDruidFormSpecialization then
 					if spellID and spellID ~= 783 then
-						self.lastDruidFormSpellID = spellID
+						self.charMacrosConfig.lastDruidFormSpellID = spellID
 						self.lastDruidFormTime = GetTime()
 					elseif not spellID and GetTime() - (self.lastDruidFormTime or 0) > 1 then
-						self.lastDruidFormSpellID = nil
+						self.charMacrosConfig.lastDruidFormSpellID = nil
 					end
 				end
 			end
