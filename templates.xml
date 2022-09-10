@@ -18,10 +18,22 @@
 		<Size x="703" y="606"/>
 		<Frames>
 
-			<Button parentKey="closeButton" inherits="UIPanelCloseButton,SecureActionButtonTemplate">
+			<Button parentKey="closeButton" inherits="UIPanelCloseButtonNoScripts,SecureActionButtonTemplate">
 				<Anchors>
-					<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" x="5.6" y="5"/>
+					<Anchor point="TOPRIGHT" x="1" y="-1"/>
 				</Anchors>
+				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent().NineSlice:GetFrameLevel() + 1)
+					</OnLoad>
+					<PreClick>
+						self.ActionButtonUseKeyDown = GetCVar("ActionButtonUseKeyDown")
+						SetCVar("ActionButtonUseKeyDown", 0)
+					</PreClick>
+					<PostClick>
+						SetCVar("ActionButtonUseKeyDown", self.ActionButtonUseKeyDown)
+					</PostClick>
+				</Scripts>
 			</Button>
 
 			<Frame parentKey="mountCount" useParentLevel="false" inherits="InsetFrameTemplate3">
@@ -319,7 +331,7 @@
 					<EditBox parentKey="searchBox" inherits="SearchBoxTemplate" letters="40">
 						<Size x="131" y="20"/>
 						<Anchors>
-							<Anchor point="TOPLEFT" relativePoint="TOPLEFT" x="54" y="-4"/>
+							<Anchor point="TOPLEFT" relativePoint="TOPLEFT" x="54" y="-5"/>
 						</Anchors>
 					</EditBox>
 					<Frame parentKey="filtersBar" inherits="BackdropTemplate">
@@ -751,6 +763,15 @@
 												<Anchor point="CENTER" relativeKey="$parent.border"/>
 											</Anchors>
 										</Texture>
+										<MaskTexture parentKey="mask" file="Interface/CHARACTERFRAME/TempPortraitAlphaMask" hWrapMode="CLAMPTOBLACKADDITIVE" vWrapMode="CLAMPTOBLACKADDITIVE">
+											<Size x="65" y="65"/>
+											<Anchors>
+												<Anchor point="CENTER"/>
+											</Anchors>
+											<MaskedTextures>
+												<MaskedTexture childKey="portrait"/>
+											</MaskedTextures>
+										</MaskTexture>
 									</Layer>
 								</Layers>
 								<HighlightTexture alphaMode="ADD" file="Interface/Minimap/UI-Minimap-ZoomButton-Highlight">
@@ -2032,11 +2053,19 @@
 		<Scripts>
 			<OnLoad>
 				self:SetAttribute("type", "click")
+				self:RegisterForClicks("AnyUp", "AnyDown")
 				self:RegisterForDrag("LeftButton")
 			</OnLoad>
 			<OnLeave>
 				GameTooltip:Hide()
 			</OnLeave>
+			<PreClick>
+				self.ActionButtonUseKeyDown = GetCVar("ActionButtonUseKeyDown")
+				SetCVar("ActionButtonUseKeyDown", 0)
+			</PreClick>
+			<PostClick>
+				SetCVar("ActionButtonUseKeyDown", self.ActionButtonUseKeyDown)
+			</PostClick>
 		</Scripts>
 	</Button>
 
@@ -2451,10 +2480,14 @@
 				</Anchors>
 			</Frame>
 			<Button parentKey="closeButton" inherits="UIPanelCloseButtonNoScripts">
+				<Size x="22" y="22"/>
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="-2" y="-2"/>
+					<Anchor point="TOPRIGHT" x="-6.9" y="-7.1"/>
 				</Anchors>
 				<Scripts>
+					<OnLoad>
+						self:SetFrameLevel(self:GetParent():GetFrameLevel() + 1)
+					</OnLoad>
 					<OnClick>
 						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 						self:GetParent():Hide()
@@ -2462,10 +2495,10 @@
 				</Scripts>
 			</Button>
 			<EditBox inherits="SearchBoxTemplate" parentKey="searchBox" letters="40">
-				<Size y="20"/>
+				<Size y="19"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.controlPanel" x="9" y="-3"/>
-					<Anchor point="TOPRIGHT" relativeKey="$parent.closeButton" relativePoint="TOPLEFT" x="4"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.controlPanel" x="9" y="-3.5"/>
+					<Anchor point="TOPRIGHT" relativeKey="$parent.closeButton" relativePoint="TOPLEFT" x="0"/>
 				</Anchors>
 			</EditBox>
 			<Frame parentKey="filtersPanel" useParentLevel="false" inherits="InsetFrameTemplate">
@@ -2576,7 +2609,7 @@
 					</OnMouseWheel>
 				</Scripts>
 			</EditBox>
-			<Slider parentKey="slider" inherits="HorizontalSliderTemplate">
+			<Slider parentKey="slider" inherits="MinimalSliderTemplate">
 				<Size y="17"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" x="0" y="2"/>
@@ -2587,7 +2620,7 @@
 					<Layer level="ARTWORK">
 						<FontString parentKey="text" inherits="GameFontNormalSmall">
 							<Anchors>
-								<Anchor point="BOTTOM" relativePoint="TOP"/>
+								<Anchor point="BOTTOM" relativePoint="TOP" y="1"/>
 							</Anchors>
 						</FontString>
 					</Layer>

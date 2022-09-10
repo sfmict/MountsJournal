@@ -26,6 +26,7 @@ function binding:createButtonBinding(parent, name, description, secureTemplate, 
 	button.selectedHighlight:Hide()
 	button:RegisterForClicks("AnyUp")
 	button.secure = CreateFrame("Button", name, UIParent, secureTemplate or "SecureActionButtonTemplate")
+	button.secure:RegisterForClicks("AnyUp", "AnyDown")
 	button.secure:SetAttribute("type", "macro")
 	if macro then button.secure:SetAttribute("macrotext", macro) end
 	button.command = "CLICK "..name..":LeftButton"

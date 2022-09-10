@@ -2,8 +2,6 @@ local addon, L = ...
 local util, mounts = MountsJournalUtil, MountsJournal
 local classConfig = CreateFrame("Frame", "MountsJournalConfigClasses", InterfaceOptionsFramePanelContainer)
 classConfig:Hide()
-classConfig.name = L["Class settings"]
-classConfig.parent = addon
 
 
 classConfig:SetScript("OnShow", function(self)
@@ -13,7 +11,7 @@ classConfig:SetScript("OnShow", function(self)
 
 	-- VERSION
 	local ver = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	ver:SetPoint("TOPRIGHT", -16, 16)
+	ver:SetPoint("TOPLEFT", -8, 28)
 	ver:SetTextColor(.5, .5, .5, 1)
 	ver:SetJustifyH("RIGHT")
 	ver:SetText(GetAddOnMetadata(addon, "Version"))
@@ -47,7 +45,7 @@ classConfig:SetScript("OnShow", function(self)
 		self:showClassSettings(btn)
 	end
 
-	for i = 1, GetNumClasses() do
+	for i = 1, 13 do -- GetNumClasses() do
 		local localized, className = GetClassInfo(i)
 		local classColor = C_ClassColor.GetClassColor(className)
 		local classFrame = CreateFrame("BUTTON", nil, self.leftPanel, "MJClassButtonTemplate")
@@ -371,4 +369,6 @@ classConfig.okay = function(self)
 end
 
 
-InterfaceOptions_AddCategory(classConfig)
+local category = Settings.GetCategory(addon)
+local subcategory, layout = Settings.RegisterCanvasLayoutSubcategory(category, classConfig, L["Class settings"])
+Settings.RegisterAddOnCategory(subcategory)

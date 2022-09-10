@@ -2,7 +2,6 @@ local addon, L = ...
 local util, mounts, binding = MountsJournalUtil, MountsJournal, _G[addon.."Binding"]
 local config = CreateFrame("FRAME", "MountsJournalConfig", InterfaceOptionsFramePanelContainer)
 config:Hide()
-config.name = addon
 config.macroName = "MJMacro"
 config.secondMacroName = "MJSecondMacro"
 config.secureButtonNameMount = addon.."_Mount"
@@ -51,7 +50,7 @@ config:SetScript("OnShow", function(self)
 
 	-- VERSION
 	local ver = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	ver:SetPoint("TOPRIGHT", -16, 16)
+	ver:SetPoint("TOPLEFT", -8, 28)
 	ver:SetTextColor(.5, .5, .5, 1)
 	ver:SetJustifyH("RIGHT")
 	ver:SetText(GetAddOnMetadata(addon, "Version"))
@@ -469,9 +468,9 @@ function config:createMacro(macroName, buttonName, texture, openMacroFrame, over
 	end
 
 	if overwrite then
-		EditMacro(macroName, macroName, texture, "/click "..buttonName)
+		EditMacro(macroName, macroName, texture, "/click "..buttonName.." LeftButton")
 	else
-		CreateMacro(macroName, texture, "/click "..buttonName)
+		CreateMacro(macroName, texture, "/click "..buttonName.." LeftButton")
 	end
 
 	if MacroFrame and MacroFrame:IsShown() then
@@ -485,22 +484,22 @@ function config:createMacro(macroName, buttonName, texture, openMacroFrame, over
 	end
 
 	if not MacroFrame:IsShown() then
-		InterfaceOptionsFrame:SetAttribute("UIPanelLayout-allowOtherPanels", 1)
-		ShowUIPanel(MacroFrame)
-		InterfaceOptionsFrame:SetAttribute("UIPanelLayout-allowOtherPanels", nil)
-	end
-
-	if MacroFrame.selectedTab ~= 1 then
-		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		PanelTemplates_SetTab(MacroFrame, MacroFrameTab1:GetID())
-		MacroFrame_SaveMacro()
-		MacroFrame_SetAccountMacros()
+		local centerFrame, allowOtherPanels = GetUIPanel("center")
+		if centerFrame then
+			allowOtherPanels = centerFrame:GetAttribute("UIPanelLayout-allowOtherPanels")
+			centerFrame:SetAttribute("UIPanelLayout-allowOtherPanels", 1)
+		end
+		ShowUIPanel(MacroFrame, 1)
+		if centerFrame then
+			centerFrame:SetAttribute("UIPanelLayout-allowOtherPanels", allowOtherPanels)
+		end
 	end
 
 	local index = GetMacroIndexByName(macroName)
 	local line = ceil(index / 6)
-	MacroButtonScrollFrame:SetVerticalScroll(line < 3 and 0 or 46 * (line - 2))
-	MacroButton_OnClick(_G["MacroButton"..index])
+	local maxLines = ceil(MAX_ACCOUNT_MACROS / 6)
+	MacroFrame.MacroSelector.ScrollBox:SetScrollPercentageInternal(line < 3 and 0 or (line - 1.5) / maxLines)
+	MacroFrame.MacroSelector:OnSelection(index)
 end
 
 
@@ -539,19 +538,16 @@ end
 
 
 -- ADD CATEGORY
-InterfaceOptions_AddCategory(config)
+local category, layout = Settings.RegisterCanvasLayoutCategory(config, addon)
+Settings.RegisterAddOnCategory(category)
 
 
 -- OPEN CONFIG
 function config:openConfig()
-	if InterfaceOptionsFrameAddOns:IsVisible() and self:IsVisible() then
-		InterfaceOptionsFrame:Hide()
-		self:cancel()
+	if SettingsPanel:IsVisible() and self:IsVisible() then
+		HideUIPanel(SettingsPanel)
 	else
-		InterfaceOptionsFrame_OpenToCategory(addon)
-		if not InterfaceOptionsFrameAddOns:IsVisible() then
-			InterfaceOptionsFrame_OpenToCategory(addon)
-		end
+		Settings.OpenToCategory(addon)
 	end
 end
 

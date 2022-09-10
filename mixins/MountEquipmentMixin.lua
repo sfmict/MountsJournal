@@ -21,13 +21,13 @@ function MJMountEquipmentMixin:onShow()
 	self.NewAlert:ValidateIsShown()
 	self:validateCursorDragSource()
 	self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
-	self:RegisterEvent("CURSOR_UPDATE")
+	self:RegisterEvent("CURSOR_CHANGED")
 end
 
 
 function MJMountEquipmentMixin:onHide()
 	self:UnregisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
-	self:UnregisterEvent("CURSOR_UPDATE")
+	self:UnregisterEvent("CURSOR_CHANGED")
 end
 
 
@@ -61,7 +61,7 @@ function MJMountEquipmentMixin:validateCursorDragSource()
 	local canApply = MountJournal_CanApplyMountEquipment(itemLocation)
 	self:SetDragTargetAnimationPlaying(canApply)
 end
-MJMountEquipmentMixin.CURSOR_UPDATE = MJMountEquipmentMixin.validateCursorDragSource
+MJMountEquipmentMixin.CURSOR_CHANGED = MJMountEquipmentMixin.validateCursorDragSource
 
 
 function MJMountEquipmentMixin:getDisplayedMountEquipment()

@@ -1,8 +1,6 @@
 local addon, L = ...
 local aboutConfig = CreateFrame("FRAME", "MountsJournalConfigAbout", InterfaceOptionsFramePanelContainer)
 aboutConfig:Hide()
-aboutConfig.name = L["About"]
-aboutConfig.parent = addon
 
 
 aboutConfig:SetScript("OnShow", function(self)
@@ -103,4 +101,6 @@ aboutConfig:SetScript("OnShow", function(self)
 end)
 
 
-InterfaceOptions_AddCategory(aboutConfig)
+local category = Settings.GetCategory(addon)
+local subcategory, layout = Settings.RegisterCanvasLayoutSubcategory(category, aboutConfig,  L["About"])
+Settings.RegisterAddOnCategory(subcategory)
