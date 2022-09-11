@@ -227,18 +227,11 @@ function test:PLAYER_ENTERING_WORLD()
 	-- journal.navBar:setMapID(980)
 
 	-- CONFIG OPEN
-	-- local config = HidingBarConfigAddon
-	-- local config = MountsJournalConfig
-	-- local config = MountsJournalConfigClasses
-	-- local config = MountsJournalConfigAbout
-	-- if InterfaceOptionsFrameAddOns:IsVisible() and config:IsVisible() then
-	-- 	InterfaceOptionsFrame:Hide()
-	-- else
-	-- 	InterfaceOptionsFrame_OpenToCategory(config.name)
-	-- 	if not InterfaceOptionsFrameAddOns:IsVisible() then
-	-- 		InterfaceOptionsFrame_OpenToCategory(config.name)
-	-- 	end
-	-- end
+	-- local configName = "HidingBar"
+	-- local configName = addon
+	-- local configName = L["Class settings"]
+	-- local configName = L["About"]
+	-- Settings.OpenToCategory(configName)
 	-- select(14,config:GetChildren()):Click()
 	-- if true then return end
 

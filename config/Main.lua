@@ -477,6 +477,35 @@ config:SetScript("OnShow", function(self)
 		self.applyBtn:Disable()
 	end
 	self:OnRefresh()
+
+	-- COMMIT
+	self.OnCommit = function(self)
+		binding.unboundMessage:Hide()
+		mounts:setModifier(self.modifierCombobox.selectedValue)
+		binding:saveBinding()
+		mounts:setHandleWaterJump(self.waterJump:GetChecked())
+		mounts.config.useHerbMounts = self.useHerbMounts:GetChecked()
+		mounts.config.herbMountsOnZones = self.herbMountsOnZones:GetChecked()
+		mounts:setHerbMount()
+		mounts.config.useRepairMounts = self.useRepairMounts:GetChecked()
+		mounts.config.useRepairMountsDurability = tonumber(self.repairPercent:GetText()) or 0
+		mounts.config.useRepairFlyable = self.repairFlyable:GetChecked()
+		mounts.config.useRepairFlyableDurability = tonumber(self.repairFlyablePercent:GetText()) or 0
+		mounts:UPDATE_INVENTORY_DURABILITY()
+		mounts.config.repairSelectedMount = self.repairMountsCombobox.selectedValue
+		mounts:setUsableRepairMounts()
+		mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
+		if self.useUnderlightAngler then
+			mounts.config.useUnderlightAngler = self.useUnderlightAngler:GetChecked()
+			mounts.config.autoUseUnderlightAngler = self.autoUseUnderlightAngler:GetChecked()
+		end
+		mounts.config.noPetInRaid = self.noPetInRaid:GetChecked()
+		mounts.config.noPetInGroup = self.noPetInGroup:GetChecked()
+		mounts.config.copyMountTarget = self.copyMountTarget:GetChecked()
+		mounts.config.arrowButtonsBrowse = self.arrowButtons:GetChecked()
+		mounts.config.openHyperlinks = self.openLinks:GetChecked()
+		MountsJournalFrame:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
+	end
 end)
 
 
@@ -519,39 +548,8 @@ function config:createMacro(macroName, buttonName, texture, openMacroFrame, over
 	end
 
 	local index = GetMacroIndexByName(macroName)
-	local line = ceil(index / 6)
-	local maxLines = ceil(MAX_ACCOUNT_MACROS / 6)
-	MacroFrame.MacroSelector.ScrollBox:SetScrollPercentageInternal(line < 3 and 0 or (line - 1.5) / maxLines)
 	MacroFrame.MacroSelector:OnSelection(index)
-end
-
-
-config.OnCommit = function(self)
-	binding.unboundMessage:Hide()
-	mounts:setModifier(self.modifierCombobox.selectedValue)
-	binding:saveBinding()
-	mounts:setHandleWaterJump(self.waterJump:GetChecked())
-	mounts.config.useHerbMounts = self.useHerbMounts:GetChecked()
-	mounts.config.herbMountsOnZones = self.herbMountsOnZones:GetChecked()
-	mounts:setHerbMount()
-	mounts.config.useRepairMounts = self.useRepairMounts:GetChecked()
-	mounts.config.useRepairMountsDurability = tonumber(self.repairPercent:GetText()) or 0
-	mounts.config.useRepairFlyable = self.repairFlyable:GetChecked()
-	mounts.config.useRepairFlyableDurability = tonumber(self.repairFlyablePercent:GetText()) or 0
-	mounts:UPDATE_INVENTORY_DURABILITY()
-	mounts.config.repairSelectedMount = self.repairMountsCombobox.selectedValue
-	mounts:setUsableRepairMounts()
-	mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
-	if self.useUnderlightAngler then
-		mounts.config.useUnderlightAngler = self.useUnderlightAngler:GetChecked()
-		mounts.config.autoUseUnderlightAngler = self.autoUseUnderlightAngler:GetChecked()
-	end
-	mounts.config.noPetInRaid = self.noPetInRaid:GetChecked()
-	mounts.config.noPetInGroup = self.noPetInGroup:GetChecked()
-	mounts.config.copyMountTarget = self.copyMountTarget:GetChecked()
-	mounts.config.arrowButtonsBrowse = self.arrowButtons:GetChecked()
-	mounts.config.openHyperlinks = self.openLinks:GetChecked()
-	MountsJournalFrame:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
+	MacroFrame.MacroSelector:ScrollToSelectedIndex()
 end
 
 
