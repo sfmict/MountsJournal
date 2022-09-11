@@ -4,7 +4,7 @@ local util = MountsJournalUtil
 
 MountsJournalFrame:on("MODULES_INIT", function(journal)
 	local dd = LibStub("LibSFDropDown-1.4"):CreateStretchButtonOriginal(journal.bgFrame, 130, 22)
-	dd:SetPoint("LEFT", journal.summonButton, "RIGHT", 4, 0)
+	dd:SetPoint("LEFT", journal.summonButton, "RIGHT", 4, -.5)
 	util.setEventsMixin(dd)
 	journal.bgFrame.profilesMenu = dd
 

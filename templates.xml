@@ -1578,7 +1578,7 @@
 	</Frame>
 
 	<CheckButton name="MJBaseCheckButtonTemplate" inherits="UICheckButtonArtTemplate" virtual="true">
-		<Size x="32" y="32"/>
+		<Size x="28" y="28"/>
 		<Scripts>
 			<OnClick>
 				PlaySound(self:GetChecked() and SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)

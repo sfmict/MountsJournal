@@ -963,7 +963,7 @@ function journal:ADDON_LOADED(addonName)
 		self.MountJournal = MountJournal
 
 		self.useMountsJournalButton = CreateFrame("CheckButton", nil, self.MountJournal, "MJUseMountsJournalButtonTemplate")
-		self.useMountsJournalButton:SetPoint("BOTTOMLEFT", self.CollectionsJournal, "BOTTOMLEFT", 281, 1)
+		self.useMountsJournalButton:SetPoint("BOTTOMLEFT", self.CollectionsJournal, "BOTTOMLEFT", 281, -.5)
 		self.useMountsJournalButton.Text:SetFontObject("GameFontNormal")
 		self.useMountsJournalButton.Text:SetText(addon)
 		self.useMountsJournalButton:SetChecked(not mounts.config.useDefaultJournal)
