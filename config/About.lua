@@ -1,5 +1,5 @@
 local addon, L = ...
-local aboutConfig = CreateFrame("FRAME", "MountsJournalConfigAbout", InterfaceOptionsFramePanelContainer)
+local aboutConfig = CreateFrame("FRAME", "MountsJournalConfigAbout")
 aboutConfig:Hide()
 
 

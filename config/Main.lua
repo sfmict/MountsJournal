@@ -1,6 +1,6 @@
 local addon, L = ...
 local util, mounts, binding = MountsJournalUtil, MountsJournal, _G[addon.."Binding"]
-local config = CreateFrame("FRAME", "MountsJournalConfig", InterfaceOptionsFramePanelContainer)
+local config = CreateFrame("FRAME", "MountsJournalConfig")
 config:Hide()
 config.macroName = "MJMacro"
 config.secondMacroName = "MJSecondMacro"
@@ -22,6 +22,8 @@ end
 
 -- SHOW CONFIG
 config:SetScript("OnShow", function(self)
+	self:SetScript("OnShow", nil)
+
 	StaticPopupDialogs[util.addonName.."MACRO_EXISTS"] = {
 		text = addon..": "..L["A macro named \"%s\" already exists, overwrite it?"],
 		button1 = ACCEPT,
@@ -32,7 +34,10 @@ config:SetScript("OnShow", function(self)
 	}
 
 	-- ENABLE APPLY
-	local function applyEnable() self.applyBtn:Enable() end
+	local function enableBtns()
+		self.applyBtn:Enable()
+		self.cancelBtn:Enable()
+	end
 
 	-- TOOLTIP
 	local function setTooltip(frame, anchor, title, text)
@@ -81,7 +86,7 @@ config:SetScript("OnShow", function(self)
 	self.waterJump.Text:SetText(L["Handle a jump in water"])
 	self.waterJump.tooltipText = L["Handle a jump in water"]
 	self.waterJump.tooltipRequirement = L["WaterJumpDescription"]
-	self.waterJump:HookScript("OnClick", applyEnable)
+	self.waterJump:HookScript("OnClick", enableBtns)
 
 	-- SUMMON 1
 	local summon1 = self.leftPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -130,7 +135,7 @@ config:SetScript("OnShow", function(self)
 			info.checked = function(btn) return modifierCombobox.selectedValue == btn.value end
 			info.func = function(btn)
 				self:ddSetSelectedValue(btn.value)
-				config.applyBtn:Enable()
+				enableBtns()
 			end
 			self:ddAddButton(info, level)
 		end
@@ -180,14 +185,14 @@ config:SetScript("OnShow", function(self)
 	self.useHerbMounts.Text:SetText(L["UseHerbMounts"])
 	self.useHerbMounts.tooltipText = L["UseHerbMounts"]
 	self.useHerbMounts.tooltipRequirement = L["UseHerbMountsDescription"]
-	self.useHerbMounts:HookScript("OnClick", applyEnable)
+	self.useHerbMounts:HookScript("OnClick", enableBtns)
 
 	-- USE HERBALISM MOUNTS ON HERBALISM ZONES
 	self.herbMountsOnZones = util.createCheckboxChild(L["UseHerbMountsOnZones"], self.useHerbMounts)
 	self.herbMountsOnZones.tooltipText = L["UseHerbMountsOnZones"]
 	self.herbMountsOnZones.tooltipRequirement = L["UseHerbMountsDescription"]
 	self.herbMountsOnZones.checkFunc = function() return mounts.config.herbMountsOnZones end
-	self.herbMountsOnZones:HookScript("OnClick", applyEnable)
+	self.herbMountsOnZones:HookScript("OnClick", enableBtns)
 
 	-- USE REPAIR MOUNTS
 	self.useRepairMounts = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
@@ -195,7 +200,7 @@ config:SetScript("OnShow", function(self)
 	self.useRepairMounts.Text:SetText(L["If item durability is less than"])
 	self.useRepairMounts.tooltipText = L["If item durability is less than"]
 	self.useRepairMounts.tooltipRequirement = L["UseRepairMountsDescription"]
-	self.useRepairMounts:HookScript("OnClick",  applyEnable)
+	self.useRepairMounts:HookScript("OnClick",  enableBtns)
 
 	-- editbox
 	self.repairPercent = CreateFrame("Editbox", nil, self.rightPanelScroll.child, "MJNumberTextBox")
@@ -208,7 +213,7 @@ config:SetScript("OnShow", function(self)
 			elseif value > 100 then
 				editBox:SetNumber(100)
 			end
-			applyEnable()
+			enableBtns()
 		end
 	end)
 	self.repairPercent:SetScript("OnMouseWheel", function(editBox, delta)
@@ -217,7 +222,7 @@ config:SetScript("OnShow", function(self)
 			if value >= 0 and value <= 100 then
 				editBox:SetNumber(value)
 			end
-			applyEnable()
+			enableBtns()
 		end
 	end)
 	util.setCheckboxChild(self.useRepairMounts, self.repairPercent)
@@ -236,7 +241,7 @@ config:SetScript("OnShow", function(self)
 	end
 	self.repairFlyable:HookScript("OnEnable", self.repairFlyable.setEnabledFunc)
 	self.repairFlyable:HookScript("OnDisable", self.repairFlyable.setEnabledFunc)
-	self.repairFlyable:HookScript("OnClick", applyEnable)
+	self.repairFlyable:HookScript("OnClick", enableBtns)
 
 	-- editbox
 	self.repairFlyablePercent = CreateFrame("Editbox", nil, self.rightPanelScroll.child, "MJNumberTextBox")
@@ -249,7 +254,7 @@ config:SetScript("OnShow", function(self)
 			elseif value > 100 then
 				editBox:SetNumber(100)
 			end
-			applyEnable()
+			enableBtns()
 		end
 	end)
 	self.repairFlyablePercent:SetScript("OnMouseWheel", function(editBox, delta)
@@ -258,7 +263,7 @@ config:SetScript("OnShow", function(self)
 			if value >= 0 and value <= 100 then
 				editBox:SetNumber(value)
 			end
-			applyEnable()
+			enableBtns()
 		end
 	end)
 	util.setCheckboxChild(self.repairFlyable, self.repairFlyablePercent)
@@ -280,7 +285,7 @@ config:SetScript("OnShow", function(self)
 		info.checked = function(btn) return self.selectedValue == btn.value end
 		info.func = function(btn)
 			self:ddSetSelectedValue(btn.value)
-			config.applyBtn:Enable()
+			enableBtns()
 		end
 		self:ddAddButton(info, level)
 
@@ -295,7 +300,7 @@ config:SetScript("OnShow", function(self)
 				info.checked = function(btn) return self.selectedValue == btn.value end
 				info.func = function(btn)
 					self:ddSetSelectedValue(btn.value)
-					config.applyBtn:Enable()
+					enableBtns()
 				end
 				info.OnTooltipShow = function(btn, tooltip)
 					tooltip:SetMountBySpellID(spellID)
@@ -320,7 +325,7 @@ config:SetScript("OnShow", function(self)
 	util.setHyperlinkTooltip(self.useMagicBroom)
 	self.useMagicBroom.tooltipText = L["UseMagicBroomTitle"]
 	self.useMagicBroom.tooltipRequirement = L["UseMagicBroomDescription"]
-	self.useMagicBroom:HookScript("OnClick", applyEnable)
+	self.useMagicBroom:HookScript("OnClick", enableBtns)
 
 	-- USE UNDERLIGHT ANGLER
 	if C_Item.DoesItemExistByID(133755) then
@@ -338,11 +343,11 @@ config:SetScript("OnShow", function(self)
 		end
 		util.setHyperlinkTooltip(self.useUnderlightAngler)
 		self.useUnderlightAngler.tooltipRequirement = L["UseUnderlightAnglerDescription"]
-		self.useUnderlightAngler:HookScript("OnClick", applyEnable)
+		self.useUnderlightAngler:HookScript("OnClick", enableBtns)
 
 		-- AUTO USE UNDERLIGHT ANGLER
 		self.autoUseUnderlightAngler = util.createCheckboxChild(L["Use automatically"], self.useUnderlightAngler)
-		self.autoUseUnderlightAngler:HookScript("OnClick", applyEnable)
+		self.autoUseUnderlightAngler:HookScript("OnClick", enableBtns)
 	end
 
 	-- NO PET IN RAID
@@ -354,28 +359,28 @@ config:SetScript("OnShow", function(self)
 	end
 	self.noPetInRaid.Text:SetSize(245, 25)
 	self.noPetInRaid.Text:SetText(L["NoPetInRaid"])
-	self.noPetInRaid:HookScript("OnClick", applyEnable)
+	self.noPetInRaid:HookScript("OnClick", enableBtns)
 
 	-- NO PET IN GROUP
 	self.noPetInGroup = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.noPetInGroup:SetPoint("TOPLEFT", self.noPetInRaid, "BOTTOMLEFT", 0, -3)
 	self.noPetInGroup.Text:SetSize(245, 25)
 	self.noPetInGroup.Text:SetText(L["NoPetInGroup"])
-	self.noPetInGroup:HookScript("OnClick", applyEnable)
+	self.noPetInGroup:HookScript("OnClick", enableBtns)
 
 	-- COPY MOUNT TARGET
 	self.copyMountTarget = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.copyMountTarget:SetPoint("TOPLEFT", self.noPetInGroup, "BOTTOMLEFT", 0, -15)
 	self.copyMountTarget.Text:SetSize(245, 25)
 	self.copyMountTarget.Text:SetText(L["CopyMountTarget"])
-	self.copyMountTarget:HookScript("OnClick", applyEnable)
+	self.copyMountTarget:HookScript("OnClick", enableBtns)
 
 	-- ARROW BUTTONS
 	self.arrowButtons = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.arrowButtons:SetPoint("TOPLEFT", self.copyMountTarget, "BOTTOMLEFT", 0, -15)
 	self.arrowButtons.Text:SetSize(245, 25)
 	self.arrowButtons.Text:SetText(L["Enable arrow buttons to browse mounts"])
-	self.arrowButtons:HookScript("OnClick", applyEnable)
+	self.arrowButtons:HookScript("OnClick", enableBtns)
 
 	-- OPEN HYPERLINKS
 	self.openLinks = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
@@ -386,7 +391,7 @@ config:SetScript("OnShow", function(self)
 	local dressUpMod = ("-"):split(GetModifiedClick("DRESSUP"))
 	local chatLinkMod = ("-"):split(GetModifiedClick("CHATLINK"))
 	self.openLinks.tooltipRequirement = ("%s+%s %s\n%s+%s+%s %s"):format(dressUpMod, L["Click opens in"], addon, dressUpMod, chatLinkMod, L["Click opens in"], DRESSUP_FRAME)
-	self.openLinks:HookScript("OnClick", applyEnable)
+	self.openLinks:HookScript("OnClick", enableBtns)
 
 	-- RESET HELP
 	self.resetHelp = CreateFrame("BUTTON", nil, self.rightPanelScroll.child, "UIPanelButtonTemplate")
@@ -400,15 +405,32 @@ config:SetScript("OnShow", function(self)
 		btn:Disable()
 	end)
 
+	-- CANCEL
+	self.cancelBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
+	self.cancelBtn:SetSize(96, 22)
+	self.cancelBtn:Disable()
+	self.cancelBtn:SetPoint("BOTTOMRIGHT", -8, 8)
+	self.cancelBtn:SetText(CANCEL)
+	self.cancelBtn:SetScript("OnClick", function(btn)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		self:GetScript("OnHide")(self)
+		binding:setButtonText(self.bindMount)
+		binding:setButtonText(self.bindSecondMount)
+		self:OnRefresh()
+		self.applyBtn:Disable()
+		btn:Disable()
+	end)
+
 	-- APPLY
 	self.applyBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
 	self.applyBtn:SetSize(96, 22)
 	self.applyBtn:Disable()
-	self.applyBtn:SetPoint("BOTTOMRIGHT", -8, 8)
+	self.applyBtn:SetPoint("RIGHT", self.cancelBtn, "LEFT", -5, 0)
 	self.applyBtn:SetText(APPLY)
 	self.applyBtn:SetScript("OnClick", function(btn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		self:okay()
+		self:OnCommit()
+		self.cancelBtn:Disable()
 		btn:Disable()
 	end)
 
@@ -416,11 +438,11 @@ config:SetScript("OnShow", function(self)
 	binding:on("SET_BINDING", function(binding, btn)
 		if self.bindMount ~= btn then binding:setButtonText(self.bindMount) end
 		if self.bindSecondMount ~= btn then binding:setButtonText(self.bindSecondMount) end
-		self.applyBtn:Enable()
+		enableBtns()
 	end)
 
 	-- REFRESH
-	self:SetScript("OnShow", function(self)
+	self.OnRefresh = function(self)
 		binding.unboundMessage:Hide()
 		modifierCombobox:ddSetSelectedValue(mounts.config.modifier)
 		modifierCombobox:ddSetSelectedText(_G[mounts.config.modifier.."_KEY"])
@@ -451,9 +473,10 @@ config:SetScript("OnShow", function(self)
 		self.arrowButtons:SetChecked(mounts.config.arrowButtonsBrowse)
 		self.openLinks:SetChecked(mounts.config.openHyperlinks)
 		self.resetHelp:Enable()
+		self.cancelBtn:Disable()
 		self.applyBtn:Disable()
-	end)
-	self:GetScript("OnShow")(self)
+	end
+	self:OnRefresh()
 end)
 
 
@@ -503,7 +526,7 @@ function config:createMacro(macroName, buttonName, texture, openMacroFrame, over
 end
 
 
-config.okay = function(self)
+config.OnCommit = function(self)
 	binding.unboundMessage:Hide()
 	mounts:setModifier(self.modifierCombobox.selectedValue)
 	binding:saveBinding()
@@ -532,9 +555,9 @@ config.okay = function(self)
 end
 
 
-config.cancel = function()
+config:SetScript("OnHide", function()
 	binding:resetBinding()
-end
+end)
 
 
 -- ADD CATEGORY
@@ -547,7 +570,9 @@ function config:openConfig()
 	if SettingsPanel:IsVisible() and self:IsVisible() then
 		HideUIPanel(SettingsPanel)
 	else
-		Settings.OpenToCategory(addon)
+		Settings.GetCategory(addon).expanded = true
+		Settings.OpenToCategory(addon, true)
+		SettingsPanel:GetCategoryList():CreateCategories()
 	end
 end
 

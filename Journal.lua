@@ -1196,7 +1196,7 @@ function journal:defaultUpdateMountList(scrollFrame)
 
 		if index <= numDisplayedMounts then
 			local mountID = self.displayedMounts[index]
-			local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+			local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected, _, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
 			local needsFanfare = C_MountJournal.NeedsFanfare(mountID)
 
 			dlist.index = index
@@ -1221,10 +1221,17 @@ function journal:defaultUpdateMountList(scrollFrame)
 
 			dlist.btn:Enable()
 			dlist.btn.name:SetText(creatureName)
+			dlist.btn.dragonriding:SetShown(isForDragonriding)
 			dlist.btn.new:SetShown(needsFanfare)
 			dlist.btn.newGlow:SetShown(needsFanfare)
 			dlist.btn.background:SetVertexColor(1, 1, 1)
 			dlist.btn.selectedTexture:SetShown(mountID == self.selectedMountID)
+
+			local yOffset = 1
+			if isForDragonriding then
+				yOffset = dlist.btn.name:GetNumLines() == 1 and 6 or 5
+			end
+			dlist.btn.name:SetPoint("LEFT", 6, yOffset)
 
 			if isFactionSpecific then
 				dlist.btn.factionIcon:SetAtlas(faction == 0 and "MountJournalIcons-Horde" or "MountJournalIcons-Alliance")
@@ -1505,16 +1512,16 @@ function journal:sortMounts()
 	local numNeedingFanfare = C_MountJournal.GetNumMountsNeedingFanfare()
 
 	local function setMCache(mountID)
-		local name, _,_,_,_,_, isFavorite, _,_,_, isCollected = C_MountJournal.GetMountInfoByID(mountID)
-		mCache[mountID] = {name, isFavorite, isCollected}
+		local name, _,_,_,_,_, isFavorite, _,_,_, isCollected, _, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
+		mCache[mountID] = {name, isFavorite, isCollected, isForDragonriding}
 		if numNeedingFanfare > 0 and C_MountJournal.NeedsFanfare(mountID) then
-			mCache[mountID][4] = true
+			mCache[mountID][5] = true
 			numNeedingFanfare = numNeedingFanfare - 1
 		end
 		if fSort.by == "type" then
 			local _,_,_,_, mType = C_MountJournal.GetMountInfoExtraByID(mountID)
 			mType = self.mountTypes[mType]
-			mCache[mountID][5] = type(mType) == "number" and mType or mType[1]
+			mCache[mountID][6] = type(mType) == "number" and mType or mType[1]
 		end
 	end
 
@@ -1524,8 +1531,8 @@ function journal:sortMounts()
 		if not mCache[b] then setMCache(b) end
 
 		-- FANFARE
-		local needFanfareA = mCache[a][4]
-		local needFanfareB = mCache[b][4]
+		local needFanfareA = mCache[a][5]
+		local needFanfareB = mCache[b][5]
 
 		if needFanfareA and not needFanfareB then return true
 		elseif not needFanfareA and needFanfareB then return false end
@@ -1546,10 +1553,17 @@ function journal:sortMounts()
 		if isCollectedA and not isCollectedB then return true
 		elseif not isCollectedA and isCollectedB then return false end
 
+		-- DRAGONRIDING
+		local isForDragonridingA = mCache[a][4]
+		local isForDragonridingB = mCache[b][4]
+
+		if isForDragonridingA and not isForDragonridingB then return true
+		elseif not isForDragonridingA and isForDragonridingB then return false end
+
 		-- TYPE
 		if fSort.by == "type" then
-			local typeA = mCache[a][5]
-			local typeB = mCache[b][5]
+			local typeA = mCache[a][6]
+			local typeB = mCache[b][6]
 
 			if typeA < typeB then return not fSort.reverse
 			elseif typeA > typeB then return fSort.reverse end

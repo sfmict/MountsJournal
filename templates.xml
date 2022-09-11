@@ -1411,10 +1411,16 @@
 								</Texture>
 							</Layer>
 							<Layer level="OVERLAY">
-								<FontString parentKey="name" inherits="GameFontNormal" justifyH="LEFT">
-									<Size x="147" y="25"/>
+								<FontString parentKey="name" inherits="GameFontNormal" justifyH="LEFT" maxLines="2">
+									<Size x="147" y="0"/>
 									<Anchors>
-										<Anchor point="LEFT" x="6" y="0"/>
+										<Anchor point="LEFT" x="6" y="1"/>
+									</Anchors>
+								</FontString>
+								<FontString parentKey="dragonriding" inherits="GameFontDisableSmall" justifyH="LEFT" text="MOUNT_JOURNAL_FILTER_DRAGONRIDING" maxLines="1" hidden="true">
+									<Size x="147"/>
+									<Anchors>
+										<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeKey="$parent.name" x="0" y="0"/>
 									</Anchors>
 								</FontString>
 							</Layer>

@@ -1,6 +1,6 @@
 local addon, L = ...
 local util, mounts = MountsJournalUtil, MountsJournal
-local classConfig = CreateFrame("Frame", "MountsJournalConfigClasses", InterfaceOptionsFramePanelContainer)
+local classConfig = CreateFrame("Frame", "MountsJournalConfigClasses")
 classConfig:Hide()
 
 
