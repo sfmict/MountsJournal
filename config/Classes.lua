@@ -11,7 +11,7 @@ classConfig:SetScript("OnShow", function(self)
 
 	-- VERSION
 	local ver = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	ver:SetPoint("TOPLEFT", -8, 28)
+	ver:SetPoint("TOPLEFT", 4, 20)
 	ver:SetTextColor(.5, .5, .5, 1)
 	ver:SetJustifyH("RIGHT")
 	ver:SetText(GetAddOnMetadata(addon, "Version"))
@@ -136,6 +136,7 @@ classConfig:SetScript("OnShow", function(self)
 	self.moveFallMF = moveFallMF
 	self.macroEditBox = moveFallMF.editFrame
 	moveFallMF:SetPoint("LEFT", 9, 0)
+	moveFallMF:SetPoint("RIGHT", self.rightPanelScroll, -5, 0)
 	moveFallMF.label:SetText(L["HELP_MACRO_MOVE_FALL"])
 	moveFallMF.enable:HookScript("OnClick", function(btn)
 		self.currentMacrosConfig.macroEnable = btn:GetChecked()
@@ -162,6 +163,7 @@ classConfig:SetScript("OnShow", function(self)
 	self.combatMF = combatMF
 	self.combatMacroEditBox = combatMF.editFrame
 	combatMF:SetPoint("TOPLEFT", moveFallMF.background, "BOTTOMLEFT", 0, -50)
+	combatMF:SetPoint("RIGHT", self.rightPanelScroll, -5, 0)
 	combatMF.label:SetText(L["HELP_MACRO_COMBAT"])
 	combatMF.enable:HookScript("OnClick", function(btn)
 		self.currentMacrosConfig.combatMacroEnable = btn:GetChecked()
@@ -184,6 +186,13 @@ classConfig:SetScript("OnShow", function(self)
 	end)
 
 	firstClassFrame:Click()
+
+	-- COMMIT
+	classConfig.OnCommit = function(self)
+		self:macroSave()
+		self:combatMacroSave()
+		util.refreshMacro()
+	end
 end)
 
 
@@ -270,7 +279,7 @@ do
 		optionFrame:SetChecked(self.currentMacrosConfig[option.key])
 		optionFrame.Text:SetText((option.text or L[(className.."_"..option.key):upper()]):format(option.hlink))
 		if not optionFrame.key then
-			optionFrame.Text:SetSize(365, 30)
+			optionFrame.Text:SetPoint("RIGHT", self.rightPanelScroll, -5, 0)
 			optionFrame:HookScript("OnClick", function(btn) optionClick(self, btn) end)
 		end
 		optionFrame.key = option.key
@@ -348,6 +357,8 @@ function classConfig:macroSave()
 		self.currentMacrosConfig.macro = text
 	end
 	self.macroEditBox:ClearFocus()
+	self.moveFallMF.saveBtn:Disable()
+	self.moveFallMF.cancelBtn:Disable()
 end
 
 
@@ -359,16 +370,13 @@ function classConfig:combatMacroSave()
 		self.currentMacrosConfig.combatMacro = text
 	end
 	self.combatMacroEditBox:ClearFocus()
-end
-
-
-classConfig.okay = function(self)
-	self:macroSave()
-	self:combatMacroSave()
-	util.refreshMacro()
+	self.combatMF.saveBtn:Disable()
+	self.combatMF.cancelBtn:Disable()
 end
 
 
 local category = Settings.GetCategory(addon)
 local subcategory, layout = Settings.RegisterCanvasLayoutSubcategory(category, classConfig, L["Class settings"])
+layout:AddAnchorPoint("TOPLEFT", -12, 8)
+layout:AddAnchorPoint("BOTTOMRIGHT", 0, 0)
 Settings.RegisterAddOnCategory(subcategory)

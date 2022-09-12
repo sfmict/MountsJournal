@@ -55,7 +55,7 @@ config:SetScript("OnShow", function(self)
 
 	-- VERSION
 	local ver = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	ver:SetPoint("TOPLEFT", -8, 28)
+	ver:SetPoint("TOPLEFT", 4, 20)
 	ver:SetTextColor(.5, .5, .5, 1)
 	ver:SetJustifyH("RIGHT")
 	ver:SetText(GetAddOnMetadata(addon, "Version"))
@@ -357,35 +357,35 @@ config:SetScript("OnShow", function(self)
 	else
 		self.noPetInRaid:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 0, -15)
 	end
-	self.noPetInRaid.Text:SetSize(245, 25)
+	self.noPetInRaid.Text:SetPoint("RIGHT", self.rightPanelScroll)
 	self.noPetInRaid.Text:SetText(L["NoPetInRaid"])
 	self.noPetInRaid:HookScript("OnClick", enableBtns)
 
 	-- NO PET IN GROUP
 	self.noPetInGroup = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.noPetInGroup:SetPoint("TOPLEFT", self.noPetInRaid, "BOTTOMLEFT", 0, -3)
-	self.noPetInGroup.Text:SetSize(245, 25)
+	self.noPetInGroup.Text:SetPoint("RIGHT", self.rightPanelScroll)
 	self.noPetInGroup.Text:SetText(L["NoPetInGroup"])
 	self.noPetInGroup:HookScript("OnClick", enableBtns)
 
 	-- COPY MOUNT TARGET
 	self.copyMountTarget = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.copyMountTarget:SetPoint("TOPLEFT", self.noPetInGroup, "BOTTOMLEFT", 0, -15)
-	self.copyMountTarget.Text:SetSize(245, 25)
+	self.copyMountTarget.Text:SetPoint("RIGHT", self.rightPanelScroll)
 	self.copyMountTarget.Text:SetText(L["CopyMountTarget"])
 	self.copyMountTarget:HookScript("OnClick", enableBtns)
 
 	-- ARROW BUTTONS
 	self.arrowButtons = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.arrowButtons:SetPoint("TOPLEFT", self.copyMountTarget, "BOTTOMLEFT", 0, -15)
-	self.arrowButtons.Text:SetSize(245, 25)
+	self.arrowButtons.Text:SetPoint("RIGHT", self.rightPanelScroll)
 	self.arrowButtons.Text:SetText(L["Enable arrow buttons to browse mounts"])
 	self.arrowButtons:HookScript("OnClick", enableBtns)
 
 	-- OPEN HYPERLINKS
 	self.openLinks = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.openLinks:SetPoint("TOPLEFT", self.arrowButtons, "BOTTOMLEFT", 0, -15)
-	self.openLinks.Text:SetSize(245, 25)
+	self.openLinks.Text:SetPoint("RIGHT", self.rightPanelScroll)
 	self.openLinks.Text:SetText(L["Open links in %s"]:format(addon))
 	self.openLinks.tooltipText = L["Open links in %s"]:format(addon)
 	local dressUpMod = ("-"):split(GetModifiedClick("DRESSUP"))
@@ -560,6 +560,8 @@ end)
 
 -- ADD CATEGORY
 local category, layout = Settings.RegisterCanvasLayoutCategory(config, addon)
+layout:AddAnchorPoint("TOPLEFT", -12, 8)
+layout:AddAnchorPoint("BOTTOMRIGHT", 0, 0)
 Settings.RegisterAddOnCategory(category)
 
 
