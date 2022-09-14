@@ -1750,8 +1750,6 @@
 				<Scripts>
 					<OnClick>
 						PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-						self:Disable()
-						self:GetParent().cancelBtn:Disable()
 					</OnClick>
 				</Scripts>
 			</Button>

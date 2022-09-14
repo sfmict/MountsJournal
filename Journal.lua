@@ -88,6 +88,7 @@ function journal:init()
 		self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 		self:RegisterEvent("PLAYER_REGEN_DISABLED")
 		self:RegisterEvent("PLAYER_REGEN_ENABLED")
+		self:RegisterUnitEvent("UNIT_FORM_CHANGED", "player")
 		self:updateMountsList()
 		self:updateMountDisplay(true)
 	end)
@@ -98,6 +99,7 @@ function journal:init()
 		self:UnregisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 		self:UnregisterEvent("PLAYER_REGEN_DISABLED")
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+		self:UnregisterEvent("UNIT_FORM_CHANGED")
 		self.mountDisplay:Show()
 		self.navBarBtn:SetChecked(false)
 		self.mapSettings:Hide()
@@ -933,6 +935,7 @@ function journal:init()
 	self.CollectionsJournal.NineSlice:Hide()
 	self:RegisterEvent("COMPANION_UPDATE")
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
+	self:RegisterUnitEvent("UNIT_FORM_CHANGED", "player")
 
 	self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 	self:setMJFiltersBackup()
@@ -1623,6 +1626,11 @@ function journal:MOUNT_JOURNAL_USABILITY_CHANGED()
 	self:updateMountDisplay()
 end
 
+-- to shapeshift worgen and dracthyr
+function journal:UNIT_FORM_CHANGED()
+	self:updateMountDisplay(true)
+end
+
 
 function journal:createMountList(mapID)
 	self.zoneMounts[mapID] = {
@@ -1870,7 +1878,7 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 					mountActor:SetAnimationBlendOperation(LE_MODEL_BLEND_OPERATION_ANIM)
 					mountActor:SetAnimation(0)
 				end
-				self.modelScene:AttachPlayerToMount(mountActor, animID, isSelfMount, disablePlayerMountPreview or not GetCVarBool("mountJournalShowPlayer"), spellVisualKitID)
+				self.modelScene:AttachPlayerToMount(mountActor, animID, isSelfMount, disablePlayerMountPreview or not GetCVarBool("mountJournalShowPlayer"), spellVisualKitID, PlayerUtil.ShouldUseNativeFormInModelScene())
 			end
 
 			self:event("MOUNT_MODEL_UPDATE", mountType)
