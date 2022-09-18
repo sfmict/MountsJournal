@@ -1232,7 +1232,7 @@ function journal:defaultUpdateMountList(scrollFrame)
 
 			local yOffset = 1
 			if isForDragonriding then
-				yOffset = dlist.btn.name:GetNumLines() == 1 and 6 or 5
+				yOffset = dlist.btn.name:GetNumLines() == 1 and 5 or 6
 			end
 			dlist.btn.name:SetPoint("LEFT", 6, yOffset)
 
@@ -1283,6 +1283,7 @@ function journal:defaultUpdateMountList(scrollFrame)
 
 			dlist.btn:Disable()
 			dlist.btn.name:SetText("")
+			dlist.btn.dragonriding:Hide()
 			dlist.btn.new:Hide()
 			dlist.btn.newGlow:Hide()
 			dlist.btn.factionIcon:Hide()
@@ -1625,6 +1626,7 @@ function journal:MOUNT_JOURNAL_USABILITY_CHANGED()
 	self:updateMountsList()
 	self:updateMountDisplay()
 end
+
 
 -- to shapeshift worgen and dracthyr
 function journal:UNIT_FORM_CHANGED()
