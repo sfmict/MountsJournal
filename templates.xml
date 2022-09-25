@@ -7,9 +7,15 @@
 	<Script file="mixins/MountEquipmentMixin.lua"/>
 
 	<CheckButton name="MJUseMountsJournalButtonTemplate" motionScriptsWhileDisabled="true" inherits="MJCheckButtonTemplate" virtual="true">
+		<Size x="25" y="24"/>
 		<Layers>
 			<Layer level="ARTWORK">
-				<Texture parentKey="highlight" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD" setAllPoints="true" hidden="true"/>
+				<Texture parentKey="highlight" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD" hidden="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="-3" y="6"/>
+						<Anchor point="BOTTOMRIGHT" x="3" y="-6"/>
+					</Anchors>
+				</Texture>
 			</Layer>
 		</Layers>
 	</CheckButton>
@@ -1577,8 +1583,18 @@
 		</Scripts>
 	</Frame>
 
-	<CheckButton name="MJBaseCheckButtonTemplate" inherits="UICheckButtonArtTemplate" virtual="true">
-		<Size x="28" y="28"/>
+	<CheckButton name="MJBaseCheckButtonTemplate" virtual="true">
+		<Size x="27" y="26"/>
+		<NormalTexture atlas="checkbox-minimal"/>
+		<PushedTexture atlas="checkbox-minimal"/>
+		<CheckedTexture atlas="checkmark-minimal"/>
+		<HighlightTexture file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD">
+			<Anchors>
+				<Anchor point="TOPLEFT" x="-3" y="6"/>
+				<Anchor point="BOTTOMRIGHT" x="3" y="-6"/>
+			</Anchors>
+		</HighlightTexture>
+		<DisabledCheckedTexture atlas="checkmark-minimal-disabled"/>
 		<Scripts>
 			<OnClick>
 				PlaySound(self:GetChecked() and SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
@@ -1605,7 +1621,7 @@
 			<Layer level="ARTWORK">
 				<FontString inherits="GameFontHighlightLeft" parentKey="Text">
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" x="1" y="0"/>
+						<Anchor point="LEFT" relativePoint="RIGHT" x="1" y="-1"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -1703,7 +1719,7 @@
 			<Frame parentKey="editFrame" inherits="ScrollingEditBoxTemplate"/>
 			<CheckButton parentKey="enable" inherits="MJCheckButtonTemplate">
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" relativeKey="$parent.background" relativePoint="TOPLEFT" x="10" y="-4"/>
+					<Anchor point="BOTTOMLEFT" relativeKey="$parent.background" relativePoint="TOPLEFT" x="10" y="-3"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>self.Text:SetText(ENABLE)</OnLoad>
