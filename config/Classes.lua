@@ -11,7 +11,7 @@ classConfig:SetScript("OnShow", function(self)
 
 	-- VERSION
 	local ver = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	ver:SetPoint("TOPLEFT", 4, 20)
+	ver:SetPoint("TOPLEFT", 40, 20)
 	ver:SetTextColor(.5, .5, .5, 1)
 	ver:SetJustifyH("RIGHT")
 	ver:SetText(GetAddOnMetadata(addon, "Version"))
