@@ -12,8 +12,8 @@
 			<Layer level="ARTWORK">
 				<Texture parentKey="highlight" file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD" hidden="true">
 					<Anchors>
-						<Anchor point="TOPLEFT" x="-3" y="6"/>
-						<Anchor point="BOTTOMRIGHT" x="3" y="-6"/>
+						<Anchor point="TOPLEFT" x="-3" y="5"/>
+						<Anchor point="BOTTOMRIGHT" x="3" y="-7"/>
 					</Anchors>
 				</Texture>
 			</Layer>
@@ -1590,8 +1590,8 @@
 		<CheckedTexture atlas="checkmark-minimal"/>
 		<HighlightTexture file="Interface\Buttons\UI-CheckBox-Highlight" alphaMode="ADD">
 			<Anchors>
-				<Anchor point="TOPLEFT" x="-3" y="6"/>
-				<Anchor point="BOTTOMRIGHT" x="3" y="-6"/>
+				<Anchor point="TOPLEFT" x="-3" y="5"/>
+				<Anchor point="BOTTOMRIGHT" x="3" y="-7"/>
 			</Anchors>
 		</HighlightTexture>
 		<DisabledCheckedTexture atlas="checkmark-minimal-disabled"/>
