@@ -103,6 +103,7 @@ end)
 
 local category = Settings.GetCategory(addon)
 local subcategory, layout = Settings.RegisterCanvasLayoutSubcategory(category, aboutConfig,  L["About"])
+subcategory.ID = L["About"]
 layout:AddAnchorPoint("TOPLEFT", -12, 8)
 layout:AddAnchorPoint("BOTTOMRIGHT", 0, 0)
 Settings.RegisterAddOnCategory(subcategory)

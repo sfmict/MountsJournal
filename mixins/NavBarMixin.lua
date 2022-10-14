@@ -98,13 +98,11 @@ end
 
 function MJNavBarMixin:dropDownToggleClick(btn)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	self.dropDown.buttonOwner = btn
-	self.dropDown:ddToggle(1, nil, btn, 20, 3)
+	self.dropDown:ddToggle(1, btn, btn, 20, 3)
 end
 
 
-function MJNavBarMixin:dropDownInit(btn, level)
-	local navButton = btn.buttonOwner
+function MJNavBarMixin:dropDownInit(btn, level, navButton)
 	if not (navButton and navButton.listFunc) then return end
 
 	local list = navButton:listFunc()

@@ -377,6 +377,7 @@ end
 
 local category = Settings.GetCategory(addon)
 local subcategory, layout = Settings.RegisterCanvasLayoutSubcategory(category, classConfig, L["Class settings"])
+subcategory.ID = L["Class settings"]
 layout:AddAnchorPoint("TOPLEFT", -12, 8)
 layout:AddAnchorPoint("BOTTOMRIGHT", 0, 0)
 Settings.RegisterAddOnCategory(subcategory)
