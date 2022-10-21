@@ -518,6 +518,7 @@ end
 
 
 function mounts:setMountsList()
+	self.mapInfo = C_Map.GetMapInfo(MapUtil.GetDisplayableMapForPlayer())
 	local mapInfo = self.mapInfo
 	local zoneMounts = self.zoneMounts
 	self.mapFlags = nil
@@ -748,7 +749,7 @@ do
 		[1220] = true,
 	}
 	function mounts:setFlags()
-		self.mapInfo = C_Map.GetMapInfo(MapUtil.GetDisplayableMapForPlayer())
+		self:setMountsList()
 		local flags = self.sFlags
 		local groundSpellKnown, flySpellKnown = self:getSpellKnown()
 		local modifier = self.modifier() or flags.forceModifier
@@ -790,7 +791,6 @@ function mounts:init()
 			flags.forceModifier = nil
 			self:setFlags()
 		end
-		self:setMountsList()
 		if flags.inVehicle then
 			VehicleExit()
 		elseif flags.isMounted then
