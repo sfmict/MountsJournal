@@ -24,6 +24,7 @@ components\DungeonRaidButton.lua
 components\Profiles.lua
 components\Help.lua
 components\Hyperlinks.lua
+components\Pets.lua
 #@do-not-package@
 _test.lua
 #@end-do-not-package@

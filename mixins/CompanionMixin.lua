@@ -184,25 +184,8 @@ function MJCompanionsPanelMixin:onLoad()
 	self.noPet.name:SetWidth(180)
 	self.noPet.name:SetText(L["No Battle Pet"])
 
-	self.owned = 0
-	self.petJournalFiltersBackup = {
-		types = {},
-		sources = {},
-		search = "",
-	}
-	self.petList = {}
+	self.petList = MountsJournal.pets.list
 	self.petFiltredList = {}
-
-	hooksecurefunc(C_PetJournal, "SetSearchFilter", function(search)
-		if not self.updatingList then
-			self.petJournalFiltersBackup.search = search or ""
-		end
-	end)
-	hooksecurefunc(C_PetJournal, "ClearSearchFilter", function()
-		if not self.updatingList then
-			self.petJournalFiltersBackup.search = ""
-		end
-	end)
 
 	self.searchBox:SetScript("OnTextChanged", function(searchBox)
 		SearchBoxTemplate_OnTextChanged(searchBox)
@@ -214,7 +197,6 @@ function MJCompanionsPanelMixin:onLoad()
 	HybridScrollFrame_CreateButtons(self.listScroll, "MJPetListButton")
 
 	self:on("MOUNT_SELECT", self.Hide)
-	self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 end
 
 
@@ -222,9 +204,7 @@ function MJCompanionsPanelMixin:onShow()
 	self:SetScript("OnShow", nil)
 	C_Timer.After(0, function()
 		self:SetScript("OnShow", function(self)
-			if self.force then
-				self:petListUpdate(self.force)
-			elseif self.needSort then
+			if self.needSort then
 				self:petListSort()
 			else
 				self:refresh()
@@ -235,6 +215,7 @@ function MJCompanionsPanelMixin:onShow()
 		self:petListUpdate(true)
 		self:scrollToSelectedPet()
 		self:on("UPDATE_PROFILE", self.refresh)
+		self:on("PET_LIST_UPDATE", self.petListUpdate)
 	end)
 end
 
@@ -330,71 +311,12 @@ function MJCompanionsPanelMixin:refresh()
 end
 
 
-function MJCompanionsPanelMixin:setPetJournalFiltersBackup()
-	local backup = self.petJournalFiltersBackup
-	backup.collected = C_PetJournal.IsFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED)
-	backup.notCollected = C_PetJournal.IsFilterChecked(LE_PET_JOURNAL_FILTER_NOT_COLLECTED)
-	for i = 1, C_PetJournal.GetNumPetTypes() do
-		backup.types[i] = C_PetJournal.IsPetTypeChecked(i)
-	end
-	for i = 1, C_PetJournal.GetNumPetSources() do
-		backup.sources[i] = C_PetJournal.IsPetSourceChecked(i)
-	end
-	C_PetJournal.ClearSearchFilter()
-	C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED, true)
-	C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_NOT_COLLECTED, true)
-	C_PetJournal.SetAllPetTypesChecked(true)
-	C_PetJournal.SetAllPetSourcesChecked(true)
-end
-
-
-function MJCompanionsPanelMixin:restorePetJournalFilters()
-	local backup = self.petJournalFiltersBackup
-	C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED, backup.collected)
-	C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_NOT_COLLECTED, backup.notCollected)
-	for i = 1, C_PetJournal.GetNumPetTypes() do
-		C_PetJournal.SetPetTypeFilter(i, backup.types[i])
-	end
-	for i = 1, C_PetJournal.GetNumPetSources() do
-		C_PetJournal.SetPetSourceChecked(i, backup.sources[i])
-	end
-	C_PetJournal.SetSearchFilter(backup.search)
-end
-
-
-function MJCompanionsPanelMixin:petListUpdate(force)
+function MJCompanionsPanelMixin:petListUpdate()
 	self.needSort = true
-	local _, owned = C_PetJournal.GetNumPets()
-
-	if not force then
-		if self.owned == owned then return end
-		self.owned = owned
-		if not self:IsVisible() then
-			self.force = true
-			return
-		end
-	else
-		self.owned = owned
-		self.force = nil
+	if self:IsVisible() then
+		self:petListSort()
 	end
-
-	self.updatingList = true
-	self:setPetJournalFiltersBackup()
-
-	local GetPetInfoByIndex = C_PetJournal.GetPetInfoByIndex
-	wipe(self.petList)
-	for i = 1, owned do
-		local petID = GetPetInfoByIndex(i)
-		if petID then
-			self.petList[#self.petList + 1] = petID
-		end
-	end
-
-	self:restorePetJournalFilters()
-	self.updatingList = nil
-	self:petListSort()
 end
-MJCompanionsPanelMixin.PET_JOURNAL_LIST_UPDATE = MJCompanionsPanelMixin.petListUpdate
 
 
 function MJCompanionsPanelMixin:petListSort()

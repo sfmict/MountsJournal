@@ -5,9 +5,11 @@ aboutConfig:Hide()
 
 aboutConfig:SetScript("OnShow", function(self)
 	self:SetScript("OnShow", function(self)
+		self:SetPoint("TOPLEFT", -12, 8)
 		self.model:PlayAnimKit(1371)
 	end)
 
+	self:SetPoint("TOPLEFT", -12, 8)
 	self.model = CreateFrame("PlayerModel", nil, self)
 	self.model:SetSize(220, 220)
 	self.model:SetPoint("TOPLEFT", 25, 20)
@@ -73,7 +75,7 @@ aboutConfig:SetScript("OnShow", function(self)
 	local langs, last = {
 		{"deDE", "SlayerEGT, Asraael, Flammenengel92, fredundaunted"},
 		{"esMX", "Pedrorco"},
-		{"frFR", "Asraael"},
+		{"frFR", "6urvan, Asraael, okaboo, Braincell1980"},
 		{"ptBR", "LutzPS"},
 		{"zhCN", "萌丶汉丶纸"},
 		{"zhTW", "BNS333"},
@@ -104,6 +106,6 @@ end)
 local category = Settings.GetCategory(addon)
 local subcategory, layout = Settings.RegisterCanvasLayoutSubcategory(category, aboutConfig,  L["About"])
 subcategory.ID = L["About"]
-layout:AddAnchorPoint("TOPLEFT", -12, 8)
-layout:AddAnchorPoint("BOTTOMRIGHT", 0, 0)
+-- layout:AddAnchorPoint("TOPLEFT", -12, 8)
+-- layout:AddAnchorPoint("BOTTOMRIGHT", 0, 0)
 Settings.RegisterAddOnCategory(subcategory)

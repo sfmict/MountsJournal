@@ -49,6 +49,7 @@ function mounts:ADDON_LOADED(addonName)
 		end
 		self.config.useRepairMountsDurability = self.config.useRepairMountsDurability or 41
 		self.config.useRepairFlyableDurability = self.config.useRepairFlyableDurability or 31
+		self.config.summonPetEveryN = self.config.summonPetEveryN or 5
 		self.config.macrosConfig = self.config.macrosConfig or {}
 		for i = 1, 13 do -- GetNumClasses() do
 			local _, className = GetClassInfo(i)
@@ -310,6 +311,7 @@ function mounts:PLAYER_LOGIN()
 	self:setHandleWaterJump(self.config.waterJump)
 	self:setHerbMount()
 	self:init()
+	self.pets:setSummonEvery()
 
 	-- MAP CHANGED
 	-- self:RegisterEvent("NEW_WMO_CHUNK")
@@ -418,9 +420,9 @@ do
 	local function summonPet(petID)
 		if InCombatLockdown() then return end
 		if type(petID) == "number" then
-			C_PetJournal.SummonRandomPet(petID == 1)
-		elseif C_PetJournal.PetIsSummonable(petID) and C_PetJournal.GetSummonedPetGUID() ~= petID then
-			C_PetJournal.SummonPetByGUID(petID)
+			mounts.pets:summonRandomPet(petID == 1)
+		else
+			mounts.pets:summon(petID)
 		end
 	end
 
@@ -431,9 +433,8 @@ do
 		if petID then
 			local groupType = util.getGroupType()
 			if self.config.noPetInRaid and groupType == "raid"
-			or self.config.noPetInGroup and groupType == "group" then
-				return
-			end
+			or self.config.noPetInGroup and groupType == "group"
+			then return end
 
 			if timer and not timer:IsCancelled() then
 				timer:Cancel()

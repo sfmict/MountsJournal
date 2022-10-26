@@ -5,7 +5,10 @@ classConfig:Hide()
 
 
 classConfig:SetScript("OnShow", function(self)
-	self:SetScript("OnShow", nil)
+	self:SetScript("OnShow", function()
+		self:SetPoint("TOPLEFT", -12, 8)
+	end)
+	self:SetPoint("TOPLEFT", -12, 8)
 	self.macrosConfig = mounts.config.macrosConfig
 	self.charMacrosConfig = mounts.charDB.macrosConfig
 
@@ -378,6 +381,6 @@ end
 local category = Settings.GetCategory(addon)
 local subcategory, layout = Settings.RegisterCanvasLayoutSubcategory(category, classConfig, L["Class settings"])
 subcategory.ID = L["Class settings"]
-layout:AddAnchorPoint("TOPLEFT", -12, 8)
-layout:AddAnchorPoint("BOTTOMRIGHT", 0, 0)
+-- layout:AddAnchorPoint("TOPLEFT", -12, 8)
+-- layout:AddAnchorPoint("BOTTOMRIGHT", 0, 0)
 Settings.RegisterAddOnCategory(subcategory)

@@ -350,13 +350,54 @@ config:SetScript("OnShow", function(self)
 		self.autoUseUnderlightAngler:HookScript("OnClick", enableBtns)
 	end
 
+	-- SUMMON PET EVERY N MINUTES
+	self.summonPetEvery = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
+	if self.autoUseUnderlightAngler then
+		self.summonPetEvery:SetPoint("TOPLEFT", self.autoUseUnderlightAngler, "BOTTOMLEFT", -20, -15)
+	else
+		self.summonPetEvery:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 0, -15)
+	end
+	self.summonPetEvery.Text:SetText(L["Summon a pet every"])
+	self.summonPetEvery:HookScript("OnClick",  enableBtns)
+
+	-- count
+	self.summonPetEveryN = CreateFrame("Editbox", nil, self.rightPanelScroll.child, "MJNumberTextBox")
+	self.summonPetEveryN:SetPoint("LEFT", self.summonPetEvery.Text, "RIGHT", 3, 0)
+	self.summonPetEveryN:SetScript("OnTextChanged", function(editBox, userInput)
+		if userInput then
+			local value = tonumber(editBox:GetText()) or 0
+			if value < 1 then
+				editBox:SetNumber(1)
+			elseif value > 999 then
+				editBox:SetNumber(999)
+			end
+			enableBtns()
+		end
+	end)
+	self.summonPetEveryN:SetScript("OnMouseWheel", function(editBox, delta)
+		if editBox:IsEnabled() then
+			local value = (tonumber(editBox:GetText()) or 0) + (delta > 0 and 1 or -1)
+			if value >= 1 and value <= 999 then
+				editBox:SetNumber(value)
+			end
+			enableBtns()
+		end
+	end)
+	util.setCheckboxChild(self.useRepairMounts, self.summonPetEveryN)
+
+	-- minutes
+	self.summonPetMinutes = self.summonPetEveryN:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	self.summonPetMinutes:SetPoint("LEFT", self.summonPetEveryN, "RIGHT", 3, 0)
+	self.summonPetMinutes:SetText(L["min"])
+
+	-- SUMMON ONLY FAVORITES
+	self.summonPetOnlyFavorites = util.createCheckboxChild(L["Summon only favorites"], self.summonPetEvery)
+	self.summonPetOnlyFavorites.checkFunc = function() return mounts.config.summonPetOnlyFavorites end
+	self.summonPetOnlyFavorites:HookScript("OnClick", enableBtns)
+
 	-- NO PET IN RAID
 	self.noPetInRaid = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
-	if self.autoUseUnderlightAngler then
-		self.noPetInRaid:SetPoint("TOPLEFT", self.autoUseUnderlightAngler, "BOTTOMLEFT", -20, -15)
-	else
-		self.noPetInRaid:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 0, -15)
-	end
+	self.noPetInRaid:SetPoint("TOPLEFT", self.summonPetOnlyFavorites, "BOTTOMLEFT", -20, -3)
 	self.noPetInRaid.Text:SetPoint("RIGHT", self.rightPanelScroll)
 	self.noPetInRaid.Text:SetText(L["NoPetInRaid"])
 	self.noPetInRaid:HookScript("OnClick", enableBtns)
@@ -443,6 +484,7 @@ config:SetScript("OnShow", function(self)
 
 	-- REFRESH
 	self.OnRefresh = function(self)
+		self:SetPoint("TOPLEFT", -12, 8)
 		binding.unboundMessage:Hide()
 		modifierCombobox:ddSetSelectedValue(mounts.config.modifier)
 		modifierCombobox:ddSetSelectedText(_G[mounts.config.modifier.."_KEY"])
@@ -467,6 +509,11 @@ config:SetScript("OnShow", function(self)
 			self.useUnderlightAngler:SetChecked(mounts.config.useUnderlightAngler)
 			self.autoUseUnderlightAngler:SetChecked(mounts.config.autoUseUnderlightAngler)
 		end
+		self.summonPetEvery:SetChecked(mounts.config.summonPetEvery)
+		self.summonPetEveryN:SetNumber(tonumber(mounts.config.summonPetEveryN) or 1)
+		for _, child in ipairs(self.summonPetEvery.childs) do
+			child:SetChecked(child:checkFunc())
+		end
 		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
 		self.copyMountTarget:SetChecked(mounts.config.copyMountTarget)
@@ -481,29 +528,34 @@ config:SetScript("OnShow", function(self)
 	-- COMMIT
 	self.OnCommit = function(self)
 		binding.unboundMessage:Hide()
-		mounts:setModifier(self.modifierCombobox.selectedValue)
-		binding:saveBinding()
-		mounts:setHandleWaterJump(self.waterJump:GetChecked())
 		mounts.config.useHerbMounts = self.useHerbMounts:GetChecked()
 		mounts.config.herbMountsOnZones = self.herbMountsOnZones:GetChecked()
-		mounts:setHerbMount()
 		mounts.config.useRepairMounts = self.useRepairMounts:GetChecked()
 		mounts.config.useRepairMountsDurability = tonumber(self.repairPercent:GetText()) or 0
 		mounts.config.useRepairFlyable = self.repairFlyable:GetChecked()
 		mounts.config.useRepairFlyableDurability = tonumber(self.repairFlyablePercent:GetText()) or 0
-		mounts:UPDATE_INVENTORY_DURABILITY()
 		mounts.config.repairSelectedMount = self.repairMountsCombobox.selectedValue
-		mounts:setUsableRepairMounts()
 		mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
 		if self.useUnderlightAngler then
 			mounts.config.useUnderlightAngler = self.useUnderlightAngler:GetChecked()
 			mounts.config.autoUseUnderlightAngler = self.autoUseUnderlightAngler:GetChecked()
 		end
+		mounts.config.summonPetEvery = self.summonPetEvery:GetChecked()
+		mounts.config.summonPetEveryN = tonumber(self.summonPetEveryN:GetText()) or 1
+		mounts.config.summonPetOnlyFavorites = self.summonPetOnlyFavorites:GetChecked()
 		mounts.config.noPetInRaid = self.noPetInRaid:GetChecked()
 		mounts.config.noPetInGroup = self.noPetInGroup:GetChecked()
 		mounts.config.copyMountTarget = self.copyMountTarget:GetChecked()
 		mounts.config.arrowButtonsBrowse = self.arrowButtons:GetChecked()
 		mounts.config.openHyperlinks = self.openLinks:GetChecked()
+
+		binding:saveBinding()
+		mounts:setHandleWaterJump(self.waterJump:GetChecked())
+		mounts:setModifier(self.modifierCombobox.selectedValue)
+		mounts:UPDATE_INVENTORY_DURABILITY()
+		mounts:setUsableRepairMounts()
+		mounts:setHerbMount()
+		mounts.pets:setSummonEvery()
 		MountsJournalFrame:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 	end
 end)
@@ -561,8 +613,8 @@ end)
 -- ADD CATEGORY
 local category, layout = Settings.RegisterCanvasLayoutCategory(config, addon)
 category.ID = addon
-layout:AddAnchorPoint("TOPLEFT", -12, 8)
-layout:AddAnchorPoint("BOTTOMRIGHT", 0, 0)
+-- layout:AddAnchorPoint("TOPLEFT", -12, 8)
+-- layout:AddAnchorPoint("BOTTOMRIGHT", 0, 0)
 Settings.RegisterAddOnCategory(category)
 
 
@@ -571,9 +623,9 @@ function config:openConfig()
 	if SettingsPanel:IsVisible() and self:IsVisible() then
 		HideUIPanel(SettingsPanel)
 	else
-		Settings.GetCategory(addon).expanded = true
+		-- Settings.GetCategory(addon).expanded = true
 		Settings.OpenToCategory(addon, true)
-		SettingsPanel:GetCategoryList():CreateCategories()
+		-- SettingsPanel:GetCategoryList():CreateCategories()
 	end
 end
 
