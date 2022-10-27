@@ -1,4 +1,4 @@
-local random, C_PetJournal, UnitBuff = random, C_PetJournal, UnitBuff
+local random, C_PetJournal, UnitBuff, C_Timer, wipe = random, C_PetJournal, UnitBuff, C_Timer, wipe
 local mounts, util = MountsJournal, MountsJournalUtil
 local pets = CreateFrame("FRAME")
 mounts.pets = pets
@@ -94,7 +94,6 @@ do
 			self:RegisterEvent("PLAYER_REGEN_ENABLED")
 		elseif IsFlying()
 			or UnitHasVehicleUI("player")
-			or UnitIsControlling("player")
 			or UnitChannelInfo("player")
 			or IsStealthed()
 			or UnitIsGhost("player")
