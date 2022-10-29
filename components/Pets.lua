@@ -1,4 +1,4 @@
-local random, C_PetJournal, UnitBuff, C_Timer, wipe = random, C_PetJournal, UnitBuff, C_Timer, wipe
+local random, C_PetJournal, UnitBuff, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitChannelInfo, IsStealthed, UnitIsGhost, GetSpellCooldown = random, C_PetJournal, UnitBuff, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitChannelInfo, IsStealthed, UnitIsGhost, GetSpellCooldown
 local mounts, util = MountsJournal, MountsJournalUtil
 local pets = CreateFrame("FRAME")
 mounts.pets = pets

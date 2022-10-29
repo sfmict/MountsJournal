@@ -571,10 +571,15 @@ function config:createMacro(macroName, buttonName, texture, openMacroFrame, over
 		return
 	end
 
+	local macro = "/click "..buttonName
+	if GetCVarBool("ActionButtonUseKeyDown") then
+		macro = macro.." LeftButton"
+	end
+
 	if overwrite then
-		EditMacro(macroName, macroName, texture, "/click "..buttonName.." LeftButton")
+		EditMacro(macroName, macroName, texture, macro)
 	else
-		CreateMacro(macroName, texture, "/click "..buttonName.." LeftButton")
+		CreateMacro(macroName, texture, macro)
 	end
 
 	if MacroFrame and MacroFrame:IsShown() then
