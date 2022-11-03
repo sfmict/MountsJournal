@@ -621,7 +621,7 @@ function mounts:isFloating()
 end
 
 
-function mounts:summonTarget()
+function mounts:getTargetMount()
 	if self.config.copyMountTarget then
 		local i = 1
 		repeat
@@ -630,10 +630,7 @@ function mounts:summonTarget()
 				local mountID = C_MountJournal.GetMountFromSpell(spellID)
 				if mountID then
 					local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
-					if isUsable then
-						C_MountJournal.SummonByID(mountID)
-					end
-					return isUsable
+					return isUsable and mountID
 				end
 				i = i + 1
 			end
@@ -775,6 +772,7 @@ do
 		                  or self:isWaterWalkLocation()
 		flags.herb = self.herbMount and (not self.config.herbMountsOnZones
 		                                 or self.mapFlags and self.mapFlags.herbGathering)
+		flags.targetMount = self:getTargetMount()
 	end
 end
 
@@ -803,7 +801,7 @@ function mounts:init()
 		-- repair mounts
 		elseif not ((flags.repair and not flags.fly or flags.flyableRepair and flags.fly) and self:summon(self.usableRepairMounts))
 		-- target's mount
-		and not self:summonTarget()
+		and not (flags.targetMount and (C_MountJournal.SummonByID(flags.targetMount) or true))
 		-- swimming
 		and not (flags.swimming
 			and (flags.isVashjir

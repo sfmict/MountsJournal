@@ -415,6 +415,7 @@ function macroFrame:getMacro()
 
 	-- MAGIC BROOM IS USABLE
 	self.magicBroom = self.config.useMagicBroom
+	                  and not self.sFlags.targetMount
 	                  and GetItemCount(self.broomID) > 0
 	                  and self.sFlags.groundSpellKnown
 	                  and not self.sFlags.isIndoors
