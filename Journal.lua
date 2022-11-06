@@ -6,7 +6,6 @@ journal.mountTypes = util.mountTypes
 util.setEventsMixin(journal)
 
 
-local COLLECTION_ACHIEVEMENT_CATEGORY = 15246
 local MOUNT_ACHIEVEMENT_CATEGORY = 15248
 
 
@@ -215,18 +214,7 @@ function journal:init()
 	self:ACHIEVEMENT_EARNED()
 	self.achiev:SetScript("OnClick", function()
 		ToggleAchievementFrame()
-		local i, categoryID = 1, COLLECTION_ACHIEVEMENT_CATEGORY
-		local button = _G["AchievementFrameCategoriesContainerButton"..i]
-		while button do
-			if button.categoryID == categoryID then
-				button:Click()
-				if categoryID == MOUNT_ACHIEVEMENT_CATEGORY then return end
-				i = 1
-				categoryID = MOUNT_ACHIEVEMENT_CATEGORY
-			end
-			i = i + 1
-			button = _G["AchievementFrameCategoriesContainerButton"..i]
-		end
+		AchievementFrame_UpdateAndSelectCategory(MOUNT_ACHIEVEMENT_CATEGORY)
 	end)
 	self:RegisterEvent("ACHIEVEMENT_EARNED")
 

@@ -307,11 +307,9 @@ do
 		HUNTER = getClassDefFunc(186257), -- Aspect of the Cheetah
 		ROGUE = getClassDefFunc(2983), -- Sprint
 		PRIEST = function(self, ...)
-			local shield = self:getSpellName(17, ...) -- Power Word: Shield
-			local feather = self:getSpellName(121536, ...) -- Angelic Feather
-
-			if shield and feather then
-				return "/cast [spec:1/2,talent:2/3,@player]"..feather..";[@player]"..shield
+			local spellName = self:getSpellName(121536, ...) -- Angelic Feather
+			if spellName then
+				return "/cast [@player]"..spellName
 			end
 		end,
 		DEATHKNIGHT = getClassDefFunc(218999), -- Wraith Walk

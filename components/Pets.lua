@@ -49,8 +49,13 @@ function pets:summonRandomPet(isFavorite)
 	elseif num == 1 then self:summon(list[1])
 	else
 		local currentPetID = C_PetJournal.GetSummonedPetGUID()
+		if currentPetID and isFavorite then
+			local _,_,_,_,_,_, favorite = C_PetJournal.GetPetInfoByPetID(currentPetID)
+			if not favorite then currentPetID = nil end
+		end
+
 		local petID = list[random(currentPetID and num - 1 or num)]
-		if petID == currentPetID then petID = list[#list] end
+		if petID == currentPetID then petID = list[num] end
 		self:summon(petID)
 	end
 end
