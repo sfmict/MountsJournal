@@ -51,7 +51,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.config.useRepairFlyableDurability = self.config.useRepairFlyableDurability or 31
 		self.config.summonPetEveryN = self.config.summonPetEveryN or 5
 		self.config.macrosConfig = self.config.macrosConfig or {}
-		for i = 1, 13 do -- GetNumClasses() do
+		for i = 1, GetNumClasses() do
 			local _, className = GetClassInfo(i)
 			self.config.macrosConfig[className] = self.config.macrosConfig[className] or {}
 		end

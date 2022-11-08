@@ -48,7 +48,7 @@ classConfig:SetScript("OnShow", function(self)
 		self:showClassSettings(btn)
 	end
 
-	for i = 1, 13 do -- GetNumClasses() do
+	for i = 1, GetNumClasses() do
 		local localized, className = GetClassInfo(i)
 		local classColor = C_ClassColor.GetClassColor(className)
 		local classFrame = CreateFrame("BUTTON", nil, self.leftPanel, "MJClassButtonTemplate")

@@ -140,6 +140,13 @@
 					<OnHide method="onHide"/>
 					<OnEnter method="onEnter"/>
 					<OnEvent method="onEvent"/>
+					<PreClick>
+						self.ActionButtonUseKeyDown = GetCVar("ActionButtonUseKeyDown")
+						SetCVar("ActionButtonUseKeyDown", 0)
+					</PreClick>
+					<PostClick>
+						SetCVar("ActionButtonUseKeyDown", self.ActionButtonUseKeyDown)
+					</PostClick>
 				</Scripts>
 			</Button>
 
@@ -2078,7 +2085,6 @@
 		<Scripts>
 			<OnLoad>
 				self:SetAttribute("type", "click")
-				self:RegisterForClicks("AnyUp", "AnyDown")
 				self:RegisterForDrag("LeftButton")
 			</OnLoad>
 			<OnLeave>
