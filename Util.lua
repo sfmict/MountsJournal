@@ -77,6 +77,7 @@ end)
 
 MountsJournalUtil = {}
 MountsJournalUtil.addonName = ("%s_ADDON_"):format(addon:upper())
+MountsJournalUtil.expansion = tonumber(GetBuildInfo():match("(.-)%."))
 
 
 -- 1 FLY, 2 GROUND, 3 SWIMMING

@@ -29,7 +29,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		EJ_SelectTier(i)
 		for _, v in ipairs(dd.list) do
 			v.list[i] = {
-				name = _G["EXPANSION_NAME"..(i - 1)],
+				name = EJ_GetTierInfo(i),
 				list = {},
 			}
 			local showRaid = v.name == RAIDS
@@ -44,6 +44,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 				index = index + 1
 				instanceID, instanceName = EJ_GetInstanceByIndex(index, showRaid)
 			end
+			if #v.list[i].list == 0 then v.list[i] = nil end
 		end
 	end
 	EJ_SelectTier(currentTier)
@@ -66,12 +67,6 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 					self.navBar:setMapID(v.mapID)
 				end
 			end
-			self:ddAddButton(info, level)
-		end
-
-		if #value == 0 then
-			info.text = EMPTY
-			info.disabled = true
 			self:ddAddButton(info, level)
 		end
 	end)

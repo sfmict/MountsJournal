@@ -2308,7 +2308,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 
 			info.notCheckable = nil
 			local expansions = mounts.filters.expansions
-			for i = 1, EJ_GetNumTiers() do
+			for i = 1, util.expansion do
 				info.text = _G["EXPANSION_NAME"..(i - 1)]
 				info.func = function(_,_,_, value)
 					expansions[i] = value
