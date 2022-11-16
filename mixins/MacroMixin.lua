@@ -492,9 +492,9 @@ function MJMacroMixin:onLoad()
 end
 
 
-function MJMacroMixin:preClick()
+function MJMacroMixin:preClick(button, down)
 	self.mounts.sFlags.forceModifier = self.forceModifier
-	if InCombatLockdown() then return end
+	if InCombatLockdown() or down ~= GetCVarBool("ActionButtonUseKeyDown") then return end
 	self:SetAttribute("macrotext", macroFrame:getMacro())
 end
 

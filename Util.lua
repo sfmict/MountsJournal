@@ -1,11 +1,11 @@
 local addon = ...
-local type, select, strsplit, tremove = type, select, strsplit, tremove
+local type, select, tremove = type, select, tremove
 local events, eventsMixin = {}, {}
 
 
 function eventsMixin:on(event, func)
 	if type(event) ~= "string" or type(func) ~= "function" then return end
-	local event, name = strsplit(".", event, 2)
+	local event, name = ("."):split(event, 2)
 
 	if not events[event] then
 		events[event] = {}
@@ -21,7 +21,7 @@ end
 
 function eventsMixin:off(event, func)
 	if type(event) ~= "string" then return end
-	local event, name = strsplit(".", event, 2)
+	local event, name = ("."):split(event, 2)
 
 	local handlerList = events[event]
 	if handlerList then
@@ -66,7 +66,7 @@ local menuBackdrop = {
 	tile = true, edgeSize = 1 * scale, tileSize = 5 * scale,
 }
 local lsfdd = LibStub("LibSFDropDown-1.4")
-	lsfdd:CreateMenuStyle(addon, function(parent)
+lsfdd:CreateMenuStyle(addon, function(parent)
 	local f = CreateFrame("FRAME", nil, parent, "BackdropTemplate")
 	f:SetBackdrop(menuBackdrop)
 	f:SetBackdropColor(.06, .06, .1, .9)
