@@ -1,4 +1,4 @@
-local random, C_PetJournal, UnitBuff, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitChannelInfo, IsStealthed, UnitIsGhost, GetSpellCooldown = random, C_PetJournal, UnitBuff, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitChannelInfo, IsStealthed, UnitIsGhost, GetSpellCooldown
+local random, C_PetJournal, UnitBuff, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, GetSpellCooldown = random, C_PetJournal, UnitBuff, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, GetSpellCooldown
 local mounts, util = MountsJournal, MountsJournalUtil
 local pets = CreateFrame("FRAME")
 mounts.pets = pets
@@ -99,6 +99,7 @@ do
 			self:RegisterEvent("PLAYER_REGEN_ENABLED")
 		elseif IsFlying()
 			or UnitHasVehicleUI("player")
+			or UnitCastingInfo("player")
 			or UnitChannelInfo("player")
 			or IsStealthed()
 			or UnitIsGhost("player")
