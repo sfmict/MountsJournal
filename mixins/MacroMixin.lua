@@ -105,7 +105,9 @@ function macroFrame:PLAYER_LOGIN()
 			if self.classConfig.usePathOfFrost
 			and (not self.classConfig.useOnlyInWaterWalkLocation or self.sFlags.waterWalk)
 			and not self.sFlags.swimming
-			and not self.sFlags.fly then
+			and not self.sFlags.fly
+			and not self.sFlags.isDragonridable
+			then
 				macro = self:addLine(macro, "/cast "..self:getSpellName(3714)) -- Path of Frost
 			end
 		]]
@@ -114,7 +116,9 @@ function macroFrame:PLAYER_LOGIN()
 			if self.classConfig.useWaterWalking
 			and (not self.classConfig.useOnlyInWaterWalkLocation or self.sFlags.waterWalk)
 			and not self.sFlags.swimming
-			and not self.sFlags.fly then
+			and not self.sFlags.fly
+			and not self.sFlags.isDragonridable
+			then
 				macro = self:addLine(macro, "/cast [@player]"..self:getSpellName(546)) -- Water Walking
 			end
 		]]
@@ -413,6 +417,7 @@ function macroFrame:getMacro()
 
 	-- MAGIC BROOM IS USABLE
 	self.magicBroom = self.config.useMagicBroom
+	                  and not self.sFlags.isDragonridable
 	                  and not self.sFlags.targetMount
 	                  and GetItemCount(self.broomID) > 0
 	                  and self.sFlags.groundSpellKnown
