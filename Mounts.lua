@@ -674,8 +674,8 @@ do
 	function mounts:summon(ids)
 		local weight = 0
 		for mountID in next, ids do
-			local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
-			if isUsable then
+			local _,_,_,_, isUsable, _,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
+			if isUsable and not isForDragonriding then
 				weight = weight + (self.mountsWeight[mountID] or 100)
 				usableIDs[weight] = mountID
 			end
