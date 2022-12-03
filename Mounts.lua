@@ -785,8 +785,6 @@ do
 		                          and self:isFlyLocation(self.instanceID)
 		                          and not (self.mapFlags and self.mapFlags.groundOnly)
 
-		flags.isDragonridable = self:isDragonridable()
-		                        and not (modifier or isFloating)
 		flags.isSubmerged = IsSubmerged()
 		flags.isIndoors = IsIndoors()
 		flags.inVehicle = UnitInVehicle("player")
@@ -795,6 +793,8 @@ do
 		flags.swimming = flags.isSubmerged
 		                 and not (modifier or isFloating)
 		flags.isVashjir = self.mapVashjir[self.mapInfo.mapID]
+		flags.isDragonridable = self:isDragonridable()
+		                        and (not modifier or flags.isSubmerged)
 		flags.fly = isFlyableLocation
 		            and (not modifier or flags.isSubmerged)
 		flags.waterWalk = isFloating
