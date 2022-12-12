@@ -722,11 +722,6 @@ end
 mounts.SKILL_LINES_CHANGED = mounts.setHerbMount
 
 
-function mounts:summonListOr(ids)
-	return self.sFlags.herb and self:summon(self.herbalismMounts) or self:summon(ids) -- herbMount
-end
-
-
 do
 	local bfaLocations = {
 		[1642] = true, -- Зандалар
@@ -838,12 +833,14 @@ function mounts:init()
 			and (flags.isVashjir
 				and self:summon(self.swimmingVashjir)
 				or self:summon(self.list.swimming)))
+		-- herbMount
+		and not (flags.herb and self:summon(self.herbalismMounts))
 		-- dragonridable
 		and not (flags.isDragonridable and self:summonDragonridable())
 		-- fly
-		and not (flags.fly and self:summonListOr(self.list.fly))
+		and not (flags.fly and self:summon(self.list.fly))
 		-- ground
-		and not self:summonListOr(self.list.ground)
+		and not self:summon(self.list.ground)
 		and not self:summon(self.list.fly)
 		and not self:summon(self.lowLevel) then
 			self:errorSummon()
