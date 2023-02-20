@@ -32,12 +32,12 @@ function macroFrame:PLAYER_LOGIN()
 		end
 	end})
 
-	local function loadFunc(name, funcStr)
+	local function loadFunc(funcStr)
 		local loadedFunc, err = loadstring(funcStr)
 		if err then
 			geterrorhandler()(err)
 		else
-			self[name] = loadedFunc()
+			return loadedFunc()
 		end
 	end
 
@@ -218,8 +218,8 @@ function macroFrame:PLAYER_LOGIN()
 		end
 	]]
 
-	loadFunc("getClassOptionMacro", classOptionMacro)
-	loadFunc("getDefMacro", defMacro)
+	self.getClassOptionMacro = loadFunc(classOptionMacro)
+	self.getDefMacro = loadFunc(defMacro)
 
 	self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
