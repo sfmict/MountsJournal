@@ -383,7 +383,7 @@ config:SetScript("OnShow", function(self)
 			enableBtns()
 		end
 	end)
-	util.setCheckboxChild(self.useRepairMounts, self.summonPetEveryN)
+	util.setCheckboxChild(self.summonPetEvery, self.summonPetEveryN)
 
 	-- minutes
 	self.summonPetMinutes = self.summonPetEveryN:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
@@ -512,7 +512,7 @@ config:SetScript("OnShow", function(self)
 		self.summonPetEvery:SetChecked(mounts.config.summonPetEvery)
 		self.summonPetEveryN:SetNumber(tonumber(mounts.config.summonPetEveryN) or 1)
 		for _, child in ipairs(self.summonPetEvery.childs) do
-			child:SetChecked(child:checkFunc())
+			if child.checkFunc then child:SetChecked(child:checkFunc()) end
 		end
 		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
