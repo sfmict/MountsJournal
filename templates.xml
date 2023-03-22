@@ -24,7 +24,7 @@
 		<Size x="703" y="606"/>
 		<Frames>
 
-			<Button parentKey="closeButton" inherits="UIPanelCloseButtonNoScripts,SecureActionButtonTemplate">
+			<Button parentKey="closeButton" inherits="UIPanelCloseButtonNoScripts,MJSecureActionButtonUpTemplate">
 				<Anchors>
 					<Anchor point="TOPRIGHT" x="1" y="0"/>
 				</Anchors>
@@ -32,13 +32,6 @@
 					<OnLoad>
 						self:SetFrameLevel(self:GetParent().NineSlice:GetFrameLevel() + 1)
 					</OnLoad>
-					<PreClick>
-						self.ActionButtonUseKeyDown = GetCVar("ActionButtonUseKeyDown")
-						SetCVar("ActionButtonUseKeyDown", 0)
-					</PreClick>
-					<PostClick>
-						SetCVar("ActionButtonUseKeyDown", self.ActionButtonUseKeyDown)
-					</PostClick>
 				</Scripts>
 			</Button>
 
@@ -129,7 +122,7 @@
 				</Anchors>
 			</Button>
 
-			<Button parentKey="slotButton" scale=".69" inherits="MountEquipmentButtonTemplate,SecureActionButtonTemplate" mixin="MJMountEquipmentMixin" hidden="true">
+			<Button parentKey="slotButton" scale=".69" inherits="MountEquipmentButtonTemplate,MJSecureActionButtonUpTemplate" mixin="MJMountEquipmentMixin" hidden="true">
 				<Anchors>
 					<Anchor point="RIGHT" relativeKey="$parent.summon1" relativePoint="LEFT" x="-20"/>
 				</Anchors>
@@ -140,13 +133,6 @@
 					<OnHide method="onHide"/>
 					<OnEnter method="onEnter"/>
 					<OnEvent method="onEvent"/>
-					<PreClick>
-						self.ActionButtonUseKeyDown = GetCVar("ActionButtonUseKeyDown")
-						SetCVar("ActionButtonUseKeyDown", 0)
-					</PreClick>
-					<PostClick>
-						SetCVar("ActionButtonUseKeyDown", self.ActionButtonUseKeyDown)
-					</PostClick>
 				</Scripts>
 			</Button>
 
@@ -1534,18 +1520,53 @@
 		</Scripts>
 	</Frame>
 
-	<ScrollFrame name="MJPanelScrollFrameTemplate" inherits="UIPanelScrollFrameTemplate" virtual="true">
+	<ScrollFrame name="MJPanelScrollFrameTemplate" virtual="true">
+		<Frames>
+			<EventFrame parentKey="ScrollBar" inherits="MinimalScrollBar">
+				<Anchors>
+					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="6" y="0"/>
+					<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" x="6" y="0"/>
+				</Anchors>
+			</EventFrame>
+			<Frame parentKey="child">
+				<Size x="1" y="1"/>
+			</Frame>
+		</Frames>
 		<Scripts>
 			<OnLoad>
-				ScrollFrame_OnLoad(self)
-				self.ScrollBar.bg = self.ScrollBar:CreateTexture(nil, "BACKGROUND")
-				self.ScrollBar.bg:SetAllPoints()
-				self.ScrollBar.bg:SetTexture("interface/buttons/white8x8")
-				self.ScrollBar.bg:SetVertexColor(0, 0, 0, .2)
-				self.child = CreateFrame("FRAME")
-				self.child:SetSize(1, 1)
+				<!-- ScrollUtil.InitScrollFrameWithScrollBar(self, self.ScrollBar) -->
+				local onScrollBarScroll = function(self, scrollPercentage)
+					local scroll = scrollPercentage * self:GetVerticalScrollRange()
+					self:SetVerticalScroll(scroll)
+				end
+				self.ScrollBar:RegisterCallback(BaseScrollBoxEvents.OnScroll, onScrollBarScroll, self)
 				self:SetScrollChild(self.child)
 			</OnLoad>
+			<OnVerticalScroll>
+				local verticalScrollRange = self:GetVerticalScrollRange()
+				local scrollPercentage = 0
+				if verticalScrollRange > 0 then
+					scrollPercentage = offset / verticalScrollRange
+				end
+				self.ScrollBar:SetScrollPercentage(scrollPercentage, ScrollBoxConstants.NoScrollInterpolation)
+			</OnVerticalScroll>
+			<OnScrollRangeChanged>
+				self:GetScript("OnVerticalScroll")(self, self:GetVerticalScroll())
+
+				local visibleExtentPercentage = 0
+				local height = self:GetHeight()
+				if height > 0 then
+					visibleExtentPercentage = height / (yrange + height)
+				end
+
+				self.ScrollBar:SetVisibleExtentPercentage(visibleExtentPercentage)
+
+				local panExtentPercentage = .3
+				self.ScrollBar:SetPanExtentPercentage(panExtentPercentage)
+			</OnScrollRangeChanged>
+			<OnMouseWheel>
+				self.ScrollBar:ScrollStepInDirection(-delta)
+			</OnMouseWheel>
 		</Scripts>
 	</ScrollFrame>
 
@@ -2069,7 +2090,19 @@
 		</Scripts>
 	</Frame>
 
-	<Button name="MJSecureMacroButtonTemplate" inherits="SecureActionButtonTemplate" virtual="true">
+	<Button name="MJSecureActionButtonUpTemplate" inherits="SecureActionButtonTemplate" virtual="true">
+		<Scripts>
+			<PreClick>
+				self.ActionButtonUseKeyDown = GetCVar("ActionButtonUseKeyDown")
+				SetCVar("ActionButtonUseKeyDown", 0)
+			</PreClick>
+			<PostClick>
+				SetCVar("ActionButtonUseKeyDown", self.ActionButtonUseKeyDown)
+			</PostClick>
+		</Scripts>
+	</Button>
+
+	<Button name="MJSecureMacroButtonTemplate" inherits="MJSecureActionButtonUpTemplate" virtual="true">
 		<Size x="33" y="33"/>
 		<Layers>
 			<Layer level="OVERLAY">
@@ -2090,13 +2123,6 @@
 			<OnLeave>
 				GameTooltip:Hide()
 			</OnLeave>
-			<PreClick>
-				self.ActionButtonUseKeyDown = GetCVar("ActionButtonUseKeyDown")
-				SetCVar("ActionButtonUseKeyDown", 0)
-			</PreClick>
-			<PostClick>
-				SetCVar("ActionButtonUseKeyDown", self.ActionButtonUseKeyDown)
-			</PostClick>
 		</Scripts>
 	</Button>
 
