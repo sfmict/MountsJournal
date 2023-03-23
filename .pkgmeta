@@ -10,13 +10,8 @@ externals:
 enable-nolib-creation: no
 
 ignore:
-	- _test.lua
-	- README.md
-	- _config.yml
-	- libs/LibStub/LibStub.toc
+	- .*\.md$
+	- _config\.yml
+	- _test\.lua
+	- libs/.*\.toc$
 	- libs/LibStub/tests
-	- libs/LibSFDropDown/LibSFDropDown.toc
-	- libs/LibSFDropDown/LibSFDropDown_TBC.toc
-	- libs/LibSFDropDown/LibSFDropDown_Vanilla.toc
-	- libs/LibSFDropDown/CHANGELOG.md
-	- libs/LibSFDropDown/README.md
