@@ -31,6 +31,7 @@ function macroFrame:PLAYER_LOGIN()
 			return rawget(self, itemID)
 		end
 	end})
+	local _,_, raceID = UnitRace("player")
 
 	local function loadFunc(funcStr)
 		local loadedFunc, err = loadstring(funcStr)
@@ -212,7 +213,28 @@ function macroFrame:PLAYER_LOGIN()
 				macro = self:addLine(macro, "/use "..self.itemName[self.broomID]) -- MAGIC BROOM
 				self.lastUseTime = GetTime()
 			else
-				macro = self:addLine(macro, "/mount doNotSetFlags")
+				self.mounts:setSummonList()
+	]]
+	if raceID == 22 then
+		defMacro = defMacro..[[
+				if self.classConfig.useRunningWild
+				and IsSpellKnown(87840)
+				and IsUsableSpell(87840)
+				and (self.mounts.summonList == self.mounts.db.ground and random(self.mounts.weight + (self.classConfig.runningWildsummoningChance or 100)) > self.mounts.weight
+					or self.mounts.summonList == self.mounts.lowLevel
+					or not self.sFlags.fly and self.mounts.summonList == self.mounts.db.fly)
+				then
+					macro = self:addLine(macro, "/cast "..self:getSpellName(87840))
+				else
+					macro = self:addLine(macro, "/run MountsJournal:summon()")
+				end
+		]]
+	else
+		defMacro = defMacro..[[
+				macro = self:addLine(macro, "/run MountsJournal:summon()")
+		]]
+	end
+	defMacro = defMacro..[[
 			end
 			return macro
 		end

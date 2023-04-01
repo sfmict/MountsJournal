@@ -2703,6 +2703,12 @@
 						local edit = self:GetParent().edit
 						edit:GetScript("OnMouseWheel")(edit, delta)
 					</OnMouseWheel>
+					<OnDisable>
+						self.text:SetVertexColor(GRAY_FONT_COLOR:GetRGB())
+					</OnDisable>
+					<OnEnable>
+						self.text:SetVertexColor(NORMAL_FONT_COLOR:GetRGB())
+					</OnEnable>
 				</Scripts>
 			</Slider>
 		</Frames>
@@ -2728,13 +2734,9 @@
 					self.edit:SetWidth(value * 7 + 7)
 					self.edit:SetMaxLetters(value)
 				end
-				self.disable = function(self)
-					self.edit:Disable()
-					self.slider:Disable()
-				end
-				self.enable = function(self)
-					self.edit:Enable()
-					self.slider:Enable()
+				self.SetEnabled = function(self, value)
+					self.edit:SetEnabled(value)
+					self.slider:SetEnabled(value)
 				end
 			</OnLoad>
 		</Scripts>

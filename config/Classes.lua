@@ -2,6 +2,7 @@ local addon, L = ...
 local util, mounts = MountsJournalUtil, MountsJournal
 local classConfig = CreateFrame("Frame", "MountsJournalConfigClasses")
 classConfig:Hide()
+local GetAddOnMetadata = GetAddOnMetadata or C_AddOns.GetAddOnMetadata
 
 
 classConfig:SetScript("OnShow", function(self)
@@ -124,7 +125,15 @@ classConfig:SetScript("OnShow", function(self)
 	self.rightPanelScroll:SetPoint("TOPLEFT", rightPanel, 4, -6)
 	self.rightPanelScroll:SetPoint("BOTTOMRIGHT", rightPanel, -26, 5)
 
-	-- CLASS FEATURE
+	-- CLASS SLIDER FEATURE
+	self.sliderPool = CreateFramePool("FRAME", self.rightPanelScroll.child, "MJSliderFrameTemplate", function(_, frame)
+		frame:Hide()
+		frame:ClearAllPoints()
+		frame:SetPoint("RIGHT", self.rightPanelScroll, -5, 0)
+		frame:SetEnabled(true)
+	end)
+
+	-- CLASS CHECKBOX FEATURE
 	self.checkPool = CreateFramePool("CHECKBUTTON", self.rightPanelScroll.child, "MJCheckButtonTemplate", function(_, frame)
 		frame:Hide()
 		frame:ClearAllPoints()
@@ -200,6 +209,30 @@ end)
 
 
 do
+	local generalOptions = {
+		{
+			isShown = function()
+				local _,_, raceID = UnitRace("player")
+				return raceID == 22
+			end,
+			key = "useRunningWild",
+			text = L["WORGEN_USERUNNINGWILD"],
+			hlink = GetSpellLink(87840),
+			childs = {
+				{
+					widget = "slider",
+					key = "runningWildsummoningChance",
+					text = L["Chance of summoning"],
+					min = 1,
+					max = 100,
+					step = 1,
+					defaultValue = 100,
+				},
+			},
+		},
+	}
+
+
 	local classOptions = {
 		PRIEST = {
 			{
@@ -264,6 +297,11 @@ do
 	}
 
 
+	local function optionSliderOnChange(self, slider, value)
+		self.currentMacrosConfig[slider.key] = value
+	end
+
+
 	local function optionClick(self, btn)
 		local isEnabled = btn:GetChecked()
 		self.currentMacrosConfig[btn.key] = isEnabled
@@ -277,20 +315,67 @@ do
 	end
 
 
-	function classConfig:createOption(option, className)
-		local optionFrame = self.checkPool:Acquire()
-		optionFrame:SetChecked(self.currentMacrosConfig[option.key])
-		optionFrame.Text:SetText((option.text or L[(className.."_"..option.key):upper()]):format(option.hlink))
-		if not optionFrame.key then
-			optionFrame.Text:SetPoint("RIGHT", self.rightPanelScroll, -5, 0)
-			optionFrame:HookScript("OnClick", function(btn) optionClick(self, btn) end)
+	function classConfig:createOption(option, prefix, lastOptionFrame, indent)
+		indent = indent or 0
+		local text = (option.text or L[(prefix.."_"..option.key):upper()]):format(option.hlink)
+		local yOffset = lastOptionFrame and lastOptionFrame:GetObjectType() == "Frame" and -15 or 0
+
+		if option.widget == "slider" then
+			local optionFrame = self.sliderPool:Acquire()
+			optionFrame:setStep(option.step)
+			optionFrame:setMinMax(option.min, option.max)
+			optionFrame:setText(text)
+			optionFrame:setValue(self.currentMacrosConfig[option.key] or option.defaultValue)
+
+			if not optionFrame.key then
+				optionFrame:setOnChanged(function(slider, value) optionSliderOnChange(self, slider, value) end)
+			end
+			optionFrame.key = option.key
+
+			if lastOptionFrame then
+				optionFrame:SetPoint("TOPLEFT", lastOptionFrame, "BOTTOMLEFT", indent, yOffset)
+			else
+				optionFrame:SetPoint("TOPLEFT", 9, -9)
+			end
+			optionFrame:Show()
+
+			return optionFrame, 0
+		else
+			local optionFrame = self.checkPool:Acquire()
+			optionFrame:SetChecked(self.currentMacrosConfig[option.key])
+			optionFrame.Text:SetText(text)
+
+			if not optionFrame.key then
+				optionFrame.Text:SetPoint("RIGHT", self.rightPanelScroll, -5, 0)
+				optionFrame:HookScript("OnClick", function(btn) optionClick(self, btn) end)
+			end
+			optionFrame.key = option.key
+
+			if option.hlink and not optionFrame:GetHyperlinksEnabled() then
+				util.setHyperlinkTooltip(optionFrame)
+			end
+
+			if lastOptionFrame then
+				optionFrame:SetPoint("TOPLEFT", lastOptionFrame, "BOTTOMLEFT", indent, yOffset)
+			else
+				optionFrame:SetPoint("TOPLEFT", 9, -9)
+			end
+			optionFrame:Show()
+
+			if option.childs then
+				optionFrame.childs = optionFrame.childs or {}
+				local isEnabled = optionFrame:GetChecked()
+				lastOptionFrame, subIndent = optionFrame, 0
+				for i, subOption in ipairs(option.childs) do
+					lastOptionFrame, subIndent = self:createOption(subOption, prefix, lastOptionFrame, i == 1 and 20 or subIndent)
+					lastOptionFrame:SetEnabled(isEnabled)
+					tinsert(optionFrame.childs, lastOptionFrame)
+				end
+				return lastOptionFrame, subIndent - 20
+			end
+
+			return optionFrame, 0
 		end
-		optionFrame.key = option.key
-		if option.hlink and not optionFrame:GetHyperlinksEnabled() then
-			util.setHyperlinkTooltip(optionFrame)
-		end
-		optionFrame:Show()
-		return optionFrame
 	end
 
 
@@ -311,38 +396,23 @@ do
 		self.combatMF.saveBtn:Disable()
 		self.combatMF.cancelBtn:Disable()
 
+		self.sliderPool:ReleaseAll()
 		self.checkPool:ReleaseAll()
-		if classOptions[btn.key] then
-			local lastOptionFrame
-			for _, option in ipairs(classOptions[btn.key]) do
-				local optionFrame = self:createOption(option, btn.key)
-				if lastOptionFrame then
-					optionFrame:SetPoint("LEFT", 9, 0)
-					optionFrame:SetPoint("TOP", lastOptionFrame, "BOTTOM", 0, 0)
-				else
-					optionFrame:SetPoint("TOPLEFT", 9, -9)
-				end
+		local lastOptionFrame, indent
 
-				if option.childs then
-					optionFrame.childs = optionFrame.childs or {}
-					local isEnabled = optionFrame:GetChecked()
-					local lastSubOptionFrame
-					for _, subOption in ipairs(option.childs) do
-						local subOptionFrame = self:createOption(subOption, btn.key)
-						subOptionFrame:SetEnabled(isEnabled)
-						if lastSubOptionFrame then
-							subOptionFrame:SetPoint("TOPLEFT", lastOptionFrame, "BOTTOMLEFT", 0, 0)
-						else
-							subOptionFrame:SetPoint("TOPLEFT", optionFrame, "BOTTOMLEFT", 20, 0)
-						end
-						tinsert(optionFrame.childs, subOptionFrame)
-						lastSubOptionFrame = subOptionFrame
-					end
-					lastOptionFrame = lastSubOptionFrame
-				else
-					lastOptionFrame = optionFrame
-				end
+		for _, option in ipairs(generalOptions) do
+			if option.isShown() then
+				lastOptionFrame, indent = self:createOption(option, btn.key, lastOptionFrame, indent)
 			end
+		end
+
+		if classOptions[btn.key] then
+			for _, option in ipairs(classOptions[btn.key]) do
+				lastOptionFrame, indent = self:createOption(option, btn.key, lastOptionFrame, indent)
+			end
+		end
+
+		if lastOptionFrame then
 			self.moveFallMF:SetPoint("TOP", lastOptionFrame, "BOTTOM", 0, -24)
 		else
 			self.moveFallMF:SetPoint("TOP", 0, -14)

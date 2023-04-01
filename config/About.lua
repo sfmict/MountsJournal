@@ -1,6 +1,7 @@
 local addon, L = ...
 local aboutConfig = CreateFrame("FRAME", "MountsJournalConfigAbout")
 aboutConfig:Hide()
+local GetAddOnMetadata = GetAddOnMetadata or C_AddOns.GetAddOnMetadata
 
 
 aboutConfig:SetScript("OnShow", function(self)

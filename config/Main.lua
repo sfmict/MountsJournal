@@ -6,6 +6,7 @@ config.macroName = "MJMacro"
 config.secondMacroName = "MJSecondMacro"
 config.secureButtonNameMount = addon.."_Mount"
 config.secureButtonNameSecondMount = addon.."_SecondMount"
+local GetAddOnMetadata = GetAddOnMetadata or C_AddOns.GetAddOnMetadata
 
 
 config:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
