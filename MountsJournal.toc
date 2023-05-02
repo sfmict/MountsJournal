@@ -2,6 +2,7 @@
 ## Title: MountsJournal
 ## Author: sfmict
 ## Version: @project-version@
+## IconTexture: 413588
 ## Notes: Improved Mounts Journal.
 ## Notes-ruRU: Улучшенный журнал средств передвижения.
 ## SavedVariables: MountsJournalDB

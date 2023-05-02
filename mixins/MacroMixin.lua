@@ -45,6 +45,12 @@ function macroFrame:PLAYER_LOGIN()
 	local classOptionMacro = ""
 	local defMacro = ""
 
+	if raceID == 22 then
+		defMacro = defMacro..[[
+			local IsSpellKnown, IsUsableSpell, random = IsSpellKnown, IsUsableSpell, random
+		]]
+	end
+
 	if self.class == "PRIEST" or self.class == "MAGE" then
 		classOptionMacro = classOptionMacro..[[
 			local IsFalling, GetTime = IsFalling, GetTime

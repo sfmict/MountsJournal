@@ -297,14 +297,14 @@ do
 	}
 
 
-	local function optionSliderOnChange(self, slider, value)
-		self.currentMacrosConfig[slider.key] = value
+	local function optionSliderOnChange(slider, value)
+		classConfig.currentMacrosConfig[slider.key] = value
 	end
 
 
-	local function optionClick(self, btn)
+	local function optionClick(btn)
 		local isEnabled = btn:GetChecked()
-		self.currentMacrosConfig[btn.key] = isEnabled
+		classConfig.currentMacrosConfig[btn.key] = isEnabled
 		util.refreshMacro()
 
 		if type(btn.childs) == "table" then
@@ -328,7 +328,7 @@ do
 			optionFrame:setValue(self.currentMacrosConfig[option.key] or option.defaultValue)
 
 			if not optionFrame.key then
-				optionFrame:setOnChanged(function(slider, value) optionSliderOnChange(self, slider, value) end)
+				optionFrame:setOnChanged(optionSliderOnChange)
 			end
 			optionFrame.key = option.key
 
@@ -347,7 +347,7 @@ do
 
 			if not optionFrame.key then
 				optionFrame.Text:SetPoint("RIGHT", self.rightPanelScroll, -5, 0)
-				optionFrame:HookScript("OnClick", function(btn) optionClick(self, btn) end)
+				optionFrame:HookScript("OnClick", optionClick)
 			end
 			optionFrame.key = option.key
 
