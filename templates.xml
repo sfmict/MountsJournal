@@ -1534,39 +1534,9 @@
 		</Frames>
 		<Scripts>
 			<OnLoad>
-				<!-- ScrollUtil.InitScrollFrameWithScrollBar(self, self.ScrollBar) -->
-				local onScrollBarScroll = function(self, scrollPercentage)
-					local scroll = scrollPercentage * self:GetVerticalScrollRange()
-					self:SetVerticalScroll(scroll)
-				end
-				self.ScrollBar:RegisterCallback(BaseScrollBoxEvents.OnScroll, onScrollBarScroll, self)
+				ScrollUtil.InitScrollFrameWithScrollBar(self, self.ScrollBar)
 				self:SetScrollChild(self.child)
 			</OnLoad>
-			<OnVerticalScroll>
-				local verticalScrollRange = self:GetVerticalScrollRange()
-				local scrollPercentage = 0
-				if verticalScrollRange > 0 then
-					scrollPercentage = offset / verticalScrollRange
-				end
-				self.ScrollBar:SetScrollPercentage(scrollPercentage, ScrollBoxConstants.NoScrollInterpolation)
-			</OnVerticalScroll>
-			<OnScrollRangeChanged>
-				self:GetScript("OnVerticalScroll")(self, self:GetVerticalScroll())
-
-				local visibleExtentPercentage = 0
-				local height = self:GetHeight()
-				if height > 0 then
-					visibleExtentPercentage = height / (yrange + height)
-				end
-
-				self.ScrollBar:SetVisibleExtentPercentage(visibleExtentPercentage)
-
-				local panExtentPercentage = .3
-				self.ScrollBar:SetPanExtentPercentage(panExtentPercentage)
-			</OnScrollRangeChanged>
-			<OnMouseWheel>
-				self.ScrollBar:ScrollStepInDirection(-delta)
-			</OnMouseWheel>
 		</Scripts>
 	</ScrollFrame>
 
