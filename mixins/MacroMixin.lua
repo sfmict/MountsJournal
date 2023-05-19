@@ -468,7 +468,7 @@ function macroFrame:getMacro()
 		end
 	-- CLASSMACRO
 	elseif self.macro and
-		(self.class == "DRUID" and self.classConfig.useMacroAlways
+		(self.class == "DRUID" and self.classConfig.useMacroAlways and not (self.classConfig.useIfNotDragonridable and self.sFlags.isDragonridable)
 		or not self.magicBroom and (self.sFlags.isIndoors or GetUnitSpeed("player") > 0 or IsFalling()))
 	then
 		macro = self.macro

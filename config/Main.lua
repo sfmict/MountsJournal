@@ -6,7 +6,6 @@ config.macroName = "MJMacro"
 config.secondMacroName = "MJSecondMacro"
 config.secureButtonNameMount = addon.."_Mount"
 config.secureButtonNameSecondMount = addon.."_SecondMount"
-local GetAddOnMetadata = GetAddOnMetadata or C_AddOns.GetAddOnMetadata
 
 
 config:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
@@ -59,7 +58,7 @@ config:SetScript("OnShow", function(self)
 	ver:SetPoint("TOPLEFT", 40, 20)
 	ver:SetTextColor(.5, .5, .5, 1)
 	ver:SetJustifyH("RIGHT")
-	ver:SetText(GetAddOnMetadata(addon, "Version"))
+	ver:SetText(C_AddOns.GetAddOnMetadata(addon, "Version"))
 
 	-- TITLE
 	local title = self:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")

@@ -1,7 +1,6 @@
 local addon, L = ...
 local aboutConfig = CreateFrame("FRAME", "MountsJournalConfigAbout")
 aboutConfig:Hide()
-local GetAddOnMetadata = GetAddOnMetadata or C_AddOns.GetAddOnMetadata
 
 
 aboutConfig:SetScript("OnShow", function(self)
@@ -32,7 +31,7 @@ aboutConfig:SetScript("OnShow", function(self)
 
 	local authorName = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	authorName:SetPoint("LEFT", author, "RIGHT", 4, 0)
-	authorName:SetText(GetAddOnMetadata(addon, "Author"))
+	authorName:SetText(C_AddOns.GetAddOnMetadata(addon, "Author"))
 
 	-- VERSION
 	local versionText = self:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -41,7 +40,7 @@ aboutConfig:SetScript("OnShow", function(self)
 
 	local version = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	version:SetPoint("LEFT", versionText, "RIGHT", 4, 0)
-	version:SetText(GetAddOnMetadata(addon, "Version"))
+	version:SetText(C_AddOns.GetAddOnMetadata(addon, "Version"))
 
 	-- HELP TRANSLATION
 	local helpText = self:CreateFontString(nil, "ARTWORK", "GameFontNormal")

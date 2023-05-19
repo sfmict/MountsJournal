@@ -2,7 +2,6 @@ local addon, L = ...
 local util, mounts = MountsJournalUtil, MountsJournal
 local classConfig = CreateFrame("Frame", "MountsJournalConfigClasses")
 classConfig:Hide()
-local GetAddOnMetadata = GetAddOnMetadata or C_AddOns.GetAddOnMetadata
 
 
 classConfig:SetScript("OnShow", function(self)
@@ -18,7 +17,7 @@ classConfig:SetScript("OnShow", function(self)
 	ver:SetPoint("TOPLEFT", 40, 20)
 	ver:SetTextColor(.5, .5, .5, 1)
 	ver:SetJustifyH("RIGHT")
-	ver:SetText(GetAddOnMetadata(addon, "Version"))
+	ver:SetText(C_AddOns.GetAddOnMetadata(addon, "Version"))
 
 	-- TITLE
 	local title = self:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
@@ -292,6 +291,11 @@ do
 			},
 			{
 				key = "useMacroAlways",
+				childs = {
+					{
+						key = "useIfNotDragonridable",
+					},
+				},
 			},
 		},
 	}

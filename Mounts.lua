@@ -2,7 +2,6 @@ local addon = ...
 local C_MountJournal, C_Map, MapUtil, next, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff, IsUsableSpell, SecureCmdOptionParse = C_MountJournal, C_Map, MapUtil, next, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff, IsUsableSpell, SecureCmdOptionParse
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
-local GetAddOnMetadata = GetAddOnMetadata or C_AddOns.GetAddOnMetadata
 
 
 mounts:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
@@ -169,7 +168,7 @@ end
 
 
 function mounts:setOldChanges()
-	local currentVersion = GetAddOnMetadata(addon, "Version")
+	local currentVersion = C_AddOns.GetAddOnMetadata(addon, "Version")
 	--@do-not-package@
 	if currentVersion == "@project-version@" then currentVersion = "9.0.8" end
 	--@end-do-not-package@
