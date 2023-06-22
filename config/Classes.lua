@@ -9,6 +9,7 @@ classConfig:SetScript("OnShow", function(self)
 		self:SetPoint("TOPLEFT", -12, 8)
 	end)
 	self:SetPoint("TOPLEFT", -12, 8)
+
 	self.macrosConfig = mounts.config.macrosConfig
 	self.charMacrosConfig = mounts.charDB.macrosConfig
 
@@ -199,7 +200,7 @@ classConfig:SetScript("OnShow", function(self)
 	firstClassFrame:Click()
 
 	-- COMMIT
-	classConfig.OnCommit = function(self)
+	self.OnCommit = function(self)
 		self:macroSave()
 		self:combatMacroSave()
 		util.refreshMacro()
@@ -434,8 +435,6 @@ function classConfig:macroSave()
 		self.currentMacrosConfig.macro = text
 	end
 	self.macroEditBox:ClearFocus()
-	self.moveFallMF.saveBtn:Disable()
-	self.moveFallMF.cancelBtn:Disable()
 end
 
 
@@ -447,8 +446,6 @@ function classConfig:combatMacroSave()
 		self.currentMacrosConfig.combatMacro = text
 	end
 	self.combatMacroEditBox:ClearFocus()
-	self.combatMF.saveBtn:Disable()
-	self.combatMF.cancelBtn:Disable()
 end
 
 

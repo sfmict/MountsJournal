@@ -8,8 +8,8 @@ aboutConfig:SetScript("OnShow", function(self)
 		self:SetPoint("TOPLEFT", -12, 8)
 		self.model:PlayAnimKit(1371)
 	end)
-
 	self:SetPoint("TOPLEFT", -12, 8)
+
 	self.model = CreateFrame("PlayerModel", nil, self)
 	self.model:SetSize(220, 220)
 	self.model:SetPoint("TOPLEFT", 25, 20)

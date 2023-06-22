@@ -101,6 +101,7 @@ L["CLASS_USEONLYWATERWALKLOCATION"] = "A n'utiliser que dans les zones aquatique
 L["DRUID_USELASTDRUIDFORM"] = "Remettre la précédente forme en descendant de la monture"
 -- L["DRUID_USEDRUIDFORMSPECIALIZATION"] = ""
 L["DRUID_USEMACROALWAYS"] = "Utiliser cette macro au lieu des montures"
+-- L["DRUID_USEIFNOTDRAGONRIDABLE"] = ""
 L["Summonable Battle Pet"] = "Compagnons de bataille invocable"
 L["Summon Random Battle Pet"] = "Invoquer un compagnon de bataille au hasard"
 L["No Battle Pet"] = "Pas de compagnon de bataille"
