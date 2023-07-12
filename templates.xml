@@ -490,7 +490,7 @@
 							<Layer level="OVERLAY" textureSubLevel="2">
 								<FontString parentKey="new" inherits="GameFontHighlight" wordwrap="false" justifyH="CENTER" text="NEW_CAPS" hidden="true">
 									<Anchors>
-										<Anchor point="TOP" x="0" y="-3"/>
+										<Anchor point="BOTTOM" relativePoint="TOP" relativeKey="$parent.icon" x="0" y="2"/>
 									</Anchors>
 									<Shadow>
 										<Color r="0.32" g="0.5" b="1.0"/>
@@ -505,6 +505,31 @@
 							</Layer>
 						</Layers>
 						<Frames>
+							<EditBox parentKey="link" multiLine="false" autoFocus="false" ignoreArrows="false" alpha=".5">
+								<Size y="20" x="250"/>
+								<Anchors>
+									<Anchor point="TOP" y="5"/>
+								</Anchors>
+								<Scripts>
+									<OnLoad>
+										self:SetFontObject("GameFontHighlightSmall")
+										self:SetJustifyH("CENTER")
+									</OnLoad>
+									<OnEnter>self:SetAlpha(1)</OnEnter>
+									<OnLeave>self:SetAlpha(.5)</OnLeave>
+									<OnEditFocusGained>self:HighlightText()</OnEditFocusGained>
+									<OnEditFocusLost>self:HighlightText(0, 0)</OnEditFocusLost>
+									<OnEscapePressed>self:ClearFocus()</OnEscapePressed>
+									<OnTextChanged>
+										if userInput then
+											self:SetText(self.text or "")
+											self:HighlightText()
+										else
+											self.text = self:GetText()
+										end
+									</OnTextChanged>
+								</Scripts>
+							</EditBox>
 							<CheckButton parentKey="mountDescriptionToggle" inherits="MJArrowToggle">
 								<Size x="20" y="40"/>
 								<Anchors>

@@ -1,5 +1,5 @@
 local addon, L = ...
-local C_MountJournal, C_PetJournal, C_Timer, wipe, tinsert, next, pairs, ipairs, select, type, sort = C_MountJournal, C_PetJournal, C_Timer, wipe, tinsert, next, pairs, ipairs, select, type, sort
+local C_MountJournal, C_PetJournal, C_Timer, wipe, tinsert, next, pairs, ipairs, select, type, sort, math = C_MountJournal, C_PetJournal, C_Timer, wipe, tinsert, next, pairs, ipairs, select, type, sort, math
 local util, mounts, config = MountsJournalUtil, MountsJournal, MountsJournalConfig
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
 journal.mountTypes = util.mountTypes
@@ -1178,7 +1178,7 @@ end
 
 
 function journal:defaultUpdateMountList(scrollFrame)
-	local offset = HybridScrollFrame_GetOffset(scrollFrame)
+	local offset = math.floor((scrollFrame.offset or 0) + .1)
 	local numDisplayedMounts = #self.displayedMounts
 
 	for i = 1, #scrollFrame.buttons do
@@ -1287,7 +1287,7 @@ end
 
 
 function journal:grid3UpdateMountList(scrollFrame)
-	local offset = HybridScrollFrame_GetOffset(scrollFrame)
+	local offset = math.floor((scrollFrame.offset or 0) + .1)
 	local numDisplayedMounts = #self.displayedMounts
 
 	for i = 1, #scrollFrame.buttons do
@@ -1848,6 +1848,7 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 			self.mountDisplay.lastMountID = self.selectedMountID
 			self.mountDisplay.lastCreatureID = creatureID
 
+			info.link:SetText("wowhead.com/spell="..spellID)
 			info.name:SetText(creatureName)
 			info.source:SetText(sourceText)
 			info.lore:SetText(descriptionText)
