@@ -1848,6 +1848,7 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 			self.mountDisplay.lastMountID = self.selectedMountID
 			self.mountDisplay.lastCreatureID = creatureID
 
+			info.link:SetShown(mounts.config.showWowheadLink)
 			info.link:SetText("wowhead.com/spell="..spellID)
 			info.name:SetText(creatureName)
 			info.source:SetText(sourceText)

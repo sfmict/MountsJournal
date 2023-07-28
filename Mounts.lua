@@ -47,6 +47,9 @@ function mounts:ADDON_LOADED(addonName)
 		if self.config.openHyperlinks == nil then
 			self.config.openHyperlinks = true
 		end
+		if self.config.showWowheadLink == nil then
+			self.config.showWowheadLink = true
+		end
 		self.config.useRepairMountsDurability = self.config.useRepairMountsDurability or 41
 		self.config.useRepairFlyableDurability = self.config.useRepairFlyableDurability or 31
 		self.config.summonPetEveryN = self.config.summonPetEveryN or 5

@@ -114,6 +114,7 @@ L["CopyMountTarget"] = "Попытаться скопировать маунта
 L["Enable arrow buttons to browse mounts"] = "Включить кнопки со стрелками для перемещения по маунтам"
 L["Open links in %s"] = "Открывать ссылки в %s"
 L["Click opens in"] = "Клик открывает в"
+L["Show wowhead link in mount preview"] = "Показывать ссылку на wowhead в предпросмотре средств передвижения"
 L["About"] = "О аддоне"
 L["Help with translation of %s. Thanks."] = "Помогите с переводом %s. Спасибо."
 L["Localization Translators:"] = "Переводчики локализаций:"
