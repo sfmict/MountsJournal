@@ -510,11 +510,8 @@
 								<Anchors>
 									<Anchor point="TOP" y="5"/>
 								</Anchors>
+								<FontString inherits="GameFontHighlightSmall" justifyH="CENTER"/>
 								<Scripts>
-									<OnLoad>
-										self:SetFontObject("GameFontHighlightSmall")
-										self:SetJustifyH("CENTER")
-									</OnLoad>
 									<OnEnter>self:SetAlpha(1)</OnEnter>
 									<OnLeave>self:SetAlpha(.5)</OnLeave>
 									<OnEditFocusGained>self:HighlightText()</OnEditFocusGained>

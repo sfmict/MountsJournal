@@ -1859,7 +1859,7 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 
 			local mountActor = self.modelScene:GetActorByTag("unwrapped")
 			if mountActor then
-				mountActor:SetModelByCreatureDisplayID(creatureID)
+				mountActor:SetModelByCreatureDisplayID(creatureID, true)
 
 				-- mount self idle animation
 				if isSelfMount then
