@@ -20,7 +20,6 @@ journal.colors = {
 
 
 local metaMounts = {__index = {[0] = 0}}
-journal.displayedMounts = setmetatable({}, metaMounts)
 journal.indexByMountID = setmetatable({}, metaMounts)
 
 
@@ -106,9 +105,9 @@ function journal:init()
 	end)
 
 	self.bgFrame:RegisterForDrag("LeftButton")
-	for _, handler in ipairs({"OnMouseDown", "OnMouseUp", "OnDragStart", "OnDragStop"}) do
-		self.bgFrame:SetScript(handler, function(_, ...)
-			local func = self.CollectionsJournal:GetScript(handler)
+	for _, e in ipairs({"OnMouseDown", "OnMouseUp", "OnDragStart", "OnDragStop"}) do
+		self.bgFrame:SetScript(e, function(_, ...)
+			local func = self.CollectionsJournal:GetScript(e)
 			if func then
 				func(self.CollectionsJournal, ...)
 			end
@@ -133,7 +132,7 @@ function journal:init()
 	self.modelScene = self.mountDisplay.modelScene
 	self.multipleMountBtn = self.modelScene.multipleMountBtn
 	self.mountListUpdateAnim = self.leftInset.updateAnimFrame.anim
-	self.scrollFrame = self.bgFrame.scrollFrame
+	self.scrollBox = self.bgFrame.scrollBox
 	self.summonButton = self.bgFrame.summonButton
 	self.weightFrame = self.bgFrame.mountsWeight
 
@@ -336,39 +335,9 @@ function journal:init()
 	end)
 
 	-- SCROLL FRAME
-	self.scrollFrame.scrollBar.doNotHide = true
-	HybridScrollFrame_CreateButtons(self.scrollFrame, "MJMountListPanelTemplate", 1, 0)
-
-	local function mouseDown(btn, mouse) self.tags:hideDropDown(mouse) end
-	local function typeClick(btn) self:mountToggle(btn) end
-	local function dragClick(btn, mouse) self.tags:dragButtonClick(btn, mouse) end
-	local function btnClick(btn, mouse) self.tags:listItemClick(btn:GetParent(), btn, mouse) end
-	local function drag(btn) self.tags:dragMount(btn:GetParent().index) end
-	local function grid3Click(btn, mouse) self.tags:listItemClick(btn, btn, mouse) end
-	local function grid3Drag(btn) self.tags:dragMount(btn.index) end
-
-	for _, child in ipairs(self.scrollFrame.buttons) do
-		child.defaultList.dragButton:SetScript("OnMouseDown", mouseDown)
-		child.defaultList.dragButton:SetScript("OnClick", dragClick)
-		child.defaultList.dragButton:SetScript("OnDragStart", drag)
-		child.defaultList.btn:SetScript("OnMouseDown", mouseDown)
-		child.defaultList.btn:SetScript("OnClick", btnClick)
-		child.defaultList.fly:SetScript("OnClick", typeClick)
-		child.defaultList.ground:SetScript("OnClick", typeClick)
-		child.defaultList.swimming:SetScript("OnClick", typeClick)
-		for i, btn in ipairs(child.grid3List.mounts) do
-			btn:SetScript("OnMouseDown", mouseDown)
-			btn:SetScript("OnClick", grid3Click)
-			btn:SetScript("OnDragStart", grid3Drag)
-			btn.fly:SetScript("OnClick", typeClick)
-			btn.ground:SetScript("OnClick", typeClick)
-			btn.swimming:SetScript("OnClick", typeClick)
-		end
-	end
-
-	self.default_UpdateMountList = function(...) self:defaultUpdateMountList(...) end
-	self.grid3_UpdateMountList = function(...) self:grid3UpdateMountList(...) end
+	self.view = CreateScrollBoxListLinearView()
 	self:setScrollGridMounts(mounts.config.gridToggle)
+	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.bgFrame.scrollBar, self.view)
 
 	-- FILTERS BAR
 	self.filtersBar.clear:SetScript("OnClick", function() self:clearBtnFilters() end)
@@ -672,7 +641,7 @@ function journal:init()
 	self.yMinSpeed:setText(L["Minimum y-axis speed"])
 
 	-- MODEL SCENE SETTINGS
-	local mssBtn = self.mountDisplay.modelSceneSettingsButton
+	local mssBtn = self.mountDisplay.info.modelSceneSettingsButton
 	lsfdd:SetMixin(mssBtn)
 	mssBtn:ddSetDisplayMode(addon)
 	mssBtn:ddHideWhenButtonHidden()
@@ -1116,31 +1085,36 @@ end
 
 function journal:COMPANION_UPDATE(companionType)
 	if companionType == "MOUNT" then
-		self.scrollFrame:update()
+		self:updateScrollMountList()
 		self:updateMountDisplay()
 	end
 end
 
 
 function journal:setScrollGridMounts(grid)
-	local scrollFrame = self.scrollFrame
-	local offset = math.floor((scrollFrame.offset or 0) + .1)
+	local index = self.view:CalculateDataIndices(self.scrollBox)
+	local template
 
 	if grid then
-		offset = math.ceil((offset + 1) / 3) - 1
-		scrollFrame.update = self.grid3_UpdateMountList
+		template = "MJMountGrid3ListButtons"
+		self.initMountButton = self.grid3InitMountButton
+		self.view:SetPadding(0,0,2,0,0)
+		index = math.ceil(index / 3)
 	else
-		offset = offset * 3
-		scrollFrame.update = self.default_UpdateMountList
+		template = "MJMountDefaultListButton"
+		self.initMountButton = self.defaultInitMountButton
+		self.view:SetPadding(0,0,40,25,0)
+		index = (index - 1) * 3 + 1
 	end
 
-	for _, btn in ipairs(scrollFrame.buttons) do
-		btn.defaultList:SetShown(not grid)
-		btn.grid3List:SetShown(grid)
-	end
+	self.view:SetElementInitializer(template, function(...)
+		self:initMountButton(...)
+	end)
 
-	scrollFrame:update()
-	scrollFrame.scrollBar:SetValue(offset * scrollFrame.buttonHeight)
+	if self.dataProvider then
+		self:updateMountsList()
+		self.scrollBox:ScrollToElementDataIndex(index, ScrollBoxConstants.AlignBegin)
+	end
 end
 
 
@@ -1177,193 +1151,125 @@ local function getColorWeight(weight)
 end
 
 
-function journal:defaultUpdateMountList(scrollFrame)
-	local offset = math.floor((scrollFrame.offset or 0) + .1)
-	local numDisplayedMounts = #self.displayedMounts
+function journal:defaultInitMountButton(btn, data)
+	local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected, _, isForDragonriding = C_MountJournal.GetMountInfoByID(data.mountID)
+	local needsFanfare = C_MountJournal.NeedsFanfare(data.mountID)
 
-	for i = 1, #scrollFrame.buttons do
-		local index = offset + i
-		local dlist = scrollFrame.buttons[i].defaultList
+	btn.spellID = spellID
+	btn.mountID = data.mountID
 
-		if index <= numDisplayedMounts then
-			local mountID = self.displayedMounts[index]
-			local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected, _, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
-			local needsFanfare = C_MountJournal.NeedsFanfare(mountID)
+	btn.dragButton.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
+	btn.dragButton.icon:SetVertexColor(1, 1, 1)
+	btn.dragButton.hidden:SetShown(self:isMountHidden(data.mountID))
+	btn.dragButton.favorite:SetShown(isFavorite)
+	btn.dragButton.activeTexture:SetShown(active)
 
-			dlist.index = index
-			dlist.spellID = spellID
-			dlist.mountID = mountID
-
-			dlist.dragButton.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
-			dlist.dragButton.icon:SetVertexColor(1, 1, 1)
-			dlist.dragButton.hidden:SetShown(self:isMountHidden(mountID))
-			dlist.dragButton.favorite:SetShown(isFavorite)
-			dlist.dragButton.activeTexture:SetShown(active)
-
-			local mountWeight = self.mountsWeight[mountID]
-			if mountWeight then
-				dlist.dragButton.mountWeight:SetText(getColorWeight(mountWeight))
-				dlist.dragButton.mountWeight:Show()
-				dlist.dragButton.mountWeightBG:Show()
-			else
-				dlist.dragButton.mountWeight:Hide()
-				dlist.dragButton.mountWeightBG:Hide()
-			end
-
-			dlist.btn:Enable()
-			dlist.btn.name:SetText(creatureName)
-			dlist.btn.dragonriding:SetShown(isForDragonriding)
-			dlist.btn.new:SetShown(needsFanfare)
-			dlist.btn.newGlow:SetShown(needsFanfare)
-			dlist.btn.background:SetVertexColor(1, 1, 1)
-			dlist.btn.selectedTexture:SetShown(mountID == self.selectedMountID)
-
-			local yOffset = 1
-			if isForDragonriding then
-				yOffset = dlist.btn.name:GetNumLines() == 1 and 5 or 6
-			end
-			dlist.btn.name:SetPoint("LEFT", 6, yOffset)
-
-			if isFactionSpecific then
-				dlist.btn.factionIcon:SetAtlas(faction == 0 and "MountJournalIcons-Horde" or "MountJournalIcons-Alliance")
-				dlist.btn.factionIcon:Show()
-			else
-				dlist.btn.factionIcon:Hide()
-			end
-
-			if isUsable or needsFanfare then
-				dlist.dragButton:Enable()
-				dlist.dragButton.icon:SetDesaturated()
-				dlist.dragButton.icon:SetAlpha(1)
-				dlist.btn.name:SetFontObject("GameFontNormal")
-			elseif isCollected then
-				dlist.dragButton:Enable()
-				dlist.dragButton.icon:SetDesaturated(true)
-				dlist.dragButton.icon:SetVertexColor(.58823529411765, .19607843137255, .19607843137255)
-				dlist.dragButton.icon:SetAlpha(.75)
-				dlist.btn.name:SetFontObject("GameFontNormal")
-				dlist.btn.background:SetVertexColor(1, 0, 0)
-			else
-				dlist.dragButton:Disable()
-				dlist.dragButton.icon:SetDesaturated(true)
-				dlist.dragButton.icon:SetAlpha(.25)
-				dlist.btn.name:SetFontObject("GameFontDisable")
-			end
-
-			if dlist.showingTooltip then
-				GameTooltip:SetMountBySpellID(spellID)
-			end
-		else
-			dlist.index = nil
-			dlist.spellID = 0
-			dlist.mountID = nil
-
-			dlist.dragButton:Disable()
-			dlist.dragButton.icon:SetTexture("Interface/PetBattles/MountJournalEmptyIcon")
-			dlist.dragButton.icon:SetVertexColor(1, 1, 1)
-			dlist.dragButton.icon:SetAlpha(.5)
-			dlist.dragButton.icon:SetDesaturated(true)
-			dlist.dragButton.hidden:Hide()
-			dlist.dragButton.favorite:Hide()
-			dlist.dragButton.activeTexture:Hide()
-			dlist.dragButton.mountWeight:Hide()
-			dlist.dragButton.mountWeightBG:Hide()
-
-			dlist.btn:Disable()
-			dlist.btn.name:SetText("")
-			dlist.btn.dragonriding:Hide()
-			dlist.btn.new:Hide()
-			dlist.btn.newGlow:Hide()
-			dlist.btn.factionIcon:Hide()
-			dlist.btn.background:SetVertexColor(1, 1, 1)
-			dlist.btn.selectedTexture:Hide()
-		end
-
-		self:updateMountToggleButton(dlist)
+	local mountWeight = self.mountsWeight[data.mountID]
+	if mountWeight then
+		btn.dragButton.mountWeight:SetText(getColorWeight(mountWeight))
+		btn.dragButton.mountWeight:Show()
+		btn.dragButton.mountWeightBG:Show()
+	else
+		btn.dragButton.mountWeight:Hide()
+		btn.dragButton.mountWeightBG:Hide()
 	end
 
-	HybridScrollFrame_Update(scrollFrame, scrollFrame.buttonHeight * numDisplayedMounts, scrollFrame:GetHeight())
+	btn:Enable()
+	btn.name:SetText(creatureName)
+	btn.dragonriding:SetShown(isForDragonriding)
+	btn.new:SetShown(needsFanfare)
+	btn.newGlow:SetShown(needsFanfare)
+	btn.background:SetVertexColor(1, 1, 1)
+	btn.selectedTexture:SetShown(data.mountID == self.selectedMountID)
+
+	local yOffset = 1
+	if isForDragonriding then
+		yOffset = btn.name:GetNumLines() == 1 and 5 or 6
+	end
+	btn.name:SetPoint("LEFT", 6, yOffset)
+
+	if isFactionSpecific then
+		btn.factionIcon:SetAtlas(faction == 0 and "MountJournalIcons-Horde" or "MountJournalIcons-Alliance")
+		btn.factionIcon:Show()
+	else
+		btn.factionIcon:Hide()
+	end
+
+	if isUsable or needsFanfare then
+		btn.dragButton:Enable()
+		btn.dragButton.icon:SetDesaturated()
+		btn.dragButton.icon:SetAlpha(1)
+		btn.name:SetFontObject("GameFontNormal")
+	elseif isCollected then
+		btn.dragButton:Enable()
+		btn.dragButton.icon:SetDesaturated(true)
+		btn.dragButton.icon:SetVertexColor(.58823529411765, .19607843137255, .19607843137255)
+		btn.dragButton.icon:SetAlpha(.75)
+		btn.name:SetFontObject("GameFontNormal")
+		btn.background:SetVertexColor(1, 0, 0)
+	else
+		btn.dragButton:Disable()
+		btn.dragButton.icon:SetDesaturated(true)
+		btn.dragButton.icon:SetAlpha(.25)
+		btn.name:SetFontObject("GameFontDisable")
+	end
+
+	self:updateMountToggleButton(btn)
 end
 
 
-function journal:grid3UpdateMountList(scrollFrame)
-	local offset = math.floor((scrollFrame.offset or 0) + .1)
-	local numDisplayedMounts = #self.displayedMounts
+function journal:grid3InitMountButton(btn, data)
+	for i = 1, #btn.mounts do
+		local g3btn = btn.mounts[i]
 
-	for i = 1, #scrollFrame.buttons do
-		local grid3Buttons = scrollFrame.buttons[i].grid3List.mounts
-		for j = 1, 3 do
-			local index = (offset + i - 1) * 3 + j
-			local g3btn = grid3Buttons[j]
+		if data[i] then
+			local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = C_MountJournal.GetMountInfoByID(data[i].mountID)
+			local needsFanfare = C_MountJournal.NeedsFanfare(data[i].mountID)
 
-			if index <= numDisplayedMounts then
-				local mountID = self.displayedMounts[index]
-				local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = C_MountJournal.GetMountInfoByID(mountID)
-				local needsFanfare = C_MountJournal.NeedsFanfare(mountID)
+			g3btn.spellID = spellID
+			g3btn.mountID = data[i].mountID
+			g3btn.active = active
+			g3btn.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
+			g3btn.icon:SetVertexColor(1, 1, 1)
+			g3btn:Enable()
+			g3btn.selectedTexture:SetShown(data[i].mountID == self.selectedMountID)
+			g3btn.hidden:SetShown(self:isMountHidden(data[i].mountID))
+			g3btn.favorite:SetShown(isFavorite)
 
-				g3btn.index = index
-				g3btn.spellID = spellID
-				g3btn.mountID = mountID
-				g3btn.active = active
-				g3btn.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
-				g3btn.icon:SetVertexColor(1, 1, 1)
-				g3btn:Enable()
-				g3btn.selectedTexture:SetShown(mountID == self.selectedMountID)
-				g3btn.hidden:SetShown(self:isMountHidden(mountID))
-				g3btn.favorite:SetShown(isFavorite)
-
-				local mountWeight = self.mountsWeight[mountID]
-				if mountWeight then
-					g3btn.mountWeight:SetText(getColorWeight(mountWeight))
-					g3btn.mountWeight:Show()
-					g3btn.mountWeightBG:Show()
-				else
-					g3btn.mountWeight:Hide()
-					g3btn.mountWeightBG:Hide()
-				end
-
-				if isUsable or needsFanfare then
-					g3btn.icon:SetDesaturated()
-					g3btn.icon:SetAlpha(1)
-				elseif isCollected then
-					g3btn.icon:SetDesaturated(true)
-					g3btn.icon:SetVertexColor(.58823529411765, .19607843137255, .19607843137255)
-					g3btn.icon:SetAlpha(.75)
-				else
-					g3btn.icon:SetDesaturated(true)
-					g3btn.icon:SetAlpha(.5)
-				end
-
-				if g3btn.showingTooltip then
-					GameTooltip:SetMountBySpellID(spellID)
-				end
+			local mountWeight = self.mountsWeight[data[i].mountID]
+			if mountWeight then
+				g3btn.mountWeight:SetText(getColorWeight(mountWeight))
+				g3btn.mountWeight:Show()
+				g3btn.mountWeightBG:Show()
 			else
-				g3btn.icon:SetTexture("Interface/PetBattles/MountJournalEmptyIcon")
-				g3btn.icon:SetDesaturated(true)
-				g3btn.icon:SetVertexColor(.4, .4, .4)
-				g3btn.icon:SetAlpha(.5)
-				g3btn.index = nil
-				g3btn.spellID = 0
-				g3btn.mountID = nil
-				g3btn.selected = false
-				g3btn:Disable()
-				g3btn.selectedTexture:Hide()
-				g3btn.hidden:Hide()
-				g3btn.favorite:Hide()
 				g3btn.mountWeight:Hide()
 				g3btn.mountWeightBG:Hide()
 			end
 
-			self:updateMountToggleButton(g3btn)
-		end
-	end
+			if isUsable or needsFanfare then
+				g3btn.icon:SetDesaturated()
+				g3btn.icon:SetAlpha(1)
+			elseif isCollected then
+				g3btn.icon:SetDesaturated(true)
+				g3btn.icon:SetVertexColor(.58823529411765, .19607843137255, .19607843137255)
+				g3btn.icon:SetAlpha(.75)
+			else
+				g3btn.icon:SetDesaturated(true)
+				g3btn.icon:SetAlpha(.5)
+			end
 
-	HybridScrollFrame_Update(scrollFrame, scrollFrame.buttonHeight * math.ceil(numDisplayedMounts / 3), scrollFrame:GetHeight())
+			g3btn:Show()
+		else
+			g3btn:Hide()
+		end
+
+		self:updateMountToggleButton(g3btn)
+	end
 end
 
 
 function journal:setArrowSelectMount(enabled)
-	if not self.scrollFrame then return end
+	if not self.leftInset then return end
 	if enabled then
 		local time, pressed, delta, index
 		local onUpdate = function(scroll, elapsed)
@@ -1371,15 +1277,20 @@ function journal:setArrowSelectMount(enabled)
 			if time <= 0 then
 				time = .1
 				index = index + delta
-				if index < 1 or index > #self.displayedMounts then
-					scroll:SetScript("OnUpdate", nil)
-					return
+
+				if index < 1 then
+					index = self.shownNumMouns + index - math.fmod(self.shownNumMouns, delta)
+					if self.shownNumMouns - index > 2 then index = index + 3 end
+				elseif index > self.shownNumMouns then
+					index = index - self.shownNumMouns + math.fmod(self.shownNumMouns, delta)
+					if index > 3 then index = index - 3 end
 				end
+
 				self:selectMount(index)
 			end
 		end
 
-		self.scrollFrame:SetScript("OnKeyDown", function(scroll, key)
+		self.leftInset:SetScript("OnKeyDown", function(scroll, key)
 			if key == "UP" or key == "DOWN" or key == "LEFT" or key == "RIGHT" then
 				scroll:SetPropagateKeyboardInput(false)
 
@@ -1389,24 +1300,25 @@ function journal:setArrowSelectMount(enabled)
 				end
 
 				index = nil
-				for i = 1, #self.displayedMounts do
-					if self.selectedMountID == self.displayedMounts[i] then
-						index = i
-						break
+				if self.selectedMountID then
+					local data = self:getMountDataByMountID(self.selectedMountID)
+					if data then
+						index = data.index + delta
 					end
 				end
 
 				if not index then
-					if mounts.config.gridToggle then
-						index = scroll.buttons[1].grid3List.mounts[1].index
-					else
-						index = scroll.buttons[1].defaultList.index
-					end
-					if not index then return end
-				else
-					index = index + delta
-					if index < 1 or index > #self.displayedMounts then return end
+					index = delta > 0 and 1 or self.shownNumMouns
 				end
+
+				if index < 1 then
+					index = self.shownNumMouns + index - math.fmod(self.shownNumMouns, delta)
+					if self.shownNumMouns - index > 2 then index = index + 3 end
+				elseif index > self.shownNumMouns then
+					index = index - self.shownNumMouns + math.fmod(self.shownNumMouns, delta)
+					if index > 3 then index = index - 3 end
+				end
+
 				self:selectMount(index)
 
 				pressed = key
@@ -1417,20 +1329,20 @@ function journal:setArrowSelectMount(enabled)
 			end
 		end)
 
-		self.scrollFrame:SetScript("OnKeyUp", function(scroll, key)
+		self.leftInset:SetScript("OnKeyUp", function(scroll, key)
 			if pressed == key then
 				scroll:SetScript("OnUpdate", nil)
 			end
 		end)
 
-		self.scrollFrame:SetScript("OnHide", function(scroll)
+		self.leftInset:SetScript("OnHide", function(scroll)
 			scroll:SetScript("OnUpdate", nil)
 		end)
 	else
-		self.scrollFrame:SetScript("OnKeyDown", nil)
-		self.scrollFrame:SetScript("OnKeyUp", nil)
-		self.scrollFrame:SetScript("OnHide", nil)
-		self.scrollFrame:SetScript("OnUpdate", nil)
+		self.leftInset:SetScript("OnKeyDown", nil)
+		self.leftInset:SetScript("OnKeyUp", nil)
+		self.leftInset:SetScript("OnHide", nil)
+		self.leftInset:SetScript("OnUpdate", nil)
 	end
 end
 
@@ -1595,7 +1507,7 @@ function journal:updateIndexByMountID()
 
 	wipe(self.indexByMountID)
 	for i = 1, C_MountJournal.GetNumDisplayedMounts() do
-		local _,_,_,_,_,_,_,_,_,_,_, mountID = C_MountJournal.GetDisplayedMountInfo(i)
+		local mountID = C_MountJournal.GetDisplayedMountID(i)
 		self.indexByMountID[mountID] = i
 	end
 end
@@ -1927,63 +1839,108 @@ function journal:useMount(mountID)
 end
 
 
-do
-	local function getMountButtonByMountID(mountID)
-		local buttons = journal.scrollFrame.buttons
-		for i = 1, #buttons do
-			local button = buttons[i]
-			if mounts.config.gridToggle then
-				for j = 1, 3 do
-					local grid3Button = button.grid3List.mounts[j]
-					if grid3Button.mountID == mountID then
-						return grid3Button
-					end
-				end
-			else
-				if button.defaultList.mountID == mountID then
-					return button
+function journal:getMountDataByMountID(mountID)
+	if mounts.config.gridToggle then
+		local mountData
+		self.scrollBox:FindElementDataByPredicate(function(data)
+			for i = 1, #data do
+				if data[i].mountID == mountID then
+					mountData = data[i]
+					return true
 				end
 			end
-		end
-	end
-
-
-	function journal:setSelectedMount(mountID, index, spellID, button)
-		if not spellID then
-			local _
-			_, spellID = C_MountJournal.GetMountInfoByID(mountID)
-		end
-		self.selectedMountID = mountID
-		self.selectedSpellID = spellID
-		self.scrollFrame:update()
-		self:updateMountDisplay()
-
-		if not button then
-			button = getMountButtonByMountID(mountID)
-		end
-		if not button or (self.scrollFrame:GetBottom() or 0) >= (button:GetTop() or 0) then
-			if not index then
-				for i = 1, #self.displayedMounts do
-					if mountID == self.displayedMounts[i] then
-						index = i
-						break
-					end
-				end
-			end
-			if index then
-				if mounts.config.gridToggle then index = math.ceil(index / 3) end
-				HybridScrollFrame_ScrollToIndex(self.scrollFrame, index, function() return self.scrollFrame.buttonHeight end)
-			end
-		end
-
-		self:event("MOUNT_SELECT")
+		end)
+		return mountData
+	else
+		return self.scrollBox:FindElementDataByPredicate(function(data)
+			return data.mountID == mountID
+		end)
 	end
 end
 
 
+function journal:getMountDataByMountIndex(index)
+	if mounts.config.gridToggle then
+		local mountData
+		self.scrollBox:FindElementDataByPredicate(function(data)
+			for i = 1, #data do
+				if data[i].index == index then
+					mountData = data[i]
+					return true
+				end
+			end
+		end)
+		return mountData
+	else
+		return self.scrollBox:FindElementDataByPredicate(function(data)
+			return data.index == index
+		end)
+	end
+end
+
+
+function journal:getMountButtonByMountID(mountID)
+	if mounts.config.gridToggle then
+		return self.scrollBox:FindFrameByPredicate(function(btn, data)
+			for i = 1, #data do
+				if data[i].mountID == mountID then return true end
+			end
+		end)
+	else
+		return self.scrollBox:FindFrameByPredicate(function(btn, data)
+			return data.mountID == mountID
+		end)
+	end
+end
+
+
+function journal:setSelectedMount(mountID, spellID)
+	if not spellID then
+		local _
+		_, spellID = C_MountJournal.GetMountInfoByID(mountID)
+	end
+	local oldSelectedID = self.selectedMountID
+	self.selectedMountID = mountID
+	self.selectedSpellID = spellID
+	self:updateMountDisplay()
+
+	if oldSelectedID ~= selectedMountID then
+		local btn = self:getMountButtonByMountID(oldSelectedID)
+		if btn then
+			self:initMountButton(btn, btn:GetElementData())
+		end
+	end
+
+	local btn = self:getMountButtonByMountID(mountID)
+	if btn then
+		self:initMountButton(btn, btn:GetElementData())
+	end
+
+
+	if not btn
+	or btn:GetTop() > self.scrollBox:GetTop()
+	or btn:GetBottom() < self.scrollBox:GetBottom()
+	then
+		if mounts.config.gridToggle then
+			self.scrollBox:ScrollToElementDataByPredicate(function(data)
+				for i = 1, #data do
+					if data[i].mountID == mountID then return true end
+				end
+			end)
+		else
+			self.scrollBox:ScrollToElementDataByPredicate(function(data)
+				return data.mountID == mountID
+			end)
+		end
+	end
+
+	self:event("MOUNT_SELECT")
+end
+
+
 function journal:selectMount(index)
-	local mountID = self.displayedMounts[index]
-	if mountID then self:setSelectedMount(mountID, index) end
+	local data = self:getMountDataByMountIndex(index)
+	if data then self:setSelectedMount(data.mountID) end
 end
 
 
@@ -2810,8 +2767,12 @@ function journal:getFilterType(mountType)
 end
 
 
-function journal:setShownCountMounts()
-	self.shownPanel.count:SetText(#self.displayedMounts)
+function journal:setShownCountMounts(numMounts)
+	if numMounts then
+		self.shownPanel.count:SetText(numMounts)
+		self.shownNumMouns = numMounts
+	end
+
 	if self:isDefaultFilters() then
 		self.shownPanel:Hide()
 		self.leftInset:SetPoint("TOPLEFT", self.filtersPanel, "BOTTOMLEFT", 0, -2)
@@ -2819,7 +2780,12 @@ function journal:setShownCountMounts()
 		self.shownPanel:Show()
 		self.leftInset:SetPoint("TOPLEFT", self.shownPanel, "BOTTOMLEFT", 0, -2)
 	end
-	self.leftInset:GetHeight()
+	-- self.leftInset:GetHeight()
+end
+
+
+function journal:updateScrollMountList()
+	self.scrollBox:SetDataProvider(self.dataProvider, ScrollBoxConstants.RetainScrollPosition)
 end
 
 
@@ -2827,7 +2793,8 @@ function journal:updateMountsList()
 	local filters, list, newMounts, mountsDB, tags, GetMountInfoByID, GetMountInfoExtraByID = mounts.filters, self.list, mounts.newMounts, mounts.mountsDB, self.tags, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID
 	local sources, selected, factions, pet, expansions = filters.sources, filters.selected, filters.factions, filters.pet, filters.expansions
 	local text = util.cleanText(self.searchBox:GetText())
-	wipe(self.displayedMounts)
+	local numMounts, data = 0
+	self.dataProvider = CreateDataProvider()
 
 	for i = 1, #self.mountIDs do
 		local mountID = self.mountIDs[i]
@@ -2876,10 +2843,20 @@ function journal:updateMountsList()
 		and self:getFilterWeight(mountID)
 		-- TAGS
 		and tags:getFilterMount(mountID) then
-			self.displayedMounts[#self.displayedMounts + 1] = mountID
+			numMounts = numMounts + 1
+			if mounts.config.gridToggle then
+				if data and #data < 3 then
+					data[#data + 1] = {index = numMounts, mountID = mountID}
+				else
+					data = {{index = numMounts, mountID = mountID}}
+					self.dataProvider:Insert(data)
+				end
+			else
+				self.dataProvider:Insert({index = numMounts, mountID = mountID})
+			end
 		end
 	end
 
-	self:setShownCountMounts()
-	self.scrollFrame:update()
+	self:updateScrollMountList()
+	self:setShownCountMounts(numMounts)
 end

@@ -185,16 +185,18 @@ function MJCompanionsPanelMixin:onLoad()
 	self.noPet.name:SetText(L["No Battle Pet"])
 
 	self.petList = MountsJournal.pets.list
-	self.petFiltredList = {}
 
 	self.searchBox:SetScript("OnTextChanged", function(searchBox)
 		SearchBoxTemplate_OnTextChanged(searchBox)
 		self:updateFilters()
 	end)
 
-	self.listScroll.update = function() self:refresh() end
-	self.listScroll.scrollBar.doNotHide = true
-	HybridScrollFrame_CreateButtons(self.listScroll, "MJPetListButton")
+	self.view = CreateScrollBoxListLinearView()
+	self.view:SetElementInitializer("MJPetListButton", function(...)
+		self:initButton(...)
+	end)
+	self.scrollBox = self.petListFrame.scrollBox
+	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.petListFrame.scrollBar, self.view)
 
 	self:on("MOUNT_SELECT", self.Hide)
 end
@@ -207,7 +209,7 @@ function MJCompanionsPanelMixin:onShow()
 			if self.needSort then
 				self:petListSort()
 			else
-				self:refresh()
+				self:updateScrollPetList()
 			end
 			self:scrollToSelectedPet()
 			self:on("UPDATE_PROFILE", self.refresh)
@@ -228,23 +230,9 @@ end
 
 function MJCompanionsPanelMixin:scrollToSelectedPet()
 	local selectedPetID = self.journal.petForMount[self.journal.selectedSpellID]
-	if type(selectedPetID) ~= "string" then return end
-	local scrollFrame = self.listScroll
-
-	for i = 1, #self.petFiltredList do
-		if selectedPetID == self.petFiltredList[i] then
-			local curHeight = scrollFrame.scrollBar:GetValue()
-			local maxHeight = i * scrollFrame.buttonHeight
-			local minHeight = maxHeight - math.floor(scrollFrame:GetHeight() + .5)
-
-			if curHeight < minHeight then
-				scrollFrame.scrollBar:SetValue(minHeight)
-			elseif curHeight >= maxHeight then
-				scrollFrame.scrollBar:SetValue(maxHeight - scrollFrame.buttonHeight)
-			end
-			break
-		end
-	end
+	self.scrollBox:ScrollToElementDataByPredicate(function(data)
+		return data.petID == selectedPetID
+	end)
 end
 
 
@@ -257,57 +245,36 @@ function MJCompanionsPanelMixin:selectButtonClick(id)
 end
 
 
-function MJCompanionsPanelMixin:refresh()
-	local scrollFrame = self.listScroll
-	local offset = HybridScrollFrame_GetOffset(scrollFrame)
-	local numPets = #self.petFiltredList
+function MJCompanionsPanelMixin:initButton(btn, data)
 	local selectedPetID = self.journal.petForMount[self.journal.selectedSpellID]
+	local _, customName, level, _,_, displayID, favorite, name, icon, petType, _,_,_,_, canBattle = C_PetJournal.GetPetInfoByPetID(data.petID)
+	local health, _,_,_, rarity = C_PetJournal.GetPetStats(data.petID)
+	local petQualityColor = ITEM_QUALITY_COLORS[rarity - 1].color
 
-	for i, btn in ipairs(scrollFrame.buttons) do
-		local index = i + offset
+	btn.id = data.petID
+	btn.displayID = displayID
+	btn.petTypeIcon:SetTexture(GetPetTypeTexture(petType))
+	btn.name:SetTextColor(petQualityColor:GetRGB())
+	btn.selectedTexture:SetShown(data.petID == selectedPetID)
 
-		if index <= numPets then
-			local petID = self.petFiltredList[index]
-			local _, customName, level, _,_, displayID, favorite, name, icon, petType, _,_,_,_, canBattle = C_PetJournal.GetPetInfoByPetID(petID)
-			local health, _,_,_, rarity = C_PetJournal.GetPetStats(petID)
-			local petQualityColor = ITEM_QUALITY_COLORS[rarity - 1].color
-
-			btn.id = petID
-			btn.displayID = displayID
-			btn.petTypeIcon:SetTexture(GetPetTypeTexture(petType))
-			btn.name:SetTextColor(petQualityColor:GetRGB())
-			btn.selectedTexture:SetShown(petID == selectedPetID)
-
-			if customName then
-				btn.name:SetText(customName)
-				btn.name:SetHeight(12)
-				btn.subName:Show()
-				btn.subName:SetText(name)
-			else
-				btn.name:SetText(name)
-				btn.name:SetHeight(25)
-				btn.subName:Hide()
-			end
-
-			btn.infoFrame.icon:SetTexture(icon)
-			btn.infoFrame.qualityBorder:SetVertexColor(petQualityColor:GetRGB())
-			btn.infoFrame.isDead:SetShown(health <= 0)
-			btn.infoFrame.levelBG:SetShown(canBattle)
-			btn.infoFrame.level:SetShown(canBattle)
-			btn.infoFrame.level:SetText(level)
-			btn.infoFrame.favorite:SetShown(favorite)
-
-			if btn.showingTooltip then
-				btn:GetScript("OnEnter")(btn)
-			end
-
-			btn:Show()
-		else
-			btn:Hide()
-		end
+	if customName then
+		btn.name:SetText(customName)
+		btn.name:SetHeight(12)
+		btn.subName:Show()
+		btn.subName:SetText(name)
+	else
+		btn.name:SetText(name)
+		btn.name:SetHeight(25)
+		btn.subName:Hide()
 	end
 
-	HybridScrollFrame_Update(scrollFrame, scrollFrame.buttonHeight * numPets, scrollFrame:GetHeight())
+	btn.infoFrame.icon:SetTexture(icon)
+	btn.infoFrame.qualityBorder:SetVertexColor(petQualityColor:GetRGB())
+	btn.infoFrame.isDead:SetShown(health <= 0)
+	btn.infoFrame.levelBG:SetShown(canBattle)
+	btn.infoFrame.level:SetShown(canBattle)
+	btn.infoFrame.level:SetText(level)
+	btn.infoFrame.favorite:SetShown(favorite)
 end
 
 
@@ -348,11 +315,17 @@ function MJCompanionsPanelMixin:petListSort()
 end
 
 
+function MJCompanionsPanelMixin:updateScrollPetList()
+	self.scrollBox:SetDataProvider(self.dataProvider, ScrollBoxConstants.RetainScrollPosition)
+end
+
+
 function MJCompanionsPanelMixin:updateFilters()
 	local text = self.util.cleanText(self.searchBox:GetText())
 	local GetPetInfoByPetID = C_PetJournal.GetPetInfoByPetID
+	local numPets = 0
+	self.dataProvider = CreateDataProvider()
 
-	wipe(self.petFiltredList)
 	for i = 1, #self.petList do
 		local petID = self.petList[i]
 		local _, customName, _,_,_,_,_, name, _, petType, _, sourceText = GetPetInfoByPetID(petID)
@@ -361,11 +334,12 @@ function MJCompanionsPanelMixin:updateFilters()
 			or name:lower():find(text, 1, true)
 			or sourceText:lower():find(text, 1, true)
 			or customName and customName:lower():find(text, 1, true)) then
-			self.petFiltredList[#self.petFiltredList + 1] = petID
+			numPets = numPets + 1
+			self.dataProvider:Insert({index = numPets, petID = petID})
 		end
 	end
 
-	self:refresh()
+	self:updateScrollPetList()
 end
 
 

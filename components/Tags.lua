@@ -85,9 +85,9 @@ function tags:hideDropDown(mouseBtn)
 end
 
 
-function tags:dragMount(index)
+function tags:dragMount(mountID)
 	if InCombatLockdown() then return end
-	index = journal.indexByMountID[journal.displayedMounts[index]]
+	local index = journal.indexByMountID[mountID]
 	if index then C_MountJournal.Pickup(index) end
 end
 
@@ -106,16 +106,16 @@ function tags:dragButtonClick(btn, mouseBtn)
 			ChatEdit_InsertLink(spellLink)
 		end
 	else
-		self:dragMount(parent.index)
+		self:dragMount(parent.mountID)
 	end
 end
 
 
 do
 	local lastMountClick = 0
-	function tags:listItemClick(btn, anchorTo, mouseBtn)
+	function tags:listItemClick(btn, mouseBtn)
 		if mouseBtn ~= "LeftButton" then
-			self:showMountDropdown(btn, anchorTo, 0, 0)
+			self:showMountDropdown(btn, btn, 0, 0)
 		elseif IsModifiedClick("CHATLINK") then
 			local id = btn.spellID
 			if MacroFrame and MacroFrame:IsShown() then
@@ -128,7 +128,7 @@ do
 		else
 			local time = GetTime()
 			if btn.mountID ~= journal.selectedMountID then
-				journal:setSelectedMount(btn.mountID, btn.index, btn.spellID, btn)
+				journal:setSelectedMount(btn.mountID, btn.spellID)
 			elseif time - lastMountClick < .4 then
 				journal:useMount(btn.mountID)
 			end
@@ -141,7 +141,6 @@ end
 function tags:showMountDropdown(btn, anchorTo, offsetX, offsetY)
 	self.menuMountID = btn.mountID
 	self.menuSpellID = btn.spellID
-	self.menuMountIndex = btn.index
 	self.mountOptionsMenu:ddToggle(1, nil, anchorTo, offsetX, offsetY)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 end
@@ -149,7 +148,7 @@ end
 
 function tags:mountOptionsMenu_Init(btn, level)
 	local info = {}
-	local realIndex = journal.indexByMountID[journal.displayedMounts[self.menuMountIndex]]
+	local realIndex = journal.indexByMountID[self.menuMountID]
 
 	if level == 1 then
 		local _,_,_, active, isUsable ,_, isFavorite, _,_,_, isCollected = C_MountJournal.GetMountInfoByID(self.menuMountID)
@@ -167,7 +166,7 @@ function tags:mountOptionsMenu_Init(btn, level)
 
 		info.func = function()
 			if needsFanfare then
-				journal:setSelectedMount(self.menuMountID, self.menuMountIndex, self.menuSpellID)
+				journal:setSelectedMount(self.menuMountID, self.menuSpellID)
 			end
 			journal:useMount(self.menuMountID)
 		end
