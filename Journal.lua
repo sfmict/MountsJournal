@@ -1103,7 +1103,7 @@ function journal:setScrollGridMounts(grid)
 	else
 		template = "MJMountDefaultListButton"
 		self.initMountButton = self.defaultInitMountButton
-		self.view:SetPadding(0,0,40,25,0)
+		self.view:SetPadding(0,0,41,25,0)
 		index = (index - 1) * 3 + 1
 	end
 
@@ -1839,62 +1839,56 @@ function journal:useMount(mountID)
 end
 
 
-function journal:getMountDataByMountID(mountID)
+local function getGridTogglePredicate(predicate)
 	if mounts.config.gridToggle then
-		local mountData
-		self.scrollBox:FindElementDataByPredicate(function(data)
+		return function(btn, data)
+			data = data or btn
 			for i = 1, #data do
-				if data[i].mountID == mountID then
-					mountData = data[i]
-					return true
-				end
+				if predicate(btn[i] or btn, data[i]) then return true end
 			end
-		end)
-		return mountData
+		end
 	else
-		return self.scrollBox:FindElementDataByPredicate(function(data)
-			return data.mountID == mountID
-		end)
+		return predicate
 	end
+end
+
+
+function journal:getMountDataByMountID(mountID)
+	local mountData
+	local predicate = getGridTogglePredicate(function(data)
+		if data.mountID == mountID then
+			mountData = data
+			return true
+		end
+	end)
+	self.scrollBox:FindByPredicate(predicate)
+	return mountData
 end
 
 
 function journal:getMountDataByMountIndex(index)
-	if mounts.config.gridToggle then
-		local mountData
-		self.scrollBox:FindElementDataByPredicate(function(data)
-			for i = 1, #data do
-				if data[i].index == index then
-					mountData = data[i]
-					return true
-				end
-			end
-		end)
-		return mountData
-	else
-		return self.scrollBox:FindElementDataByPredicate(function(data)
-			return data.index == index
-		end)
-	end
+	local mountData
+	local predicate = getGridTogglePredicate(function(data)
+		if data.index == index then
+			mountData = data
+			return true
+		end
+	end)
+	self.scrollBox:FindByPredicate(predicate)
+	return mountData
 end
 
 
 function journal:getMountButtonByMountID(mountID)
-	if mounts.config.gridToggle then
-		return self.scrollBox:FindFrameByPredicate(function(btn, data)
-			for i = 1, #data do
-				if data[i].mountID == mountID then return true end
-			end
-		end)
-	else
-		return self.scrollBox:FindFrameByPredicate(function(btn, data)
-			return data.mountID == mountID
-		end)
-	end
+	local predicate = getGridTogglePredicate(function(btn, data)
+		return data.mountID == mountID
+	end)
+	return self.scrollBox:FindFrameByPredicate(predicate)
 end
 
 
 function journal:setSelectedMount(mountID, spellID)
+	local scrollTo = not spellID
 	if not spellID then
 		local _
 		_, spellID = C_MountJournal.GetMountInfoByID(mountID)
@@ -1916,22 +1910,16 @@ function journal:setSelectedMount(mountID, spellID)
 		self:initMountButton(btn, btn:GetElementData())
 	end
 
-
-	if not btn
-	or btn:GetTop() > self.scrollBox:GetTop()
-	or btn:GetBottom() < self.scrollBox:GetBottom()
+	if scrollTo and (
+		not btn
+		or btn:GetTop() > self.scrollBox:GetTop()
+		or btn:GetBottom() < self.scrollBox:GetBottom()
+	)
 	then
-		if mounts.config.gridToggle then
-			self.scrollBox:ScrollToElementDataByPredicate(function(data)
-				for i = 1, #data do
-					if data[i].mountID == mountID then return true end
-				end
-			end)
-		else
-			self.scrollBox:ScrollToElementDataByPredicate(function(data)
-				return data.mountID == mountID
-			end)
-		end
+		local predicate = getGridTogglePredicate(function(data)
+			return data.mountID == mountID
+		end)
+		self.scrollBox:ScrollToElementDataByPredicate(predicate)
 	end
 
 	self:event("MOUNT_SELECT")
