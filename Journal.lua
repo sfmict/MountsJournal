@@ -87,6 +87,7 @@ function journal:init()
 		self:RegisterEvent("PLAYER_REGEN_DISABLED")
 		self:RegisterEvent("PLAYER_REGEN_ENABLED")
 		self:RegisterUnitEvent("UNIT_FORM_CHANGED", "player")
+		self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 		self:updateMountsList()
 		self:updateMountDisplay(true)
 	end)
@@ -900,7 +901,7 @@ function journal:init()
 	self:setEditMountsList()
 	self:updateBtnFilters()
 	self:sortMounts()
-	self:selectMount(1)
+	self:selectMountByIndex(1)
 	if not self.selectedMountID then
 		self:updateMountDisplay()
 	end
@@ -1066,6 +1067,7 @@ function journal:PLAYER_REGEN_DISABLED()
 	if self.init then
 		self.useMountsJournalButton:Disable()
 	else
+		self:setArrowSelectMount(false)
 		self:updateMountsList()
 	end
 end
@@ -1078,6 +1080,7 @@ function journal:PLAYER_REGEN_ENABLED()
 			self:init()
 		end
 	else
+		self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 		self:updateMountsList()
 	end
 end
@@ -1270,9 +1273,9 @@ end
 
 function journal:setArrowSelectMount(enabled)
 	if not self.leftInset then return end
-	if enabled then
+	if enabled and not InCombatLockdown() then
 		local time, pressed, delta, index
-		local onUpdate = function(scroll, elapsed)
+		local onUpdate = function(f, elapsed)
 			time = time - elapsed
 			if time <= 0 then
 				time = .1
@@ -1286,13 +1289,13 @@ function journal:setArrowSelectMount(enabled)
 					if index > 3 then index = index - 3 end
 				end
 
-				self:selectMount(index)
+				self:selectMountByIndex(index)
 			end
 		end
 
-		self.leftInset:SetScript("OnKeyDown", function(scroll, key)
+		self.leftInset:SetScript("OnKeyDown", function(f, key)
 			if key == "UP" or key == "DOWN" or key == "LEFT" or key == "RIGHT" then
-				scroll:SetPropagateKeyboardInput(false)
+				f:SetPropagateKeyboardInput(false)
 
 				delta = (key == "UP" or key == "LEFT") and -1 or 1
 				if mounts.config.gridToggle and (key == "UP" or key == "DOWN") then
@@ -1319,24 +1322,24 @@ function journal:setArrowSelectMount(enabled)
 					if index > 3 then index = index - 3 end
 				end
 
-				self:selectMount(index)
+				self:selectMountByIndex(index)
 
 				pressed = key
 				time = .5
-				scroll:SetScript("OnUpdate", onUpdate)
+				f:SetScript("OnUpdate", onUpdate)
 			else
-				scroll:SetPropagateKeyboardInput(true)
+				f:SetPropagateKeyboardInput(true)
 			end
 		end)
 
-		self.leftInset:SetScript("OnKeyUp", function(scroll, key)
+		self.leftInset:SetScript("OnKeyUp", function(f, key)
 			if pressed == key then
-				scroll:SetScript("OnUpdate", nil)
+				f:SetScript("OnUpdate", nil)
 			end
 		end)
 
-		self.leftInset:SetScript("OnHide", function(scroll)
-			scroll:SetScript("OnUpdate", nil)
+		self.leftInset:SetScript("OnHide", function(f)
+			f:SetScript("OnUpdate", nil)
 		end)
 	else
 		self.leftInset:SetScript("OnKeyDown", nil)
@@ -1926,7 +1929,7 @@ function journal:setSelectedMount(mountID, spellID)
 end
 
 
-function journal:selectMount(index)
+function journal:selectMountByIndex(index)
 	local data = self:getMountDataByMountIndex(index)
 	if data then self:setSelectedMount(data.mountID) end
 end
