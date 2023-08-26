@@ -1864,8 +1864,8 @@ function journal:getMountDataByMountID(mountID)
 			return true
 		end
 	end)
-	self.scrollBox:FindByPredicate(predicate)
-	return mountData
+	local dataIndex = self.scrollBox:FindByPredicate(predicate)
+	return mountData, dataIndex
 end
 
 
@@ -1877,8 +1877,8 @@ function journal:getMountDataByMountIndex(index)
 			return true
 		end
 	end)
-	self.scrollBox:FindByPredicate(predicate)
-	return mountData
+	local dataIndex = self.scrollBox:FindByPredicate(predicate)
+	return mountData, dataIndex
 end
 
 
@@ -1890,7 +1890,7 @@ function journal:getMountButtonByMountID(mountID)
 end
 
 
-function journal:setSelectedMount(mountID, spellID)
+function journal:setSelectedMount(mountID, spellID, dataIndex)
 	local scrollTo = not spellID
 	if not spellID then
 		local _
@@ -1913,16 +1913,20 @@ function journal:setSelectedMount(mountID, spellID)
 		self:initMountButton(btn, btn:GetElementData())
 	end
 
-	if scrollTo and (
-		not btn
-		or btn:GetTop() > self.scrollBox:GetTop()
-		or btn:GetBottom() < self.scrollBox:GetBottom()
-	)
-	then
-		local predicate = getGridTogglePredicate(function(data)
-			return data.mountID == mountID
-		end)
-		self.scrollBox:ScrollToElementDataByPredicate(predicate)
+	if scrollTo then
+		if not dataIndex then
+			local _
+			_, dataIndex = self:getMountDataByMountID(mountID)
+		end
+
+		local scrollOffset = self.scrollBox:GetDerivedScrollOffset()
+		local indexOffset = self.scrollBox:GetExtentUntil(dataIndex)
+
+		if indexOffset < scrollOffset then
+			self.scrollBox:ScrollToElementDataIndex(dataIndex, ScrollBoxConstants.AlignBegin)
+		elseif indexOffset + self.scrollBox:GetElementExtent(dataIndex) > scrollOffset + self.scrollBox:GetVisibleExtent() then
+			self.scrollBox:ScrollToElementDataIndex(dataIndex, ScrollBoxConstants.AlignEnd)
+		end
 	end
 
 	self:event("MOUNT_SELECT")
@@ -1930,8 +1934,8 @@ end
 
 
 function journal:selectMountByIndex(index)
-	local data = self:getMountDataByMountIndex(index)
-	if data then self:setSelectedMount(data.mountID) end
+	local data, dataIndex = self:getMountDataByMountIndex(index)
+	if data then self:setSelectedMount(data.mountID, nil, dataIndex) end
 end
 
 
