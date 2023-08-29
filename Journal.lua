@@ -87,7 +87,7 @@ function journal:init()
 		self:RegisterEvent("PLAYER_REGEN_DISABLED")
 		self:RegisterEvent("PLAYER_REGEN_ENABLED")
 		self:RegisterUnitEvent("UNIT_FORM_CHANGED", "player")
-		self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
+		self.leftInset:EnableKeyboard(not InCombatLockdown())
 		self:updateMountsList()
 		self:updateMountDisplay(true)
 	end)
@@ -1067,7 +1067,7 @@ function journal:PLAYER_REGEN_DISABLED()
 	if self.init then
 		self.useMountsJournalButton:Disable()
 	else
-		self:setArrowSelectMount(false)
+		self.leftInset:EnableKeyboard(false)
 		self:updateMountsList()
 	end
 end
@@ -1080,7 +1080,7 @@ function journal:PLAYER_REGEN_ENABLED()
 			self:init()
 		end
 	else
-		self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
+		self.leftInset:EnableKeyboard(true)
 		self:updateMountsList()
 	end
 end
@@ -1273,7 +1273,7 @@ end
 
 function journal:setArrowSelectMount(enabled)
 	if not self.leftInset then return end
-	if enabled and not InCombatLockdown() then
+	if enabled then
 		local time, pressed, delta, index
 		local onUpdate = function(f, elapsed)
 			time = time - elapsed
