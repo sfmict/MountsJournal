@@ -643,51 +643,6 @@ function mounts:getTargetMount()
 end
 
 
--- do
--- 	local usableIDs = {}
--- 	local function summon(weight)
--- 		if weight > 0 then
--- 			for i = random(weight), weight do
--- 				if usableIDs[i] then
--- 					C_MountJournal.SummonByID(usableIDs[i])
--- 					break
--- 				end
--- 			end
--- 			wipe(usableIDs)
--- 			return true
--- 		else
--- 			return false
--- 		end
--- 	end
-
-
--- 	function mounts:summonDragonridable()
--- 		local weight = 0
--- 		for i = 1, #self.dragonridingMounts do
--- 			local mountID = self.dragonridingMounts[i]
--- 			if self.list.fly[mountID] then
--- 				weight = weight + (self.mountsWeight[mountID] or 100)
--- 				usableIDs[weight] = mountID
--- 			end
--- 		end
--- 		return summon(weight)
--- 	end
-
-
--- 	function mounts:summon(ids)
--- 		local weight = 0
--- 		for mountID in next, ids do
--- 			local _,_,_,_, isUsable, _,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
--- 			if isUsable and not isForDragonriding then
--- 				weight = weight + (self.mountsWeight[mountID] or 100)
--- 				usableIDs[weight] = mountID
--- 			end
--- 		end
--- 		return summon(weight)
--- 	end
--- end
-
-
 function mounts:summon()
 	if self.weight > 0 then
 		for i = random(self.weight), self.weight do

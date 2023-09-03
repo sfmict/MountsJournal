@@ -5,7 +5,6 @@ mounts.pets = pets
 util.setEventsMixin(pets)
 
 
-pets.owned = 0
 pets.petJournalFiltersBackup = {
 	types = {},
 	sources = {},
@@ -24,9 +23,6 @@ hooksecurefunc(C_PetJournal, "ClearSearchFilter", function()
 	if not pets.updatingList then
 		pets.petJournalFiltersBackup.search = ""
 	end
-end)
-hooksecurefunc(C_PetJournal, "SetFavorite", function(petID, value)
-	pets:updateList(true)
 end)
 
 
@@ -176,17 +172,15 @@ end
 
 function pets:updateList(force)
 	local _, owned = C_PetJournal.GetNumPets()
-	if self.owned ~= owned or force then
-		self.owned = owned
-
+	if #self.list ~= owned or force then
 		self.updatingList = true
 		self:setPetJournalFiltersBackup()
 
-		local GetPetInfoByPetID = C_PetJournal.GetPetInfoByIndex
+		local GetPetInfoByIndex = C_PetJournal.GetPetInfoByIndex
 		wipe(self.list)
 		wipe(self.favoritesList)
 		for i = 1, owned do
-			local petID, _,_,_,_, favorite = GetPetInfoByPetID(i)
+			local petID, _,_,_,_, favorite = GetPetInfoByIndex(i)
 			if petID then
 				self.list[#self.list + 1] = petID
 				if favorite then

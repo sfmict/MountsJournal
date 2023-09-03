@@ -186,7 +186,10 @@ function tags:mountOptionsMenu_Init(btn, level)
 						if value == 100 then value = nil end
 						if mountsWeight[self.menuMountID] ~= value then
 							mountsWeight[self.menuMountID] = value
-							journal.scrollFrame:update()
+							local btn = journal:getMountButtonByMountID(self.menuMountID)
+							if btn then
+								journal:initMountButton(btn, btn:GetElementData())
+							end
 						end
 					end
 				end

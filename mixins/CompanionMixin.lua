@@ -1,4 +1,4 @@
-local _, L = ...
+local addon, L = ...
 local util = MountsJournalUtil
 local petRandomIcon = "Interface/Icons/INV_Pet_Achievement_CaptureAPetFromEachFamily_Battle" -- select(3, GetSpellInfo(243819))
 
@@ -198,6 +198,11 @@ function MJCompanionsPanelMixin:onLoad()
 	self.scrollBox = self.petListFrame.scrollBox
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.petListFrame.scrollBar, self.view)
 
+	self.companionOptionsMenu = LibStub("LibSFDropDown-1.4"):SetMixin({})
+	self.companionOptionsMenu:ddHideWhenButtonHidden(self)
+	self.companionOptionsMenu:ddSetInitFunc(function(...) self:companionOptionsMenu_Init(...) end)
+	self.companionOptionsMenu:ddSetDisplayMode(addon)
+
 	self:on("MOUNT_SELECT", self.Hide)
 end
 
@@ -212,19 +217,69 @@ function MJCompanionsPanelMixin:onShow()
 				self:updateScrollPetList()
 			end
 			self:scrollToSelectedPet()
-			self:on("UPDATE_PROFILE", self.refresh)
+			self:on("UPDATE_PROFILE", self.updateScrollPetList)
 		end)
 		self:petListUpdate(true)
 		self:scrollToSelectedPet()
-		self:on("UPDATE_PROFILE", self.refresh)
+		self:on("UPDATE_PROFILE", self.updateScrollPetList)
 		self:on("PET_LIST_UPDATE", self.petListUpdate)
 	end)
 end
 
 
 function MJCompanionsPanelMixin:onHide()
-	self:off("UPDATE_PROFILE", self.refresh)
+	self:off("UPDATE_PROFILE", self.updateScrollPetList)
 	self:Hide()
+end
+
+
+function MJCompanionsPanelMixin:showCompanionOptionsMenu(btn)
+	if not btn.id or type(btn.id) == "number" then
+		self.companionOptionsMenu:ddCloseMenus()
+	else
+		self.companionOptionsMenu:ddToggle(1, btn.id, btn, 37, 0)
+	end
+end
+
+
+function MJCompanionsPanelMixin:companionOptionsMenu_Init(btn, level, petID)
+	local speciesID ,_,_,_,_,_, isFavorite = C_PetJournal.GetPetInfoByPetID(petID)
+	local isRevoked = C_PetJournal.PetIsRevoked(petID)
+	local isLockedForConvert = C_PetJournal.PetIsLockedForConvert(petID)
+	local info = {}
+	info.notCheckable = true
+
+	if not (isRevoked or isLockedForConvert) then
+		info.disabled = not C_PetJournal.PetIsSummonable(petID)
+		if petID == C_PetJournal.GetSummonedPetGUID() then
+			info.text = PET_DISMISS
+		else
+			info.text = BATTLE_PET_SUMMON
+		end
+		info.func = function() C_PetJournal.SummonPetByGUID(petID) end
+		btn:ddAddButton(info, level)
+
+		info.disabled = nil
+
+		if isFavorite then
+			info.text = BATTLE_PET_UNFAVORITE
+			info.func = function()
+				C_PetJournal.SetFavorite(petID, 0)
+				self:GetParent():refresh()
+			end
+		else
+			info.text = BATTLE_PET_FAVORITE
+			info.func = function()
+				C_PetJournal.SetFavorite(petID, 1)
+				self:GetParent():refresh()
+			end
+		end
+		btn:ddAddButton(info, level)
+	end
+
+	info.func = nil
+	info.text = CANCEL
+	btn:ddAddButton(info, level)
 end
 
 

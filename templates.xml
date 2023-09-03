@@ -2463,13 +2463,23 @@
 				</Anchors>
 			</Frame>
 		</Frames>
+		<KeyValues>
+			<KeyValue key="LibSFDropDownNoGMEvent" value="true" type="boolean"/>
+		</KeyValues>
 		<Scripts>
+			<OnLoad>
+				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+			</OnLoad>
 			<OnClick>
 				local frame = self:GetParent()
 				while not frame.selectButtonClick do
 					frame = frame:GetParent()
 				end
-				frame:selectButtonClick(self.id)
+				if button == "LeftButton" then
+					frame:selectButtonClick(self.id)
+				elseif button == "RightButton" then
+					frame:showCompanionOptionsMenu(self)
+				end
 			</OnClick>
 			<OnEnter>
 				if self.displayID then

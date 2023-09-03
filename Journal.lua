@@ -1226,20 +1226,21 @@ function journal:grid3InitMountButton(btn, data)
 		local g3btn = btn.mounts[i]
 
 		if data[i] then
-			local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = C_MountJournal.GetMountInfoByID(data[i].mountID)
-			local needsFanfare = C_MountJournal.NeedsFanfare(data[i].mountID)
+			local mountID = data[i].mountID
+			local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+			local needsFanfare = C_MountJournal.NeedsFanfare(mountID)
 
 			g3btn.spellID = spellID
-			g3btn.mountID = data[i].mountID
+			g3btn.mountID = mountID
 			g3btn.active = active
 			g3btn.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
 			g3btn.icon:SetVertexColor(1, 1, 1)
 			g3btn:Enable()
-			g3btn.selectedTexture:SetShown(data[i].mountID == self.selectedMountID)
-			g3btn.hidden:SetShown(self:isMountHidden(data[i].mountID))
+			g3btn.selectedTexture:SetShown(mountID == self.selectedMountID)
+			g3btn.hidden:SetShown(self:isMountHidden(mountID))
 			g3btn.favorite:SetShown(isFavorite)
 
-			local mountWeight = self.mountsWeight[data[i].mountID]
+			local mountWeight = self.mountsWeight[mountID]
 			if mountWeight then
 				g3btn.mountWeight:SetText(getColorWeight(mountWeight))
 				g3btn.mountWeight:Show()
@@ -1919,13 +1920,15 @@ function journal:setSelectedMount(mountID, spellID, dataIndex)
 			_, dataIndex = self:getMountDataByMountID(mountID)
 		end
 
-		local scrollOffset = self.scrollBox:GetDerivedScrollOffset()
-		local indexOffset = self.scrollBox:GetExtentUntil(dataIndex)
+		if dataIndex then
+			local scrollOffset = self.scrollBox:GetDerivedScrollOffset()
+			local indexOffset = self.scrollBox:GetExtentUntil(dataIndex)
 
-		if indexOffset < scrollOffset then
-			self.scrollBox:ScrollToElementDataIndex(dataIndex, ScrollBoxConstants.AlignBegin)
-		elseif indexOffset + self.scrollBox:GetElementExtent(dataIndex) > scrollOffset + self.scrollBox:GetVisibleExtent() then
-			self.scrollBox:ScrollToElementDataIndex(dataIndex, ScrollBoxConstants.AlignEnd)
+			if indexOffset < scrollOffset then
+				self.scrollBox:ScrollToElementDataIndex(dataIndex, ScrollBoxConstants.AlignBegin)
+			elseif indexOffset + self.scrollBox:GetElementExtent(dataIndex) > scrollOffset + self.scrollBox:GetVisibleExtent() then
+				self.scrollBox:ScrollToElementDataIndex(dataIndex, ScrollBoxConstants.AlignEnd)
+			end
 		end
 	end
 
