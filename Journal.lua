@@ -1,5 +1,5 @@
 local addon, L = ...
-local C_MountJournal, C_PetJournal, C_Timer, wipe, tinsert, next, pairs, ipairs, select, type, sort, math = C_MountJournal, C_PetJournal, C_Timer, wipe, tinsert, next, pairs, ipairs, select, type, sort, math
+local C_MountJournal, C_PetJournal, wipe, tinsert, next, pairs, ipairs, select, type, sort, math = C_MountJournal, C_PetJournal, wipe, tinsert, next, pairs, ipairs, select, type, sort, math
 local util, mounts, config = MountsJournalUtil, MountsJournal, MountsJournalConfig
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
 journal.mountTypes = util.mountTypes

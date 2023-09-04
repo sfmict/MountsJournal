@@ -1,5 +1,5 @@
 local addon = ...
-local C_MountJournal, C_Map, MapUtil, next, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff, IsUsableSpell, SecureCmdOptionParse = C_MountJournal, C_Map, MapUtil, next, wipe, random, C_PetJournal, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff, IsUsableSpell, SecureCmdOptionParse
+local C_MountJournal, C_Map, MapUtil, next, wipe, random, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff, IsUsableSpell, SecureCmdOptionParse = C_MountJournal, C_Map, MapUtil, next, wipe, random, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff, IsUsableSpell, SecureCmdOptionParse
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 

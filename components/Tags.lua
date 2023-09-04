@@ -1,5 +1,5 @@
 local addon, L = ...
-local pairs, ipairs, next, select, tinsert, wipe, tconcat = pairs, ipairs, next, select, tinsert, wipe, table.concat
+local pairs, ipairs, next, select, tinsert, wipe = pairs, ipairs, next, select, tinsert, wipe
 local util, mounts, journal, tags = MountsJournalUtil, MountsJournal, MountsJournalFrame, {}
 journal.tags = tags
 journal:on("MODULES_INIT", function() tags:init() end)
@@ -55,6 +55,10 @@ function tags:init()
 	self.mountOptionsMenu:ddHideWhenButtonHidden(journal.bgFrame)
 	self.mountOptionsMenu:ddSetInitFunc(function(...) self:mountOptionsMenu_Init(...) end)
 	self.mountOptionsMenu:ddSetDisplayMode(addon)
+
+	journal.scrollBox:RegisterCallback("OnDataRangeChanged", function()
+		self.mountOptionsMenu:ddOnHide()
+	end)
 end
 
 

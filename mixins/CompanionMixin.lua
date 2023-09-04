@@ -203,6 +203,10 @@ function MJCompanionsPanelMixin:onLoad()
 	self.companionOptionsMenu:ddSetInitFunc(function(...) self:companionOptionsMenu_Init(...) end)
 	self.companionOptionsMenu:ddSetDisplayMode(addon)
 
+	self.scrollBox:RegisterCallback("OnDataRangeChanged", function()
+		self.companionOptionsMenu:ddOnHide()
+	end)
+
 	self:on("MOUNT_SELECT", self.Hide)
 end
 
