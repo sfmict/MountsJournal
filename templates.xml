@@ -21,7 +21,7 @@
 		</Layers>
 	</CheckButton>
 
-	<Frame name="MJMountJournalFrameTemplate" frameLevel="1000" enableMouse="true" inherits="PortraitFrameTemplateNoCloseButton" virtual="true">
+	<Frame name="MJMountJournalFrameTemplate" protected="true" frameLevel="1000" enableMouse="true" inherits="PortraitFrameTemplateNoCloseButton" virtual="true">
 		<Size x="703" y="606"/>
 		<Frames>
 
