@@ -57,6 +57,7 @@ function tags:init()
 	self.mountOptionsMenu:ddSetDisplayMode(addon)
 
 	journal.scrollBox:RegisterCallback("OnDataRangeChanged", function()
+		if self.doNotHideMenu then return end
 		self.mountOptionsMenu:ddOnHide()
 	end)
 end
@@ -245,7 +246,9 @@ function tags:mountOptionsMenu_Init(btn, level)
 					mounts.globalDB.hiddenMounts = nil
 				end
 			end
+			self.doNotHideMenu = true
 			journal:updateMountsList()
+			self.doNotHideMenu = nil
 		end
 		info.checked = journal:isMountHidden(self.menuMountID)
 		btn:ddAddButton(info, level)
@@ -338,7 +341,9 @@ function tags:addMountTag(mountID, tag)
 		self.mountTags[mountID] = {}
 	end
 	self.mountTags[mountID][tag] = true
+	self.doNotHideMenu = true
 	journal:updateMountsList()
+	self.doNotHideMenu = nil
 end
 
 
@@ -348,7 +353,11 @@ function tags:removeMountTag(mountID, tag, needUpdate)
 		mountTags[tag] = nil
 		if next(mountTags) == nil then self.mountTags[mountID] = nil end
 	end
-	if needUpdate then journal:updateMountsList() end
+	if needUpdate then
+		self.doNotHideMenu = true
+		journal:updateMountsList()
+		self.doNotHideMenu = nil
+	end
 end
 
 

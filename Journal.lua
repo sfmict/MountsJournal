@@ -475,6 +475,11 @@ function journal:init()
 		local parent = self:GetParent()
 		parent:GetScript("OnEnter")(parent)
 	end
+	local mountListUpdate = function()
+		self.tags.doNotHideMenu = true
+		self:updateMountsList()
+		self.tags.doNotHideMenu = nil
+	end
 	self.weightFrame:setOnChanged(function(frame, value)
 		frame.setFunc(value)
 		frame.slider.isModified = true
@@ -486,22 +491,19 @@ function journal:init()
 	end)
 	self.weightFrame.slider:HookScript("OnEnter", weightControl_OnEnter)
 	self.weightFrame.slider:HookScript("OnMouseUp", function(slider)
-		journal:updateMountsList()
+		mountListUpdate()
 		slider.isModified = nil
 	end)
 	self.weightFrame.slider:HookScript("OnHide", function(slider)
 		if slider.isModified then
-			journal:updateMountsList()
+			self:updateMountsList()
 			slider.isModified = nil
 		end
 	end)
-	self.weightFrame.slider:HookScript("OnMouseWheel", function()
-		journal:updateMountsList()
-	end)
+	self.weightFrame.slider:HookScript("OnMouseWheel", mountListUpdate)
 	self.weightFrame.edit:HookScript("OnEnter", weightControl_OnEnter)
-	self.weightFrame.edit:HookScript("OnEnterPressed", function()
-		journal:updateMountsList()
-	end)
+	self.weightFrame.edit:HookScript("OnEnterPressed", mountListUpdate)
+	self.weightFrame.edit:HookScript("OnMouseWheel", mountListUpdate)
 
 	-- FILTERS BUTTONS
 	local function filterClick(btn)
