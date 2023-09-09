@@ -381,13 +381,23 @@ do
 end
 
 
-function macroFrame:ITEM_LOCK_CHANGED(bag, slot, ...)
+function macroFrame:PLAYER_REGEN_ENABLED()
+	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+	EquipItemByName(self.fishingRodID)
+end
+
+
+function macroFrame:ITEM_LOCK_CHANGED(bag, slot)
 	if self.needToEquip
 	and slot
 	and not GetInventoryItemID("player", 28)
 	and self.fishingRodID == C_Container.GetContainerItemID(bag, slot)
 	then
-		EquipItemByName(self.fishingRodID)
+		if InCombatLockdown() then
+			self:RegisterEvent("PLAYER_REGEN_ENABLED")
+		else
+			EquipItemByName(self.fishingRodID)
+		end
 		self.needToEquip = nil
 	end
 end
@@ -411,8 +421,7 @@ function macroFrame:getFishingRodMacro()
 			self.charMacrosConfig.itemSlot28 = nil
 		elseif isNotFishingBuff() then
 			local action = EquipmentManager_UnequipItemInSlot(28)
-			if action then
-				EquipmentManager_RunAction(action)
+			if action and EquipmentManager_RunAction(action) then
 				self.needToEquip = true
 			end
 		end
@@ -434,8 +443,7 @@ function macroFrame:autoEquip()
 				EquipItemByName(self.fishingRodID)
 			elseif isNotFishingBuff() then
 				local action = EquipmentManager_UnequipItemInSlot(28)
-				if action then
-					EquipmentManager_RunAction(action)
+				if action and EquipmentManager_RunAction(action) then
 					self.needToEquip = true
 				end
 			end
