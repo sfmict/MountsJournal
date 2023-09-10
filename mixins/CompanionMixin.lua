@@ -348,6 +348,7 @@ end
 function MJCompanionsPanelMixin:petListSort()
 	local GetPetInfoByPetID, GetPetStats = C_PetJournal.GetPetInfoByPetID, C_PetJournal.GetPetStats
 	sort(self.petList, function(p1, p2)
+		if p1 == p2 then return false end
 		local _,_, level1, _,_,_, favorite1, name1 = GetPetInfoByPetID(p1)
 		local _,_, level2, _,_,_, favorite2, name2 = GetPetInfoByPetID(p2)
 

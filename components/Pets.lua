@@ -24,6 +24,9 @@ hooksecurefunc(C_PetJournal, "ClearSearchFilter", function()
 		pets.petJournalFiltersBackup.search = ""
 	end
 end)
+hooksecurefunc(C_PetJournal, "SetFavorite", function(petID, value)
+	pets:updateList(true)
+end)
 
 
 pets:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
@@ -142,31 +145,60 @@ function pets:setPetJournalFiltersBackup()
 	local backup = self.petJournalFiltersBackup
 	backup.collected = C_PetJournal.IsFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED)
 	backup.notCollected = C_PetJournal.IsFilterChecked(LE_PET_JOURNAL_FILTER_NOT_COLLECTED)
+	backup.allTypes = true
 	for i = 1, C_PetJournal.GetNumPetTypes() do
 		backup.types[i] = C_PetJournal.IsPetTypeChecked(i)
+		if not backup.types[i] then backup.allTypes = false end
 	end
+	backup.allSources = true
 	for i = 1, C_PetJournal.GetNumPetSources() do
 		backup.sources[i] = C_PetJournal.IsPetSourceChecked(i)
+		if not backup.sources[i] then backup.allSources = false end
 	end
-	C_PetJournal.ClearSearchFilter()
-	C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED, true)
-	C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_NOT_COLLECTED, true)
-	C_PetJournal.SetAllPetTypesChecked(true)
-	C_PetJournal.SetAllPetSourcesChecked(true)
+
+	if not backup.collected then
+		C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED, true)
+	end
+	if not backup.notCollected then
+		C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_NOT_COLLECTED, true)
+	end
+	if not backup.allTypes then
+		C_PetJournal.SetAllPetTypesChecked(true)
+	end
+	if not backup.allSources then
+		C_PetJournal.SetAllPetSourcesChecked(true)
+	end
+	if backup.search ~= "" then
+		C_PetJournal.ClearSearchFilter()
+	end
 end
 
 
 function pets:restorePetJournalFilters()
 	local backup = self.petJournalFiltersBackup
-	C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED, backup.collected)
-	C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_NOT_COLLECTED, backup.notCollected)
-	for i = 1, C_PetJournal.GetNumPetTypes() do
-		C_PetJournal.SetPetTypeFilter(i, backup.types[i])
+	if not backup.collected then
+		C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED, backup.collected)
 	end
-	for i = 1, C_PetJournal.GetNumPetSources() do
-		C_PetJournal.SetPetSourceChecked(i, backup.sources[i])
+	if not backup.notCollected then
+		C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_NOT_COLLECTED, backup.notCollected)
 	end
-	C_PetJournal.SetSearchFilter(backup.search)
+	if not backup.allTypes then
+		for i = 1, C_PetJournal.GetNumPetTypes() do
+			if not backup.types[i] then
+				C_PetJournal.SetPetTypeFilter(i, backup.types[i])
+			end
+		end
+	end
+	if not backup.allSources then
+		for i = 1, C_PetJournal.GetNumPetSources() do
+			if not backup.sources[i] then
+				C_PetJournal.SetPetSourceChecked(i, backup.sources[i])
+			end
+		end
+	end
+	if backup.search ~= "" then
+		C_PetJournal.SetSearchFilter(backup.search)
+	end
 end
 
 

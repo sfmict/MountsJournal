@@ -1419,74 +1419,78 @@ end
 
 
 function journal:sortMounts()
-	local fSort, mCache = mounts.filters.sorting, {}
+	local fSort, db = mounts.filters.sorting, mounts.mountsDB
 	local numNeedingFanfare = C_MountJournal.GetNumMountsNeedingFanfare()
 
-	local function setMCache(mountID)
+	local mCache = setmetatable({}, {__index = function(t, mountID)
 		local name, _,_,_,_,_, isFavorite, _,_,_, isCollected, _, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
-		mCache[mountID] = {name, isFavorite, isCollected, isForDragonriding}
+		t[mountID] = {name, isFavorite, isCollected, isForDragonriding}
 		if numNeedingFanfare > 0 and C_MountJournal.NeedsFanfare(mountID) then
-			mCache[mountID][5] = true
+			t[mountID][5] = true
 			numNeedingFanfare = numNeedingFanfare - 1
 		end
 		if fSort.by == "type" then
 			local _,_,_,_, mType = C_MountJournal.GetMountInfoExtraByID(mountID)
 			mType = self.mountTypes[mType]
-			mCache[mountID][6] = type(mType) == "number" and mType or mType[1]
+			t[mountID][6] = type(mType) == "number" and mType or mType[1]
 		end
-	end
+		return t[mountID]
+	end})
 
 	sort(self.mountIDs, function(a, b)
 		if a == b then return false end
-		if not mCache[a] then setMCache(a) end
-		if not mCache[b] then setMCache(b) end
+		local ma = mCache[a]
+		local mb = mCache[b]
 
 		-- FANFARE
-		local needFanfareA = mCache[a][5]
-		local needFanfareB = mCache[b][5]
+		local needFanfareA = ma[5]
+		local needFanfareB = mb[5]
 
 		if needFanfareA and not needFanfareB then return true
 		elseif not needFanfareA and needFanfareB then return false end
 
 		-- FAVORITES
 		if fSort.favoritesFirst then
-			local isFavoriteA = mCache[a][2]
-			local isFavoriteB = mCache[b][2]
+			local isFavoriteA = ma[2]
+			local isFavoriteB = mb[2]
 
 			if isFavoriteA and not isFavoriteB then return true
 			elseif not isFavoriteA and isFavoriteB then return false end
 		end
 
 		-- COLLECTED
-		local isCollectedA = mCache[a][3]
-		local isCollectedB = mCache[b][3]
+		local isCollectedA = ma[3]
+		local isCollectedB = mb[3]
 
 		if isCollectedA and not isCollectedB then return true
 		elseif not isCollectedA and isCollectedB then return false end
 
 		-- DRAGONRIDING
-		local isForDragonridingA = mCache[a][4]
-		local isForDragonridingB = mCache[b][4]
+		local isForDragonridingA = ma[4]
+		local isForDragonridingB = mb[4]
 
 		if isForDragonridingA and not isForDragonridingB then return true
 		elseif not isForDragonridingA and isForDragonridingB then return false end
 
 		-- TYPE
 		if fSort.by == "type" then
-			local typeA = mCache[a][6]
-			local typeB = mCache[b][6]
+			local typeA = ma[6]
+			local typeB = mb[6]
 
 			if typeA < typeB then return not fSort.reverse
 			elseif typeA > typeB then return fSort.reverse end
 		-- EXPANSION
 		elseif fSort.by == "expansion" then
-			if mounts.mountsDB[a] < mounts.mountsDB[b] then return not fSort.reverse
-			elseif mounts.mountsDB[a] > mounts.mountsDB[b] then return fSort.reverse end
+			local expA = db[a]
+			local expB = db[b]
+
+			if expA < expB then return not fSort.reverse
+			elseif expA > expB then return fSort.reverse end
 		end
 
 		-- NAME
-		local nameA = mCache[a][1]
-		local nameB = mCache[b][1]
+		local nameA = ma[1]
+		local nameB = mb[1]
 		local reverse = fSort.by == "name" and fSort.reverse
 
 		if nameA < nameB then return not reverse

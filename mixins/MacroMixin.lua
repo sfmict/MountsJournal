@@ -255,7 +255,6 @@ function macroFrame:PLAYER_LOGIN()
 
 	self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
-	self:RegisterEvent("ITEM_LOCK_CHANGED")
 
 	self:refresh()
 	self:getClassMacro(self.class, function() self:refresh() end)
@@ -387,18 +386,20 @@ function macroFrame:PLAYER_REGEN_ENABLED()
 end
 
 
-function macroFrame:ITEM_LOCK_CHANGED(bag, slot)
-	if self.needToEquip
-	and slot
+function macroFrame:ITEM_UNLOCKED(bag, slot)
+	if slot
 	and not GetInventoryItemID("player", 28)
-	and self.fishingRodID == C_Container.GetContainerItemID(bag, slot)
+	and C_Container.GetContainerItemID(bag, slot) == self.fishingRodID
 	then
 		if InCombatLockdown() then
 			self:RegisterEvent("PLAYER_REGEN_ENABLED")
 		else
 			EquipItemByName(self.fishingRodID)
 		end
-		self.needToEquip = nil
+	elseif bag == 28
+	and GetInventoryItemID("player", 28)
+	then
+		self:UnregisterEvent("ITEM_UNLOCKED")
 	end
 end
 
@@ -422,7 +423,7 @@ function macroFrame:getFishingRodMacro()
 		elseif isNotFishingBuff() then
 			local action = EquipmentManager_UnequipItemInSlot(28)
 			if action and EquipmentManager_RunAction(action) then
-				self.needToEquip = true
+				self:RegisterEvent("ITEM_UNLOCKED")
 			end
 		end
 	else
@@ -444,7 +445,7 @@ function macroFrame:autoEquip()
 			elseif isNotFishingBuff() then
 				local action = EquipmentManager_UnequipItemInSlot(28)
 				if action and EquipmentManager_RunAction(action) then
-					self.needToEquip = true
+					self:RegisterEvent("ITEM_UNLOCKED")
 				end
 			end
 		elseif IsMounted() and curFishingRod == self.fishingRodID and self.charMacrosConfig.itemSlot28 then
@@ -465,6 +466,7 @@ function macroFrame:getMacro()
 		self.fishingSlotID = GetInventoryItemID("player", 28)
 		if self.sFlags.swimming
 			and not self.sFlags.isVashjir
+			and isNotFishingBuff()
 		or self.fishingSlotID == self.fishingRodID
 			and self.charMacrosConfig.itemSlot28
 			and not self.sFlags.isSubmerged
