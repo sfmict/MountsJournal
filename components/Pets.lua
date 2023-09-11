@@ -1,4 +1,4 @@
-local random, C_PetJournal, UnitBuff, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, GetSpellCooldown = random, C_PetJournal, UnitBuff, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, GetSpellCooldown
+local random, C_PetJournal, UnitBuff, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, GetSpellCooldown, UnitIsAFK, DoEmote = random, C_PetJournal, UnitBuff, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, GetSpellCooldown, UnitIsAFK, DoEmote
 local mounts, util = MountsJournal, MountsJournalUtil
 local pets = CreateFrame("FRAME")
 mounts.pets = pets
@@ -31,6 +31,7 @@ end)
 
 pets:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
 pets:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
+pets:RegisterEvent("UI_ERROR_MESSAGE")
 
 
 function pets:summon(petID)
@@ -111,12 +112,25 @@ do
 		else
 			self:UnregisterEvent("PLAYER_STARTED_MOVING")
 			self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+			if UnitIsAFK("player") then DoEmote("STAND") end
 			self:summonRandomPet(mounts.config.summonPetOnlyFavorites)
 			if not self.ticker then self:setSummonEvery() end
 		end
 	end
 	pets.PLAYER_STARTED_MOVING = pets.summonByTimer
 	pets.PLAYER_REGEN_ENABLED = pets.summonByTimer
+end
+
+
+function pets:UI_ERROR_MESSAGE(errType, message)
+	if errType == 56
+	and message == SPELL_FAILED_NOT_STANDING
+	and self.ticker
+	and not self.ticker:IsCancelled()
+	then
+		self:stopTicker()
+		self:RegisterEvent("PLAYER_STARTED_MOVING")
+	end
 end
 
 
@@ -129,6 +143,9 @@ end
 
 
 function pets:setSummonEvery()
+	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+	self:UnregisterEvent("PLAYER_STARTED_MOVING")
+
 	if mounts.config.summonPetEvery then
 		local timer = 60 * (tonumber(mounts.config.summonPetEveryN) or 1)
 		if self.timer == timer and self.ticker then return end
