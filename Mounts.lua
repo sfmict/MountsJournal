@@ -41,6 +41,9 @@ function mounts:ADDON_LOADED(addonName)
 		if self.config.mountDescriptionToggle == nil then
 			self.config.mountDescriptionToggle = true
 		end
+		if self.config.coloredMountNames == nil then
+			self.config.coloredMountNames = true
+		end
 		if self.config.arrowButtonsBrowse == nil then
 			self.config.arrowButtonsBrowse = true
 		end

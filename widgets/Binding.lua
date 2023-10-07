@@ -85,8 +85,11 @@ end
 
 
 function binding:OnKeyDown(keyPressed)
-	if GetBindingFromClick(keyPressed) == "SCREENSHOT" then
+	local action = GetBindingFromClick(keyPressed)
+	if action == "SCREENSHOT" then
 		Screenshot()
+	elseif keyPressed == "ESCAPE" and action == "TOGGLEGAMEMENU" then
+		self:setSelected()
 	elseif self.selected then
 		keyPressed = GetConvertedKeyOrButton(keyPressed)
 
@@ -101,6 +104,7 @@ function binding:OnKeyDown(keyPressed)
 	end
 end
 binding:SetScript("OnKeyDown", binding.OnKeyDown)
+binding:SetScript("OnGamePadButtonDown", binding.OnKeyDown)
 
 
 function binding:setBinding(key, selectedBinding)

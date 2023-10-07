@@ -182,7 +182,9 @@ function tags:mountOptionsMenu_Init(btn, level)
 			if isCollected then
 				info.text = nil
 				info.disabled = nil
-				info.customFrame = journal.weightFrame
+				info.customFrame = journal.percentSlider
+				info.customFrame:setText(L["Chance of summoning"])
+				info.customFrame:setMinMax(1, 100)
 				info.OnLoad = function(frame)
 					local mountsWeight = journal.mountsWeight
 					frame.level = level + 1

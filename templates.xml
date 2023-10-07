@@ -476,6 +476,11 @@
 								</Texture>
 							</Layer>
 							<Layer level="OVERLAY">
+								<FontString inherits="GameFontNormalSmall" justifyH="CENTER" parentKey="rarityValue">
+									<Anchors>
+										<Anchor point="BOTTOM" relativePoint="TOP" relativeKey="$parent.icon" x="4" y="2"/>
+									</Anchors>
+								</FontString>
 								<FontString inherits="GameFontHighlightLarge" justifyH="LEFT" justifyV="MIDDLE" parentKey="name" maxLines="2">
 									<Size x="270" y="35"/>
 									<Anchors>
@@ -513,6 +518,12 @@
 							</Layer>
 						</Layers>
 						<Frames>
+							<Frame parentKey="rarityTooltip">
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeKey="$parent.rarityValue"/>
+									<Anchor point="BOTTOMRIGHT" relativeKey="$parent.rarityValue"/>
+								</Anchors>
+							</Frame>
 							<EditBox parentKey="link" multiLine="false" autoFocus="false" ignoreArrows="false" alpha=".5">
 								<Size y="20" x="250"/>
 								<Anchors>
@@ -980,7 +991,7 @@
 				</Anchors>
 			</Button>
 
-			<Frame parentKey="mountsWeight" inherits="MJSliderFrameTemplate" hidden="true">
+			<Frame parentKey="percentSlider" inherits="MJSliderFrameTemplate" hidden="true">
 				<Layers>
 					<Layer level="ARTWORK">
 						<FontString parentKey="label" text="%" inherits="GameFontHighlightSmall">
@@ -1286,8 +1297,16 @@
 					<Anchor point="RIGHT" relativePoint="LEFT" x="0" y="0"/>
 				</Anchors>
 				<Layers>
-					<Layer level="ARTWORK" textureSubLevel="1">
+					<Layer level="ARTWORK">
 						<Texture parentKey="icon">
+							<Size x="38" y="38"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+					<Layer level="ARTWORK" textureSubLevel="1">
+						<Texture parentKey="qualityBorder" file="Interface/Common/WhiteIconFrame">
 							<Size x="38" y="38"/>
 							<Anchors>
 								<Anchor point="CENTER"/>
@@ -1396,6 +1415,9 @@
 		<Layers>
 			<Layer level="BORDER">
 				<Texture parentKey="icon" setAllPoints="true"/>
+			</Layer>
+			<Layer level="BORDER" textureSubLevel="1">
+				<Texture parentKey="qualityBorder" setAllPoints="true" file="Interface/Common/WhiteIconFrame"/>
 			</Layer>
 			<Layer level="ARTWORK">
 				<FontString inherits="GameFontNormal" parentKey="mountWeight">

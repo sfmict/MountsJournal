@@ -46,6 +46,10 @@ function journal:init()
 		filters.factions = setmetatable(filters.factions or {}, filtersMeta)
 		filters.pet = setmetatable(filters.pet or {}, filtersMeta)
 		filters.expansions = setmetatable(filters.expansions or {}, filtersMeta)
+		filters.mountsRarity = filters.mountsRarity or {
+			-- sign = nil,
+			value = 100,
+		}
 		filters.mountsWeight = filters.mountsWeight or {
 			-- sign = nil,
 			weight = 100,
@@ -62,6 +66,9 @@ function journal:init()
 		by = "name",
 		favoritesFirst = true,
 	}
+	if mounts.filters.sorting.dragonridingFirst == nil then
+		mounts.filters.sorting.dragonridingFirst = true
+	end
 	checkFilters(mounts.defFilters)
 	setmetatable(mounts.defFilters.tags.tags, filtersMeta)
 
@@ -135,7 +142,7 @@ function journal:init()
 	self.mountListUpdateAnim = self.leftInset.updateAnimFrame.anim
 	self.scrollBox = self.bgFrame.scrollBox
 	self.summonButton = self.bgFrame.summonButton
-	self.weightFrame = self.bgFrame.mountsWeight
+	self.percentSlider = self.bgFrame.percentSlider
 
 	-- USE MountsJournal BUTTON
 	self.useMountsJournalButton:SetParent(self.CollectionsJournal)
@@ -427,6 +434,17 @@ function journal:init()
 		self:setScrollGridMounts(checked)
 	end)
 
+	-- RARITY TOOLTIP
+	local rarityTooltip = self.mountDisplay.info.rarityTooltip
+	rarityTooltip:SetScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_TOP")
+		GameTooltip:SetText(L["Collected by %s of players"]:format(self:GetParent().rarityValue:GetText()))
+		GameTooltip:Show()
+	end)
+	rarityTooltip:SetScript("OnLeave", function()
+		GameTooltip:Hide()
+	end)
+
 	-- MOUNT DESCRIPTION TOGGLE
 	local mountDescriptionToggle = self.mountDisplay.info.mountDescriptionToggle
 	mountDescriptionToggle.vertical = true
@@ -481,30 +499,28 @@ function journal:init()
 		self:updateMountsList()
 		self.tags.doNotHideMenu = nil
 	end
-	self.weightFrame:setOnChanged(function(frame, value)
+	self.percentSlider:setOnChanged(function(frame, value)
 		frame.setFunc(value)
 		frame.slider.isModified = true
 	end)
-	self.weightFrame:setMinMax(1, 100)
-	self.weightFrame:setText(L["Chance of summoning"])
-	self.weightFrame:SetScript("OnEnter", function(frame)
+	self.percentSlider:SetScript("OnEnter", function(frame)
 		self.filtersButton:ddCloseMenus(frame.level)
 	end)
-	self.weightFrame.slider:HookScript("OnEnter", weightControl_OnEnter)
-	self.weightFrame.slider:HookScript("OnMouseUp", function(slider)
+	self.percentSlider.slider:HookScript("OnEnter", weightControl_OnEnter)
+	self.percentSlider.slider:HookScript("OnMouseUp", function(slider)
 		mountListUpdate()
 		slider.isModified = nil
 	end)
-	self.weightFrame.slider:HookScript("OnHide", function(slider)
+	self.percentSlider.slider:HookScript("OnHide", function(slider)
 		if slider.isModified then
 			self:updateMountsList()
 			slider.isModified = nil
 		end
 	end)
-	self.weightFrame.slider:HookScript("OnMouseWheel", mountListUpdate)
-	self.weightFrame.edit:HookScript("OnEnter", weightControl_OnEnter)
-	self.weightFrame.edit:HookScript("OnEnterPressed", mountListUpdate)
-	self.weightFrame.edit:HookScript("OnMouseWheel", mountListUpdate)
+	self.percentSlider.slider:HookScript("OnMouseWheel", mountListUpdate)
+	self.percentSlider.edit:HookScript("OnEnter", weightControl_OnEnter)
+	self.percentSlider.edit:HookScript("OnEnterPressed", mountListUpdate)
+	self.percentSlider.edit:HookScript("OnMouseWheel", mountListUpdate)
 
 	-- FILTERS BUTTONS
 	local function filterClick(btn)
@@ -1157,15 +1173,32 @@ local function getColorWeight(weight)
 end
 
 
+local function getQualityColor(rarity)
+	if rarity < 1 then
+		return ITEM_QUALITY_COLORS[5].color
+	elseif rarity < 10 then
+		return ITEM_QUALITY_COLORS[4].color
+	elseif rarity < 20 then
+		return ITEM_QUALITY_COLORS[3].color
+	elseif rarity < 50 then
+		return ITEM_QUALITY_COLORS[2].color
+	else
+		return ITEM_QUALITY_COLORS[1].color
+	end
+end
+
+
 function journal:defaultInitMountButton(btn, data)
 	local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected, _, isForDragonriding = C_MountJournal.GetMountInfoByID(data.mountID)
 	local needsFanfare = C_MountJournal.NeedsFanfare(data.mountID)
+	local qualityColor = getQualityColor(mounts.mountsDB[data.mountID][2])
 
 	btn.spellID = spellID
 	btn.mountID = data.mountID
 
 	btn.dragButton.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
 	btn.dragButton.icon:SetVertexColor(1, 1, 1)
+	btn.dragButton.qualityBorder:SetVertexColor(qualityColor:GetRGB())
 	btn.dragButton.hidden:SetShown(self:isMountHidden(data.mountID))
 	btn.dragButton.favorite:SetShown(isFavorite)
 	btn.dragButton.activeTexture:SetShown(active)
@@ -1182,6 +1215,7 @@ function journal:defaultInitMountButton(btn, data)
 
 	btn:Enable()
 	btn.name:SetText(creatureName)
+	btn.name:SetTextColor((mounts.config.coloredMountNames and qualityColor or NORMAL_FONT_COLOR):GetRGB())
 	btn.dragonriding:SetShown(isForDragonriding)
 	btn.new:SetShown(needsFanfare)
 	btn.newGlow:SetShown(needsFanfare)
@@ -1211,12 +1245,14 @@ function journal:defaultInitMountButton(btn, data)
 		btn.dragButton.icon:SetDesaturated(true)
 		btn.dragButton.icon:SetVertexColor(.58823529411765, .19607843137255, .19607843137255)
 		btn.dragButton.icon:SetAlpha(.75)
+		btn.dragButton.qualityBorder:SetAlpha(.75)
 		btn.name:SetFontObject("GameFontNormal")
 		btn.background:SetVertexColor(1, 0, 0)
 	else
 		btn.dragButton:Disable()
 		btn.dragButton.icon:SetDesaturated(true)
 		btn.dragButton.icon:SetAlpha(.25)
+		btn.dragButton.qualityBorder:SetAlpha(.25)
 		btn.name:SetFontObject("GameFontDisable")
 	end
 
@@ -1232,12 +1268,14 @@ function journal:grid3InitMountButton(btn, data)
 			local mountID = data[i].mountID
 			local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 			local needsFanfare = C_MountJournal.NeedsFanfare(mountID)
+			local qualityColor = getQualityColor(mounts.mountsDB[mountID][2])
 
 			g3btn.spellID = spellID
 			g3btn.mountID = mountID
 			g3btn.active = active
 			g3btn.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
 			g3btn.icon:SetVertexColor(1, 1, 1)
+			g3btn.qualityBorder:SetVertexColor(qualityColor:GetRGB())
 			g3btn:Enable()
 			g3btn.selectedTexture:SetShown(mountID == self.selectedMountID)
 			g3btn.hidden:SetShown(self:isMountHidden(mountID))
@@ -1260,9 +1298,11 @@ function journal:grid3InitMountButton(btn, data)
 				g3btn.icon:SetDesaturated(true)
 				g3btn.icon:SetVertexColor(.58823529411765, .19607843137255, .19607843137255)
 				g3btn.icon:SetAlpha(.75)
+				g3btn.qualityBorder:SetAlpha(.75)
 			else
 				g3btn.icon:SetDesaturated(true)
 				g3btn.icon:SetAlpha(.5)
+				g3btn.qualityBorder:SetAlpha(.5)
 			end
 
 			g3btn:Show()
@@ -1466,11 +1506,13 @@ function journal:sortMounts()
 		elseif not isCollectedA and isCollectedB then return false end
 
 		-- DRAGONRIDING
-		local isForDragonridingA = ma[4]
-		local isForDragonridingB = mb[4]
+		if fSort.dragonridingFirst then
+			local isForDragonridingA = ma[4]
+			local isForDragonridingB = mb[4]
 
-		if isForDragonridingA and not isForDragonridingB then return true
-		elseif not isForDragonridingA and isForDragonridingB then return false end
+			if isForDragonridingA and not isForDragonridingB then return true
+			elseif not isForDragonridingA and isForDragonridingB then return false end
+		end
 
 		-- TYPE
 		if fSort.by == "type" then
@@ -1481,11 +1523,18 @@ function journal:sortMounts()
 			elseif typeA > typeB then return fSort.reverse end
 		-- EXPANSION
 		elseif fSort.by == "expansion" then
-			local expA = db[a]
-			local expB = db[b]
+			local expA = db[a][1]
+			local expB = db[b][1]
 
 			if expA < expB then return not fSort.reverse
 			elseif expA > expB then return fSort.reverse end
+		-- RARITY
+		elseif fSort.by == "rarity" then
+			local rarA = db[a][2]
+			local rarB = db[b][2]
+
+			if rarA < rarB then return not fSort.reverse
+			elseif rarA > rarB then return fSort.reverse end
 		end
 
 		-- NAME
@@ -1771,6 +1820,14 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 			self.mountDisplay.lastMountID = self.selectedMountID
 			self.mountDisplay.lastCreatureID = creatureID
 
+			local rarity = mounts.mountsDB[self.selectedMountID][2]
+			local k = 100
+			if rarity < .0001 then k = 100000
+			elseif rarity < .001 then k = 10000
+			elseif rarity < .01 then k = 1000 end
+			info.rarityValue:SetText((math.floor(rarity * k + .5) / k).."%")
+			info.rarityValue:SetShown(rarity > 0)
+
 			info.link:SetShown(mounts.config.showWowheadLink)
 			info.link:SetText("wowhead.com/spell="..spellID)
 			info.name:SetText(creatureName)
@@ -1909,7 +1966,7 @@ function journal:setSelectedMount(mountID, spellID, dataIndex)
 	self.selectedSpellID = spellID
 	self:updateMountDisplay()
 
-	if oldSelectedID ~= selectedMountID then
+	if oldSelectedID ~= mountID then
 		local btn = self:getMountButtonByMountID(oldSelectedID)
 		if btn then
 			self:initMountButton(btn, btn:GetElementData())
@@ -2070,18 +2127,22 @@ function journal:filterDropDown_Initialize(btn, level, value)
 		info.value = 6
 		btn:ddAddButton(info, level)
 
-		info.text = L["Chance of summoning"]
+		info.text = L["Rarity"]
 		info.value = 7
 		btn:ddAddButton(info, level)
 
-		info.text = L["tags"]
+		info.text = L["Chance of summoning"]
 		info.value = 8
+		btn:ddAddButton(info, level)
+
+		info.text = L["tags"]
+		info.value = 9
 		btn:ddAddButton(info, level)
 
 		btn:ddAddSpace(level)
 
 		info.text = L["sorting"]
-		info.value = 9
+		info.value = 10
 		btn:ddAddButton(info, level)
 
 		btn:ddAddSpace(level)
@@ -2281,7 +2342,54 @@ function journal:filterDropDown_Initialize(btn, level, value)
 				info.checked = function() return expansions[i] end
 				btn:ddAddButton(info, level)
 			end
-		elseif value == 7 then -- CHANCE OF SUMMONING
+		elseif value == 7 then -- RARITY
+			local filterRarity = mounts.filters.mountsRarity
+
+			info.notCheckable = nil
+			info.isNotRadio = nil
+
+			info.text = L["Any"]
+			info.func = function(button)
+				filterRarity.sign = button.value
+				btn:ddRefresh(level)
+				self:updateMountsList()
+			end
+			info.checked = function() return not filterRarity.sign end
+			btn:ddAddButton(info, level)
+
+			info.text = L["> (more than)"]
+			info.value = ">"
+			info.checked = function() return filterRarity.sign == ">" end
+			btn:ddAddButton(info, level)
+
+			info.text = L["< (less than)"]
+			info.value = "<"
+			info.checked = function() return filterRarity.sign == "<" end
+			btn:ddAddButton(info, level)
+
+			info.text = L["= (equal to)"]
+			info.value = "="
+			info.checked = function() return filterRarity.sign == "=" end
+			btn:ddAddButton(info, level)
+
+			info.text = nil
+			info.value = nil
+			info.func = nil
+			info.checked = nil
+			info.customFrame = self.percentSlider
+			info.customFrame:setText(L["Rarity"])
+			info.customFrame:setMinMax(0, 100)
+			info.OnLoad = function(frame)
+				frame.level = level + 1
+				frame:setValue(filterRarity.value)
+				frame.setFunc = function(value)
+					if filterRarity.value ~= value then
+						filterRarity.value = value
+					end
+				end
+			end
+			btn:ddAddButton(info, level)
+		elseif value == 8 then -- CHANCE OF SUMMONING
 			local filterWeight = mounts.filters.mountsWeight
 
 			info.notCheckable = nil
@@ -2315,7 +2423,9 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			info.value = nil
 			info.func = nil
 			info.checked = nil
-			info.customFrame = self.weightFrame
+			info.customFrame = self.percentSlider
+			info.customFrame:setText(L["Chance of summoning"])
+			info.customFrame:setMinMax(1, 100)
 			info.OnLoad = function(frame)
 				frame.level = level + 1
 				frame:setValue(filterWeight.weight)
@@ -2326,7 +2436,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 				end
 			end
 			btn:ddAddButton(info, level)
-		elseif value == 8 then -- TAGS
+		elseif value == 9 then -- TAGS
 			local filterTags = self.tags.filter
 
 			info.notCheckable = nil
@@ -2438,6 +2548,15 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			info.checked = function() return fSort.by == "expansion" end
 			btn:ddAddButton(info, level)
 
+			info.text = L["Rarity"]
+			info.func = function()
+				fSort.by = "rarity"
+				self:sortMounts()
+				btn:ddRefresh(level)
+			end
+			info.checked = function() return fSort.by == "rarity" end
+			btn:ddAddButton(info, level)
+
 			btn:ddAddSeparator(level)
 
 			info.isNotRadio = true
@@ -2455,6 +2574,14 @@ function journal:filterDropDown_Initialize(btn, level, value)
 				self:sortMounts()
 			end
 			info.checked = fSort.favoritesFirst
+			btn:ddAddButton(info, level)
+
+			info.text = L["Dragonriding First"]
+			info.func = function(_,_,_, value)
+				fSort.dragonridingFirst = value
+				self:sortMounts()
+			end
+			info.checked = fSort.dragonridingFirst
 			btn:ddAddButton(info, level)
 		end
 	end
@@ -2474,6 +2601,8 @@ function journal:saveDefaultFilters()
 	defFilters.hiddenByPlayer = filters.hiddenByPlayer
 	defFilters.onlyHiddenByPlayer = filters.onlyHiddenByPlayer
 	defFilters.onlyNew = filters.onlyNew
+	defFilters.mountsRarity.sign = filters.mountsRarity.sign
+	defFilters.mountsRarity.value = filters.mountsRarity.value
 	defFilters.mountsWeight.sign = filters.mountsWeight.sign
 	defFilters.mountsWeight.weight = filters.mountsWeight.weight
 	defFilters.tags.noTag = filters.tags.noTag
@@ -2517,6 +2646,8 @@ function journal:restoreDefaultFilters()
 	defFilters.hiddenByPlayer = false
 	defFilters.onlyHiddenByPlayer = false
 	defFilters.onlyNew = false
+	defFilters.mountsRarity.sign = nil
+	defFilters.mountsRarity.value = 100
 	defFilters.mountsWeight.sign = nil
 	defFilters.mountsWeight.weight = 100
 	defFilters.tags.noTag = true
@@ -2547,6 +2678,8 @@ function journal:isDefaultFilters()
 	or not defFilters.hiddenByPlayer ~= not filters.hiddenByPlayer
 	or not defFilters.onlyHiddenByPlayer ~= not filters.onlyHiddenByPlayer
 	or not defFilters.onlyNew ~= not filters.onlyNew
+	or defFilters.mountsRarity.sign ~= filters.mountsRarity.sign
+	or defFilters.mountsRarity.value ~= filters.mountsRarity.value
 	or defFilters.mountsWeight.sign ~= filters.mountsWeight.sign
 	or defFilters.mountsWeight.weight ~= filters.mountsWeight.weight
 	or defFilters.tags.noTag ~= filters.tags.noTag
@@ -2610,6 +2743,8 @@ function journal:resetToDefaultFilters()
 	filters.hiddenByPlayer = defFilters.hiddenByPlayer
 	filters.onlyHiddenByPlayer = defFilters.onlyHiddenByPlayer
 	filters.onlyNew = defFilters.onlyNew
+	filters.mountsRarity.sign = defFilters.mountsRarity.sign
+	filters.mountsRarity.value = defFilters.mountsRarity.value
 	filters.mountsWeight.sign = defFilters.mountsWeight.sign
 	filters.mountsWeight.weight = defFilters.mountsWeight.weight
 	filters.tags.noTag = defFilters.tags.noTag
@@ -2742,6 +2877,22 @@ function journal:isMountHidden(mountID)
 end
 
 
+function journal:getFilterRarity(rarity)
+	local filter = mounts.filters.mountsRarity
+	if not filter.sign then
+		return true
+	else
+		if filter.sign == ">" then
+			return rarity > filter.value
+		elseif filter.sign == "<" then
+			return rarity < filter.value
+		else
+			return math.floor(rarity +.5) == filter.value
+		end
+	end
+end
+
+
 function journal:getFilterWeight(mountID)
 	local filter = mounts.filters.mountsWeight
 	if not filter.sign then
@@ -2821,7 +2972,7 @@ function journal:updateMountsList()
 		-- MUTIPLE MODELS
 		and (not filters.multipleModels or self.mountsWithMultipleModels[mountID])
 		-- EXPANSIONS
-		and expansions[mountsDB[mountID]]
+		and expansions[mountsDB[mountID][1]]
 		-- ONLY NEW
 		and (not filters.onlyNew or newMounts[mountID])
 		-- SOURCES
@@ -2844,6 +2995,8 @@ function journal:updateMountsList()
 		                                 or list.swimming[mountID])))
 		-- PET
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
+		-- MOUNTS RARITY
+		and self:getFilterRarity(mountsDB[mountID][2])
 		-- MOUNTS WEIGHT
 		and self:getFilterWeight(mountID)
 		-- TAGS

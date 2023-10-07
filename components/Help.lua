@@ -28,7 +28,7 @@ function util.showHelpJournal()
 			callbackArg = 1,
 			onAcknowledgeCallback = nextTip,
 		}
-		HelpTip:Show(journal.bgFrame, helpTipInfo, journal.scrollFrame)
+		HelpTip:Show(journal.bgFrame, helpTipInfo, journal.scrollBox)
 	elseif step == 1 then
 		local helpTipInfo = {
 			text = L["ZoneSettingsTooltipDescription"],
