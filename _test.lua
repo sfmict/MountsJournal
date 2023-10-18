@@ -217,6 +217,7 @@ function test:PLAYER_ENTERING_WORLD()
 	-- 	LoadAddOn("Blizzard_Collections")
 	-- end
 	-- ShowUIPanel(CollectionsJournal)
+	-- MountsJournalFrame.bgFrame.profilesMenu:Click()
 	-- CollectionsJournal_SetTab(CollectionsJournal, COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS) -- DISABLE
 	-- journal.mountDisplay.info.petSelectionBtn:Click()
 

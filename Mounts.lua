@@ -2,6 +2,7 @@ local addon = ...
 local C_MountJournal, C_Map, MapUtil, next, wipe, random, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff, IsUsableSpell, SecureCmdOptionParse = C_MountJournal, C_Map, MapUtil, next, wipe, random, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff, IsUsableSpell, SecureCmdOptionParse
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
+util.setEventsMixin(mounts)
 
 
 mounts:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
@@ -26,6 +27,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.globalDB.mountAnimations = self.globalDB.mountAnimations or {}
 		self.globalDB.defProfile = self.globalDB.defProfile or {}
 		self.globalDB.mountsProfiles = self.globalDB.mountsProfiles or {}
+		self.globalDB.holidayNames = self.globalDB.holidayNames or {}
 		self.globalDB.help = self.globalDB.help or {}
 
 		self.defProfile = self.globalDB.defProfile
@@ -83,6 +85,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.charDB.macrosConfig = self.charDB.macrosConfig or {}
 		self.charDB.profileBySpecialization = self.charDB.profileBySpecialization or {}
 		self.charDB.profileBySpecializationPVP = self.charDB.profileBySpecializationPVP or {}
+		self.charDB.holidayProfiles = self.charDB.holidayProfiles or {}
 
 		-- Рудименты
 		self:setOldChanges()
@@ -319,6 +322,7 @@ function mounts:PLAYER_LOGIN()
 	self:setHerbMount()
 	self:init()
 	self.pets:setSummonEvery()
+	self.calendar:init()
 
 	-- MAP CHANGED
 	-- self:RegisterEvent("NEW_WMO_CHUNK")
@@ -340,6 +344,9 @@ function mounts:PLAYER_LOGIN()
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
+
+	-- CALENDAR
+	self:on("CALENDAR_UPDATE_EVENT_LIST", self.setDB)
 end
 
 
@@ -583,10 +590,15 @@ function mounts:setDB()
 	local currentProfileName
 	if self.pvp and self.charDB.profileBySpecializationPVP.enable then
 		currentProfileName = self.charDB.profileBySpecializationPVP[GetSpecialization()]
-	elseif self.charDB.profileBySpecialization.enable then
-		currentProfileName = self.charDB.profileBySpecialization[GetSpecialization()]
 	else
-		currentProfileName = self.charDB.currentProfileName
+		local enabled, holidayProfile = self.calendar:getHolidayProfileName()
+		if enabled then
+			currentProfileName = holidayProfile
+		elseif self.charDB.profileBySpecialization.enable then
+			currentProfileName = self.charDB.profileBySpecialization[GetSpecialization()]
+		else
+			currentProfileName = self.charDB.currentProfileName
+		end
 	end
 
 	self.db = currentProfileName and self.profiles[currentProfileName] or self.defProfile

@@ -489,7 +489,7 @@ function journal:init()
 	self.filtersButton:ddSetDisplayMode(addon)
 	self.filtersButton:ddSetInitFunc(function(...) self:filterDropDown_Initialize(...) end)
 
-	-- MOUNTS WEIGHT SLIDER
+	-- PERCENT SLIDER
 	local weightControl_OnEnter = function(self)
 		local parent = self:GetParent()
 		parent:GetScript("OnEnter")(parent)
@@ -1173,17 +1173,18 @@ local function getColorWeight(weight)
 end
 
 
-local function getQualityColor(rarity)
-	if rarity < 1 then
-		return ITEM_QUALITY_COLORS[5].color
-	elseif rarity < 10 then
-		return ITEM_QUALITY_COLORS[4].color
-	elseif rarity < 20 then
-		return ITEM_QUALITY_COLORS[3].color
-	elseif rarity < 50 then
-		return ITEM_QUALITY_COLORS[2].color
-	else
+local function getQualityColor(mountID)
+	local rarity = mounts.mountsDB[mountID][2]
+	if rarity > 50 then
 		return ITEM_QUALITY_COLORS[1].color
+	elseif rarity > 20 then
+		return ITEM_QUALITY_COLORS[2].color
+	elseif rarity > 10 then
+		return ITEM_QUALITY_COLORS[3].color
+	elseif rarity > 1 then
+		return ITEM_QUALITY_COLORS[4].color
+	else
+		return ITEM_QUALITY_COLORS[5].color
 	end
 end
 
@@ -1191,7 +1192,7 @@ end
 function journal:defaultInitMountButton(btn, data)
 	local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected, _, isForDragonriding = C_MountJournal.GetMountInfoByID(data.mountID)
 	local needsFanfare = C_MountJournal.NeedsFanfare(data.mountID)
-	local qualityColor = getQualityColor(mounts.mountsDB[data.mountID][2])
+	local qualityColor = getQualityColor(data.mountID)
 
 	btn.spellID = spellID
 	btn.mountID = data.mountID
@@ -1268,7 +1269,7 @@ function journal:grid3InitMountButton(btn, data)
 			local mountID = data[i].mountID
 			local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 			local needsFanfare = C_MountJournal.NeedsFanfare(mountID)
-			local qualityColor = getQualityColor(mounts.mountsDB[mountID][2])
+			local qualityColor = getQualityColor(mountID)
 
 			g3btn.spellID = spellID
 			g3btn.mountID = mountID
@@ -2887,7 +2888,7 @@ function journal:getFilterRarity(rarity)
 		elseif filter.sign == "<" then
 			return rarity < filter.value
 		else
-			return math.floor(rarity +.5) == filter.value
+			return math.floor(rarity + .5) == filter.value
 		end
 	end
 end

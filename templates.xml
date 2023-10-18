@@ -1008,8 +1008,94 @@
 				</Scripts>
 			</Frame>
 
+			<Frame parentKey="calendarFrame" hidden="true">
+				<Size x="200" y="70"/>
+				<Layers>
+					<Layer level="OVERLAY">
+						<Texture parentKey="monthBackground" file="Interface\Calendar\CalendarBackground">
+							<Size x="142" y="36"/>
+							<Anchors>
+								<Anchor point="TOP" x="0" y="-11"/>
+							</Anchors>
+							<TexCoords left="0" right=".5546875" top=".828125" bottom=".96875"/>
+						</Texture>
+						<FontString parentKey="monthText" inherits="GameFontHighlightLarge" justifyH="CENTER">
+							<Anchors>
+								<Anchor point="CENTER" relativeKey="$parent.monthBackground"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+					<Layer level="ARTWORK">
+						<Texture parentKey="yearBackground" file="Interface\Calendar\CalendarBackground">
+							<Size x="47" y="24"/>
+							<Anchors>
+								<Anchor point="BOTTOM" relativeKey="$parent.monthBackground" relativePoint="TOP" x="0" y="-10"/>
+							</Anchors>
+							<TexCoords left="0" right=".5546875" top=".828125" bottom=".96875"/>
+						</Texture>
+						<FontString parentKey="yearText" inherits="GameFontNormalSmall" justifyH="CENTER">
+							<Anchors>
+								<Anchor point="CENTER" relativeKey="$parent.yearBackground" x="0" y="-1"/>
+							</Anchors>
+						</FontString>
+						<Texture parentKey="dayBackground" file="Interface\Calendar\CalendarBackground">
+							<Size x="47" y="24"/>
+							<Anchors>
+								<Anchor point="TOP" relativeKey="$parent.monthBackground" relativePoint="BOTTOM" x="0" y="2"/>
+							</Anchors>
+							<TexCoords left="0" right=".5546875" top=".828125" bottom=".96875"/>
+						</Texture>
+						<FontString parentKey="dayText" inherits="GameFontHighlightSmall" justifyH="CENTER">
+							<Anchors>
+								<Anchor point="CENTER" relativeKey="$parent.dayBackground" x="0" y="0"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Frames>
+					<Button parentKey="prevMonthButton" inherits="MJCalendarPrev">
+						<Anchors>
+							<Anchor point="RIGHT" relativeKey="$parent.monthBackground" relativePoint="LEFT" x="4" y="0"/>
+						</Anchors>
+					</Button>
+					<Button parentKey="nextMonthButton" inherits="MJCalendarNext">
+						<Anchors>
+							<Anchor point="LEFT" relativeKey="$parent.monthBackground" relativePoint="RIGHT" x="-4" y="0"/>
+						</Anchors>
+					</Button>
+					<Button parentKey="prevDayButton" inherits="MJCalendarPrev">
+						<Size x="30" y="30"/>
+						<Anchors>
+							<Anchor point="RIGHT" relativeKey="$parent.dayBackground" relativePoint="LEFT" x="1" y="0"/>
+						</Anchors>
+					</Button>
+					<Button parentKey="nextDayButton" inherits="MJCalendarNext">
+						<Size x="30" y="30"/>
+						<Anchors>
+							<Anchor point="LEFT" relativeKey="$parent.dayBackground" relativePoint="RIGHT" x="-1" y="0"/>
+						</Anchors>
+					</Button>
+				</Frames>
+			</Frame>
+
 		</Frames>
 	</Frame>
+
+	<Button name="MJCalendarPrev" virtual="true">
+		<Size x="32" y="32"/>
+		<NormalTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Up"/>
+		<PushedTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Down"/>
+		<DisabledTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Disabled"/>
+		<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
+	</Button>
+
+	<Button name="MJCalendarNext" virtual="true">
+		<Size x="32" y="32"/>
+		<NormalTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Up"/>
+		<PushedTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Down"/>
+		<DisabledTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Disabled"/>
+		<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
+	</Button>
 
 	<Button name="MJTabTemplate" virtual="true">
 		<Size x="83" y="24"/>

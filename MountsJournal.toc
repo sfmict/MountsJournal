@@ -26,6 +26,7 @@ components\Profiles.lua
 components\Help.lua
 components\Hyperlinks.lua
 components\Pets.lua
+components\Calendar.lua
 #@do-not-package@
 _test.lua
 #@end-do-not-package@

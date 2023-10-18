@@ -39,7 +39,7 @@ end
 
 function MJGrid3MountListMixin:onEnter()
 	self.highlight:Show()
-	GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 	if self.spellID then
 		GameTooltip:SetMountBySpellID(self.spellID)
 	end
