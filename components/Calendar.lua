@@ -21,7 +21,7 @@ local CALENDAR_MONTH_NAMES = {
 }
 
 
-function calendar:setFilterBackup()
+function calendar:setBackup()
 	local backup = calendar.filterBackup
 	backup.calendarShowHolidays = GetCVarBool("calendarShowHolidays")
 	backup.calendarShowDarkmoon = GetCVarBool("calendarShowDarkmoon")
@@ -34,20 +34,7 @@ function calendar:setFilterBackup()
 	if backup.calendarShowLockouts then SetCVar("calendarShowLockouts", "0") end
 	if backup.calendarShowWeeklyHolidays then SetCVar("calendarShowWeeklyHolidays", "0") end
 	if backup.calendarShowBattlegrounds then SetCVar("calendarShowBattlegrounds", "0") end
-end
 
-
-function calendar:restoreFilterBackup()
-	local backup = calendar.filterBackup
-	if not backup.calendarShowHolidays then SetCVar("calendarShowHolidays", "0") end
-	if not backup.calendarShowDarkmoon then SetCVar("calendarShowDarkmoon", "0") end
-	if backup.calendarShowLockouts then SetCVar("calendarShowLockouts", "1") end
-	if backup.calendarShowWeeklyHolidays then SetCVar("calendarShowWeeklyHolidays", "1") end
-	if backup.calendarShowBattlegrounds then SetCVar("calendarShowBattlegrounds", "1") end
-end
-
-
-function calendar:setDateBackup()
 	self.dateBackup = C_Calendar.GetMonthInfo()
 	if CalendarFrame then
 		CalendarFrame:UnregisterEvent("CALENDAR_UPDATE_EVENT_LIST")
@@ -56,7 +43,14 @@ function calendar:setDateBackup()
 end
 
 
-function calendar:restoreDateBackup()
+function calendar:restoreBackup()
+	local backup = calendar.filterBackup
+	if not backup.calendarShowHolidays then SetCVar("calendarShowHolidays", "0") end
+	if not backup.calendarShowDarkmoon then SetCVar("calendarShowDarkmoon", "0") end
+	if backup.calendarShowLockouts then SetCVar("calendarShowLockouts", "1") end
+	if backup.calendarShowWeeklyHolidays then SetCVar("calendarShowWeeklyHolidays", "1") end
+	if backup.calendarShowBattlegrounds then SetCVar("calendarShowBattlegrounds", "1") end
+
 	C_Calendar.SetAbsMonth(self.dateBackup.month, self.dateBackup.year)
 	if CalendarFrame then
 		CalendarFrame:RegisterEvent("CALENDAR_UPDATE_EVENT_LIST")
@@ -65,27 +59,11 @@ function calendar:restoreDateBackup()
 end
 
 
-function calendar:getSelectedMonthInfo()
-	self:setDateBackup()
-	C_Calendar.SetAbsMonth(self.date.month, self.date.year)
-	local monthInfo = C_Calendar.GetMonthInfo()
-	self:restoreDateBackup()
-	return monthInfo
-end
-
-
 function calendar:setPreviousMonth()
 	self.date.month = self.date.month - 1
 	if self.date.month < 1 then
 		self.date.year = self.date.year - 1
 		self.date.month = 12
-	end
-
-	if self.date.monthDay > 28 then
-		local monthInfo = self:getSelectedMonthInfo()
-		if self.date.monthDay > monthInfo.numDays then
-			self.date.monthDay = monthInfo.numDays
-		end
 	end
 end
 
@@ -96,35 +74,6 @@ function calendar:setNextMonth()
 		self.date.year = self.date.year + 1
 		self.date.month = 1
 	end
-
-	if self.date.monthDay > 28 then
-		local monthInfo = self:getSelectedMonthInfo()
-		if self.date.monthDay > monthInfo.numDays then
-			self.date.monthDay = monthInfo.numDays
-		end
-	end
-end
-
-
-function calendar:setPreviousDay()
-	self.date.monthDay = self.date.monthDay - 1
-	if self.date.monthDay < 1 then
-		self.date.monthDay = 31
-		calendar:setPreviousMonth()
-	end
-end
-
-
-function calendar:setNextDay()
-	self.date.monthDay = self.date.monthDay + 1
-
-	if self.date.monthDay > 28 then
-		local monthInfo = self:getSelectedMonthInfo()
-		if self.date.monthDay > monthInfo.numDays then
-			self.date.monthDay = 1
-			calendar:setNextMonth()
-		end
-	end
 end
 
 
@@ -134,7 +83,7 @@ end
 
 
 function calendar:getSelectedDate()
-	return self.date, CALENDAR_MONTH_NAMES[self.date.month]
+	return self.date.year, CALENDAR_MONTH_NAMES[self.date.month]
 end
 
 
@@ -156,27 +105,29 @@ end
 
 
 function calendar:getHolidayList()
-	local holidays = {}
+	local holidays, addedIDs = {}, {}
 
-	self:setFilterBackup()
-	self:setDateBackup()
+	self:setBackup()
 
 	C_Calendar.SetAbsMonth(self.date.month, self.date.year)
-	local numEvents = C_Calendar.GetNumDayEvents(0, self.date.monthDay)
+	local monthInfo = C_Calendar.GetMonthInfo()
 
-	for i = 1, numEvents do
-		local e = C_Calendar.GetDayEvent(0, self.date.monthDay, i)
-		if not self.holidayProfiles[e.eventID] then
-			holidays[#holidays + 1] = {
-				eventID = e.eventID,
-				name = e.title,
-				isActive = self:isEventActive(e.eventID)
-			}
+	for day = 1, monthInfo.numDays do
+		local numEvents = C_Calendar.GetNumDayEvents(0, day)
+		for i = 1, numEvents do
+			local e = C_Calendar.GetDayEvent(0, day, i)
+			if not (addedIDs[e.eventID] or self.holidayProfiles[e.eventID]) then
+				holidays[#holidays + 1] = {
+					eventID = e.eventID,
+					name = e.title,
+					isActive = self:isEventActive(e.eventID)
+				}
+				addedIDs[e.eventID] = true
+			end
 		end
 	end
 
-	self:restoreDateBackup()
-	self:restoreFilterBackup()
+	self:restoreBackup()
 
 	for eventID, data in pairs(self.holidayProfiles) do
 		holidays[#holidays + 1] = {
@@ -292,8 +243,7 @@ function calendar:updateTodayEvents()
 	local secondsToUpdate = ((24 - date.hour) * 60 + 1 - date.minute) * 60
 	self.todayHolidays = {}
 
-	self:setFilterBackup()
-	self:setDateBackup()
+	self:setBackup()
 
 	C_Calendar.SetAbsMonth(date.month, date.year)
 	local numEvents = C_Calendar.GetNumDayEvents(0, date.monthDay)
@@ -320,8 +270,7 @@ function calendar:updateTodayEvents()
 		end
 	end
 
-	self:restoreDateBackup()
-	self:restoreFilterBackup()
+	self:restoreBackup()
 
 	self:sortTodayEvents()
 	C_Timer.After(secondsToUpdate, function() self:updateTodayEvents() end)
@@ -375,8 +324,7 @@ function calendar:init()
 
 	if numNoName == 0 then return end
 
-	self:setFilterBackup()
-	self:setDateBackup()
+	self:setBackup()
 
 	local date = C_DateAndTime.GetCurrentCalendarTime()
 	local year = date.year - 2
@@ -405,6 +353,5 @@ function calendar:init()
 		end
 	end
 
-	self:restoreDateBackup()
-	self:restoreFilterBackup()
+	self:restoreBackup()
 end

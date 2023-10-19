@@ -1009,7 +1009,7 @@
 			</Frame>
 
 			<Frame parentKey="calendarFrame" hidden="true">
-				<Size x="200" y="70"/>
+				<Size x="200" y="50"/>
 				<Layers>
 					<Layer level="OVERLAY">
 						<Texture parentKey="monthBackground" file="Interface\Calendar\CalendarBackground">
@@ -1038,18 +1038,6 @@
 								<Anchor point="CENTER" relativeKey="$parent.yearBackground" x="0" y="-1"/>
 							</Anchors>
 						</FontString>
-						<Texture parentKey="dayBackground" file="Interface\Calendar\CalendarBackground">
-							<Size x="47" y="24"/>
-							<Anchors>
-								<Anchor point="TOP" relativeKey="$parent.monthBackground" relativePoint="BOTTOM" x="0" y="2"/>
-							</Anchors>
-							<TexCoords left="0" right=".5546875" top=".828125" bottom=".96875"/>
-						</Texture>
-						<FontString parentKey="dayText" inherits="GameFontHighlightSmall" justifyH="CENTER">
-							<Anchors>
-								<Anchor point="CENTER" relativeKey="$parent.dayBackground" x="0" y="0"/>
-							</Anchors>
-						</FontString>
 					</Layer>
 				</Layers>
 				<Frames>
@@ -1061,18 +1049,6 @@
 					<Button parentKey="nextMonthButton" inherits="MJCalendarNext">
 						<Anchors>
 							<Anchor point="LEFT" relativeKey="$parent.monthBackground" relativePoint="RIGHT" x="-4" y="0"/>
-						</Anchors>
-					</Button>
-					<Button parentKey="prevDayButton" inherits="MJCalendarPrev">
-						<Size x="30" y="30"/>
-						<Anchors>
-							<Anchor point="RIGHT" relativeKey="$parent.dayBackground" relativePoint="LEFT" x="1" y="0"/>
-						</Anchors>
-					</Button>
-					<Button parentKey="nextDayButton" inherits="MJCalendarNext">
-						<Size x="30" y="30"/>
-						<Anchors>
-							<Anchor point="LEFT" relativeKey="$parent.dayBackground" relativePoint="RIGHT" x="-1" y="0"/>
 						</Anchors>
 					</Button>
 				</Frames>

@@ -159,16 +159,6 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		calendar:setNextMonth()
 		reloadMenu(calendarFrame.level, calendarFrame.value)
 	end)
-	calendarFrame.prevDayButton:SetScript("OnClick", function()
-		PlaySound(SOUNDKIT.IG_ABILITY_PAGE_TURN)
-		calendar:setPreviousDay()
-		reloadMenu(calendarFrame.level, calendarFrame.value)
-	end)
-	calendarFrame.nextDayButton:SetScript("OnClick", function()
-		PlaySound(SOUNDKIT.IG_ABILITY_PAGE_TURN)
-		calendar:setNextDay()
-		reloadMenu(calendarFrame.level, calendarFrame.value)
-	end)
 
 	-- DROPDOWN
 	dd:ddSetDisplayMode(addon)
@@ -356,10 +346,9 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 			info.OnLoad = function(frame)
 				frame.level = level
 				frame.value = value
-				local date, monthName = calendar:getSelectedDate()
-				frame.yearText:SetText(date.year)
+				local year, monthName = calendar:getSelectedDate()
+				frame.yearText:SetText(year)
 				frame.monthText:SetText(monthName)
-				frame.dayText:SetText(date.monthDay)
 			end
 			self:ddAddButton(info, level)
 
@@ -367,10 +356,28 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 			info.OnLoad = nil
 			info.list = {}
 
-			local list = calendar:getHolidayList()
+			local list, selected = calendar:getHolidayList()
+
 			for i = 1, #list do
 				local e = list[i]
-				info.list[i] = {
+
+				if not e.profile then
+					selected = false
+				elseif selected == false then
+					selected = true
+					info.list[#info.list + 1] = {
+						disabled = true,
+						notCheckable = true,
+						iconOnly = true,
+						icon = "Interface/Common/UI-TooltipDivider-Transparent",
+						iconInfo = {
+							tSizeX = 0,
+							tSizeY = 8,
+						},
+					}
+				end
+
+				local eInfo = {
 					isNotRadio = true,
 					hasArrow = true,
 					keepShownOnClick = true,
@@ -392,12 +399,13 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 					end
 				}
 				if e.profile then
-					info.list[i].order = function(btn, step)
+					eInfo.order = function(btn, step)
 						calendar:setEventProfileOrder(btn.value.eventID, step)
 						calendar:sortHolidays(list)
 						reloadMenu(level + 1, list[i])
 					end
 				end
+				info.list[#info.list + 1] = eInfo
 			end
 			self:ddAddButton(info, level)
 
