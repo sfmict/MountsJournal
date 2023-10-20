@@ -366,6 +366,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 				elseif selected == false then
 					selected = true
 					info.list[#info.list + 1] = {
+						keepShownOnClick = true,
 						disabled = true,
 						notCheckable = true,
 						iconOnly = true,
