@@ -146,6 +146,7 @@ function mounts:ADDON_LOADED(addonName)
 		}
 		self.usableRepairMounts = {}
 		self.usableIDs = {}
+		self.weight = 0
 		self:setUsableRepairMounts()
 	end
 end
@@ -649,7 +650,7 @@ function mounts:getTargetMount()
 				local mountID = C_MountJournal.GetMountFromSpell(spellID)
 				if mountID then
 					local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
-					return isUsable and mountID
+					return isUsable and IsUsableSpell(spellID) and mountID
 				end
 				i = i + 1
 			end

@@ -120,7 +120,7 @@ function calendar:getHolidayList()
 				holidays[#holidays + 1] = {
 					eventID = e.eventID,
 					name = e.title,
-					isActive = self:isEventActive(e.eventID)
+					isActive = self:isEventActive(e.eventID),
 				}
 				addedIDs[e.eventID] = true
 			end
