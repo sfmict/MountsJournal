@@ -120,7 +120,7 @@ function calendar:getHolidayList()
 				holidays[#holidays + 1] = {
 					eventID = e.eventID,
 					name = e.title,
-					isActive = self:isEventActive(e.eventID),
+					isActive = self.activeHolidays[e.eventID],
 				}
 				addedIDs[e.eventID] = true
 			end
@@ -133,7 +133,7 @@ function calendar:getHolidayList()
 		holidays[#holidays + 1] = {
 			eventID = eventID,
 			name = self.holidayNames[eventID],
-			isActive = self:isEventActive(eventID),
+			isActive = self.activeHolidays[eventID],
 			profile = data,
 		}
 	end
@@ -150,7 +150,6 @@ function calendar:createEventProfile(eventID, enabled, profileName)
 		profileName = profileName,
 		order = self.numHolidayProfiles,
 	}
-	self:sortTodayEvents()
 end
 
 
@@ -168,8 +167,6 @@ function calendar:removeEventProfile(eventID)
 	for lang, holidayNames in pairs(mounts.globalDB.holidayNames) do
 		holidayNames[eventID] = nil
 	end
-
-	self:sortTodayEvents()
 end
 
 
@@ -178,13 +175,12 @@ function calendar:setEventProfileEnabled(eventID, enabled, eventName)
 		self.holidayProfiles[eventID].enabled = enabled
 		if not (enabled or self.holidayProfiles[eventID].profileName) then
 			self:removeEventProfile(eventID)
-		else
-			self:event("CALENDAR_UPDATE_EVENT_LIST")
 		end
 	elseif enabled then
 		self:createEventProfile(eventID, enabled)
 		self.holidayNames[eventID] = eventName
 	end
+	self:event("CALENDAR_UPDATE_EVENT_LIST")
 end
 
 
@@ -193,13 +189,12 @@ function calendar:setEventProfileName(eventID, name, eventName)
 		self.holidayProfiles[eventID].profileName = name
 		if not (name or self.holidayProfiles[eventID].enabled) then
 			self:removeEventProfile(eventID)
-		else
-			self:event("CALENDAR_UPDATE_EVENT_LIST")
 		end
 	elseif name then
 		self:createEventProfile(eventID, nil, name)
 		self.holidayNames[eventID] = eventName
 	end
+	self:event("CALENDAR_UPDATE_EVENT_LIST")
 end
 
 
@@ -215,25 +210,6 @@ function calendar:setEventProfileOrder(eventID, step)
 		end
 		self.holidayProfiles[eventID].order = newOrder
 	end
-	self:sortTodayEvents()
-end
-
-
-function calendar:isEventActive(eventID)
-	for i = 1, #self.todayHolidays do
-		if eventID == self.todayHolidays[i] then return true end
-	end
-end
-
-
-function calendar:sortTodayEvents()
-	sort(self.todayHolidays, function(e1, e2)
-		local data1 = self.holidayProfiles[e1]
-		local data2 = self.holidayProfiles[e2]
-		return data1 and not data2
-			or data1 and data2 and data1.order < data2.order
-			or data1 == data2 and e1 < e2
-	end)
 	self:event("CALENDAR_UPDATE_EVENT_LIST")
 end
 
@@ -241,7 +217,7 @@ end
 function calendar:updateTodayEvents()
 	local date = C_DateAndTime.GetCurrentCalendarTime()
 	local secondsToUpdate = ((24 - date.hour) * 60 + 1 - date.minute) * 60
-	self.todayHolidays = {}
+	self.activeHolidays = {}
 
 	self:setBackup()
 
@@ -253,26 +229,26 @@ function calendar:updateTodayEvents()
 		if e.sequenceType == "START" then
 			local secondsToEvent = ((e.startTime.hour - date.hour) * 60 + e.startTime.minute - date.minute) * 60
 			if secondsToEvent <= 0 then
-				self.todayHolidays[#self.todayHolidays + 1] = e.eventID
+				self.activeHolidays[e.eventID] = true
 			elseif secondsToEvent < secondsToUpdate then
 				secondsToUpdate = secondsToEvent
 			end
 		elseif e.sequenceType == "END" then
 			local secondsToEvent = ((e.endTime.hour - date.hour) * 60 + e.endTime.minute - date.minute) * 60
 			if secondsToEvent > 0 then
-				self.todayHolidays[#self.todayHolidays + 1] = e.eventID
+				self.activeHolidays[e.eventID] = true
 				if secondsToEvent < secondsToUpdate then
 					secondsToUpdate = secondsToEvent
 				end
 			end
 		else
-			self.todayHolidays[#self.todayHolidays + 1] = e.eventID
+			self.activeHolidays[e.eventID] = true
 		end
 	end
 
 	self:restoreBackup()
 
-	self:sortTodayEvents()
+	self:event("CALENDAR_UPDATE_EVENT_LIST")
 	C_Timer.After(secondsToUpdate, function() self:updateTodayEvents() end)
 end
 
@@ -287,14 +263,16 @@ function calendar:getHolidayProfileName()
 		end
 	end
 
-	for i = 1, #self.todayHolidays do
-		local data = self.holidayProfiles[self.todayHolidays[i]]
-		if data and data.enabled then
-			return true, data.profileName
-		elseif not data then
-			break
+	local profileName, order
+	for eventID in pairs(self.activeHolidays) do
+		local data = self.holidayProfiles[eventID]
+		if data and data.enabled and (not order or data.order < order) then
+			profileName = data.profileName
+			order = data.order
 		end
 	end
+
+	if profileName then return true, profileName end
 	return false
 end
 
