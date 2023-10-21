@@ -272,7 +272,7 @@ function calendar:getHolidayProfileName()
 		end
 	end
 
-	if profileName then return true, profileName end
+	if order then return true, profileName end
 	return false
 end
 
