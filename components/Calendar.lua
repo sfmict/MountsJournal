@@ -253,7 +253,7 @@ function calendar:updateTodayEvents()
 end
 
 
-function calendar:getHolidayProfileName()
+function calendar:getHolidayProfileNames()
 	for eventID, data in pairs(self.holidayProfiles) do
 		if data.profileName and not self.profiles[data.profileName] then
 			data.profileName = nil
@@ -263,17 +263,17 @@ function calendar:getHolidayProfileName()
 		end
 	end
 
-	local profileName, order
+	local profileNames = {}
 	for eventID in pairs(self.activeHolidays) do
 		local data = self.holidayProfiles[eventID]
-		if data and data.enabled and (not order or data.order < order) then
-			profileName = data.profileName
+		if data and data.enabled then
+			profileNames[#profileNames + 1] = data
 			order = data.order
 		end
 	end
 
-	if order then return true, profileName end
-	return false
+	sort(profileNames, function(p1, p2) return p1.order < p2.order end)
+	return profileNames
 end
 
 
