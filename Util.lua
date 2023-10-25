@@ -80,20 +80,14 @@ MountsJournalUtil.addonName = ("%s_ADDON_"):format(addon:upper())
 MountsJournalUtil.expansion = tonumber(GetBuildInfo():match("(.-)%."))
 
 
--- 1 FLY, 2 GROUND, 3 SWIMMING
+-- 1 FLY, 2 GROUND, 3 SWIMMING, 4 DRAGONRIDING
 MountsJournalUtil.mountTypes = setmetatable({
 	[242] = 1,
 	[247] = 1,
 	[248] = 1,
 	[398] = 1,
-	[402] = 1,
 	[407] = {1, 3},
-	[411] = 1,
 	[424] = 1,
-	[426] = 1,
-	[428] = 1,
-	[429] = 1,
-	[430] = 1,
 	[230] = 2,
 	[241] = 2,
 	[284] = 2,
@@ -102,6 +96,10 @@ MountsJournalUtil.mountTypes = setmetatable({
 	[231] = 3,
 	[232] = 3,
 	[254] = 3,
+	[402] = 4,
+	[411] = 4,
+	[426] = 4,
+	[430] = 4,
 }, {
 	__index = function(self, key)
 		if type(key) == "number" then

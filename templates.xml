@@ -1284,16 +1284,16 @@
 					self.icon:SetScale(1)
 				end
 			</OnMouseUp>
-			<OnEnable>
-				self.icon:SetVertexColor(.8, .6, .0)
-				self.normalTexture:SetVertexColor(.2, .18, .01)
-				self.check:SetAlpha(1)
-			</OnEnable>
-			<OnDisable>
-				self.icon:SetVertexColor(.3, .3, .3)
-				self.normalTexture:SetVertexColor(.1, .1, .1)
-				self.check:SetAlpha(0)
-			</OnDisable>
+		</Scripts>
+	</CheckButton>
+
+	<CheckButton name="MJSetDragonridingToggleTemplate" inherits="MJSetMountToggleTemplate" virtual="true">
+		<Size x="24" y="30"/>
+		<Scripts>
+			<OnLoad>
+				self.icon:SetSize(22, 22)
+				self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/dragonriding")
+			</OnLoad>
 		</Scripts>
 	</CheckButton>
 
@@ -1321,7 +1321,7 @@
 						<Anchor point="LEFT" x="6" y="1"/>
 					</Anchors>
 				</FontString>
-				<FontString parentKey="dragonriding" inherits="GameFontDisableSmall" justifyH="LEFT" text="MOUNT_JOURNAL_FILTER_DRAGONRIDING" maxLines="1" hidden="true">
+				<FontString parentKey="dragonridingText" inherits="GameFontDisableSmall" justifyH="LEFT" text="MOUNT_JOURNAL_FILTER_DRAGONRIDING" maxLines="1" hidden="true">
 					<Size x="147"/>
 					<Anchors>
 						<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeKey="$parent.name" x="0" y="0"/>
@@ -1431,6 +1431,14 @@
 					</OnLoad>
 				</Scripts>
 			</Button>
+			<CheckButton parentKey="dragonriding" inherits="MJSetDragonridingToggleTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="0"/>
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="type" value="dragonriding" type="string"/>
+				</KeyValues>
+			</CheckButton>
 			<CheckButton parentKey="fly" inherits="MJSetMountToggleTemplate">
 				<Anchors>
 					<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="14"/>
@@ -1514,6 +1522,14 @@
 			</Layer>
 		</Layers>
 		<Frames>
+			<CheckButton parentKey="dragonriding" inherits="MJSetDragonridingToggleTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativePoint="RIGHT" x="1" y="0"/>
+				</Anchors>
+				<KeyValues>
+					<KeyValue key="type" value="dragonriding" type="string"/>
+				</KeyValues>
+			</CheckButton>
 			<CheckButton parentKey="fly" inherits="MJSetMountToggleTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="0"/>

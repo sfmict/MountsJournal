@@ -155,6 +155,7 @@ end
 
 
 function mounts:checkProfile(profile)
+	profile.dragonriding = profile.dragonriding or {}
 	profile.fly = profile.fly or {}
 	profile.ground = profile.ground or {}
 	profile.swimming = profile.swimming or {}
@@ -180,9 +181,11 @@ end
 
 
 function mounts:setOldChanges()
+	self.setOldChanges = nil
+
 	local currentVersion = C_AddOns.GetAddOnMetadata(addon, "Version")
 	--@do-not-package@
-	if currentVersion == "@project-version@" then currentVersion = "9.0.8" end
+	if currentVersion == "@project-version@" then currentVersion = "10.1.15" end
 	--@end-do-not-package@
 
 	--IF < 8.3.2 GLOBAL
@@ -263,6 +266,37 @@ function mounts:setOldChanges()
 		if type(self.globalDB.petForMount) == "table" then
 			updateTable(self.defProfile.petForMount, self.globalDB.petForMount)
 			self.globalDB.petForMount = nil
+		end
+	end
+
+		-- IF < 10.1.16 GLOBAL
+	if compareVersion("10.1.16", self.globalDB.lastAddonVersion or "") then
+		local function listToDragonriding(dragonriding, list)
+			for mountID in pairs(list) do
+				local _,_,_,_,_,_,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
+				if isForDragonriding then
+					list[mountID] = nil
+					dragonriding[mountID] = true
+				end
+			end
+		end
+
+		local function allToDragonriding(profile)
+			listToDragonriding(profile.dragonriding, profile.fly)
+			listToDragonriding(profile.dragonriding, profile.ground)
+			listToDragonriding(profile.dragonriding, profile.swimming)
+
+			for mapID, data in next, profile.zoneMounts do
+				data.dragonriding = data.dragonriding or {}
+				listToDragonriding(data.dragonriding, data.fly)
+				listToDragonriding(data.dragonriding, data.ground)
+				listToDragonriding(data.dragonriding, data.swimming)
+			end
+		end
+
+		allToDragonriding(self.defProfile)
+		for name, data in next, self.profiles do
+			allToDragonriding(data)
 		end
 	end
 
@@ -487,8 +521,10 @@ do
 			mountType = "fly"
 		elseif mountType == 2 then
 			mountType = "ground"
-		else
+		elseif mountType == 3 then
 			mountType = "swimming"
+		else
+			mountType = "dragonriding"
 		end
 
 		list[mountType][mountID] = true
@@ -562,7 +598,7 @@ function mounts:setMountsList()
 			end
 
 			if list then
-				if not (self.list.fly and self.list.ground and self.list.swimming) then
+				if not (self.list.dragonriding and self.list.fly and self.list.ground and self.list.swimming) then
 					while list and list.listFromID do
 						if list.listFromID == self.defMountsListID then
 							list = profile
@@ -571,6 +607,10 @@ function mounts:setMountsList()
 						end
 					end
 					if list then
+						if not self.list.dragonriding and next(list.dragonriding) then
+							self.list.dragonriding = list.dragonriding
+							self.list.dragonridingWeight = profile.mountsWeight
+						end
 						if not self.list.fly and next(list.fly) then
 							self.list.fly = list.fly
 							self.list.flyWeight = profile.mountsWeight
@@ -590,9 +630,11 @@ function mounts:setMountsList()
 		mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
 	end
 
-	if not self.list.fly then self.list.fly = {} end
-	if not self.list.ground then self.list.ground = {} end
-	if not self.list.swimming then self.list.swimming = {} end
+	local empty = {}
+	if not self.list.dragonriding then self.list.dragonriding = empty end
+	if not self.list.fly then self.list.fly = empty end
+	if not self.list.ground then self.list.ground = empty end
+	if not self.list.swimming then self.list.swimming = empty end
 end
 -- mounts.NEW_WMO_CHUNK = mounts.setMountsList
 -- mounts.ZONE_CHANGED = mounts.setMountsList
@@ -700,14 +742,14 @@ function mounts:summon()
 end
 
 
-function mounts:summonDragonridable(mountsWeight)
+function mounts:summonDragonridable()
 	self.weight = 0
 	wipe(self.usableIDs)
 
-	for i = 1, #self.dragonridingMounts do
-		local mountID = self.dragonridingMounts[i]
-		if self.list.fly[mountID] then
-			self.weight = self.weight + (mountsWeight[mountID] or 100)
+	for mountID in next, self.list.dragonriding do
+		local _,_,_,_,_,_,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
+		if isForDragonriding then
+			self.weight = self.weight + (self.list.dragonridingWeight[mountID] or 100)
 			self.usableIDs[self.weight] = mountID
 		end
 	end
@@ -878,7 +920,7 @@ function mounts:setSummonList()
 	-- herbMount
 	and not (flags.herb and self:setUsableIDs(self.herbalismMounts, self.db.mountsWeight))
 	-- dragonridable
-	and not (flags.isDragonridable and self:summonDragonridable(self.list.flyWeight))
+	and not (flags.isDragonridable and self:summonDragonridable())
 	-- fly
 	and not (flags.fly and self:setUsableIDs(self.list.fly, self.list.flyWeight))
 	-- ground

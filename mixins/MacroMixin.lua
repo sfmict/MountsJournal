@@ -230,9 +230,9 @@ function macroFrame:PLAYER_LOGIN()
 				if self.classConfig.useRunningWild
 				and IsSpellKnown(87840)
 				and IsUsableSpell(87840)
-				and (self.mounts.summonList == self.mounts.db.ground and random(self.mounts.weight + (self.classConfig.runningWildsummoningChance or 100)) > self.mounts.weight
+				and (self.mounts.summonList == self.mounts.list.ground and random(self.mounts.weight + (self.classConfig.runningWildsummoningChance or 100)) > self.mounts.weight
 					or self.mounts.summonList == self.mounts.lowLevel
-					or not self.sFlags.fly and self.mounts.summonList == self.mounts.db.fly)
+					or not self.sFlags.fly and self.mounts.summonList == self.mounts.list.fly)
 				then
 					macro = self:addLine(macro, "/cast "..self:getSpellName(87840))
 				else

@@ -16,6 +16,7 @@ journal.colors = {
 	mount1 = CreateColor(.824, .78, .235),
 	mount2 = CreateColor(.42, .302, .224),
 	mount3 = CreateColor(.031, .333, .388),
+	mount4 = CreateColor(.03, .48, .03),
 }
 
 
@@ -537,12 +538,12 @@ function journal:init()
 		GameTooltip:Hide()
 	end
 
-	local function CreateButtonFilter(id, parent, width, height, texture, tooltip)
+	local function CreateButtonFilter(i, parent, width, height, texture)
 		local btn = CreateFrame("CheckButton", nil, parent, width == height and "MJFilterButtonSquareTemplate" or "MJFilterButtonRectangleTemplate")
-		btn.id = id
-		btn.tooltip = tooltip
+		btn.id = texture.id
+		btn.tooltip = texture.tooltip
 		btn:SetSize(width, height)
-		if id == 1 then
+		if i == 1 then
 			btn:SetPoint("LEFT", 5, 0)
 			parent.childs = {}
 		else
@@ -551,7 +552,7 @@ function journal:init()
 		parent.childs[#parent.childs + 1] = btn
 
 		btn.icon:SetTexture(texture.path)
-		btn.icon:SetSize(texture.width, texture.height)
+		btn.icon:SetSize(texture.iconWidth or texture.width, texture.height)
 		if texture.texCoord then btn.icon:SetTexCoord(unpack(texture.texCoord)) end
 
 		btn:SetScript("OnClick", filterClick)
@@ -561,40 +562,40 @@ function journal:init()
 
 	-- FILTERS TYPES BUTTONS
 	local typesTextures = {
-		{path = texPath.."fly", width = 32, height = 16},
-		{path = texPath.."ground", width = 32, height = 16},
-		{path = texPath.."swimming", width = 32, height = 16},
+		{id = 4, path = texPath.."dragonriding", width = 32, height = 16, iconWidth = 16, tooltip = MOUNT_JOURNAL_FILTER_DRAGONRIDING},
+		{id = 1, path = texPath.."fly", width = 32, height = 16, tooltip = L["MOUNT_TYPE_1"]},
+		{id = 2, path = texPath.."ground", width = 32, height = 16, tooltip = L["MOUNT_TYPE_2"]},
+		{id = 3, path = texPath.."swimming", width = 32, height = 16, tooltip = L["MOUNT_TYPE_3"]},
 	}
 
 	for i = 1, #typesTextures do
-		CreateButtonFilter(i, self.filtersBar.types, 83.3333, 25, typesTextures[i], L["MOUNT_TYPE_"..i])
+		CreateButtonFilter(i, self.filtersBar.types, 62.5, 25, typesTextures[i])
 	end
 
 	-- FILTERS SELECTED BUTTONS
-	typesTextures[4] = {path = "Interface/BUTTONS/UI-GROUPLOOT-PASS-DOWN", width = 16, height = 16}
+	typesTextures[5] = {id = 5, path = "Interface/BUTTONS/UI-GROUPLOOT-PASS-DOWN", width = 16, height = 16, tooltip = L["MOUNT_TYPE_4"]}
 	for i = 1, #typesTextures do
-		CreateButtonFilter(i, self.filtersBar.selected, 62.5, 25, typesTextures[i], L["MOUNT_TYPE_"..i])
+		CreateButtonFilter(i, self.filtersBar.selected, 50, 25, typesTextures[i])
 	end
 
 	-- FILTERS SOURCES BUTTONS
 	local sourcesTextures = {
-		{path = texPath.."sources", texCoord = {0, .25, 0, .25}, width = 20, height = 20},
-		{path = texPath.."sources", texCoord = {.25, .5, 0, .25}, width = 20, height = 20},
-		{path = texPath.."sources", texCoord = {.5, .75, 0, .25}, width = 20, height = 20},
-		{path = texPath.."sources", texCoord = {.75, 1, 0, .25}, width = 20, height = 20},
-		nil,
-		{path = texPath.."sources", texCoord = {.25, .5, .25, .5}, width = 20, height = 20},
-		{path = texPath.."sources", texCoord = {.5, .75, .25, .5}, width = 20, height = 20},
-		{path = texPath.."sources", texCoord = {.75, 1, .25, .5}, width = 20, height = 20},
-		{path = texPath.."sources", texCoord = {0, .25, .5, .75}, width = 20, height = 20},
-		{path = texPath.."sources", texCoord = {.25, .5, .5, .75}, width = 20, height = 20},
-		{path = texPath.."sources", texCoord = {.5, .75, .5, .75}, width = 20, height = 20},
+		{id = 1, path = texPath.."sources", texCoord = {0, .25, 0, .25}, width = 20, height = 20},
+		{id = 2, path = texPath.."sources", texCoord = {.25, .5, 0, .25}, width = 20, height = 20},
+		{id = 3, path = texPath.."sources", texCoord = {.5, .75, 0, .25}, width = 20, height = 20},
+		{id = 4, path = texPath.."sources", texCoord = {.75, 1, 0, .25}, width = 20, height = 20},
+		{id = 6, path = texPath.."sources", texCoord = {.25, .5, .25, .5}, width = 20, height = 20},
+		{id = 7, path = texPath.."sources", texCoord = {.5, .75, .25, .5}, width = 20, height = 20},
+		{id = 8, path = texPath.."sources", texCoord = {.75, 1, .25, .5}, width = 20, height = 20},
+		{id = 9, path = texPath.."sources", texCoord = {0, .25, .5, .75}, width = 20, height = 20},
+		{id = 10, path = texPath.."sources", texCoord = {.25, .5, .5, .75}, width = 20, height = 20},
+		{id = 11, path = texPath.."sources", texCoord = {.5, .75, .5, .75}, width = 20, height = 20},
 	}
 
 	for i = 1, #sourcesTextures do
-		if sourcesTextures[i] then
-			CreateButtonFilter(i, self.filtersBar.sources, 25, 25, sourcesTextures[i], _G["BATTLE_PET_SOURCE_"..i])
-		end
+		local t = sourcesTextures[i]
+		t.tooltip = _G["BATTLE_PET_SOURCE_"..t.id]
+		CreateButtonFilter(i, self.filtersBar.sources, 25, 25, t)
 	end
 
 	-- SHOWN PANEL
@@ -1147,18 +1148,21 @@ do
 		btn:SetChecked(checked)
 	end
 
-	function journal:updateMountToggleButton(btn)
-		if btn.mountID then
-			btn.fly:Enable()
-			btn.ground:Enable()
-			btn.swimming:Enable()
+	function journal:updateMountToggleButton(btn, isForDragonriding)
+		if isForDragonriding then
+			btn.dragonriding:Show()
+			btn.fly:Hide()
+			btn.ground:Hide()
+			btn.swimming:Hide()
+			setColor(self, btn.dragonriding, self.list and self.list.dragonriding[btn.mountID])
+		else
+			btn.dragonriding:Hide()
+			btn.fly:Show()
+			btn.ground:Show()
+			btn.swimming:Show()
 			setColor(self, btn.fly, self.list and self.list.fly[btn.mountID])
 			setColor(self, btn.ground, self.list and self.list.ground[btn.mountID])
 			setColor(self, btn.swimming, self.list and self.list.swimming[btn.mountID])
-		else
-			btn.fly:Disable()
-			btn.ground:Disable()
-			btn.swimming:Disable()
 		end
 	end
 end
@@ -1217,7 +1221,7 @@ function journal:defaultInitMountButton(btn, data)
 	btn:Enable()
 	btn.name:SetText(creatureName)
 	btn.name:SetTextColor((mounts.config.coloredMountNames and qualityColor or NORMAL_FONT_COLOR):GetRGB())
-	btn.dragonriding:SetShown(isForDragonriding)
+	btn.dragonridingText:SetShown(isForDragonriding)
 	btn.new:SetShown(needsFanfare)
 	btn.newGlow:SetShown(needsFanfare)
 	btn.background:SetVertexColor(1, 1, 1)
@@ -1257,7 +1261,7 @@ function journal:defaultInitMountButton(btn, data)
 		btn.name:SetFontObject("GameFontDisable")
 	end
 
-	self:updateMountToggleButton(btn)
+	self:updateMountToggleButton(btn, isForDragonriding)
 end
 
 
@@ -1267,7 +1271,7 @@ function journal:grid3InitMountButton(btn, data)
 
 		if data[i] then
 			local mountID = data[i].mountID
-			local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+			local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected, _, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
 			local needsFanfare = C_MountJournal.NeedsFanfare(mountID)
 			local qualityColor = getQualityColor(mountID)
 
@@ -1306,12 +1310,11 @@ function journal:grid3InitMountButton(btn, data)
 				g3btn.qualityBorder:SetAlpha(.5)
 			end
 
+			self:updateMountToggleButton(g3btn, isForDragonriding)
 			g3btn:Show()
 		else
 			g3btn:Hide()
 		end
-
-		self:updateMountToggleButton(g3btn)
 	end
 end
 
@@ -1597,6 +1600,7 @@ end
 
 function journal:createMountList(mapID)
 	self.zoneMounts[mapID] = {
+		dragonriding = {},
 		fly = {},
 		ground = {},
 		swimming = {},
@@ -1795,6 +1799,20 @@ function journal:updateMapSettings()
 end
 
 
+local function getRarityPercent(rarity)
+	local k
+	if rarity == 0 then
+		k = 1
+	else
+		k = 100
+		while rarity < 1 / k do
+			k = k * 10
+		end
+	end
+	return (math.floor(rarity * k + .5) / k).."%"
+end
+
+
 function journal:updateMountDisplay(forceSceneChange, creatureID)
 	local info = self.mountDisplay.info
 	if self.selectedMountID then
@@ -1822,11 +1840,7 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 			self.mountDisplay.lastCreatureID = creatureID
 
 			local rarity = mounts.mountsDB[self.selectedMountID][2]
-			local k = 100
-			if rarity < .0001 then k = 100000
-			elseif rarity < .001 then k = 10000
-			elseif rarity < .01 then k = 1000 end
-			info.rarityValue:SetText((math.floor(rarity * k + .5) / k).."%")
+			info.rarityValue:SetText(getRarityPercent(rarity))
 			info.rarityValue:SetShown(rarity > 0)
 
 			info.link:SetShown(mounts.config.showWowheadLink)
@@ -2185,6 +2199,16 @@ function journal:filterDropDown_Initialize(btn, level, value)
 
 			info.notCheckable = nil
 			local types = mounts.filters.types
+
+			info.text = MOUNT_JOURNAL_FILTER_DRAGONRIDING
+			info.func = function(_,_,_, value)
+				types[4] = value
+				self:updateBtnFilters()
+				self:updateMountsList()
+			end
+			info.checked = function() return types[4] end
+			btn:ddAddButton(info, level)
+
 			for i = 1, 3 do
 				info.text = L["MOUNT_TYPE_"..i]
 				info.func = function(_,_,_, value)
@@ -2216,7 +2240,17 @@ function journal:filterDropDown_Initialize(btn, level, value)
 
 			info.notCheckable = nil
 			local selected = mounts.filters.selected
-			for i = 1, 4 do
+
+			info.text = MOUNT_JOURNAL_FILTER_DRAGONRIDING
+			info.func = function(_,_,_, value)
+				selected[4] = value
+				self:updateBtnFilters()
+				self:updateMountsList()
+			end
+			info.checked = function() return selected[4] end
+			btn:ddAddButton(info, level)
+
+			for i = 1, 3 do
 				info.text = L["MOUNT_TYPE_"..i]
 				info.func = function(_,_,_, value)
 					selected[i] = value
@@ -2226,6 +2260,15 @@ function journal:filterDropDown_Initialize(btn, level, value)
 				info.checked = function() return selected[i] end
 				btn:ddAddButton(info, level)
 			end
+
+			info.text = L["MOUNT_TYPE_4"]
+			info.func = function(_,_,_, value)
+				selected[5] = value
+				self:updateBtnFilters()
+				self:updateMountsList()
+			end
+			info.checked = function() return selected[5] end
+			btn:ddAddButton(info, level)
 		elseif value == 3 then -- SOURCES
 			info.text = CHECK_ALL
 			info.func = function()
@@ -2844,7 +2887,7 @@ function journal:updateBtnFilters()
 			if i == #filter then
 				for _, btn in ipairs(filtersBar[typeFilter].childs) do
 					btn:SetChecked(false)
-					if btn.id > 3 then
+					if btn.id > 4 then
 						btn.icon:SetDesaturated()
 					else
 						btn.icon:SetVertexColor(self.colors["mount"..btn.id]:GetRGB())
@@ -2856,7 +2899,7 @@ function journal:updateBtnFilters()
 				for _, btn in ipairs(filtersBar[typeFilter].childs) do
 					local checked = filter[btn.id]
 					btn:SetChecked(checked)
-					if btn.id > 3 then
+					if btn.id > 4 then
 						btn.icon:SetDesaturated(not checked)
 					else
 						local color = checked and self.colors["mount"..btn.id] or self.colors.dark
@@ -2990,10 +3033,12 @@ function journal:updateMountsList()
 		-- SELECTED
 		and (list and (selected[1] and list.fly[mountID]
 		            or selected[2] and list.ground[mountID]
-		            or selected[3] and list.swimming[mountID])
-		  or selected[4] and not (list and (list.fly[mountID]
+		            or selected[3] and list.swimming[mountID]
+		            or selected[4] and list.dragonriding[mountID])
+		  or selected[5] and not (list and (list.fly[mountID]
 		                                 or list.ground[mountID]
-		                                 or list.swimming[mountID])))
+		                                 or list.swimming[mountID]
+		                                 or list.dragonriding[mountID])))
 		-- PET
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
 		-- MOUNTS RARITY
