@@ -185,7 +185,7 @@ function mounts:setOldChanges()
 
 	local currentVersion = C_AddOns.GetAddOnMetadata(addon, "Version")
 	--@do-not-package@
-	if currentVersion == "@project-version@" then currentVersion = "10.1.17" end
+	if currentVersion == "@project-version@" then currentVersion = "10.1.18" end
 	--@end-do-not-package@
 
 	--IF < 8.3.2 GLOBAL
@@ -269,10 +269,10 @@ function mounts:setOldChanges()
 		end
 	end
 
-		-- IF < 10.1.16 GLOBAL
-	if compareVersion("10.1.17", self.globalDB.lastAddonVersion or "") then
+	-- IF < 10.1.18 GLOBAL
+	if compareVersion("10.1.18", self.globalDB.lastAddonVersion or "") then
 		local function listToDragonriding(dragonriding, list)
-			for mountID in pairs(list) do
+			for mountID in next, list do
 				local _,_,_,_,_,_,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
 				if isForDragonriding then
 					list[mountID] = nil
@@ -294,10 +294,12 @@ function mounts:setOldChanges()
 			end
 		end
 
-		allToDragonriding(self.defProfile)
-		for name, data in next, self.profiles do
-			allToDragonriding(data)
-		end
+		C_Timer.After(0, function()
+			allToDragonriding(self.defProfile)
+			for name, data in next, self.profiles do
+				allToDragonriding(data)
+			end
+		end)
 	end
 
 	-- SET LAST GLOBAL VERSION

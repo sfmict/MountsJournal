@@ -101,7 +101,7 @@ do
 		for mapID, mapConfig in pairs(self.journal.zoneMounts) do
 			if mapConfig.listFromID then
 				createOptionButton(self.lists[2].childs, mapID, mapConfig.listFromID)
-			elseif next(mapConfig.fly) or next(mapConfig.ground) or next(mapConfig.swimming) then
+			elseif next(mapConfig.dragonriding) or next(mapConfig.fly) or next(mapConfig.ground) or next(mapConfig.swimming) then
 				createOptionButton(self.lists[1].childs, mapID)
 			end
 

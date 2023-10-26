@@ -1622,7 +1622,7 @@ function journal:getRemoveMountList(mapID)
 		end
 	end
 
-	if not (next(list.fly) or next(list.ground) or next(list.swimming))
+	if not (next(list.dragonriding) or next(list.fly) or next(list.ground) or next(list.swimming))
 	and not flags
 	and not list.listFromID then
 		self.zoneMounts[mapID] = nil
