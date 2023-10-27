@@ -148,6 +148,10 @@ function mounts:ADDON_LOADED(addonName)
 		}
 		self.usableRepairMounts = {}
 		self.usableIDs = {}
+		self.magicBrooms = {
+			{itemID = 37011},
+			{mountID = 1799},
+		}
 		self.weight = 0
 		self:setUsableRepairMounts()
 	end

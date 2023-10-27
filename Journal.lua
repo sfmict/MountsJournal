@@ -1306,8 +1306,8 @@ function journal:grid3InitMountButton(btn, data)
 				g3btn.qualityBorder:SetAlpha(.75)
 			else
 				g3btn.icon:SetDesaturated(true)
-				g3btn.icon:SetAlpha(.5)
-				g3btn.qualityBorder:SetAlpha(.5)
+				g3btn.icon:SetAlpha(.35)
+				g3btn.qualityBorder:SetAlpha(.25)
 			end
 
 			self:updateMountToggleButton(g3btn, isForDragonriding)

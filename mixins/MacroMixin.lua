@@ -21,20 +21,6 @@ function macroFrame:PLAYER_LOGIN()
 	-- ---------------------
 	self.class = select(2, UnitClass("player"))
 	self.fishingRodID = 133755
-	self.broomID = 37011
-	self.itemName = setmetatable({}, {__index = function(self, itemID)
-		if C_Item.DoesItemExistByID(itemID) then
-			local item = Item:CreateFromItemID(itemID)
-			if item:IsItemDataCached() then
-				self[itemID] = item:GetItemName()
-			else
-				item:ContinueOnItemLoad(function()
-					self[itemID] = item:GetItemName()
-				end)
-			end
-			return rawget(self, itemID)
-		end
-	end})
 	local _,_, raceID = UnitRace("player")
 
 	local function loadFunc(funcStr)
@@ -220,7 +206,12 @@ function macroFrame:PLAYER_LOGIN()
 	]]
 	defMacro = defMacro..[[
 			if self.magicBroom then
-				macro = self:addLine(macro, "/use "..self.itemName[self.broomID]) -- MAGIC BROOM
+				if self.magicBroom.itemID then
+					macro = self:addLine(macro, "/use item:"..self.magicBroom.itemID) -- USE ITEM BROOM
+				elseif self.magicBroom.mountID then
+					local name = C_MountJournal.GetMountInfoByID(self.magicBroom.mountID)
+					macro = self:addLine(macro, "/use "..name) -- USE MOUNT BROOM
+				end
 				self.lastUseTime = GetTime()
 			else
 				self.mounts:setSummonList()
@@ -458,6 +449,44 @@ macroFrame.PLAYER_MOUNT_DISPLAY_CHANGED = macroFrame.autoEquip
 macroFrame.MOUNT_JOURNAL_USABILITY_CHANGED = macroFrame.autoEquip
 
 
+do
+	local function isBroomUsable(data)
+		if data.mountID then
+			local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(data.mountID)
+			return isUsable
+		elseif data.itemID then
+			return GetItemCount(data.itemID) > 0
+		end
+	end
+
+
+	function macroFrame:getBroomData()
+		if not self.config.useMagicBroom
+		or not self.mounts.calendar:isHolidayActive(324) -- Hallow's End
+		or self.sFlags.isDragonridable
+		or self.sFlags.targetMount
+		or not self.sFlags.groundSpellKnown
+		or self.sFlags.herb
+		or self.sFlags.swimming
+		then return end
+
+		local data = self.config.broomSelectedMount
+		if data then
+			return isBroomUsable(data) and data
+		else
+			local usable = {}
+			for i = 1, #self.mounts.magicBrooms do
+				local data = self.mounts.magicBrooms[i]
+				if isBroomUsable(data) then usable[#usable + 1] = data end
+			end
+
+			if #usable == 0 then return
+			else return usable[random(#usable)] end
+		end
+	end
+end
+
+
 function macroFrame:getMacro()
 	self.mounts:setFlags()
 
@@ -477,15 +506,7 @@ function macroFrame:getMacro()
 	end
 
 	-- MAGIC BROOM IS USABLE
-	self.magicBroom = self.config.useMagicBroom
-	                  and not self.sFlags.isDragonridable
-	                  and not self.sFlags.targetMount
-	                  and GetItemCount(self.broomID) > 0
-	                  and self.sFlags.groundSpellKnown
-	                  and not self.sFlags.isIndoors
-	                  and not self.sFlags.herb
-	                  and not self.sFlags.swimming
-	                  and self.itemName[self.broomID]
+	self.magicBroom = self:getBroomData()
 
 	-- CLASS OPTIONS
 	local macro = self:getClassOptionMacro()

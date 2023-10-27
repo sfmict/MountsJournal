@@ -102,7 +102,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 	end)
 
 	function dd:replayAnimation()
-		if self.selectedValue == "custom" or self.selectedValue and (self.selectedValue.type == nil or self.selectedValue.type >= self.currentMountType) then
+		if self.selectedValue == "custom" or self.selectedValue and (self.selectedValue.type == nil or self.selectedValue.type >= self.currentMountType or self.currentMountType == 4) then
 			if self.selectedValue.animation ~= 0 then
 				self:SetScript("OnUpdate", self.onUpdate)
 			end
@@ -143,7 +143,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 
 		info.list = {}
 		for _, v in ipairs(self.animationsList) do
-			if v.type == nil or v.type >= mountType then
+			if v.type == nil or v.type >= mountType or mountType == 4 then
 				tinsert(info.list, {
 					text = ("%s|cff808080.%d%s|r"):format(v.name, v.animation, v.isKit and ".k" or ""),
 					value = v,

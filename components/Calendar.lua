@@ -253,6 +253,11 @@ function calendar:updateTodayEvents()
 end
 
 
+function calendar:isHolidayActive(eventID)
+	return self.activeHolidays[eventID]
+end
+
+
 function calendar:getHolidayProfileNames()
 	for eventID, data in pairs(self.holidayProfiles) do
 		if data.profileName and not self.profiles[data.profileName] then

@@ -33,6 +33,8 @@ config:SetScript("OnShow", function(self)
 		OnAccept = function(popup, cb) popup:Hide() cb() end,
 	}
 
+	local randomMountIcon = 413588
+
 	-- ENABLE APPLY
 	local function enableBtns()
 		self.applyBtn:Enable()
@@ -98,7 +100,7 @@ config:SetScript("OnShow", function(self)
 	self.createMacroBtn:SetSize(258, 30)
 	self.createMacroBtn:SetPoint("TOPLEFT", summon1, "BOTTOMLEFT", 0, -5)
 	self.createMacroBtn:SetText(L["CreateMacro"])
-	self.createMacroBtn:SetScript("OnClick", function() self:createMacro(self.macroName, self.secureButtonNameMount, 413588, true) end)
+	self.createMacroBtn:SetScript("OnClick", function() self:createMacro(self.macroName, self.secureButtonNameMount, randomMountIcon, true) end)
 
 	setTooltip(self.createMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
 
@@ -281,7 +283,7 @@ config:SetScript("OnShow", function(self)
 
 		info.text = L["Random available mount"]
 		info.value = nil
-		info.icon = 413588
+		info.icon = randomMountIcon
 		info.checked = function(btn) return self.selectedValue == btn.value end
 		info.func = function(btn)
 			self:ddSetSelectedValue(btn.value)
@@ -314,33 +316,80 @@ config:SetScript("OnShow", function(self)
 	-- USE MAGIC BROOM
 	self.useMagicBroom = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.useMagicBroom:SetPoint("TOPLEFT", self.repairMountsCombobox, "BOTTOMLEFT", -20, -20)
+	self.useMagicBroom.Text:SetPoint("RIGHT", self.rightPanelScroll)
 	local magicBroom = Item:CreateFromItemID(37011)
-	if magicBroom:IsItemDataCached() then
-		self.useMagicBroom.Text:SetText(L["Use %s"]:format(magicBroom:GetItemLink()))
-	else
-		magicBroom:ContinueOnItemLoad(function()
-			self.useMagicBroom.Text:SetText(L["Use %s"]:format(magicBroom:GetItemLink()))
-		end)
-	end
+	magicBroom:ContinueOnItemLoad(function()
+		self.useMagicBroom.Text:SetText(L["Use %s"]:format(magicBroom:GetItemLink()..", "..GetSpellLink(419345)))
+	end)
 	util.setHyperlinkTooltip(self.useMagicBroom)
 	self.useMagicBroom.tooltipText = L["UseMagicBroomTitle"]
 	self.useMagicBroom.tooltipRequirement = L["UseMagicBroomDescription"]
 	self.useMagicBroom:HookScript("OnClick", enableBtns)
 
+	-- REPAIR MOUNTS COMBOBOX
+	self.magicBroomCombobox = LibStub("LibSFDropDown-1.4"):CreateButton(self.rightPanelScroll.child, 230)
+	self.magicBroomCombobox:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 20, -8)
+	self.magicBroomCombobox:ddSetInitFunc(function(self, level)
+		local info = {}
+
+		info.text = L["Random available mount"]
+		info.value = nil
+		info.icon = randomMountIcon
+		info.checked = function(btn) return self.selectedValue == btn.value end
+		info.func = function(btn)
+			self:ddSetSelectedValue(btn.value)
+			enableBtns()
+		end
+		self:ddAddButton(info, level)
+
+		info.tooltipWhileDisabled = true
+		for i, data in ipairs(mounts.magicBrooms) do
+			if data.mountID then
+				local name, spellID, icon, _,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(data.mountID)
+				info.disabled = not isCollected
+				info.text = name
+				info.icon = icon
+				info.value = data
+				info.checked = function(btn) return self.selectedValue and self.selectedValue.mountID == btn.value.mountID end
+				info.func = function(btn)
+					self:ddSetSelectedValue(btn.value)
+					enableBtns()
+				end
+				info.OnTooltipShow = function(btn, tooltip)
+					tooltip:SetMountBySpellID(spellID)
+				end
+				self:ddAddButton(info, level)
+			elseif data.itemID then
+				local item = Item:CreateFromItemID(data.itemID)
+				item:ContinueOnItemLoad(function()
+					info.disabled = nil
+					info.text = item:GetItemName()
+					info.icon = item:GetItemIcon()
+					info.value = data
+					info.checked = function(btn) return self.selectedValue and self.selectedValue.itemID == btn.value.itemID end
+					info.func = function(btn)
+						self:ddSetSelectedValue(btn.value)
+						enableBtns()
+					end
+					info.OnTooltipShow = function(btn, tooltip)
+						tooltip:SetHyperlink(item:GetItemLink())
+					end
+					self:ddAddButton(info, level)
+				end)
+			end
+		end
+	end)
+	util.setCheckboxChild(self.useMagicBroom, self.magicBroomCombobox)
+
 	-- USE UNDERLIGHT ANGLER
 	if C_Item.DoesItemExistByID(133755) then
 		self.useUnderlightAngler = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
-		self.useUnderlightAngler:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 0, -15)
+		self.useUnderlightAngler:SetPoint("TOPLEFT", self.magicBroomCombobox, "BOTTOMLEFT", -20, -20)
 		local underlightAngler = Item:CreateFromItemID(133755)
-		if underlightAngler:IsItemDataCached() then
+		underlightAngler:ContinueOnItemLoad(function()
 			self.useUnderlightAngler.Text:SetText(L["Use %s"]:format(underlightAngler:GetItemLink()))
 			self.useUnderlightAngler.tooltipText = L["Use %s"]:format(underlightAngler:GetItemName())
-		else
-			underlightAngler:ContinueOnItemLoad(function()
-				self.useUnderlightAngler.Text:SetText(L["Use %s"]:format(underlightAngler:GetItemLink()))
-				self.useUnderlightAngler.tooltipText = L["Use %s"]:format(underlightAngler:GetItemName())
-			end)
-		end
+		end)
 		util.setHyperlinkTooltip(self.useUnderlightAngler)
 		self.useUnderlightAngler.tooltipRequirement = L["UseUnderlightAnglerDescription"]
 		self.useUnderlightAngler:HookScript("OnClick", enableBtns)
@@ -516,9 +565,23 @@ config:SetScript("OnShow", function(self)
 			local name, _, icon = C_MountJournal.GetMountInfoByID(mounts.config.repairSelectedMount)
 			self.repairMountsCombobox:ddSetSelectedText(name, icon)
 		else
-			self.repairMountsCombobox:ddSetSelectedText(L["Random available mount"], 413588)
+			self.repairMountsCombobox:ddSetSelectedText(L["Random available mount"], randomMountIcon)
 		end
 		self.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
+		self.magicBroomCombobox:ddSetSelectedValue(mounts.config.broomSelectedMount)
+		if mounts.config.broomSelectedMount then
+			if mounts.config.broomSelectedMount.mountID then
+				local name, _, icon = C_MountJournal.GetMountInfoByID(mounts.config.broomSelectedMount.mountID)
+				self.magicBroomCombobox:ddSetSelectedText(name, icon)
+			elseif mounts.config.broomSelectedMount.itemID then
+				local item = Item:CreateFromItemID(mounts.config.broomSelectedMount.itemID)
+				item:ContinueOnItemLoad(function()
+					self.magicBroomCombobox:ddSetSelectedText(item:GetItemName(), item:GetItemIcon())
+				end)
+			end
+		else
+			self.magicBroomCombobox:ddSetSelectedText(L["Random available mount"], randomMountIcon)
+		end
 		if self.useUnderlightAngler then
 			self.useUnderlightAngler:SetChecked(mounts.config.useUnderlightAngler)
 			self.autoUseUnderlightAngler:SetChecked(mounts.config.autoUseUnderlightAngler)
@@ -552,6 +615,7 @@ config:SetScript("OnShow", function(self)
 		mounts.config.useRepairFlyableDurability = tonumber(self.repairFlyablePercent:GetText()) or 0
 		mounts.config.repairSelectedMount = self.repairMountsCombobox.selectedValue
 		mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
+		mounts.config.broomSelectedMount = self.magicBroomCombobox.selectedValue
 		if self.useUnderlightAngler then
 			mounts.config.useUnderlightAngler = self.useUnderlightAngler:GetChecked()
 			mounts.config.autoUseUnderlightAngler = self.autoUseUnderlightAngler:GetChecked()
