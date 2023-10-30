@@ -1799,20 +1799,6 @@ function journal:updateMapSettings()
 end
 
 
-local function getRarityPercent(rarity)
-	local k
-	if rarity == 0 then
-		k = 1
-	else
-		k = 100
-		while rarity < 1 / k do
-			k = k * 10
-		end
-	end
-	return (math.floor(rarity * k + .5) / k).."%"
-end
-
-
 function journal:updateMountDisplay(forceSceneChange, creatureID)
 	local info = self.mountDisplay.info
 	if self.selectedMountID then
@@ -1840,7 +1826,7 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 			self.mountDisplay.lastCreatureID = creatureID
 
 			local rarity = mounts.mountsDB[self.selectedMountID][2]
-			info.rarityValue:SetText(getRarityPercent(rarity))
+			info.rarityValue:SetText(rarity.."%")
 			info.rarityValue:SetShown(rarity > 0)
 
 			info.link:SetShown(mounts.config.showWowheadLink)

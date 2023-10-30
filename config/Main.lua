@@ -317,16 +317,12 @@ config:SetScript("OnShow", function(self)
 	self.useMagicBroom = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.useMagicBroom:SetPoint("TOPLEFT", self.repairMountsCombobox, "BOTTOMLEFT", -20, -20)
 	self.useMagicBroom.Text:SetPoint("RIGHT", self.rightPanelScroll)
-	local magicBroom = Item:CreateFromItemID(37011)
-	magicBroom:ContinueOnItemLoad(function()
-		self.useMagicBroom.Text:SetText(L["Use %s"]:format(magicBroom:GetItemLink()..", "..GetSpellLink(419345)))
-	end)
-	util.setHyperlinkTooltip(self.useMagicBroom)
-	self.useMagicBroom.tooltipText = L["UseMagicBroomTitle"]
-	self.useMagicBroom.tooltipRequirement = L["UseMagicBroomDescription"]
+	self.useMagicBroom.Text:SetText(L["UseHallowsEndMounts"])
+	self.useMagicBroom.tooltipText = L["UseHallowsEndMounts"]
+	self.useMagicBroom.tooltipRequirement = L["UseHallowsEndMountsDescription"]
 	self.useMagicBroom:HookScript("OnClick", enableBtns)
 
-	-- REPAIR MOUNTS COMBOBOX
+	-- MAGIC BROOM COMBOBOX
 	self.magicBroomCombobox = LibStub("LibSFDropDown-1.4"):CreateButton(self.rightPanelScroll.child, 230)
 	self.magicBroomCombobox:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 20, -8)
 	self.magicBroomCombobox:ddSetInitFunc(function(self, level)
