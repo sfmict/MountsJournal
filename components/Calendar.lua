@@ -248,8 +248,8 @@ function calendar:updateTodayEvents()
 
 	self:restoreBackup()
 
+	C_Timer.After(secondsToUpdate - GetServerTime() % 60, function() self:updateTodayEvents() end)
 	self:event("CALENDAR_UPDATE_EVENT_LIST")
-	C_Timer.After(secondsToUpdate, function() self:updateTodayEvents() end)
 end
 
 

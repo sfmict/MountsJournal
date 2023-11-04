@@ -357,7 +357,7 @@ config:SetScript("OnShow", function(self)
 				self:ddAddButton(info, level)
 			elseif data.itemID then
 				local item = Item:CreateFromItemID(data.itemID)
-				item:ContinueOnItemLoad(function()
+				if item:IsItemDataCached() then
 					info.disabled = nil
 					info.text = item:GetItemName()
 					info.icon = item:GetItemIcon()
@@ -371,7 +371,12 @@ config:SetScript("OnShow", function(self)
 						tooltip:SetHyperlink(item:GetItemLink())
 					end
 					self:ddAddButton(info, level)
-				end)
+				else
+					item:ContinueOnItemLoad(function()
+						self:ddCloseMenus()
+						self:ddToggle(1, nil, self)
+					end)
+				end
 			end
 		end
 	end)
