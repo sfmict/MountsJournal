@@ -35,8 +35,8 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 	end
 
 	function activeCamera:ApplyFromModelSceneCameraInfo(modelSceneCameraInfo, transitionType, modificationType)
-		modelSceneCameraInfo.target.z = 1
-		modelSceneCameraInfo.maxZoomDistance = 24
+		modelSceneCameraInfo.target.z = modelSceneCameraInfo.target.z - 1.2
+		modelSceneCameraInfo.maxZoomDistance = modelSceneCameraInfo.maxZoomDistance + 6
 
 		local transitionalCameraInfo = self:CalculateTransitionalValues(self.modelSceneCameraInfo, modelSceneCameraInfo, modificationType)
 		self.modelSceneCameraInfo = modelSceneCameraInfo
@@ -55,9 +55,10 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 		self:SetRoll(transitionalCameraInfo.roll)
 
 		if self.xOffset == nil then
-			self.offsetDelta = 50
+			self.defYOfsset = 20
+			self.yOffsetDelta = 40
 			self.xOffset = 0
-			self.yOffset = mounts.config.mountDescriptionToggle and self.offsetDelta or 0
+			self.yOffset = self.defYOfsset + (mounts.config.mountDescriptionToggle and self.yOffsetDelta or 0)
 			self.panningXOffset = 0
 			self.panningYOffset = self.yOffset
 			self:setMaxOffsets()
@@ -263,6 +264,10 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 		self:SetRoll(self.modelSceneCameraInfo.roll)
 		self:SetZoomDistance(self.modelSceneCameraInfo.zoomDistance)
 		self.xOffset = 0
-		self.yOffset = mounts.config.mountDescriptionToggle and self.offsetDelta or 0
+		self.yOffset = self.defYOfsset + (mounts.config.mountDescriptionToggle and self.yOffsetDelta or 0)
+	end
+
+	function activeCamera:updateYOffset()
+		self.yOffset = self.yOffset + (mounts.config.mountDescriptionToggle and 1 or -1) * activeCamera.yOffsetDelta
 	end
 end)

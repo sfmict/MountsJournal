@@ -458,9 +458,7 @@ function journal:init()
 		mounts.config.mountDescriptionToggle = checked
 
 		local activeCamera = self.modelScene.activeCamera
-		if activeCamera then
-			activeCamera.yOffset = activeCamera.yOffset + (checked and activeCamera.offsetDelta or -activeCamera.offsetDelta)
-		end
+		if activeCamera then activeCamera:updateYOffset() end
 	end
 	setShownDescription(mountDescriptionToggle)
 	mountDescriptionToggle:HookScript("OnClick", setShownDescription)

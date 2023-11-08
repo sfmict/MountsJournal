@@ -77,7 +77,7 @@ aboutConfig:SetScript("OnShow", function(self)
 		{"esMX", "Pedrorco"},
 		{"frFR", "6urvan, Asraael, okaboo, Braincell1980, macumbafeh"},
 		{"ptBR", "LutzPS"},
-		{"zhCN", "萌丶汉丶纸"},
+		{"zhCN", "萌丶汉丶纸, kuaishan"},
 		{"zhTW", "BNS333"},
 	}
 

@@ -753,8 +753,8 @@ function mounts:summonDragonridable()
 	wipe(self.usableIDs)
 
 	for mountID in next, self.list.dragonriding do
-		local _,_,_,_,_,_,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
-		if isForDragonriding then
+		local _,_,_,_, isUsable, _,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
+		if isUsable and isForDragonriding then
 			self.weight = self.weight + (self.list.dragonridingWeight[mountID] or 100)
 			self.usableIDs[self.weight] = mountID
 		end
