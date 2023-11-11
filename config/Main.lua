@@ -4,8 +4,10 @@ local config = CreateFrame("FRAME", "MountsJournalConfig")
 config:Hide()
 config.macroName = "MJMacro"
 config.secondMacroName = "MJSecondMacro"
+config.thirdMacroName = "MJThirdMacro"
 config.secureButtonNameMount = addon.."_Mount"
 config.secureButtonNameSecondMount = addon.."_SecondMount"
+config.secureButtonNameThirdMount = addon.."_ThirdMount"
 
 
 config:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
@@ -14,9 +16,11 @@ config:RegisterEvent("PLAYER_LOGIN")
 
 -- BIND MOUNT
 function config:PLAYER_LOGIN()
-	self.bindMount = binding:createButtonBinding(nil, self.secureButtonNameMount, ("%s %s %d"):format(addon, SUMMONS, 1), "MJSecureActionButtonTemplate")
-	self.bindSecondMount = binding:createButtonBinding(nil, self.secureButtonNameSecondMount, ("%s %s %d"):format(addon, SUMMONS, 2), "MJSecureActionButtonTemplate")
+	self.bindMount = binding:createButtonBinding(self.secureButtonNameMount, ("%s %s %d"):format(addon, SUMMONS, 1), "MJSecureActionButtonTemplate")
+	self.bindSecondMount = binding:createButtonBinding(self.secureButtonNameSecondMount, ("%s %s %d"):format(addon, SUMMONS, 2), "MJSecureActionButtonTemplate")
 	self.bindSecondMount.secure.forceModifier = true
+	self.bindThirdMount = binding:createButtonBinding(self.secureButtonNameThirdMount, ("%s %s %d"):format(addon, SUMMONS, 3), "MJSecureActionButtonTemplate")
+	self.bindThirdMount.secure.forceFly = true
 end
 
 
@@ -84,7 +88,7 @@ config:SetScript("OnShow", function(self)
 
 	-- WATER JUMP
 	self.waterJump = CreateFrame("CheckButton", nil, self.leftPanel, "MJCheckButtonTemplate")
-	self.waterJump:SetPoint("TOPLEFT", subtitle, "BOTTOMLEFT", 8, -20)
+	self.waterJump:SetPoint("TOPLEFT", self.leftPanel, 13, -15)
 	self.waterJump.Text:SetText(L["Handle a jump in water"])
 	self.waterJump.tooltipText = L["Handle a jump in water"]
 	self.waterJump.tooltipRequirement = L["WaterJumpDescription"]
@@ -114,15 +118,15 @@ config:SetScript("OnShow", function(self)
 	self.bindMount:SetSize(258, 22)
 	self.bindMount:SetPoint("TOPLEFT", self.createMacroBtn, "BOTTOMLEFT", 0, -20)
 
-	-- HELP PLATE
-	local helpPlate = CreateFrame("FRAME", nil, self.leftPanel, "MJHelpPlate")
-	helpPlate:SetPoint("TOP", self.bindMount, "BOTTOM", 0, -20)
-	helpPlate.tooltip = L["SecondMountTooltipTitle"]:format(SUMMONS)
-	helpPlate.tooltipDescription = "\n"..L["SecondMountTooltipDescription"]
+	-- HELP PLATE SECOND MOUNT
+	local helpPlateSecond = CreateFrame("FRAME", nil, self.leftPanel, "MJHelpPlate")
+	helpPlateSecond:SetPoint("TOP", self.bindMount, "BOTTOM", 0, -10)
+	helpPlateSecond.tooltip = L["SecondMountTooltipTitle"]:format(SUMMONS)
+	helpPlateSecond.tooltipDescription = "\n"..L["SecondMountTooltipDescription"]
 
 	-- MODIFIER TEXT
 	local modifierText = self.leftPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	modifierText:SetPoint("TOPLEFT", self.bindMount, "BOTTOMLEFT", 0, -80)
+	modifierText:SetPoint("TOPLEFT", self.bindMount, "BOTTOMLEFT", 0, -70)
 	modifierText:SetText(L["Modifier"]..":")
 
 	-- MODIFIER COMBOBOX
@@ -166,6 +170,36 @@ config:SetScript("OnShow", function(self)
 	self.bindSecondMount:SetParent(self.leftPanel)
 	self.bindSecondMount:SetSize(258, 22)
 	self.bindSecondMount:SetPoint("TOP", self.createSecondMacroBtn, "BOTTOM", 0, -20)
+
+	-- HELP PLATE THIRD MOUNT
+	local helpPlateThird = CreateFrame("FRAME", nil, self.leftPanel, "MJHelpPlate")
+	helpPlateThird:SetPoint("TOP", self.bindSecondMount, "BOTTOM", 0, -10)
+	helpPlateThird.tooltip = SUMMONS.." 3"
+	helpPlateThird.tooltipDescription = "\n"..L["ThirdMountTooltipDescription"]
+
+	-- SUMMON 3
+	local summon3 = self.leftPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+	summon3:SetPoint("TOPLEFT", self.bindSecondMount, "BOTTOMLEFT", 0, -55)
+	summon3:SetText(SUMMONS.." 3")
+
+	-- CREATE THIRD MACRO
+	self.createThirdMacroBtn = CreateFrame("BUTTON", nil, self.leftPanel, "UIPanelButtonTemplate")
+	self.createThirdMacroBtn:SetSize(258, 30)
+	self.createThirdMacroBtn:SetPoint("TOPLEFT", summon3, "BOTTOMLEFT", 0, -5)
+	self.createThirdMacroBtn:SetText(L["CreateMacro"])
+	self.createThirdMacroBtn:SetScript("OnClick", function() self:createMacro(self.thirdMacroName, self.secureButtonNameThirdMount, 132239, true) end)
+
+	setTooltip(self.createThirdMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
+
+	-- OR TEXT THIRD
+	local macroOrBindThird = self.leftPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	macroOrBindThird:SetPoint("TOP", self.createThirdMacroBtn, "BOTTOM", 0, -3)
+	macroOrBindThird:SetText(L["or key bind"])
+
+	-- BIND THIRD MOUNT
+	self.bindThirdMount:SetParent(self.leftPanel)
+	self.bindThirdMount:SetSize(258, 22)
+	self.bindThirdMount:SetPoint("TOP", self.createThirdMacroBtn, "BOTTOM", 0, -20)
 
 	-- UNBOUND MESSAGE
 	binding.unboundMessage:SetParent(self)

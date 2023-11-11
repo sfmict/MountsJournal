@@ -111,9 +111,15 @@
 				</HighlightTexture>
 			</Button>
 
-			<Button parentKey="summon2" inherits="MJSecureMacroButtonTemplate">
+			<Button parentKey="summon3" inherits="MJSecureMacroButtonTemplate">
 				<Anchors>
 					<Anchor point="TOPRIGHT" x="-7" y="-25"/>
+				</Anchors>
+			</Button>
+
+			<Button parentKey="summon2" inherits="MJSecureMacroButtonTemplate">
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.summon3" relativePoint="LEFT" x="-6" y="0"/>
 				</Anchors>
 			</Button>
 
@@ -1041,37 +1047,31 @@
 					</Layer>
 				</Layers>
 				<Frames>
-					<Button parentKey="prevMonthButton" inherits="MJCalendarPrev">
+					<Button parentKey="prevMonthButton">
+						<Size x="32" y="32"/>
 						<Anchors>
 							<Anchor point="RIGHT" relativeKey="$parent.monthBackground" relativePoint="LEFT" x="4" y="0"/>
 						</Anchors>
+						<NormalTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Up"/>
+						<PushedTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Down"/>
+						<DisabledTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Disabled"/>
+						<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
 					</Button>
-					<Button parentKey="nextMonthButton" inherits="MJCalendarNext">
+					<Button parentKey="nextMonthButton">
+						<Size x="32" y="32"/>
 						<Anchors>
 							<Anchor point="LEFT" relativeKey="$parent.monthBackground" relativePoint="RIGHT" x="-4" y="0"/>
 						</Anchors>
+						<NormalTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Up"/>
+						<PushedTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Down"/>
+						<DisabledTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Disabled"/>
+						<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
 					</Button>
 				</Frames>
 			</Frame>
 
 		</Frames>
 	</Frame>
-
-	<Button name="MJCalendarPrev" virtual="true">
-		<Size x="32" y="32"/>
-		<NormalTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Up"/>
-		<PushedTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Down"/>
-		<DisabledTexture file="Interface\Buttons\UI-SpellbookIcon-PrevPage-Disabled"/>
-		<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
-	</Button>
-
-	<Button name="MJCalendarNext" virtual="true">
-		<Size x="32" y="32"/>
-		<NormalTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Up"/>
-		<PushedTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Down"/>
-		<DisabledTexture file="Interface\Buttons\UI-SpellbookIcon-NextPage-Disabled"/>
-		<HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
-	</Button>
 
 	<Button name="MJTabTemplate" virtual="true">
 		<Size x="83" y="24"/>

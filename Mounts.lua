@@ -106,6 +106,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.sFlags = {}
 		self.priorityProfiles = {}
 		self.list = {}
+		self.empty = {}
 		self.continentsGround = {
 			[1813] = true, -- Экспедиция: Руины Ун'гола
 			[1814] = true, -- Экспедиция: Тихая Сень
@@ -636,11 +637,10 @@ function mounts:setMountsList()
 		mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
 	end
 
-	local empty = {}
-	if not self.list.dragonriding then self.list.dragonriding = empty end
-	if not self.list.fly then self.list.fly = empty end
-	if not self.list.ground then self.list.ground = empty end
-	if not self.list.swimming then self.list.swimming = empty end
+	if not self.list.dragonriding then self.list.dragonriding = self.empty end
+	if not self.list.fly then self.list.fly = self.empty end
+	if not self.list.ground then self.list.ground = self.empty end
+	if not self.list.swimming then self.list.swimming = self.empty end
 end
 -- mounts.NEW_WMO_CHUNK = mounts.setMountsList
 -- mounts.ZONE_CHANGED = mounts.setMountsList
@@ -884,7 +884,8 @@ do
 		flags.swimming = flags.isSubmerged
 		                 and not (modifier or isFloating)
 		flags.isVashjir = self.mapVashjir[self.mapInfo.mapID]
-		flags.isDragonridable = self:isDragonridable()
+		flags.isDragonridable = not flags.forceFly
+		                        and self:isDragonridable()
 		                        and (not modifier or flags.isSubmerged)
 		flags.fly = isFlyableLocation
 		            and (not modifier or flags.isSubmerged)

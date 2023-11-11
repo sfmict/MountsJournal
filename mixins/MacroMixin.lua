@@ -576,6 +576,7 @@ end
 
 function MJMacroMixin:preClick(button, down)
 	self.mounts.sFlags.forceModifier = self.forceModifier
+	self.mounts.sFlags.forceFly = self.forceFly
 	if InCombatLockdown() or down ~= GetCVarBool("ActionButtonUseKeyDown") then return end
 	self:SetAttribute("macrotext", macroFrame:getMacro())
 end

@@ -272,6 +272,28 @@ function journal:init()
 		GameTooltip:Show()
 	end)
 
+	local summon3 = self.bgFrame.summon3
+	summon3:SetNormalTexture(132239)
+	summon3.icon = summon3:GetNormalTexture()
+	summon3:SetAttribute("clickbutton", _G[config.secureButtonNameThirdMount])
+	summon3:SetScript("OnDragStart", function()
+		if InCombatLockdown() then return end
+		if not GetMacroInfo(config.thirdMacroName) then
+			config:createMacro(config.thirdMacroName, config.secureButtonNameThirdMount, 132239)
+		end
+		PickupMacro(config.thirdMacroName)
+	end)
+	summon3:SetScript("OnEnter", function(btn)
+		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 3\"")
+		GameTooltip_AddNormalLine(GameTooltip, L["ThirdMountTooltipDescription"])
+		GameTooltip_AddColoredLine(GameTooltip, "\nMacro: /click "..config.secureButtonNameThirdMount, NIGHT_FAE_BLUE_COLOR, false)
+		if InCombatLockdown() then
+			GameTooltip_AddErrorLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT)
+		end
+		GameTooltip:Show()
+	end)
+
 	-- NAVBAR BUTTON
 	self.navBarBtn:HookScript("OnClick", function(btn)
 		local checked = btn:GetChecked()

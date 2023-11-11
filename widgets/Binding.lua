@@ -15,7 +15,7 @@ binding:SetScript("OnEvent", function(self)
 end)
 
 
-function binding:createButtonBinding(parent, name, description, secureTemplate, macro)
+function binding:createButtonBinding(name, description, secureTemplate, macro)
 	local button = CreateFrame("Button", nil, parent, "UIMenuButtonStretchTemplate")
 	button.selectedHighlight = button:CreateTexture(nil, "OVERLAY")
 	button.selectedHighlight:SetTexture("Interface/Buttons/UI-Silver-Button-Select")
