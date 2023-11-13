@@ -15,6 +15,25 @@ binding:SetScript("OnEvent", function(self)
 end)
 
 
+local function button_OnEnter(self)
+	local key = GetBindingKey(self.command)
+	if key then
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+		GameTooltip_AddHighlightLine(GameTooltip, KEY_BINDING_NAME_AND_KEY:format(GetBindingName(self.command), GetBindingText(key)))
+		GameTooltip_AddNormalLine(GameTooltip, KEY_BINDING_TOOLTIP)
+		GameTooltip:Show()
+	end
+end
+local function button_OnShow(...) binding:setButtonText(...) end
+local function button_OnClick(...) binding:OnClick(...) end
+local function button_OnMouseWheel(self, delta)
+	if binding.selected == self then
+		binding:OnKeyDown(delta > 0 and "MOUSEWHEELUP" or "MOUSEWHEELDOWN")
+	end
+end
+local function button_OnSetBidning(...) binding:setButtonText(...) end
+
+
 function binding:createButtonBinding(name, description, secureTemplate, macro)
 	local button = CreateFrame("Button", nil, parent, "UIMenuButtonStretchTemplate")
 	button.selectedHighlight = button:CreateTexture(nil, "OVERLAY")
@@ -30,9 +49,12 @@ function binding:createButtonBinding(name, description, secureTemplate, macro)
 	if macro then button.secure:SetAttribute("macrotext", macro) end
 	button.command = "CLICK "..name..":LeftButton"
 	_G["BINDING_NAME_"..button.command] = description or name
-	button:SetScript("OnShow", function(self) binding:setButtonText(self) end)
-	button:SetScript("OnClick", function(self, key) binding:OnClick(self, key) end)
-	button:SetScript("OnMouseWheel", function(self, delta) binding:OnKeyDown(delta > 0 and "MOUSEWHEELUP" or "MOUSEWHEELDOWN") end)
+	button:SetScript("OnEnter", button_OnEnter)
+	button:SetScript("OnShow", button_OnShow)
+	button:SetScript("OnClick", button_OnClick)
+	button:SetScript("OnMouseWheel", button_OnMouseWheel)
+	util.setEventsMixin(button)
+	button:on("SET_BINDING", button_OnSetBidning)
 	self:setButtonText(button)
 	return button
 end
@@ -70,21 +92,30 @@ function binding:setSelected(button)
 end
 
 
-function binding:OnClick(button, key)
+function binding:OnClick(button, keyButton)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	if key == "LeftButton" or key == "RightButton" then
+	if keyButton == "LeftButton" then
 		if self.selected then
 			self:setSelected()
 		else
 			self:setSelected(button)
 		end
+	elseif keyButton == "RightButton" then
+		if InCombatLockdown() then return end
+		local key = GetBindingKey(button.command)
+		if key then
+			if self.selected == button then binding:setSelected() end
+			self:setBinding(key, button.command)
+			self:event("SET_BINDING")
+		end
 	else
-		self:OnKeyDown(key)
+		self:OnKeyDown(keyButton)
 	end
 end
 
 
 function binding:OnKeyDown(keyPressed)
+	if InCombatLockdown() then return end
 	local action = GetBindingFromClick(keyPressed)
 	if action == "SCREENSHOT" then
 		Screenshot()
@@ -97,8 +128,7 @@ function binding:OnKeyDown(keyPressed)
 			keyPressed = CreateKeyChordStringUsingMetaKeyState(keyPressed)
 
 			self:setBinding(keyPressed, self.selected.command)
-			self:setButtonText(self.selected)
-			self:event("SET_BINDING", self.selected)
+			self:event("SET_BINDING")
 			self:setSelected()
 		end
 	end
@@ -108,17 +138,16 @@ binding:SetScript("OnGamePadButtonDown", binding.OnKeyDown)
 
 
 function binding:setBinding(key, selectedBinding)
-	if not InCombatLockdown() then
-		local oldAction = GetBindingAction(key)
-		if oldAction ~= "" and oldAction ~= selectedBinding then
-			self.unboundMessage:SetText(KEY_UNBOUND_ERROR:format(GetBindingName(oldAction)))
-			self.unboundMessage:Show()
-		end
+	if InCombatLockdown() then return end
+	local oldAction = GetBindingAction(key)
+	if oldAction ~= "" and oldAction ~= selectedBinding then
+		self.unboundMessage:SetText(KEY_UNBOUND_ERROR:format(GetBindingName(oldAction)))
+		self.unboundMessage:Show()
+	end
 
-		local oldKey = GetBindingKey(selectedBinding)
-		if SetBinding(key, selectedBinding) and oldKey then
-			SetBinding(oldKey, nil)
-		end
+	local oldKey = GetBindingKey(selectedBinding)
+	if SetBinding(key, selectedBinding) and oldKey then
+		SetBinding(oldKey, nil)
 	end
 end
 
@@ -142,4 +171,5 @@ function binding:resetBinding()
 	else
 		LoadBindings(GetCurrentBindingSet())
 	end
+	self:event("SET_BINDING")
 end
