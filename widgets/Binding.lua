@@ -24,6 +24,7 @@ local function button_OnEnter(self)
 		GameTooltip:Show()
 	end
 end
+local function button_OnLeave() GameTooltip:Hide() end
 local function button_OnShow(...) binding:setButtonText(...) end
 local function button_OnClick(...) binding:OnClick(...) end
 local function button_OnMouseWheel(self, delta)
@@ -31,7 +32,6 @@ local function button_OnMouseWheel(self, delta)
 		binding:OnKeyDown(delta > 0 and "MOUSEWHEELUP" or "MOUSEWHEELDOWN")
 	end
 end
-local function button_OnSetBidning(...) binding:setButtonText(...) end
 
 
 function binding:createButtonBinding(name, description, secureTemplate, macro)
@@ -50,11 +50,12 @@ function binding:createButtonBinding(name, description, secureTemplate, macro)
 	button.command = "CLICK "..name..":LeftButton"
 	_G["BINDING_NAME_"..button.command] = description or name
 	button:SetScript("OnEnter", button_OnEnter)
+	button:SetScript("OnLeave", button_OnLeave)
 	button:SetScript("OnShow", button_OnShow)
 	button:SetScript("OnClick", button_OnClick)
 	button:SetScript("OnMouseWheel", button_OnMouseWheel)
 	util.setEventsMixin(button)
-	button:on("SET_BINDING", button_OnSetBidning)
+	button:on("SET_BINDING", button_OnShow)
 	self:setButtonText(button)
 	return button
 end
