@@ -126,6 +126,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 				wipe(self.journal.list.fly)
 				wipe(self.journal.list.ground)
 				wipe(self.journal.list.swimming)
+				wipe(self.journal.list.dragonriding)
 				self.journal:getRemoveMountList(self.journal.listMapID)
 				self:event("UPDATE_PROFILE")
 			end
@@ -145,8 +146,8 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 
 	local function reloadMenu(level, value)
 		dd:ddCloseMenus(level)
-		local f, t = lsfdd:IterateMenus()
-		dd:ddToggle(level, value, t[level].anchorFrame)
+		local menu = lsfdd:GetMenu(level)
+		dd:ddToggle(level, value, menu.anchorFrame)
 	end
 
 	calendarFrame.prevMonthButton:SetScript("OnClick", function()

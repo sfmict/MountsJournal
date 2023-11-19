@@ -407,8 +407,10 @@ config:SetScript("OnShow", function(self)
 					self:ddAddButton(info, level)
 				else
 					item:ContinueOnItemLoad(function()
-						self:ddCloseMenus()
-						self:ddToggle(1, nil, self)
+						if self:ddIsMenuShown(level) then
+							self:ddCloseMenus()
+							self:ddToggle(1, nil, self)
+						end
 					end)
 				end
 			end
