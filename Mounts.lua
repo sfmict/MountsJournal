@@ -826,8 +826,6 @@ do
 	}
 	function mounts:isFlyLocation(instanceID)
 		if self.continentsGround[instanceID]
-		-- Битва за Азерот
-		or bfaLocations[instanceID] and not IsSpellKnown(278833)
 		then return false end
 
 		return true
