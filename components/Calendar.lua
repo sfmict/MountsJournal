@@ -95,7 +95,8 @@ function calendar:sortHolidays(list)
 			return e1.profile.order < e2.profile.order
 		end
 
-		if e1.name and e2.name then return e1.name < e2.name
+		if e1.name and e2.name then
+			if e1.name ~= e2.name then return e1.name < e2.name end
 		elseif e1.name and not e2.name then return true
 		elseif not e1.name and e2.name then return false end
 
