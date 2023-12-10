@@ -1847,7 +1847,6 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 
 			local rarity = mounts.mountsDB[self.selectedMountID][2]
 			info.rarityValue:SetText(rarity.."%")
-			info.rarityValue:SetShown(rarity > 0)
 
 			info.link:SetShown(mounts.config.showWowheadLink)
 			info.link:SetText("wowhead.com/spell="..spellID)

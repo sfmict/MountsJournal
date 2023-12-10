@@ -466,7 +466,7 @@
 				</Layers>
 				<Frames>
 					<Frame parentKey="shadowOverlay" inherits="ShadowOverlayTemplate" useParentLevel="true" setAllPoints="true"/>
-					<Frame parentKey="info">
+					<Frame parentKey="info" inherits="InlineHyperlinkFrameTemplate">
 						<Size y="46"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" x="6" y="-6"/>
