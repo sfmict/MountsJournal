@@ -8,7 +8,7 @@ externals:
 		tag: latest
 	libs/LibThingsLoad:
 		site: https://www.curseforge.com/wow/addons/libthingsload
-		url: https://github.com/sfmict/LibSFDropDown
+		url: https://github.com/sfmict/LibThingsLoad
 		tag: latest
 
 enable-nolib-creation: no
