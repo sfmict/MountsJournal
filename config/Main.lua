@@ -28,6 +28,9 @@ end
 config:SetScript("OnShow", function(self)
 	self:SetScript("OnShow", nil)
 
+	local lsfdd = LibStub("LibSFDropDown-1.4")
+	local ltl = LibStub("LibThingsLoad-1.0")
+
 	StaticPopupDialogs[util.addonName.."MACRO_EXISTS"] = {
 		text = addon..": "..L["A macro named \"%s\" already exists, overwrite it?"],
 		button1 = ACCEPT,
@@ -130,7 +133,7 @@ config:SetScript("OnShow", function(self)
 	modifierText:SetText(L["Modifier"]..":")
 
 	-- MODIFIER COMBOBOX
-	local modifierCombobox = LibStub("LibSFDropDown-1.4"):CreateButton(self.leftPanel)
+	local modifierCombobox = lsfdd:CreateButton(self.leftPanel)
 	self.modifierCombobox = modifierCombobox
 	modifierCombobox:SetPoint("LEFT", modifierText, "RIGHT", 7, 0)
 	modifierCombobox:ddSetInitFunc(function(self, level)
@@ -310,7 +313,7 @@ config:SetScript("OnShow", function(self)
 	self.repairFlyablePercentText:SetText("%")
 
 	-- REPAIR MOUNTS COMBOBOX
-	self.repairMountsCombobox = LibStub("LibSFDropDown-1.4"):CreateButton(self.rightPanelScroll.child, 230)
+	self.repairMountsCombobox = lsfdd:CreateButton(self.rightPanelScroll.child, 230)
 	self.repairMountsCombobox:SetPoint("TOPLEFT", self.repairFlyable, "BOTTOMLEFT", 0, -8)
 	self.repairMountsCombobox:ddSetInitFunc(function(self, level)
 		local info = {}
@@ -357,8 +360,29 @@ config:SetScript("OnShow", function(self)
 	self.useMagicBroom:HookScript("OnClick", enableBtns)
 
 	-- MAGIC BROOM COMBOBOX
-	self.magicBroomCombobox = LibStub("LibSFDropDown-1.4"):CreateButton(self.rightPanelScroll.child, 230)
+	self.magicBroomCombobox = lsfdd:CreateButton(self.rightPanelScroll.child, 230)
 	self.magicBroomCombobox:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 20, -8)
+
+	self.magicBroomCombobox.Button:SetScript("OnClick", function(btn)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+
+		if not btn.promise then
+			local t = {}
+			for i, data in ipairs(mounts.magicBrooms) do
+				if data.itemID then t[#t + 1] = data.itemID end
+			end
+			btn.promise = ltl:Items(t)
+		end
+
+		local parent = btn:GetParent()
+		parent:Disable()
+
+		btn.promise:Then(function()
+			parent:Enable()
+			parent:ddToggle(1, nil, parent)
+		end)
+	end)
+
 	self.magicBroomCombobox:ddSetInitFunc(function(self, level)
 		local info = {}
 
@@ -390,29 +414,19 @@ config:SetScript("OnShow", function(self)
 				end
 				self:ddAddButton(info, level)
 			elseif data.itemID then
-				local item = Item:CreateFromItemID(data.itemID)
-				if item:IsItemDataCached() then
-					info.disabled = nil
-					info.text = item:GetItemName()
-					info.icon = item:GetItemIcon()
-					info.value = data
-					info.checked = function(btn) return self.selectedValue and self.selectedValue.itemID == btn.value.itemID end
-					info.func = function(btn)
-						self:ddSetSelectedValue(btn.value)
-						enableBtns()
-					end
-					info.OnTooltipShow = function(btn, tooltip)
-						tooltip:SetHyperlink(item:GetItemLink())
-					end
-					self:ddAddButton(info, level)
-				else
-					item:ContinueOnItemLoad(function()
-						if self:ddIsMenuShown(level) then
-							self:ddCloseMenus()
-							self:ddToggle(1, nil, self)
-						end
-					end)
+				info.disabled = nil
+				info.text = ltl:GetItemName(data.itemID)
+				info.icon = ltl:GetItemIcon(data.itemID)
+				info.value = data
+				info.checked = function(btn) return self.selectedValue and self.selectedValue.itemID == btn.value.itemID end
+				info.func = function(btn)
+					self:ddSetSelectedValue(btn.value)
+					enableBtns()
 				end
+				info.OnTooltipShow = function(btn, tooltip)
+					tooltip:SetHyperlink(ltl:GetItemLink(data.itemID))
+				end
+				self:ddAddButton(info, level)
 			end
 		end
 	end)

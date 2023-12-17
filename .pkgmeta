@@ -6,6 +6,10 @@ externals:
 		site: https://www.curseforge.com/wow/addons/libsfdropdown
 		url: https://github.com/sfmict/LibSFDropDown
 		tag: latest
+	libs/LibThingsLoad:
+		site: https://www.curseforge.com/wow/addons/libthingsload
+		url: https://github.com/sfmict/LibSFDropDown
+		tag: latest
 
 enable-nolib-creation: no
 

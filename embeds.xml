@@ -1,4 +1,5 @@
 <UI>
 	<Script file="libs\LibStub\LibStub.lua"/>
 	<Include file="libs\LibSFDropDown\LibSFDropDown.xml"/>
+	<Include file="libs\LibThingsLoad\LibThingsLoad.xml"/>
 </UI>
