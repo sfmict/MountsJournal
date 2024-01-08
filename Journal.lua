@@ -572,7 +572,7 @@ function journal:init()
 		parent.childs[#parent.childs + 1] = btn
 
 		btn.icon:SetTexture(texture.path)
-		btn.icon:SetSize(texture.iconWidth or texture.width, texture.height)
+		btn.icon:SetSize(texture.width, texture.height)
 		if texture.texCoord then btn.icon:SetTexCoord(unpack(texture.texCoord)) end
 
 		btn:SetScript("OnClick", filterClick)
@@ -582,7 +582,7 @@ function journal:init()
 
 	-- FILTERS TYPES BUTTONS
 	local typesTextures = {
-		{id = 4, path = texPath.."dragonriding", width = 32, height = 16, iconWidth = 16, tooltip = MOUNT_JOURNAL_FILTER_DRAGONRIDING},
+		{id = 4, path = texPath.."dragonriding", width = 16, height = 16, tooltip = MOUNT_JOURNAL_FILTER_DRAGONRIDING},
 		{id = 1, path = texPath.."fly", width = 32, height = 16, tooltip = L["MOUNT_TYPE_1"]},
 		{id = 2, path = texPath.."ground", width = 32, height = 16, tooltip = L["MOUNT_TYPE_2"]},
 		{id = 3, path = texPath.."swimming", width = 32, height = 16, tooltip = L["MOUNT_TYPE_3"]},
@@ -1172,18 +1172,14 @@ do
 		if isForDragonriding then
 			btn.dragonriding:Show()
 			btn.fly:Hide()
-			btn.ground:Hide()
-			btn.swimming:Hide()
 			setColor(self, btn.dragonriding, self.list and self.list.dragonriding[btn.mountID])
 		else
 			btn.dragonriding:Hide()
 			btn.fly:Show()
-			btn.ground:Show()
-			btn.swimming:Show()
 			setColor(self, btn.fly, self.list and self.list.fly[btn.mountID])
-			setColor(self, btn.ground, self.list and self.list.ground[btn.mountID])
-			setColor(self, btn.swimming, self.list and self.list.swimming[btn.mountID])
 		end
+		setColor(self, btn.ground, self.list and self.list.ground[btn.mountID])
+		setColor(self, btn.swimming, self.list and self.list.swimming[btn.mountID])
 	end
 end
 

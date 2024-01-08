@@ -1288,10 +1288,9 @@
 	</CheckButton>
 
 	<CheckButton name="MJSetDragonridingToggleTemplate" inherits="MJSetMountToggleTemplate" virtual="true">
-		<Size x="24" y="30"/>
 		<Scripts>
 			<OnLoad>
-				self.icon:SetSize(22, 22)
+				self.icon:SetSize(11, 11)
 				self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/dragonriding")
 			</OnLoad>
 		</Scripts>
@@ -1433,7 +1432,7 @@
 			</Button>
 			<CheckButton parentKey="dragonriding" inherits="MJSetDragonridingToggleTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="0"/>
+					<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="14"/>
 				</Anchors>
 				<KeyValues>
 					<KeyValue key="type" value="dragonriding" type="string"/>
@@ -1524,7 +1523,7 @@
 		<Frames>
 			<CheckButton parentKey="dragonriding" inherits="MJSetDragonridingToggleTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativePoint="RIGHT" x="1" y="0"/>
+					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="0"/>
 				</Anchors>
 				<KeyValues>
 					<KeyValue key="type" value="dragonriding" type="string"/>
