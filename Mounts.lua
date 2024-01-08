@@ -1,5 +1,5 @@
 local addon = ...
-local C_MountJournal, C_Map, MapUtil, next, wipe, random, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff, IsUsableSpell, SecureCmdOptionParse = C_MountJournal, C_Map, MapUtil, next, wipe, random, IsSpellKnown, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff, IsUsableSpell, SecureCmdOptionParse
+local C_MountJournal, C_Map, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff, IsUsableSpell, SecureCmdOptionParse, C_Scenario = C_MountJournal, C_Map, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff, IsUsableSpell, SecureCmdOptionParse, C_Scenario
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 util.setEventsMixin(mounts)
@@ -722,20 +722,20 @@ function mounts:summon()
 end
 
 
-function mounts:summonDragonridable()
-	self.weight = 0
-	wipe(self.usableIDs)
+-- function mounts:summonDragonridable()
+-- 	self.weight = 0
+-- 	wipe(self.usableIDs)
 
-	for mountID in next, self.list.dragonriding do
-		local _,_,_,_, isUsable, _,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
-		if isUsable and isForDragonriding then
-			self.weight = self.weight + (self.list.dragonridingWeight[mountID] or 100)
-			self.usableIDs[self.weight] = mountID
-		end
-	end
+-- 	for mountID in next, self.list.dragonriding do
+-- 		local _,_,_,_, isUsable, _,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
+-- 		if isUsable and isForDragonriding then
+-- 			self.weight = self.weight + (self.list.dragonridingWeight[mountID] or 100)
+-- 			self.usableIDs[self.weight] = mountID
+-- 		end
+-- 	end
 
-	return self.weight > 0
-end
+-- 	return self.weight > 0
+-- end
 
 
 function mounts:setUsableIDs(ids, mountsWeight)
@@ -744,8 +744,8 @@ function mounts:setUsableIDs(ids, mountsWeight)
 	wipe(self.usableIDs)
 
 	for mountID in next, ids do
-		local _,_,_,_, isUsable, _,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
-		if isUsable and not isForDragonriding then
+		local _, spellID, _,_, isUsable, _,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
+		if isUsable and (not isForDragonriding or IsUsableSpell(spellID)) then
 			self.weight = self.weight + (mountsWeight[mountID] or 100)
 			self.usableIDs[self.weight] = mountID
 		end
@@ -756,22 +756,20 @@ end
 
 
 function mounts:getSpellKnown()
-	if IsSpellKnown(90265) -- Мастер верховой езды
-	or IsSpellKnown(34091) -- Верховая езда (искусник)
-	or IsSpellKnown(34090) -- Верховая езда (умелец)
+	if IsPlayerSpell(90265) -- Мастер верховой езды
+	or IsPlayerSpell(34091) -- Верховая езда (искусник)
+	or IsPlayerSpell(34090) -- Верховая езда (умелец)
 	then
 		return true, true
 	end
 
-	if IsSpellKnown(33391) -- Верховая езда (подмастерье)
-	or IsSpellKnown(33388) -- Верховая езда (ученик)
+	if IsPlayerSpell(33391) -- Верховая езда (подмастерье)
+	or IsPlayerSpell(33388) -- Верховая езда (ученик)
 	then
 		return true, false
 	end
 
-	-- 34091 and 34090 not detected
-	-- return false, false
-	return true, true
+	return false, false
 end
 
 
@@ -811,20 +809,24 @@ do
 		[1688] = true, -- Мертвые копи
 		[1760] = true, -- Лордерон
 		[1763] = true, -- Атал'Дазар
-		[1876] = true, -- Фронт: Арати (Орда)
-		[1943] = true, -- Фронт: Арати (Альянс)
-		[2105] = true, -- Фронт: Темные берега (Альянс)
-		[2111] = true, -- Фронт: Темные берега (Орда)
+		-- [1876] = true, -- Фронт: Арати (Орда)
+		-- [1943] = true, -- Фронт: Арати (Альянс)
+		-- [2105] = true, -- Фронт: Темные берега (Альянс)
+		-- [2111] = true, -- Фронт: Темные берега (Орда)
 
 		[2291] = true, -- Та Сторона
 	}
 	-- 1170, -- Горгронд - сценарий маг'харов
 
-	function mounts:isFlyLocation(instanceID)
-		if continentsGround[instanceID]
-		then return false end
+	local LE_SCENARIO_TYPE_WARFRONT = LE_SCENARIO_TYPE_WARFRONT
 
-		return true
+	function mounts:isFlyLocation(instanceID)
+		if C_Scenario.IsInScenario() then
+			local _,_,_,_,_,_,_,_,_, scenarioType = C_Scenario.GetInfo()
+			if scenarioType == LE_SCENARIO_TYPE_WARFRONT then return false end
+		end
+
+		return not continentsGround[instanceID]
 	end
 end
 
@@ -834,13 +836,13 @@ function mounts:isWaterWalkLocation()
 end
 
 
-function mounts:isDragonridable()
-	self.dragonridingMounts = C_MountJournal.GetCollectedDragonridingMounts()
-	if #self.dragonridingMounts > 0 then
-		local _, spellID, _,_, isUsable = C_MountJournal.GetMountInfoByID(self.dragonridingMounts[1])
-		return isUsable and IsUsableSpell(spellID)
-	end
-end
+-- function mounts:isDragonridable()
+-- 	self.dragonridingMounts = C_MountJournal.GetCollectedDragonridingMounts()
+-- 	if #self.dragonridingMounts > 0 then
+-- 		local _, spellID, _,_, isUsable = C_MountJournal.GetMountInfoByID(self.dragonridingMounts[1])
+-- 		return isUsable and IsUsableSpell(spellID)
+-- 	end
+-- end
 
 
 do
@@ -879,7 +881,8 @@ do
 		                 and not (modifier or isFloating)
 		flags.isVashjir = self.mapVashjir[self.mapInfo.mapID]
 		flags.isDragonridable = not flags.forceFly
-		                        and self:isDragonridable()
+		                        and IsAdvancedFlyableArea()
+		                        -- and self:isDragonridable()
 		                        and (not modifier or flags.isSubmerged)
 		flags.fly = isFlyableLocation
 		            and (not modifier or flags.isSubmerged)
@@ -914,14 +917,14 @@ function mounts:setSummonList()
 	-- target's mount
 	and not (flags.targetMount and (C_MountJournal.SummonByID(flags.targetMount) or true))
 	-- swimming
-	and not (flags.swimming
-		and (flags.isVashjir
-			and self:setUsableIDs(self.swimmingVashjir, self.db.mountsWeight)
-			or self:setUsableIDs(self.list.swimming, self.list.swimmingWeight)))
+	and not (flags.swimming and (
+		flags.isVashjir and self:setUsableIDs(self.swimmingVashjir, self.db.mountsWeight)
+		or self:setUsableIDs(self.list.swimming, self.list.swimmingWeight)
+	))
 	-- herbMount
 	and not (flags.herb and self:setUsableIDs(self.herbalismMounts, self.db.mountsWeight))
 	-- dragonridable
-	and not (flags.isDragonridable and self:summonDragonridable())
+	and not (flags.isDragonridable and self:setUsableIDs(self.list.dragonriding, self.list.dragonridingWeight))
 	-- fly
 	and not (flags.fly and self:setUsableIDs(self.list.fly, self.list.flyWeight))
 	-- ground
@@ -938,6 +941,7 @@ function mounts:init()
 	SlashCmdList["MOUNTSJOURNAL"] = function(msg)
 		if not SecureCmdOptionParse(msg) then return end
 		self.sFlags.forceModifier = nil
+		self.sFlags.forceFly = nil
 		self:setFlags()
 		self:setSummonList()
 		self:summon()
