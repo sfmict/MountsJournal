@@ -1,4 +1,4 @@
-local random, C_PetJournal, UnitBuff, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, GetSpellCooldown, UnitIsAFK, DoEmote = random, C_PetJournal, UnitBuff, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, GetSpellCooldown, UnitIsAFK, DoEmote
+local random, C_PetJournal, AuraUtil, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, GetSpellCooldown, UnitIsAFK, DoEmote = random, C_PetJournal, AuraUtil, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, GetSpellCooldown, UnitIsAFK, DoEmote
 local mounts, util = MountsJournal, MountsJournalUtil
 local pets = CreateFrame("FRAME")
 mounts.pets = pets
@@ -62,7 +62,8 @@ end
 
 
 do
-	local aurasList = {
+	local aurasList, aura = {
+		[66] = true, -- Invisibility
 		[3680] = true, -- Lesser Invisibility
 		[11392] = true, -- Invisibility Potion
 		[32612] = true, -- Invisibility
@@ -79,12 +80,17 @@ do
 		[371134] = true, -- Potion of the Hushed Zephyr 18 sec
 	}
 
-	local function isAuraApplied()
-		for i = 1, 255 do
-			local _,_,_,_,_,_,_,_,_, spellID = UnitBuff("player", i)
-			if not spellID then return end
-			if aurasList[spellID] then return true end
+	local function checkAura(auraData)
+		if aurasList[auraData.spellId] then
+			aura = true
+			return true
 		end
+	end
+
+	local function isAuraApplied()
+		aura = nil
+		AuraUtil.ForEachAura("player", "HELPFUL", nil, checkAura, true)
+		return aura
 	end
 
 	function pets:summonByTimer()

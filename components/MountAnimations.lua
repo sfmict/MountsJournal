@@ -116,7 +116,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 
 	function dd:onUpdate()
 		local actor = journal.modelScene:GetActorByTag("unwrapped")
-		if actor and not actor:IsLoaded() then return end
+		if not (actor and actor:IsLoaded()) then return end
 		self:SetScript("OnUpdate", nil)
 
 		C_Timer.After(0, function()

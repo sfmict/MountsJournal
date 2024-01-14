@@ -1,4 +1,4 @@
-local type, pairs, rawget, GetItemCount, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged = type, pairs, rawget, GetItemCount, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged
+local type, pairs, rawget, GetItemCount, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras = type, pairs, rawget, GetItemCount, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras
 local macroFrame = CreateFrame("FRAME")
 
 
@@ -43,11 +43,11 @@ function macroFrame:PLAYER_LOGIN()
 
 	if self.class == "PRIEST" or self.class == "MAGE" then
 		classOptionMacro = classOptionMacro..[[
-			local IsFalling, GetTime = IsFalling, GetTime
+			local IsFalling, GetTime, C_UnitAuras = IsFalling, GetTime, C_UnitAuras
 		]]
 	elseif self.class == "MONK" then
 		classOptionMacro = classOptionMacro..[[
-			local IsFalling, GetTime, GetUnitSpeed = IsFalling, GetTime, GetUnitSpeed
+			local IsFalling, GetTime, GetUnitSpeed, C_UnitAuras = IsFalling, GetTime, GetUnitSpeed, C_UnitAuras
 		]]
 	elseif self.class == "DRUID" then
 		classOptionMacro = classOptionMacro..[[
@@ -84,17 +84,14 @@ function macroFrame:PLAYER_LOGIN()
 		classOptionMacro = classOptionMacro..[[
 			-- 111759 - Levitation
 			if self.classConfig.useLevitation and not self.magicBroom and IsFalling() then
-				if GetTime() - (self.lastUseClassSpellTime or 0) < .5 then return "" end
-				local i = 1
-				repeat
-					local _,_,_,_,_,_,_,_,_, spellID = UnitBuff("player", i)
-					if spellID == 111759 then
-						return "/cancelaura "..self:getSpellName(111759)
-					end
-					i = i + 1
-				until not spellID
-				self.lastUseClassSpellTime = GetTime()
-				return "/cast [@player]"..self:getSpellName(111759)
+				if GetTime() - (self.lastUseClassSpellTime or 0) < .5 then
+					return ""
+				elseif C_UnitAuras.GetPlayerAuraBySpellID(111759) then
+					return "/cancelaura "..self:getSpellName(111759)
+				else
+					self.lastUseClassSpellTime = GetTime()
+					return "/cast [@player]"..self:getSpellName(111759)
+				end
 			end
 		]]
 	elseif self.class == "DEATHKNIGHT" then
@@ -123,17 +120,14 @@ function macroFrame:PLAYER_LOGIN()
 		classOptionMacro = classOptionMacro..[[
 			-- 130 - Slow Fall
 			if self.classConfig.useSlowFall and not self.magicBroom and IsFalling() then
-				if GetTime() - (self.lastUseClassSpellTime or 0) < .5 then return "" end
-				local i = 1
-				repeat
-					local _,_,_,_,_,_,_,_,_, spellID = UnitBuff("player", i)
-					if spellID == 130 then
-						return "/cancelaura "..self:getSpellName(130)
-					end
-					i = i + 1
-				until not spellID
-				self.lastUseClassSpellTime = GetTime()
-				return "/cast [@player]"..self:getSpellName(130)
+				if GetTime() - (self.lastUseClassSpellTime or 0) < .5 then
+					return ""
+				elseif C_UnitAuras.GetPlayerAuraBySpellID(130) then
+					return "/cancelaura "..self:getSpellName(130)
+				else
+					self.lastUseClassSpellTime = GetTime()
+					return "/cast [@player]"..self:getSpellName(130)
+				end
 			end
 		]]
 	elseif self.class == "MONK" then
@@ -143,19 +137,7 @@ function macroFrame:PLAYER_LOGIN()
 				if IsFalling() then
 					self.lastUseClassSpellTime = GetTime()
 					return "/cast "..self:getSpellName(125883)
-				end
-
-				local i, isBuffed = 1
-				repeat
-					local _,_,_,_,_,_,_,_,_, spellID = UnitBuff("player", i)
-					if spellID == 125883 then
-						isBuffed = true
-						break
-					end
-					i = i + 1
-				until not spellID
-
-				if isBuffed then
+				elseif C_UnitAuras.GetPlayerAuraBySpellID(125883) then
 					return GetTime() - (self.lastUseClassSpellTime or 0) < .5 and "" or GetUnitSpeed("player") > 0 and "/cancelaura "..self:getSpellName(125883)
 				end
 			end
@@ -396,13 +378,7 @@ end
 
 
 local function isNotFishingBuff()
-	local i = 1
-	repeat
-		local _,_,_,_,_,_,_,_,_, spellID = UnitBuff("player", i)
-		if spellID == 394009 then return false end
-		i = i + 1
-	until not spellID
-	return true
+	return not C_UnitAuras.GetPlayerAuraBySpellID(394009)
 end
 
 

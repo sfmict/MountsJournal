@@ -1,5 +1,5 @@
 local addon = ...
-local C_MountJournal, C_Map, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff, IsUsableSpell, SecureCmdOptionParse, C_Scenario = C_MountJournal, C_Map, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, UnitBuff, IsUsableSpell, SecureCmdOptionParse, C_Scenario
+local C_MountJournal, C_Map, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, AuraUtil, IsUsableSpell, SecureCmdOptionParse, C_Scenario = C_MountJournal, C_Map, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, AuraUtil, IsUsableSpell, SecureCmdOptionParse, C_Scenario
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 util.setEventsMixin(mounts)
@@ -692,20 +692,23 @@ function mounts:isFloating()
 end
 
 
-function mounts:getTargetMount()
-	if self.config.copyMountTarget then
-		local i = 1
-		repeat
-			local _,_,_,_,_,_,_,_,_, spellID = UnitBuff("target", i)
-			if spellID then
-				local mountID = C_MountJournal.GetMountFromSpell(spellID)
-				if mountID then
-					local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
-					return isUsable and IsUsableSpell(spellID) and mountID
-				end
-				i = i + 1
-			end
-		until not spellID
+do
+	local mount
+	local function checkMount(auraData)
+		local mountID = C_MountJournal.GetMountFromSpell(auraData.spellId)
+		if mountID then
+			local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
+			mount = isUsable and IsUsableSpell(auraData.spellId) and mountID
+			return true
+		end
+	end
+
+	function mounts:getTargetMount()
+		if self.config.copyMountTarget then
+			mount = nil
+			AuraUtil.ForEachAura("target", "HELPFUL", nil, checkMount, true)
+			return mount
+		end
 	end
 end
 
@@ -720,22 +723,6 @@ function mounts:summon()
 		end
 	end
 end
-
-
--- function mounts:summonDragonridable()
--- 	self.weight = 0
--- 	wipe(self.usableIDs)
-
--- 	for mountID in next, self.list.dragonriding do
--- 		local _,_,_,_, isUsable, _,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
--- 		if isUsable and isForDragonriding then
--- 			self.weight = self.weight + (self.list.dragonridingWeight[mountID] or 100)
--- 			self.usableIDs[self.weight] = mountID
--- 		end
--- 	end
-
--- 	return self.weight > 0
--- end
 
 
 function mounts:setUsableIDs(ids, mountsWeight)
@@ -836,15 +823,6 @@ function mounts:isWaterWalkLocation()
 end
 
 
--- function mounts:isDragonridable()
--- 	self.dragonridingMounts = C_MountJournal.GetCollectedDragonridingMounts()
--- 	if #self.dragonridingMounts > 0 then
--- 		local _, spellID, _,_, isUsable = C_MountJournal.GetMountInfoByID(self.dragonridingMounts[1])
--- 		return isUsable and IsUsableSpell(spellID)
--- 	end
--- end
-
-
 do
 	local isFlyableOverride = {
 		-- Draenor
@@ -882,7 +860,6 @@ do
 		flags.isVashjir = self.mapVashjir[self.mapInfo.mapID]
 		flags.isDragonridable = not flags.forceFly
 		                        and IsAdvancedFlyableArea()
-		                        -- and self:isDragonridable()
 		                        and (not modifier or flags.isSubmerged)
 		flags.fly = isFlyableLocation
 		            and (not modifier or flags.isSubmerged)
