@@ -79,7 +79,13 @@ do
 			if groupID then
 				btnText = ("[%d] %s"):format(groupID, btnText)
 			elseif flags then
-				btnText = ("%s [%s%s%s]"):format(btnText, getTextBool(flags.groundOnly), getTextBool(flags.waterWalkOnly), getTextBool(flags.herbGathering))
+				btnText = ("%s [%s%s%s%s]"):format(
+					btnText,
+					getTextBool(flags.regularFlyOnly),
+					getTextBool(flags.groundOnly),
+					getTextBool(flags.waterWalkOnly),
+					getTextBool(flags.herbGathering)
+				)
 			end
 			if #text == 0 or btnText:lower():find(text, 1, true) then
 				local optionButton = self.optionsButtonPool:Acquire()

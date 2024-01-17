@@ -381,6 +381,7 @@ do
 		INVSLOT_MAINHAND,
 		INVSLOT_OFFHAND,
 	}
+
 	function mounts:UPDATE_INVENTORY_DURABILITY()
 		local percent = (tonumber(self.config.useRepairMountsDurability) or 0) / 100
 		local flyablePercent = (tonumber(self.config.useRepairFlyableDurability) or 0) / 100
@@ -839,6 +840,7 @@ do
 		-- Legion
 		[1220] = true,
 	}
+
 	function mounts:setFlags()
 		self:setMountsList()
 		local flags = self.sFlags
@@ -849,6 +851,10 @@ do
 		                          and (IsFlyableArea() or isFlyableOverride[self.instanceID])
 		                          and self:isFlyLocation(self.instanceID)
 		                          and not (self.mapFlags and self.mapFlags.groundOnly)
+		local isDragonridable = not flags.forceFly
+		                        and IsAdvancedFlyableArea()
+		                        and not (self.mapFlags and (self.mapFlags.regularFlyOnly
+		                                                    or self.mapFlags.groundOnly))
 
 		flags.isSubmerged = IsSubmerged()
 		flags.isIndoors = IsIndoors()
@@ -858,13 +864,12 @@ do
 		flags.swimming = flags.isSubmerged
 		                 and not (modifier or isFloating)
 		flags.isVashjir = self.mapVashjir[self.mapInfo.mapID]
-		flags.isDragonridable = not flags.forceFly
-		                        and IsAdvancedFlyableArea()
+		flags.isDragonridable = isDragonridable
 		                        and (not modifier or flags.isSubmerged)
 		flags.fly = isFlyableLocation
 		            and (not modifier or flags.isSubmerged)
 		flags.waterWalk = isFloating
-		                  or not isFlyableLocation and modifier
+		                  or not (isFlyableLocation or isDragonridable) and modifier
 		                  or self:isWaterWalkLocation()
 		flags.herb = self.herbMount and (not self.config.herbMountsOnZones
 		                                 or self.mapFlags and self.mapFlags.herbGathering)

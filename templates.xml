@@ -919,7 +919,7 @@
 					</Frame>
 					<CheckButton parentKey="Flags" inherits="MJCheckButtonTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" x="33" y="-15"/>
+							<Anchor point="TOPLEFT" x="15" y="-5"/>
 						</Anchors>
 					</CheckButton>
 					<Frame parentKey="relationMap">

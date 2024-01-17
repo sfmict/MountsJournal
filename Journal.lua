@@ -329,6 +329,8 @@ function journal:init()
 	self.mapSettings.hint.tooltipDescription = "\n"..L["ZoneSettingsTooltipDescription"]
 	self.mapSettings.Flags.Text:SetText(L["Enable Flags"])
 	self.mapSettings.Flags:HookScript("OnClick", function(check) self:setFlag("enableFlags", check:GetChecked()) end)
+	self.mapSettings.Fly = util.createCheckboxChild(L["Regular Flying Mounts Only"], self.mapSettings.Flags)
+	self.mapSettings.Fly:HookScript("OnClick", function(check) self:setFlag("regularFlyOnly", check:GetChecked()) end)
 	self.mapSettings.Ground = util.createCheckboxChild(L["Ground Mounts Only"], self.mapSettings.Flags)
 	self.mapSettings.Ground:HookScript("OnClick", function(check) self:setFlag("groundOnly", check:GetChecked()) end)
 	self.mapSettings.WaterWalk = util.createCheckboxChild(L["Water Walking"], self.mapSettings.Flags)
@@ -340,7 +342,7 @@ function journal:init()
 	self.mapSettings.HerbGathering.tooltipRequirement = L["HerbGatheringFlagDescription"]
 	self.mapSettings.HerbGathering:HookScript("OnClick", function(check) self:setFlag("herbGathering", check:GetChecked()) end)
 	self.mapSettings.listFromMap = lsfdd:CreateStretchButtonOriginal(self.mapSettings, 134, 30, true)
-	self.mapSettings.listFromMap:SetPoint("BOTTOMLEFT", 33, 15)
+	self.mapSettings.listFromMap:SetPoint("BOTTOMLEFT", 33, 5)
 	self.mapSettings.listFromMap:SetText(L["ListMountsFromZone"])
 	self.mapSettings.listFromMap.maps = {}
 	self.mapSettings.listFromMap:SetScript("OnClick", function(btn) self:listFromMapClick(btn) end)
@@ -1793,6 +1795,7 @@ function journal:updateMapSettings()
 	local flags = self.currentList and self.currentList.flags
 
 	mapSettings.Flags:SetChecked(flags and flags.enableFlags)
+	mapSettings.Fly:SetChecked(flags and flags.regularFlyOnly)
 	mapSettings.Ground:SetChecked(flags and flags.groundOnly)
 	mapSettings.WaterWalk:SetChecked(flags and flags.waterWalkOnly)
 	mapSettings.HerbGathering:SetChecked(flags and flags.herbGathering)

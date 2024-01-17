@@ -39,6 +39,10 @@ function macroFrame:PLAYER_LOGIN()
 		defMacro = defMacro..[[
 			local IsSpellKnown, IsUsableSpell, random = IsSpellKnown, IsUsableSpell, random
 		]]
+	elseif raceID == 52 then
+		defMacro = defMacro..[[
+			local IsSpellKnown, IsUsableSpell, random, GetSpellCooldown = IsSpellKnown, IsUsableSpell, random, GetSpellCooldown
+		]]
 	end
 
 	if self.class == "PRIEST" or self.class == "MAGE" then
@@ -208,6 +212,21 @@ function macroFrame:PLAYER_LOGIN()
 					or not self.sFlags.fly and self.mounts.summonList == self.mounts.list.fly)
 				then
 					macro = self:addLine(macro, "/cast "..self:getSpellName(87840))
+				else
+					macro = self:addLine(macro, "/run MountsJournal:summon()")
+				end
+		]]
+	elseif raceID == 52 then
+		defMacro = defMacro..[[
+				if self.classConfig.useSoar
+				and self.sFlags.isDragonridable
+				and IsSpellKnown(369536)
+				and IsUsableSpell(369536)
+				and GetSpellCooldown(369536) == 0
+				and GetSpellCooldown(61304) == 0
+				and (self.mounts.summonList ~= self.mounts.list.dragonriding or random(self.mounts.weight + (self.classConfig.soarSummoningChance or 100)) > self.mounts.weight)
+				then
+					macro = self:addLine(macro, "/cast "..self:getSpellName(369536))
 				else
 					macro = self:addLine(macro, "/run MountsJournal:summon()")
 				end
