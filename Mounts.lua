@@ -845,7 +845,6 @@ do
 		self:setMountsList()
 		local flags = self.sFlags
 		local groundSpellKnown, flySpellKnown = self:getSpellKnown()
-		local modifier = self.modifier() or flags.forceModifier
 		local isFloating = self:isFloating()
 		local isFlyableLocation = flySpellKnown
 		                          and (IsFlyableArea() or isFlyableOverride[self.instanceID])
@@ -856,20 +855,21 @@ do
 		                        and not (self.mapFlags and (self.mapFlags.regularFlyOnly
 		                                                    or self.mapFlags.groundOnly))
 
+		flags.modifier = self.modifier() or flags.forceModifier
 		flags.isSubmerged = IsSubmerged()
 		flags.isIndoors = IsIndoors()
 		flags.inVehicle = UnitInVehicle("player")
 		flags.isMounted = IsMounted()
 		flags.groundSpellKnown = groundSpellKnown
 		flags.swimming = flags.isSubmerged
-		                 and not (modifier or isFloating)
+		                 and not (flags.modifier or isFloating)
 		flags.isVashjir = self.mapVashjir[self.mapInfo.mapID]
 		flags.isDragonridable = isDragonridable
-		                        and (not modifier or flags.isSubmerged)
+		                        and (not flags.modifier or flags.isSubmerged)
 		flags.fly = isFlyableLocation
-		            and (not modifier or flags.isSubmerged)
+		            and (not flags.modifier or flags.isSubmerged)
 		flags.waterWalk = isFloating
-		                  or not (isFlyableLocation or isDragonridable) and modifier
+		                  or not (isFlyableLocation or isDragonridable) and flags.modifier
 		                  or self:isWaterWalkLocation()
 		flags.herb = self.herbMount and (not self.config.herbMountsOnZones
 		                                 or self.mapFlags and self.mapFlags.herbGathering)

@@ -219,8 +219,12 @@ function macroFrame:PLAYER_LOGIN()
 	elseif raceID == 52 then
 		defMacro = defMacro..[[
 				if self.classConfig.useSoar
-				and self.sFlags.isDragonridable
-				and IsSpellKnown(369536)
+				and not (self.sFlags.forceFly
+				         or self.sFlags.modifier
+				         or self.mounts.mapFlags and (self.mounts.mapFlags.regularFlyOnly
+				                                      or self.mounts.mapFlags.groundOnly))
+				and not self.sFlags.isSubmerged
+				and IsSpellKnown(430935)
 				and IsUsableSpell(369536)
 				and GetSpellCooldown(369536) == 0
 				and GetSpellCooldown(61304) == 0
