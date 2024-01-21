@@ -91,6 +91,7 @@ function journal:init()
 	self.bgFrame:SetScript("OnShow", function()
 		self.CollectionsJournal.NineSlice:Hide()
 		self:RegisterEvent("COMPANION_UPDATE")
+		self:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 		self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 		self:RegisterEvent("PLAYER_REGEN_DISABLED")
 		self:RegisterEvent("PLAYER_REGEN_ENABLED")
@@ -103,6 +104,7 @@ function journal:init()
 	self.bgFrame:SetScript("OnHide", function()
 		self.CollectionsJournal.NineSlice:Show()
 		self:UnregisterEvent("COMPANION_UPDATE")
+		self:UnregisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 		self:UnregisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 		self:UnregisterEvent("PLAYER_REGEN_DISABLED")
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
@@ -217,7 +219,8 @@ function journal:init()
 	-- MOUNT COUNT
 	self.mountCount.collectedLabel:SetText(L["Collected:"])
 	self:updateCountMounts()
-	self:RegisterEvent("NEW_MOUNT_ADDED")
+	self:RegisterEvent("COMPANION_LEARNED")
+	self:RegisterEvent("COMPANION_UNLEARNED")
 
 	-- ACHIEVEMENT
 	self:ACHIEVEMENT_EARNED()
@@ -927,6 +930,11 @@ function journal:init()
 		self:sortMounts()
 	end)
 
+	-- ON ALERT CLICK
+	hooksecurefunc("MountJournal_SelectByMountID", function(mountID)
+		self:setSelectedMount(mountID)
+	end)
+
 	-- MODULES INIT
 	self:event("MODULES_INIT"):off("MODULES_INIT")
 
@@ -934,6 +942,7 @@ function journal:init()
 	self.MountJournal.SummonRandomFavoriteButton:Hide()
 	self.CollectionsJournal.NineSlice:Hide()
 	self:RegisterEvent("COMPANION_UPDATE")
+	self:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 	self:RegisterUnitEvent("UNIT_FORM_CHANGED", "player")
 
@@ -1039,7 +1048,7 @@ function journal:setMJFiltersBackup()
 	backup.isBackuped = true
 	self:RegisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 	self:RegisterEvent("PLAYER_LEAVING_WORLD")
-	self:updateIndexByMountID()
+	self:updateIndexByMountID(true)
 end
 
 
@@ -1574,9 +1583,9 @@ function journal:sortMounts()
 end
 
 
-function journal:updateIndexByMountID()
+function journal:updateIndexByMountID(force)
 	if not self.mjFiltersBackup.isBackuped then return end
-	if C_MountJournal.GetNumDisplayedMounts() ~= self.mountCount.count.num then
+	if C_MountJournal.GetNumDisplayedMounts() ~= self.mountCount.count.num or force then
 		self:UnregisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 		C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
 		C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
@@ -1596,11 +1605,12 @@ end
 journal.MOUNT_JOURNAL_SEARCH_UPDATED = journal.updateIndexByMountID
 
 
-function journal:NEW_MOUNT_ADDED()
+function journal:COMPANION_LEARNED()
 	self:updateCountMounts()
-	self:updateIndexByMountID()
+	self:updateIndexByMountID(true)
 	self:sortMounts()
 end
+journal.COMPANION_UNLEARNED = journal.COMPANION_LEARNED
 
 
 -- isUsable FLAG CHANGED
@@ -1909,6 +1919,11 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 		self.mountDisplay.noMounts:Show()
 		self.summonButton:Disable()
 	end
+end
+
+
+function journal:UI_MODEL_SCENE_INFO_UPDATED()
+	self:updateMountDisplay(true)
 end
 
 
