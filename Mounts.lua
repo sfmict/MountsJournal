@@ -21,6 +21,7 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalDB = MountsJournalDB or {}
 		self.globalDB = MountsJournalDB
 		self.globalDB.mountTags = self.globalDB.mountTags or {}
+		self.globalDB.additionalFavorites = self.globalDB.additionalFavorites or {}
 		self.globalDB.filters = self.globalDB.filters or {}
 		self.globalDB.defFilters = self.globalDB.defFilters or {}
 		self.globalDB.config = self.globalDB.config or {}
@@ -36,6 +37,7 @@ function mounts:ADDON_LOADED(addonName)
 		for name, profile in next, self.profiles do
 			self:checkProfile(profile)
 		end
+		self.additionalFavorites = self.globalDB.additionalFavorites
 		self.filters = self.globalDB.filters
 		self.defFilters = self.globalDB.defFilters
 		self.help = self.globalDB.help
@@ -92,15 +94,15 @@ function mounts:ADDON_LOADED(addonName)
 
 		-- Списки
 		self.swimmingVashjir = {
-			[373] = true, -- Вайш'ирский морской конек
+			[75207] = true, -- Вайш'ирский морской конек
 		}
 		self.lowLevel = {
-			[678] = true, -- Механоцикл с шофером
-			[679] = true, -- Анжинерский чоппер с водителем
+			[179244] = true, -- Механоцикл с шофером
+			[179245] = true, -- Анжинерский чоппер с водителем
 		}
 		self.herbalismMounts = {
-			[522] = true, -- Небесный голем
-			[845] = true, -- Механизированный хвататель разностей
+			[134359] = true, -- Небесный голем
+			[223814] = true, -- Механизированный хвататель разностей
 		}
 
 		self.sFlags = {}
@@ -116,10 +118,10 @@ function mounts:ADDON_LOADED(addonName)
 		}
 
 		self.repairMounts = {
-			280,
-			284,
-			460,
-			1039,
+			61425,
+			61447,
+			122708,
+			264058,
 		}
 		self.usableRepairMounts = {}
 		self.usableIDs = {}
@@ -146,7 +148,7 @@ end
 
 local function compareVersion(v1, v2)
 	v1 = v1:gsub("%D*([%d%.]+).*", "%1")
-	v2 = v2:gsub("%D*([%d%.]+).*", "%1")
+	v2 = (v2 or ""):gsub("%D*([%d%.]+).*", "%1")
 	v1 = {("."):split(v1)}
 	v2 = {("."):split(v2)}
 	for i = 1, min(#v1, #v2) do
@@ -164,156 +166,53 @@ function mounts:setOldChanges()
 
 	local currentVersion = C_AddOns.GetAddOnMetadata(addon, "Version")
 	--@do-not-package@
-	if currentVersion == "@project-version@" then currentVersion = "10.1.18" end
+	if currentVersion == "@project-version@" then currentVersion = "10.2.15" end
 	--@end-do-not-package@
 
-	--IF < 8.3.2 GLOBAL
-	if compareVersion("8.3.2", self.globalDB.lastAddonVersion or "") then
-		self.config.waterWalkAll = nil
-		self.config.waterWalkList = nil
-		self.config.waterWalkInstance = nil
-		self.config.waterWalkExpedition = nil
-		self.config.waterWalkExpeditionList = nil
+	if compareVersion(currentVersion, self.globalDB.lastAddonVersion) then
+		local function after(func)
+			self.after = self.after or {}
+			self.after[#self.after + 1] = func
+		end
 
-		local function setMounts(tbl)
-			if tbl and #tbl > 0 then
-				local newTbl = {}
-				for i = 1, #tbl do
-					newTbl[tbl[i]] = true
+		--IF < 8.3.2 GLOBAL
+		if compareVersion("8.3.2", self.globalDB.lastAddonVersion) then
+			self.config.waterWalkAll = nil
+			self.config.waterWalkList = nil
+			self.config.waterWalkInstance = nil
+			self.config.waterWalkExpedition = nil
+			self.config.waterWalkExpeditionList = nil
+
+			local function setMounts(tbl)
+				if tbl and #tbl > 0 then
+					local newTbl = {}
+					for i = 1, #tbl do
+						newTbl[tbl[i]] = true
+					end
+					return newTbl
 				end
-				return newTbl
+				return tbl
 			end
-			return tbl
-		end
 
-		self.globalDB.fly = setMounts(self.globalDB.fly)
-		self.globalDB.ground = setMounts(self.globalDB.ground)
-		self.globalDB.swimming = setMounts(self.globalDB.swimming)
-		if self.globalDB.zoneMounts then
-			for _, list in next, self.globalDB.zoneMounts do
-				list.fly = setMounts(list.fly)
-				list.ground = setMounts(list.ground)
-				list.swimming = setMounts(list.swimming)
-			end
-		end
-
-		for _, profile in next, self.globalDB.mountsProfiles do
-			profile.fly = setMounts(profile.fly or {})
-			profile.ground = setMounts(profile.ground or {})
-			profile.swimming = setMounts(profile.swimming or {})
-			profile.zoneMounts = profile.zoneMounts or {}
-			profile.petForMount = profile.petForMount or {}
-
-			for _, list in next, profile.zoneMounts do
-				list.fly = setMounts(list.fly)
-				list.ground = setMounts(list.ground)
-				list.swimming = setMounts(list.swimming)
-			end
-		end
-	end
-
-	--IF < 9.0.8 GLOBAL
-	if compareVersion("9.0.8", self.globalDB.lastAddonVersion or "") then
-		local function updateTable(to, from)
-			for k, v in next, from do
-				if type(v) ~= "table" then
-					to[k] = v
-				elseif type(to[k]) ~= "table" then
-					to[k] = util:copyTable(v)
-				else
-					updateTable(to[k], v)
+			self.globalDB.fly = setMounts(self.globalDB.fly)
+			self.globalDB.ground = setMounts(self.globalDB.ground)
+			self.globalDB.swimming = setMounts(self.globalDB.swimming)
+			if self.globalDB.zoneMounts then
+				for _, list in next, self.globalDB.zoneMounts do
+					list.fly = setMounts(list.fly)
+					list.ground = setMounts(list.ground)
+					list.swimming = setMounts(list.swimming)
 				end
 			end
-		end
 
-		if type(self.globalDB.fly) == "table" then
-			updateTable(self.defProfile.fly, self.globalDB.fly)
-			self.globalDB.fly = nil
-		end
-		if type(self.globalDB.ground) == "table" then
-			updateTable(self.defProfile.ground, self.globalDB.ground)
-			self.globalDB.ground = nil
-		end
-		if type(self.globalDB.swimming) == "table" then
-			updateTable(self.defProfile.swimming, self.globalDB.swimming)
-			self.globalDB.swimming = nil
-		end
-		if type(self.globalDB.zoneMounts) == "table" then
-			updateTable(self.defProfile.zoneMounts, self.globalDB.zoneMounts)
-			self.globalDB.zoneMounts = nil
-		end
-		if type(self.globalDB.petForMount) == "table" then
-			updateTable(self.defProfile.petForMount, self.globalDB.petForMount)
-			self.globalDB.petForMount = nil
-		end
-	end
+			for _, profile in next, self.globalDB.mountsProfiles do
+				profile.fly = setMounts(profile.fly or {})
+				profile.ground = setMounts(profile.ground or {})
+				profile.swimming = setMounts(profile.swimming or {})
+				profile.zoneMounts = profile.zoneMounts or {}
+				profile.petForMount = profile.petForMount or {}
 
-	-- IF < 10.1.18 GLOBAL
-	if compareVersion("10.1.18", self.globalDB.lastAddonVersion or "") then
-		local function listToDragonriding(dragonriding, list)
-			for mountID in next, list do
-				local _,_,_,_,_,_,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
-				if isForDragonriding then
-					list[mountID] = nil
-					dragonriding[mountID] = true
-				end
-			end
-		end
-
-		local function allToDragonriding(profile)
-			listToDragonriding(profile.dragonriding, profile.fly)
-			listToDragonriding(profile.dragonriding, profile.ground)
-			listToDragonriding(profile.dragonriding, profile.swimming)
-
-			for mapID, data in next, profile.zoneMounts do
-				data.dragonriding = data.dragonriding or {}
-				listToDragonriding(data.dragonriding, data.fly)
-				listToDragonriding(data.dragonriding, data.ground)
-				listToDragonriding(data.dragonriding, data.swimming)
-			end
-		end
-
-		C_Timer.After(0, function()
-			allToDragonriding(self.defProfile)
-			for name, data in next, self.profiles do
-				allToDragonriding(data)
-			end
-		end)
-	end
-
-	-- SET LAST GLOBAL VERSION
-	self.globalDB.lastAddonVersion = currentVersion
-
-	-- IF < 8.3.2 CHAR
-	if compareVersion("8.3.2", self.charDB.lastAddonVersion or "") then
-		local function setMounts(tbl)
-			if #tbl > 0 then
-				local newTbl = {}
-				for i = 1, #tbl do
-					newTbl[tbl[i]] = true
-				end
-				return newTbl
-			end
-			return tbl
-		end
-
-		if type(self.charDB.fly) == "table" and #self.charDB.fly > 0
-		or type(self.charDB.ground) == "table" and #self.charDB.ground > 0
-		or type(self.charDB.swimming) == "table" and #self.charDB.swimming > 0
-		or type(self.charDB.zoneMounts) == "table" and next(self.charDB.zoneMounts) ~= nil then
-			local name = UnitName("player").." - "..GetRealmName()
-			if not self.profiles[name] then
-				self.profiles[name] = {
-					fly = setMounts(self.charDB.fly or {}),
-					ground = setMounts(self.charDB.ground or {}),
-					swimming = setMounts(self.charDB.swimming or {}),
-					zoneMounts = self.charDB.zoneMounts or {},
-					petForMount = {},
-				}
-				if self.charDB.enable then
-					self.charDB.currentProfileName = name
-				end
-				for _, list in next, self.profiles[name].zoneMounts do
+				for _, list in next, profile.zoneMounts do
 					list.fly = setMounts(list.fly)
 					list.ground = setMounts(list.ground)
 					list.swimming = setMounts(list.swimming)
@@ -321,19 +220,197 @@ function mounts:setOldChanges()
 			end
 		end
 
-		self.charDB.fly = nil
-		self.charDB.ground = nil
-		self.charDB.swimming = nil
-		self.charDB.zoneMounts = nil
-		self.charDB.enable = nil
+		--IF < 9.0.8 GLOBAL
+		if compareVersion("9.0.8", self.globalDB.lastAddonVersion) then
+			local function updateTable(to, from)
+				for k, v in next, from do
+					if type(v) ~= "table" then
+						to[k] = v
+					elseif type(to[k]) ~= "table" then
+						to[k] = util:copyTable(v)
+					else
+						updateTable(to[k], v)
+					end
+				end
+			end
+
+			if type(self.globalDB.fly) == "table" then
+				updateTable(self.defProfile.fly, self.globalDB.fly)
+				self.globalDB.fly = nil
+			end
+			if type(self.globalDB.ground) == "table" then
+				updateTable(self.defProfile.ground, self.globalDB.ground)
+				self.globalDB.ground = nil
+			end
+			if type(self.globalDB.swimming) == "table" then
+				updateTable(self.defProfile.swimming, self.globalDB.swimming)
+				self.globalDB.swimming = nil
+			end
+			if type(self.globalDB.zoneMounts) == "table" then
+				updateTable(self.defProfile.zoneMounts, self.globalDB.zoneMounts)
+				self.globalDB.zoneMounts = nil
+			end
+			if type(self.globalDB.petForMount) == "table" then
+				updateTable(self.defProfile.petForMount, self.globalDB.petForMount)
+				self.globalDB.petForMount = nil
+			end
+		end
+
+		-- IF < 10.1.18 GLOBAL
+		if compareVersion("10.1.18", self.globalDB.lastAddonVersion) then
+			local function listToDragonriding(dragonriding, list)
+				for mountID in next, list do
+					local _,_,_,_,_,_,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
+					if isForDragonriding then
+						list[mountID] = nil
+						dragonriding[mountID] = true
+					end
+				end
+			end
+
+			local function allToDragonriding(profile)
+				listToDragonriding(profile.dragonriding, profile.fly)
+				listToDragonriding(profile.dragonriding, profile.ground)
+				listToDragonriding(profile.dragonriding, profile.swimming)
+
+				for mapID, data in next, profile.zoneMounts do
+					data.dragonriding = data.dragonriding or {}
+					listToDragonriding(data.dragonriding, data.fly)
+					listToDragonriding(data.dragonriding, data.ground)
+					listToDragonriding(data.dragonriding, data.swimming)
+				end
+			end
+
+			after(function()
+				allToDragonriding(self.defProfile)
+				for name, data in next, self.profiles do
+					allToDragonriding(data)
+				end
+			end)
+		end
+
+		-- IF < 10.2.15 GLOBAL
+		if compareVersion("10.2.15", self.globalDB.lastAddonVersion) then
+			for i = 1, GetNumClasses() do
+				local _, className = GetClassInfo(i)
+				self.config.macrosConfig[className].useRunningWild = nil
+				self.config.macrosConfig[className].runningWildsummoningChance = nil
+				self.config.macrosConfig[className].useRunningWild = nil
+				self.config.macrosConfig[className].soarSummoningChance = nil
+			end
+
+			local function mountToSpell(list)
+				local newList = {}
+				for mountID, v in next, list do
+					local _, spellID = C_MountJournal.GetMountInfoByID(mountID)
+					newList[spellID] = v
+				end
+				return newList
+			end
+
+			local function profileToSpell(profile)
+				profile.mountsWeight = mountToSpell(profile.mountsWeight)
+				profile.dragonriding = mountToSpell(profile.dragonriding)
+				profile.fly = mountToSpell(profile.fly)
+				profile.ground = mountToSpell(profile.ground)
+				profile.swimming = mountToSpell(profile.swimming)
+
+				local zoneMounts = profile.zoneMounts
+				for mapID, data in next, zoneMounts do
+					data.dragonriding = mountToSpell(data.dragonriding)
+					data.fly = mountToSpell(data.fly)
+					data.ground = mountToSpell(data.ground)
+					data.swimming = mountToSpell(data.swimming)
+				end
+			end
+
+			after(function()
+				if self.config.repairSelectedMount then
+					local _, spellID = C_MountJournal.GetMountInfoByID(self.config.repairSelectedMount)
+					self.config.repairSelectedMount = spellID
+				end
+				if self.globalDB.hiddenMounts then
+					self.globalDB.hiddenMounts = mountToSpell(self.globalDB.hiddenMounts)
+				end
+				self.globalDB.mountTags = mountToSpell(self.globalDB.mountTags)
+				profileToSpell(self.defProfile)
+				for name, data in next, self.profiles do
+					profileToSpell(data)
+				end
+			end)
+		end
+
+		-- SET LAST GLOBAL VERSION
+		self.globalDB.lastAddonVersion = currentVersion
 	end
 
-	-- SET LAST CHAR VERSION
-	self.charDB.lastAddonVersion = currentVersion
+	if compareVersion(currentVersion, self.charDB.lastAddonVersion) then
+		-- IF < 8.3.2 CHAR
+		if compareVersion("8.3.2", self.charDB.lastAddonVersion) then
+			local function setMounts(tbl)
+				if #tbl > 0 then
+					local newTbl = {}
+					for i = 1, #tbl do
+						newTbl[tbl[i]] = true
+					end
+					return newTbl
+				end
+				return tbl
+			end
+
+			if type(self.charDB.fly) == "table" and #self.charDB.fly > 0
+			or type(self.charDB.ground) == "table" and #self.charDB.ground > 0
+			or type(self.charDB.swimming) == "table" and #self.charDB.swimming > 0
+			or type(self.charDB.zoneMounts) == "table" and next(self.charDB.zoneMounts) ~= nil then
+				local name = UnitName("player").." - "..GetRealmName()
+				if not self.profiles[name] then
+					self.profiles[name] = {
+						fly = setMounts(self.charDB.fly or {}),
+						ground = setMounts(self.charDB.ground or {}),
+						swimming = setMounts(self.charDB.swimming or {}),
+						zoneMounts = self.charDB.zoneMounts or {},
+						petForMount = {},
+					}
+					if self.charDB.enable then
+						self.charDB.currentProfileName = name
+					end
+					for _, list in next, self.profiles[name].zoneMounts do
+						list.fly = setMounts(list.fly)
+						list.ground = setMounts(list.ground)
+						list.swimming = setMounts(list.swimming)
+					end
+				end
+			end
+
+			self.charDB.fly = nil
+			self.charDB.ground = nil
+			self.charDB.swimming = nil
+			self.charDB.zoneMounts = nil
+			self.charDB.enable = nil
+		end
+
+		-- IF < 10.2.15 CHAR
+		if compareVersion("10.2.15", self.charDB.lastAddonVersion) then
+			self.charDB.macrosConfig.useRunningWild = nil
+			self.charDB.macrosConfig.runningWildsummoningChance = nil
+			self.charDB.macrosConfig.useRunningWild = nil
+			self.charDB.macrosConfig.soarSummoningChance = nil
+		end
+
+		-- SET LAST CHAR VERSION
+		self.charDB.lastAddonVersion = currentVersion
+	end
 end
 
 
 function mounts:PLAYER_LOGIN()
+	if self.after then
+		for i = 1, #self.after do
+			self.after[i]()
+		end
+		self.after = nil
+	end
+
 	-- INIT
 	self:setModifier(self.config.modifier)
 	self:setHandleWaterJump(self.config.waterJump)
@@ -421,7 +498,7 @@ function mounts:setUsableRepairMounts()
 	else
 		local _,_,_,_,_,_,_,_,_, shouldHideOnChar = C_MountJournal.GetMountInfoByID(self.config.repairSelectedMount)
 		if shouldHideOnChar then
-			self.config.repairSelectedMount = self.config.repairSelectedMount == 280 and 284 or 280
+			self.config.repairSelectedMount = self.config.repairSelectedMount == 61425 and 61447 or 61425
 		end
 		self.usableRepairMounts[self.config.repairSelectedMount] = true
 	end
@@ -609,7 +686,12 @@ function mounts:setMountsList()
 				elseif self.mapFlags then return end
 			end
 		end
-		mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
+
+		if mapInfo.parentMapID == 0 and mapInfo.mapID ~= self.defMountsListID then
+			mapInfo = C_Map.GetMapInfo(self.defMountsListID)
+		else
+			mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
+		end
 	end
 
 	if not self.list.dragonriding then self.list.dragonriding = self.empty end
@@ -699,7 +781,7 @@ do
 		local mountID = C_MountJournal.GetMountFromSpell(auraData.spellId)
 		if mountID then
 			local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
-			mount = isUsable and IsUsableSpell(auraData.spellId) and mountID
+			mount = isUsable and IsUsableSpell(auraData.spellId) and auraData.spellId
 			return true
 		end
 	end
@@ -714,32 +796,46 @@ do
 end
 
 
-function mounts:summon()
-	if self.weight > 0 then
-		for i = random(self.weight), self.weight do
-			if self.usableIDs[i] then
-				C_MountJournal.SummonByID(self.usableIDs[i])
-				break
-			end
+function mounts:summon(spellID)
+	self.summonedSpellID = spellID or self.summonedSpellID
+	if self.summonedSpellID then
+		local mountID = C_MountJournal.GetMountFromSpell(self.summonedSpellID)
+		if mountID then
+			C_MountJournal.SummonByID(mountID)
+			return true
 		end
 	end
 end
 
 
-function mounts:setUsableIDs(ids, mountsWeight)
-	self.summonList = ids
-	self.weight = 0
+function mounts:setUsableID(ids, mountsWeight)
+	local weight = 0
 	wipe(self.usableIDs)
 
-	for mountID in next, ids do
-		local _, spellID, _,_, isUsable, _,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
-		if isUsable and (not isForDragonriding or IsUsableSpell(spellID)) then
-			self.weight = self.weight + (mountsWeight[mountID] or 100)
-			self.usableIDs[self.weight] = mountID
+	for spellID in next, ids do
+		local usable
+		if self.additionalMounts[spellID] then
+			usable = self.withAdditional and self.additionalMounts[spellID]:canUse()
+		else
+			local mountID = C_MountJournal.GetMountFromSpell(spellID)
+			local _,_,_,_, isUsable, _,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
+			usable = isUsable and (not isForDragonriding or IsUsableSpell(spellID))
+		end
+
+		if usable then
+			weight = weight + (mountsWeight[spellID] or 100)
+			self.usableIDs[weight] = spellID
 		end
 	end
 
-	return self.weight > 0
+	if weight > 0 then
+		for i = random(weight), weight do
+			if self.usableIDs[i] then
+				self.summonedSpellID = self.usableIDs[i]
+				return true
+			end
+		end
+	end
 end
 
 
@@ -850,10 +946,10 @@ do
 		                          and (IsFlyableArea() or isFlyableOverride[self.instanceID])
 		                          and self:isFlyLocation(self.instanceID)
 		                          and not (self.mapFlags and self.mapFlags.groundOnly)
-		local isDragonridable = not flags.forceFly
+		local canDragonriding = not (flags.forceFly
+		                        or self.mapFlags and (self.mapFlags.regularFlyOnly or self.mapFlags.groundOnly))
+		local isDragonridable = canDragonriding
 		                        and IsAdvancedFlyableArea()
-		                        and not (self.mapFlags and (self.mapFlags.regularFlyOnly
-		                                                    or self.mapFlags.groundOnly))
 
 		flags.modifier = self.modifier() or flags.forceModifier
 		flags.isSubmerged = IsSubmerged()
@@ -864,6 +960,7 @@ do
 		flags.swimming = flags.isSubmerged
 		                 and not (flags.modifier or isFloating)
 		flags.isVashjir = self.mapVashjir[self.mapInfo.mapID]
+		flags.canDragonriding = canDragonriding
 		flags.isDragonridable = isDragonridable
 		                        and (not flags.modifier or flags.isSubmerged)
 		flags.fly = isFlyableLocation
@@ -871,6 +968,8 @@ do
 		flags.waterWalk = isFloating
 		                  or not (isFlyableLocation or isDragonridable) and flags.modifier
 		                  or self:isWaterWalkLocation()
+		flags.useRepair = flags.repair and not (flags.fly or flags.isDragonridable)
+		                  or flags.flyableRepair and (flags.fly or flags.isDragonridable)
 		flags.herb = self.herbMount and (not self.config.herbMountsOnZones
 		                                 or self.mapFlags and self.mapFlags.herbGathering)
 		flags.targetMount = self:getTargetMount()
@@ -883,36 +982,39 @@ function mounts:errorSummon()
 end
 
 
-function mounts:setSummonList()
-	self.summonList = nil
+function mounts:setSummonMount(withAdditional)
+	self.withAdditional = withAdditional
+	self.summonedSpellID = nil
 	local flags = self.sFlags
 	if flags.inVehicle then
 		VehicleExit()
 	elseif flags.isMounted then
 		Dismount()
 	elseif not flags.groundSpellKnown then
-		if not (flags.swimming and self:setUsableIDs(self.list.swimming, self.list.swimmingWeight) or self:setUsableIDs(self.lowLevel, self.db.mountsWeight)) then
+		if not (flags.swimming and self:setUsableID(self.list.swimming, self.list.swimmingWeight) or self:setUsableID(self.lowLevel, self.db.mountsWeight)) then
 			self:errorSummon()
 		end
 	-- repair mounts
-	elseif not ((flags.repair and not flags.fly or flags.flyableRepair and flags.fly) and self:setUsableIDs(self.usableRepairMounts, self.db.mountsWeight))
+	elseif not (flags.useRepair and self:setUsableID(self.usableRepairMounts, self.db.mountsWeight))
 	-- target's mount
-	and not (flags.targetMount and (C_MountJournal.SummonByID(flags.targetMount) or true))
+	and not (flags.targetMount and self:summon(flags.targetMount))
 	-- swimming
 	and not (flags.swimming and (
-		flags.isVashjir and self:setUsableIDs(self.swimmingVashjir, self.db.mountsWeight)
-		or self:setUsableIDs(self.list.swimming, self.list.swimmingWeight)
+		flags.isVashjir and self:setUsableID(self.swimmingVashjir, self.db.mountsWeight)
+		or self:setUsableID(self.list.swimming, self.list.swimmingWeight)
 	))
 	-- herbMount
-	and not (flags.herb and self:setUsableIDs(self.herbalismMounts, self.db.mountsWeight))
+	and not (flags.herb and self:setUsableID(self.herbalismMounts, self.db.mountsWeight))
 	-- dragonridable
-	and not (flags.isDragonridable and self:setUsableIDs(self.list.dragonriding, self.list.dragonridingWeight))
+	and not (flags.isDragonridable and self:setUsableID(self.list.dragonriding, self.list.dragonridingWeight))
+	-- soar
+	and not (self.withAdditional and flags.canDragonriding and self._soar:canUse() and self._soar:setMount())
 	-- fly
-	and not (flags.fly and self:setUsableIDs(self.list.fly, self.list.flyWeight))
+	and not (flags.fly and self:setUsableID(self.list.fly, self.list.flyWeight))
 	-- ground
-	and not self:setUsableIDs(self.list.ground, self.list.groundWeight)
-	and not self:setUsableIDs(self.list.fly, self.list.flyWeight)
-	and not self:setUsableIDs(self.lowLevel, self.db.mountsWeight) then
+	and not self:setUsableID(self.list.ground, self.list.groundWeight)
+	and not self:setUsableID(self.list.fly, self.list.flyWeight)
+	and not self:setUsableID(self.lowLevel, self.db.mountsWeight) then
 		self:errorSummon()
 	end
 end
@@ -925,7 +1027,7 @@ function mounts:init()
 		self.sFlags.forceModifier = nil
 		self.sFlags.forceFly = nil
 		self:setFlags()
-		self:setSummonList()
+		self:setSummonMount()
 		self:summon()
 	end
 end

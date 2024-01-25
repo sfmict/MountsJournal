@@ -29,7 +29,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 	}
 
 	dd.animations = MountsJournal.globalDB.mountAnimations
-	dd.animationsList = {
+	dd.animationList = {
 		{
 			name = L["Default"],
 			animation = 0,
@@ -89,7 +89,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 	dd.customAnimationPanel = CreateFrame("FRAME", nil, journal.modelScene, "MJMountCustomAnimationPanel")
 	dd.customAnimationPanel:SetPoint("BOTTOMRIGHT", dd, "TOPRIGHT", 0, 2)
 
-	journal:on("MOUNT_MODEL_UPDATE", function(journal, mountType)
+	journal:on("MOUNT_MODEL_UPDATE", function(journal, mountType, animationList)
 		if mountType then
 			if mountType == 231 then
 				dd.currentMountType = 2
@@ -97,6 +97,17 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 				mountType = journal.mountTypes[mountType]
 				dd.currentMountType = type(mountType) == "table" and mountType[1] or mountType
 			end
+
+			dd.currentAnimationList = animationList or dd.animationList
+			if dd.selectedValue and dd.selectedValue ~= "custom" then
+				for i = 1, #dd.currentAnimationList do
+					if dd.selectedValue.name == dd.currentAnimationList[i].name then
+						dd.selectedValue = dd.currentAnimationList[i]
+						break
+					end
+				end
+			end
+
 			dd:replayAnimation()
 		end
 	end)
@@ -109,8 +120,8 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		else
 			local actor = journal.modelScene:GetActorByTag("unwrapped")
 			if actor then actor:StopAnimationKit() end
-			self:ddSetSelectedValue(self.animationsList[1])
-			self:ddSetSelectedText(self.animationsList[1].name)
+			self:ddSetSelectedValue(self.currentAnimationList[1])
+			self:ddSetSelectedText(self.currentAnimationList[1].name)
 		end
 	end
 
@@ -142,7 +153,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		local function remove(btn) self:deleteAnimation(btn.arg1) end
 
 		info.list = {}
-		for _, v in ipairs(self.animationsList) do
+		for _, v in ipairs(self.currentAnimationList) do
 			if v.type == nil or v.type >= mountType or mountType == 4 then
 				tinsert(info.list, {
 					text = ("%s|cff808080.%d%s|r"):format(v.name, v.animation, v.isKit and ".k" or ""),
@@ -192,7 +203,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		local animation = self.animations[id]
 		StaticPopup_Show(util.addonName.."DELETE_MOUNT_ANIMATION", NORMAL_FONT_COLOR_CODE..animation.name..FONT_COLOR_CODE_CLOSE, nil, function()
 			if self.selectedValue == animation then
-				local value = self.animationsList[1]
+				local value = self.currentAnimationList[1]
 				self:playAnimation(value.animation, value.isKit, value.loop)
 				self:ddSetSelectedValue(value)
 				self:ddSetSelectedText(value.name)

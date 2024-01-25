@@ -210,51 +210,29 @@ end)
 
 do
 	local generalOptions = {
-		{
-			isShown = function()
-				local class = classConfig.rightPanel.currentBtn.key
-				if class ~= "PALADIN" and class ~= "SHAMAN" and class ~= "DEMONHUNTER" and class ~= "EVOKER" then
-					local _,_, raceID = UnitRace("player")
-					return raceID == 22
-				end
-			end,
-			key = "useRunningWild",
-			text = L["WORGEN_USERUNNINGWILD"],
-			hlink = GetSpellLink(87840),
-			childs = {
-				{
-					widget = "slider",
-					key = "runningWildsummoningChance",
-					text = L["Chance of summoning"],
-					min = 1,
-					max = 100,
-					step = 1,
-					defaultValue = 100,
-				},
-			},
-		},
-		{
-			isShown = function()
-				if classConfig.rightPanel.currentBtn.key == "EVOKER" then
-					local _,_, raceID = UnitRace("player")
-					return raceID == 52
-				end
-			end,
-			key = "useSoar",
-			text = L["DRACTHYR_USESOAR"],
-			hlink = GetSpellLink(369536),
-			childs = {
-				{
-					widget = "slider",
-					key = "soarSummoningChance",
-					text = L["Chance of summoning"],
-					min = 1,
-					max = 100,
-					step = 1,
-					defaultValue = 100,
-				},
-			}
-		},
+		-- {
+		-- 	isShown = function()
+		-- 		local class = classConfig.rightPanel.currentBtn.key
+		-- 		if class ~= "PALADIN" and class ~= "SHAMAN" and class ~= "DEMONHUNTER" and class ~= "EVOKER" then
+		-- 			local _,_, raceID = UnitRace("player")
+		-- 			return raceID == 22
+		-- 		end
+		-- 	end,
+		-- 	key = "useRunningWild",
+		-- 	text = L["WORGEN_USERUNNINGWILD"],
+		-- 	hlink = GetSpellLink(87840),
+		-- 	childs = {
+		-- 		{
+		-- 			widget = "slider",
+		-- 			key = "runningWildsummoningChance",
+		-- 			text = L["Chance of summoning"],
+		-- 			min = 1,
+		-- 			max = 100,
+		-- 			step = 1,
+		-- 			defaultValue = 100,
+		-- 		},
+		-- 	},
+		-- },
 	}
 
 

@@ -82,6 +82,11 @@ function journal:init()
 		end
 	end
 
+	-- ADDITIONAL MOUNTS
+	for spellID, mount in next, mounts.additionalMounts do
+		if mount:isShown() then self.mountIDs[#self.mountIDs + 1] = mount end
+	end
+
 	-- BACKGROUND FRAME
 	self.bgFrame = CreateFrame("FRAME", "MountsJournalBackground", self.CollectionsJournal, "MJMountJournalFrameTemplate")
 	self.bgFrame:SetPoint("TOPLEFT", self.CollectionsJournal, "TOPLEFT", 0, 0)
@@ -91,6 +96,7 @@ function journal:init()
 	self.bgFrame:SetScript("OnShow", function()
 		self.CollectionsJournal.NineSlice:Hide()
 		self:RegisterEvent("COMPANION_UPDATE")
+		self:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 		self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 		self:RegisterEvent("PLAYER_REGEN_DISABLED")
 		self:RegisterEvent("PLAYER_REGEN_ENABLED")
@@ -103,6 +109,7 @@ function journal:init()
 	self.bgFrame:SetScript("OnHide", function()
 		self.CollectionsJournal.NineSlice:Show()
 		self:UnregisterEvent("COMPANION_UPDATE")
+		self:UnregisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 		self:UnregisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 		self:UnregisterEvent("PLAYER_REGEN_DISABLED")
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
@@ -217,7 +224,8 @@ function journal:init()
 	-- MOUNT COUNT
 	self.mountCount.collectedLabel:SetText(L["Collected:"])
 	self:updateCountMounts()
-	self:RegisterEvent("NEW_MOUNT_ADDED")
+	self:RegisterEvent("COMPANION_LEARNED")
+	self:RegisterEvent("COMPANION_UNLEARNED")
 
 	-- ACHIEVEMENT
 	self:ACHIEVEMENT_EARNED()
@@ -870,14 +878,16 @@ function journal:init()
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
 		GameTooltip:SetText(btn:GetText(), HIGHLIGHT_FONT_COLOR:GetRGB())
 
-		local needsFanFare = self.selectedMountID and C_MountJournal.NeedsFanfare(self.selectedMountID)
+		local isMount = type(self.selectedMountID) == "number"
+
+		local needsFanFare = isMount and C_MountJournal.NeedsFanfare(self.selectedMountID)
 		if needsFanFare then
 			GameTooltip_AddNormalLine(GameTooltip, MOUNT_UNWRAP_TOOLTIP, true)
 		else
 			GameTooltip_AddNormalLine(GameTooltip, MOUNT_SUMMON_TOOLTIP, true)
 		end
 
-		if self.selectedMountID ~= nil then
+		if isMount then
 			local checkIndoors = true
 			local isUsable, errorText = C_MountJournal.GetMountUsabilityByID(self.selectedMountID, checkIndoors)
 			if errorText ~= nil then
@@ -887,9 +897,16 @@ function journal:init()
 
 		GameTooltip:Show()
 	end)
-	self.summonButton:SetScript("OnClick", function()
-		if self.selectedMountID then
+	self.summonButton:HookScript("PreClick", function(btn)
+		if type(self.selectedMountID) == "number" then
 			self:useMount(self.selectedMountID)
+			btn:SetAttribute("macrotext", "")
+		elseif self.selectedMountID then
+			if self.selectedMountID:isActive() then
+				btn:SetAttribute("macrotext", "/dismount")
+			else
+				btn:SetAttribute("macrotext", self.selectedMountID.macro)
+			end
 		end
 	end)
 
@@ -923,8 +940,14 @@ function journal:init()
 	end)
 
 	-- SET/UNSET FAVORITE
+	self:on("UPDATE_FAVORITES", self.sortMounts)
 	hooksecurefunc(C_MountJournal, "SetIsFavorite", function()
 		self:sortMounts()
+	end)
+
+	-- ON ALERT CLICK
+	hooksecurefunc("MountJournal_SelectByMountID", function(mountID)
+		self:setSelectedMount(mountID)
 	end)
 
 	-- MODULES INIT
@@ -934,6 +957,7 @@ function journal:init()
 	self.MountJournal.SummonRandomFavoriteButton:Hide()
 	self.CollectionsJournal.NineSlice:Hide()
 	self:RegisterEvent("COMPANION_UPDATE")
+	self:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 	self:RegisterUnitEvent("UNIT_FORM_CHANGED", "player")
 
@@ -1039,7 +1063,7 @@ function journal:setMJFiltersBackup()
 	backup.isBackuped = true
 	self:RegisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 	self:RegisterEvent("PLAYER_LEAVING_WORLD")
-	self:updateIndexByMountID()
+	self:updateIndexByMountID(true)
 end
 
 
@@ -1136,6 +1160,26 @@ function journal:COMPANION_UPDATE(companionType)
 end
 
 
+function journal:getMountInfo(mount)
+	-- name, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, shouldHideOnChar, isCollected, _, isForDragonriding
+	if type(mount) == "number" then
+		return C_MountJournal.GetMountInfoByID(mount)
+	else
+		return mount.name, mount.spellID, mount.icon, mount:isActive(), mount:isUsable(), 0, mount:getIsFavorite(), false, nil, false, true, nil, mount.dragonriding
+	end
+end
+
+
+function journal:getMountInfoExtra(mount)
+	-- expansion, rarity, creatureDisplayID, descriptionText, sourceText, isSelfMount, mountType, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview
+	if type(mount) == "number" then
+		return mounts.mountsDB[mount][1], mounts.mountsDB[mount][2], C_MountJournal.GetMountInfoExtraByID(mount)
+	else
+		return mount.expansion, nil, mount.creatureID, mount.description, mount.sourceText, true, mount.mountType, mount.modelSceneID
+	end
+end
+
+
 function journal:setScrollGridMounts(grid)
 	local index = self.view:CalculateDataIndices(self.scrollBox)
 	local template
@@ -1174,14 +1218,14 @@ do
 		if isForDragonriding then
 			btn.dragonriding:Show()
 			btn.fly:Hide()
-			setColor(self, btn.dragonriding, self.list and self.list.dragonriding[btn.mountID])
+			setColor(self, btn.dragonriding, self.list and self.list.dragonriding[btn.spellID])
 		else
 			btn.dragonriding:Hide()
 			btn.fly:Show()
-			setColor(self, btn.fly, self.list and self.list.fly[btn.mountID])
+			setColor(self, btn.fly, self.list and self.list.fly[btn.spellID])
 		end
-		setColor(self, btn.ground, self.list and self.list.ground[btn.mountID])
-		setColor(self, btn.swimming, self.list and self.list.swimming[btn.mountID])
+		setColor(self, btn.ground, self.list and self.list.ground[btn.spellID])
+		setColor(self, btn.swimming, self.list and self.list.swimming[btn.spellID])
 	end
 end
 
@@ -1212,9 +1256,15 @@ end
 
 
 function journal:defaultInitMountButton(btn, data)
-	local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected, _, isForDragonriding = C_MountJournal.GetMountInfoByID(data.mountID)
-	local needsFanfare = C_MountJournal.NeedsFanfare(data.mountID)
-	local qualityColor = getQualityColor(data.mountID)
+	local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected, _, isForDragonriding = self:getMountInfo(data.mountID)
+
+	local needsFanfare, qualityColor
+	if type(data.mountID) == "number" then
+		needsFanfare = C_MountJournal.NeedsFanfare(data.mountID)
+		qualityColor = getQualityColor(data.mountID)
+	else
+		qualityColor = HIGHLIGHT_FONT_COLOR
+	end
 
 	btn.spellID = spellID
 	btn.mountID = data.mountID
@@ -1222,11 +1272,11 @@ function journal:defaultInitMountButton(btn, data)
 	btn.dragButton.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
 	btn.dragButton.icon:SetVertexColor(1, 1, 1)
 	btn.dragButton.qualityBorder:SetVertexColor(qualityColor:GetRGB())
-	btn.dragButton.hidden:SetShown(self:isMountHidden(data.mountID))
+	btn.dragButton.hidden:SetShown(self:isMountHidden(spellID))
 	btn.dragButton.favorite:SetShown(isFavorite)
 	btn.dragButton.activeTexture:SetShown(active)
 
-	local mountWeight = self.mountsWeight[data.mountID]
+	local mountWeight = self.mountsWeight[spellID]
 	if mountWeight then
 		btn.dragButton.mountWeight:SetText(getColorWeight(mountWeight))
 		btn.dragButton.mountWeight:Show()
@@ -1289,9 +1339,15 @@ function journal:grid3InitMountButton(btn, data)
 
 		if data[i] then
 			local mountID = data[i].mountID
-			local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected, _, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
-			local needsFanfare = C_MountJournal.NeedsFanfare(mountID)
-			local qualityColor = getQualityColor(mountID)
+			local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected, _, isForDragonriding = self:getMountInfo(mountID)
+
+			local needsFanfare, qualityColor
+			if type(mountID) == "number" then
+				needsFanfare = C_MountJournal.NeedsFanfare(mountID)
+				qualityColor = getQualityColor(mountID)
+			else
+				qualityColor = HIGHLIGHT_FONT_COLOR
+			end
 
 			g3btn.spellID = spellID
 			g3btn.mountID = mountID
@@ -1301,10 +1357,10 @@ function journal:grid3InitMountButton(btn, data)
 			g3btn.qualityBorder:SetVertexColor(qualityColor:GetRGB())
 			g3btn:Enable()
 			g3btn.selectedTexture:SetShown(mountID == self.selectedMountID)
-			g3btn.hidden:SetShown(self:isMountHidden(mountID))
+			g3btn.hidden:SetShown(self:isMountHidden(spellID))
 			g3btn.favorite:SetShown(isFavorite)
 
-			local mountWeight = self.mountsWeight[mountID]
+			local mountWeight = self.mountsWeight[spellID]
 			if mountWeight then
 				g3btn.mountWeight:SetText(getColorWeight(mountWeight))
 				g3btn.mountWeight:Show()
@@ -1450,7 +1506,7 @@ end
 
 function journal:setCountMounts()
 	if mounts.filters.hideOnChar then
-		self.mountCount.count:SetText(#self.mountIDs)
+		self.mountCount.count:SetText(self.mountCount.count.numWithHidden)
 		self.mountCount.collected:SetText(self.mountCount.collected.numWithHidden)
 	else
 		self.mountCount.count:SetText(self.mountCount.count.num)
@@ -1460,20 +1516,25 @@ end
 
 
 function journal:updateCountMounts()
-	local count, collected, collectedWithHidden = 0, 0, 0
+	local count, countWithHidden, collected, collectedWithHidden = 0, 0, 0, 0
 	for i = 1, #self.mountIDs do
-		local _,_,_,_,_,_,_,_,_, hideOnChar, isCollected = C_MountJournal.GetMountInfoByID(self.mountIDs[i])
-		if not hideOnChar then
-			count = count + 1
-			if isCollected then
-				collected = collected + 1
+		local mountID = self.mountIDs[i]
+		if type(mountID) == "number" then
+			local _,_,_,_,_,_,_,_,_, hideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+			if not hideOnChar then
+				count = count + 1
+				if isCollected then
+					collected = collected + 1
+				end
 			end
-		end
-		if isCollected then
-			collectedWithHidden = collectedWithHidden + 1
+			if isCollected then
+				collectedWithHidden = collectedWithHidden + 1
+			end
+			countWithHidden = countWithHidden + 1
 		end
 	end
 	self.mountCount.count.num = count
+	self.mountCount.count.numWithHidden = countWithHidden
 	self.mountCount.collected.num = collected
 	self.mountCount.collected.numWithHidden = collectedWithHidden
 	self:setCountMounts()
@@ -1485,16 +1546,32 @@ function journal:sortMounts()
 	local numNeedingFanfare = C_MountJournal.GetNumMountsNeedingFanfare()
 
 	local mCache = setmetatable({}, {__index = function(t, mountID)
-		local name, _,_,_,_,_, isFavorite, _,_,_, isCollected, _, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
-		t[mountID] = {name, isFavorite, isCollected, isForDragonriding}
-		if numNeedingFanfare > 0 and C_MountJournal.NeedsFanfare(mountID) then
-			t[mountID][5] = true
-			numNeedingFanfare = numNeedingFanfare - 1
-		end
-		if fSort.by == "type" then
-			local _,_,_,_, mType = C_MountJournal.GetMountInfoExtraByID(mountID)
-			mType = self.mountTypes[mType]
-			t[mountID][6] = type(mType) == "number" and mType or mType[1]
+		if type(mountID) == "number" then
+			local name, _,_,_,_,_, isFavorite, _,_,_, isCollected, _, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
+			t[mountID] = {name, isFavorite, isCollected, isForDragonriding}
+			if numNeedingFanfare > 0 and C_MountJournal.NeedsFanfare(mountID) then
+				t[mountID][5] = true
+				numNeedingFanfare = numNeedingFanfare - 1
+			end
+			if fSort.by == "type" then
+				local _,_,_,_, mType = C_MountJournal.GetMountInfoExtraByID(mountID)
+				mType = self.mountTypes[mType]
+				t[mountID][7] = type(mType) == "number" and mType or mType[1]
+			elseif fSort.by == "expansion" then
+				t[mountID][7] = db[mountID][1]
+			elseif fSort.by == "rarity" then
+				t[mountID][7] = db[mountID][2]
+			end
+		else
+			t[mountID] = {mountID.name, mountID:getIsFavorite(), true, mountID.dragonriding, false, true}
+			if fSort.by == "type" then
+				local mType = self.mountTypes[mountID.mountType]
+				t[mountID][7] = type(mType) == "number" and mType or mType[1]
+			elseif fSort.by == "expansion" then
+				t[mountID][7] = mountID.expansion
+			elseif fSort.by == "rarity" then
+				t[mountID][7] = 100
+			end
 		end
 		return t[mountID]
 	end})
@@ -1520,6 +1597,13 @@ function journal:sortMounts()
 			elseif not isFavoriteA and isFavoriteB then return false end
 		end
 
+		-- ADDITIONAL
+		local isAdditionalA = ma[6]
+		local isAdditionalB = mb[6]
+
+		if isAdditionalA and not isAdditionalB then return true
+		elseif not isAdditionalA and isAdditionalB then return false end
+
 		-- COLLECTED
 		local isCollectedA = ma[3]
 		local isCollectedB = mb[3]
@@ -1536,27 +1620,13 @@ function journal:sortMounts()
 			elseif not isForDragonridingA and isForDragonridingB then return false end
 		end
 
-		-- TYPE
-		if fSort.by == "type" then
-			local typeA = ma[6]
-			local typeB = mb[6]
+		-- BY
+		if fSort.by ~= "name" then
+			local byA = ma[7]
+			local byB = mb[7]
 
-			if typeA < typeB then return not fSort.reverse
-			elseif typeA > typeB then return fSort.reverse end
-		-- EXPANSION
-		elseif fSort.by == "expansion" then
-			local expA = db[a][1]
-			local expB = db[b][1]
-
-			if expA < expB then return not fSort.reverse
-			elseif expA > expB then return fSort.reverse end
-		-- RARITY
-		elseif fSort.by == "rarity" then
-			local rarA = db[a][2]
-			local rarB = db[b][2]
-
-			if rarA < rarB then return not fSort.reverse
-			elseif rarA > rarB then return fSort.reverse end
+			if byA < byB then return not fSort.reverse
+			elseif byA > byB then return fSort.reverse end
 		end
 
 		-- NAME
@@ -1574,9 +1644,9 @@ function journal:sortMounts()
 end
 
 
-function journal:updateIndexByMountID()
+function journal:updateIndexByMountID(force)
 	if not self.mjFiltersBackup.isBackuped then return end
-	if C_MountJournal.GetNumDisplayedMounts() ~= self.mountCount.count.num then
+	if C_MountJournal.GetNumDisplayedMounts() ~= self.mountCount.count.num or force then
 		self:UnregisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
 		C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
 		C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
@@ -1596,11 +1666,12 @@ end
 journal.MOUNT_JOURNAL_SEARCH_UPDATED = journal.updateIndexByMountID
 
 
-function journal:NEW_MOUNT_ADDED()
+function journal:COMPANION_LEARNED()
 	self:updateCountMounts()
-	self:updateIndexByMountID()
+	self:updateIndexByMountID(true)
 	self:sortMounts()
 end
+journal.COMPANION_UNLEARNED = journal.COMPANION_LEARNED
 
 
 -- isUsable FLAG CHANGED
@@ -1654,15 +1725,15 @@ function journal:mountToggle(btn)
 		self:createMountList(self.listMapID)
 	end
 	local tbl = self.list[btn.type]
-	local mountID = btn:GetParent().mountID
+	local spellID = btn:GetParent().spellID
 
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	if tbl[mountID] then
-		tbl[mountID] = nil
+	if tbl[spellID] then
+		tbl[spellID] = nil
 		btn.icon:SetVertexColor(self.colors.gray:GetRGB())
 		self:getRemoveMountList(self.listMapID)
 	else
-		tbl[mountID] = true
+		tbl[spellID] = true
 		btn.icon:SetVertexColor(self.colors.gold:GetRGB())
 	end
 
@@ -1821,11 +1892,17 @@ end
 function journal:updateMountDisplay(forceSceneChange, creatureID)
 	local info = self.mountDisplay.info
 	if self.selectedMountID then
-		local creatureName, spellID, icon, active, isUsable = C_MountJournal.GetMountInfoByID(self.selectedMountID)
-		local needsFanfare = C_MountJournal.NeedsFanfare(self.selectedMountID)
+		local creatureName, spellID, icon, active, isUsable = self:getMountInfo(self.selectedMountID)
+
+		local needsFanfare, animationList
+		if type(self.selectedMountID) == "number" then
+			needsFanfare = C_MountJournal.NeedsFanfare(self.selectedMountID)
+		else
+			animationList = self.selectedMountID.animationList
+		end
 
 		if self.mountDisplay.lastMountID ~= self.selectedMountID or forceSceneChange then
-			local creatureDisplayID, descriptionText, sourceText, isSelfMount, mountType, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = C_MountJournal.GetMountInfoExtraByID(self.selectedMountID)
+			local _, rarity, creatureDisplayID, descriptionText, sourceText, isSelfMount, mountType, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = self:getMountInfoExtra(self.selectedMountID)
 			if not creatureID then
 				if self.mountDisplay.lastMountID == self.selectedMountID then
 					creatureID = self.mountDisplay.lastCreatureID
@@ -1844,8 +1921,14 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 			self.mountDisplay.lastMountID = self.selectedMountID
 			self.mountDisplay.lastCreatureID = creatureID
 
-			local rarity = mounts.mountsDB[self.selectedMountID][2]
-			info.rarityValue:SetText(rarity.."%")
+			if rarity then
+				info.rarityValue:SetText(rarity.."%")
+				info.rarityValue:Show()
+				info.rarityTooltip:Show()
+			else
+				info.rarityValue:Hide()
+				info.rarityTooltip:Hide()
+			end
 
 			info.link:SetShown(mounts.config.showWowheadLink)
 			info.link:SetText("wowhead.com/spell="..spellID)
@@ -1859,20 +1942,30 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 
 			local mountActor = self.modelScene:GetActorByTag("unwrapped")
 			if mountActor then
-				mountActor:SetModelByCreatureDisplayID(creatureID, true)
-
-				-- mount self idle animation
-				if isSelfMount then
-					mountActor:SetAnimationBlendOperation(LE_MODEL_BLEND_OPERATION_NONE)
-					mountActor:SetAnimation(618)
+				if creatureID == "player" then
+					self.modelScene:GetActorByTag("player-rider"):ClearModel()
+					local sheathWeapons = true
+					local autoDress = true
+					local hideWeapons = false
+					local usePlayerNativeForm = true
+					if not mountActor:SetModelByUnit("player", sheathWeapons, autoDress, hideWeapons, usePlayerNativeForm) then
+						mountActor:ClearModel()
+					end
 				else
-					mountActor:SetAnimationBlendOperation(LE_MODEL_BLEND_OPERATION_ANIM)
-					mountActor:SetAnimation(0)
+					mountActor:SetModelByCreatureDisplayID(creatureID, true)
+					-- mount self idle animation
+					if isSelfMount then
+						mountActor:SetAnimationBlendOperation(LE_MODEL_BLEND_OPERATION_NONE)
+						mountActor:SetAnimation(618)
+					else
+						mountActor:SetAnimationBlendOperation(LE_MODEL_BLEND_OPERATION_ANIM)
+						mountActor:SetAnimation(0)
+					end
+					self.modelScene:AttachPlayerToMount(mountActor, animID, isSelfMount, disablePlayerMountPreview or not GetCVarBool("mountJournalShowPlayer"), spellVisualKitID, PlayerUtil.ShouldUseNativeFormInModelScene())
 				end
-				self.modelScene:AttachPlayerToMount(mountActor, animID, isSelfMount, disablePlayerMountPreview or not GetCVarBool("mountJournalShowPlayer"), spellVisualKitID, PlayerUtil.ShouldUseNativeFormInModelScene())
 			end
 
-			self:event("MOUNT_MODEL_UPDATE", mountType)
+			self:event("MOUNT_MODEL_UPDATE", mountType, animationList)
 		end
 
 		if needsFanfare then
@@ -1909,6 +2002,11 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 		self.mountDisplay.noMounts:Show()
 		self.summonButton:Disable()
 	end
+end
+
+
+function journal:UI_MODEL_SCENE_INFO_UPDATED()
+	self:updateMountDisplay(true)
 end
 
 
@@ -1978,7 +2076,7 @@ function journal:setSelectedMount(mountID, spellID, dataIndex)
 	local scrollTo = not spellID
 	if not spellID then
 		local _
-		_, spellID = C_MountJournal.GetMountInfoByID(mountID)
+		_, spellID = self:getMountInfo(mountID)
 	end
 	local oldSelectedID = self.selectedMountID
 	self.selectedMountID = mountID
@@ -2920,8 +3018,8 @@ function journal:updateBtnFilters()
 end
 
 
-function journal:isMountHidden(mountID)
-	return mounts.globalDB.hiddenMounts and mounts.globalDB.hiddenMounts[mountID]
+function journal:isMountHidden(spellID)
+	return mounts.globalDB.hiddenMounts and mounts.globalDB.hiddenMounts[spellID]
 end
 
 
@@ -2994,7 +3092,7 @@ end
 
 
 function journal:updateMountsList()
-	local filters, list, newMounts, mountsDB, tags, GetMountInfoByID, GetMountInfoExtraByID = mounts.filters, self.list, mounts.newMounts, mounts.mountsDB, self.tags, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID
+	local filters, list, newMounts, tags = mounts.filters, self.list, mounts.newMounts, self.tags
 	local sources, selected, factions, pet, expansions = filters.sources, filters.selected, filters.factions, filters.pet, filters.expansions
 	local text = util.cleanText(self.searchBox:GetText())
 	local numMounts, data = 0
@@ -3002,10 +3100,10 @@ function journal:updateMountsList()
 
 	for i = 1, #self.mountIDs do
 		local mountID = self.mountIDs[i]
-		local name, spellID, _,_, isUsable, sourceType, _,_, mountFaction, shouldHideOnChar, isCollected = GetMountInfoByID(mountID)
-		local _,_, sourceText, _, mountType = GetMountInfoExtraByID(mountID)
+		local name, spellID, _,_, isUsable, sourceType, _,_, mountFaction, shouldHideOnChar, isCollected = self:getMountInfo(mountID)
+		local expansion, rarity, _,_, sourceText, _, mountType = self:getMountInfoExtra(mountID)
 		local petID = self.petForMount[spellID]
-		local isMountHidden = self:isMountHidden(mountID)
+		local isMountHidden = self:isMountHidden(spellID)
 
 		-- HIDDEN FOR CHARACTER
 		if (not shouldHideOnChar or filters.hideOnChar)
@@ -3020,7 +3118,7 @@ function journal:updateMountsList()
 		-- MUTIPLE MODELS
 		and (not filters.multipleModels or self.mountsWithMultipleModels[mountID])
 		-- EXPANSIONS
-		and expansions[mountsDB[mountID][1]]
+		and expansions[expansion]
 		-- ONLY NEW
 		and (not filters.onlyNew or newMounts[mountID])
 		-- SOURCES
@@ -3029,28 +3127,28 @@ function journal:updateMountsList()
 		and (#text == 0
 			or name:lower():find(text, 1, true)
 			or sourceText:lower():find(text, 1, true)
-			or tags:find(mountID, text))
+			or tags:find(spellID, text))
 		-- TYPE
 		and self:getFilterType(mountType)
 		-- FACTION
 		and factions[(mountFaction or 2) + 1]
 		-- SELECTED
-		and (list and (selected[1] and list.fly[mountID]
-		            or selected[2] and list.ground[mountID]
-		            or selected[3] and list.swimming[mountID]
-		            or selected[4] and list.dragonriding[mountID])
-		  or selected[5] and not (list and (list.fly[mountID]
-		                                 or list.ground[mountID]
-		                                 or list.swimming[mountID]
-		                                 or list.dragonriding[mountID])))
+		and (list and (selected[1] and list.fly[spellID]
+		            or selected[2] and list.ground[spellID]
+		            or selected[3] and list.swimming[spellID]
+		            or selected[4] and list.dragonriding[spellID])
+		  or selected[5] and not (list and (list.fly[spellID]
+		                                 or list.ground[spellID]
+		                                 or list.swimming[spellID]
+		                                 or list.dragonriding[spellID])))
 		-- PET
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
 		-- MOUNTS RARITY
-		and self:getFilterRarity(mountsDB[mountID][2])
+		and self:getFilterRarity(rarity)
 		-- MOUNTS WEIGHT
-		and self:getFilterWeight(mountID)
+		and self:getFilterWeight(spellID)
 		-- TAGS
-		and tags:getFilterMount(mountID) then
+		and tags:getFilterMount(spellID) then
 			numMounts = numMounts + 1
 			if mounts.config.gridToggle then
 				if data and #data < 3 then
