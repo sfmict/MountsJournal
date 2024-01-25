@@ -609,7 +609,12 @@ function mounts:setMountsList()
 				elseif self.mapFlags then return end
 			end
 		end
-		mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
+
+		if mapInfo.parentMapID == 0 and mapInfo.mapID ~= self.defMountsListID then
+			mapInfo = C_Map.GetMapInfo(self.defMountsListID)
+		else
+			mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
+		end
 	end
 
 	if not self.list.dragonriding then self.list.dragonriding = self.empty end
