@@ -329,12 +329,13 @@ config:SetScript("OnShow", function(self)
 		self:ddAddButton(info, level)
 
 		info.tooltipWhileDisabled = true
-		for i, mountID in ipairs(mounts.repairMounts) do
+		for i, spellID in ipairs(mounts.repairMounts) do
+			local mountID = C_MountJournal.GetMountFromSpell(spellID)
 			local name, spellID, icon, _,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 			if not shouldHideOnChar then
 				info.text = name
 				info.icon = icon
-				info.value = mountID
+				info.value = spellID
 				info.disabled = not isCollected
 				info.checked = function(btn) return self.selectedValue == btn.value end
 				info.func = function(btn)
@@ -607,7 +608,8 @@ config:SetScript("OnShow", function(self)
 		self.repairFlyablePercent:SetNumber(tonumber(mounts.config.useRepairFlyableDurability) or 0)
 		self.repairMountsCombobox:ddSetSelectedValue(mounts.config.repairSelectedMount)
 		if mounts.config.repairSelectedMount then
-			local name, _, icon = C_MountJournal.GetMountInfoByID(mounts.config.repairSelectedMount)
+			local mountID = C_MountJournal.GetMountFromSpell(mounts.config.repairSelectedMount)
+			local name, _, icon = C_MountJournal.GetMountInfoByID(mountID)
 			self.repairMountsCombobox:ddSetSelectedText(name, icon)
 		else
 			self.repairMountsCombobox:ddSetSelectedText(L["Random available mount"], randomMountIcon)

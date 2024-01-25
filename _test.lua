@@ -236,12 +236,46 @@ function test:PLAYER_ENTERING_WORLD()
 	-- select(14,config:GetChildren()):Click()
 	-- if true then return end
 
+	-- LOAD CHARACTER FORM
+	-- local modelScene = MountsJournalFrame.mountDisplay.modelScene
+
+	-- local function loadPlayer()
+	-- 	local mountActor = modelScene:GetActorByTag("unwrapped")
+	-- 	local playerActor = modelScene:GetActorByTag("player-rider")
+	-- 	playerActor:ClearModel()
+
+	-- 	local forceSceneChange = false
+	-- 	modelScene:TransitionToModelSceneID(4, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_MAINTAIN, forceSceneChange)
+	-- 	modelScene:PrepareForFanfare(false)
+
+	-- 	local sheathWeapons = true
+	-- 	local autoDress = true
+	-- 	local hideWeapons = false
+	-- 	local usePlayerNativeForm = true
+	-- 	if not mountActor:SetModelByUnit("player", sheathWeapons, autoDress, hideWeapons, usePlayerNativeForm) then
+	-- 		mountActor:ClearModel()
+	-- 	end
+	-- end
+
+	-- IDLE INIT 1265k
+	-- IDLE 618
+	-- WALK 620
+	-- RUN 622 2024k
+	-- Walk backwards 634
+	-- SPECIAL 636 1852k
+
+	-- 2400k
+
+	-- C_Timer.After(0, function() loadPlayer() end)
+
+
 	-- MOUNT ANIMATION
 	-- local modelScene = MountJournal.MountDisplay.ModelScene
 	-- local timer
 	-- local i = 530
 	-- local i = 557
 	-- modelScene:HookScript("OnMouseDown", function(self, btn)
+		-- loadPlayer()
 	-- 	-- C_PetJournal.SummonPetByGUID("BattlePet-0-000001B3BB78")
 	-- 	-- if true then return end
 	-- 	-- if self.needsFanFare then return end

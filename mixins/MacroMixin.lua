@@ -21,7 +21,6 @@ function macroFrame:PLAYER_LOGIN()
 	-- ---------------------
 	self.class = select(2, UnitClass("player"))
 	self.fishingRodID = 133755
-	local _,_, raceID = UnitRace("player")
 
 	local function loadFunc(funcStr)
 		local loadedFunc, err = loadstring(funcStr)
@@ -34,16 +33,6 @@ function macroFrame:PLAYER_LOGIN()
 
 	local classOptionMacro = ""
 	local defMacro = ""
-
-	if raceID == 22 then
-		defMacro = defMacro..[[
-			local IsSpellKnown, IsUsableSpell, random = IsSpellKnown, IsUsableSpell, random
-		]]
-	elseif raceID == 52 then
-		defMacro = defMacro..[[
-			local IsSpellKnown, IsUsableSpell, random, GetSpellCooldown = IsSpellKnown, IsUsableSpell, random, GetSpellCooldown
-		]]
-	end
 
 	if self.class == "PRIEST" or self.class == "MAGE" then
 		classOptionMacro = classOptionMacro..[[
@@ -200,47 +189,13 @@ function macroFrame:PLAYER_LOGIN()
 				end
 				self.lastUseTime = GetTime()
 			else
-				self.mounts:setSummonList()
-	]]
-	if raceID == 22 then
-		defMacro = defMacro..[[
-				if self.classConfig.useRunningWild
-				and IsSpellKnown(87840)
-				and IsUsableSpell(87840)
-				and (self.mounts.summonList == self.mounts.list.ground and random(self.mounts.weight + (self.classConfig.runningWildsummoningChance or 100)) > self.mounts.weight
-					or self.mounts.summonList == self.mounts.lowLevel
-					or not self.sFlags.fly and self.mounts.summonList == self.mounts.list.fly)
-				then
-					macro = self:addLine(macro, "/cast "..self:getSpellName(87840))
+				self.mounts:setSummonMount(true)
+
+				if self.mounts.additionalMounts[self.mounts.summonedSpellID] then
+					macro = self:addLine(macro, self.mounts.additionalMounts[self.mounts.summonedSpellID].macro)
 				else
 					macro = self:addLine(macro, "/run MountsJournal:summon()")
 				end
-		]]
-	elseif raceID == 52 then
-		defMacro = defMacro..[[
-				if self.classConfig.useSoar
-				and not (self.sFlags.forceFly
-				         or self.sFlags.modifier
-				         or self.mounts.mapFlags and (self.mounts.mapFlags.regularFlyOnly
-				                                      or self.mounts.mapFlags.groundOnly))
-				and not self.sFlags.isSubmerged
-				and IsSpellKnown(430935)
-				and IsUsableSpell(369536)
-				and GetSpellCooldown(369536) == 0
-				and GetSpellCooldown(61304) == 0
-				and (self.mounts.summonList ~= self.mounts.list.dragonriding or random(self.mounts.weight + (self.classConfig.soarSummoningChance or 100)) > self.mounts.weight)
-				then
-					macro = self:addLine(macro, "/cast "..self:getSpellName(369536))
-				else
-					macro = self:addLine(macro, "/run MountsJournal:summon()")
-				end
-		]]
-	else
-		defMacro = defMacro..[[
-				macro = self:addLine(macro, "/run MountsJournal:summon()")
-		]]
-	end
-	defMacro = defMacro..[[
 			end
 			return macro
 		end
@@ -357,6 +312,7 @@ do
 			end
 		end,
 		DEMONHUNTER = getClassDefFunc(192611), -- Fel Rush
+		EVOKER = getClassDefFunc(358267), -- Hover
 	}
 
 

@@ -980,12 +980,15 @@
 				</Frames>
 			</Frame>
 
-			<Button parentKey="summonButton" motionScriptsWhileDisabled="true" inherits="UIPanelButtonTemplate" text="MOUNT">
+			<Button parentKey="summonButton" motionScriptsWhileDisabled="true" inherits="UIPanelButtonTemplate,MJSecureActionButtonUpTemplate" text="MOUNT">
 				<Size x="140" y="22"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" x="4" y="4"/>
 				</Anchors>
 				<Scripts>
+					<OnLoad>
+						self:SetAttribute("type", "macro")
+					</OnLoad>
 					<OnLeave function="GameTooltip_Hide"/>
 				</Scripts>
 			</Button>
@@ -1414,15 +1417,15 @@
 						self.highlight:Show()
 						GameTooltip:SetOwner(self, "ANCHOR_LEFT")
 						local parent = self:GetParent()
-						if parent.spellID then
+						if type(parent.mountID) == "number" then
 							GameTooltip:SetMountBySpellID(parent.spellID)
+						elseif parent.spellID then
+							GameTooltip:SetSpellByID(parent.spellID)
 						end
-						parent.showingTooltip = true
 					</OnEnter>
 					<OnLeave>
 						self.highlight:Hide()
 						GameTooltip:Hide()
-						self:GetParent().showingTooltip = false
 					</OnLeave>
 					<OnLoad>
 						self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
