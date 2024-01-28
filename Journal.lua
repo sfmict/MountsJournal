@@ -874,6 +874,11 @@ function journal:init()
 	end)
 
 	-- SUMMON BUTTON
+	self.summonButton:SetScript("OnEvent", function(btn)
+		btn:Disable()
+	end)
+	self.summonButton:RegisterEvent("PLAYER_REGEN_DISABLED")
+
 	self.summonButton:SetScript("OnEnter", function(btn)
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
 		GameTooltip:SetText(btn:GetText(), HIGHLIGHT_FONT_COLOR:GetRGB())
@@ -897,7 +902,9 @@ function journal:init()
 
 		GameTooltip:Show()
 	end)
+
 	self.summonButton:HookScript("PreClick", function(btn)
+		if InCombatLockdown() then return end
 		if type(self.selectedMountID) == "number" then
 			self:useMount(self.selectedMountID)
 			btn:SetAttribute("macrotext", "")
@@ -1148,6 +1155,7 @@ function journal:PLAYER_REGEN_ENABLED()
 	else
 		self.leftInset:EnableKeyboard(true)
 		self:updateMountsList()
+		self:updateMountDisplay()
 	end
 end
 
@@ -1986,13 +1994,13 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 
 		if needsFanfare then
 			self.summonButton:SetText(UNWRAP)
-			self.summonButton:Enable()
+			if not InCombatLockdown() then self.summonButton:Enable() end
 		elseif active then
 			self.summonButton:SetText(BINDING_NAME_DISMOUNT)
-			self.summonButton:SetEnabled(isUsable)
+			if not InCombatLockdown() then self.summonButton:SetEnabled(isUsable) end
 		else
 			self.summonButton:SetText(MOUNT)
-			self.summonButton:SetEnabled(isUsable)
+			if not InCombatLockdown() then self.summonButton:SetEnabled(isUsable) end
 		end
 	else
 		info:Hide()
@@ -2000,7 +2008,7 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 		self.mountDisplay.yesMountsTex:Hide()
 		self.mountDisplay.noMountsTex:Show()
 		self.mountDisplay.noMounts:Show()
-		self.summonButton:Disable()
+		if not InCombatLockdown() then self.summonButton:Disable() end
 	end
 end
 
