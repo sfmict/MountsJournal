@@ -96,6 +96,7 @@ local function createMountFromSpell(spellID, mountType, dragonriding, expansion,
 		animationList = animationList,
 		isActive = isActive,
 		isUsable = isUsable,
+		canUse = isUsable,
 		setIsFavorite = setIsFavorite,
 		getIsFavorite = getIsFavorite,
 	}
@@ -128,16 +129,10 @@ end
 
 function soar:canUse()
 	return not mounts.sFlags.isSubmerged
-	   and not mounts.sFlags.modifier
 	   and IsSpellKnown(430935)
 	   and IsUsableSpell(self.spellID)
 	   and GetSpellCooldown(self.spellID) == 0
 	   and GetSpellCooldown(61304) == 0
-end
-
-function soar:setMount()
-	mounts.summonedSpellID = self.spellID
-	return true
 end
 
 
@@ -146,9 +141,4 @@ local runningWild = createMountFromSpell(87840, 230, false, 4, "player", 719)
 
 function runningWild:isShown()
 	return raceID == 22
-end
-
-function runningWild:canUse()
-	return IsSpellKnown(self.spellID)
-	   and IsUsableSpell(self.spellID)
 end

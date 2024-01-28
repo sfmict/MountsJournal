@@ -689,9 +689,9 @@ do
 		                          and (IsFlyableArea() or isFlyableOverride[self.instanceID])
 		                          and self:isFlyLocation(self.instanceID)
 		                          and not (self.mapFlags and self.mapFlags.groundOnly)
-		local canDragonriding = not (flags.forceFly
-		                        or self.mapFlags and (self.mapFlags.regularFlyOnly or self.mapFlags.groundOnly))
-		local isDragonridable = canDragonriding
+		local isDragonridable = not (flags.forceFly
+		                             or self.mapFlags and (self.mapFlags.regularFlyOnly
+		                                                   or self.mapFlags.groundOnly))
 		                        and IsAdvancedFlyableArea()
 
 		flags.modifier = self.modifier() or flags.forceModifier
@@ -703,7 +703,6 @@ do
 		flags.swimming = flags.isSubmerged
 		                 and not (flags.modifier or isFloating)
 		flags.isVashjir = self.mapVashjir[self.mapInfo.mapID]
-		flags.canDragonriding = canDragonriding
 		flags.isDragonridable = isDragonridable
 		                        and (not flags.modifier or flags.isSubmerged)
 		flags.fly = isFlyableLocation
@@ -750,8 +749,6 @@ function mounts:setSummonMount(withAdditional)
 	and not (flags.herb and self:setUsableID(self.herbalismMounts, self.db.mountsWeight))
 	-- dragonridable
 	and not (flags.isDragonridable and self:setUsableID(self.list.dragonriding, self.list.dragonridingWeight))
-	-- soar
-	and not (self.withAdditional and flags.canDragonriding and self._soar:canUse() and self._soar:setMount())
 	-- fly
 	and not (flags.fly and self:setUsableID(self.list.fly, self.list.flyWeight))
 	-- ground

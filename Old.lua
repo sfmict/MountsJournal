@@ -152,7 +152,9 @@ local function updateGlobal(self)
 			local newList = {}
 			for mountID, v in next, list do
 				local _, spellID = C_MountJournal.GetMountInfoByID(mountID)
-				newList[spellID] = v
+				if spellID and spellID > 0 then
+					newList[spellID] = v
+				end
 			end
 			return newList
 		end
