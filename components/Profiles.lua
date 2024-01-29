@@ -104,6 +104,31 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		end
 	end
 
+	function dd:selectAllFiltredMounts(actionText)
+		StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(actionText), nil, function()
+			if not self.journal.list then
+				self.journal:createMountList(self.journal.listMapID)
+			end
+
+			for i, data in ipairs(self.journal.dataProvider:GetCollection()) do
+				if self.mounts.config.gridToggle then
+					for j, mountData in ipairs(data) do
+						local _, spellID, _,_,_,_,_,_,_,_, isCollected = self.journal:getMountInfo(mountData.mountID)
+						if isCollected then
+							self.mounts:addMountToList(self.journal.list, spellID)
+						end
+					end
+				else
+					local _, spellID, _,_,_,_,_,_,_,_, isCollected = self.journal:getMountInfo(data.mountID)
+					if isCollected then
+						self.mounts:addMountToList(self.journal.list, spellID)
+					end
+				end
+			end
+			self:event("UPDATE_PROFILE")
+		end)
+	end
+
 	function dd:selectAllMounts(actionText, onlyFavorites)
 		StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(actionText), nil, function()
 			if not self.journal.list then
@@ -111,9 +136,9 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 			end
 
 			for _, mountID in ipairs(self.journal.mountIDs) do
-				local _,_,_,_,_,_, isFavorite, _,_,_, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+				local _, spellID, _,_,_,_, isFavorite, _,_,_, isCollected = self.journal:getMountInfo(mountID)
 				if isCollected and (not onlyFavorites or isFavorite) then
-					self.mounts:addMountToList(self.journal.list, mountID)
+					self.mounts:addMountToList(self.journal.list, spellID)
 				end
 			end
 			self:event("UPDATE_PROFILE")
@@ -278,6 +303,10 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 
 			info.notCheckable = true
 			info.keepShownOnClick = nil
+
+			info.text = L["Select all filtred mounts by type in the selected zone"]
+			info.func = function(btn) self:selectAllFiltredMounts(btn.text) end
+			self:ddAddButton(info, level)
 
 			info.text = L["Select all favorite mounts by type in the selected zone"]
 			info.func = function(btn) self:selectAllMounts(btn.text, true) end

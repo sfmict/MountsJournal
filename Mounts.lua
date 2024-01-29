@@ -312,13 +312,14 @@ end
 
 
 function mounts:NEW_MOUNT_ADDED(mountID)
-	self:autoAddNewMount(mountID)
-	if self.herbalismMounts[mountID] then self:setHerbMount() end
+	local _, spellID = C_MountJournal.GetMountInfoByID(mountID)
+	self:autoAddNewMount(spellID)
+	if self.herbalismMounts[spellID] then self:setHerbMount() end
 end
 
 
 do
-	local function addMount(list, mountType, mountID)
+	local function addMount(list, mountType, spellID)
 		if mountType == 1 then
 			mountType = "fly"
 		elseif mountType == 2 then
@@ -329,33 +330,39 @@ do
 			mountType = "dragonriding"
 		end
 
-		list[mountType][mountID] = true
+		list[mountType][spellID] = true
 	end
 
 
-	function mounts:addMountToList(list, mountID)
-		local _,_,_,_, mountTypeExtra = C_MountJournal.GetMountInfoExtraByID(mountID)
-		local mountType = util.mountTypes[mountTypeExtra]
+	function mounts:addMountToList(list, spellID)
+		local mountType
+		if self.additionalMounts[spellID] then
+			mountType = self.additionalMounts[spellID].mountType
+		else
+			local mountID = C_MountJournal.GetMountFromSpell(spellID)
+			local _,_,_,_, mountTypeExtra = C_MountJournal.GetMountInfoExtraByID(mountID)
+			mountType = util.mountTypes[mountTypeExtra]
+		end
 
 		if type(mountType) == "table" then
 			for i = 1, #mountType do
-				addMount(list, mountType[i], mountID)
+				addMount(list, mountType[i], spellID)
 			end
 		else
-			addMount(list, mountType, mountID)
+			addMount(list, mountType, spellID)
 		end
 	end
 end
 
 
-function mounts:autoAddNewMount(mountID)
+function mounts:autoAddNewMount(spellID)
 	if self.defProfile.autoAddNewMount then
-		self:addMountToList(self.defProfile, mountID)
+		self:addMountToList(self.defProfile, spellID)
 	end
 
 	for _, profile in next, self.profiles do
 		if profile.autoAddNewMount then
-			self:addMountToList(profile, mountID)
+			self:addMountToList(profile, spellID)
 		end
 	end
 end
@@ -604,7 +611,8 @@ function mounts:setHerbMount()
 	if self.config.useHerbMounts then
 		local prof1, prof2 = GetProfessions()
 		if prof1 and select(7, GetProfessionInfo(prof1)) == 182 or prof2 and select(7, GetProfessionInfo(prof2)) == 182 then
-			for mountID in next, self.herbalismMounts do
+			for spellID in next, self.herbalismMounts do
+				local mountID = C_MountJournal.GetMountFromSpell(spellID)
 				if select(11, C_MountJournal.GetMountInfoByID(mountID)) then
 					self.herbMount = true
 					return
