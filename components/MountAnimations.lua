@@ -104,31 +104,21 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 
 	journal:on("MOUNT_MODEL_UPDATE", function(journal, mountType, isPlayer)
 		if mountType then
+			dd.isPlayer = isPlayer
+
 			if mountType == 231 then
 				dd.currentMountType = 2
 			else
 				mountType = journal.mountTypes[mountType]
 				dd.currentMountType = type(mountType) == "table" and mountType[1] or mountType
 			end
-			dd.isPlayer = isPlayer
-			dd:replayAnimation()
-		end
-	end)
 
-	function dd:replayAnimation()
-		if not dd.selectedValue then
-			self:ddSetSelectedValue(self.animationList[1])
-			self:ddSetSelectedText(self.animationList[1].name)
-		elseif dd.selectedValue ~= "custom" then
-			self.selectedValue = self.animationList[self.currentAnimationIndex or 1]
-			if self.currentMountType ~= 4 and self.selectedValue.type and self.currentMountType > self.selectedValue.type then
-				local actor = journal.modelScene:GetActorByTag("unwrapped")
-				if actor then actor:StopAnimationKit() end
-				self:ddSetSelectedValue(self.animationList[1])
-				self:ddSetSelectedText(self.animationList[1].name)
+			if not dd.selectedValue or dd.selectedValue ~= "custom" and dd.currentMountType ~= 4 and dd.selectedValue.type and dd.currentMountType > dd.selectedValue.type then
+				dd:ddSetSelectedValue(dd.animationList[1])
+				dd:ddSetSelectedText(dd.animationList[1].name)
 			end
 		end
-	end
+	end)
 
 	function dd:initialize(level)
 		local info = {}
@@ -190,7 +180,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 	function dd:playAnimation(anim)
 		local animation, isKit
 		if self.isPlayer then
-			animation = anim.selfAnimation or anim.current
+			animation = anim.selfAnimation or anim.animation or anim.current
 			if anim.current then
 				isKit = anim.isKit
 			else

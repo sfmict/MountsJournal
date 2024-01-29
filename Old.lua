@@ -23,7 +23,7 @@ local function after(self, func)
 end
 
 
-local function updateGlobal(self, currentVersion)
+local function updateGlobal(self)
 	--IF < 8.3.2 GLOBAL
 	if compareVersion("8.3.2", self.globalDB.lastAddonVersion) then
 		self.config.waterWalkAll = nil
@@ -190,13 +190,10 @@ local function updateGlobal(self, currentVersion)
 			end
 		end)
 	end
-
-	-- SET LAST GLOBAL VERSION
-	self.globalDB.lastAddonVersion = currentVersion
 end
 
 
-local function updateChar(self, currentVersion)
+local function updateChar(self)
 	-- IF < 8.3.2 CHAR
 	if compareVersion("8.3.2", self.charDB.lastAddonVersion) then
 		local function setMounts(tbl)
@@ -248,9 +245,6 @@ local function updateChar(self, currentVersion)
 		self.charDB.macrosConfig.useRunningWild = nil
 		self.charDB.macrosConfig.soarSummoningChance = nil
 	end
-
-	-- SET LAST CHAR VERSION
-	self.charDB.lastAddonVersion = currentVersion
 end
 
 
@@ -263,10 +257,12 @@ function mounts:setOldChanges()
 	--@end-do-not-package@
 
 	if compareVersion(currentVersion, self.charDB.lastAddonVersion) then
-		updateChar(self, currentVersion)
+		updateChar(self)
+		self.charDB.lastAddonVersion = currentVersion
 	end
 
 	if compareVersion(currentVersion, self.globalDB.lastAddonVersion) then
-		updateGlobal(self, currentVersion)
+		updateGlobal(self)
+		self.globalDB.lastAddonVersion = currentVersion
 	end
 end

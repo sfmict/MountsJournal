@@ -260,11 +260,11 @@ function test:PLAYER_ENTERING_WORLD()
 	-- IDLE INIT 1265k
 	-- IDLE 618
 	-- WALK 620
-	-- RUN 622 2024k
+	-- RUN 622 2024k 2932k
 	-- Walk backwards 634
 	-- SPECIAL 636 1852k
 
-	-- 2400k
+	-- 3000k
 
 	-- C_Timer.After(0, function() loadPlayer() end)
 
