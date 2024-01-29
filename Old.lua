@@ -23,7 +23,7 @@ local function after(self, func)
 end
 
 
-local function updateGlobal(self)
+local function updateGlobal(self, currentVersion)
 	--IF < 8.3.2 GLOBAL
 	if compareVersion("8.3.2", self.globalDB.lastAddonVersion) then
 		self.config.waterWalkAll = nil
@@ -196,7 +196,7 @@ local function updateGlobal(self)
 end
 
 
-local function updateChar(self)
+local function updateChar(self, currentVersion)
 	-- IF < 8.3.2 CHAR
 	if compareVersion("8.3.2", self.charDB.lastAddonVersion) then
 		local function setMounts(tbl)
@@ -263,10 +263,10 @@ function mounts:setOldChanges()
 	--@end-do-not-package@
 
 	if compareVersion(currentVersion, self.charDB.lastAddonVersion) then
-		updateChar(self)
+		updateChar(self, currentVersion)
 	end
 
 	if compareVersion(currentVersion, self.globalDB.lastAddonVersion) then
-		updateGlobal(self)
+		updateGlobal(self, currentVersion)
 	end
 end
