@@ -632,6 +632,15 @@ function journal:init()
 	self.shownPanel.text:SetText(L["Shown:"])
 	self.shownPanel.clear:SetScript("OnClick", function() self:resetToDefaultFilters() end)
 
+	-- MODEL SCENE ACTOR
+	hooksecurefunc(self.modelScene, "AcquireAndInitializeActor", function(self, actorInfo)
+		if actorInfo.scriptTag == "unwrapped" then
+			self:GetActorByTag("unwrapped"):SetOnSizeChangedCallback(function()
+				journal:event("MOUNT_MODEL_LOADED")
+			end)
+		end
+	end)
+
 	-- MODEL SCENE CAMERA
 	hooksecurefunc(self.modelScene, "SetActiveCamera", function(self)
 		journal:event("SET_ACTIVE_CAMERA", self.activeCamera)
@@ -1901,13 +1910,7 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 	local info = self.mountDisplay.info
 	if self.selectedMountID then
 		local creatureName, spellID, icon, active, isUsable = self:getMountInfo(self.selectedMountID)
-
-		local needsFanfare, animationList
-		if type(self.selectedMountID) == "number" then
-			needsFanfare = C_MountJournal.NeedsFanfare(self.selectedMountID)
-		else
-			animationList = self.selectedMountID.animationList
-		end
+		local needsFanfare = type(self.selectedMountID) == "number" and C_MountJournal.NeedsFanfare(self.selectedMountID)
 
 		if self.mountDisplay.lastMountID ~= self.selectedMountID or forceSceneChange then
 			local _, rarity, creatureDisplayID, descriptionText, sourceText, isSelfMount, mountType, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = self:getMountInfoExtra(self.selectedMountID)
@@ -1945,6 +1948,8 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 			info.lore:SetText(descriptionText)
 			self.multipleMountBtn:SetShown(self.mountsWithMultipleModels[self.selectedMountID])
 
+			self:event("MOUNT_MODEL_UPDATE", mountType, creatureID == "player")
+
 			self.modelScene:TransitionToModelSceneID(modelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_MAINTAIN, forceSceneChange)
 			self.modelScene:PrepareForFanfare(needsFanfare)
 
@@ -1956,24 +1961,25 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 					local autoDress = true
 					local hideWeapons = false
 					local usePlayerNativeForm = true
-					if not mountActor:SetModelByUnit("player", sheathWeapons, autoDress, hideWeapons, usePlayerNativeForm) then
+					if mountActor:SetModelByUnit("player", sheathWeapons, autoDress, hideWeapons, usePlayerNativeForm) then
+						mountActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
+						mountActor:SetAnimation(618)
+					else
 						mountActor:ClearModel()
 					end
 				else
 					mountActor:SetModelByCreatureDisplayID(creatureID, true)
 					-- mount self idle animation
 					if isSelfMount then
-						mountActor:SetAnimationBlendOperation(LE_MODEL_BLEND_OPERATION_NONE)
+						mountActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
 						mountActor:SetAnimation(618)
 					else
-						mountActor:SetAnimationBlendOperation(LE_MODEL_BLEND_OPERATION_ANIM)
+						mountActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.Anim)
 						mountActor:SetAnimation(0)
 					end
 					self.modelScene:AttachPlayerToMount(mountActor, animID, isSelfMount, disablePlayerMountPreview or not GetCVarBool("mountJournalShowPlayer"), spellVisualKitID, PlayerUtil.ShouldUseNativeFormInModelScene())
 				end
 			end
-
-			self:event("MOUNT_MODEL_UPDATE", mountType, animationList)
 		end
 
 		if needsFanfare then

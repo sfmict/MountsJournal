@@ -6,63 +6,6 @@ local _,_, raceID = UnitRace("player")
 mounts.additionalMounts = {}
 
 
-local animationList = {
-	{
-		name = L["Default"],
-		animation = 618,
-	},
-	{
-		name = L["Mount special"],
-		animation = 636,
-	},
-	{
-		name = L["Walk"],
-		animation = 620,
-		type = 2,
-	},
-	{
-		name = L["Walk backwards"],
-		animation = 634,
-		type = 2,
-	},
-	{
-		name = L["Run"],
-		animation = 622,
-		type = 2,
-	},
-	{
-		name = L["Swim idle"],
-		animation = 532,
-		type = 3,
-	},
-	{
-		name = L["Swim"],
-		animation = 540,
-		type = 3,
-	},
-	{
-		name = L["Swim backwards"],
-		animation = 534,
-		type = 3,
-	},
-	{
-		name = L["Fly stand"],
-		animation = 548,
-		type = 1,
-	},
-	{
-		name = L["Fly"],
-		animation = 558,
-		type = 1,
-	},
-	{
-		name = L["Fly backwards"],
-		animation = 562,
-		type = 1,
-	},
-}
-
-
 local function isActive(self)
 	return C_UnitAuras.GetPlayerAuraBySpellID(self.spellID)
 end
@@ -93,7 +36,6 @@ local function createMountFromSpell(spellID, mountType, dragonriding, expansion,
 		expansion = expansion,
 		creatureID = creatureID,
 		modelSceneID = modelSceneID,
-		animationList = animationList,
 		isActive = isActive,
 		isUsable = isUsable,
 		canUse = isUsable,
@@ -121,7 +63,6 @@ end
 
 -- SOAR
 local soar = createMountFromSpell(369536, 402, true, 10, "player", 4)
-mounts._soar = soar
 
 function soar:isShown()
 	return raceID == 52

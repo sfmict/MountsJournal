@@ -33,25 +33,30 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		{
 			name = L["Default"],
 			animation = 0,
+			selfAnimation = 618,
 		},
 		{
 			name = L["Mount special"],
 			animation = 1371,
 			isKit = true,
+			selfAnimation = 636,
 		},
 		{
 			name = L["Walk"],
 			animation = 4,
+			selfAnimation = 620,
 			type = 2,
 		},
 		{
 			name = L["Walk backwards"],
 			animation = 13,
+			selfAnimation = 634,
 			type = 2,
 		},
 		{
 			name = L["Run"],
 			animation = 5,
+			selfAnimation = 622,
 			type = 2,
 		},
 		{
@@ -89,7 +94,15 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 	dd.customAnimationPanel = CreateFrame("FRAME", nil, journal.modelScene, "MJMountCustomAnimationPanel")
 	dd.customAnimationPanel:SetPoint("BOTTOMRIGHT", dd, "TOPRIGHT", 0, 2)
 
-	journal:on("MOUNT_MODEL_UPDATE", function(journal, mountType, animationList)
+	journal:on("MOUNT_MODEL_LOADED", function()
+		if dd.selectedValue == "custom" then
+			dd.customAnimationPanel:play()
+		else
+			dd:playAnimation(dd.selectedValue)
+		end
+	end)
+
+	journal:on("MOUNT_MODEL_UPDATE", function(journal, mountType, isPlayer)
 		if mountType then
 			if mountType == 231 then
 				dd.currentMountType = 2
@@ -97,46 +110,24 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 				mountType = journal.mountTypes[mountType]
 				dd.currentMountType = type(mountType) == "table" and mountType[1] or mountType
 			end
-
-			dd.currentAnimationList = animationList or dd.animationList
-			if dd.selectedValue and dd.selectedValue ~= "custom" then
-				for i = 1, #dd.currentAnimationList do
-					if dd.selectedValue.name == dd.currentAnimationList[i].name then
-						dd.selectedValue = dd.currentAnimationList[i]
-						break
-					end
-				end
-			end
-
+			dd.isPlayer = isPlayer
 			dd:replayAnimation()
 		end
 	end)
 
 	function dd:replayAnimation()
-		if self.selectedValue == "custom" or self.selectedValue and (self.selectedValue.type == nil or self.selectedValue.type >= self.currentMountType or self.currentMountType == 4) then
-			if self.selectedValue.animation ~= 0 then
-				self:SetScript("OnUpdate", self.onUpdate)
+		if not dd.selectedValue then
+			self:ddSetSelectedValue(self.animationList[1])
+			self:ddSetSelectedText(self.animationList[1].name)
+		elseif dd.selectedValue ~= "custom" then
+			self.selectedValue = self.animationList[self.currentAnimationIndex or 1]
+			if self.currentMountType ~= 4 and self.selectedValue.type and self.currentMountType > self.selectedValue.type then
+				local actor = journal.modelScene:GetActorByTag("unwrapped")
+				if actor then actor:StopAnimationKit() end
+				self:ddSetSelectedValue(self.animationList[1])
+				self:ddSetSelectedText(self.animationList[1].name)
 			end
-		else
-			local actor = journal.modelScene:GetActorByTag("unwrapped")
-			if actor then actor:StopAnimationKit() end
-			self:ddSetSelectedValue(self.currentAnimationList[1])
-			self:ddSetSelectedText(self.currentAnimationList[1].name)
 		end
-	end
-
-	function dd:onUpdate()
-		local actor = journal.modelScene:GetActorByTag("unwrapped")
-		if not (actor and actor:IsLoaded()) then return end
-		self:SetScript("OnUpdate", nil)
-
-		C_Timer.After(0, function()
-			if self.selectedValue == "custom" then
-				self.customAnimationPanel:play()
-			else
-				self:playAnimation(self.selectedValue.animation, self.selectedValue.isKit, self.selectedValue.loop)
-			end
-		end)
 	end
 
 	function dd:initialize(level)
@@ -144,19 +135,29 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		local mountType = self.currentMountType or 1
 
 		local function checked(btn) return self.selectedValue == btn.value end
-		local function func(btn)
+		local function func(btn, index)
+			self.currentAnimationIndex = index
 			self.customAnimationPanel:Hide()
-			self:playAnimation(btn.value.animation, btn.value.isKit, btn.value.loop)
+			self:playAnimation(btn.value)
 			self:ddSetSelectedValue(btn.value, level)
 			self:ddSetSelectedText(btn.value.name)
 		end
 		local function remove(btn) self:deleteAnimation(btn.arg1) end
 
 		info.list = {}
-		for _, v in ipairs(self.currentAnimationList) do
+		for i, v in ipairs(self.animationList) do
 			if v.type == nil or v.type >= mountType or mountType == 4 then
+				local animation, isKit
+				if self.isPlayer then
+					animation = v.selfAnimation or v.animation
+					isKit = v.selfIsKit
+				else
+					animation = v.animation
+					isKit = v.isKit
+				end
 				tinsert(info.list, {
-					text = ("%s|cff808080.%d%s|r"):format(v.name, v.animation, v.isKit and ".k" or ""),
+					text = ("%s|cff808080.%d%s|r"):format(v.name, animation, isKit and ".k" or ""),
+					arg1 = i,
 					value = v,
 					checked = checked,
 					func = func,
@@ -186,12 +187,25 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		self:ddAddButton(info, level)
 	end
 
-	function dd:playAnimation(animation, isKit, loop)
+	function dd:playAnimation(anim)
+		local animation, isKit
+		if self.isPlayer then
+			animation = anim.selfAnimation or anim.current
+			if anim.current then
+				isKit = anim.isKit
+			else
+				isKit = anim.selfIsKit
+			end
+		else
+			animation = anim.animation or anim.current
+			isKit = anim.isKit
+		end
+
 		local actor = journal.modelScene:GetActorByTag("unwrapped")
 		actor:StopAnimationKit()
 		--max animation 2^31 - 1
 		if isKit then
-			actor:PlayAnimationKit(animation, loop)
+			actor:PlayAnimationKit(animation, anim.loop)
 		else
 			actor:PlayAnimationKit(0)
 			actor:StopAnimationKit()
@@ -203,8 +217,8 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		local animation = self.animations[id]
 		StaticPopup_Show(util.addonName.."DELETE_MOUNT_ANIMATION", NORMAL_FONT_COLOR_CODE..animation.name..FONT_COLOR_CODE_CLOSE, nil, function()
 			if self.selectedValue == animation then
-				local value = self.currentAnimationList[1]
-				self:playAnimation(value.animation, value.isKit, value.loop)
+				local value = self.animationList[1]
+				self:playAnimation(value)
 				self:ddSetSelectedValue(value)
 				self:ddSetSelectedText(value.name)
 			end
@@ -331,7 +345,7 @@ end
 
 
 function MJMountCustomAnimationMixin:play()
-	self.animationsCombobox:playAnimation(self.animations.current, self.animations.isKit, self.animations.loop)
+	self.animationsCombobox:playAnimation(self.animations)
 end
 
 
