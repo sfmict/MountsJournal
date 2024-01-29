@@ -337,7 +337,7 @@ do
 	function mounts:addMountToList(list, spellID)
 		local mountType
 		if self.additionalMounts[spellID] then
-			mountType = self.additionalMounts[spellID].mountType
+			mountType = util.mountTypes[self.additionalMounts[spellID].mountType] 
 		else
 			local mountID = C_MountJournal.GetMountFromSpell(spellID)
 			local _,_,_,_, mountTypeExtra = C_MountJournal.GetMountInfoExtraByID(mountID)
