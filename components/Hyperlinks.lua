@@ -1,5 +1,6 @@
 hooksecurefunc("HandleModifiedItemClick", function(link)
-	local config = MountsJournal.config
+	local mounts = MountsJournal
+	local config = mounts.config
 
 	if config.openHyperlinks and not config.useDefaultJournal and not InCombatLockdown() and IsModifiedClick("DRESSUP") and not IsModifiedClick("CHATLINK") then
 		local _,_,_, linkType, linkID = (":|H"):split(link)
@@ -8,7 +9,8 @@ hooksecurefunc("HandleModifiedItemClick", function(link)
 		if linkType == "item" then
 			mountID = C_MountJournal.GetMountFromItem(tonumber(linkID))
 		elseif linkType == "spell" then
-			mountID = C_MountJournal.GetMountFromSpell(tonumber(linkID))
+			linkID = tonumber(linkID)
+			mountID = mounts.additionalMounts[linkID] or C_MountJournal.GetMountFromSpell(linkID)
 		end
 
 		if mountID then

@@ -232,10 +232,11 @@ function mounts:setUsableRepairMounts()
 	wipe(self.usableRepairMounts)
 	if not self.config.repairSelectedMount then
 		for i = 1, #self.repairMounts do
-			local mountID = self.repairMounts[i]
+			local spellID = self.repairMounts[i]
+			local mountID = C_MountJournal.GetMountFromSpell(spellID)
 			local _,_,_,_,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 			if isCollected and not shouldHideOnChar then
-				self.usableRepairMounts[mountID] = true
+				self.usableRepairMounts[spellID] = true
 			end
 		end
 	else

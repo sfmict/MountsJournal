@@ -84,7 +84,7 @@ function journal:init()
 
 	-- ADDITIONAL MOUNTS
 	for spellID, mount in next, mounts.additionalMounts do
-		if mount:isShown() then self.mountIDs[#self.mountIDs + 1] = mount end
+		self.mountIDs[#self.mountIDs + 1] = mount
 	end
 
 	-- BACKGROUND FRAME
@@ -1182,7 +1182,7 @@ function journal:getMountInfo(mount)
 	if type(mount) == "number" then
 		return C_MountJournal.GetMountInfoByID(mount)
 	else
-		return mount.name, mount.spellID, mount.icon, mount:isActive(), mount:isUsable(), 0, mount:getIsFavorite(), false, nil, false, true, nil, mount.dragonriding
+		return mount.name, mount.spellID, mount.icon, mount:isActive(), mount:isUsable(), 0, mount:getIsFavorite(), false, nil, not mount:isShown(), true, nil, mount.dragonriding
 	end
 end
 
@@ -1910,7 +1910,8 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 	local info = self.mountDisplay.info
 	if self.selectedMountID then
 		local creatureName, spellID, icon, active, isUsable = self:getMountInfo(self.selectedMountID)
-		local needsFanfare = type(self.selectedMountID) == "number" and C_MountJournal.NeedsFanfare(self.selectedMountID)
+		local isMount = type(self.selectedMountID) == "number"
+		local needsFanfare = isMount and C_MountJournal.NeedsFanfare(self.selectedMountID)
 
 		if self.mountDisplay.lastMountID ~= self.selectedMountID or forceSceneChange then
 			local _, rarity, creatureDisplayID, descriptionText, sourceText, isSelfMount, mountType, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = self:getMountInfoExtra(self.selectedMountID)
@@ -1948,7 +1949,7 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 			info.lore:SetText(descriptionText)
 			self.multipleMountBtn:SetShown(self.mountsWithMultipleModels[self.selectedMountID])
 
-			self:event("MOUNT_MODEL_UPDATE", mountType, creatureID == "player")
+			self:event("MOUNT_MODEL_UPDATE", mountType, not isMount)
 
 			self.modelScene:TransitionToModelSceneID(modelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_MAINTAIN, forceSceneChange)
 			self.modelScene:PrepareForFanfare(needsFanfare)
@@ -3053,12 +3054,12 @@ function journal:getFilterRarity(rarity)
 end
 
 
-function journal:getFilterWeight(mountID)
+function journal:getFilterWeight(spellID)
 	local filter = mounts.filters.mountsWeight
 	if not filter.sign then
 		return true
 	else
-		local mountWeight = self.mountsWeight[mountID] or 100
+		local mountWeight = self.mountsWeight[spellID] or 100
 		if filter.sign == ">" then
 			return mountWeight > filter.weight
 		elseif filter.sign == "<" then
@@ -3158,7 +3159,7 @@ function journal:updateMountsList()
 		-- PET
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
 		-- MOUNTS RARITY
-		and self:getFilterRarity(rarity)
+		and self:getFilterRarity(rarity or 100)
 		-- MOUNTS WEIGHT
 		and self:getFilterWeight(spellID)
 		-- TAGS

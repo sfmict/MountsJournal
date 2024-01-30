@@ -156,7 +156,7 @@ function tags:mountOptionsMenu_Init(btn, level)
 	local realIndex = journal.indexByMountID[self.menuMountID]
 
 	if level == 1 then
-		local _,_,_, active, isUsable ,_, isFavorite, _,_,_, isCollected = journal:getMountInfo(self.menuMountID)
+		local _,_,_, active, isUsable, _, isFavorite, _,_,_, isCollected = journal:getMountInfo(self.menuMountID)
 		local isMount = type(self.menuMountID) == "number"
 		local needsFanfare = isMount and C_MountJournal.NeedsFanfare(self.menuMountID)
 		info.notCheckable = true

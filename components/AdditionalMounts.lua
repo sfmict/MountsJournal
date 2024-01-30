@@ -6,6 +6,9 @@ local _,_, raceID = UnitRace("player")
 mounts.additionalMounts = {}
 
 
+local meta = {__lt = function(a, b) return a.spellID < b.spellID end}
+
+
 local function isActive(self)
 	return C_UnitAuras.GetPlayerAuraBySpellID(self.spellID)
 end
@@ -28,20 +31,19 @@ local function getIsFavorite(self)
 end
 
 
-local function createMountFromSpell(spellID, mountType, dragonriding, expansion, creatureID, modelSceneID)
-	local t = {
+local function createMountFromSpell(spellID, mountType, dragonriding, expansion, modelSceneID)
+	local t = setmetatable({
 		spellID = spellID,
 		mountType = mountType,
 		dragonriding = dragonriding,
 		expansion = expansion,
-		creatureID = creatureID,
 		modelSceneID = modelSceneID,
 		isActive = isActive,
 		isUsable = isUsable,
 		canUse = isUsable,
 		setIsFavorite = setIsFavorite,
 		getIsFavorite = getIsFavorite,
-	}
+	}, meta)
 	mounts.additionalMounts[t.spellID] = t
 
 	local _, icon = ltl:GetSpellTexture(spellID)
@@ -62,7 +64,14 @@ end
 
 
 -- SOAR
-local soar = createMountFromSpell(369536, 402, true, 10, "player", 4)
+local soar = createMountFromSpell(369536, 402, true, 10, 4)
+
+if raceID == 52 then
+	soar.creatureID = "player"
+else
+	-- MALE ID 198587 or FEMALE ID 200550
+	soar.creatureID = UnitSex("player") == 2 and 110241 or 111204
+end
 
 function soar:isShown()
 	return raceID == 52
@@ -70,7 +79,7 @@ end
 
 function soar:canUse()
 	return not mounts.sFlags.isSubmerged
-	   and IsSpellKnown(430935)
+	   and IsSpellKnown(self.spellID)
 	   and IsUsableSpell(self.spellID)
 	   and GetSpellCooldown(self.spellID) == 0
 	   and GetSpellCooldown(61304) == 0
@@ -78,7 +87,14 @@ end
 
 
 -- RUNNING WILD
-local runningWild = createMountFromSpell(87840, 230, false, 4, "player", 719)
+local runningWild = createMountFromSpell(87840, 230, false, 4, 719)
+
+if raceID == 22 then
+	runningWild.creatureID = "player"
+else
+	-- MALE ID 45254 or FEMALE ID 39725
+	runningWild.creatureID = UnitSex("player") == 2 and 34344 or 37389
+end
 
 function runningWild:isShown()
 	return raceID == 22
