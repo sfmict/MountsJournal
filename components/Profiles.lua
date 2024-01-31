@@ -104,7 +104,21 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		end
 	end
 
-	function dd:selectAllFiltredMounts(actionText)
+	local function setMount(mountID, enabled)
+		local _, spellID, _,_,_,_,_,_,_,_, isCollected = dd.journal:getMountInfo(mountID)
+		if enabled then
+			if isCollected then
+				dd.mounts:addMountToList(dd.journal.list, spellID)
+			end
+		else
+			dd.journal.list.fly[spellID] = nil
+			dd.journal.list.ground[spellID] = nil
+			dd.journal.list.swimming[spellID] = nil
+			dd.journal.list.dragonriding[spellID] = nil
+		end
+	end
+
+	function dd:setAllFiltredMounts(actionText, enabled)
 		StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(actionText), nil, function()
 			if not self.journal.list then
 				self.journal:createMountList(self.journal.listMapID)
@@ -112,19 +126,13 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 
 			for i, data in ipairs(self.journal.dataProvider:GetCollection()) do
 				if self.mounts.config.gridToggle then
-					for j, mountData in ipairs(data) do
-						local _, spellID, _,_,_,_,_,_,_,_, isCollected = self.journal:getMountInfo(mountData.mountID)
-						if isCollected then
-							self.mounts:addMountToList(self.journal.list, spellID)
-						end
-					end
+					for j, mountData in ipairs(data) do setMount(mountData.mountID, enabled) end
 				else
-					local _, spellID, _,_,_,_,_,_,_,_, isCollected = self.journal:getMountInfo(data.mountID)
-					if isCollected then
-						self.mounts:addMountToList(self.journal.list, spellID)
-					end
+					setMount(data.mountID, enabled)
 				end
 			end
+
+			self.journal:getRemoveMountList(self.journal.listMapID)
 			self:event("UPDATE_PROFILE")
 		end)
 	end
@@ -141,6 +149,8 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 					self.mounts:addMountToList(self.journal.list, spellID)
 				end
 			end
+
+			self.journal:getRemoveMountList(self.journal.listMapID)
 			self:event("UPDATE_PROFILE")
 		end)
 	end
@@ -301,12 +311,20 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 			end
 			self:ddAddButton(info, level)
 
+			self:ddAddSpace(level)
+
 			info.notCheckable = true
 			info.keepShownOnClick = nil
 
-			info.text = L["Select all filtred mounts by type in the selected zone"]
-			info.func = function(btn) self:selectAllFiltredMounts(btn.text) end
+			info.text = L["Select all filtered mounts by type in the selected zone"]
+			info.func = function(btn) self:setAllFiltredMounts(btn.text, true) end
 			self:ddAddButton(info, level)
+
+			info.text = L["Unselect all filtered mounts in the selected zone"]
+			info.func = function(btn) self:setAllFiltredMounts(btn.text, false) end
+			self:ddAddButton(info, level)
+
+			self:ddAddSpace(level)
 
 			info.text = L["Select all favorite mounts by type in the selected zone"]
 			info.func = function(btn) self:selectAllMounts(btn.text, true) end

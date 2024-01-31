@@ -341,8 +341,13 @@ do
 			mountType = util.mountTypes[self.additionalMounts[spellID].mountType] 
 		else
 			local mountID = C_MountJournal.GetMountFromSpell(spellID)
-			local _,_,_,_, mountTypeExtra = C_MountJournal.GetMountInfoExtraByID(mountID)
-			mountType = util.mountTypes[mountTypeExtra]
+			local _,_,_,_,_,_,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
+			if isForDragonriding then
+				mountType = 4
+			else
+				local _,_,_,_, mountTypeExtra = C_MountJournal.GetMountInfoExtraByID(mountID)
+				mountType = util.mountTypes[mountTypeExtra]
+			end
 		end
 
 		if type(mountType) == "table" then
