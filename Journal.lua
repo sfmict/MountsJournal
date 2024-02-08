@@ -3165,15 +3165,17 @@ function journal:updateMountsList()
 		-- TAGS
 		and tags:getFilterMount(spellID) then
 			numMounts = numMounts + 1
+			local mountData = {index = numMounts, mountID = mountID}
+
 			if mounts.config.gridToggle then
 				if data and #data < 3 then
-					data[#data + 1] = {index = numMounts, mountID = mountID}
+					data[#data + 1] = mountData
 				else
-					data = {{index = numMounts, mountID = mountID}}
+					data = {mountData}
 					self.dataProvider:Insert(data)
 				end
 			else
-				self.dataProvider:Insert({index = numMounts, mountID = mountID})
+				self.dataProvider:Insert(mountData)
 			end
 		end
 	end
