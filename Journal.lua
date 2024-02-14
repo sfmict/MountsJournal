@@ -100,7 +100,7 @@ function journal:init()
 		self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 		self:RegisterEvent("PLAYER_REGEN_DISABLED")
 		self:RegisterEvent("PLAYER_REGEN_ENABLED")
-		self:RegisterUnitEvent("UNIT_FORM_CHANGED", "player")
+		self:RegisterUnitEvent("UNIT_PORTRAIT_UPDATE", "player")
 		self.leftInset:EnableKeyboard(not InCombatLockdown())
 		self:updateMountsList()
 		self:updateMountDisplay(true)
@@ -113,7 +113,7 @@ function journal:init()
 		self:UnregisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 		self:UnregisterEvent("PLAYER_REGEN_DISABLED")
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-		self:UnregisterEvent("UNIT_FORM_CHANGED")
+		self:UnregisterEvent("UNIT_PORTRAIT_UPDATE")
 		self.mountDisplay:Show()
 		self.navBarBtn:SetChecked(false)
 		self.mapSettings:Hide()
@@ -807,7 +807,7 @@ function journal:init()
 				end
 			end
 			if index then
-				index = index >= #allCreatureDisplays and 1 or index + 1
+				index = Wrap(index + 1, #allCreatureDisplays)
 				self:updateMountDisplay(true, allCreatureDisplays[index].creatureDisplayID)
 			end
 		else
@@ -975,7 +975,7 @@ function journal:init()
 	self:RegisterEvent("COMPANION_UPDATE")
 	self:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
-	self:RegisterUnitEvent("UNIT_FORM_CHANGED", "player")
+	self:RegisterUnitEvent("UNIT_PORTRAIT_UPDATE", "player")
 
 	self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 	self:setMJFiltersBackup()
@@ -1698,8 +1698,8 @@ function journal:MOUNT_JOURNAL_USABILITY_CHANGED()
 end
 
 
--- to shapeshift worgen and dracthyr
-function journal:UNIT_FORM_CHANGED()
+-- to shapeshift worgen and dracthyr or change clothes
+function journal:UNIT_PORTRAIT_UPDATE()
 	self:updateMountDisplay(true)
 end
 

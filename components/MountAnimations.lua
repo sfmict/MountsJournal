@@ -89,6 +89,26 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 			animation = 562,
 			type = 1,
 		},
+		{
+			name = SUMMON,
+			animation = 1496,
+			type = 0,
+		},
+		{
+			name = GetSpellInfo(372610), -- Skyward Ascent
+			animation = 1726,
+			type = 0,
+		},
+		{
+			name = GetSpellInfo(372608), -- Surge Forward
+			animation = 1680,
+			type = 0,
+		},
+		{
+			name = GetSpellInfo(361584), -- Whirling Surge
+			animation = 1534,
+			type = 0,
+		},
 	}
 
 	dd.customAnimationPanel = CreateFrame("FRAME", nil, journal.modelScene, "MJMountCustomAnimationPanel")
@@ -113,7 +133,11 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 				dd.currentMountType = type(mountType) == "table" and mountType[1] or mountType
 			end
 
-			if not dd.selectedValue or dd.selectedValue ~= "custom" and dd.currentMountType ~= 4 and dd.selectedValue.type and dd.currentMountType > dd.selectedValue.type then
+			if dd.currentMountType == 4 then
+				dd.currentMountType = 0
+			end
+
+			if not dd.selectedValue or dd.selectedValue ~= "custom" and dd.selectedValue.type and dd.currentMountType > dd.selectedValue.type then
 				dd:ddSetSelectedValue(dd.animationList[1])
 				dd:ddSetSelectedText(dd.animationList[1].name)
 			end
@@ -136,7 +160,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 
 		info.list = {}
 		for i, v in ipairs(self.animationList) do
-			if v.type == nil or v.type >= mountType or mountType == 4 then
+			if v.type == nil or v.type >= mountType then
 				local animation, isKit
 				if self.isPlayer then
 					animation = v.selfAnimation or v.animation
@@ -248,21 +272,17 @@ function MJMountCustomAnimationMixin:onLoad()
 		self.animations.current = tonumber(edit:GetText()) or 0
 	end)
 	self.animationNum:SetScript("OnMouseWheel", function(_, delta)
-		if delta > 0 then
-			self:nextAnimation()
-		else
-			self:previousAnimation()
-		end
+		self:nextAnimation(delta)
 	end)
 
 	self.minus:SetScript("OnClick", function()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		self:previousAnimation()
+		self:nextAnimation(-1)
 	end)
 
 	self.plus:SetScript("OnClick", function()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		self:nextAnimation()
+		self:nextAnimation(1)
 	end)
 
 	self.playButton:SetScript("OnClick", function()
@@ -313,17 +333,8 @@ function MJMountCustomAnimationMixin:onLoad()
 end
 
 
-function MJMountCustomAnimationMixin:previousAnimation()
-	if self.animations.current > 0 then
-		self:setAnimation(self.animations.current - 1)
-	end
-end
-
-
-function MJMountCustomAnimationMixin:nextAnimation()
-	if self.animations.current < 10000 then
-		self:setAnimation(self.animations.current + 1)
-	end
+function MJMountCustomAnimationMixin:nextAnimation(delta)
+	self:setAnimation(Wrap(self.animations.current + 1 + delta, 2^31) - 1)
 end
 
 

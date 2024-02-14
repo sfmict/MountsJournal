@@ -2280,7 +2280,7 @@
 	</Button>
 
 	<Frame name="MJMountCustomAnimationPanel" mixin="MJMountCustomAnimationMixin" hidden="true" virtual="true">
-		<Size x="168" y="66"/>
+		<Size x="175" y="66"/>
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture parentKey="BG" file="Interface/ChatFrame/ChatFrameBackground" setAllPoints="true">
@@ -2297,8 +2297,8 @@
 					<OnLoad>self.icon:SetTexCoord(.625, 1, 0, .4375)</OnLoad>
 				</Scripts>
 			</Button>
-			<EditBox parentKey="animationNum" numeric="true" letters="4" multiLine="false" autoFocus="false">
-				<Size x="40" y="22"/>
+			<EditBox parentKey="animationNum" numeric="true" letters="10" multiLine="false" autoFocus="false">
+				<Size x="80" y="22"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.minus" relativePoint="RIGHT" x="-2"/>
 				</Anchors>
@@ -2325,7 +2325,7 @@
 			<Button inherits="UIPanelButtonTemplate" parentKey="playButton">
 				<Size x="26" y="22"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.plus" relativePoint="RIGHT" x="20"/>
+					<Anchor point="LEFT" relativeKey="$parent.plus" relativePoint="RIGHT" x="0"/>
 				</Anchors>
 				<Layers>
 					<Layer level="OVERLAY">
@@ -2442,7 +2442,7 @@
 			<Button inherits="UIPanelButtonTemplate" text="SAVE" parentKey="save">
 				<Size x="80" y="22"/>
 				<Anchors>
-					<Anchor point="LEFT" relativeKey="$parent.nameBox" relativePoint="RIGHT" x="0" y="0"/>
+					<Anchor point="BOTTOMRIGHT" x="-3" y="2"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>self:Disable()</OnLoad>
