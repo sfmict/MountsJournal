@@ -5,7 +5,6 @@
 	<Script file="mixins/ExistingListsMixin.lua"/>
 	<Script file="mixins/CompanionMixin.lua"/>
 	<Script file="mixins/MountEquipmentMixin.lua"/>
-	<Script file="mixins/MountListMixin.lua"/>
 
 	<CheckButton name="MJUseMountsJournalButtonTemplate" motionScriptsWhileDisabled="true" inherits="MJCheckButtonTemplate" virtual="true">
 		<Size x="25" y="24"/>
@@ -1299,11 +1298,8 @@
 		</Scripts>
 	</CheckButton>
 
-	<Button name="MJMountDefaultListButton" mixin="MJDefaultMountListMixin" virtual="true">
+	<Button name="MJMountDefaultListButton" virtual="true">
 		<Size x="184" y="46"/>
-		<Anchors>
-			<Anchor point="LEFT" relativeKey="$parent.dragButton" relativePoint="RIGHT" x="0" y="0"/>
-		</Anchors>
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture atlas="PetList-ButtonBackground" parentKey="background"/>
@@ -1412,26 +1408,6 @@
 				<KeyValues>
 					<KeyValue key="LibSFDropDownNoGMEvent" value="true" type="boolean"/>
 				</KeyValues>
-				<Scripts>
-					<OnEnter>
-						self.highlight:Show()
-						GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-						local parent = self:GetParent()
-						if type(parent.mountID) == "number" then
-							GameTooltip:SetMountBySpellID(parent.spellID)
-						elseif parent.spellID then
-							GameTooltip:SetSpellByID(parent.spellID)
-						end
-					</OnEnter>
-					<OnLeave>
-						self.highlight:Hide()
-						GameTooltip:Hide()
-					</OnLeave>
-					<OnLoad>
-						self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-						self:RegisterForDrag("LeftButton")
-					</OnLoad>
-				</Scripts>
 			</Button>
 			<CheckButton parentKey="dragonriding" inherits="MJSetDragonridingToggleTemplate">
 				<Anchors>
@@ -1475,14 +1451,9 @@
 				</Scripts>
 			</CheckButton>
 		</Frames>
-		<Scripts>
-			<OnLoad method="onLoad"/>
-			<OnMouseDown method="onMouseDown"/>
-			<OnClick method="onClick"/>
-		</Scripts>
 	</Button>
 
-	<Button name="MJGridMountButtonTemplate" mixin="MJGrid3MountListMixin" virtual="true">
+	<Button name="MJGridMountButtonTemplate" virtual="true">
 		<Size x="40" y="40"/>
 		<Layers>
 			<Layer level="BORDER">
@@ -1569,14 +1540,6 @@
 		<KeyValues>
 			<KeyValue key="LibSFDropDownNoGMEvent" value="true" type="boolean"/>
 		</KeyValues>
-		<Scripts>
-			<OnLoad method="onLoad"/>
-			<OnEnter method="onEnter"/>
-			<OnLeave method="onLeave"/>
-			<OnMouseDown method="onMouseDown"/>
-			<OnClick method="onClick"/>
-			<OnDragStart method="onDragStart"/>
-		</Scripts>
 	</Button>
 
 	<Frame name="MJMountGrid3ListButtons" virtual="true">

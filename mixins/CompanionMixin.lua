@@ -12,7 +12,7 @@ function MJSetPetMixin:onLoad()
 
 	self:SetScript("OnEnter", function(self)
 		self.highlight:Show()
-		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 		GameTooltip:SetText(L["Summonable Battle Pet"])
 		local description
 		if self.id then
@@ -20,6 +20,10 @@ function MJSetPetMixin:onLoad()
 				description = self.id == 1 and PET_JOURNAL_SUMMON_RANDOM_FAVORITE_PET or L["Summon Random Battle Pet"]
 			else
 				description = self.name
+				MJTooltipModel.model:SetDisplayInfo(self.displayID)
+				MJTooltipModel.model:SetDoBlend(false)
+				MJTooltipModel.model:SetAnimation(742, 0)
+				MJTooltipModel:Show()
 			end
 		else
 			description = L["No Battle Pet"]
@@ -30,6 +34,7 @@ function MJSetPetMixin:onLoad()
 	self:SetScript("OnLeave", function(self)
 		self.highlight:Hide()
 		GameTooltip:Hide()
+		MJTooltipModel:Hide()
 	end)
 end
 
@@ -76,12 +81,13 @@ function MJSetPetMixin:refresh()
 		self.infoFrame:Show()
 	else
 		-- speciesID, customName, level, xp, maxXp, displayID, favorite, name, icon, petType, creatureID, sourceText, description, isWild, canBattle, tradable, unique, obtainable = C_PetJournal.GetPetInfoByPetID(petID)
-		local _,_, level, _,_,_, favorite, name, icon, _,_,_,_,_, canBattle = C_PetJournal.GetPetInfoByPetID(petID)
+		local _,_, level, _,_, displayID, favorite, name, icon, _,_,_,_,_, canBattle = C_PetJournal.GetPetInfoByPetID(petID)
 
 		if icon then
 			local health, _,_,_, rarity = C_PetJournal.GetPetStats(petID)
 
 			self.name = name
+			self.displayID = displayID
 			self.infoFrame.icon:SetTexture(icon)
 			self.infoFrame.qualityBorder:Show()
 			self.infoFrame.qualityBorder:SetVertexColor(ITEM_QUALITY_COLORS[rarity - 1].color:GetRGB())

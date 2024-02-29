@@ -29,6 +29,7 @@ components\Hyperlinks.lua
 components\Pets.lua
 components\Calendar.lua
 components\AdditionalMounts.lua
+components\MountListButtonInit.lua
 #@do-not-package@
 _test.lua
 #@end-do-not-package@
