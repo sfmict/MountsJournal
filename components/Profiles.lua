@@ -3,7 +3,7 @@ local util = MountsJournalUtil
 
 
 MountsJournalFrame:on("MODULES_INIT", function(journal)
-	local lsfdd = LibStub("LibSFDropDown-1.4")
+	local lsfdd = LibStub("LibSFDropDown-1.5")
 	local dd = lsfdd:CreateStretchButtonOriginal(journal.bgFrame, 130, 22)
 	dd:SetPoint("LEFT", journal.summonButton, "RIGHT", 4, -.5)
 	util.setEventsMixin(dd)

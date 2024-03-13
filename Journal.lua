@@ -27,7 +27,7 @@ journal.indexByMountID = setmetatable({}, metaMounts)
 function journal:init()
 	self.init = nil
 
-	local lsfdd = LibStub("LibSFDropDown-1.4")
+	local lsfdd = LibStub("LibSFDropDown-1.5")
 	local texPath = "Interface/AddOns/MountsJournal/textures/"
 	self.mountIDs = C_MountJournal.GetMountIDs()
 

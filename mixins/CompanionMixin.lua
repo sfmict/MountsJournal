@@ -204,7 +204,7 @@ function MJCompanionsPanelMixin:onLoad()
 	self.scrollBox = self.petListFrame.scrollBox
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.petListFrame.scrollBar, self.view)
 
-	self.companionOptionsMenu = LibStub("LibSFDropDown-1.4"):SetMixin({})
+	self.companionOptionsMenu = LibStub("LibSFDropDown-1.5"):SetMixin({})
 	self.companionOptionsMenu:ddHideWhenButtonHidden(self)
 	self.companionOptionsMenu:ddSetInitFunc(function(...) self:companionOptionsMenu_Init(...) end)
 	self.companionOptionsMenu:ddSetDisplayMode(addon)

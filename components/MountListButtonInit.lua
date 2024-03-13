@@ -21,7 +21,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		GameTooltip:Hide()
 	end
 
-	journal.view:RegisterCallback(ScrollBoxListViewMixin.Event.OnAcquiredFrame, function(owner, frame, elementData, new)
+	journal.view:RegisterCallback(journal.view.Event.OnAcquiredFrame, function(owner, frame, elementData, new)
 		if new then
 			if frame.mounts then
 				for i = 1, #frame.mounts do

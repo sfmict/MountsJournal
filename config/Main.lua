@@ -28,7 +28,7 @@ end
 config:SetScript("OnShow", function(self)
 	self:SetScript("OnShow", nil)
 
-	local lsfdd = LibStub("LibSFDropDown-1.4")
+	local lsfdd = LibStub("LibSFDropDown-1.5")
 	local ltl = LibStub("LibThingsLoad-1.0")
 
 	StaticPopupDialogs[util.addonName.."MACRO_EXISTS"] = {
@@ -141,7 +141,7 @@ config:SetScript("OnShow", function(self)
 		for i, modifier in ipairs({"ALT", "CTRL", "SHIFT", "NONE"}) do
 			info.text = _G[modifier.."_KEY"]
 			info.value = modifier
-			info.checked = function(btn) return modifierCombobox.selectedValue == btn.value end
+			info.checked = function(btn) return modifierCombobox:ddGetSelectedValue() == btn.value end
 			info.func = function(btn)
 				self:ddSetSelectedValue(btn.value)
 				enableBtns()
@@ -321,7 +321,7 @@ config:SetScript("OnShow", function(self)
 		info.text = L["Random available mount"]
 		info.value = nil
 		info.icon = randomMountIcon
-		info.checked = function(btn) return self.selectedValue == btn.value end
+		info.checked = function(btn) return self:ddGetSelectedValue() == btn.value end
 		info.func = function(btn)
 			self:ddSetSelectedValue(btn.value)
 			enableBtns()
@@ -337,7 +337,7 @@ config:SetScript("OnShow", function(self)
 				info.icon = icon
 				info.value = spellID
 				info.disabled = not isCollected
-				info.checked = function(btn) return self.selectedValue == btn.value end
+				info.checked = function(btn) return self:ddGetSelectedValue() == btn.value end
 				info.func = function(btn)
 					self:ddSetSelectedValue(btn.value)
 					enableBtns()
@@ -390,7 +390,7 @@ config:SetScript("OnShow", function(self)
 		info.text = L["Random available mount"]
 		info.value = nil
 		info.icon = randomMountIcon
-		info.checked = function(btn) return self.selectedValue == btn.value end
+		info.checked = function(btn) return self:ddGetSelectedValue() == btn.value end
 		info.func = function(btn)
 			self:ddSetSelectedValue(btn.value)
 			enableBtns()
@@ -405,7 +405,10 @@ config:SetScript("OnShow", function(self)
 				info.text = name
 				info.icon = icon
 				info.value = data
-				info.checked = function(btn) return self.selectedValue and self.selectedValue.mountID == btn.value.mountID end
+				info.checked = function(btn)
+					local selectedValue = self:ddGetSelectedValue()
+					return selectedValue and selectedValue.mountID == btn.value.mountID
+				end
 				info.func = function(btn)
 					self:ddSetSelectedValue(btn.value)
 					enableBtns()
@@ -419,7 +422,10 @@ config:SetScript("OnShow", function(self)
 				info.text = ltl:GetItemName(data.itemID)
 				info.icon = ltl:GetItemIcon(data.itemID)
 				info.value = data
-				info.checked = function(btn) return self.selectedValue and self.selectedValue.itemID == btn.value.itemID end
+				info.checked = function(btn)
+					local selectedValue = self:ddGetSelectedValue()
+					return selectedValue and selectedValue.itemID == btn.value.itemID
+				end
 				info.func = function(btn)
 					self:ddSetSelectedValue(btn.value)
 					enableBtns()
@@ -660,9 +666,9 @@ config:SetScript("OnShow", function(self)
 		mounts.config.useRepairMountsDurability = tonumber(self.repairPercent:GetText()) or 0
 		mounts.config.useRepairFlyable = self.repairFlyable:GetChecked()
 		mounts.config.useRepairFlyableDurability = tonumber(self.repairFlyablePercent:GetText()) or 0
-		mounts.config.repairSelectedMount = self.repairMountsCombobox.selectedValue
+		mounts.config.repairSelectedMount = self.repairMountsCombobox:ddGetSelectedValue()
 		mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
-		mounts.config.broomSelectedMount = self.magicBroomCombobox.selectedValue
+		mounts.config.broomSelectedMount = self.magicBroomCombobox:ddGetSelectedValue()
 		if self.useUnderlightAngler then
 			mounts.config.useUnderlightAngler = self.useUnderlightAngler:GetChecked()
 			mounts.config.autoUseUnderlightAngler = self.autoUseUnderlightAngler:GetChecked()
@@ -680,7 +686,7 @@ config:SetScript("OnShow", function(self)
 
 		binding:saveBinding()
 		mounts:setHandleWaterJump(self.waterJump:GetChecked())
-		mounts:setModifier(self.modifierCombobox.selectedValue)
+		mounts:setModifier(self.modifierCombobox:ddGetSelectedValue())
 		mounts:UPDATE_INVENTORY_DURABILITY()
 		mounts:setUsableRepairMounts()
 		mounts:setHerbMount()

@@ -52,12 +52,12 @@ function tags:init()
 	self.sortedTags = {}
 	self:setSortedTags()
 
-	self.mountOptionsMenu = LibStub("LibSFDropDown-1.4"):SetMixin({})
+	self.mountOptionsMenu = LibStub("LibSFDropDown-1.5"):SetMixin({})
 	self.mountOptionsMenu:ddHideWhenButtonHidden(journal.bgFrame)
 	self.mountOptionsMenu:ddSetInitFunc(function(...) self:mountOptionsMenu_Init(...) end)
 	self.mountOptionsMenu:ddSetDisplayMode(addon)
 
-	journal.scrollBox:RegisterCallback("OnDataRangeChanged", function()
+	journal.scrollBox:RegisterCallback(journal.scrollBox.Event.OnDataRangeChanged, function()
 		if self.doNotHideMenu then return end
 		self.mountOptionsMenu:ddOnHide()
 	end)
