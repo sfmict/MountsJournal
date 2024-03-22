@@ -467,6 +467,50 @@ function journal:init()
 		self:setScrollGridMounts(checked)
 	end)
 
+	-- WOWHEAD LINK LANG
+	local langButton = self.mountDisplay.info.link.lang
+	langButton:SetText(mounts.config.wowheadLinkLang)
+
+	lsfdd:SetMixin(langButton)
+	langButton:ddSetDisplayMode(addon)
+	langButton:ddHideWhenButtonHidden()
+	langButton:ddSetNoGlobalMouseEvent(true)
+
+	langButton:ddSetInitFunc(function(langButton)
+		local info = {}
+
+		local langs = {
+			de = "Deutsch",
+			en = "English",
+			es = "Español",
+			fr = "Français",
+			it = "Italiano",
+			pt = "Português Brasileiro",
+			ru = "Русский",
+			ko = "한국어",
+			cn = "简体中文",
+		}
+
+		local function langSelect(btn)
+			mounts.config.wowheadLinkLang = btn.value
+			langButton:SetText(btn.value)
+			self:updateMountDisplay(true)
+		end
+
+		for i, lang in ipairs({"de", "en", "es", "fr", "it", "pt", "ru", "ko", "cn"}) do
+			info.value = lang
+			info.text = langs[lang]
+			info.checked = lang == mounts.config.wowheadLinkLang
+			info.func = langSelect
+			langButton:ddAddButton(info)
+		end
+	end)
+
+	langButton:SetScript("OnClick", function(btn)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		btn:ddToggle(1, nil, btn, 30, 20)
+	end)
+
 	-- RARITY TOOLTIP
 	local rarityTooltip = self.mountDisplay.info.rarityTooltip
 	rarityTooltip:SetScript("OnEnter", function(self)
@@ -1943,7 +1987,8 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 			end
 
 			info.link:SetShown(mounts.config.showWowheadLink)
-			info.link:SetText("wowhead.com/spell="..spellID)
+			local lang = mounts.config.wowheadLinkLang
+			info.link:SetText("wowhead.com"..(lang == "en" and "" or "/"..lang).."/spell="..spellID)
 			info.name:SetText(creatureName)
 			info.source:SetText(sourceText)
 			info.lore:SetText(descriptionText)

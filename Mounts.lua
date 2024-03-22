@@ -42,6 +42,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.defFilters = self.globalDB.defFilters
 		self.help = self.globalDB.help
 		self.config = self.globalDB.config
+		self.config.wowheadLinkLang = self.config.wowheadLinkLang or "en"
 		if self.config.mountDescriptionToggle == nil then
 			self.config.mountDescriptionToggle = true
 		end

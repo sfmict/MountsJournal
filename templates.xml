@@ -535,9 +535,45 @@
 									<Anchor point="TOP" y="5"/>
 								</Anchors>
 								<FontString inherits="GameFontHighlightSmall" justifyH="CENTER"/>
+								<Frames>
+									<Button parentKey="lang" alpha="0">
+										<Size x="30" y="20"/>
+										<Anchors>
+											<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="1"/>
+										</Anchors>
+										<NormalFont style="GameFontNormalSmall"/>
+										<Layers>
+											<Layer level="ARTWORK">
+												<Texture parentKey="arrow" file="Interface/ChatFrame/ChatFrameExpandArrow">
+													<Size x="10" y="12"/>
+													<Anchors>
+														<Anchor point="RIGHT" x="2" y="-1"/>
+													</Anchors>
+												</Texture>
+											</Layer>
+										</Layers>
+										<HighlightTexture file="Interface/Buttons/UI-Common-MouseHilight" alpha=".25" alphaMode="ADD"/>
+										<Scripts>
+											<OnEnter>
+												local parent = self:GetParent()
+												parent:GetScript("OnEnter")(parent)
+											</OnEnter>
+											<OnLeave>
+												local parent = self:GetParent()
+												parent:GetScript("OnLeave")(parent)
+											</OnLeave>
+										</Scripts>
+									</Button>
+								</Frames>
 								<Scripts>
-									<OnEnter>self:SetAlpha(1)</OnEnter>
-									<OnLeave>self:SetAlpha(.5)</OnLeave>
+									<OnEnter>
+										self:SetAlpha(1)
+										self.lang:SetAlpha(1)
+									</OnEnter>
+									<OnLeave>
+										self:SetAlpha(.5)
+										self.lang:SetAlpha(0)
+									</OnLeave>
 									<OnEditFocusGained>self:HighlightText()</OnEditFocusGained>
 									<OnEditFocusLost>self:HighlightText(0, 0)</OnEditFocusLost>
 									<OnEscapePressed>self:ClearFocus()</OnEscapePressed>
