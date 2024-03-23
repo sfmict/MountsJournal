@@ -1035,6 +1035,13 @@
 				</Anchors>
 			</Button>
 
+			<Button parentKey="mountSpecial" motionScriptsWhileDisabled="true" inherits="UIPanelButtonNoTooltipTemplate">
+				<Size x="22" y="22"/>
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.btnConfig" relativePoint="LEFT" x="-5" y="0"/>
+				</Anchors>
+			</Button>
+
 			<Frame parentKey="percentSlider" inherits="MJSliderFrameTemplate" hidden="true">
 				<Layers>
 					<Layer level="ARTWORK">

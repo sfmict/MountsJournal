@@ -108,6 +108,7 @@ function journal:init()
 		self.leftInset:EnableKeyboard(not InCombatLockdown())
 		self:updateMountsList()
 		self:updateMountDisplay(true)
+		self.mountSpecial:SetEnabled(IsMounted())
 	end)
 
 	self.bgFrame:SetScript("OnHide", function()
@@ -155,6 +156,7 @@ function journal:init()
 	self.scrollBox = self.bgFrame.scrollBox
 	self.summonButton = self.bgFrame.summonButton
 	self.percentSlider = self.bgFrame.percentSlider
+	self.mountSpecial = self.bgFrame.mountSpecial
 
 	-- USE MountsJournal BUTTON
 	self.useMountsJournalButton:SetParent(self.CollectionsJournal)
@@ -992,6 +994,25 @@ function journal:init()
 	self.bgFrame.btnConfig:SetText(L["Settings"])
 	self.bgFrame.btnConfig:SetScript("OnClick", function() config:openConfig() end)
 
+	-- MOUNT SPECIAL
+	self.mountSpecial:SetText("!")
+	self.mountSpecial.normal = self.mountSpecial:GetFontString()
+	self.mountSpecial.normal:ClearAllPoints()
+	self.mountSpecial.normal:SetPoint("CENTER", -1, 0)
+	self.mountSpecial:SetEnabled(IsMounted())
+	self.mountSpecial:SetScript("OnEnter", function(btn)
+		GameTooltip:SetOwner(btn, "ANCHOR_TOP")
+		GameTooltip_SetTitle(GameTooltip, "/MountSpecial")
+		GameTooltip:Show()
+	end)
+	self.mountSpecial:SetScript("OnLeave", function()
+		GameTooltip:Hide()
+	end)
+	self.mountSpecial:SetScript("OnClick", function()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		DoEmote("MountSpecial")
+	end)
+
 	-- FANFARE
 	hooksecurefunc(C_MountJournal, "ClearFanfare", function(mountID)
 		self:sortMounts()
@@ -1221,6 +1242,7 @@ function journal:COMPANION_UPDATE(companionType)
 	if companionType == "MOUNT" then
 		self:updateScrollMountList()
 		self:updateMountDisplay()
+		self.mountSpecial:SetEnabled(not not util.getUnitMount("player"))
 	end
 end
 
