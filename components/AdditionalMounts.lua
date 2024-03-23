@@ -6,9 +6,6 @@ local _,_, raceID = UnitRace("player")
 mounts.additionalMounts = {}
 
 
-local meta = {__lt = function(a, b) return a.spellID < b.spellID end}
-
-
 local function isActive(self)
 	return C_UnitAuras.GetPlayerAuraBySpellID(self.spellID)
 end
@@ -32,7 +29,7 @@ end
 
 
 local function createMountFromSpell(spellID, mountType, dragonriding, expansion, modelSceneID)
-	local t = setmetatable({
+	local t = {
 		spellID = spellID,
 		mountType = mountType,
 		dragonriding = dragonriding,
@@ -43,7 +40,7 @@ local function createMountFromSpell(spellID, mountType, dragonriding, expansion,
 		canUse = isUsable,
 		setIsFavorite = setIsFavorite,
 		getIsFavorite = getIsFavorite,
-	}, meta)
+	}
 	mounts.additionalMounts[t.spellID] = t
 
 	local _, icon = ltl:GetSpellTexture(spellID)

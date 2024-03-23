@@ -329,7 +329,7 @@ config:SetScript("OnShow", function(self)
 		self:ddAddButton(info, level)
 
 		info.tooltipWhileDisabled = true
-		for i, spellID in ipairs(mounts.repairMounts) do
+		for spellID in pairs(mounts.specificDB.repair) do
 			local mountID = C_MountJournal.GetMountFromSpell(spellID)
 			local name, spellID, icon, _,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 			if not shouldHideOnChar then

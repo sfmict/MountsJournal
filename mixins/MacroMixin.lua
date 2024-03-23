@@ -191,8 +191,13 @@ function macroFrame:PLAYER_LOGIN()
 			else
 				self.mounts:setSummonMount(true)
 
-				if self.mounts.additionalMounts[self.mounts.summonedSpellID] then
-					macro = self:addLine(macro, self.mounts.additionalMounts[self.mounts.summonedSpellID].macro)
+				local additionMount = self.mounts.additionalMounts[self.sFlags.targetMount]
+				if not additionMount then
+					additionMount = self.mounts.additionalMounts[self.mounts.summonedSpellID]
+				end
+
+				if additionMount then
+					macro = self:addLine(macro, additionMount.macro)
 				else
 					macro = self:addLine(macro, "/run MountsJournal:summon()")
 				end

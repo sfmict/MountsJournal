@@ -118,12 +118,6 @@ function mounts:ADDON_LOADED(addonName)
 			[205] = true, -- Мерцающий простор
 		}
 
-		self.repairMounts = {
-			61425,
-			61447,
-			122708,
-			264058,
-		}
 		self.usableRepairMounts = {}
 		self.usableIDs = {}
 		self.magicBrooms = {
@@ -232,8 +226,7 @@ end
 function mounts:setUsableRepairMounts()
 	wipe(self.usableRepairMounts)
 	if not self.config.repairSelectedMount then
-		for i = 1, #self.repairMounts do
-			local spellID = self.repairMounts[i]
+		for spellID in pairs(self.specificDB.repair) do
 			local mountID = C_MountJournal.GetMountFromSpell(spellID)
 			local _,_,_,_,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 			if isCollected and not shouldHideOnChar then
@@ -532,22 +525,17 @@ function mounts:isFloating()
 end
 
 
-do
-	local mount
-	local function checkMount(auraData)
-		local mountID = C_MountJournal.GetMountFromSpell(auraData.spellId)
-		if mountID then
-			local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
-			mount = isUsable and IsUsableSpell(auraData.spellId) and auraData.spellId
-			return true
-		end
-	end
-
-	function mounts:getTargetMount()
-		if self.config.copyMountTarget then
-			mount = nil
-			AuraUtil.ForEachAura("target", "HELPFUL", nil, checkMount, true)
-			return mount
+function mounts:getTargetMount()
+	if self.config.copyMountTarget then
+		local spellID = util.getUnitMount("target")
+		if spellID then
+			local mountID = C_MountJournal.GetMountFromSpell(spellID)
+			if mountID then
+				local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
+				return isUsable and IsUsableSpell(spellID) and spellID
+			elseif self.additionalMounts[spellID] then
+				return self.additionalMounts[spellID]:canUse() and spellID
+			end
 		end
 	end
 end

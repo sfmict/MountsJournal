@@ -1,5 +1,6 @@
 local addon = ...
 local type, select, tremove = type, select, tremove
+local _G, C_MountJournal = _G, C_MountJournal
 local events, eventsMixin = {}, {}
 
 
@@ -258,4 +259,23 @@ end
 
 function MountsJournalUtil.cleanText(text)
 	return text:trim():lower()
+end
+
+
+do
+	local spellID
+	local function checkMount(auraData)
+		if C_MountJournal.GetMountFromSpell(auraData.spellId)
+		or _G.MountsJournal.additionalMounts[auraData.spellId]
+		then
+			spellID = auraData.spellId
+			return true
+		end
+	end
+
+	function MountsJournalUtil.getUnitMount(unit)
+		spellID = nil
+		AuraUtil.ForEachAura(unit, "HELPFUL", nil, checkMount, true)
+		return spellID
+	end
 end

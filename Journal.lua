@@ -44,6 +44,7 @@ function journal:init()
 		filters.types = setmetatable(filters.types or {}, filtersMeta)
 		filters.selected = setmetatable(filters.selected or {}, filtersMeta)
 		filters.sources = setmetatable(filters.sources or {}, filtersMeta)
+		filters.specific = setmetatable(filters.specific or {}, filtersMeta)
 		filters.factions = setmetatable(filters.factions or {}, filtersMeta)
 		filters.pet = setmetatable(filters.pet or {}, filtersMeta)
 		filters.expansions = setmetatable(filters.expansions or {}, filtersMeta)
@@ -67,6 +68,9 @@ function journal:init()
 		by = "name",
 		favoritesFirst = true,
 	}
+	if mounts.filters.sorting.additionalFirst == nil then
+		mounts.filters.sorting.additionalFirst = true
+	end
 	if mounts.filters.sorting.dragonridingFirst == nil then
 		mounts.filters.sorting.dragonridingFirst = true
 	end
@@ -1606,35 +1610,35 @@ function journal:sortMounts()
 	local fSort, db = mounts.filters.sorting, mounts.mountsDB
 	local numNeedingFanfare = C_MountJournal.GetNumMountsNeedingFanfare()
 
-	local mCache = setmetatable({}, {__index = function(t, mountID)
-		if type(mountID) == "number" then
-			local name, _,_,_,_,_, isFavorite, _,_,_, isCollected, _, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
-			t[mountID] = {name, isFavorite, isCollected, isForDragonriding}
-			if numNeedingFanfare > 0 and C_MountJournal.NeedsFanfare(mountID) then
-				t[mountID][5] = true
+	local mCache = setmetatable({}, {__index = function(t, mount)
+		if type(mount) == "number" then
+			local name, spellID, _,_,_,_, isFavorite, _,_,_, isCollected, _, isForDragonriding = C_MountJournal.GetMountInfoByID(mount)
+			t[mount] = {name, isFavorite, isCollected, isForDragonriding, spellID}
+			if numNeedingFanfare > 0 and C_MountJournal.NeedsFanfare(mount) then
+				t[mount][6] = true
 				numNeedingFanfare = numNeedingFanfare - 1
 			end
 			if fSort.by == "type" then
-				local _,_,_,_, mType = C_MountJournal.GetMountInfoExtraByID(mountID)
+				local _,_,_,_, mType = C_MountJournal.GetMountInfoExtraByID(mount)
 				mType = self.mountTypes[mType]
-				t[mountID][7] = type(mType) == "number" and mType or mType[1]
+				t[mount][8] = type(mType) == "number" and mType or mType[1]
 			elseif fSort.by == "expansion" then
-				t[mountID][7] = db[mountID][1]
+				t[mount][8] = db[mount][1]
 			elseif fSort.by == "rarity" then
-				t[mountID][7] = db[mountID][2]
+				t[mount][8] = db[mount][2]
 			end
 		else
-			t[mountID] = {mountID.name, mountID:getIsFavorite(), true, mountID.dragonriding, false, true}
+			t[mount] = {mount.name, mount:getIsFavorite(), true, mount.dragonriding, mount.spellID, false, true}
 			if fSort.by == "type" then
-				local mType = self.mountTypes[mountID.mountType]
-				t[mountID][7] = type(mType) == "number" and mType or mType[1]
+				local mType = self.mountTypes[mount.mountType]
+				t[mount][8] = type(mType) == "number" and mType or mType[1]
 			elseif fSort.by == "expansion" then
-				t[mountID][7] = mountID.expansion
+				t[mount][8] = mount.expansion
 			elseif fSort.by == "rarity" then
-				t[mountID][7] = 100
+				t[mount][8] = 100
 			end
 		end
-		return t[mountID]
+		return t[mount]
 	end})
 
 	sort(self.mountIDs, function(a, b)
@@ -1643,8 +1647,8 @@ function journal:sortMounts()
 		local mb = mCache[b]
 
 		-- FANFARE
-		local needFanfareA = ma[5]
-		local needFanfareB = mb[5]
+		local needFanfareA = ma[6]
+		local needFanfareB = mb[6]
 
 		if needFanfareA and not needFanfareB then return true
 		elseif not needFanfareA and needFanfareB then return false end
@@ -1659,11 +1663,13 @@ function journal:sortMounts()
 		end
 
 		-- ADDITIONAL
-		local isAdditionalA = ma[6]
-		local isAdditionalB = mb[6]
+		if fSort.additionalFirst then
+			local isAdditionalA = ma[7]
+			local isAdditionalB = mb[7]
 
-		if isAdditionalA and not isAdditionalB then return true
-		elseif not isAdditionalA and isAdditionalB then return false end
+			if isAdditionalA and not isAdditionalB then return true
+			elseif not isAdditionalA and isAdditionalB then return false end
+		end
 
 		-- COLLECTED
 		local isCollectedA = ma[3]
@@ -1683,8 +1689,8 @@ function journal:sortMounts()
 
 		-- BY
 		if fSort.by ~= "name" then
-			local byA = ma[7]
-			local byB = mb[7]
+			local byA = ma[8]
+			local byB = mb[8]
 
 			if byA < byB then return not fSort.reverse
 			elseif byA > byB then return fSort.reverse end
@@ -1698,7 +1704,7 @@ function journal:sortMounts()
 		if nameA < nameB then return not reverse
 		elseif nameA > nameB then return reverse end
 
-		return a < b
+		return ma[5] < mb[5]
 	end)
 
 	self:updateMountsList()
@@ -2292,34 +2298,38 @@ function journal:filterDropDown_Initialize(btn, level, value)
 		info.value = 3
 		btn:ddAddButton(info, level)
 
-		info.text = L["factions"]
+		info.text = L["Specific"]
 		info.value = 4
 		btn:ddAddButton(info, level)
 
-		info.text = PET
+		info.text = L["factions"]
 		info.value = 5
 		btn:ddAddButton(info, level)
 
-		info.text = L["expansions"]
+		info.text = PET
 		info.value = 6
 		btn:ddAddButton(info, level)
 
-		info.text = L["Rarity"]
+		info.text = L["expansions"]
 		info.value = 7
 		btn:ddAddButton(info, level)
 
-		info.text = L["Chance of summoning"]
+		info.text = L["Rarity"]
 		info.value = 8
 		btn:ddAddButton(info, level)
 
-		info.text = L["tags"]
+		info.text = L["Chance of summoning"]
 		info.value = 9
+		btn:ddAddButton(info, level)
+
+		info.text = L["tags"]
+		info.value = 10
 		btn:ddAddButton(info, level)
 
 		btn:ddAddSpace(level)
 
 		info.text = L["sorting"]
-		info.value = 10
+		info.value = 11
 		btn:ddAddButton(info, level)
 
 		btn:ddAddSpace(level)
@@ -2464,7 +2474,60 @@ function journal:filterDropDown_Initialize(btn, level, value)
 					btn:ddAddButton(info, level)
 				end
 			end
-		elseif value == 4 then -- FACTIONS
+		elseif value == 4 then -- SPECIFIC
+			info.text = CHECK_ALL
+			info.func = function()
+				self:setAllFilters("specific", true)
+				self:updateMountsList()
+				btn:ddRefresh(level)
+			end
+			btn:ddAddButton(info, level)
+
+			info.text = UNCHECK_ALL
+			info.func = function()
+				self:setAllFilters("specific", false)
+				self:updateMountsList()
+				btn:ddRefresh(level)
+			end
+			btn:ddAddButton(info, level)
+
+			info.notCheckable = nil
+			local specific = mounts.filters.specific
+
+			for k, t in pairs(mounts.specificDB) do
+				info.text = L[k]
+				info.func = function(_,_,_, value)
+					specific[k] = value
+					self:updateMountsList()
+				end
+				info.checked = function() return specific[k] end
+				btn:ddAddButton(info, level)
+			end
+
+			info.text = L["transform"]
+			info.func = function(_,_,_, value)
+				specific.transform = value
+				self:updateMountsList()
+			end
+			info.checked = function() return specific.transform end
+			btn:ddAddButton(info, level)
+
+			info.text = L["additional"]
+			info.func = function(_,_,_, value)
+				specific.additional = value
+				self:updateMountsList()
+			end
+			info.checked = function() return specific.additional end
+			btn:ddAddButton(info, level)
+
+			info.text = L["rest"]
+			info.func = function(_,_,_, value)
+				specific.rest = value
+				self:updateMountsList()
+			end
+			info.checked = function() return specific.rest end
+			btn:ddAddButton(info, level)
+		elseif value == 5 then -- FACTIONS
 			info.text = CHECK_ALL
 			info.func = function()
 				self:setAllFilters("factions", true)
@@ -2492,7 +2555,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 				info.checked = function() return factions[i] end
 				btn:ddAddButton(info, level)
 			end
-		elseif value == 5 then -- PET
+		elseif value == 6 then -- PET
 			info.text = CHECK_ALL
 			info.func = function()
 				self:setAllFilters("pet", true)
@@ -2520,7 +2583,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 				info.checked = function() return pet[i] end
 				btn:ddAddButton(info, level)
 			end
-		elseif value == 6 then -- EXPANSIONS
+		elseif value == 7 then -- EXPANSIONS
 			info.text = CHECK_ALL
 			info.func = function()
 				self:setAllFilters("expansions", true)
@@ -2548,7 +2611,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 				info.checked = function() return expansions[i] end
 				btn:ddAddButton(info, level)
 			end
-		elseif value == 7 then -- RARITY
+		elseif value == 8 then -- RARITY
 			local filterRarity = mounts.filters.mountsRarity
 
 			info.notCheckable = nil
@@ -2595,7 +2658,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 				end
 			end
 			btn:ddAddButton(info, level)
-		elseif value == 8 then -- CHANCE OF SUMMONING
+		elseif value == 9 then -- CHANCE OF SUMMONING
 			local filterWeight = mounts.filters.mountsWeight
 
 			info.notCheckable = nil
@@ -2642,7 +2705,7 @@ function journal:filterDropDown_Initialize(btn, level, value)
 				end
 			end
 			btn:ddAddButton(info, level)
-		elseif value == 9 then -- TAGS
+		elseif value == 10 then -- TAGS
 			local filterTags = self.tags.filter
 
 			info.notCheckable = nil
@@ -2782,6 +2845,14 @@ function journal:filterDropDown_Initialize(btn, level, value)
 			info.checked = fSort.favoritesFirst
 			btn:ddAddButton(info, level)
 
+			info.text = L["Additional First"]
+			info.func = function(_,_,_, value)
+				fSort.additionalFirst = value
+				self:sortMounts()
+			end
+			info.checked = fSort.additionalFirst
+			btn:ddAddButton(info, level)
+
 			info.text = L["Dragonriding First"]
 			info.func = function(_,_,_, value)
 				fSort.dragonridingFirst = value
@@ -2823,6 +2894,9 @@ function journal:saveDefaultFilters()
 	for i = 1, #filters.sources do
 		defFilters.sources[i] = filters.sources[i]
 	end
+	for k, value in pairs(filters.specific) do
+		defFilters.specific[k] = value
+	end
 	for i = 1, #filters.factions do
 		defFilters.factions[i] = filters.factions[i]
 	end
@@ -2861,6 +2935,7 @@ function journal:restoreDefaultFilters()
 	wipe(defFilters.types)
 	wipe(defFilters.selected)
 	wipe(defFilters.sources)
+	wipe(defFilters.specific)
 	wipe(defFilters.factions)
 	wipe(defFilters.pet)
 	wipe(defFilters.expansions)
@@ -2900,6 +2975,9 @@ function journal:isDefaultFilters()
 	end
 	for i = 1, #filters.sources do
 		if defFilters.sources[i] ~= filters.sources[i] then return end
+	end
+	for k, value in pairs(filters.specific) do
+		if defFilters.specific[k] ~= value then return end
 	end
 	for i = 1, #filters.factions do
 		if defFilters.factions[i] ~= filters.factions[i] then return end
@@ -2964,6 +3042,9 @@ function journal:resetToDefaultFilters()
 	end
 	for i = 1, #filters.sources do
 		filters.sources[i] = defFilters.sources[i]
+	end
+	for k in pairs(filters.specific) do
+		filters.specific[k] = defFilters.specific[k]
 	end
 	for i = 1, #filters.factions do
 		filters.factions[i] = defFilters.factions[i]
@@ -3083,6 +3164,41 @@ function journal:isMountHidden(spellID)
 end
 
 
+function journal:getFilterSelected(spellID)
+	local filter = mounts.filters.selected
+	local list = self.list
+	if list then
+		local i = 0
+		if list.fly[spellID] then if filter[1] then return true end
+		else i = i + 1 end
+		if list.ground[spellID] then if filter[2] then return true end
+		else i = i + 1 end
+		if list.swimming[spellID] then if filter[3] then return true end
+		else i = i + 1 end
+		if list.dragonriding[spellID] then if filter[4] then return true end
+		else i = i + 1 end
+		return i == 4 and filter[5]
+	else
+		return filter[5]
+	end
+end
+
+
+function journal:getFilterSpecific(spellID, isSelfMount)
+	local filter = mounts.filters.specific
+	local i = 0
+	if isSelfMount then if filter.transform then return true end
+	else i = i + 1 end
+	if mounts.additionalMounts[spellID] then if filter.additional then return true end
+	else i = i + 1 end
+	for k, t in pairs(mounts.specificDB) do
+		if t[spellID] then if filter[k] then return true end
+		else i = i + 1 end
+	end
+	return i == 4 and filter.rest
+end
+
+
 function journal:getFilterRarity(rarity)
 	local filter = mounts.filters.mountsRarity
 	if not filter.sign then
@@ -3153,7 +3269,7 @@ end
 
 function journal:updateMountsList()
 	local filters, list, newMounts, tags = mounts.filters, self.list, mounts.newMounts, self.tags
-	local sources, selected, factions, pet, expansions = filters.sources, filters.selected, filters.factions, filters.pet, filters.expansions
+	local sources, factions, pet, expansions = filters.sources, filters.factions, filters.pet, filters.expansions
 	local text = util.cleanText(self.searchBox:GetText())
 	local numMounts, data = 0
 	self.dataProvider = CreateDataProvider()
@@ -3161,7 +3277,7 @@ function journal:updateMountsList()
 	for i = 1, #self.mountIDs do
 		local mountID = self.mountIDs[i]
 		local name, spellID, _,_, isUsable, sourceType, _,_, mountFaction, shouldHideOnChar, isCollected = self:getMountInfo(mountID)
-		local expansion, rarity, _,_, sourceText, _, mountType = self:getMountInfoExtra(mountID)
+		local expansion, rarity, _,_, sourceText, isSelfMount, mountType = self:getMountInfoExtra(mountID)
 		local petID = self.petForMount[spellID]
 		local isMountHidden = self:isMountHidden(spellID)
 
@@ -3193,16 +3309,11 @@ function journal:updateMountsList()
 		-- FACTION
 		and factions[(mountFaction or 2) + 1]
 		-- SELECTED
-		and (list and (selected[1] and list.fly[spellID]
-		            or selected[2] and list.ground[spellID]
-		            or selected[3] and list.swimming[spellID]
-		            or selected[4] and list.dragonriding[spellID])
-		  or selected[5] and not (list and (list.fly[spellID]
-		                                 or list.ground[spellID]
-		                                 or list.swimming[spellID]
-		                                 or list.dragonriding[spellID])))
+		and self:getFilterSelected(spellID)
 		-- PET
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
+		-- SPECIFIC
+		and self:getFilterSpecific(spellID, isSelfMount)
 		-- MOUNTS RARITY
 		and self:getFilterRarity(rarity or 100)
 		-- MOUNTS WEIGHT
