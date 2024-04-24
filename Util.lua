@@ -77,12 +77,13 @@ end)
 
 
 MountsJournalUtil = {}
-MountsJournalUtil.addonName = ("%s_ADDON_"):format(addon:upper())
-MountsJournalUtil.expansion = tonumber(GetBuildInfo():match("(.-)%."))
+local util = MountsJournalUtil
+util.addonName = ("%s_ADDON_"):format(addon:upper())
+util.expansion = tonumber(GetBuildInfo():match("(.-)%."))
 
 
 -- 1 FLY, 2 GROUND, 3 SWIMMING, 4 DRAGONRIDING
-MountsJournalUtil.mountTypes = setmetatable({
+util.mountTypes = setmetatable({
 	[242] = 1,
 	[247] = 1,
 	[248] = 1,
@@ -111,13 +112,13 @@ MountsJournalUtil.mountTypes = setmetatable({
 })
 
 
-MountsJournalUtil.filterButtonBackdrop = {
+util.filterButtonBackdrop = {
 	edgeFile = "Interface/AddOns/MountsJournal/textures/border",
 	edgeSize = 8 * scale,
 }
 
 
-MountsJournalUtil.optionsPanelBackdrop = {
+util.optionsPanelBackdrop = {
 	bgFile = "Interface/Tooltips/UI-Tooltip-Background",
 	edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
 	tile = true,
@@ -128,14 +129,14 @@ MountsJournalUtil.optionsPanelBackdrop = {
 }
 
 
-MountsJournalUtil.editBoxBackdrop = {
+util.editBoxBackdrop = {
 	bgFile = "Interface/ChatFrame/ChatFrameBackground",
 	edgeFile = "Interface/ChatFrame/ChatFrameBackground",
 	tile = true, edgeSize = 1 * scale, tileSize = 5 * scale,
 }
 
 
-function MountsJournalUtil.setMixin(obj, mixin)
+function util.setMixin(obj, mixin)
 	for k, v in pairs(mixin) do
 		obj[k] = v
 	end
@@ -143,17 +144,17 @@ function MountsJournalUtil.setMixin(obj, mixin)
 end
 
 
-function MountsJournalUtil.createFromEventsMixin()
-	return MountsJournalUtil.setMixin({}, eventsMixin)
+function util.createFromEventsMixin()
+	return util.setMixin({}, eventsMixin)
 end
 
 
-function MountsJournalUtil.setEventsMixin(frame)
-	MountsJournalUtil.setMixin(frame, eventsMixin)
+function util.setEventsMixin(frame)
+	util.setMixin(frame, eventsMixin)
 end
 
 
-function MountsJournalUtil.inTable(tbl, item)
+function util.inTable(tbl, item)
 	for i = 1, #tbl do
 		if tbl[i] == item then
 			return i
@@ -163,7 +164,7 @@ function MountsJournalUtil.inTable(tbl, item)
 end
 
 
-function MountsJournalUtil.getMapFullNameInfo(mapID)
+function util.getMapFullNameInfo(mapID)
 	local mapInfo = C_Map.GetMapInfo(mapID)
 
 	local mapGroupID = C_Map.GetMapGroupID(mapID)
@@ -197,7 +198,7 @@ do
 		end
 	end
 
-	function MountsJournalUtil.setCheckboxChild(parent, child, lastChild)
+	function util.setCheckboxChild(parent, child, lastChild)
 		if not parent.childs then
 			parent.childs = {}
 			hooksecurefunc(parent, "SetChecked", setEnabledChilds)
@@ -211,7 +212,7 @@ do
 end
 
 
-function MountsJournalUtil.createCheckboxChild(text, parent)
+function util.createCheckboxChild(text, parent)
 	local check = CreateFrame("CheckButton", nil, parent:GetParent(), "MJCheckButtonTemplate")
 	if parent.lastChild then
 		check:SetPoint("TOPLEFT", parent.lastChild, "BOTTOMLEFT", 0, -3)
@@ -219,7 +220,7 @@ function MountsJournalUtil.createCheckboxChild(text, parent)
 		check:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 20, -3)
 	end
 	if text then check.Text:SetText(text) end
-	MountsJournalUtil.setCheckboxChild(parent, check, true)
+	util.setCheckboxChild(parent, check, true)
 	return check
 end
 
@@ -235,7 +236,7 @@ do
 		GameTooltip:Hide()
 	end
 
-	function MountsJournalUtil.setHyperlinkTooltip(frame)
+	function util.setHyperlinkTooltip(frame)
 		frame:SetHyperlinksEnabled(true)
 		frame:SetScript("OnHyperlinkEnter", showTooltip)
 		frame:SetScript("OnHyperlinkLeave", hideTooltip)
@@ -243,7 +244,7 @@ do
 end
 
 
-function MountsJournalUtil:copyTable(t)
+function util:copyTable(t)
 	local n = {}
 	for k, v in pairs(t) do
 		n[k] = type(v) == "table" and self:copyTable(v) or v
@@ -252,12 +253,12 @@ function MountsJournalUtil:copyTable(t)
 end
 
 
-function MountsJournalUtil.getGroupType()
+function util.getGroupType()
 	return IsInRaid() and "raid" or IsInGroup() and "group"
 end
 
 
-function MountsJournalUtil.cleanText(text)
+function util.cleanText(text)
 	return text:trim():lower()
 end
 
@@ -273,9 +274,91 @@ do
 		end
 	end
 
-	function MountsJournalUtil.getUnitMount(unit)
+	function util.getUnitMount(unit)
 		spellID = nil
 		AuraUtil.ForEachAura(unit, "HELPFUL", nil, checkMount, true)
 		return spellID
+	end
+end
+
+
+do
+	local cover = CreateFrame("BUTTON")
+	cover:Hide()
+
+	local copyBox = CreateFrame("Editbox")
+	copyBox:Hide()
+	copyBox:SetAutoFocus(false)
+	copyBox:SetMultiLine(false)
+	copyBox:SetAltArrowKeyMode(true)
+	copyBox:SetJustifyH("LEFT")
+	copyBox:SetScript("OnEditFocusGained", function(self) self:HighlightText() end)
+	copyBox:SetScript("OnEditFocusLost", copyBox.Hide)
+	copyBox:SetScript("OnEscapePressed", copyBox.Hide)
+	copyBox:SetScript("OnHide", function(self)
+		self:Hide()
+		self.fontString:Show()
+	end)
+	copyBox:SetScript("OnTextChanged", function(self, userInput)
+		if userInput then
+			self:SetText(self.fontString:GetText())
+			self:HighlightText()
+		end
+	end)
+	copyBox:SetScript("OnEnter", function(self)
+		cover:SetParent(self:GetParent())
+		cover:SetAllPoints(self.fontString)
+		cover:Show()
+		cover.fontString = self.fontString
+	end)
+
+	cover:SetScript("OnClick", function(self)
+		copyBox:SetParent(self:GetParent())
+		copyBox:SetPoint("TOPLEFT", self)
+		copyBox:SetPoint("BOTTOMRIGHT", self, 4, 0)
+		copyBox:SetFontObject(self.fontString:GetFontObject())
+		copyBox:SetText(self.fontString:GetText())
+		copyBox:SetCursorPosition(0)
+		copyBox:Show()
+		copyBox:SetFocus()
+		copyBox.fontString = self.fontString
+		copyBox.fontString:Hide()
+		copyBox:SetFrameLevel(self:GetFrameLevel() - 1)
+	end)
+	cover:SetScript("OnEnter", function(self)
+		self.fontString:GetScript("OnEnter")(self.fontString)
+	end)
+	cover:SetScript("OnLeave", function(self)
+		self.fontString:GetScript("OnLeave")(self.fontString)
+	end)
+
+	local function fontString_OnEnter(self)
+		if self:IsShown() then
+			cover:SetParent(self:GetParent())
+			cover:SetAllPoints(self)
+			cover:Show()
+			cover.fontString = self
+		end
+	end
+
+	local function fontString_OnLeave(self)
+		if self:IsShown() then
+			cover:Hide()
+		end
+	end
+
+	local function fontString_SetText(self, text)
+		if copyBox.fontString == self and copyBox:IsShown() then
+			copyBox:SetText(text)
+			copyBox:SetCursorPosition(0)
+			copyBox:HighlightText()
+		end
+	end
+
+	function util.setCopyBox(fontString)
+		fontString:HookScript("OnEnter", fontString_OnEnter)
+		fontString:HookScript("OnLeave", fontString_OnLeave)
+		fontString:SetMouseClickEnabled(false)
+		hooksecurefunc(fontString, "SetText", fontString_SetText)
 	end
 end

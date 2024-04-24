@@ -1,4 +1,5 @@
 local addon, L = ...
+local util = MountsJournalUtil
 local aboutConfig = CreateFrame("FRAME", "MountsJournalConfigAbout")
 aboutConfig:Hide()
 
@@ -48,24 +49,10 @@ aboutConfig:SetScript("OnShow", function(self)
 	helpText:SetPoint("LEFT", 32, 0)
 	helpText:SetText(L["Help with translation of %s. Thanks."]:format(addon))
 
-	local link = "https://www.curseforge.com/wow/addons/mountsjournal/localization"
-	local editbox = CreateFrame("Editbox", nil, self)
-	editbox:SetAutoFocus(false)
-	editbox:SetAltArrowKeyMode(true)
-	editbox:SetFontObject("GameFontHighlight")
-	editbox:SetSize(500, 20)
-	editbox:SetPoint("TOPLEFT", helpText, "BOTTOMLEFT", 8, 0)
-	editbox:SetText(link)
-	editbox:SetCursorPosition(0)
-	editbox:SetScript("OnEditFocusGained", function(self) self:HighlightText() end)
-	editbox:SetScript("OnEditFocusLost", function(self) self:HighlightText(0, 0) end)
-	editbox:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
-	editbox:SetScript("OnTextChanged", function(self, userInput)
-		if userInput then
-			self:SetText(link)
-			self:HighlightText()
-		end
-	end)
+	local link = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	link:SetPoint("TOPLEFT", helpText, "BOTTOMLEFT", 8, -4)
+	link:SetText("https://www.curseforge.com/wow/addons/mountsjournal/localization")
+	util.setCopyBox(link)
 
 	-- TRANSLATORS
 	local translators = self:CreateFontString(nil, "ARTWORK", "GameFontNormal")

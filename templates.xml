@@ -382,6 +382,12 @@
 								<Anchor point="LEFT" relativeKey="$parent.text" relativePoint="RIGHT" x="2" y="0"/>
 							</Anchors>
 						</FontString>
+						<FontString parentKey="filters" inherits="GameFontHighlight" justifyH="RIGHT" maxLines="1">
+							<Anchors>
+								<Anchor point="LEFT" relativeKey="$parent.count" relativePoint="RIGHT" x="4" y="0"/>
+								<Anchor point="RIGHT" x="-28" y="0"/>
+							</Anchors>
+						</FontString>
 					</Layer>
 				</Layers>
 				<Frames>
@@ -486,6 +492,21 @@
 										<Anchor point="BOTTOM" relativePoint="TOP" relativeKey="$parent.icon" x="4" y="2"/>
 									</Anchors>
 								</FontString>
+								<FontString inherits="GameFontHighlightSmall" justifyH="CENTER" parentKey="link" alpha=".5">
+									<Anchors>
+										<Anchor point="TOP" y="3"/>
+									</Anchors>
+									<Scripts>
+										<OnEnter>
+											self:SetAlpha(1)
+											self:GetParent().linkLang:SetAlpha(1)
+										</OnEnter>
+										<OnLeave>
+											self:SetAlpha(.5)
+											self:GetParent().linkLang:SetAlpha(0)
+										</OnLeave>
+									</Scripts>
+								</FontString>
 								<FontString inherits="GameFontHighlightLarge" justifyH="LEFT" justifyV="MIDDLE" parentKey="name" maxLines="2">
 									<Size x="270" y="35"/>
 									<Anchors>
@@ -508,7 +529,7 @@
 							<Layer level="OVERLAY" textureSubLevel="2">
 								<FontString parentKey="new" inherits="GameFontHighlight" wordwrap="false" justifyH="CENTER" text="NEW_CAPS" hidden="true">
 									<Anchors>
-										<Anchor point="BOTTOM" relativePoint="TOP" relativeKey="$parent.icon" x="0" y="2"/>
+										<Anchor point="LEFT" relativePoint="RIGHT" relativeKey="$parent.rarityValue" x="2" y="1"/>
 									</Anchors>
 									<Shadow>
 										<Color r="0.32" g="0.5" b="1.0"/>
@@ -523,70 +544,34 @@
 							</Layer>
 						</Layers>
 						<Frames>
-							<Frame parentKey="rarityTooltip">
+							<Button parentKey="linkLang" alpha="0">
+								<Size x="30" y="20"/>
 								<Anchors>
-									<Anchor point="TOPLEFT" relativeKey="$parent.rarityValue"/>
-									<Anchor point="BOTTOMRIGHT" relativeKey="$parent.rarityValue"/>
+									<Anchor point="LEFT" relativeKey="$parent.link" relativePoint="RIGHT" x="0" y="0"/>
 								</Anchors>
-							</Frame>
-							<EditBox parentKey="link" multiLine="false" autoFocus="false" ignoreArrows="false" alpha=".5">
-								<Size y="20" x="250"/>
-								<Anchors>
-									<Anchor point="TOP" y="5"/>
-								</Anchors>
-								<FontString inherits="GameFontHighlightSmall" justifyH="CENTER"/>
-								<Frames>
-									<Button parentKey="lang" alpha="0">
-										<Size x="30" y="20"/>
-										<Anchors>
-											<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="1"/>
-										</Anchors>
-										<NormalFont style="GameFontNormalSmall"/>
-										<Layers>
-											<Layer level="ARTWORK">
-												<Texture parentKey="arrow" file="Interface/ChatFrame/ChatFrameExpandArrow">
-													<Size x="10" y="12"/>
-													<Anchors>
-														<Anchor point="RIGHT" x="2" y="-1"/>
-													</Anchors>
-												</Texture>
-											</Layer>
-										</Layers>
-										<HighlightTexture file="Interface/Buttons/UI-Common-MouseHilight" alpha=".25" alphaMode="ADD"/>
-										<Scripts>
-											<OnEnter>
-												local parent = self:GetParent()
-												parent:GetScript("OnEnter")(parent)
-											</OnEnter>
-											<OnLeave>
-												local parent = self:GetParent()
-												parent:GetScript("OnLeave")(parent)
-											</OnLeave>
-										</Scripts>
-									</Button>
-								</Frames>
+								<NormalFont style="GameFontNormalSmall"/>
+								<Layers>
+									<Layer level="ARTWORK">
+										<Texture parentKey="arrow" file="Interface/ChatFrame/ChatFrameExpandArrow">
+											<Size x="10" y="12"/>
+											<Anchors>
+												<Anchor point="RIGHT" x="2" y="0"/>
+											</Anchors>
+										</Texture>
+									</Layer>
+								</Layers>
+								<HighlightTexture file="Interface/Buttons/UI-Common-MouseHilight" alpha=".25" alphaMode="ADD"/>
 								<Scripts>
 									<OnEnter>
-										self:SetAlpha(1)
-										self.lang:SetAlpha(1)
+										local link = self:GetParent().link
+										link:GetScript("OnEnter")(link)
 									</OnEnter>
 									<OnLeave>
-										self:SetAlpha(.5)
-										self.lang:SetAlpha(0)
+										local link = self:GetParent().link
+										link:GetScript("OnLeave")(link)
 									</OnLeave>
-									<OnEditFocusGained>self:HighlightText()</OnEditFocusGained>
-									<OnEditFocusLost>self:HighlightText(0, 0)</OnEditFocusLost>
-									<OnEscapePressed>self:ClearFocus()</OnEscapePressed>
-									<OnTextChanged>
-										if userInput then
-											self:SetText(self.text or "")
-											self:HighlightText()
-										else
-											self.text = self:GetText()
-										end
-									</OnTextChanged>
 								</Scripts>
-							</EditBox>
+							</Button>
 							<CheckButton parentKey="mountDescriptionToggle" inherits="MJArrowToggle">
 								<Size x="20" y="40"/>
 								<Anchors>
@@ -1333,11 +1318,41 @@
 	</CheckButton>
 
 	<CheckButton name="MJSetDragonridingToggleTemplate" inherits="MJSetMountToggleTemplate" virtual="true">
+		<KeyValues>
+			<KeyValue key="type" value="dragonriding" type="string"/>
+		</KeyValues>
 		<Scripts>
 			<OnLoad>
 				self.icon:SetSize(11, 11)
 				self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/dragonriding")
 			</OnLoad>
+		</Scripts>
+	</CheckButton>
+
+	<CheckButton name="MJSetFlyToggleTemplate" inherits="MJSetMountToggleTemplate" virtual="true">
+		<KeyValues>
+			<KeyValue key="type" value="fly" type="string"/>
+		</KeyValues>
+		<Scripts>
+			<OnLoad>self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/fly")</OnLoad>
+		</Scripts>
+	</CheckButton>
+
+	<CheckButton name="MJSetGroundToggleTemplate" inherits="MJSetMountToggleTemplate" virtual="true">
+		<KeyValues>
+			<KeyValue key="type" value="ground" type="string"/>
+		</KeyValues>
+		<Scripts>
+			<OnLoad>self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/ground")</OnLoad>
+		</Scripts>
+	</CheckButton>
+
+	<CheckButton name="MJSetSwimmingToggleTemplate" inherits="MJSetMountToggleTemplate" virtual="true">
+		<KeyValues>
+			<KeyValue key="type" value="swimming" type="string"/>
+		</KeyValues>
+		<Scripts>
+			<OnLoad>self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/swimming")</OnLoad>
 		</Scripts>
 	</CheckButton>
 
@@ -1456,42 +1471,21 @@
 				<Anchors>
 					<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="14"/>
 				</Anchors>
-				<KeyValues>
-					<KeyValue key="type" value="dragonriding" type="string"/>
-				</KeyValues>
 			</CheckButton>
-			<CheckButton parentKey="fly" inherits="MJSetMountToggleTemplate">
+			<CheckButton parentKey="fly" inherits="MJSetFlyToggleTemplate">
 				<Anchors>
 					<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="14"/>
 				</Anchors>
-				<KeyValues>
-					<KeyValue key="type" value="fly" type="string"/>
-				</KeyValues>
-				<Scripts>
-					<OnLoad>self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/fly")</OnLoad>
-				</Scripts>
 			</CheckButton>
-			<CheckButton parentKey="ground" inherits="MJSetMountToggleTemplate">
+			<CheckButton parentKey="ground" inherits="MJSetGroundToggleTemplate">
 				<Anchors>
 					<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="0"/>
 				</Anchors>
-				<KeyValues>
-					<KeyValue key="type" value="ground" type="string"/>
-				</KeyValues>
-				<Scripts>
-					<OnLoad>self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/ground")</OnLoad>
-				</Scripts>
 			</CheckButton>
-			<CheckButton parentKey="swimming" inherits="MJSetMountToggleTemplate">
+			<CheckButton parentKey="swimming" inherits="MJSetSwimmingToggleTemplate">
 				<Anchors>
 					<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="-14"/>
 				</Anchors>
-				<KeyValues>
-					<KeyValue key="type" value="swimming" type="string"/>
-				</KeyValues>
-				<Scripts>
-					<OnLoad>self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/swimming")</OnLoad>
-				</Scripts>
 			</CheckButton>
 		</Frames>
 	</Button>
@@ -1542,42 +1536,21 @@
 				<Anchors>
 					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="0"/>
 				</Anchors>
-				<KeyValues>
-					<KeyValue key="type" value="dragonriding" type="string"/>
-				</KeyValues>
 			</CheckButton>
-			<CheckButton parentKey="fly" inherits="MJSetMountToggleTemplate">
+			<CheckButton parentKey="fly" inherits="MJSetFlyToggleTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="0"/>
 				</Anchors>
-				<KeyValues>
-					<KeyValue key="type" value="fly" type="string"/>
-				</KeyValues>
-				<Scripts>
-					<OnLoad>self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/fly")</OnLoad>
-				</Scripts>
 			</CheckButton>
-			<CheckButton parentKey="ground" inherits="MJSetMountToggleTemplate">
+			<CheckButton parentKey="ground" inherits="MJSetGroundToggleTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="-14"/>
 				</Anchors>
-				<KeyValues>
-					<KeyValue key="type" value="ground" type="string"/>
-				</KeyValues>
-				<Scripts>
-					<OnLoad>self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/ground")</OnLoad>
-				</Scripts>
 			</CheckButton>
-			<CheckButton parentKey="swimming" inherits="MJSetMountToggleTemplate">
+			<CheckButton parentKey="swimming" inherits="MJSetSwimmingToggleTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="-28"/>
 				</Anchors>
-				<KeyValues>
-					<KeyValue key="type" value="swimming" type="string"/>
-				</KeyValues>
-				<Scripts>
-					<OnLoad>self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/swimming")</OnLoad>
-				</Scripts>
 			</CheckButton>
 		</Frames>
 		<KeyValues>

@@ -473,8 +473,10 @@ function journal:init()
 		self:setScrollGridMounts(checked)
 	end)
 
-	-- WOWHEAD LINK LANG
-	local langButton = self.mountDisplay.info.link.lang
+	-- WOWHEAD LINK
+	util.setCopyBox(self.mountDisplay.info.link)
+
+	local langButton = self.mountDisplay.info.linkLang
 	langButton:SetText(mounts.config.wowheadLinkLang)
 
 	lsfdd:SetMixin(langButton)
@@ -518,15 +520,18 @@ function journal:init()
 	end)
 
 	-- RARITY TOOLTIP
-	local rarityTooltip = self.mountDisplay.info.rarityTooltip
-	rarityTooltip:SetScript("OnEnter", function(self)
-		GameTooltip:SetOwner(self, "ANCHOR_TOP")
-		GameTooltip:SetText(L["Collected by %s of players"]:format(self:GetParent().rarityValue:GetText()))
-		GameTooltip:Show()
+	local rarityValue = self.mountDisplay.info.rarityValue
+	rarityValue:SetScript("OnEnter", function(self)
+		if self:IsShown() then
+			GameTooltip:SetOwner(self, "ANCHOR_TOP")
+			GameTooltip:SetText(L["Collected by %s of players"]:format(self:GetParent().rarityValue:GetText()))
+			GameTooltip:Show()
+		end
 	end)
-	rarityTooltip:SetScript("OnLeave", function()
-		GameTooltip:Hide()
+	rarityValue:SetScript("OnLeave", function()
+		if self:IsShown() then GameTooltip:Hide() end
 	end)
+	rarityValue:SetMouseClickEnabled(false)
 
 	-- MOUNT DESCRIPTION TOGGLE
 	local mountDescriptionToggle = self.mountDisplay.info.mountDescriptionToggle
@@ -2004,13 +2009,12 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 			if rarity then
 				info.rarityValue:SetText(rarity.."%")
 				info.rarityValue:Show()
-				info.rarityTooltip:Show()
 			else
 				info.rarityValue:Hide()
-				info.rarityTooltip:Hide()
 			end
 
 			info.link:SetShown(mounts.config.showWowheadLink)
+			info.linkLang:SetShown(mounts.config.showWowheadLink)
 			local lang = mounts.config.wowheadLinkLang
 			info.link:SetText("wowhead.com"..(lang == "en" and "" or "/"..lang).."/spell="..spellID)
 			info.name:SetText(creatureName)
@@ -2964,53 +2968,62 @@ end
 
 
 function journal:isDefaultFilters()
-	if #self.searchBox:GetText() ~= 0 then return end
 	local filters = mounts.filters
 	local defFilters = mounts.defFilters
+	local isDefault = true
+	local filterStr = ""
 
-	if defFilters.collected ~= filters.collected
-	or defFilters.notCollected ~= filters.notCollected
-	or defFilters.unusable ~= filters.unusable
-	or not defFilters.multipleModels ~= not filters.multipleModels
-	or not defFilters.hideOnChar ~= not filters.hideOnChar
-	or not defFilters.onlyHideOnChar ~= not filters.onlyHideOnChar
-	or not defFilters.hiddenByPlayer ~= not filters.hiddenByPlayer
-	or not defFilters.onlyHiddenByPlayer ~= not filters.onlyHiddenByPlayer
-	or not defFilters.onlyNew ~= not filters.onlyNew
-	or defFilters.mountsRarity.sign ~= filters.mountsRarity.sign
-	or defFilters.mountsRarity.value ~= filters.mountsRarity.value
-	or defFilters.mountsWeight.sign ~= filters.mountsWeight.sign
-	or defFilters.mountsWeight.weight ~= filters.mountsWeight.weight
-	or defFilters.tags.noTag ~= filters.tags.noTag
-	or defFilters.tags.withAllTags ~= filters.tags.withAllTags
-	then return end
+	local function add(text)
+		isDefault = false
+		if not filterStr:find(text, 3, true) then
+			filterStr = filterStr..", "..text
+		end
+	end
+
+	if #self.searchBox:GetText() ~= 0 then add(SEARCH) end
+	if defFilters.collected ~= filters.collected then add(COLLECTED) end
+	if defFilters.notCollected ~= filters.notCollected then add(NOT_COLLECTED) end
+	if defFilters.unusable ~= filters.unusable then add(MOUNT_JOURNAL_FILTER_UNUSABLE) end
+	if not defFilters.multipleModels ~= not filters.multipleModels then add(L["With multiple models"]) end
+	if not defFilters.hideOnChar ~= not filters.hideOnChar then add(L["hidden for character"]) end
+	if not defFilters.onlyHideOnChar ~= not filters.onlyHideOnChar then add(L["hidden for character"]) end
+	if not defFilters.hiddenByPlayer ~= not filters.hiddenByPlayer then add(L["Hidden by player"]) end
+	if not defFilters.onlyHiddenByPlayer ~= not filters.onlyHiddenByPlayer then add(L["Hidden by player"]) end
+	if not defFilters.onlyNew ~= not filters.onlyNew then add(L["Only new"]) end
+	if defFilters.mountsRarity.sign ~= filters.mountsRarity.sign then add(L["Rarity"]) end
+	if defFilters.mountsRarity.value ~= filters.mountsRarity.value then add(L["Rarity"]) end
+	if defFilters.mountsWeight.sign ~= filters.mountsWeight.sign then add(L["Chance of summoning"]) end
+	if defFilters.mountsWeight.weight ~= filters.mountsWeight.weight then add(L["Chance of summoning"]) end
+	if defFilters.tags.noTag ~= filters.tags.noTag then add(L["tags"]) end
+	if defFilters.tags.withAllTags ~= filters.tags.withAllTags then add(L["tags"]) end
 
 	for i = 1, #filters.types do
-		if defFilters.types[i] ~= filters.types[i] then return end
+		if defFilters.types[i] ~= filters.types[i] then add(L["types"]) break end
 	end
 	for i = 1, #filters.selected do
-		if defFilters.selected[i] ~= filters.selected[i] then return end
+		if defFilters.selected[i] ~= filters.selected[i] then add(L["selected"]) break end
 	end
 	for i = 1, #filters.sources do
-		if defFilters.sources[i] ~= filters.sources[i] then return end
+		if defFilters.sources[i] ~= filters.sources[i] then add(SOURCES) break end
 	end
 	for k, value in pairs(filters.specific) do
-		if defFilters.specific[k] ~= value then return end
+		if defFilters.specific[k] ~= value then add(L["Specific"]) break end
 	end
 	for i = 1, #filters.factions do
-		if defFilters.factions[i] ~= filters.factions[i] then return end
+		if defFilters.factions[i] ~= filters.factions[i] then add(L["factions"]) break end
 	end
 	for i = 1, #filters.pet do
-		if defFilters.pet[i] ~= filters.pet[i] then return end
+		if defFilters.pet[i] ~= filters.pet[i] then add(PET) break end
 	end
 	for i = 1, #filters.expansions do
-		if defFilters.expansions[i] ~= filters.expansions[i] then return end
+		if defFilters.expansions[i] ~= filters.expansions[i] then add(L["expansions"]) break end
 	end
 	for tag, value in pairs(filters.tags.tags) do
-		if defFilters.tags.tags[tag] ~= value[2] then return end
+		if defFilters.tags.tags[tag] ~= value[2] then add(L["tags"]) break end
 	end
 
-	return true
+	self.shownPanel.filters:SetText("("..filterStr:sub(3)..")")
+	return isDefault
 end
 
 
