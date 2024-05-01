@@ -1,4 +1,3 @@
-local _, L = ...
 local C_UnitAuras, IsUsableSpell, IsSpellKnown, GetSpellCooldown = C_UnitAuras, IsUsableSpell, IsSpellKnown, GetSpellCooldown
 local mounts = MountsJournal
 local ltl = LibStub("LibThingsLoad-1.0")

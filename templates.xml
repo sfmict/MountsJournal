@@ -364,7 +364,7 @@
 				</Frames>
 			</Frame>
 
-			<Frame parentKey="shownPanel" inherits="InsetFrameTemplate" hidden="true">
+			<Frame parentKey="shownPanel" useParentLevel="false" inherits="InsetFrameTemplate" hidden="true">
 				<Size y="26"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.filtersPanel" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
@@ -383,10 +383,23 @@
 							</Anchors>
 						</FontString>
 						<FontString parentKey="filters" inherits="GameFontHighlight" justifyH="RIGHT" maxLines="1">
+							<Size y="22"/>
 							<Anchors>
 								<Anchor point="LEFT" relativeKey="$parent.count" relativePoint="RIGHT" x="4" y="0"/>
 								<Anchor point="RIGHT" x="-28" y="0"/>
 							</Anchors>
+							<Scripts>
+								<OnEnter>
+									if self:IsTruncated() then
+										GameTooltip:SetOwner(self, "ANCHOR_TOP")
+										GameTooltip:AddLine(self:GetText(), nil, nil, nil, true)
+										GameTooltip:Show()
+									end
+								</OnEnter>
+								<OnLeave>
+									GameTooltip:Hide()
+								</OnLeave>
+							</Scripts>
 						</FontString>
 					</Layer>
 				</Layers>

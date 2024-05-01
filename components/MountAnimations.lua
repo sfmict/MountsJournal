@@ -173,7 +173,6 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 				end
 				tinsert(info.list, {
 					text = ("%s|cff808080.%d%s|r"):format(v.name, animation, isKit and ".k" or ""),
-					arg1 = i,
 					value = v,
 					checked = checked,
 					func = func,

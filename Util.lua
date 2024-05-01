@@ -1,6 +1,6 @@
 local addon = ...
 local type, select, tremove = type, select, tremove
-local _G, C_MountJournal = _G, C_MountJournal
+local _G, C_MountJournal, AuraUtil = _G, C_MountJournal, AuraUtil
 local events, eventsMixin = {}, {}
 
 

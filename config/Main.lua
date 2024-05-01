@@ -331,7 +331,7 @@ config:SetScript("OnShow", function(self)
 		info.tooltipWhileDisabled = true
 		for spellID in pairs(mounts.specificDB.repair) do
 			local mountID = C_MountJournal.GetMountFromSpell(spellID)
-			local name, spellID, icon, _,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+			local name, _, icon, _,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 			if not shouldHideOnChar then
 				info.text = name
 				info.icon = icon

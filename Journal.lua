@@ -163,7 +163,6 @@ function journal:init()
 	self.useMountsJournalButton:SetFrameLevel(self.bgFrame:GetFrameLevel() + 10)
 	self.useMountsJournalButton:SetScript("OnShow", nil)
 	self.useMountsJournalButton:SetScript("OnHide", nil)
-	self.useMountsJournalButton:SetProtected(true)
 
 	-- SECURE FRAMES
 	local sMountJournal = CreateFrame("FRAME", nil, self.MountJournal, "SecureHandlerShowHideTemplate")
@@ -186,12 +185,12 @@ function journal:init()
 		local bgFrame = self:GetFrameRef("bgFrame")
 		if self:GetAttribute("isShow") then
 			useMountsJournalButton:Show()
-			if not self:GetAttribute("useDefaultJournal") then
-				randomButton:Hide()
-				bgFrame:Show()
-			else
+			if self:GetAttribute("useDefaultJournal") then
 				randomButton:Show()
 				bgFrame:Hide()
+			else
+				randomButton:Hide()
+				bgFrame:Show()
 			end
 		else
 			randomButton:Show()
@@ -524,7 +523,7 @@ function journal:init()
 	rarityValue:SetScript("OnEnter", function(self)
 		if self:IsShown() then
 			GameTooltip:SetOwner(self, "ANCHOR_TOP")
-			GameTooltip:SetText(L["Collected by %s of players"]:format(self:GetParent().rarityValue:GetText()))
+			GameTooltip:SetText(L["Collected by %s of players"]:format(self:GetText()))
 			GameTooltip:Show()
 		end
 	end)
@@ -1676,6 +1675,13 @@ function journal:sortMounts()
 		if needFanfareA and not needFanfareB then return true
 		elseif not needFanfareA and needFanfareB then return false end
 
+		-- COLLECTED
+		local isCollectedA = ma[3]
+		local isCollectedB = mb[3]
+
+		if isCollectedA and not isCollectedB then return true
+		elseif not isCollectedA and isCollectedB then return false end
+
 		-- FAVORITES
 		if fSort.favoritesFirst then
 			local isFavoriteA = ma[2]
@@ -1693,13 +1699,6 @@ function journal:sortMounts()
 			if isAdditionalA and not isAdditionalB then return true
 			elseif not isAdditionalA and isAdditionalB then return false end
 		end
-
-		-- COLLECTED
-		local isCollectedA = ma[3]
-		local isCollectedB = mb[3]
-
-		if isCollectedA and not isCollectedB then return true
-		elseif not isCollectedA and isCollectedB then return false end
 
 		-- DRAGONRIDING
 		if fSort.dragonridingFirst then
@@ -2094,7 +2093,7 @@ end
 
 
 function journal:UI_MODEL_SCENE_INFO_UPDATED()
-	self:updateMountDisplay(true)
+	if self.bgFrame:IsShown() then self:updateMountDisplay(true) end
 end
 
 
@@ -2990,13 +2989,6 @@ function journal:isDefaultFilters()
 	if not defFilters.hiddenByPlayer ~= not filters.hiddenByPlayer then add(L["Hidden by player"]) end
 	if not defFilters.onlyHiddenByPlayer ~= not filters.onlyHiddenByPlayer then add(L["Hidden by player"]) end
 	if not defFilters.onlyNew ~= not filters.onlyNew then add(L["Only new"]) end
-	if defFilters.mountsRarity.sign ~= filters.mountsRarity.sign then add(L["Rarity"]) end
-	if defFilters.mountsRarity.value ~= filters.mountsRarity.value then add(L["Rarity"]) end
-	if defFilters.mountsWeight.sign ~= filters.mountsWeight.sign then add(L["Chance of summoning"]) end
-	if defFilters.mountsWeight.weight ~= filters.mountsWeight.weight then add(L["Chance of summoning"]) end
-	if defFilters.tags.noTag ~= filters.tags.noTag then add(L["tags"]) end
-	if defFilters.tags.withAllTags ~= filters.tags.withAllTags then add(L["tags"]) end
-
 	for i = 1, #filters.types do
 		if defFilters.types[i] ~= filters.types[i] then add(L["types"]) break end
 	end
@@ -3018,6 +3010,12 @@ function journal:isDefaultFilters()
 	for i = 1, #filters.expansions do
 		if defFilters.expansions[i] ~= filters.expansions[i] then add(L["expansions"]) break end
 	end
+	if defFilters.mountsRarity.sign ~= filters.mountsRarity.sign then add(L["Rarity"]) end
+	if defFilters.mountsRarity.value ~= filters.mountsRarity.value then add(L["Rarity"]) end
+	if defFilters.mountsWeight.sign ~= filters.mountsWeight.sign then add(L["Chance of summoning"]) end
+	if defFilters.mountsWeight.weight ~= filters.mountsWeight.weight then add(L["Chance of summoning"]) end
+	if defFilters.tags.noTag ~= filters.tags.noTag then add(L["tags"]) end
+	if defFilters.tags.withAllTags ~= filters.tags.withAllTags then add(L["tags"]) end
 	for tag, value in pairs(filters.tags.tags) do
 		if defFilters.tags.tags[tag] ~= value[2] then add(L["tags"]) break end
 	end
@@ -3274,6 +3272,18 @@ function journal:getFilterType(mountType)
 end
 
 
+function journal:getCustomSearchFilter(text, mountID, spellID, mountType)
+	local id = text:match("^id:(%d+)")
+	if id then return tonumber(id) == mountID end
+
+	id = text:match("^spell:(%d+)")
+	if id then return tonumber(id) == spellID end
+
+	id = text:match("^type:(%d+)")
+	if id then return tonumber(id) == mountType end
+end
+
+
 function journal:setShownCountMounts(numMounts)
 	if numMounts then
 		self.shownPanel.count:SetText(numMounts)
@@ -3332,7 +3342,8 @@ function journal:updateMountsList()
 		and (#text == 0
 			or name:lower():find(text, 1, true)
 			or sourceText:lower():find(text, 1, true)
-			or tags:find(spellID, text))
+			or tags:find(spellID, text)
+			or self:getCustomSearchFilter(text, mountID, spellID, mountType))
 		-- TYPE
 		and self:getFilterType(mountType)
 		-- FACTION
