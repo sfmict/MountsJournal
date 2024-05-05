@@ -270,4 +270,8 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)
 	function activeCamera:updateYOffset()
 		self.yOffset = self.yOffset + (mounts.config.mountDescriptionToggle and 1 or -1) * activeCamera.yOffsetDelta
 	end
+
+	self:off("JOURNAL_RESIZED.ACTIVE_CAMERA"):on("JOURNAL_RESIZED.ACTIVE_CAMERA", function()
+		activeCamera:setMaxOffsets()
+	end)
 end)

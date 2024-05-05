@@ -88,6 +88,6 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 
 	dd:SetScript("OnClick", function(self)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		self:ddToggle(1, self.list, self, 112, 18)
+		self:ddToggle(1, self.list, self, self:GetWidth() - 18, (self:GetHeight() / 2 + 6) * (self:ddIsOpenMenuUp() and -1 or 1))
 	end)
 end)

@@ -20,7 +20,7 @@
 		</Layers>
 	</CheckButton>
 
-	<Frame name="MJMountJournalFrameTemplate" protected="true" frameLevel="1000" enableMouse="true" inherits="PortraitFrameTemplateNoCloseButton" virtual="true">
+	<Frame name="MJMountJournalFrameTemplate" protected="true" frameLevel="1000" enableMouse="true" dontSavePosition="true" resizable="true" inherits="PortraitFrameTemplateNoCloseButton" virtual="true">
 		<Size x="703" y="606"/>
 		<Frames>
 
@@ -145,7 +145,7 @@
 			<CheckButton parentKey="navBarBtn">
 				<Size x="48" y="32"/>
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="-1" y="-60"/>
+					<Anchor point="TOPRIGHT" x="-1" y="-61"/>
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -185,22 +185,22 @@
 				</CheckedTexture>
 			</CheckButton>
 
-			<Frame parentKey="navBar" inherits="NavBarTemplate" mixin="MJNavBarMixin">
-				<Size x="600" y="28"/>
+			<Frame parentKey="navBar" clipChildren="true" inherits="NavBarTemplate" mixin="MJNavBarMixin">
+				<Size x="600" y="32"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="8" y="-60"/>
+					<Anchor point="TOPLEFT" x="5" y="-61"/>
 					<Anchor point="TOPRIGHT" relativeKey="$parent.navBarBtn" relativePoint="TOPLEFT" x="0" y="0"/>
 				</Anchors>
 				<Layers>
 					<Layer level="BORDER" textureSubLevel="-5">
 						<Texture inherits="UI-Frame-InnerBotLeftCorner" parentKey="InsetBorderBottomLeft">
 							<Anchors>
-								<Anchor point="BOTTOMLEFT" x="-3" y="-3"/>
+								<Anchor point="BOTTOMLEFT" x="0" y="0"/>
 							</Anchors>
 						</Texture>
 						<Texture inherits="UI-Frame-InnerBotRight" parentKey="InsetBorderBottomRight">
 							<Anchors>
-								<Anchor point="BOTTOMRIGHT" x="3" y="-3"/>
+								<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
 							</Anchors>
 						</Texture>
 						<Texture inherits="_UI-Frame-InnerBotTile" parentKey="InsetBorderBottom">
@@ -211,13 +211,13 @@
 						</Texture>
 						<Texture inherits="!UI-Frame-InnerLeftTile" parentKey="InsetBorderLeft">
 							<Anchors>
-								<Anchor point="TOPLEFT" x="-3" y="0"/>
+								<Anchor point="TOPLEFT" x="0" y="0"/>
 								<Anchor point="BOTTOMLEFT" relativeKey="$parent.InsetBorderBottomRight" relativePoint="TOPLEFT"/>
 							</Anchors>
 						</Texture>
 						<Texture inherits="!UI-Frame-InnerRightTile" parentKey="InsetBorderRight">
 							<Anchors>
-								<Anchor point="TOPRIGHT" x="3" y="0"/>
+								<Anchor point="TOPRIGHT" x="0" y="0"/>
 								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.InsetBorderBottomRight" relativePoint="TOPRIGHT"/>
 							</Anchors>
 						</Texture>
@@ -291,7 +291,7 @@
 			<Frame parentKey="filtersPanel" inherits="InsetFrameTemplate">
 				<Size x="280" y="29"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.navBar" relativePoint="BOTTOMLEFT" x="-4" y="-4"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.navBar" relativePoint="BOTTOMLEFT" x="-1" y="-1"/>
 				</Anchors>
 				<Frames>
 					<CheckButton parentKey="btnToggle" inherits="MJArrowToggle">
@@ -521,9 +521,10 @@
 									</Scripts>
 								</FontString>
 								<FontString inherits="GameFontHighlightLarge" justifyH="LEFT" justifyV="MIDDLE" parentKey="name" maxLines="2">
-									<Size x="270" y="35"/>
+									<Size y="35"/>
 									<Anchors>
 										<Anchor point="LEFT" relativePoint="RIGHT" relativeKey="$parent.icon" x="20" y="0"/>
+										<Anchor point="RIGHT" x="-57"/>
 									</Anchors>
 								</FontString>
 								<FontString inherits="GameFontHighlight" justifyH="LEFT" parentKey="source">
@@ -880,10 +881,9 @@
 			</Frame>
 
 			<Frame parentKey="worldMap" useParentLevel="false" hidden="true" inherits="InsetFrameTemplate" mixin="MJMapCanvasMixin">
-				<Size y="276"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.rightInset"/>
-					<Anchor point="TOPRIGHT" relativeKey="$parent.rightInset"/>
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.rightInset" y="212"/>
 				</Anchors>
 				<Frames>
 					<ScrollFrame parentKey="ScrollContainer">
@@ -940,9 +940,10 @@
 						</Anchors>
 					</CheckButton>
 					<Button parentKey="CurrentMap" inherits="UIPanelButtonTemplate">
-						<Size x="257" y="24"/>
+						<Size y="24"/>
 						<Anchors>
 							<Anchor point="RIGHT" relativeKey="$parent.existingListsToggle" relativePoint="LEFT" x="2"/>
+							<Anchor point="LEFT" relativeKey="$parent.mapControl" relativePoint="LEFT" x="134"/>
 						</Anchors>
 					</Button>
 					<Frame parentKey="hint" inherits="MJHelpPlate">
@@ -1026,10 +1027,20 @@
 				</Scripts>
 			</Button>
 
+			<Button parentKey="resize">
+				<Size x="16" y="16"/>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
+				</Anchors>
+				<NormalTexture file="Interface\ChatFrame\UI-ChatIM-SizeGrabber-Up"/>
+				<HighlightTexture file="Interface\ChatFrame\UI-ChatIM-SizeGrabber-Highlight"/>
+				<PushedTexture file="Interface\ChatFrame\UI-ChatIM-SizeGrabber-Down"/>
+			</Button>
+
 			<Button parentKey="btnConfig" inherits="UIPanelButtonTemplate">
 				<Size x="80" y="22"/>
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" x="-5" y="4"/>
+					<Anchor point="BOTTOMRIGHT" x="-8" y="4"/>
 				</Anchors>
 			</Button>
 

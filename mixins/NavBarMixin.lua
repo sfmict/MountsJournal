@@ -33,6 +33,8 @@ function MJNavBarMixin:onLoad()
 		OnClick = function() self:setDefMap() end,
 	}
 	NavBar_Initialize(self, "MJNavButtonTemplate", homeData, self.home, self.overflow)
+	self.home:SetPoint("LEFT", 3, 0)
+	self.overflow:SetPoint("LEFT", 3, 0)
 	self.overflow:SetScript("OnMouseDown", function(btn) self:dropDownToggleClick(btn) end)
 	self.overflow.listFunc = function(self)
 		local navBar = self:GetParent()
@@ -48,6 +50,8 @@ function MJNavBarMixin:onLoad()
 		return list
 	end
 	self:setDefMap()
+
+	self:on("JOURNAL_RESIZED", self.refresh)
 end
 
 

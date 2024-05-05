@@ -264,11 +264,10 @@ end
 
 
 do
-	local spellID
+	local spellID, mountID
 	local function checkMount(auraData)
-		if C_MountJournal.GetMountFromSpell(auraData.spellId)
-		or _G.MountsJournal.additionalMounts[auraData.spellId]
-		then
+		mountID = C_MountJournal.GetMountFromSpell(auraData.spellId)
+		if mountID or _G.MountsJournal.additionalMounts[auraData.spellId] then
 			spellID = auraData.spellId
 			return true
 		end
@@ -276,8 +275,9 @@ do
 
 	function util.getUnitMount(unit)
 		spellID = nil
+		mountID = nil
 		AuraUtil.ForEachAura(unit, "HELPFUL", nil, checkMount, true)
-		return spellID
+		return spellID, mountID
 	end
 end
 
