@@ -38,6 +38,7 @@ L["A macro named \"%s\" already exists, overwrite it?"] = "Ein Makro mit dem Nam
 L["CreateMacro"] = "Makro erstellen"
 L["CreateMacroTooltip"] = "Das erstellte Makro wird verwendet, um die ausgewählten Reittiere aufzurufen."
 L["or key bind"] = "oder Tastenbindung"
+-- L["ERR_MOUNT_NO_SELECTED"] = ""
 L["Collected:"] = "Gesammelt"
 L["Settings"] = "Einstellungen"
 L["Shown:"] = "Abgebildet:"

@@ -38,6 +38,7 @@ L["A macro named \"%s\" already exists, overwrite it?"] = "Une macro nommée \"%
 L["CreateMacro"] = "Créer macro"
 L["CreateMacroTooltip"] = "La macro créée est utilisée pour invoquer la monture sélectionnée"
 L["or key bind"] = "ou raccourcis"
+-- L["ERR_MOUNT_NO_SELECTED"] = ""
 L["Collected:"] = "Collecté"
 L["Settings"] = "Réglages"
 L["Shown:"] = "Montré:"

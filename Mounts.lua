@@ -1,4 +1,4 @@
-local addon = ...
+local addon, L = ...
 local C_MountJournal, C_Map, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, AuraUtil, IsUsableSpell, SecureCmdOptionParse, C_Scenario = C_MountJournal, C_Map, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, AuraUtil, IsUsableSpell, SecureCmdOptionParse, C_Scenario
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
@@ -455,8 +455,9 @@ end
 
 
 function mounts:setDB()
+	local profileName
 	for i = 1, GetNumSpecializations() do
-		local profileName = self.charDB.profileBySpecialization[i]
+		profileName = self.charDB.profileBySpecialization[i]
 		if profileName and not self.profiles[profileName] then
 			self.charDB.profileBySpecialization[i] = nil
 		end
@@ -470,7 +471,6 @@ function mounts:setDB()
 		self.charDB.currentProfileName = nil
 	end
 
-	local profileName
 	wipe(self.priorityProfiles)
 
 	if self.pvp and self.charDB.profileBySpecializationPVP.enable then
@@ -719,7 +719,7 @@ end
 
 
 function mounts:errorSummon()
-	UIErrorsFrame:AddMessage(InCombatLockdown() and SPELL_FAILED_AFFECTING_COMBAT or ERR_MOUNT_NO_FAVORITES, 1, .1, .1, 1)
+	UIErrorsFrame:AddMessage(InCombatLockdown() and SPELL_FAILED_AFFECTING_COMBAT or L["ERR_MOUNT_NO_SELECTED"], 1, .1, .1, 1)
 end
 
 

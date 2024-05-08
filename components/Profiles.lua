@@ -248,15 +248,6 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 
 			info.notCheckable = nil
 			info.isNotRadio = true
-			info.text = L["By Specialization"]
-			info.value = "specialization"
-			info.checked = function() return self.charDB.profileBySpecialization.enable end
-			info.func = function(_,_,_, checked)
-				self.charDB.profileBySpecialization.enable = checked
-				self.mounts:setDB()
-			end
-			self:ddAddButton(info, level)
-
 			info.text = L["Areans and Battlegrounds"]
 			info.value = "pvp"
 			info.checked = function() return self.charDB.profileBySpecializationPVP.enable end
@@ -271,6 +262,16 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 			info.notCheckable = true
 			info.text = CALENDAR_FILTER_HOLIDAYS
 			info.value = "holidays"
+			self:ddAddButton(info, level)
+
+			info.notCheckable = nil
+			info.text = L["By Specialization"]
+			info.value = "specialization"
+			info.checked = function() return self.charDB.profileBySpecialization.enable end
+			info.func = function(_,_,_, checked)
+				self.charDB.profileBySpecialization.enable = checked
+				self.mounts:setDB()
+			end
 			self:ddAddButton(info, level)
 
 		elseif value == "settings" then -- PROFILE SETTINGS

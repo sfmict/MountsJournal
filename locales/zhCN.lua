@@ -38,6 +38,7 @@ L["A macro named \"%s\" already exists, overwrite it?"] = "一个名为\"%s\"的
 L["CreateMacro"] = "创建宏"
 L["CreateMacroTooltip"] = "所创建的宏用于召唤所选坐骑."
 L["or key bind"] = "或按键绑定"
+-- L["ERR_MOUNT_NO_SELECTED"] = ""
 L["Collected:"] = "已收集"
 L["Settings"] = "设置"
 L["Shown:"] = "显示:"

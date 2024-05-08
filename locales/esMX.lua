@@ -38,6 +38,7 @@ L["A macro named \"%s\" already exists, overwrite it?"] = "Ya existe una macro l
 L["CreateMacro"] = "Crear macro"
 -- L["CreateMacroTooltip"] = ""
 -- L["or key bind"] = ""
+-- L["ERR_MOUNT_NO_SELECTED"] = ""
 L["Collected:"] = "Reunido"
 -- L["Settings"] = ""
 -- L["Shown:"] = ""
