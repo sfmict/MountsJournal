@@ -151,7 +151,7 @@ function tags:showMountDropdown(btn, anchorTo, offsetX, offsetY)
 end
 
 
-function tags:mountOptionsMenu_Init(btn, level)
+function tags:mountOptionsMenu_Init(btn, level, value)
 	local info = {}
 	local realIndex = journal.indexByMountID[self.menuMountID]
 
@@ -226,12 +226,23 @@ function tags:mountOptionsMenu_Init(btn, level)
 			info.hasArrow = true
 			info.func = nil
 			info.text = L["tags"]
+			info.value = 1
 			btn:ddAddButton(info, level)
 		end
+		--@do-not-package@
+		if isMount then
+			info.keepShownOnClick = true
+			info.hasArrow = true
+			info.text = L["Family"]
+			info.value = 2
+			btn:ddAddButton(info)
+		end
+		--@end-do-not-package@
 
 		info.disabled = nil
 		info.hasArrow = nil
 		info.notCheckable = nil
+		info.value = nil
 		info.isNotRadio = true
 		info.text = HIDE
 		info.func = function(_,_,_, checked)
@@ -257,7 +268,7 @@ function tags:mountOptionsMenu_Init(btn, level)
 		info.notCheckable = true
 		info.text = CANCEL
 		btn:ddAddButton(info, level)
-	else
+	elseif value == 1 then
 		if #self.sortedTags == 0 then
 			info.isNotRadio = true
 			info.keepShownOnClick = true
@@ -284,6 +295,135 @@ function tags:mountOptionsMenu_Init(btn, level)
 			end
 			btn:ddAddButton(info, level)
 		end
+	--@do-not-package@
+	else
+		local mountDB = mounts.mountsDB[self.menuMountID]
+		local familyDB = mounts.familyDB
+
+		local function isChecked(familyID)
+			local ids = mountDB[2]
+			if type(ids) == "number" then
+				return ids == familyID
+			else
+				for i, id in ipairs(ids) do
+					if id == familyID then return true end
+				end
+			end
+		end
+
+		local function setFamilyID(familyID, enabled)
+			local ids = mountDB[2]
+			if enabled then
+				if type(ids) == "table" then
+					if tInsertUnique(ids, familyID) then
+						sort(ids)
+					end
+				elseif ids == 0 then
+					mountDB[2] = familyID
+				else
+					mountDB[2] = {ids, familyID}
+					sort(mountDB[2])
+				end
+			else
+				if type(ids) == "table" then
+					tDeleteItem(ids, familyID)
+					if #ids == 1 then mountDB[2] = ids[1] end
+				else
+					mountDB[2] = 0
+				end
+			end
+		end
+
+		local check = function(button)
+			return isChecked(button.value)
+		end
+
+		if value == 2 then
+			local sortedNames = {}
+			for k in next, familyDB do
+				sortedNames[#sortedNames + 1] = {k, L[k]}
+			end
+			sort(sortedNames, function(a, b) return a[2] < b[2] end)
+
+			local func = function(button, _,_, checked)
+				setFamilyID(button.value, checked)
+				btn:ddRefresh(level)
+			end
+
+			local textFunc = function(button)
+				local i, j = 0, 0
+				for k, v in next, familyDB[button.value] do
+					i = i + 1
+					if isChecked(v) then j = j + 1 end
+				end
+				local name = L[button.value]
+				return j > 0 and j < i and "*"..name or name
+			end
+			local subFunc = function(button, _,_, checked)
+				for k, v in next, familyDB[button.value] do
+					setFamilyID(v, checked)
+				end
+				btn:ddRefresh(level)
+				btn:ddRefresh(level + 1)
+			end
+			local subCheck = function(button)
+				for k, v in next, familyDB[button.value] do
+					if not isChecked(v) then return false end
+				end
+				return true
+			end
+
+			local list = {}
+			for i, name in ipairs(sortedNames) do
+				local subInfo = {
+					keepShownOnClick = true,
+					isNotRadio = true,
+				}
+
+				if type(familyDB[name[1]]) == "number" then
+					subInfo.disabled = name[1] == "rest"
+					subInfo.text = name[2]
+					subInfo.value = familyDB[name[1]]
+					subInfo.func = func
+					subInfo.checked = check
+				else
+					subInfo.hasArrow = true
+					subInfo.text = textFunc
+					subInfo.value = name[1]
+					subInfo.func = subFunc
+					subInfo.checked = subCheck
+				end
+
+				list[i] = subInfo
+			end
+
+			info.listMaxSize = 30
+			info.list = list
+			btn:ddAddButton(info, level)
+		else
+			info.keepShownOnClick = true
+			info.isNotRadio = true
+
+			local sortedNames = {}
+			for k in next, familyDB[value] do
+				sortedNames[#sortedNames + 1] = {k, L[k]}
+			end
+			sort(sortedNames, function(a, b) return a[2] < b[2] end)
+
+			local func = function(button, _,_, checked)
+				setFamilyID(button.value, checked)
+				btn:ddRefresh(level - 1)
+			end
+
+			for i, name in ipairs(sortedNames) do
+				info.text = name[2]
+				info.value = familyDB[value][name[1]]
+				info.func = func
+				info.checked = check
+				btn:ddAddButton(info, level)
+			end
+		end
+	--@end-do-not-package@
 	end
 end
 

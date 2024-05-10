@@ -1,4 +1,4 @@
-## Interface: 100206
+## Interface: 100207
 ## Title: MountsJournal
 ## Author: sfmict
 ## Version: @project-version@
@@ -30,6 +30,19 @@ components\Pets.lua
 components\Calendar.lua
 components\AdditionalMounts.lua
 components\MountListButtonInit.lua
+components\filter\Main.lua
+components\filter\Types.lua
+components\filter\Selected.lua
+components\filter\Sources.lua
+components\filter\Specific.lua
+components\filter\Family.lua
+components\filter\Factions.lua
+components\filter\Pet.lua
+components\filter\Expansions.lua
+components\filter\Rarity.lua
+components\filter\Chance.lua
+components\filter\Tags.lua
+components\filter\Sorting.lua
 #@do-not-package@
 _test.lua
 #@end-do-not-package@
