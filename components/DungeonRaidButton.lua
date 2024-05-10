@@ -18,7 +18,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		end)
 	end
 
-	dd.list = {
+	local list = {
 		{
 			name = DUNGEONS,
 			list = {},
@@ -38,7 +38,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 	local currentTier = EJ_GetCurrentTier()
 	for i = 1, EJ_GetNumTiers() do
 		EJ_SelectTier(i)
-		for _, v in ipairs(dd.list) do
+		for _, v in ipairs(list) do
 			v.list[i] = {
 				name = EJ_GetTierInfo(i),
 				list = {},
@@ -65,6 +65,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 	end
 
 	dd:ddSetDisplayMode(addon)
+	dd:ddSetValue(list)
 	dd:ddSetInitFunc(function(self, level, value)
 		local info = {}
 
@@ -84,10 +85,5 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 			end
 			self:ddAddButton(info, level)
 		end
-	end)
-
-	dd:SetScript("OnClick", function(self)
-		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		self:ddToggle(1, self.list, self, self:GetWidth() - 18, (self:GetHeight() / 2 + 6) * (self:ddIsOpenMenuUp() and -1 or 1))
 	end)
 end)
