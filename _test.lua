@@ -113,14 +113,6 @@ function test:PLAYER_ENTERING_WORLD()
 	-- 	end
 	-- end
 
-	for _, id in ipairs({90265, 34091, 34090, 33391, 33388}) do
-		if IsSpellKnown(id) then
-			fprint(("IsSpellKnown(%d)"):format(id), "DETECTED")
-		else
-			fprint(("IsSpellKnown(%d)"):format(id), "NOT DETECTED")
-		end
-	end
-
 	-- self.a = function(...) return ... end
 	-- local err, r = xpcall(self.a, geterrorhandler(), "dsa")
 	-- fprint("asd", err, r)
@@ -439,3 +431,34 @@ end
 -- 	self.z = q1z * q2a + q1a * q2z + q1x * q2y - q1y * q2x
 -- 	return self
 -- end
+
+
+
+
+-- function MountsJournalNextAnimKit(cur)
+-- 	for i = 1, #animKit do
+-- 		if cur < animKit[i] then return animKit[i] end
+-- 	end
+-- 	return animKit[1]
+-- end
+-- function MountsJournalPrevAnimKit(cur)
+-- 	for i = #animKit, 1, -1 do
+-- 		if cur > animKit[i] then return animKit[i] end
+-- 	end
+-- 	return animKit[#animKit]
+-- end
+
+-- local prev = animKit[1]
+-- local v = {prev}
+-- local asd = {}
+-- for i = 2, #animKit do
+-- 	local id = animKit[i]
+
+-- 	if id - prev ~= 1 then
+-- 		if prev ~= v[1] then v[2] = prev end
+-- 		asd[#asd + 1] = v
+-- 		v = {id}
+-- 	end
+-- 	prev = id
+-- end
+-- fprint(dumpe, asd)

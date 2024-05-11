@@ -1688,7 +1688,7 @@ function journal:sortMounts()
 			elseif fSort.by == "expansion" then
 				t[mount][8] = db[mount][1]
 			elseif fSort.by == "rarity" then
-				t[mount][8] = db[mount][2]
+				t[mount][8] = db[mount][3]
 			end
 		else
 			t[mount] = {mount.name, mount:getIsFavorite(), true, mount.dragonriding, mount.spellID, false, true}
@@ -2294,8 +2294,8 @@ function journal:saveDefaultFilters()
 	for k, value in pairs(filters.specific) do
 		defFilters.specific[k] = value
 	end
-	for i = 0, #filters.family do
-		defFilters.family[i] = filters.family[i]
+	for k, value in pairs(filters.family) do
+		defFilters.family[k] = value
 	end
 	for i = 1, #filters.factions do
 		defFilters.factions[i] = filters.factions[i]
@@ -2381,8 +2381,8 @@ function journal:isDefaultFilters()
 	for k, value in pairs(filters.specific) do
 		if defFilters.specific[k] ~= value then add(L["Specific"]) break end
 	end
-	for i = 0, #filters.family do
-		if defFilters.family[i] ~= filters.family[i] then add(L["Family"]) break end
+	for k, value in pairs(filters.family) do
+		if defFilters.family[k] ~= value then add(L["Family"]) break end
 	end
 	for i = 1, #filters.factions do
 		if defFilters.factions[i] ~= filters.factions[i] then add(L["factions"]) break end
@@ -2458,8 +2458,8 @@ function journal:resetToDefaultFilters()
 	for k in pairs(filters.specific) do
 		filters.specific[k] = defFilters.specific[k]
 	end
-	for i = 0, #filters.family do
-		filters.family[i] = defFilters.family[i]
+	for k in pairs(filters.family) do
+		filters.family[k] = defFilters.family[k]
 	end
 	for i = 1, #filters.factions do
 		filters.factions[i] = defFilters.factions[i]
