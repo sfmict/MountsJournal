@@ -7,40 +7,43 @@ function journal.filters.sorting(btn, level)
 	local info = {}
 	info.keepShownOnClick = true
 
-	info.text = NAME
-	info.func = function()
-		fSort.by = "name"
+	local func = function(_, by)
+		fSort.by = by
 		journal:sortMounts()
 		btn:ddRefresh(level)
 	end
-	info.checked = function() return fSort.by == "name" end
+	local check = function(_, by)
+		return fSort.by == by
+	end
+
+	info.text = NAME
+	info.arg1 = "name"
+	info.func = func
+	info.checked = check
 	btn:ddAddButton(info, level)
 
 	info.text = TYPE
-	info.func = function()
-		fSort.by = "type"
-		journal:sortMounts()
-		btn:ddRefresh(level)
-	end
-	info.checked = function() return fSort.by == "type" end
+	info.arg1 = "type"
+	info.func = func
+	info.checked = check
+	btn:ddAddButton(info, level)
+
+	info.text = L["Family"]
+	info.arg1 = "family"
+	info.func = func
+	info.checked = check
 	btn:ddAddButton(info, level)
 
 	info.text = EXPANSION_FILTER_TEXT
-	info.func = function()
-		fSort.by = "expansion"
-		journal:sortMounts()
-		btn:ddRefresh(level)
-	end
-	info.checked = function() return fSort.by == "expansion" end
+	info.arg1 = "expansion"
+	info.func = func
+	info.checked = check
 	btn:ddAddButton(info, level)
 
 	info.text = L["Rarity"]
-	info.func = function()
-		fSort.by = "rarity"
-		journal:sortMounts()
-		btn:ddRefresh(level)
-	end
-	info.checked = function() return fSort.by == "rarity" end
+	info.arg1 = "rarity"
+	info.func = func
+	info.checked = check
 	btn:ddAddButton(info, level)
 
 	btn:ddAddSeparator(level)

@@ -190,6 +190,12 @@ local function updateGlobal(self)
 			end
 		end)
 	end
+
+	-- IF < 10.2.41 GLOBAL
+	if compareVersion("10.2.41", self.globalDB.lastAddonVersion) then
+		if self.filters.family then wipe(self.filters.family) end
+		if self.defFilters.family then wipe(self.defFilters.family) end
+	end
 end
 
 
@@ -253,7 +259,7 @@ function mounts:setOldChanges()
 
 	local currentVersion = C_AddOns.GetAddOnMetadata(addon, "Version")
 	--@do-not-package@
-	if currentVersion == "@project-version@" then currentVersion = "10.2.15" end
+	if currentVersion == "@project-version@" then currentVersion = "10.2.41" end
 	--@end-do-not-package@
 
 	if compareVersion(currentVersion, self.charDB.lastAddonVersion) then

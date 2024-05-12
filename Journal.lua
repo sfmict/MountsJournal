@@ -1685,6 +1685,9 @@ function journal:sortMounts()
 				local _,_,_,_, mType = C_MountJournal.GetMountInfoExtraByID(mount)
 				mType = self.mountTypes[mType]
 				t[mount][8] = type(mType) == "number" and mType or mType[1]
+			elseif fSort.by == "family" then
+				local family = db[mount][2]
+				t[mount][8] = type(family) == "number" and family or family[1]
 			elseif fSort.by == "expansion" then
 				t[mount][8] = db[mount][1]
 			elseif fSort.by == "rarity" then
@@ -1695,6 +1698,8 @@ function journal:sortMounts()
 			if fSort.by == "type" then
 				local mType = self.mountTypes[mount.mountType]
 				t[mount][8] = type(mType) == "number" and mType or mType[1]
+			elseif fSort.by == "family" then
+				t[mount][8] = 0
 			elseif fSort.by == "expansion" then
 				t[mount][8] = mount.expansion
 			elseif fSort.by == "rarity" then
