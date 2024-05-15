@@ -451,7 +451,7 @@ function journal:init()
 
 	self.filtersToggle.setFiltersToggleCheck = function()
 		if mounts.config.filterToggle then
-			self.filtersPanel:SetHeight(84)
+			self.filtersPanel:SetHeight(82)
 			self.filtersBar:Show()
 		else
 			self.filtersPanel:SetHeight(29)
@@ -666,13 +666,13 @@ function journal:init()
 	}
 
 	for i = 1, #typesTextures do
-		CreateButtonFilter(i, self.filtersBar.types, 62.5, 25, typesTextures[i])
+		CreateButtonFilter(i, self.filtersBar.types, 66, 24, typesTextures[i])
 	end
 
 	-- FILTERS SELECTED BUTTONS
 	typesTextures[5] = {id = 5, path = "Interface/BUTTONS/UI-GROUPLOOT-PASS-DOWN", width = 16, height = 16, tooltip = L["MOUNT_TYPE_4"]}
 	for i = 1, #typesTextures do
-		CreateButtonFilter(i, self.filtersBar.selected, 50, 25, typesTextures[i])
+		CreateButtonFilter(i, self.filtersBar.selected, 52.8, 24, typesTextures[i])
 	end
 
 	-- FILTERS SOURCES BUTTONS
@@ -687,12 +687,13 @@ function journal:init()
 		{id = 9, path = texPath.."sources", texCoord = {0, .25, .5, .75}, width = 20, height = 20},
 		{id = 10, path = texPath.."sources", texCoord = {.25, .5, .5, .75}, width = 20, height = 20},
 		{id = 11, path = texPath.."sources", texCoord = {.5, .75, .5, .75}, width = 20, height = 20},
+		{id = 12, path = 4696085, width = 20, height = 20},
 	}
 
 	for i = 1, #sourcesTextures do
 		local t = sourcesTextures[i]
 		t.tooltip = _G["BATTLE_PET_SOURCE_"..t.id]
-		CreateButtonFilter(i, self.filtersBar.sources, 25, 25, t)
+		CreateButtonFilter(i, self.filtersBar.sources, 24, 24, t)
 	end
 
 	-- SHOWN PANEL

@@ -340,14 +340,14 @@
 						</Anchors>
 					</EditBox>
 					<Frame parentKey="filtersBar" inherits="BackdropTemplate">
-						<Size x="260" y="35"/>
+						<Size x="274" y="34"/>
 						<Anchors>
 							<Anchor point="TOP" x="0" y="-46"/>
 						</Anchors>
 						<Frames>
 							<Button parentKey="clear" inherits="MJClearButtonTemplate">
 								<Anchors>
-									<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT"/>
+									<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" x="-1"/>
 								</Anchors>
 							</Button>
 						</Frames>
@@ -1128,7 +1128,7 @@
 	</Frame>
 
 	<Button name="MJTabTemplate" virtual="true">
-		<Size x="83" y="24"/>
+		<Size x="88" y="24"/>
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture file="Interface/ChatFrame/ChatFrameTab-BGLeft">
