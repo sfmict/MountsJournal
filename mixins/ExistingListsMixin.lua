@@ -13,48 +13,76 @@ function MJExistingListsMixin:onLoad()
 		self:refresh()
 	end)
 
-	self.child = self.scrollFrame.child
-	self.optionsButtonPool = CreateFramePool("BUTTON", self.child, "MJOptionButtonTemplate", function(_, frame)
-		frame:Hide()
-		frame:ClearAllPoints()
-		frame:Enable()
-	end)
-	self.lists = {}
-	local listNames = {
-		L["Zones with list"],
-		L["Zones with relation"],
-		L["Zones with flags"],
+	self.categories = {
+		{name = L["Zones with list"], expanded = true},
+		{name = L["Zones with relation"], expanded = true},
+		{name = L["Zones with flags"], expanded = true},
 	}
 
-	for i, name in ipairs(listNames) do
-		local button = CreateFrame("CheckButton", nil, self.child, "MJCollapseButtonTemplate")
-		button.name = name
-		button.childs = {}
-		button:SetScript("OnClick", function(btn)
-			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			self:collapse(btn, i)
-		end)
-		tinsert(self.lists, button)
+	local function Factory(factory, data)
+		if data.id then
+			factory("MJCollapseButtonTemplate", function(...) self:toggleInit(...) end)
+		else
+			factory("MJOptionButtonTemplate", function(...) self:buttonInit(...) end)
+		end
 	end
 
-	self.lists[1]:SetPoint("TOPLEFT", self.child)
-	self.lists[1]:SetPoint("TOPRIGHT", self.child)
+	self.view = CreateScrollBoxListLinearView()
+	self.view:SetElementFactory(Factory)
+	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.scrollBar, self.view)
 end
 
 
-function MJExistingListsMixin:collapse(btn, i)
-	local checked = btn:GetChecked()
-	btn.toggle.plusMinus:SetTexture(checked and "Interface/Buttons/UI-PlusButton-UP" or "Interface/Buttons/UI-MinusButton-UP")
+function MJExistingListsMixin:toggleInit(btn, data)
+	local category = self.categories[data.id]
+	btn:SetText(data.name)
+	btn.toggle:SetTexture(category.expanded and "Interface/Buttons/UI-MinusButton-UP" or "Interface/Buttons/UI-PlusButton-UP")
+	btn:SetScript("OnClick", function(btn)
+		category.expanded = not category.expanded
+		self:refresh()
+	end)
+end
 
-	for _, child in ipairs(btn.childs) do
-		child:SetShown(not checked)
+
+function MJExistingListsMixin:buttonInit(btn, data)
+	btn:SetText(data.name)
+	btn:SetEnabled(not data.disabled)
+	local color = data.isGray and GRAY_FONT_COLOR or WHITE_FONT_COLOR
+	btn.text:SetTextColor(color:GetRGB())
+	btn:SetScript("OnClick", function()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		self.journal.navBar:setMapID(data.mapID)
+	end)
+end
+
+
+function MJExistingListsMixin:getTextWidth(data)
+	local frames = self.view:GetFrames()
+	if #frames == 0 then
+		self.view:AcquireInternal(1, data)
+		self.view:InvokeInitializers()
 	end
+	frames[1]:SetText(data.name)
+	return frames[1].text:GetStringWidth()
+end
 
-	local nextButton = self.lists[i + 1]
-	if nextButton then
-		local relativeFrame = checked and btn or btn.childs[#btn.childs]
-		nextButton:SetPoint("TOPLEFT", relativeFrame,"BOTTOMLEFT")
-		nextButton:SetPoint("TOPRIGHT", relativeFrame,"BOTTOMRIGHT")
+
+function MJExistingListsMixin:addCategory(dataProvider, id, tbl)
+	local category = self.categories[id]
+	local data = {name = ("%s [%d]"):format(self.categories[id].name, #tbl), id = id}
+	self.lastWidth = math.max(self.lastWidth, self:getTextWidth(data))
+	dataProvider:Insert(data)
+
+	if category.expanded then
+		if #tbl == 0 then
+			tbl[1] = {name = EMPTY, isGray = true, disabled = true}
+		elseif #tbl > 1 then
+			sort(tbl, function(a, b)
+				return not a.isGray and b.isGray
+					or a.isGray == b.isGray and a.name < b.name
+			end)
+		end
+		for i = 1, #tbl do dataProvider:Insert(tbl[i]) end
 	end
 end
 
@@ -66,15 +94,11 @@ do
 
 	function MJExistingListsMixin:refresh()
 		if not self:IsVisible() then return end
-		local lastWidth = 0
+		self.lastWidth = 0
 		local text = self.util.cleanText(self.searchBox:GetText())
+		local list, relation, flags = {}, {}, {}
 
-		for _, withList in ipairs(self.lists) do
-			wipe(withList.childs)
-		end
-		self.optionsButtonPool:ReleaseAll()
-
-		local function createOptionButton(tbl, mapID, groupID, flags)
+		local function addData(tbl, mapID, groupID, flags)
 			local btnText = self.util.getMapFullNameInfo(mapID).name
 			if groupID then
 				btnText = ("[%d] %s"):format(groupID, btnText)
@@ -88,74 +112,39 @@ do
 				)
 			end
 			if #text == 0 or btnText:lower():find(text, 1, true) then
-				local optionButton = self.optionsButtonPool:Acquire()
-				optionButton.isGray = flags and not flags.enableFlags
-				local color = optionButton.isGray and GRAY_FONT_COLOR or WHITE_FONT_COLOR
-				optionButton.text:SetTextColor(color:GetRGB())
-				optionButton:SetText(btnText)
-
-				optionButton:SetScript("OnClick", function()
-					PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-					self.journal.navBar:setMapID(mapID)
-				end)
-				local width = optionButton.text:GetStringWidth()
-				if width > lastWidth then lastWidth = width end
-				tinsert(tbl, optionButton)
+				local data = {
+					name = btnText,
+					mapID = mapID,
+					isGray = flags and not flags.enableFlags
+				}
+				self.lastWidth = math.max(self.lastWidth, self:getTextWidth(data))
+				tbl[#tbl + 1] = data
 			end
 		end
 
 		for mapID, mapConfig in pairs(self.journal.zoneMounts) do
 			if mapConfig.listFromID then
-				createOptionButton(self.lists[2].childs, mapID, mapConfig.listFromID)
+				addData(relation, mapID, mapConfig.listFromID)
 			elseif next(mapConfig.dragonriding) or next(mapConfig.fly) or next(mapConfig.ground) or next(mapConfig.swimming) then
-				createOptionButton(self.lists[1].childs, mapID)
+				addData(list, mapID)
 			end
 
-			local flags
+			local flagExists
 			for _, value in pairs(mapConfig.flags) do
 				if value then
-					flags = true
+					flagExists = true
 					break
 				end
 			end
-
-			if flags then
-				createOptionButton(self.lists[3].childs, mapID, nil, mapConfig.flags)
-			end
+			if flagExists then addData(flags, mapID, nil, mapConfig.flags) end
 		end
 
-		for i, withList in ipairs(self.lists) do
-			local childsCount = #withList.childs
+		local dataProvider = CreateDataProvider()
+		self:addCategory(dataProvider, 1, list)
+		self:addCategory(dataProvider, 2, relation)
+		self:addCategory(dataProvider, 3, flags)
+		self.scrollBox:SetDataProvider(dataProvider, ScrollBoxConstants.RetainScrollPosition)
 
-			if childsCount == 0 then
-				withList:SetText(withList.name)
-				local optionButton = self.optionsButtonPool:Acquire()
-				optionButton:SetText(EMPTY)
-				optionButton:Disable()
-				tinsert(withList.childs, optionButton)
-			else
-				withList:SetText(("%s [%s]"):format(withList.name, childsCount))
-				sort(withList.childs, function(a, b)
-					return not a.isGray and b.isGray
-						or a.isGray == b.isGray and a:GetText() < b:GetText()
-				end)
-			end
-
-			local width = withList.text:GetStringWidth() + 10
-			if lastWidth < width then lastWidth = width end
-
-			local lastChild
-			for _, child in ipairs(withList.childs) do
-				local relativeFrame = lastChild or withList
-				child:SetPoint("TOPLEFT", relativeFrame, "BOTTOMLEFT")
-				child:SetPoint("TOPRIGHT", relativeFrame, "BOTTOMRIGHT")
-				lastChild = child
-			end
-
-			self:collapse(withList, i)
-		end
-
-		self.child:SetWidth(lastWidth + 35)
-		self:SetWidth(lastWidth + 65)
+		self:SetWidth(self.lastWidth + 65)
 	end
 end

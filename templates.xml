@@ -999,12 +999,18 @@
 									<Anchor point="TOPRIGHT" x="-5"/>
 								</Anchors>
 							</EditBox>
-							<ScrollFrame parentKey="scrollFrame" inherits="MJPanelScrollFrameTemplate">
+							<Frame parentKey="scrollBox" inherits="WowScrollBoxList">
 								<Anchors>
 									<Anchor point="TOPLEFT" x="5" y="-26"/>
 									<Anchor point="BOTTOMRIGHT" x="-26" y="5"/>
 								</Anchors>
-							</ScrollFrame>
+							</Frame>
+							<EventFrame parentKey="scrollBar" inherits="MinimalScrollBar">
+								<Anchors>
+									<Anchor point="TOPLEFT" relativeKey="$parent.scrollBox" relativePoint="TOPRIGHT" x="8" y="1"/>
+									<Anchor point="BOTTOMLEFT" relativeKey="$parent.scrollBox" relativePoint="BOTTOMRIGHT" x="8" y="-1"/>
+								</Anchors>
+							</EventFrame>
 						</Frames>
 						<Scripts>
 							<OnLoad inherit="prepend" method="onLoad"/>
@@ -2115,27 +2121,20 @@
 			</Anchors>
 			<Color r=".196" g=".388" b=".8"/>
 		</HighlightTexture>
-		<Scripts>
-			<OnEnable>self.text:SetTextColor(1,1,1,1)</OnEnable>
-			<OnDisable>self.text:SetTextColor(.5,.5,.5,1)</OnDisable>
-		</Scripts>
 	</Button>
 
-	<CheckButton name="MJCollapseButtonTemplate" virtual="true">
+	<Button name="MJCollapseButtonTemplate" virtual="true">
 		<Size y="18"/>
-		<Frames>
-			<Frame parentKey="toggle">
-				<Size x="14" y="14"/>
-				<Anchors>
-					<Anchor point="TOPLEFT" x="4" y="-1"/>
-				</Anchors>
-				<layers>
-					<Layer level="ARTWORK">
-						<Texture parentKey="plusMinus" file="Interface/Buttons/UI-MinusButton-UP" setAllPoints="true"/>
-					</Layer>
-				</layers>
-			</Frame>
-		</Frames>
+		<layers>
+			<Layer level="ARTWORK">
+				<Texture parentKey="toggle" file="Interface/Buttons/UI-MinusButton-UP">
+					<Size x="14" y="14"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="4" y="-1"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</layers>
 		<ButtonText parentKey="text" justifyH="LEFT" wordwrap="false">
 			<Anchors>
 				<Anchor point="LEFT" x="20" y="0"/>
@@ -2149,7 +2148,7 @@
 			</Anchors>
 			<Color r=".196" g=".388" b=".8"/>
 		</HighlightTexture>
-	</CheckButton>
+	</Button>
 
 	<Frame name="MJSecureActionButtonTemplate" inherits="SecureActionButtonTemplate" mixin="MJMacroMixin" virtual="true">
 		<Scripts>
