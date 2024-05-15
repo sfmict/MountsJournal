@@ -69,6 +69,9 @@ function journal:init()
 		by = "name",
 		favoritesFirst = true,
 	}
+	if mounts.filters.sorting.collectedFirst == nil then
+		mounts.filters.sorting.collectedFirst = true
+	end
 	if mounts.filters.sorting.additionalFirst == nil then
 		mounts.filters.sorting.additionalFirst = true
 	end
@@ -1723,11 +1726,13 @@ function journal:sortMounts()
 		elseif not needFanfareA and needFanfareB then return false end
 
 		-- COLLECTED
-		local isCollectedA = ma[3]
-		local isCollectedB = mb[3]
+		if fSort.collectedFirst then
+			local isCollectedA = ma[3]
+			local isCollectedB = mb[3]
 
-		if isCollectedA and not isCollectedB then return true
-		elseif not isCollectedA and isCollectedB then return false end
+			if isCollectedA and not isCollectedB then return true
+			elseif not isCollectedA and isCollectedB then return false end
+		end
 
 		-- FAVORITES
 		if fSort.favoritesFirst then

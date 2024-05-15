@@ -57,6 +57,14 @@ function journal.filters.sorting(btn, level)
 	info.checked = fSort.reverse
 	btn:ddAddButton(info, level)
 
+	info.text = L["Collected First"]
+	info.func = function(_,_,_, value)
+		fSort.collectedFirst = value
+		journal:sortMounts()
+	end
+	info.checked = fSort.favoritesFirst
+	btn:ddAddButton(info, level)
+
 	info.text = L["Favorites First"]
 	info.func = function(_,_,_, value)
 		fSort.favoritesFirst = value
