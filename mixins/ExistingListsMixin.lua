@@ -19,11 +19,22 @@ function MJExistingListsMixin:onLoad()
 		{name = L["Zones with flags"], expanded = true},
 	}
 
+	self.toggleOnClick = function(btn)
+		btn.category.expanded = not btn.category.expanded
+		self:refresh()
+	end
+	self.buttonOnClick = function(btn)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		self.journal.navBar:setMapID(btn.mapID)
+	end
+
+	local function toggleInit(...) self:toggleInit(...) end
+	local function buttonInit(...) self:buttonInit(...) end
 	local function Factory(factory, data)
 		if data.id then
-			factory("MJCollapseButtonTemplate", function(...) self:toggleInit(...) end)
+			factory("MJCollapseButtonTemplate", toggleInit)
 		else
-			factory("MJOptionButtonTemplate", function(...) self:buttonInit(...) end)
+			factory("MJOptionButtonTemplate", buttonInit)
 		end
 	end
 
@@ -34,13 +45,10 @@ end
 
 
 function MJExistingListsMixin:toggleInit(btn, data)
-	local category = self.categories[data.id]
 	btn:SetText(data.name)
-	btn.toggle:SetTexture(category.expanded and "Interface/Buttons/UI-MinusButton-UP" or "Interface/Buttons/UI-PlusButton-UP")
-	btn:SetScript("OnClick", function(btn)
-		category.expanded = not category.expanded
-		self:refresh()
-	end)
+	btn.category = self.categories[data.id]
+	btn.toggle:SetTexture(btn.category.expanded and "Interface/Buttons/UI-MinusButton-UP" or "Interface/Buttons/UI-PlusButton-UP")
+	btn:SetScript("OnClick", self.toggleOnClick)
 end
 
 
@@ -49,10 +57,8 @@ function MJExistingListsMixin:buttonInit(btn, data)
 	btn:SetEnabled(not data.disabled)
 	local color = data.isGray and GRAY_FONT_COLOR or WHITE_FONT_COLOR
 	btn.text:SetTextColor(color:GetRGB())
-	btn:SetScript("OnClick", function()
-		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		self.journal.navBar:setMapID(data.mapID)
-	end)
+	btn.mapID = data.mapID
+	btn:SetScript("OnClick", self.buttonOnClick)
 end
 
 
