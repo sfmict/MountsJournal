@@ -24,6 +24,7 @@ L["HerbGatheringFlagDescription"] = "Used to configure use of Mount to Herbalism
 L["If item durability is less than"] = "If item durability is less than"
 L["In flyable zones"] = "In flyable zones"
 L["UseRepairMountsDescription"] = "If the durability of at least one item is less than the specified percentage, the selected mount will be summoned."
+L["If the number of free slots in bags is less"] = "If the number of free slots in bags is less"
 L["Random available mount"] = "Random available mount"
 L["UseHallowsEndMounts"] = "Use \"Hallow's End\" mounts"
 L["UseHallowsEndMountsDescription"] = "When \"Hallow's End\" event is active, if you have its mounts, they are used."

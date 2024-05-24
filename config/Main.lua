@@ -62,6 +62,15 @@ config:SetScript("OnShow", function(self)
 		end)
 	end
 
+	-- GROUP
+	local function createGropPanel(parent, numCheck, numComboBox)
+		local group = CreateFrame("FRAME", nil, parent, "MJOptionsPanel")
+		group:SetPoint("RIGHT", parent:GetParent(), 0, 0)
+		-- check = 26 + 3, combobox = 24 + 8 + 1
+		group:SetHeight(29 * numCheck + 33 * (numComboBox or 0) + 3)
+		return group
+	end
+
 	-- VERSION
 	local ver = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	ver:SetPoint("TOPLEFT", 40, 20)
@@ -218,9 +227,13 @@ config:SetScript("OnShow", function(self)
 	self.rightPanelScroll:SetPoint("TOPLEFT", self.rightPanel, 4, -6)
 	self.rightPanelScroll:SetPoint("BOTTOMRIGHT", self.rightPanel, -26, 5)
 
+	-- HERB GROUP
+	self.herbGroup = createGropPanel(self.rightPanelScroll.child, 2)
+	self.herbGroup:SetPoint("TOPLEFT", 3, -2)
+
 	-- USE HERBALISM MOUNTS
-	self.useHerbMounts = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.useHerbMounts:SetPoint("TOPLEFT", self.rightPanelScroll.child, 9, -9)
+	self.useHerbMounts = CreateFrame("CheckButton", nil, self.herbGroup, "MJCheckButtonTemplate")
+	self.useHerbMounts:SetPoint("TOPLEFT", self.herbGroup, 3, -3)
 	self.useHerbMounts.Text:SetText(L["UseHerbMounts"])
 	self.useHerbMounts.tooltipText = L["UseHerbMounts"]
 	self.useHerbMounts.tooltipRequirement = L["UseHerbMountsDescription"]
@@ -233,16 +246,20 @@ config:SetScript("OnShow", function(self)
 	self.herbMountsOnZones.checkFunc = function() return mounts.config.herbMountsOnZones end
 	self.herbMountsOnZones:HookScript("OnClick", enableBtns)
 
+	-- REPAIR GROUP
+	self.repairGroup = createGropPanel(self.rightPanelScroll.child, 3, 1)
+	self.repairGroup:SetPoint("TOPLEFT", self.herbGroup, "BOTTOMLEFT", 0, -5)
+
 	-- USE REPAIR MOUNTS
-	self.useRepairMounts = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.useRepairMounts:SetPoint("TOPLEFT", self.herbMountsOnZones, "BOTTOMLEFT", -20, -15)
+	self.useRepairMounts = CreateFrame("CheckButton", nil, self.repairGroup, "MJCheckButtonTemplate")
+	self.useRepairMounts:SetPoint("TOPLEFT", self.repairGroup, 3, -3)
 	self.useRepairMounts.Text:SetText(L["If item durability is less than"])
 	self.useRepairMounts.tooltipText = L["If item durability is less than"]
 	self.useRepairMounts.tooltipRequirement = L["UseRepairMountsDescription"]
 	self.useRepairMounts:HookScript("OnClick",  enableBtns)
 
 	-- editbox
-	self.repairPercent = CreateFrame("Editbox", nil, self.rightPanelScroll.child, "MJNumberTextBox")
+	self.repairPercent = CreateFrame("Editbox", nil, self.repairGroup, "MJNumberTextBox")
 	self.repairPercent:SetPoint("LEFT", self.useRepairMounts.Text, "RIGHT", 3, 0)
 	self.repairPercent:SetScript("OnTextChanged", function(editBox, userInput)
 		if userInput then
@@ -260,8 +277,8 @@ config:SetScript("OnShow", function(self)
 			local value = (tonumber(editBox:GetText()) or 0) + (delta > 0 and 1 or -1)
 			if value >= 0 and value <= 100 then
 				editBox:SetNumber(value)
+				enableBtns()
 			end
-			enableBtns()
 		end
 	end)
 	util.setCheckboxChild(self.useRepairMounts, self.repairPercent)
@@ -283,7 +300,7 @@ config:SetScript("OnShow", function(self)
 	self.repairFlyable:HookScript("OnClick", enableBtns)
 
 	-- editbox
-	self.repairFlyablePercent = CreateFrame("Editbox", nil, self.rightPanelScroll.child, "MJNumberTextBox")
+	self.repairFlyablePercent = CreateFrame("Editbox", nil, self.repairGroup, "MJNumberTextBox")
 	self.repairFlyablePercent:SetPoint("LEFT", self.repairFlyable.Text, "RIGHT", 3, 0)
 	self.repairFlyablePercent:SetScript("OnTextChanged", function(editBox, userInput)
 		if userInput then
@@ -301,8 +318,8 @@ config:SetScript("OnShow", function(self)
 			local value = (tonumber(editBox:GetText()) or 0) + (delta > 0 and 1 or -1)
 			if value >= 0 and value <= 100 then
 				editBox:SetNumber(value)
+				enableBtns()
 			end
-			enableBtns()
 		end
 	end)
 	util.setCheckboxChild(self.repairFlyable, self.repairFlyablePercent)
@@ -312,9 +329,37 @@ config:SetScript("OnShow", function(self)
 	self.repairFlyablePercentText:SetPoint("LEFT", self.repairFlyablePercent, "RIGHT", 3, 0)
 	self.repairFlyablePercentText:SetText("%")
 
+	-- FREE SLOTS NUM
+	self.freeSlots = CreateFrame("CheckButton", nil, self.repairGroup, "MJCheckButtonTemplate")
+	self.freeSlots:SetPoint("TOPLEFT", self.repairFlyable, "BOTTOMLEFT", -20, -3)
+	self.freeSlots.Text:SetPoint("RIGHT", self.repairGroup, -34, 0)
+	self.freeSlots.Text:SetText(L["If the number of free slots in bags is less"])
+	self.freeSlots:HookScript("OnClick",  enableBtns)
+
+	-- editbox
+	self.freeSlosNum = CreateFrame("Editbox", nil, self.repairGroup, "MJNumberTextBox")
+	self.freeSlosNum:SetPoint("LEFT", self.freeSlots.Text, self.freeSlots.Text:GetWrappedWidth() + 3, 0)
+	self.freeSlosNum:SetScript("OnTextChanged", function(editBox, userInput)
+		if userInput then
+			local value = tonumber(editBox:GetText()) or 0
+			if value < 1 then editBox:SetNumber(1) end
+			enableBtns()
+		end
+	end)
+	self.freeSlosNum:SetScript("OnMouseWheel", function(editBox, delta)
+		if editBox:IsEnabled() then
+			local value = (tonumber(editBox:GetText()) or 0) + (delta > 0 and 1 or -1)
+			if value > 0 then
+				editBox:SetNumber(value)
+				enableBtns()
+			end
+		end
+	end)
+	util.setCheckboxChild(self.freeSlots, self.freeSlosNum)
+
 	-- REPAIR MOUNTS COMBOBOX
-	self.repairMountsCombobox = lsfdd:CreateButton(self.rightPanelScroll.child, 230)
-	self.repairMountsCombobox:SetPoint("TOPLEFT", self.repairFlyable, "BOTTOMLEFT", 0, -8)
+	self.repairMountsCombobox = lsfdd:CreateButton(self.repairGroup, 230)
+	self.repairMountsCombobox:SetPoint("TOPLEFT", self.freeSlots, "BOTTOMLEFT", 0, -8)
 	self.repairMountsCombobox:ddSetInitFunc(function(self, level)
 		local info = {}
 
@@ -349,11 +394,14 @@ config:SetScript("OnShow", function(self)
 			end
 		end
 	end)
-	util.setCheckboxChild(self.useRepairMounts, self.repairMountsCombobox)
+
+	-- MAGIC BROOM GROUP
+	self.magicBroomGroup = createGropPanel(self.rightPanelScroll.child, 1, 1)
+	self.magicBroomGroup:SetPoint("TOPLEFT", self.repairGroup, "BOTTOMLEFT", 0, -5)
 
 	-- USE MAGIC BROOM
-	self.useMagicBroom = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.useMagicBroom:SetPoint("TOPLEFT", self.repairMountsCombobox, "BOTTOMLEFT", -20, -20)
+	self.useMagicBroom = CreateFrame("CheckButton", nil, self.magicBroomGroup, "MJCheckButtonTemplate")
+	self.useMagicBroom:SetPoint("TOPLEFT", self.magicBroomGroup, 3, -3)
 	self.useMagicBroom.Text:SetPoint("RIGHT", self.rightPanelScroll)
 	self.useMagicBroom.Text:SetText(L["UseHallowsEndMounts"])
 	self.useMagicBroom.tooltipText = L["UseHallowsEndMounts"]
@@ -361,7 +409,7 @@ config:SetScript("OnShow", function(self)
 	self.useMagicBroom:HookScript("OnClick", enableBtns)
 
 	-- MAGIC BROOM COMBOBOX
-	self.magicBroomCombobox = lsfdd:CreateButton(self.rightPanelScroll.child, 230)
+	self.magicBroomCombobox = lsfdd:CreateButton(self.magicBroomGroup, 230)
 	self.magicBroomCombobox:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 20, -8)
 
 	self.magicBroomCombobox.Button:SetScript("OnClick", function(btn)
@@ -441,8 +489,11 @@ config:SetScript("OnShow", function(self)
 
 	-- USE UNDERLIGHT ANGLER
 	if C_Item.DoesItemExistByID(133755) then
-		self.useUnderlightAngler = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
-		self.useUnderlightAngler:SetPoint("TOPLEFT", self.magicBroomCombobox, "BOTTOMLEFT", -20, -20)
+		self.underlightAnglerGroup = createGropPanel(self.rightPanelScroll.child, 2)
+		self.underlightAnglerGroup:SetPoint("TOPLEFT", self.magicBroomGroup, "BOTTOMLEFT", 0, -5)
+
+		self.useUnderlightAngler = CreateFrame("CheckButton", nil, self.underlightAnglerGroup, "MJCheckButtonTemplate")
+		self.useUnderlightAngler:SetPoint("TOPLEFT", self.underlightAnglerGroup, 3, -3)
 		local underlightAngler = Item:CreateFromItemID(133755)
 		underlightAngler:ContinueOnItemLoad(function()
 			self.useUnderlightAngler.Text:SetText(L["Use %s"]:format(underlightAngler:GetItemLink()))
@@ -457,18 +508,17 @@ config:SetScript("OnShow", function(self)
 		self.autoUseUnderlightAngler:HookScript("OnClick", enableBtns)
 	end
 
+	self.petGroup = createGropPanel(self.rightPanelScroll.child, 4)
+	self.petGroup:SetPoint("TOPLEFT", self.underlightAnglerGroup or self.magicBroomGroup, "BOTTOMLEFT", 0, -5)
+
 	-- SUMMON PET EVERY N MINUTES
-	self.summonPetEvery = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
-	if self.autoUseUnderlightAngler then
-		self.summonPetEvery:SetPoint("TOPLEFT", self.autoUseUnderlightAngler, "BOTTOMLEFT", -20, -15)
-	else
-		self.summonPetEvery:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 0, -15)
-	end
+	self.summonPetEvery = CreateFrame("CheckButton", nil, self.petGroup, "MJCheckButtonTemplate")
+	self.summonPetEvery:SetPoint("TOPLEFT", self.petGroup, 3, -3)
 	self.summonPetEvery.Text:SetText(L["Summon a pet every"])
 	self.summonPetEvery:HookScript("OnClick",  enableBtns)
 
 	-- count
-	self.summonPetEveryN = CreateFrame("Editbox", nil, self.rightPanelScroll.child, "MJNumberTextBox")
+	self.summonPetEveryN = CreateFrame("Editbox", nil, self.petGroup, "MJNumberTextBox")
 	self.summonPetEveryN:SetPoint("LEFT", self.summonPetEvery.Text, "RIGHT", 3, 0)
 	self.summonPetEveryN:SetScript("OnTextChanged", function(editBox, userInput)
 		if userInput then
@@ -486,8 +536,8 @@ config:SetScript("OnShow", function(self)
 			local value = (tonumber(editBox:GetText()) or 0) + (delta > 0 and 1 or -1)
 			if value >= 1 and value <= 999 then
 				editBox:SetNumber(value)
+				enableBtns()
 			end
-			enableBtns()
 		end
 	end)
 	util.setCheckboxChild(self.summonPetEvery, self.summonPetEveryN)
@@ -503,14 +553,14 @@ config:SetScript("OnShow", function(self)
 	self.summonPetOnlyFavorites:HookScript("OnClick", enableBtns)
 
 	-- NO PET IN RAID
-	self.noPetInRaid = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.noPetInRaid = CreateFrame("CheckButton", nil, self.petGroup, "MJCheckButtonTemplate")
 	self.noPetInRaid:SetPoint("TOPLEFT", self.summonPetOnlyFavorites, "BOTTOMLEFT", -20, -3)
 	self.noPetInRaid.Text:SetPoint("RIGHT", self.rightPanelScroll)
 	self.noPetInRaid.Text:SetText(L["NoPetInRaid"])
 	self.noPetInRaid:HookScript("OnClick", enableBtns)
 
 	-- NO PET IN GROUP
-	self.noPetInGroup = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.noPetInGroup = CreateFrame("CheckButton", nil, self.petGroup, "MJCheckButtonTemplate")
 	self.noPetInGroup:SetPoint("TOPLEFT", self.noPetInRaid, "BOTTOMLEFT", 0, -3)
 	self.noPetInGroup.Text:SetPoint("RIGHT", self.rightPanelScroll)
 	self.noPetInGroup.Text:SetText(L["NoPetInGroup"])
@@ -612,6 +662,8 @@ config:SetScript("OnShow", function(self)
 		self.repairFlyable:SetChecked(mounts.config.useRepairFlyable)
 		self.repairPercent:SetNumber(tonumber(mounts.config.useRepairMountsDurability) or 0)
 		self.repairFlyablePercent:SetNumber(tonumber(mounts.config.useRepairFlyableDurability) or 0)
+		self.freeSlots:SetChecked(mounts.config.useRepairFreeSlots)
+		self.freeSlosNum:SetNumber(tonumber(mounts.config.useRepairFreeSlotsNum) or 0)
 		self.repairMountsCombobox:ddSetSelectedValue(mounts.config.repairSelectedMount)
 		if mounts.config.repairSelectedMount then
 			local mountID = C_MountJournal.GetMountFromSpell(mounts.config.repairSelectedMount)
@@ -666,6 +718,8 @@ config:SetScript("OnShow", function(self)
 		mounts.config.useRepairMountsDurability = tonumber(self.repairPercent:GetText()) or 0
 		mounts.config.useRepairFlyable = self.repairFlyable:GetChecked()
 		mounts.config.useRepairFlyableDurability = tonumber(self.repairFlyablePercent:GetText()) or 0
+		mounts.config.useRepairFreeSlots = self.freeSlots:GetChecked()
+		mounts.config.useRepairFreeSlotsNum = tonumber(self.freeSlosNum:GetText()) or 0
 		mounts.config.repairSelectedMount = self.repairMountsCombobox:ddGetSelectedValue()
 		mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
 		mounts.config.broomSelectedMount = self.magicBroomCombobox:ddGetSelectedValue()

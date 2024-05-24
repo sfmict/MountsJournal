@@ -1,5 +1,5 @@
 local addon, L = ...
-local C_MountJournal, C_Map, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, AuraUtil, IsUsableSpell, SecureCmdOptionParse, C_Scenario = C_MountJournal, C_Map, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, AuraUtil, IsUsableSpell, SecureCmdOptionParse, C_Scenario
+local C_MountJournal, C_Map, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, AuraUtil, IsUsableSpell, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container = C_MountJournal, C_Map, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, AuraUtil, IsUsableSpell, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 util.setEventsMixin(mounts)
@@ -60,6 +60,7 @@ function mounts:ADDON_LOADED(addonName)
 		end
 		self.config.useRepairMountsDurability = self.config.useRepairMountsDurability or 41
 		self.config.useRepairFlyableDurability = self.config.useRepairFlyableDurability or 31
+		self.config.useRepairFreeSlotsNum = self.config.useRepairFreeSlotsNum or 1
 		self.config.summonPetEveryN = self.config.summonPetEveryN or 5
 		self.config.macrosConfig = self.config.macrosConfig or {}
 		for i = 1, GetNumClasses() do
@@ -238,6 +239,18 @@ function mounts:setUsableRepairMounts()
 			self.config.repairSelectedMount = self.config.repairSelectedMount == 61425 and 61447 or 61425
 		end
 		self.usableRepairMounts[self.config.repairSelectedMount] = true
+	end
+end
+
+
+function mounts:notEnoughFreeSlots()
+	if self.config.useRepairFreeSlots then
+		local totalFree, freeSlots, bagFamily = 0
+		for i = BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS do
+			freeSlots, bagFamily = C_Container.GetContainerNumFreeSlots(i)
+			if bagFamily == 0 then totalFree = totalFree + freeSlots end
+		end
+		return totalFree < self.config.useRepairFreeSlotsNum
 	end
 end
 
@@ -711,6 +724,7 @@ do
 		                  or self:isWaterWalkLocation()
 		flags.useRepair = flags.repair and not (flags.fly or flags.isDragonridable)
 		                  or flags.flyableRepair and (flags.fly or flags.isDragonridable)
+		                  or self:notEnoughFreeSlots()
 		flags.herb = self.herbMount and (not self.config.herbMountsOnZones
 		                                 or self.mapFlags and self.mapFlags.herbGathering)
 		flags.targetMount = self:getTargetMount()
