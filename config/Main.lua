@@ -332,21 +332,22 @@ config:SetScript("OnShow", function(self)
 	-- FREE SLOTS NUM
 	self.freeSlots = CreateFrame("CheckButton", nil, self.repairGroup, "MJCheckButtonTemplate")
 	self.freeSlots:SetPoint("TOPLEFT", self.repairFlyable, "BOTTOMLEFT", -20, -3)
-	self.freeSlots.Text:SetPoint("RIGHT", self.repairGroup, -37, 0)
+	-- self.freeSlots.Text:SetPoint("RIGHT", self.repairGroup, -37, 0) -- width isn't redered correctly
+	self.freeSlots.Text:SetWidth(264)
 	self.freeSlots.Text:SetText(L["If the number of free slots in bags is less"])
 	self.freeSlots:HookScript("OnClick",  enableBtns)
 
 	-- editbox
-	self.freeSlosNum = CreateFrame("Editbox", nil, self.repairGroup, "MJNumberTextBox")
-	self.freeSlosNum:SetPoint("LEFT", self.freeSlots.Text, "RIGHT", 3, 0)
-	self.freeSlosNum:SetScript("OnTextChanged", function(editBox, userInput)
+	self.freeSlotsNum = CreateFrame("Editbox", nil, self.repairGroup, "MJNumberTextBox")
+	self.freeSlotsNum:SetPoint("LEFT", self.freeSlots.Text, self.freeSlots.Text:GetWrappedWidth() + 3, 0)
+	self.freeSlotsNum:SetScript("OnTextChanged", function(editBox, userInput)
 		if userInput then
 			local value = tonumber(editBox:GetText()) or 0
 			if value < 1 then editBox:SetNumber(1) end
 			enableBtns()
 		end
 	end)
-	self.freeSlosNum:SetScript("OnMouseWheel", function(editBox, delta)
+	self.freeSlotsNum:SetScript("OnMouseWheel", function(editBox, delta)
 		if editBox:IsEnabled() then
 			local value = (tonumber(editBox:GetText()) or 0) + (delta > 0 and 1 or -1)
 			if value > 0 then
@@ -355,7 +356,7 @@ config:SetScript("OnShow", function(self)
 			end
 		end
 	end)
-	util.setCheckboxChild(self.freeSlots, self.freeSlosNum)
+	util.setCheckboxChild(self.freeSlots, self.freeSlotsNum)
 
 	-- REPAIR MOUNTS COMBOBOX
 	self.repairMountsCombobox = lsfdd:CreateButton(self.repairGroup, 230)
@@ -663,7 +664,7 @@ config:SetScript("OnShow", function(self)
 		self.repairPercent:SetNumber(tonumber(mounts.config.useRepairMountsDurability) or 0)
 		self.repairFlyablePercent:SetNumber(tonumber(mounts.config.useRepairFlyableDurability) or 0)
 		self.freeSlots:SetChecked(mounts.config.useRepairFreeSlots)
-		self.freeSlosNum:SetNumber(tonumber(mounts.config.useRepairFreeSlotsNum) or 0)
+		self.freeSlotsNum:SetNumber(tonumber(mounts.config.useRepairFreeSlotsNum) or 0)
 		self.repairMountsCombobox:ddSetSelectedValue(mounts.config.repairSelectedMount)
 		if mounts.config.repairSelectedMount then
 			local mountID = C_MountJournal.GetMountFromSpell(mounts.config.repairSelectedMount)
@@ -719,7 +720,7 @@ config:SetScript("OnShow", function(self)
 		mounts.config.useRepairFlyable = self.repairFlyable:GetChecked()
 		mounts.config.useRepairFlyableDurability = tonumber(self.repairFlyablePercent:GetText()) or 0
 		mounts.config.useRepairFreeSlots = self.freeSlots:GetChecked()
-		mounts.config.useRepairFreeSlotsNum = tonumber(self.freeSlosNum:GetText()) or 0
+		mounts.config.useRepairFreeSlotsNum = tonumber(self.freeSlotsNum:GetText()) or 0
 		mounts.config.repairSelectedMount = self.repairMountsCombobox:ddGetSelectedValue()
 		mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
 		mounts.config.broomSelectedMount = self.magicBroomCombobox:ddGetSelectedValue()
