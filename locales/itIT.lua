@@ -28,6 +28,7 @@ local _, L = ...
 -- L["If item durability is less than"] = ""
 -- L["In flyable zones"] = ""
 -- L["UseRepairMountsDescription"] = ""
+-- L["If the number of free slots in bags is less"] = ""
 -- L["Random available mount"] = ""
 -- L["UseHallowsEndMounts"] = ""
 -- L["UseHallowsEndMountsDescription"] = ""

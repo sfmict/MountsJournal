@@ -28,6 +28,7 @@ L["ButtonsSelectedTooltipDescription"] = "Les boutons sur le côté sélectionne
 L["If item durability is less than"] = "Si la durabilité de l'objet est inférieure à"
 L["In flyable zones"] = "En zone de vol"
 L["UseRepairMountsDescription"] = "Si la durabilité d'au moins un objet est inférieure au pourcentage spécifié, la monture sélectionnée sera invoquée."
+-- L["If the number of free slots in bags is less"] = ""
 -- L["Random available mount"] = ""
 -- L["UseHallowsEndMounts"] = ""
 -- L["UseHallowsEndMountsDescription"] = ""

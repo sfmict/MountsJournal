@@ -332,13 +332,13 @@ config:SetScript("OnShow", function(self)
 	-- FREE SLOTS NUM
 	self.freeSlots = CreateFrame("CheckButton", nil, self.repairGroup, "MJCheckButtonTemplate")
 	self.freeSlots:SetPoint("TOPLEFT", self.repairFlyable, "BOTTOMLEFT", -20, -3)
-	self.freeSlots.Text:SetPoint("RIGHT", self.repairGroup, -34, 0)
+	self.freeSlots.Text:SetPoint("RIGHT", self.repairGroup, -37, 0)
 	self.freeSlots.Text:SetText(L["If the number of free slots in bags is less"])
 	self.freeSlots:HookScript("OnClick",  enableBtns)
 
 	-- editbox
 	self.freeSlosNum = CreateFrame("Editbox", nil, self.repairGroup, "MJNumberTextBox")
-	self.freeSlosNum:SetPoint("LEFT", self.freeSlots.Text, self.freeSlots.Text:GetWrappedWidth() + 3, 0)
+	self.freeSlosNum:SetPoint("LEFT", self.freeSlots.Text, "RIGHT", 3, 0)
 	self.freeSlosNum:SetScript("OnTextChanged", function(editBox, userInput)
 		if userInput then
 			local value = tonumber(editBox:GetText()) or 0
