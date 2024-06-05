@@ -87,7 +87,7 @@ function journal.filters.family(dd, level, subFamily)
 					PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 					journal:setAllFilters("family", false)
 					for k, v in next, familyDB[btn.value[2]] do
-						filterFamily[v] = checked
+						filterFamily[v] = true
 					end
 					journal:updateMountsList()
 					dd:ddRefresh(level)
