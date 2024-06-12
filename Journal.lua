@@ -1488,7 +1488,6 @@ function journal:grid3InitMountButton(btn, data)
 
 			g3btn.spellID = spellID
 			g3btn.mountID = mountID
-			g3btn.active = active
 			g3btn.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
 			g3btn.icon:SetVertexColor(1, 1, 1)
 			g3btn.qualityBorder:SetVertexColor(qualityColor:GetRGB())
