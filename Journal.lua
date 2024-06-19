@@ -1020,13 +1020,19 @@ function journal:init()
 		local maxWidth = UIParent:GetWidth() - parent:GetLeft() * 2
 		local maxHeight = parent:GetTop() - CollectionsJournalTab1:GetHeight()
 		parent:SetResizeBounds(minWidth, minHeight, maxWidth, maxHeight)
-		parent:StartSizing("BOTTOMRIGHT")
+		parent:StartSizing("BOTTOMRIGHT", true)
 	end)
 	resize:SetScript("OnDragStop", function(btn)
 		local parent = btn:GetParent()
 		parent:StopMovingOrSizing()
 		mounts.config.journalWidth, mounts.config.journalHeight = parent:GetSize()
 		self:event("JOURNAL_RESIZED")
+	end)
+	resize:SetScript("OnEnter", function()
+		if SetCursor then SetCursor("UI_RESIZE_CURSOR") end
+	end)
+	resize:SetScript("OnLeave", function()
+		if SetCursor then SetCursor(nil) end
 	end)
 
 	-- SETTINGS BUTTON
