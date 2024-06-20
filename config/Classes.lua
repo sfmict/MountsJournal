@@ -220,7 +220,7 @@ do
 		-- 	end,
 		-- 	key = "useRunningWild",
 		-- 	text = L["WORGEN_USERUNNINGWILD"],
-		-- 	hlink = GetSpellLink(87840),
+		-- 	hlink = C_Spell.GetSpellLink(87840),
 		-- 	childs = {
 		-- 		{
 		-- 			widget = "slider",
@@ -241,14 +241,14 @@ do
 			{
 				key = "useLevitation",
 				text = L["CLASS_USEWHENCHARACTERFALLS"],
-				hlink = GetSpellLink(111759),
+				hlink = C_Spell.GetSpellLink(111759),
 			},
 		},
 		DEATHKNIGHT = {
 			{
 				key = "usePathOfFrost",
 				text = L["CLASS_USEWATERWALKINGSPELL"],
-				hlink = GetSpellLink(3714),
+				hlink = C_Spell.GetSpellLink(3714),
 				childs = {
 					{
 						key = "useOnlyInWaterWalkLocation",
@@ -261,7 +261,7 @@ do
 			{
 				key = "useWaterWalking",
 				text = L["CLASS_USEWATERWALKINGSPELL"],
-				hlink = GetSpellLink(546),
+				hlink = C_Spell.GetSpellLink(546),
 				childs = {
 					{
 						key = "useOnlyInWaterWalkLocation",
@@ -274,14 +274,14 @@ do
 			{
 				key = "useSlowFall",
 				text = L["CLASS_USEWHENCHARACTERFALLS"],
-				hlink = GetSpellLink(130),
+				hlink = C_Spell.GetSpellLink(130),
 			},
 		},
 		MONK = {
 			{
 				key = "useZenFlight",
 				text = L["CLASS_USEWHENCHARACTERFALLS"],
-				hlink = GetSpellLink(125883),
+				hlink = C_Spell.GetSpellLink(125883),
 			},
 		},
 		DRUID = {
@@ -295,11 +295,6 @@ do
 			},
 			{
 				key = "useMacroAlways",
-				childs = {
-					{
-						key = "useIfNotDragonridable",
-					},
-				},
 			},
 		},
 	}

@@ -1,5 +1,5 @@
 local addon, L = ...
-local C_MountJournal, C_Map, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, IsUsableSpell, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container = C_MountJournal, C_Map, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, IsUsableSpell, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container
+local C_MountJournal, C_Map, C_Spell, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container = C_MountJournal, C_Map, C_Spell, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container
 local util = MountsJournalUtil
 local mounts = CreateFrame("Frame", "MountsJournal")
 util.setEventsMixin(mounts)
@@ -131,7 +131,6 @@ end
 
 
 function mounts:checkProfile(profile)
-	profile.dragonriding = profile.dragonriding or {}
 	profile.fly = profile.fly or {}
 	profile.ground = profile.ground or {}
 	profile.swimming = profile.swimming or {}
@@ -306,12 +305,12 @@ do
 				timer = nil
 			end
 
-			local start, duration = GetSpellCooldown(61304)
+			local cdInfo = C_Spell.GetSpellCooldown(61304)
 
-			if duration == 0 then
+			if cdInfo.duration == 0 then
 				summonPet(petID)
 			else
-				timer = C_Timer.NewTicker(start + duration - GetTime(), function() summonPet(petID) end, 1)
+				timer = C_Timer.NewTicker(cdInfo.startTime + cdInfo.duration - GetTime(), function() summonPet(petID) end, 1)
 			end
 		end
 	end
@@ -331,10 +330,8 @@ do
 			mountType = "fly"
 		elseif mountType == 2 then
 			mountType = "ground"
-		elseif mountType == 3 then
-			mountType = "swimming"
 		else
-			mountType = "dragonriding"
+			mountType = "swimming"
 		end
 
 		list[mountType][spellID] = true
@@ -347,13 +344,8 @@ do
 			mountType = util.mountTypes[self.additionalMounts[spellID].mountType] 
 		else
 			local mountID = C_MountJournal.GetMountFromSpell(spellID)
-			local _,_,_,_,_,_,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
-			if isForDragonriding then
-				mountType = 4
-			else
-				local _,_,_,_, mountTypeExtra = C_MountJournal.GetMountInfoExtraByID(mountID)
-				mountType = util.mountTypes[mountTypeExtra]
-			end
+			local _,_,_,_, mountTypeExtra = C_MountJournal.GetMountInfoExtraByID(mountID)
+			mountType = util.mountTypes[mountTypeExtra]
 		end
 
 		if type(mountType) == "table" then
@@ -419,7 +411,7 @@ function mounts:setMountsList()
 			end
 
 			if list then
-				if not (self.list.dragonriding and self.list.fly and self.list.ground and self.list.swimming) then
+				if not (self.list.fly and self.list.ground and self.list.swimming) then
 					while list and list.listFromID do
 						if list.listFromID == self.defMountsListID then
 							list = profile
@@ -428,10 +420,6 @@ function mounts:setMountsList()
 						end
 					end
 					if list then
-						if not self.list.dragonriding and next(list.dragonriding) then
-							self.list.dragonriding = list.dragonriding
-							self.list.dragonridingWeight = profile.mountsWeight
-						end
 						if not self.list.fly and next(list.fly) then
 							self.list.fly = list.fly
 							self.list.flyWeight = profile.mountsWeight
@@ -456,7 +444,6 @@ function mounts:setMountsList()
 		end
 	end
 
-	if not self.list.dragonriding then self.list.dragonriding = self.empty end
 	if not self.list.fly then self.list.fly = self.empty end
 	if not self.list.ground then self.list.ground = self.empty end
 	if not self.list.swimming then self.list.swimming = self.empty end
@@ -542,7 +529,7 @@ function mounts:getTargetMount()
 		local spellID, mountID = util.getUnitMount("target")
 		if mountID then
 			local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
-			return isUsable and IsUsableSpell(spellID) and spellID
+			return isUsable and C_Spell.IsSpellUsable(spellID) and spellID
 		elseif spellID then
 			return self.additionalMounts[spellID]:canUse() and spellID
 		end
@@ -573,8 +560,8 @@ function mounts:setUsableID(ids, mountsWeight)
 		else
 			local mountID = C_MountJournal.GetMountFromSpell(spellID)
 			if mountID then
-				local _,_,_,_, isUsable, _,_,_,_,_,_,_, isForDragonriding = C_MountJournal.GetMountInfoByID(mountID)
-				usable = isUsable and (not isForDragonriding or IsUsableSpell(spellID))
+				local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
+				usable = isUsable and C_Spell.IsSpellUsable(spellID)
 			end
 		end
 
@@ -703,10 +690,6 @@ do
 		                          and (IsFlyableArea() or isFlyableOverride[self.instanceID])
 		                          and self:isFlyLocation(self.instanceID)
 		                          and not (self.mapFlags and self.mapFlags.groundOnly)
-		local isDragonridable = not (flags.forceFly
-		                             or self.mapFlags and (self.mapFlags.regularFlyOnly
-		                                                   or self.mapFlags.groundOnly))
-		                        and IsAdvancedFlyableArea()
 
 		flags.modifier = self.modifier() or flags.forceModifier
 		flags.isSubmerged = IsSubmerged()
@@ -717,15 +700,13 @@ do
 		flags.swimming = flags.isSubmerged
 		                 and not (flags.modifier or isFloating)
 		flags.isVashjir = self.mapVashjir[self.mapInfo.mapID]
-		flags.isDragonridable = isDragonridable
-		                        and (not flags.modifier or flags.isSubmerged)
 		flags.fly = isFlyableLocation
 		            and (not flags.modifier or flags.isSubmerged)
 		flags.waterWalk = isFloating
-		                  or not (isFlyableLocation or isDragonridable) and flags.modifier
+		                  or not isFlyableLocation and flags.modifier
 		                  or self:isWaterWalkLocation()
-		flags.useRepair = flags.repair and not (flags.fly or flags.isDragonridable)
-		                  or flags.flyableRepair and (flags.fly or flags.isDragonridable)
+		flags.useRepair = flags.repair and not flags.fly
+		                  or flags.flyableRepair and flags.fly
 		                  or self:notEnoughFreeSlots()
 		flags.herb = self.herbMount and (not self.config.herbMountsOnZones
 		                                 or self.mapFlags and self.mapFlags.herbGathering)
@@ -762,8 +743,6 @@ function mounts:setSummonMount(withAdditional)
 	))
 	-- herbMount
 	and not (flags.herb and self:setUsableID(self.herbalismMounts, self.db.mountsWeight))
-	-- dragonridable
-	and not (flags.isDragonridable and self:setUsableID(self.list.dragonriding, self.list.dragonridingWeight))
 	-- fly
 	and not (flags.fly and self:setUsableID(self.list.fly, self.list.flyWeight))
 	-- ground
@@ -780,7 +759,6 @@ function mounts:init()
 	SlashCmdList["MOUNTSJOURNAL"] = function(msg)
 		if not SecureCmdOptionParse(msg) then return end
 		self.sFlags.forceModifier = nil
-		self.sFlags.forceFly = nil
 		self:setFlags()
 		self:setSummonMount()
 		self:summon()

@@ -109,9 +109,8 @@ do
 			if groupID then
 				btnText = ("[%d] %s"):format(groupID, btnText)
 			elseif flags then
-				btnText = ("%s [%s%s%s%s]"):format(
+				btnText = ("%s [%s%s%s]"):format(
 					btnText,
-					getTextBool(flags.regularFlyOnly),
 					getTextBool(flags.groundOnly),
 					getTextBool(flags.waterWalkOnly),
 					getTextBool(flags.herbGathering)
@@ -131,7 +130,7 @@ do
 		for mapID, mapConfig in pairs(self.journal.zoneMounts) do
 			if mapConfig.listFromID then
 				addData(relation, mapID, mapConfig.listFromID)
-			elseif next(mapConfig.dragonriding) or next(mapConfig.fly) or next(mapConfig.ground) or next(mapConfig.swimming) then
+			elseif next(mapConfig.fly) or next(mapConfig.ground) or next(mapConfig.swimming) then
 				addData(list, mapID)
 			end
 

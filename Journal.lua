@@ -75,9 +75,6 @@ function journal:init()
 	if mounts.filters.sorting.additionalFirst == nil then
 		mounts.filters.sorting.additionalFirst = true
 	end
-	if mounts.filters.sorting.dragonridingFirst == nil then
-		mounts.filters.sorting.dragonridingFirst = true
-	end
 	checkFilters(mounts.defFilters)
 	setmetatable(mounts.defFilters.tags.tags, filtersMeta)
 
@@ -301,28 +298,6 @@ function journal:init()
 		GameTooltip:Show()
 	end)
 
-	local summon3 = self.bgFrame.summon3
-	summon3:SetNormalTexture(132239)
-	summon3.icon = summon3:GetNormalTexture()
-	summon3:SetAttribute("clickbutton", _G[config.secureButtonNameThirdMount])
-	summon3:SetScript("OnDragStart", function()
-		if InCombatLockdown() then return end
-		if not GetMacroInfo(config.thirdMacroName) then
-			config:createMacro(config.thirdMacroName, config.secureButtonNameThirdMount, 132239)
-		end
-		PickupMacro(config.thirdMacroName)
-	end)
-	summon3:SetScript("OnEnter", function(btn)
-		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 3\"")
-		GameTooltip_AddNormalLine(GameTooltip, L["ThirdMountTooltipDescription"])
-		GameTooltip_AddColoredLine(GameTooltip, "\nMacro: /click "..config.secureButtonNameThirdMount, NIGHT_FAE_BLUE_COLOR, false)
-		if InCombatLockdown() then
-			GameTooltip_AddErrorLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT)
-		end
-		GameTooltip:Show()
-	end)
-
 	-- NAVBAR BUTTON
 	self.navBarBtn:HookScript("OnClick", function(btn)
 		local checked = btn:GetChecked()
@@ -358,8 +333,6 @@ function journal:init()
 	self.mapSettings.hint.tooltipDescription = "\n"..L["ZoneSettingsTooltipDescription"]
 	self.mapSettings.Flags.Text:SetText(L["Enable Flags"])
 	self.mapSettings.Flags:HookScript("OnClick", function(check) self:setFlag("enableFlags", check:GetChecked()) end)
-	self.mapSettings.Fly = util.createCheckboxChild(L["Regular Flying Mounts Only"], self.mapSettings.Flags)
-	self.mapSettings.Fly:HookScript("OnClick", function(check) self:setFlag("regularFlyOnly", check:GetChecked()) end)
 	self.mapSettings.Ground = util.createCheckboxChild(L["Ground Mounts Only"], self.mapSettings.Flags)
 	self.mapSettings.Ground:HookScript("OnClick", function(check) self:setFlag("groundOnly", check:GetChecked()) end)
 	self.mapSettings.WaterWalk = util.createCheckboxChild(L["Water Walking"], self.mapSettings.Flags)
@@ -662,20 +635,19 @@ function journal:init()
 
 	-- FILTERS TYPES BUTTONS
 	local typesTextures = {
-		{id = 4, path = texPath.."dragonriding", width = 16, height = 16, tooltip = MOUNT_JOURNAL_FILTER_DRAGONRIDING},
 		{id = 1, path = texPath.."fly", width = 32, height = 16, tooltip = L["MOUNT_TYPE_1"]},
 		{id = 2, path = texPath.."ground", width = 32, height = 16, tooltip = L["MOUNT_TYPE_2"]},
 		{id = 3, path = texPath.."swimming", width = 32, height = 16, tooltip = L["MOUNT_TYPE_3"]},
 	}
 
 	for i = 1, #typesTextures do
-		CreateButtonFilter(i, self.filtersBar.types, 66, 24, typesTextures[i])
+		CreateButtonFilter(i, self.filtersBar.types, 88, 24, typesTextures[i])
 	end
 
 	-- FILTERS SELECTED BUTTONS
-	typesTextures[5] = {id = 5, path = "Interface/BUTTONS/UI-GROUPLOOT-PASS-DOWN", width = 16, height = 16, tooltip = L["MOUNT_TYPE_4"]}
+	typesTextures[4] = {id = 4, path = "Interface/BUTTONS/UI-GROUPLOOT-PASS-DOWN", width = 16, height = 16, tooltip = L["MOUNT_TYPE_4"]}
 	for i = 1, #typesTextures do
-		CreateButtonFilter(i, self.filtersBar.selected, 52.8, 24, typesTextures[i])
+		CreateButtonFilter(i, self.filtersBar.selected, 66, 24, typesTextures[i])
 	end
 
 	-- FILTERS SOURCES BUTTONS
@@ -987,12 +959,13 @@ function journal:init()
 		if InCombatLockdown() then return end
 		if type(self.selectedMountID) == "number" then
 			self:useMount(self.selectedMountID)
-			btn:SetAttribute("macrotext", "")
+			btn:SetAttribute("spell", nil)
 		elseif self.selectedMountID then
 			if self.selectedMountID:isActive() then
-				btn:SetAttribute("macrotext", "/dismount")
+				btn:SetAttribute("spell", nil)
+				Dismount()
 			else
-				btn:SetAttribute("macrotext", self.selectedMountID.macro)
+				btn:SetAttribute("spell", self.selectedMountID.spellID)
 			end
 		end
 	end)
@@ -1110,8 +1083,8 @@ journal:RegisterEvent("ADDON_LOADED")
 
 
 function journal:ADDON_LOADED(addonName)
-	if addonName == "Blizzard_Collections" and select(2, IsAddOnLoaded(addon))
-	or addonName == addon and select(2, IsAddOnLoaded("Blizzard_Collections")) then
+	if addonName == "Blizzard_Collections" and select(2, C_AddOns.IsAddOnLoaded(addon))
+	or addonName == addon and select(2, C_AddOns.IsAddOnLoaded("Blizzard_Collections")) then
 		self:UnregisterEvent("ADDON_LOADED")
 		self.ADDON_LOADED = nil
 
@@ -1306,7 +1279,7 @@ function journal:getMountInfo(mount)
 	if type(mount) == "number" then
 		return C_MountJournal.GetMountInfoByID(mount)
 	else
-		return mount.name, mount.spellID, mount.icon, mount:isActive(), mount:isUsable(), 0, mount:getIsFavorite(), false, nil, not mount:isShown(), true, nil, mount.dragonriding
+		return mount.name, mount.spellID, mount.icon, mount:isActive(), mount:isUsable(), 0, mount:getIsFavorite(), false, nil, not mount:isShown(), true
 	end
 end
 
@@ -1356,16 +1329,8 @@ do
 		btn:SetChecked(checked)
 	end
 
-	function journal:updateMountToggleButton(btn, isForDragonriding)
-		if isForDragonriding then
-			btn.dragonriding:Show()
-			btn.fly:Hide()
-			setColor(self, btn.dragonriding, self.list and self.list.dragonriding[btn.spellID])
-		else
-			btn.dragonriding:Hide()
-			btn.fly:Show()
-			setColor(self, btn.fly, self.list and self.list.fly[btn.spellID])
-		end
+	function journal:updateMountToggleButton(btn)
+		setColor(self, btn.fly, self.list and self.list.fly[btn.spellID])
 		setColor(self, btn.ground, self.list and self.list.ground[btn.spellID])
 		setColor(self, btn.swimming, self.list and self.list.swimming[btn.spellID])
 	end
@@ -1398,7 +1363,7 @@ end
 
 
 function journal:defaultInitMountButton(btn, data)
-	local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected, _, isForDragonriding = self:getMountInfo(data.mountID)
+	local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = self:getMountInfo(data.mountID)
 
 	local needsFanfare, qualityColor
 	if type(data.mountID) == "number" then
@@ -1431,17 +1396,10 @@ function journal:defaultInitMountButton(btn, data)
 	btn:Enable()
 	btn.name:SetText(creatureName)
 	btn.name:SetTextColor((mounts.config.coloredMountNames and qualityColor or NORMAL_FONT_COLOR):GetRGB())
-	btn.dragonridingText:SetShown(isForDragonriding)
 	btn.new:SetShown(needsFanfare)
 	btn.newGlow:SetShown(needsFanfare)
 	btn.background:SetVertexColor(1, 1, 1)
 	btn.selectedTexture:SetShown(data.mountID == self.selectedMountID)
-
-	local yOffset = 1
-	if isForDragonriding then
-		yOffset = btn.name:GetNumLines() == 1 and 5 or 6
-	end
-	btn.name:SetPoint("LEFT", 6, yOffset)
 
 	if isFactionSpecific then
 		btn.factionIcon:SetAtlas(faction == 0 and "MountJournalIcons-Horde" or "MountJournalIcons-Alliance")
@@ -1472,7 +1430,7 @@ function journal:defaultInitMountButton(btn, data)
 		btn.name:SetFontObject("GameFontDisable")
 	end
 
-	self:updateMountToggleButton(btn, isForDragonriding)
+	self:updateMountToggleButton(btn)
 end
 
 
@@ -1482,7 +1440,7 @@ function journal:grid3InitMountButton(btn, data)
 
 		if data[i] then
 			local mountID = data[i].mountID
-			local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected, _, isForDragonriding = self:getMountInfo(mountID)
+			local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = self:getMountInfo(mountID)
 
 			local needsFanfare, qualityColor
 			if type(mountID) == "number" then
@@ -1527,7 +1485,7 @@ function journal:grid3InitMountButton(btn, data)
 				g3btn.qualityBorder:SetAlpha(.25)
 			end
 
-			self:updateMountToggleButton(g3btn, isForDragonriding)
+			self:updateMountToggleButton(g3btn)
 			g3btn:Show()
 		else
 			g3btn:Hide()
@@ -1684,35 +1642,47 @@ function journal:sortMounts()
 
 	local mCache = setmetatable({}, {__index = function(t, mount)
 		if type(mount) == "number" then
-			local name, spellID, _,_,_,_, isFavorite, _,_,_, isCollected, _, isForDragonriding = C_MountJournal.GetMountInfoByID(mount)
-			t[mount] = {name, isFavorite, isCollected, isForDragonriding, spellID}
+			local name, spellID, _,_,_,_, isFavorite, _,_,_, isCollected = C_MountJournal.GetMountInfoByID(mount)
+			t[mount] = {
+				name = name,
+				isFavorite = isFavorite,
+				isCollected = isCollected,
+				spellID = spellID,
+			}
 			if numNeedingFanfare > 0 and C_MountJournal.NeedsFanfare(mount) then
-				t[mount][6] = true
+				t[mount].needFanfare = true
 				numNeedingFanfare = numNeedingFanfare - 1
 			end
 			if fSort.by == "type" then
 				local _,_,_,_, mType = C_MountJournal.GetMountInfoExtraByID(mount)
 				mType = self.mountTypes[mType]
-				t[mount][8] = type(mType) == "number" and mType or mType[1]
+				t[mount].by = type(mType) == "number" and mType or mType[1]
 			elseif fSort.by == "family" then
 				local family = db[mount][2]
-				t[mount][8] = type(family) == "number" and family or family[1]
+				t[mount].by = type(family) == "number" and family or family[1]
 			elseif fSort.by == "expansion" then
-				t[mount][8] = db[mount][1]
+				t[mount].by = db[mount][1]
 			elseif fSort.by == "rarity" then
-				t[mount][8] = db[mount][3]
+				t[mount].by = db[mount][3]
 			end
 		else
-			t[mount] = {mount.name, mount:getIsFavorite(), true, mount.dragonriding, mount.spellID, false, true}
+			t[mount] = {
+				name = mount.name,
+				isFavorite = mount:getIsFavorite(),
+				isCollected = true,
+				spellID = mount.spellID,
+				needsFanfare = false,
+				additional = true,
+			}
 			if fSort.by == "type" then
 				local mType = self.mountTypes[mount.mountType]
-				t[mount][8] = type(mType) == "number" and mType or mType[1]
+				t[mount].by = type(mType) == "number" and mType or mType[1]
 			elseif fSort.by == "family" then
-				t[mount][8] = 0
+				t[mount].by = 0
 			elseif fSort.by == "expansion" then
-				t[mount][8] = mount.expansion
+				t[mount].by = mount.expansion
 			elseif fSort.by == "rarity" then
-				t[mount][8] = 100
+				t[mount].by = 100
 			end
 		end
 		return t[mount]
@@ -1724,16 +1694,16 @@ function journal:sortMounts()
 		local mb = mCache[b]
 
 		-- FANFARE
-		local needFanfareA = ma[6]
-		local needFanfareB = mb[6]
+		local needFanfareA = ma.needFanfare
+		local needFanfareB = mb.needFanfare
 
 		if needFanfareA and not needFanfareB then return true
 		elseif not needFanfareA and needFanfareB then return false end
 
 		-- COLLECTED
 		if fSort.collectedFirst then
-			local isCollectedA = ma[3]
-			local isCollectedB = mb[3]
+			local isCollectedA = ma.isCollected
+			local isCollectedB = mb.isCollected
 
 			if isCollectedA and not isCollectedB then return true
 			elseif not isCollectedA and isCollectedB then return false end
@@ -1741,8 +1711,8 @@ function journal:sortMounts()
 
 		-- FAVORITES
 		if fSort.favoritesFirst then
-			local isFavoriteA = ma[2]
-			local isFavoriteB = mb[2]
+			local isFavoriteA = ma.isFavorite
+			local isFavoriteB = mb.isFavorite
 
 			if isFavoriteA and not isFavoriteB then return true
 			elseif not isFavoriteA and isFavoriteB then return false end
@@ -1750,40 +1720,31 @@ function journal:sortMounts()
 
 		-- ADDITIONAL
 		if fSort.additionalFirst then
-			local isAdditionalA = ma[7]
-			local isAdditionalB = mb[7]
+			local isAdditionalA = ma.additional
+			local isAdditionalB = mb.additional
 
 			if isAdditionalA and not isAdditionalB then return true
 			elseif not isAdditionalA and isAdditionalB then return false end
 		end
 
-		-- DRAGONRIDING
-		if fSort.dragonridingFirst then
-			local isForDragonridingA = ma[4]
-			local isForDragonridingB = mb[4]
-
-			if isForDragonridingA and not isForDragonridingB then return true
-			elseif not isForDragonridingA and isForDragonridingB then return false end
-		end
-
 		-- BY
 		if fSort.by ~= "name" then
-			local byA = ma[8]
-			local byB = mb[8]
+			local byA = ma.by
+			local byB = mb.by
 
 			if byA < byB then return not fSort.reverse
 			elseif byA > byB then return fSort.reverse end
 		end
 
 		-- NAME
-		local nameA = ma[1]
-		local nameB = mb[1]
+		local nameA = ma.name
+		local nameB = mb.name
 		local reverse = fSort.by == "name" and fSort.reverse
 
 		if nameA < nameB then return not reverse
 		elseif nameA > nameB then return reverse end
 
-		return ma[5] < mb[5]
+		return ma.spellID < mb.spellID
 	end)
 
 	self:updateMountsList()
@@ -1835,7 +1796,6 @@ end
 
 function journal:createMountList(mapID)
 	self.zoneMounts[mapID] = {
-		dragonriding = {},
 		fly = {},
 		ground = {},
 		swimming = {},
@@ -1857,7 +1817,7 @@ function journal:getRemoveMountList(mapID)
 		end
 	end
 
-	if not (next(list.dragonriding) or next(list.fly) or next(list.ground) or next(list.swimming))
+	if not (next(list.fly) or next(list.ground) or next(list.swimming))
 	and not flags
 	and not list.listFromID then
 		self.zoneMounts[mapID] = nil
@@ -2012,7 +1972,6 @@ function journal:updateMapSettings()
 	local flags = self.currentList and self.currentList.flags
 
 	mapSettings.Flags:SetChecked(flags and flags.enableFlags)
-	mapSettings.Fly:SetChecked(flags and flags.regularFlyOnly)
 	mapSettings.Ground:SetChecked(flags and flags.groundOnly)
 	mapSettings.WaterWalk:SetChecked(flags and flags.waterWalkOnly)
 	mapSettings.HerbGathering:SetChecked(flags and flags.herbGathering)
@@ -2561,7 +2520,7 @@ function journal:updateBtnFilters()
 			if i == #filter then
 				for _, btn in ipairs(filtersBar[typeFilter].childs) do
 					btn:SetChecked(false)
-					if btn.id > 4 then
+					if btn.id > 3 then
 						btn.icon:SetDesaturated()
 					else
 						btn.icon:SetVertexColor(self.colors["mount"..btn.id]:GetRGB())
@@ -2573,7 +2532,7 @@ function journal:updateBtnFilters()
 				for _, btn in ipairs(filtersBar[typeFilter].childs) do
 					local checked = filter[btn.id]
 					btn:SetChecked(checked)
-					if btn.id > 4 then
+					if btn.id > 3 then
 						btn.icon:SetDesaturated(not checked)
 					else
 						local color = checked and self.colors["mount"..btn.id] or self.colors.dark
@@ -2606,11 +2565,9 @@ function journal:getFilterSelected(spellID)
 		else i = i + 1 end
 		if list.swimming[spellID] then if filter[3] then return true end
 		else i = i + 1 end
-		if list.dragonriding[spellID] then if filter[4] then return true end
-		else i = i + 1 end
-		return i == 4 and filter[5]
+		return i == 3 and filter[4]
 	else
-		return filter[5]
+		return filter[4]
 	end
 end
 

@@ -29,15 +29,6 @@ function journal.filters.types(btn, level)
 	info.notCheckable = nil
 	local types = mounts.filters.types
 
-	info.text = MOUNT_JOURNAL_FILTER_DRAGONRIDING
-	info.func = function(_,_,_, value)
-		types[4] = value
-		journal:updateBtnFilters()
-		journal:updateMountsList()
-	end
-	info.checked = function() return types[4] end
-	btn:ddAddButton(info, level)
-
 	for i = 1, 3 do
 		info.text = L["MOUNT_TYPE_"..i]
 		info.func = function(_,_,_, value)

@@ -80,12 +80,4 @@ function journal.filters.sorting(btn, level)
 	end
 	info.checked = fSort.additionalFirst
 	btn:ddAddButton(info, level)
-
-	info.text = L["Dragonriding First"]
-	info.func = function(_,_,_, value)
-		fSort.dragonridingFirst = value
-		journal:sortMounts()
-	end
-	info.checked = fSort.dragonridingFirst
-	btn:ddAddButton(info, level)
 end

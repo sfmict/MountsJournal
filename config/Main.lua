@@ -19,8 +19,6 @@ function config:PLAYER_LOGIN()
 	self.bindMount = binding:createButtonBinding(self.secureButtonNameMount, ("%s %s %d"):format(addon, SUMMONS, 1), "MJSecureActionButtonTemplate")
 	self.bindSecondMount = binding:createButtonBinding(self.secureButtonNameSecondMount, ("%s %s %d"):format(addon, SUMMONS, 2), "MJSecureActionButtonTemplate")
 	self.bindSecondMount.secure.forceModifier = true
-	self.bindThirdMount = binding:createButtonBinding(self.secureButtonNameThirdMount, ("%s %s %d"):format(addon, SUMMONS, 3), "MJSecureActionButtonTemplate")
-	self.bindThirdMount.secure.forceFly = true
 end
 
 
@@ -182,36 +180,6 @@ config:SetScript("OnShow", function(self)
 	self.bindSecondMount:SetParent(self.leftPanel)
 	self.bindSecondMount:SetSize(258, 22)
 	self.bindSecondMount:SetPoint("TOP", self.createSecondMacroBtn, "BOTTOM", 0, -20)
-
-	-- HELP PLATE THIRD MOUNT
-	local helpPlateThird = CreateFrame("FRAME", nil, self.leftPanel, "MJHelpPlate")
-	helpPlateThird:SetPoint("TOP", self.bindSecondMount, "BOTTOM", 0, -10)
-	helpPlateThird.tooltip = SUMMONS.." 3"
-	helpPlateThird.tooltipDescription = "\n"..L["ThirdMountTooltipDescription"]
-
-	-- SUMMON 3
-	local summon3 = self.leftPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-	summon3:SetPoint("TOPLEFT", self.bindSecondMount, "BOTTOMLEFT", 0, -55)
-	summon3:SetText(SUMMONS.." 3")
-
-	-- CREATE THIRD MACRO
-	self.createThirdMacroBtn = CreateFrame("BUTTON", nil, self.leftPanel, "UIPanelButtonTemplate")
-	self.createThirdMacroBtn:SetSize(258, 30)
-	self.createThirdMacroBtn:SetPoint("TOPLEFT", summon3, "BOTTOMLEFT", 0, -5)
-	self.createThirdMacroBtn:SetText(L["CreateMacro"])
-	self.createThirdMacroBtn:SetScript("OnClick", function() self:createMacro(self.thirdMacroName, self.secureButtonNameThirdMount, 132239, true) end)
-
-	setTooltip(self.createThirdMacroBtn, "ANCHOR_TOP", L["CreateMacro"], L["CreateMacroTooltip"])
-
-	-- OR TEXT THIRD
-	local macroOrBindThird = self.leftPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	macroOrBindThird:SetPoint("TOP", self.createThirdMacroBtn, "BOTTOM", 0, -3)
-	macroOrBindThird:SetText(L["or key bind"])
-
-	-- BIND THIRD MOUNT
-	self.bindThirdMount:SetParent(self.leftPanel)
-	self.bindThirdMount:SetSize(258, 22)
-	self.bindThirdMount:SetPoint("TOP", self.createThirdMacroBtn, "BOTTOM", 0, -20)
 
 	-- UNBOUND MESSAGE
 	binding.unboundMessage:SetParent(self)

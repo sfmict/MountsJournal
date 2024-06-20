@@ -1,4 +1,4 @@
-local random, C_PetJournal, AuraUtil, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, GetSpellCooldown, UnitIsAFK, DoEmote = random, C_PetJournal, AuraUtil, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, GetSpellCooldown, UnitIsAFK, DoEmote
+local random, C_PetJournal, C_Spell, AuraUtil, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, UnitIsAFK, DoEmote = random, C_PetJournal, C_Spell, AuraUtil, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, UnitIsAFK, DoEmote
 local mounts, util = MountsJournal, MountsJournalUtil
 local pets = CreateFrame("FRAME")
 mounts.pets = pets
@@ -109,7 +109,7 @@ do
 			or UnitChannelInfo("player")
 			or IsStealthed()
 			or UnitIsGhost("player")
-			or GetSpellCooldown(61304) ~= 0
+			or C_Spell.GetSpellCooldown(61304).startTime ~= 0
 			or isAuraApplied()
 		then
 			self:stopTicker()
