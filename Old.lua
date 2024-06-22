@@ -213,10 +213,12 @@ local function updateGlobal(self)
 			end
 		end
 
-		removeDragonriding(self.defProfile)
-		for name, profile in next, self.profiles do
-			removeDragonriding(profile)
-		end
+		after(self, function()
+			removeDragonriding(self.defProfile)
+			for name, profile in next, self.profiles do
+				removeDragonriding(profile)
+			end
+		end)
 	end
 end
 
