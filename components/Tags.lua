@@ -93,7 +93,7 @@ end
 
 function tags:dragMount(spellID)
 	if InCombatLockdown() then return end
-	PickupSpell(spellID)
+	C_Spell.PickupSpell(spellID)
 end
 
 

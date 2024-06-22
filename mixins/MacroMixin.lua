@@ -1,11 +1,13 @@
 local type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras = type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras
 local macroFrame = CreateFrame("FRAME")
+local macroName = "MJMacroMixin"
 
 
 macroFrame:SetScript("OnEvent", function(self, event, ...)
 	self[event](self, ...)
 end)
 macroFrame:RegisterEvent("PLAYER_LOGIN")
+macroFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
 
 
 function macroFrame:PLAYER_LOGIN()
@@ -509,6 +511,21 @@ function macroFrame:getCombatMacro()
 end
 
 
+function setMacro(macroName, defTexture, macro)
+	local _, texture = GetMacroInfo(macroName)
+	if texture then
+		EditMacro(macroName, macroName, texture, macro)
+	else
+		CreateMacro(macroName, defTexture, macro)
+	end
+end
+
+
+function macroFrame:PLAYER_REGEN_DISABLED()
+	setMacro(macroName, 134400, macroFrame:getCombatMacro())
+end
+
+
 function MountsJournalUtil.getClassMacro(...)
 	return macroFrame:getClassMacro(...)
 end
@@ -522,38 +539,13 @@ end
 MJMacroMixin = {}
 
 
-function MJMacroMixin:onEvent(event, ...)
-	self[event](self, ...)
-end
-
-
 function MJMacroMixin:onLoad()
 	self.mounts = MountsJournal
-	self:RegisterEvent("PLAYER_REGEN_DISABLED")
-end
-
-
-function setMacro(macroName, defTexture, macro)
-	local _, texture = GetMacroInfo(macroName)
-	if texture then
-		EditMacro(macroName, macroName, texture, macro)
-	else
-		CreateMacro(macroName, defTexture, macro)
-	end
 end
 
 
 function MJMacroMixin:preClick(button, down)
 	self.mounts.sFlags.forceModifier = self.forceModifier
 	if InCombatLockdown() or down ~= GetCVarBool("ActionButtonUseKeyDown") then return end
-	local macroName = "MJNoCombatMacro"
 	setMacro(macroName, 134400, macroFrame:getMacro())
-	self:SetAttribute("macro", macroName)
-end
-
-
-function MJMacroMixin:PLAYER_REGEN_DISABLED()
-	local macroName = "MJCombatMacro"
-	setMacro(macroName, 134400, macroFrame:getCombatMacro())
-	self:SetAttribute("macro", macroName)
 end

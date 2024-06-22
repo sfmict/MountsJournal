@@ -235,6 +235,14 @@ function journal:init()
 		frame:RunAttribute("update")
 	]])
 
+	-- DYNAMIC FLIGHT
+	hooksecurefunc(self.MountJournal.ToggleDynamicFlightFlyoutButton, "UpdateVisibility", function()
+		if InCombatLockdown() then return end
+		local isDragonRidingUnlocked = DragonridingUtil.IsDragonridingUnlocked()
+		self.bgFrame.OpenDynamicFlightSkillTreeButton:SetShown(isDragonRidingUnlocked)
+		self.bgFrame.DynamicFlightModeButton:SetShown(isDragonRidingUnlocked)
+	end)
+
 	-- CLOSE BUTTON
 	self.bgFrame.closeButton:SetAttribute("type", "click")
 	self.bgFrame.closeButton:SetAttribute("clickbutton", self.CollectionsJournal.CloseButton)
@@ -1267,7 +1275,9 @@ end
 
 function journal:COMPANION_UPDATE(companionType)
 	if companionType == "MOUNT" then
+		self.tags.doNotHideMenu = true
 		self:updateScrollMountList()
+		self.tags.doNotHideMenu = nil
 		self:updateMountDisplay()
 		self.mountSpecial:SetEnabled(not not util.getUnitMount("player"))
 	end
@@ -1694,55 +1704,38 @@ function journal:sortMounts()
 		local mb = mCache[b]
 
 		-- FANFARE
-		local needFanfareA = ma.needFanfare
-		local needFanfareB = mb.needFanfare
-
-		if needFanfareA and not needFanfareB then return true
-		elseif not needFanfareA and needFanfareB then return false end
+		if ma.needFanfare and not mb.needFanfare then return true
+		elseif not ma.needFanfare and mb.needFanfare then return false end
 
 		-- COLLECTED
 		if fSort.collectedFirst then
-			local isCollectedA = ma.isCollected
-			local isCollectedB = mb.isCollected
-
-			if isCollectedA and not isCollectedB then return true
-			elseif not isCollectedA and isCollectedB then return false end
+			if ma.isCollected and not mb.isCollected then return true
+			elseif not ma.isCollected and mb.isCollected then return false end
 		end
 
 		-- FAVORITES
 		if fSort.favoritesFirst then
-			local isFavoriteA = ma.isFavorite
-			local isFavoriteB = mb.isFavorite
-
-			if isFavoriteA and not isFavoriteB then return true
-			elseif not isFavoriteA and isFavoriteB then return false end
+			if ma.isFavorite and not mb.isFavorite then return true
+			elseif not ma.isFavorite and mb.isFavorite then return false end
 		end
 
 		-- ADDITIONAL
 		if fSort.additionalFirst then
-			local isAdditionalA = ma.additional
-			local isAdditionalB = mb.additional
-
-			if isAdditionalA and not isAdditionalB then return true
-			elseif not isAdditionalA and isAdditionalB then return false end
+			if ma.additional and not mb.additional then return true
+			elseif not ma.additional and mb.additional then return false end
 		end
 
 		-- BY
 		if fSort.by ~= "name" then
-			local byA = ma.by
-			local byB = mb.by
-
-			if byA < byB then return not fSort.reverse
-			elseif byA > byB then return fSort.reverse end
+			if ma.by < mb.by then return not fSort.reverse
+			elseif ma.by > mb.by then return fSort.reverse end
 		end
 
 		-- NAME
-		local nameA = ma.name
-		local nameB = mb.name
 		local reverse = fSort.by == "name" and fSort.reverse
 
-		if nameA < nameB then return not reverse
-		elseif nameA > nameB then return reverse end
+		if ma.name < mb.name then return not reverse
+		elseif ma.name > mb.name then return reverse end
 
 		return ma.spellID < mb.spellID
 	end)

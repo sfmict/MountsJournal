@@ -27,11 +27,10 @@ local function getIsFavorite(self)
 end
 
 
-local function createMountFromSpell(spellID, mountType, dragonriding, expansion, modelSceneID)
+local function createMountFromSpell(spellID, mountType, expansion, modelSceneID)
 	local t = {
 		spellID = spellID,
 		mountType = mountType,
-		dragonriding = dragonriding,
 		expansion = expansion,
 		modelSceneID = modelSceneID,
 		isActive = isActive,
@@ -60,7 +59,7 @@ end
 
 
 -- SOAR
-local soar = createMountFromSpell(369536, 402, true, 10, 4)
+local soar = createMountFromSpell(369536, 402, 10, 4)
 
 if raceID == 52 then
 	soar.creatureID = "player"
@@ -83,7 +82,7 @@ end
 
 
 -- RUNNING WILD
-local runningWild = createMountFromSpell(87840, 230, false, 4, 719)
+local runningWild = createMountFromSpell(87840, 230, 4, 719)
 
 if raceID == 22 then
 	runningWild.creatureID = "player"
