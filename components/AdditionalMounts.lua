@@ -61,15 +61,13 @@ end
 -- SOAR
 local soar = createMountFromSpell(369536, 402, 10, 4)
 
-if raceID == 52 then
+if raceID == 52 or raceID == 70 then
 	soar.creatureID = "player"
+	soar.isShown = true
 else
 	-- MALE ID 198587 or FEMALE ID 200550
 	soar.creatureID = UnitSex("player") == 2 and 110241 or 111204
-end
-
-function soar:isShown()
-	return raceID == 52
+	soar.isShown = false
 end
 
 function soar:canUse()
@@ -86,11 +84,9 @@ local runningWild = createMountFromSpell(87840, 230, 4, 719)
 
 if raceID == 22 then
 	runningWild.creatureID = "player"
+	runningWild.isShown = true
 else
 	-- MALE ID 45254 or FEMALE ID 39725
 	runningWild.creatureID = UnitSex("player") == 2 and 34344 or 37389
-end
-
-function runningWild:isShown()
-	return raceID == 22
+	runningWild.isShown = false
 end

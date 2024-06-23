@@ -1289,7 +1289,7 @@ function journal:getMountInfo(mount)
 	if type(mount) == "number" then
 		return C_MountJournal.GetMountInfoByID(mount)
 	else
-		return mount.name, mount.spellID, mount.icon, mount:isActive(), mount:isUsable(), 0, mount:getIsFavorite(), false, nil, not mount:isShown(), true
+		return mount.name, mount.spellID, mount.icon, mount:isActive(), mount:isUsable(), 0, mount:getIsFavorite(), false, nil, not mount.isShown, true
 	end
 end
 
