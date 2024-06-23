@@ -17,12 +17,6 @@ local function compareVersion(v1, v2)
 end
 
 
-local function after(self, func)
-	self.after = self.after or {}
-	self.after[#self.after + 1] = func
-end
-
-
 local function updateGlobal(self)
 	--IF < 8.3.2 GLOBAL
 	if compareVersion("8.3.2", self.globalDB.lastAddonVersion) then
@@ -130,12 +124,10 @@ local function updateGlobal(self)
 			end
 		end
 
-		after(self, function()
-			allToDragonriding(self.defProfile)
-			for name, data in next, self.profiles do
-				allToDragonriding(data)
-			end
-		end)
+		allToDragonriding(self.defProfile)
+		for name, data in next, self.profiles do
+			allToDragonriding(data)
+		end
 	end
 
 	-- IF < 10.2.15 GLOBAL
@@ -175,20 +167,18 @@ local function updateGlobal(self)
 			end
 		end
 
-		after(self, function()
-			if self.config.repairSelectedMount then
-				local _, spellID = C_MountJournal.GetMountInfoByID(self.config.repairSelectedMount)
-				self.config.repairSelectedMount = spellID
-			end
-			if self.globalDB.hiddenMounts then
-				self.globalDB.hiddenMounts = mountToSpell(self.globalDB.hiddenMounts)
-			end
-			self.globalDB.mountTags = mountToSpell(self.globalDB.mountTags)
-			profileToSpell(self.defProfile)
-			for name, data in next, self.profiles do
-				profileToSpell(data)
-			end
-		end)
+		if self.config.repairSelectedMount then
+			local _, spellID = C_MountJournal.GetMountInfoByID(self.config.repairSelectedMount)
+			self.config.repairSelectedMount = spellID
+		end
+		if self.globalDB.hiddenMounts then
+			self.globalDB.hiddenMounts = mountToSpell(self.globalDB.hiddenMounts)
+		end
+		self.globalDB.mountTags = mountToSpell(self.globalDB.mountTags)
+		profileToSpell(self.defProfile)
+		for name, data in next, self.profiles do
+			profileToSpell(data)
+		end
 	end
 
 	-- IF < 10.2.41 GLOBAL
