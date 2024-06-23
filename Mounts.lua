@@ -14,6 +14,7 @@ mounts:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
 function mounts:ADDON_LOADED(addonName)
 	if addonName == addon then
 		self:UnregisterEvent("ADDON_LOADED")
+		self.ADDON_LOADED = nil
 
 		local mapInfo = MapUtil.GetMapParentInfo(C_Map.GetFallbackWorldMapID(), Enum.UIMapType.Cosmic, true)
 		self.defMountsListID = mapInfo and mapInfo.mapID or 946 -- WORLD
@@ -91,9 +92,6 @@ function mounts:ADDON_LOADED(addonName)
 		self.charDB.profileBySpecializationPVP = self.charDB.profileBySpecializationPVP or {}
 		self.charDB.holidayProfiles = self.charDB.holidayProfiles or {}
 
-		-- Рудименты
-		self:setOldChanges()
-
 		-- Списки
 		self.swimmingVashjir = {
 			[75207] = true, -- Вайш'ирский морской конек
@@ -125,7 +123,6 @@ function mounts:ADDON_LOADED(addonName)
 			{itemID = 37011},
 			{mountID = 1799},
 		}
-		self:setUsableRepairMounts()
 	end
 end
 
@@ -141,14 +138,11 @@ end
 
 
 function mounts:PLAYER_LOGIN()
-	if self.after then
-		for i = 1, #self.after do
-			self.after[i]()
-		end
-		self.after = nil
-	end
+	self.PLAYER_LOGIN = nil
+	self:setOldChanges()
 
 	-- INIT
+	self:setUsableRepairMounts()
 	self:setModifier(self.config.modifier)
 	self:setHandleWaterJump(self.config.waterJump)
 	self:setHerbMount()
