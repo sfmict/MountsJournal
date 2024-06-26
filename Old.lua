@@ -195,11 +195,20 @@ local function updateGlobal(self)
 		if self.defFilters.types then self.defFilters.types[4] = nil end
 		if self.defFilters.selected then self.defFilters.selected[5] = nil end
 
+		local function dragonridingToFly(list)
+			if list.dragonriding then
+				for k, v in next, list.dragonriding do
+					list.fly[k] = v
+				end
+				list.dragonriding = nil
+			end
+		end
+
 		local function removeDragonriding(profile)
-			profile.dragonriding = nil
+			dragonridingToFly(profile)
 			for mapID, mapSettings in next, profile.zoneMounts do
 				mapSettings.flags.regularFlyOnly = nil
-				mapSettings.dragonriding = nil
+				dragonridingToFly(mapSettings)
 			end
 		end
 

@@ -1,4 +1,4 @@
-local C_UnitAuras, C_Spell, IsSpellKnown, GetSpellCooldown = C_UnitAuras, C_Spell, IsSpellKnown, GetSpellCooldown
+local C_UnitAuras, C_Spell, IsSpellKnown = C_UnitAuras, C_Spell, IsSpellKnown
 local mounts = MountsJournal
 local ltl = LibStub("LibThingsLoad-1.0")
 local _,_, raceID = UnitRace("player")
@@ -74,8 +74,8 @@ function soar:canUse()
 	return not mounts.sFlags.isSubmerged
 	   and IsSpellKnown(self.spellID)
 	   and C_Spell.IsSpellUsable(self.spellID)
-	   and GetSpellCooldown(self.spellID) == 0
-	   and GetSpellCooldown(61304) == 0
+	   and C_Spell.GetSpellCooldown(self.spellID).startTime == 0
+	   and C_Spell.GetSpellCooldown(61304).startTime == 0
 end
 
 
