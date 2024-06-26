@@ -62,7 +62,7 @@ end
 -- SOAR
 local soar = createMountFromSpell(369536, 402, true, 10, 4)
 
-if raceID == 52 then
+if raceID == 52 or raceID == 70 then
 	soar.creatureID = "player"
 else
 	-- MALE ID 198587 or FEMALE ID 200550
@@ -70,7 +70,7 @@ else
 end
 
 function soar:isShown()
-	return raceID == 52
+	return raceID == 52 or raceID == 70
 end
 
 function soar:canUse()
