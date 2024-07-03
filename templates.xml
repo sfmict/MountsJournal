@@ -2174,6 +2174,7 @@
 	<Frame name="MJSecureActionButtonTemplate" inherits="SecureActionButtonTemplate" mixin="MJMacroMixin" virtual="true">
 		<Scripts>
 			<OnLoad method="onLoad"/>
+			<OnEvent method="onEvent"/>
 			<PreClick method="preClick"/>
 		</Scripts>
 	</Frame>

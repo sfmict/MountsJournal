@@ -46,7 +46,6 @@ function binding:createButtonBinding(name, description, secureTemplate, macro)
 	button.secure = CreateFrame("Button", name, UIParent, secureTemplate or "SecureActionButtonTemplate")
 	button.secure:RegisterForClicks("AnyUp", "AnyDown")
 	button.secure:SetAttribute("type", "macro")
-	button.secure:SetAttribute("macro", "MJMacroMixin")
 	if macro then button.secure:SetAttribute("macrotext", macro) end
 	button.command = "CLICK "..name..":LeftButton"
 	_G["BINDING_NAME_"..button.command] = description or name
