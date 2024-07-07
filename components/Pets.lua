@@ -78,6 +78,7 @@ do
 		[371125] = true, -- Potion of the Hushed Zephyr 12 sec
 		[371133] = true, -- Potion of the Hushed Zephyr 15 sec
 		[371134] = true, -- Potion of the Hushed Zephyr 18 sec
+		[431424] = true, -- Treading Lightly
 	}
 
 	local function checkAura(auraData)
