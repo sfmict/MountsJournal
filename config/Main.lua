@@ -7,7 +7,6 @@ config.secondMacroName = "MJSecondMacro"
 config.thirdMacroName = "MJThirdMacro"
 config.secureButtonNameMount = addon.."_Mount"
 config.secureButtonNameSecondMount = addon.."_SecondMount"
-config.secureButtonNameThirdMount = addon.."_ThirdMount"
 
 
 config:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
