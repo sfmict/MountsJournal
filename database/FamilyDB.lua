@@ -59,6 +59,7 @@ MountsJournal.familyDB = {
 		["Sabers"] = 706,
 		["Stone Cats"] = 707,
 		["Tigers"] = 708,
+		["Lynx"] = 709,
 	},
 	["Crabs"] = 800,
 	["Demons"] = {
@@ -143,6 +144,8 @@ MountsJournal.familyDB = {
 		["Silithids"] = 2008,
 		["Wasp"] = 2009,
 		["Water Striders"] = 2010,
+		["Skyrazor"] = 2011,
+		["Skyflayer"] = 2012,
 	},
 	["Jellyfish"] = 2100,
 	["Mollusc"] = {
@@ -173,6 +176,7 @@ MountsJournal.familyDB = {
 	["Rodent"] = {
 		["Rabbit"] = 2600,
 		["Rats"] = 2601,
+		["Mudnose"] = 2602,
 	},
 	["Rylaks"] = 2700,
 	["Ungulates"] = {
