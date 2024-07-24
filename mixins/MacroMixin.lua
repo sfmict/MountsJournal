@@ -1,4 +1,4 @@
-local type, pairs, rawget, GetItemCount, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras = type, pairs, rawget, GetItemCount, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras
+local type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras = type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras
 local macroFrame = CreateFrame("FRAME")
 
 
@@ -93,7 +93,6 @@ function macroFrame:PLAYER_LOGIN()
 			and (not self.classConfig.useOnlyInWaterWalkLocation or self.sFlags.waterWalk)
 			and not self.sFlags.swimming
 			and not self.sFlags.fly
-			and not self.sFlags.isDragonridable
 			then
 				macro = self:addLine(macro, "/cast "..self:getSpellName(3714)) -- Path of Frost
 			end
@@ -104,7 +103,6 @@ function macroFrame:PLAYER_LOGIN()
 			and (not self.classConfig.useOnlyInWaterWalkLocation or self.sFlags.waterWalk)
 			and not self.sFlags.swimming
 			and not self.sFlags.fly
-			and not self.sFlags.isDragonridable
 			then
 				macro = self:addLine(macro, "/cast [@player]"..self:getSpellName(546)) -- Water Walking
 			end
@@ -191,8 +189,10 @@ function macroFrame:PLAYER_LOGIN()
 			else
 				self.mounts:setSummonMount(true)
 
-				local additionMount = self.mounts.additionalMounts[self.sFlags.targetMount]
-				if not additionMount then
+				local additionMount
+				if self.sFlags.targetMount then
+					additionMount = self.mounts.additionalMounts[self.sFlags.targetMount]
+				else
 					additionMount = self.mounts.additionalMounts[self.mounts.summonedSpellID]
 				end
 
@@ -255,10 +255,10 @@ do
 		if spellCache[spellID] then
 			return spellCache[spellID]
 		else
-			local name = GetSpellInfo(spellID)
+			local name = C_Spell.GetSpellName(spellID)
 			if C_Spell.IsSpellDataCached(spellID) then
-				local subText = GetSpellSubtext(spellID)
-				if #subText > 0 then
+				local subText = C_Spell.GetSpellSubtext(spellID)
+				if subText and #subText > 0 then
 					name = name.."("..subText..")"
 				end
 				spellCache[spellID] = name
@@ -387,7 +387,7 @@ end
 
 
 function macroFrame:autoEquip()
-	if self.config.useUnderlightAngler and self.config.autoUseUnderlightAngler and GetItemCount(self.fishingRodID) > 0 and not InCombatLockdown() then
+	if self.config.useUnderlightAngler and self.config.autoUseUnderlightAngler and C_Item.GetItemCount(self.fishingRodID) > 0 and not InCombatLockdown() then
 		local curFishingRod = GetInventoryItemID("player", 28)
 		if IsSubmerged() then
 			if curFishingRod ~= self.fishingRodID then
@@ -415,7 +415,7 @@ do
 			local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(data.mountID)
 			return isUsable
 		elseif data.itemID then
-			return GetItemCount(data.itemID) > 0
+			return C_Item.GetItemCount(data.itemID) > 0
 		end
 	end
 
@@ -423,7 +423,6 @@ do
 	function macroFrame:getBroomData()
 		if not self.config.useMagicBroom
 		or not self.mounts.calendar:isHolidayActive(324) -- Hallow's End
-		or self.sFlags.isDragonridable
 		or self.sFlags.targetMount
 		or not self.sFlags.groundSpellKnown
 		or self.sFlags.herb
@@ -451,7 +450,7 @@ function macroFrame:getMacro()
 	self.mounts:setFlags()
 
 	-- UNDERLIGHT ANGLER
-	if self.config.useUnderlightAngler and GetItemCount(self.fishingRodID) > 0 then
+	if self.config.useUnderlightAngler and C_Item.GetItemCount(self.fishingRodID) > 0 then
 		self.fishingSlotID = GetInventoryItemID("player", 28)
 		if self.sFlags.swimming
 			and not self.sFlags.isVashjir
@@ -482,7 +481,7 @@ function macroFrame:getMacro()
 		end
 	-- CLASSMACRO
 	elseif self.macro and
-		(self.class == "DRUID" and self.classConfig.useMacroAlways and not (self.classConfig.useIfNotDragonridable and self.sFlags.isDragonridable)
+		(self.class == "DRUID" and self.classConfig.useMacroAlways
 		or not self.magicBroom and (self.sFlags.isIndoors or GetUnitSpeed("player") > 0 or IsFalling()))
 	then
 		macro = self.macro
@@ -523,25 +522,19 @@ end
 MJMacroMixin = {}
 
 
-function MJMacroMixin:onEvent(event, ...)
-	self[event](self, ...)
-end
-
-
 function MJMacroMixin:onLoad()
 	self.mounts = MountsJournal
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 end
 
 
-function MJMacroMixin:preClick(button, down)
-	self.mounts.sFlags.forceModifier = self.forceModifier
-	self.mounts.sFlags.forceFly = self.forceFly
-	if InCombatLockdown() or down ~= GetCVarBool("ActionButtonUseKeyDown") then return end
-	self:SetAttribute("macrotext", macroFrame:getMacro())
+function MJMacroMixin:onEvent(event, ...)
+	self:SetAttribute("macrotext", macroFrame:getCombatMacro())
 end
 
 
-function MJMacroMixin:PLAYER_REGEN_DISABLED()
-	self:SetAttribute("macrotext", macroFrame:getCombatMacro())
+function MJMacroMixin:preClick(button, down)
+	self.mounts.sFlags.forceModifier = self.forceModifier
+	if InCombatLockdown() or down ~= GetCVarBool("ActionButtonUseKeyDown") then return end
+	self:SetAttribute("macrotext", macroFrame:getMacro())
 end

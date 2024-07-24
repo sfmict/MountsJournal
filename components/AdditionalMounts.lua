@@ -1,4 +1,4 @@
-local C_UnitAuras, IsUsableSpell, IsSpellKnown, GetSpellCooldown = C_UnitAuras, IsUsableSpell, IsSpellKnown, GetSpellCooldown
+local C_UnitAuras, C_Spell, IsSpellKnown = C_UnitAuras, C_Spell, IsSpellKnown
 local mounts = MountsJournal
 local ltl = LibStub("LibThingsLoad-1.0")
 local _,_, raceID = UnitRace("player")
@@ -12,7 +12,7 @@ end
 
 local function isUsable(self)
 	return IsSpellKnown(self.spellID)
-	   and IsUsableSpell(self.spellID)
+	   and C_Spell.IsSpellUsable(self.spellID)
 end
 
 
@@ -27,11 +27,10 @@ local function getIsFavorite(self)
 end
 
 
-local function createMountFromSpell(spellID, mountType, dragonriding, expansion, modelSceneID)
+local function createMountFromSpell(spellID, mountType, expansion, modelSceneID)
 	local t = {
 		spellID = spellID,
 		mountType = mountType,
-		dragonriding = dragonriding,
 		expansion = expansion,
 		modelSceneID = modelSceneID,
 		isActive = isActive,
@@ -60,38 +59,34 @@ end
 
 
 -- SOAR
-local soar = createMountFromSpell(369536, 402, true, 10, 4)
+local soar = createMountFromSpell(369536, 402, 10, 4)
 
 if raceID == 52 or raceID == 70 then
 	soar.creatureID = "player"
+	soar.isShown = true
 else
 	-- MALE ID 198587 or FEMALE ID 200550
 	soar.creatureID = UnitSex("player") == 2 and 110241 or 111204
-end
-
-function soar:isShown()
-	return raceID == 52 or raceID == 70
+	soar.isShown = false
 end
 
 function soar:canUse()
 	return not mounts.sFlags.isSubmerged
 	   and IsSpellKnown(self.spellID)
-	   and IsUsableSpell(self.spellID)
-	   and GetSpellCooldown(self.spellID) == 0
-	   and GetSpellCooldown(61304) == 0
+	   and C_Spell.IsSpellUsable(self.spellID)
+	   and C_Spell.GetSpellCooldown(self.spellID).startTime == 0
+	   and C_Spell.GetSpellCooldown(61304).startTime == 0
 end
 
 
 -- RUNNING WILD
-local runningWild = createMountFromSpell(87840, 230, false, 4, 719)
+local runningWild = createMountFromSpell(87840, 230, 4, 719)
 
 if raceID == 22 then
 	runningWild.creatureID = "player"
+	runningWild.isShown = true
 else
 	-- MALE ID 45254 or FEMALE ID 39725
 	runningWild.creatureID = UnitSex("player") == 2 and 34344 or 37389
-end
-
-function runningWild:isShown()
-	return raceID == 22
+	runningWild.isShown = false
 end

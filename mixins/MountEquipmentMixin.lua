@@ -46,6 +46,8 @@ function MJMountEquipmentMixin:initEquipmentTooltip()
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 		GameTooltip:SetItemByID(item:GetItemID())
 		GameTooltip:Show()
+	else
+		GameTooltip_ShowSimpleTooltip(GameTooltip, MOUNT_EQUIPMENT_NOTICE, SimpleTooltipConstants.NoOverrideColor, SimpleTooltipConstants.DoNotWrapText, self, "ANCHOR_RIGHT")
 	end
 end
 

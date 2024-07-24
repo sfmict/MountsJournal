@@ -186,6 +186,37 @@ local function updateGlobal(self)
 		if self.filters.family then wipe(self.filters.family) end
 		if self.defFilters.family then wipe(self.defFilters.family) end
 	end
+
+	-- IF < 11.0.0 GLOBAL
+	if compareVersion("11.0.0", self.globalDB.lastAddonVersion) then
+		if self.filters.types then self.filters.types[4] = nil end
+		if self.filters.selected then self.filters.selected[5] = nil end
+		if self.filters.sorting then self.filters.sorting.dragonridingFirst = nil end
+		if self.defFilters.types then self.defFilters.types[4] = nil end
+		if self.defFilters.selected then self.defFilters.selected[5] = nil end
+
+		local function dragonridingToFly(list)
+			if list.dragonriding then
+				for k, v in next, list.dragonriding do
+					list.fly[k] = v
+				end
+				list.dragonriding = nil
+			end
+		end
+
+		local function removeDragonriding(profile)
+			dragonridingToFly(profile)
+			for mapID, mapSettings in next, profile.zoneMounts do
+				mapSettings.flags.regularFlyOnly = nil
+				dragonridingToFly(mapSettings)
+			end
+		end
+
+		removeDragonriding(self.defProfile)
+		for name, profile in next, self.profiles do
+			removeDragonriding(profile)
+		end
+	end
 end
 
 
@@ -241,6 +272,11 @@ local function updateChar(self)
 		self.charDB.macrosConfig.useRunningWild = nil
 		self.charDB.macrosConfig.soarSummoningChance = nil
 	end
+
+	-- IF < 11.0.0 CHAR
+	if compareVersion("11.0.0", self.globalDB.lastAddonVersion) then
+		self.charDB.macrosConfig.useIfNotDragonridable = nil
+	end
 end
 
 
@@ -249,7 +285,7 @@ function mounts:setOldChanges()
 
 	local currentVersion = C_AddOns.GetAddOnMetadata(addon, "Version")
 	--@do-not-package@
-	if currentVersion == "@project-version@" then currentVersion = "10.2.41" end
+	if currentVersion == "@project-version@" then currentVersion = "11.0.0" end
 	--@end-do-not-package@
 
 	if compareVersion(currentVersion, self.charDB.lastAddonVersion) then

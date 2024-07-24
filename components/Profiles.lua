@@ -114,7 +114,6 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 			dd.journal.list.fly[spellID] = nil
 			dd.journal.list.ground[spellID] = nil
 			dd.journal.list.swimming[spellID] = nil
-			dd.journal.list.dragonriding[spellID] = nil
 		end
 	end
 
@@ -161,7 +160,6 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 				wipe(self.journal.list.fly)
 				wipe(self.journal.list.ground)
 				wipe(self.journal.list.swimming)
-				wipe(self.journal.list.dragonriding)
 				self.journal:getRemoveMountList(self.journal.listMapID)
 				self:event("UPDATE_PROFILE")
 			end

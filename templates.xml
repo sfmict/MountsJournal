@@ -5,6 +5,7 @@
 	<Script file="mixins/ExistingListsMixin.lua"/>
 	<Script file="mixins/CompanionMixin.lua"/>
 	<Script file="mixins/MountEquipmentMixin.lua"/>
+	<Script file="mixins/DynamicFlightMixin.lua"/>
 
 	<CheckButton name="MJUseMountsJournalButtonTemplate" motionScriptsWhileDisabled="true" inherits="MJCheckButtonTemplate" virtual="true">
 		<Size x="25" y="24"/>
@@ -66,6 +67,20 @@
 				</Layers>
 			</Frame>
 
+			<Button parentKey="slotButton" scale=".69" inherits="MountEquipmentButtonTemplate,MJSecureActionButtonUpTemplate" mixin="MJMountEquipmentMixin" hidden="true">
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.mountCount" relativePoint="RIGHT" x="15"/>
+				</Anchors>
+				<Scripts>
+					<OnLoad inherit="prepend" method="onLoad"/>
+					<OnReceiveDrag/>
+					<OnShow method="onShow"/>
+					<OnHide method="onHide"/>
+					<OnEnter method="onEnter"/>
+					<OnEvent method="onEvent"/>
+				</Scripts>
+			</Button>
+
 			<Button parentKey="achiev" virtual="true">
 				<Size x="60" y="40"/>
 				<Anchors>
@@ -110,15 +125,9 @@
 				</HighlightTexture>
 			</Button>
 
-			<Button parentKey="summon3" inherits="MJSecureMacroButtonTemplate">
-				<Anchors>
-					<Anchor point="TOPRIGHT" x="-7" y="-25"/>
-				</Anchors>
-			</Button>
-
 			<Button parentKey="summon2" inherits="MJSecureMacroButtonTemplate">
 				<Anchors>
-					<Anchor point="RIGHT" relativeKey="$parent.summon3" relativePoint="LEFT" x="-6" y="0"/>
+					<Anchor point="TOPRIGHT" x="-7" y="-25"/>
 				</Anchors>
 			</Button>
 
@@ -128,17 +137,57 @@
 				</Anchors>
 			</Button>
 
-			<Button parentKey="slotButton" scale=".69" inherits="MountEquipmentButtonTemplate,MJSecureActionButtonUpTemplate" mixin="MJMountEquipmentMixin" hidden="true">
+			<Button parentKey="OpenDynamicFlightSkillTreeButton" inherits="DynamicFlightFlyoutButtonTemplate" mixin="MJDynamicFlightSkillTreeButtonMixin">
 				<Anchors>
-					<Anchor point="RIGHT" relativeKey="$parent.summon1" relativePoint="LEFT" x="-20"/>
+					<Anchor point="RIGHT" relativeKey="$parent.summon1" relativePoint="LEFT" x="-20" y="0"/>
 				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture file="Interface/ICONS/Ability_DragonRiding_Glyph01" setAllPoints="true"/>
+					</Layer>
+					<Layer level="OVERLAY">
+						<Texture parentKey="UnspentGlyphsHighlight" atlas="newplayertutorial-drag-slotgreen" alphaMode="ADD" alpha="0">
+							<Size x="54" y="54"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Animations>
+					<AnimationGroup parentKey="UnspentGlyphsAnim" setToFinalAlpha="true" looping="REPEAT">
+						<Alpha childKey="UnspentGlyphsHighlight" smoothing="OUT" duration=".75" order="1" fromAlpha="0" toAlpha="1"/>
+						<Alpha childKey="UnspentGlyphsHighlight" smoothing="IN" duration=".75" order="2" fromAlpha="1" toAlpha="0"/>
+					</AnimationGroup>
+				</Animations>
 				<Scripts>
-					<OnLoad inherit="prepend" method="onLoad"/>
-					<OnReceiveDrag/>
+					<OnLoad method="onLoad"/>
+					<OnClick method="onClick"/>
+					<OnEnter method="onEnter"/>
+					<OnLeave method="onLeave"/>
 					<OnShow method="onShow"/>
 					<OnHide method="onHide"/>
-					<OnEnter method="onEnter"/>
 					<OnEvent method="onEvent"/>
+				</Scripts>
+			</Button>
+
+			<Button parentKey="DynamicFlightModeButton"  inherits="DynamicFlightFlyoutButtonTemplate,MJSecureActionButtonUpTemplate" mixin="MJDynamicFlightModeButtonMixin">
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.OpenDynamicFlightSkillTreeButton" relativePoint="LEFT" x="-3" y="0"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture parentKey="texture" setAllPoints="true"/>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad method="onLoad"/>
+					<OnShow method="onShow"/>
+					<OnHide method="onHide"/>
+					<OnEvent method="onEvent"/>
+					<OnDragStart method="onDragStart"/>
+					<OnEnter method="onEnter"/>
+					<OnLeave function="GameTooltip_Hide"/>
 				</Scripts>
 			</Button>
 
@@ -224,7 +273,7 @@
 					</Layer>
 				</Layers>
 				<Frames>
-					<Button parentKey="overflow">
+					<Button parentKey="overflowButton" hidden="true">
 						<Size x="44" y="24"/>
 						<KeyValues>
 							<KeyValue key="LibSFDropDownNoGMEvent" value="true" type="boolean"/>
@@ -240,7 +289,7 @@
 							<TexCoords left=".54296875" right=".62890625" top=".7578125" bottom=".9921875"/>
 						</HighlightTexture>
 					</Button>
-					<Button parentKey="home" text="HOME">
+					<Button parentKey="homeButton" text="HOME">
 						<Size x="128" y="24"/>
 						<Layers>
 							<Layer level="OVERLAY">
@@ -1027,7 +1076,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self:SetAttribute("type", "macro")
+						self:SetAttribute("type", "spell")
 					</OnLoad>
 					<OnLeave function="GameTooltip_Hide"/>
 				</Scripts>
@@ -1347,18 +1396,6 @@
 		</Scripts>
 	</CheckButton>
 
-	<CheckButton name="MJSetDragonridingToggleTemplate" inherits="MJSetMountToggleTemplate" virtual="true">
-		<KeyValues>
-			<KeyValue key="type" value="dragonriding" type="string"/>
-		</KeyValues>
-		<Scripts>
-			<OnLoad>
-				self.icon:SetSize(11, 11)
-				self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/dragonriding")
-			</OnLoad>
-		</Scripts>
-	</CheckButton>
-
 	<CheckButton name="MJSetFlyToggleTemplate" inherits="MJSetMountToggleTemplate" virtual="true">
 		<KeyValues>
 			<KeyValue key="type" value="fly" type="string"/>
@@ -1405,12 +1442,6 @@
 					<Size x="147" y="0"/>
 					<Anchors>
 						<Anchor point="LEFT" x="6" y="1"/>
-					</Anchors>
-				</FontString>
-				<FontString parentKey="dragonridingText" inherits="GameFontDisableSmall" justifyH="LEFT" text="MOUNT_JOURNAL_FILTER_DRAGONRIDING" maxLines="1" hidden="true">
-					<Size x="147"/>
-					<Anchors>
-						<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeKey="$parent.name" x="0" y="0"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -1497,11 +1528,6 @@
 					<KeyValue key="LibSFDropDownNoGMEvent" value="true" type="boolean"/>
 				</KeyValues>
 			</Button>
-			<CheckButton parentKey="dragonriding" inherits="MJSetDragonridingToggleTemplate">
-				<Anchors>
-					<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="14"/>
-				</Anchors>
-			</CheckButton>
 			<CheckButton parentKey="fly" inherits="MJSetFlyToggleTemplate">
 				<Anchors>
 					<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="14"/>
@@ -1562,11 +1588,6 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<CheckButton parentKey="dragonriding" inherits="MJSetDragonridingToggleTemplate">
-				<Anchors>
-					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="0"/>
-				</Anchors>
-			</CheckButton>
 			<CheckButton parentKey="fly" inherits="MJSetFlyToggleTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="0"/>
@@ -2152,8 +2173,8 @@
 
 	<Frame name="MJSecureActionButtonTemplate" inherits="SecureActionButtonTemplate" mixin="MJMacroMixin" virtual="true">
 		<Scripts>
-			<OnEvent method="onEvent"/>
 			<OnLoad method="onLoad"/>
+			<OnEvent method="onEvent"/>
 			<PreClick method="preClick"/>
 		</Scripts>
 	</Frame>

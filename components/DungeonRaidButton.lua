@@ -9,7 +9,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 	dd.navBar = journal.navBar
 	journal.mapSettings.dnr = dd
 
-	if IsAddOnLoaded("Blizzard_EncounterJournal") then
+	if C_AddOns.IsAddOnLoaded("Blizzard_EncounterJournal") then
 		local oldOnEvent = EncounterJournal:GetScript("OnEvent")
 		EncounterJournal:SetScript("OnEvent", function(self, event, ...)
 			if event ~= "EJ_LOOT_DATA_RECIEVED" and event ~= "EJ_DIFFICULTY_UPDATE" or self:IsShown() then

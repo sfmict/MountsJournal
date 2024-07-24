@@ -44,6 +44,8 @@ test:RegisterEvent("ADDON_LOADED")
 -- test:RegisterAllEvents()
 
 test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
+-- test:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
+-- test:RegisterEvent("CHAT_MSG_CURRENCY")
 
 -- test:RegisterEvent("COMBAT_LOG_EVENT_UNFILTERED")
 -- function test:COMBAT_LOG_EVENT_UNFILTERED()

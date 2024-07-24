@@ -17,6 +17,10 @@ MJNavBarMixin = util.createFromEventsMixin()
 
 
 function MJNavBarMixin:onLoad()
+	self.template = "MJNavButtonTemplate"
+	self.freeButtons = {}
+	self.navList = {self.homeButton}
+	self.widthBuffer = 20
 	self.overlay:SetFrameLevel(self:GetFrameLevel() + 50)
 	self.defMapID = MountsJournal.defMountsListID
 
@@ -28,15 +32,22 @@ function MJNavBarMixin:onLoad()
 	self.navBtnClick = function(_, mapID)
 		self:setMapID(mapID or self.defMapID)
 	end
-	local homeData = {
+	self.homeButton:SetPoint("LEFT", 3, 0)
+	self.homeButton:SetScript("OnEnter", NavBar_ButtonOnEnter)
+	self.homeButton:SetScript("OnLeave", NavBar_ButtonOnLeave)
+	self.homeButton:RegisterForClicks("LeftButtonUp")
+	self.homeButton.oldClick = self.homeButton:GetScript("OnClick")
+	self.homeButton:SetScript("OnClick", NavBar_ButtonOnClick)
+	self.homeButton.data = {
 		name = WORLD,
 		OnClick = function() self:setDefMap() end,
 	}
-	NavBar_Initialize(self, "MJNavButtonTemplate", homeData, self.home, self.overflow)
-	self.home:SetPoint("LEFT", 3, 0)
-	self.overflow:SetPoint("LEFT", 3, 0)
-	self.overflow:SetScript("OnMouseDown", function(btn) self:dropDownToggleClick(btn) end)
-	self.overflow.listFunc = function(self)
+	self.homeButton:SetText(self.homeButton.data.name)
+	self.homeButton.myclick = self.homeButton.data.OnClick
+
+	self.overflowButton:SetPoint("LEFT", 3, 0)
+	self.overflowButton:SetScript("OnMouseDown", function(btn) self:dropDownToggleClick(btn) end)
+	self.overflowButton.listFunc = function(self)
 		local navBar = self:GetParent()
 		local list = {}
 		for _, button in ipairs(navBar.navList) do
@@ -50,6 +61,10 @@ function MJNavBarMixin:onLoad()
 		return list
 	end
 	self:setDefMap()
+
+	if Kiosk.IsEnabled() then
+		self.KioskOverlay:Show();
+	end
 
 	self:on("JOURNAL_RESIZED", self.refresh)
 end
