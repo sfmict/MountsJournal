@@ -580,6 +580,7 @@ function mounts:getSpellKnown()
 	if IsPlayerSpell(90265) -- Мастер верховой езды
 	or IsPlayerSpell(34091) -- Верховая езда (искусник)
 	or IsPlayerSpell(34090) -- Верховая езда (умелец)
+	or C_MountJournal.IsDragonridingUnlocked()
 	then
 		return true, true
 	end
