@@ -12,6 +12,7 @@ local _, L = ...
 -- L["Normal mount summon"] = ""
 -- L["SecondMountTooltipTitle"] = ""
 -- L["SecondMountTooltipDescription"] = ""
+-- L["UseBindingTooltip"] = ""
 -- L["ZoneSettingsTooltip"] = ""
 -- L["ZoneSettingsTooltipDescription"] = ""
 -- L["ButtonsSelectedTooltipDescription"] = ""
