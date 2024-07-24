@@ -112,6 +112,7 @@ local function updateGlobal(self)
 		end
 
 		local function allToDragonriding(profile)
+			profile.dragonriding = profile.dragonriding or {}
 			listToDragonriding(profile.dragonriding, profile.fly)
 			listToDragonriding(profile.dragonriding, profile.ground)
 			listToDragonriding(profile.dragonriding, profile.swimming)
