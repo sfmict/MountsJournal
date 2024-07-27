@@ -95,15 +95,6 @@ function journal.filters.family(dd, level, subFamily)
 				end
 			}
 		}
-		local textFunc = function(btn)
-			local i, j = 0, 0
-			for k, v in next, familyDB[btn.value[2]] do
-				i = i + 1
-				if filterFamily[v] then j = j + 1 end
-			end
-			local name = L[btn.value[2]]
-			return j > 0 and j < i and "*"..name or name
-		end
 		local subFunc = function(btn, _,_, checked)
 			for k, v in next, familyDB[btn.value[2]] do
 				filterFamily[v] = checked
@@ -113,10 +104,13 @@ function journal.filters.family(dd, level, subFamily)
 			dd:ddRefresh(level + 1)
 		end
 		local subCheck = function(btn)
+			local i, j = 0, 0
 			for k, v in next, familyDB[btn.value[2]] do
-				if not filterFamily[v] then return false end
+				i = i + 1
+				if filterFamily[v] then j = j + 1 end
 			end
-			return true
+			local name = L[btn.value[2]]
+			return i == j and 1 or j > 0 and 2
 		end
 
 		local list = {}
@@ -134,7 +128,7 @@ function journal.filters.family(dd, level, subFamily)
 				subInfo.checked = check
 			else
 				subInfo.hasArrow = true
-				subInfo.text = textFunc
+				subInfo.text = name[2]
 				subInfo.value = {"family", name[1]}
 				subInfo.widgets = subWidgets
 				subInfo.func = subFunc

@@ -350,15 +350,6 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 				btn:ddRefresh(level)
 			end
 
-			local textFunc = function(button)
-				local i, j = 0, 0
-				for k, v in next, familyDB[button.value] do
-					i = i + 1
-					if isChecked(v) then j = j + 1 end
-				end
-				local name = L[button.value]
-				return j > 0 and j < i and "*"..name or name
-			end
 			local subFunc = function(button, _,_, checked)
 				for k, v in next, familyDB[button.value] do
 					setFamilyID(v, checked)
@@ -366,11 +357,14 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 				btn:ddRefresh(level)
 				btn:ddRefresh(level + 1)
 			end
-			local subCheck = function(button)
-				for k, v in next, familyDB[button.value] do
-					if not isChecked(v) then return false end
+			local subCheck = function(btn)
+				local i, j = 0, 0
+				for k, v in next, familyDB[btn.value] do
+					i = i + 1
+					if isChecked(v) then j = j + 1 end
 				end
-				return true
+				local name = L[btn.value]
+				return i == j and 1 or j > 0 and 2
 			end
 
 			local list = {}
@@ -388,7 +382,7 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 					subInfo.checked = check
 				else
 					subInfo.hasArrow = true
-					subInfo.text = textFunc
+					subInfo.text = name[2]
 					subInfo.value = name[1]
 					subInfo.func = subFunc
 					subInfo.checked = subCheck
