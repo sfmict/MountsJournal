@@ -266,18 +266,22 @@ function journal:init()
 	summon1:SetNormalTexture(413588)
 	summon1.icon = summon1:GetNormalTexture()
 	summon1:SetAttribute("clickbutton", _G[config.secureButtonNameMount])
-	-- summon1:SetScript("OnDragStart", function()
-	-- 	if InCombatLockdown() then return end
+	summon1:SetScript("OnDragStart", function()
+		mounts.summonPanel:startDrag()
 	-- 	if not GetMacroInfo(config.macroName) then
 	-- 		config:createMacro(config.macroName, config.secureButtonNameMount, 413588)
 	-- 	end
 	-- 	PickupMacro(config.macroName)
-	-- end)
+	end)
+	summon1:SetScript("OnDragStop", function()
+		mounts.summonPanel:stopDrag()
+	end)
 	summon1:SetScript("OnEnter", function(btn)
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
 		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 1\"")
 		GameTooltip:AddLine(L["Normal mount summon"])
-		GameTooltip_AddColoredLine(GameTooltip, "\n"..L["UseBindingTooltip"], NIGHT_FAE_BLUE_COLOR, false)
+		GameTooltip_AddColoredLine(GameTooltip, "\n"..L["Drag to create a summon panel"], NIGHT_FAE_BLUE_COLOR, false)
+		GameTooltip_AddColoredLine(GameTooltip, L["UseBindingTooltip"], NIGHT_FAE_BLUE_COLOR, false)
 		if InCombatLockdown() then
 			GameTooltip_AddErrorLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT)
 		end
@@ -288,18 +292,23 @@ function journal:init()
 	summon2:SetNormalTexture(631718)
 	summon2.icon = summon2:GetNormalTexture()
 	summon2:SetAttribute("clickbutton", _G[config.secureButtonNameSecondMount])
-	-- summon2:SetScript("OnDragStart", function()
+	summon2:SetScript("OnDragStart", function()
+		mounts.summonPanel:startDrag()
 	-- 	if InCombatLockdown() then return end
 	-- 	if not GetMacroInfo(config.secondMacroName) then
 	-- 		config:createMacro(config.secondMacroName, config.secureButtonNameSecondMount, 631718)
 	-- 	end
 	-- 	PickupMacro(config.secondMacroName)
-	-- end)
+	end)
+	summon2:SetScript("OnDragStop", function()
+		mounts.summonPanel:stopDrag()
+	end)
 	summon2:SetScript("OnEnter", function(btn)
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
 		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 2\"")
 		GameTooltip_AddNormalLine(GameTooltip, L["SecondMountTooltipDescription"]:gsub("\n\n", "\n"))
-		GameTooltip_AddColoredLine(GameTooltip, "\n"..L["UseBindingTooltip"], NIGHT_FAE_BLUE_COLOR, false)
+		GameTooltip_AddColoredLine(GameTooltip, "\n"..L["Drag to create a summon panel"], NIGHT_FAE_BLUE_COLOR, false)
+		GameTooltip_AddColoredLine(GameTooltip, L["UseBindingTooltip"], NIGHT_FAE_BLUE_COLOR, false)
 		if InCombatLockdown() then
 			GameTooltip_AddErrorLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT)
 		end

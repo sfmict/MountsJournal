@@ -32,6 +32,7 @@ components\Pets.lua
 components\Calendar.lua
 components\AdditionalMounts.lua
 components\MountListButtonInit.lua
+components\SummonPanel.lua
 components\filter\Main.lua
 components\filter\Types.lua
 components\filter\Selected.lua

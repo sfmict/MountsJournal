@@ -26,6 +26,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.globalDB.filters = self.globalDB.filters or {}
 		self.globalDB.defFilters = self.globalDB.defFilters or {}
 		self.globalDB.config = self.globalDB.config or {}
+		self.globalDB.summonPanelConfig = self.globalDB.summonPanelConfig or {}
 		self.globalDB.mountAnimations = self.globalDB.mountAnimations or {}
 		self.globalDB.defProfile = self.globalDB.defProfile or {}
 		self.globalDB.mountsProfiles = self.globalDB.mountsProfiles or {}
