@@ -27,6 +27,14 @@ panel:SetScript("OnDragStop", function(self)
 		self:savePosition()
 	end
 end)
+panel:SetScript("OnEvent", function(self)
+	if InCombatLockdown() then
+		self:RegisterEvent("PLAYER_REGEN_ENABLED")
+	else
+		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+		self:setPosition()
+	end
+end)
 
 
 -- RESIZE
@@ -263,4 +271,6 @@ mounts:on("CREATE_BUTTONS", function()
 	panel:setSize()
 	panel:setShown(panel.config.isShown)
 	panel:setLocked(panel.config.isLocked)
+	panel:RegisterEvent("UI_SCALE_CHANGED")
+	hooksecurefunc(UIParent, "SetScale", function() panel:GetScript("OnEvent")(panel) end)
 end)

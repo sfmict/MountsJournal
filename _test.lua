@@ -105,6 +105,8 @@ test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 
 -- fprint(dumpe, getmetatable(CreateFrame("EventFrame", nil, UIParent)))
 
+-- hooksecurefunc(C_Macro, "RunMacroText", fprint)
+
 function test:PLAYER_ENTERING_WORLD()
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD")
 
