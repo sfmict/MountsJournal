@@ -5,34 +5,41 @@ local PANEL_HEIGHT = 65
 
 
 -- PANEL
-local panel = CreateFrame("BUTTON", nil, UIParent, "TooltipBackdropTemplate")
+local panel = CreateFrame("FRAME", nil, UIParent, "TooltipBackdropTemplate")
 mounts.summonPanel = panel
 panel:SetFrameLevel(1000)
 panel:SetMovable(true)
-panel:RegisterForClicks("RightButtonUp")
-panel:RegisterForDrag("LeftButton")
-panel:SetScript("OnDragStart", function(self)
-	if self.config.isLocked then return end
-	self.NineSlice:Hide()
-	self.resize:Hide()
-	self:StartMoving()
-	self.isDrag = true
-end)
-panel:SetScript("OnDragStop", function(self)
-	if self.isDrag then
-		self.isDrag = nil
-		self.NineSlice:Show()
-		self.resize:Show()
-		self:StopMovingOrSizing()
-		self:savePosition()
-	end
-end)
 panel:SetScript("OnEvent", function(self)
 	if InCombatLockdown() then
 		self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	else
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 		self:setPosition()
+	end
+end)
+
+local drag = CreateFrame("BUTTON", nil, panel)
+panel.drag = drag
+drag:SetFrameLevel(1000)
+drag:RegisterForClicks("RightButtonUp")
+drag:RegisterForDrag("LeftButton")
+drag:SetScript("OnDragStart", function(self)
+	local panel = self:GetParent()
+	if panel.config.isLocked then return end
+	panel.NineSlice:Hide()
+	panel.resize:Hide()
+	panel.contextMenu:ddCloseMenus()
+	panel:StartMoving()
+	panel.isDrag = true
+end)
+drag:SetScript("OnDragStop", function(self)
+	local panel = self:GetParent()
+	if panel.isDrag then
+		panel.isDrag = nil
+		panel.NineSlice:Show()
+		panel.resize:Show()
+		panel:StopMovingOrSizing()
+		panel:savePosition()
 	end
 end)
 
@@ -60,7 +67,7 @@ local function resizeOnUpdate(self)
 	local scale = self:GetEffectiveScale()
 	local width = self.width + x / scale - self.x
 	local height = self.height + self.y - y / scale
-	local k = math.min(width / PANEL_WIDTH, height / PANEL_HEIGHT)
+	local k = math.max(width / PANEL_WIDTH, height / PANEL_HEIGHT)
 	if k < .5 then k = .5
 	elseif k > 3 then k = 3 end
 	self:GetParent():setSize(k)
@@ -72,6 +79,14 @@ end)
 
 resize:SetScript("OnDragStop", function(self)
 	self:SetScript("OnUpdate", nil)
+end)
+
+resize:SetScript("OnEnter", function()
+	if SetCursor then SetCursor("UI_RESIZE_CURSOR") end
+end)
+
+resize:SetScript("OnLeave", function()
+	if SetCursor then SetCursor(nil) end
 end)
 
 
@@ -102,7 +117,7 @@ end
 
 
 function panel:setPosition()
-	if InCombatLockdown() then return end
+	if InCombatLockdown() or not self:IsShown() then return end
 	self:ClearAllPoints()
 	local scale = self:GetEffectiveScale()
 	self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", self.config.x / scale,  self.config.y / scale)
@@ -126,6 +141,13 @@ function panel:setLocked(lock)
 	self.config.isLocked = lock
 	self.NineSlice:SetShown(not lock)
 	self.resize:SetShown(not lock)
+	self.drag:ClearAllPoints()
+	if lock then
+		self.drag:SetPoint("TOPLEFT", self.summon1.border)
+		self.drag:SetPoint("BOTTOMRIGHT", self.summon2.border)
+	else
+		self.drag:SetAllPoints()
+	end
 end
 
 
@@ -152,19 +174,21 @@ function panel:startDrag()
 	self.config.x = x - width / 2 * scale
 	self.config.y = y + height / 2 * scale
 	self:setShown(true)
-	self:GetScript("OnDragStart")(self)
+	self.drag:GetScript("OnDragStart")(self.drag)
 end
 
 
 function panel:stopDrag()
-	self:GetScript("OnDragStop")(self)
+	self.drag:GetScript("OnDragStop")(self.drag)
 end
 
 
 -- CONTEXT MENU
 local contextMenu = LibStub("LibSFDropDown-1.5"):SetMixin({})
+panel.contextMenu = contextMenu
 contextMenu:ddSetDisplayMode("menu")
-contextMenu:ddHideWhenButtonHidden(panel)
+contextMenu:ddHideWhenButtonHidden(panel.drag)
+contextMenu:ddSetNoGlobalMouseEvent(true, panel.drag)
 
 contextMenu:ddSetInitFunc(function(self, level, value)
 	local info = {}
@@ -211,7 +235,7 @@ contextMenu:ddSetInitFunc(function(self, level, value)
 	end
 end)
 
-panel:SetScript("OnClick", function(self)
+panel.drag:SetScript("OnClick", function(self)
 	contextMenu:ddToggle(1, nil, "cursor")
 end)
 
@@ -227,10 +251,10 @@ mounts:on("CREATE_BUTTONS", function()
 	local summon1 = CreateFrame("BUTTON", nil, panel, "MJSecureMacroButtonTemplate")
 	panel.summon1 = summon1
 	summon1:SetPropagateMouseClicks(true)
-	summon1:SetPoint("RIGHT", panel, "CENTER", -3, 0)
 	summon1:SetNormalTexture(413588)
 	summon1.icon = summon1:GetNormalTexture()
 	summon1:SetAttribute("clickbutton", _G[config.secureButtonNameMount])
+	summon1:HookScript("OnClick", function() contextMenu:ddCloseMenus() end)
 	summon1:SetScript("OnEnter", function(btn)
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
 		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 1\"")
@@ -245,6 +269,7 @@ mounts:on("CREATE_BUTTONS", function()
 		end
 		GameTooltip:Show()
 	end)
+	contextMenu:ddSetNoGlobalMouseEvent(true, summon1)
 
 	local summon2 = CreateFrame("BUTTON", nil, panel, "MJSecureMacroButtonTemplate")
 	panel.summon2 = summon2
@@ -252,6 +277,7 @@ mounts:on("CREATE_BUTTONS", function()
 	summon2:SetNormalTexture(631718)
 	summon2.icon = summon2:GetNormalTexture()
 	summon2:SetAttribute("clickbutton", _G[config.secureButtonNameSecondMount])
+	summon2:HookScript("OnClick", function() contextMenu:ddCloseMenus() end)
 	summon2:SetScript("OnEnter", function(btn)
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
 		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 2\"")
@@ -266,6 +292,7 @@ mounts:on("CREATE_BUTTONS", function()
 		end
 		GameTooltip:Show()
 	end)
+	contextMenu:ddSetNoGlobalMouseEvent(true, summon2)
 
 	panel:setStrata()
 	panel:setSize()
