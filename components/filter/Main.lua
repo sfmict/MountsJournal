@@ -32,14 +32,6 @@ function journal.filters.main(btn, level)
 	info.checked = mounts.filters.unusable
 	btn:ddAddButton(info, level)
 
-	info.text = L["With multiple models"]
-	info.func = function(_,_,_, value)
-		mounts.filters.multipleModels = value
-		journal:updateMountsList()
-	end
-	info.checked = mounts.filters.multipleModels
-	btn:ddAddButton(info, level)
-
 	info.text = L["hidden for character"]
 	info.func = function(_,_,_, value)
 		mounts.filters.hideOnChar = value

@@ -37,12 +37,28 @@ function journal.filters.specific(btn, level)
 		btn:ddAddButton(info, level)
 	end
 
+	info.text = L["Ride Along"]
+	info.func = function(_,_,_, value)
+		specific.rideAlong = value
+		journal:updateMountsList()
+	end
+	info.checked = function() return specific.rideAlong end
+	btn:ddAddButton(info, level)
+
 	info.text = L["transform"]
 	info.func = function(_,_,_, value)
 		specific.transform = value
 		journal:updateMountsList()
 	end
 	info.checked = function() return specific.transform end
+	btn:ddAddButton(info, level)
+
+	info.text = L["Multiple Models"]
+	info.func = function(_,_,_, value)
+		specific.multipleModels = value
+		journal:updateMountsList()
+	end
+	info.checked = function() return specific.multipleModels end
 	btn:ddAddButton(info, level)
 
 	info.text = L["additional"]
