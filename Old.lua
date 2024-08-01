@@ -218,6 +218,12 @@ local function updateGlobal(self)
 			removeDragonriding(profile)
 		end
 	end
+
+	-- IF < 11.0.7 GLOBAL
+	if compareVersion("11.0.7", self.globalDB.lastAddonVersion) then
+		self.filters.multipleModels = nil
+		self.defFilters.multipleModels = nil
+	end
 end
 
 
@@ -286,7 +292,7 @@ function mounts:setOldChanges()
 
 	local currentVersion = C_AddOns.GetAddOnMetadata(addon, "Version")
 	--@do-not-package@
-	if currentVersion == "@project-version@" then currentVersion = "11.0.0" end
+	if currentVersion == "@project-version@" then currentVersion = "11.0.7" end
 	--@end-do-not-package@
 
 	if compareVersion(currentVersion, self.charDB.lastAddonVersion) then

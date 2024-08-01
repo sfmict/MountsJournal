@@ -107,7 +107,7 @@ function tags:dragButtonClick(btn, mouseBtn)
 			local spellName = ltl:GetSpellFullName(spellID)
 			ChatEdit_InsertLink(spellName)
 		else
-			local spellLink = GetSpellLink(spellID)
+			local spellLink = ltl:GetSpellLink(spellID)
 			ChatEdit_InsertLink(spellLink)
 		end
 	elseif parent.spellID then
@@ -127,7 +127,7 @@ do
 				local spellName = ltl:GetSpellFullName(spellID)
 				ChatEdit_InsertLink(spellName)
 			else
-				local spellLink = GetSpellLink(spellID)
+				local spellLink = ltl:GetSpellLink(spellID)
 				ChatEdit_InsertLink(spellLink)
 			end
 		else

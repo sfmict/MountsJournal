@@ -59,7 +59,7 @@ end
 
 
 -- SOAR
-local soar = createMountFromSpell(369536, 402, 10, 4)
+local soar = createMountFromSpell(369536, 442, 10, 4)
 
 if raceID == 52 or raceID == 70 then
 	soar.creatureID = "player"

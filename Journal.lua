@@ -2247,7 +2247,6 @@ function journal:saveDefaultFilters()
 	defFilters.collected = filters.collected
 	defFilters.notCollected = filters.notCollected
 	defFilters.unusable = filters.unusable
-	defFilters.multipleModels = filters.multipleModels
 	defFilters.hideOnChar = filters.hideOnChar
 	defFilters.onlyHideOnChar = filters.onlyHideOnChar
 	defFilters.hiddenByPlayer = filters.hiddenByPlayer
@@ -2298,7 +2297,6 @@ function journal:restoreDefaultFilters()
 	defFilters.collected = true
 	defFilters.notCollected = true
 	defFilters.unusable = true
-	defFilters.multipleModels = false
 	defFilters.hideOnChar = false
 	defFilters.onlyHideOnChar = false
 	defFilters.hiddenByPlayer = false
@@ -2341,7 +2339,7 @@ function journal:isDefaultFilters()
 	if defFilters.collected ~= filters.collected then add(COLLECTED) end
 	if defFilters.notCollected ~= filters.notCollected then add(NOT_COLLECTED) end
 	if defFilters.unusable ~= filters.unusable then add(MOUNT_JOURNAL_FILTER_UNUSABLE) end
-	if not defFilters.multipleModels ~= not filters.multipleModels then add(L["With multiple models"]) end
+
 	if not defFilters.hideOnChar ~= not filters.hideOnChar then add(L["hidden for character"]) end
 	if not defFilters.onlyHideOnChar ~= not filters.onlyHideOnChar then add(L["hidden for character"]) end
 	if not defFilters.hiddenByPlayer ~= not filters.hiddenByPlayer then add(L["Hidden by player"]) end
@@ -2411,7 +2409,6 @@ function journal:resetToDefaultFilters()
 	filters.collected = defFilters.collected
 	filters.notCollected = defFilters.notCollected
 	filters.unusable = defFilters.unusable
-	filters.multipleModels = defFilters.multipleModels
 	filters.hideOnChar = defFilters.hideOnChar
 	filters.onlyHideOnChar = defFilters.onlyHideOnChar
 	filters.hiddenByPlayer = defFilters.hiddenByPlayer
@@ -2575,18 +2572,22 @@ function journal:getFilterSelected(spellID)
 end
 
 
-function journal:getFilterSpecific(spellID, isSelfMount)
+function journal:getFilterSpecific(spellID, isSelfMount, mountType, mountID)
 	local filter = mounts.filters.specific
 	local i = 0
 	if isSelfMount then if filter.transform then return true end
 	else i = i + 1 end
 	if mounts.additionalMounts[spellID] then if filter.additional then return true end
 	else i = i + 1 end
+	if mountType == 402 then if filter.rideAlong then return true end
+	else i = i + 1 end
+	if self.mountsWithMultipleModels[mountID] then if filter.multipleModels then return true end
+	else i = i + 1 end
 	for k, t in pairs(mounts.specificDB) do
 		if t[spellID] then if filter[k] then return true end
 		else i = i + 1 end
 	end
-	return i == 4 and filter.rest
+	return i == 6 and filter.rest
 end
 
 
@@ -2706,8 +2707,6 @@ function journal:updateMountsList()
 		and (isCollected and filters.collected or not isCollected and filters.notCollected)
 		-- UNUSABLE
 		and (isUsable or not isCollected or filters.unusable)
-		-- MUTIPLE MODELS
-		and (not filters.multipleModels or self.mountsWithMultipleModels[mountID])
 		-- EXPANSIONS
 		and expansions[expansion]
 		-- ONLY NEW
@@ -2729,7 +2728,7 @@ function journal:updateMountsList()
 		-- PET
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
 		-- SPECIFIC
-		and self:getFilterSpecific(spellID, isSelfMount)
+		and self:getFilterSpecific(spellID, isSelfMount, mountType, mountID)
 		-- MOUNTS RARITY
 		and self:getFilterRarity(rarity or 100)
 		-- MOUNTS WEIGHT
