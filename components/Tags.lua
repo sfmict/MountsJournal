@@ -363,7 +363,6 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 					i = i + 1
 					if isChecked(v) then j = j + 1 end
 				end
-				local name = L[btn.value]
 				return i == j and 1 or j > 0 and 2
 			end
 

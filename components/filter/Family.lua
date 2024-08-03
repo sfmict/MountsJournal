@@ -109,7 +109,6 @@ function journal.filters.family(dd, level, subFamily)
 				i = i + 1
 				if filterFamily[v] then j = j + 1 end
 			end
-			local name = L[btn.value[2]]
 			return i == j and 1 or j > 0 and 2
 		end
 
