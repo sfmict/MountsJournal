@@ -138,7 +138,7 @@ end
 
 
 function MJNavBarMixin:setMapID(mapID)
-	if mapID == self.mapID then return end
+	if not mapID or mapID == self.mapID then return end
 	self.mapID = mapID
 	self:refresh()
 	self:event("MAP_CHANGE")

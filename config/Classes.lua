@@ -5,17 +5,14 @@ classConfig:Hide()
 
 
 classConfig:SetScript("OnShow", function(self)
-	self:SetScript("OnShow", function()
-		self:SetPoint("TOPLEFT", -12, 8)
-	end)
-	self:SetPoint("TOPLEFT", -12, 8)
+	self:SetScript("OnShow", nil)
 
 	self.macrosConfig = mounts.config.macrosConfig
 	self.charMacrosConfig = mounts.charDB.macrosConfig
 
 	-- VERSION
 	local ver = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	ver:SetPoint("TOPLEFT", 40, 20)
+	ver:SetPoint("TOPRIGHT", -40, 15)
 	ver:SetTextColor(.5, .5, .5, 1)
 	ver:SetJustifyH("RIGHT")
 	ver:SetText(C_AddOns.GetAddOnMetadata(addon, "Version"))
@@ -445,11 +442,3 @@ function classConfig:combatMacroSave()
 	end
 	self.combatMacroEditBox:ClearFocus()
 end
-
-
-local category = Settings.GetCategory(addon)
-local subcategory, layout = Settings.RegisterCanvasLayoutSubcategory(category, classConfig, L["Class settings"])
-subcategory.ID = L["Class settings"]
--- layout:AddAnchorPoint("TOPLEFT", -12, 8)
--- layout:AddAnchorPoint("BOTTOMRIGHT", 0, 0)
-Settings.RegisterAddOnCategory(subcategory)

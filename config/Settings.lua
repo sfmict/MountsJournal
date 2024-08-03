@@ -1,0 +1,44 @@
+local _, L = ...
+
+
+MountsJournal:on("MODULES_INIT", function(self)
+	local bg, activeContent = MountsJournalFrame.bgFrame.settingsBackground
+
+	local function onTabClick(self)
+		PanelTemplates_SetTab(bg, self.id)
+		activeContent:Hide()
+		activeContent = self.content
+		activeContent:Show()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end
+
+	local index = 0
+	local function addTab(name, content)
+		index = index + 1
+
+		local tab = CreateFrame("BUTTON", nil, bg, "PanelTopTabButtonTemplate")
+		tab:SetText(name)
+		tab.id = index
+		tab.content = content
+		tab:SetScript("OnClick", onTabClick)
+		content:SetParent(tab)
+		content:SetAllPoints(bg)
+
+		if index == 1 then
+			tab:SetPoint("TOPLEFT", 54, 32)
+			activeContent = content
+		end
+	end
+
+	addTab(L["Main"], MountsJournalConfig)
+	addTab(L["Class settings"], MountsJournalConfigClasses)
+	addTab(L["About"], MountsJournalConfigAbout)
+
+	PanelTemplates_SetNumTabs(bg, index)
+	PanelTemplates_SetTab(bg, 1)
+
+	bg:SetScript("OnShow", function() activeContent:Show() end)
+	bg:SetScript("OnHide", function() activeContent:Hide() end)
+end)
+
+

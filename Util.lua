@@ -80,6 +80,8 @@ MountsJournalUtil = {}
 local util = MountsJournalUtil
 util.addonName = ("%s_ADDON_"):format(addon:upper())
 util.expansion = tonumber(GetBuildInfo():match("(.-)%."))
+util.secureButtonNameMount = addon.."_Mount"
+util.secureButtonNameSecondMount = addon.."_SecondMount"
 
 
 -- 1 FLY, 2 GROUND, 3 SWIMMING, 4 DRAGONRIDING

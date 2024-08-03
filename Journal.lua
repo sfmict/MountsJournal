@@ -1,6 +1,6 @@
 local addon, L = ...
 local C_MountJournal, C_PetJournal, wipe, tinsert, next, pairs, ipairs, select, type, sort, math = C_MountJournal, C_PetJournal, wipe, tinsert, next, pairs, ipairs, select, type, sort, math
-local util, mounts, config = MountsJournalUtil, MountsJournal, MountsJournalConfig
+local util, mounts = MountsJournalUtil, MountsJournal
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
 journal.mountTypes = util.mountTypes
 util.setEventsMixin(journal)
@@ -129,10 +129,6 @@ function journal:init()
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 		self:UnregisterEvent("UNIT_PORTRAIT_UPDATE")
 		self:updateCollectionTabs()
-		self.mountDisplay:Show()
-		self.navBarBtn:SetChecked(false)
-		self.mapSettings:Hide()
-		self.worldMap:Hide()
 	end)
 
 	self.bgFrame:RegisterForDrag("LeftButton")
@@ -163,7 +159,7 @@ function journal:init()
 	self.modelScene = self.mountDisplay.modelScene
 	self.multipleMountBtn = self.modelScene.multipleMountBtn
 	self.mountListUpdateAnim = self.leftInset.updateAnimFrame.anim
-	self.scrollBox = self.bgFrame.scrollBox
+	self.scrollBox = self.leftInset.scrollBox
 	self.summonButton = self.bgFrame.summonButton
 	self.percentSlider = self.bgFrame.percentSlider
 	self.mountSpecial = self.bgFrame.mountSpecial
@@ -211,6 +207,31 @@ function journal:init()
 			bgFrame:Hide()
 		end
 	]])
+	sMountJournal:SetFrameRef("slotButton", self.bgFrame.slotButton)
+	sMountJournal:SetFrameRef("DynamicFlightModeButton", self.bgFrame.DynamicFlightModeButton)
+	sMountJournal:SetFrameRef("summon1", self.bgFrame.summon1)
+	sMountJournal:SetFrameRef("summon2", self.bgFrame.summon2)
+	sMountJournal:SetFrameRef("summonButton", self.summonButton)
+	sMountJournal:SetAttribute("tabUpdate", [[
+		local slotButton = self:GetFrameRef("slotButton")
+		local DynamicFlightModeButton = self:GetFrameRef("DynamicFlightModeButton")
+		local summon1 = self:GetFrameRef("summon1")
+		local summon2 = self:GetFrameRef("summon2")
+		local summonButton = self:GetFrameRef("summonButton")
+		if self:GetAttribute("tab") ~= 1 then
+			slotButton:Show()
+			if self:GetAttribute("dynamicFlight") then DynamicFlightModeButton:Show() end
+			summon1:Show()
+			summon2:Show()
+			summonButton:Show()
+		else
+			slotButton:Hide()
+			DynamicFlightModeButton:Hide()
+			summon1:Hide()
+			summon2:Hide()
+			summonButton:Hide()
+		end
+	]])
 
 	local sMountsJournalButton = CreateFrame("BUTTON", nil, self.useMountsJournalButton, "SecureHandlerClickTemplate")
 	sMountsJournalButton:SetAllPoints()
@@ -235,12 +256,63 @@ function journal:init()
 		frame:RunAttribute("update")
 	]])
 
+	-- TABS
+	local function setTab(tab)
+		PlaySound(SOUNDKIT.UI_TOYBOX_TABS)
+		PanelTemplates_SetTab(self.bgFrame, tab)
+
+		self.mountCount:SetShown(tab ~= 1)
+		self.achiev:SetShown(tab ~= 1)
+		self.bgFrame.OpenDynamicFlightSkillTreeButton:SetShown(tab ~= 1 and DragonridingUtil.IsDragonridingUnlocked())
+		self.navBar:SetShown(tab == 2)
+		self.filtersPanel:SetShown(tab ~= 1)
+		self.leftInset:SetShown(tab ~= 1)
+		self.bgFrame.rightInset:SetShown(tab ~= 1)
+		self.mountDisplay:SetShown(tab == 3)
+		self.worldMap:SetShown(tab == 2)
+		self.mapSettings:SetShown(tab == 2)
+		self.bgFrame.profilesMenu:SetShown(tab ~= 1)
+		self.mountSpecial:SetShown(tab ~= 1)
+		self.bgFrame.settingsBackground:SetShown(tab == 1)
+
+		if tab == 2 then
+			self.navBar:setMapID(self.mapTabID)
+			self.filtersPanel:SetPoint("TOPLEFT", self.navBar, "BOTTOMLEFT", -1, -1)
+		else
+			self.mapTabID = self.navBar.mapID
+			self.navBar:setDefMap()
+			self.filtersPanel:SetPoint("TOPLEFT", 4, -60)
+		end
+	end
+
+	self.bgFrame.settingsTab:SetText(L["Settings"])
+	self.bgFrame.mapTab:SetText(L["Map"])
+	self.bgFrame.modelTab:SetText(L["Model"])
+
+	for i = 1, #self.bgFrame.Tabs do
+		local tab = self.bgFrame.Tabs[i]
+		PanelTabButtonMixin.OnLoad(tab)
+		tab:OnEvent()
+		tab:SetFrameRef("s", sMountJournal)
+		tab:SetAttribute("_onclick", [[
+			local frame = self:GetFrameRef("s")
+			frame:SetAttribute("tab", ]]..i..[[)
+			frame:RunAttribute("tabUpdate")
+		]])
+		tab:HookScript("OnClick", function() setTab(i) end)
+	end
+
+	self.bgFrame.numTabs = 3
+	PanelTemplates_SetTab(self.bgFrame, 3)
+
 	-- DYNAMIC FLIGHT
 	hooksecurefunc(self.MountJournal.ToggleDynamicFlightFlyoutButton, "UpdateVisibility", function()
 		if InCombatLockdown() then return end
 		local isDragonRidingUnlocked = DragonridingUtil.IsDragonridingUnlocked()
-		self.bgFrame.OpenDynamicFlightSkillTreeButton:SetShown(isDragonRidingUnlocked)
-		self.bgFrame.DynamicFlightModeButton:SetShown(isDragonRidingUnlocked)
+		local show = isDragonRidingUnlocked and PanelTemplates_GetSelectedTab(self.bgFrame) ~= 1
+		sMountJournal:SetAttribute("dynamicFlight", isDragonRidingUnlocked)
+		self.bgFrame.OpenDynamicFlightSkillTreeButton:SetShown(show)
+		self.bgFrame.DynamicFlightModeButton:SetShown(show)
 	end)
 
 	-- CLOSE BUTTON
@@ -265,7 +337,7 @@ function journal:init()
 	local summon1 = self.bgFrame.summon1
 	summon1:SetNormalTexture(413588)
 	summon1.icon = summon1:GetNormalTexture()
-	summon1:SetAttribute("clickbutton", _G[config.secureButtonNameMount])
+	summon1:SetAttribute("clickbutton", _G[util.secureButtonNameMount])
 	summon1:SetScript("OnDragStart", function()
 		mounts.summonPanel:startDrag()
 	-- 	if not GetMacroInfo(config.macroName) then
@@ -291,7 +363,7 @@ function journal:init()
 	local summon2 = self.bgFrame.summon2
 	summon2:SetNormalTexture(631718)
 	summon2.icon = summon2:GetNormalTexture()
-	summon2:SetAttribute("clickbutton", _G[config.secureButtonNameSecondMount])
+	summon2:SetAttribute("clickbutton", _G[util.secureButtonNameSecondMount])
 	summon2:SetScript("OnDragStart", function()
 		mounts.summonPanel:startDrag()
 	-- 	if InCombatLockdown() then return end
@@ -314,20 +386,6 @@ function journal:init()
 		end
 		GameTooltip:Show()
 	end)
-
-	-- NAVBAR BUTTON
-	self.navBarBtn:HookScript("OnClick", function(btn)
-		local checked = btn:GetChecked()
-		self.mountDisplay:SetShown(not checked)
-		self.worldMap:SetShown(checked)
-		self.mapSettings:SetShown(checked)
-	end)
-	self.navBarBtn:SetScript("OnEnter", function(self)
-		GameTooltip:SetOwner(self, "ANCHOR_RIGHT", -4, -32)
-		GameTooltip:SetText(L["Map / Model"])
-		GameTooltip:Show()
-	end)
-	self.navBarBtn:SetScript("OnLeave", function() GameTooltip_Hide() end)
 
 	-- NAVBAR
 	self:on("MAP_CHANGE", function(self)
@@ -390,7 +448,7 @@ function journal:init()
 	-- SCROLL FRAME
 	self.view = CreateScrollBoxListLinearView()
 	self:setScrollGridMounts(mounts.config.gridToggle)
-	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.bgFrame.scrollBar, self.view)
+	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.leftInset.scrollBar, self.view)
 
 	-- FILTERS BAR
 	self.filtersBar.clear:SetScript("OnClick", function() self:clearBtnFilters() end)
@@ -1024,10 +1082,6 @@ function journal:init()
 	resize:SetScript("OnLeave", function()
 		if SetCursor then SetCursor(nil) end
 	end)
-
-	-- SETTINGS BUTTON
-	self.bgFrame.btnConfig:SetText(L["Settings"])
-	self.bgFrame.btnConfig:SetScript("OnClick", function() config:openConfig() end)
 
 	-- MOUNT SPECIAL
 	self.mountSpecial:SetText("!")

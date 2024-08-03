@@ -1,5 +1,5 @@
 local addon, L = ...
-local mounts, config = MountsJournal, MountsJournalConfig
+local mounts, util = MountsJournal, MountsJournalUtil
 local PANEL_WIDTH = 101
 local PANEL_HEIGHT = 65
 
@@ -92,6 +92,7 @@ end)
 
 -- PANEL METHODS
 function panel:setStrata(strata)
+	if InCombatLockdown() then return end
 	if strata then self.config.frameStrata = strata end
 
 	if self.config.frameStrata == 3 then
@@ -205,6 +206,7 @@ contextMenu:ddSetInitFunc(function(self, level, value)
 		self:ddAddButton(info, level)
 
 		info.hasArrow = nil
+		info.disabled = InCombatLockdown()
 		info.text = L["Reset size"]
 		info.func = function() panel:setSize(1) end
 		self:ddAddButton(info, level)
@@ -224,6 +226,7 @@ contextMenu:ddSetInitFunc(function(self, level, value)
 			return btn.value == panel.config.frameStrata
 		end
 
+		info.disabled = InCombatLockdown()
 		info.keepShownOnClick = true
 		for i = 0, #strata do
 			info.text = strata[i]
@@ -253,7 +256,7 @@ mounts:on("CREATE_BUTTONS", function()
 	summon1:SetPropagateMouseClicks(true)
 	summon1:SetNormalTexture(413588)
 	summon1.icon = summon1:GetNormalTexture()
-	summon1:SetAttribute("clickbutton", _G[config.secureButtonNameMount])
+	summon1:SetAttribute("clickbutton", _G[util.secureButtonNameMount])
 	summon1:HookScript("OnClick", function() contextMenu:ddCloseMenus() end)
 	summon1:SetScript("OnEnter", function(btn)
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
@@ -276,7 +279,7 @@ mounts:on("CREATE_BUTTONS", function()
 	summon2:SetPropagateMouseClicks(true)
 	summon2:SetNormalTexture(631718)
 	summon2.icon = summon2:GetNormalTexture()
-	summon2:SetAttribute("clickbutton", _G[config.secureButtonNameSecondMount])
+	summon2:SetAttribute("clickbutton", _G[util.secureButtonNameSecondMount])
 	summon2:HookScript("OnClick", function() contextMenu:ddCloseMenus() end)
 	summon2:SetScript("OnEnter", function(btn)
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")

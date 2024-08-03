@@ -1,6 +1,7 @@
 local _, L = ...
 
 L["author"] = "Author"
+L["Main"] = "Main"
 L["%s Configuration"] = "%s Configuration"
 L["ConfigPanelTitle"] = "Global settings"
 L["Class settings"] = "Class settings"
@@ -42,7 +43,6 @@ L["CreateMacroTooltip"] = "The created macro is used to summon the selected moun
 L["or key bind"] = "or key bind"
 L["ERR_MOUNT_NO_SELECTED"] = "You have no valid selected mounts."
 L["Collected:"] = "Collected"
-L["Settings"] = "Settings"
 L["Shown:"] = "Shown:"
 L["hidden for character"] = "Hidden For Character"
 L["only hidden"] = "Only hidden"
@@ -93,7 +93,9 @@ L["Enable Acceleration around the Y-axis"] = "Enable Acceleration around the Y-a
 L["Initial y-axis accseleration"] = "Initial Y-axis Accseleration"
 L["Y-axis accseleration"] = "Y-axis Accseleration"
 L["Minimum y-axis speed"] = "Minimum Y-axis Speed"
-L["Map / Model"] = "Map / Model"
+L["Model"] = "Model"
+L["Map"] = "Map"
+L["Settings"] = "Settings"
 L["Dungeons and Raids"] = "Dungeons and Raids"
 L["Current Location"] = "Current Location"
 L["Enable Flags"] = "Enable Flags"

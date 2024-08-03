@@ -20,6 +20,7 @@ database\MountsDB.lua
 config\Main.lua
 config\Classes.lua
 config\About.lua
+config\Settings.lua
 Journal.lua
 components\Tags.lua
 components\Camera.lua
