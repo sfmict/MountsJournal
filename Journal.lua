@@ -1808,6 +1808,35 @@ function journal:sortMounts()
 end
 
 
+function journal:isCanFavorite(mountID)
+	if type(mountID) == "table" then return true end
+	local index = self.indexByMountID[mountID]
+	if index and mountID ~= C_MountJournal.GetDisplayedMountID(index) then
+		self:updateIndexByMountID(true)
+		index = self.indexByMountID[mountID]
+	end
+	if index then
+		local isFavorite, canFavorite = C_MountJournal.GetIsFavorite(index)
+		return canFavorite
+	end
+	return false
+end
+
+
+function journal:setIsFavorite(mountID, enabled)
+	if type(mountID) == "table" then
+		mountID:setIsFavorite(enabled)
+	else
+		local index = self.indexByMountID[mountID]
+		if index and mountID ~= C_MountJournal.GetDisplayedMountID(index) then
+			self:updateIndexByMountID(true)
+			index = self.indexByMountID[mountID]
+		end
+		if index then C_MountJournal.SetIsFavorite(index, enabled) end
+	end
+end
+
+
 function journal:updateIndexByMountID(force)
 	if not self.mjFiltersBackup.isBackuped then return end
 	if C_MountJournal.GetNumDisplayedMounts() ~= self.mountCount.count.num or force then

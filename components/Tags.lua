@@ -153,7 +153,6 @@ end
 
 function tags:mountOptionsMenu_Init(btn, level, value)
 	local info = {}
-	local realIndex = journal.indexByMountID[self.menuMountID]
 
 	if level == 1 then
 		local _,_,_, active, isUsable, _, isFavorite, _,_,_, isCollected = journal:getMountInfo(self.menuMountID)
@@ -206,19 +205,9 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 				info.OnLoad = nil
 			end
 
-			local canFavorite = realIndex and select(2, C_MountJournal.GetIsFavorite(realIndex)) or not isMount
-			info.disabled = not (isCollected and canFavorite)
-
+			info.disabled = not (isCollected and journal:isCanFavorite(self.menuMountID))
 			info.text = isFavorite and BATTLE_PET_UNFAVORITE or BATTLE_PET_FAVORITE
-			info.func = function()
-				if isMount then
-					if realIndex then
-						C_MountJournal.SetIsFavorite(realIndex, not isFavorite)
-					end
-				else
-					self.menuMountID:setIsFavorite(not isFavorite)
-				end
-			end
+			info.func = function() journal:setIsFavorite(self.menuMountID, not isFavorite) end
 			btn:ddAddButton(info, level)
 
 			info.disabled = nil
