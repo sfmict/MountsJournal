@@ -18,22 +18,17 @@ classConfig:SetScript("OnShow", function(self)
 	ver:SetText(C_AddOns.GetAddOnMetadata(addon, "Version"))
 
 	-- TITLE
-	local title = self:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-	title:SetPoint("TOPLEFT", 16, -16)
-	title:SetText(L["Class settings"])
-
-	-- SUBTITLE
-	local subtitle = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	local subtitle = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	self.subtitle = subtitle
 	subtitle:SetHeight(30)
-	subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 1, -8)
+	subtitle:SetPoint("TOPLEFT", 16, -16)
 	subtitle:SetNonSpaceWrap(true)
 	subtitle:SetJustifyH("LEFT")
 	subtitle:SetJustifyV("TOP")
 
 	-- LEFT PANEL
 	self.leftPanel = CreateFrame("FRAME", nil, self, "MJOptionsPanel")
-	self.leftPanel:SetPoint("TOPLEFT", 8, -67)
+	self.leftPanel:SetPoint("TOPLEFT", 8, -37)
 	self.leftPanel:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", 181, 8)
 
 	-- CLASS BUTTONS
@@ -64,8 +59,7 @@ classConfig:SetScript("OnShow", function(self)
 				classFrame:Click()
 			end
 		end)
-		classFrame.name:SetText(localized)
-		classFrame.name:SetTextColor(classColor:GetRGB())
+		classFrame.name:SetText(classColor:WrapTextInColorCode(localized))
 		classFrame.check:SetVertexColor(classColor:GetRGB())
 		classFrame.highlight:SetVertexColor(classColor:GetRGB())
 		classFrame.icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[className]))
@@ -88,8 +82,7 @@ classConfig:SetScript("OnShow", function(self)
 		end
 	end)
 	classFrame.name:SetPoint("RIGHT", -30, 0)
-	classFrame.name:SetText(UnitName("player"))
-	classFrame.name:SetTextColor(classColor:GetRGB())
+	classFrame.name:SetText(classColor:WrapTextInColorCode(UnitName("player")))
 	classFrame.description = L["CHARACTER_CLASS_DESCRIPTION"]
 	classFrame.check:SetVertexColor(classColor:GetRGB())
 	classFrame.highlight:SetVertexColor(classColor:GetRGB())
@@ -114,7 +107,7 @@ classConfig:SetScript("OnShow", function(self)
 	-- RIGHT PANEL
 	local rightPanel = CreateFrame("FRAME", nil, self, "MJOptionsPanel")
 	self.rightPanel = rightPanel
-	rightPanel:SetPoint("TOPRIGHT", -8, -67)
+	rightPanel:SetPoint("TOPRIGHT", -8, -37)
 	rightPanel:SetPoint("BOTTOMLEFT", self.leftPanel, "BOTTOMRIGHT", 0, 0)
 
 	-- RIGHT PANEL SCROLL

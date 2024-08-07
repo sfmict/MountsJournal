@@ -72,15 +72,9 @@ config:SetScript("OnShow", function(self)
 	ver:SetText(C_AddOns.GetAddOnMetadata(addon, "Version"))
 
 	-- TITLE
-	local title = self:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-	title:SetPoint("TOPLEFT", 16, -16)
-	title:SetJustifyH("LEFT")
-	title:SetText(L["%s Configuration"]:format(addon))
-
-	-- SUBTITLE
-	local subtitle = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	local subtitle = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	subtitle:SetHeight(30)
-	subtitle:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 1, -8)
+	subtitle:SetPoint("TOPLEFT", 16, -16)
 	subtitle:SetNonSpaceWrap(true)
 	subtitle:SetJustifyH("LEFT")
 	subtitle:SetJustifyV("TOP")
@@ -88,7 +82,7 @@ config:SetScript("OnShow", function(self)
 
 	-- LEFT PANEL
 	self.leftPanel = CreateFrame("FRAME", nil, self, "MJOptionsPanel")
-	self.leftPanel:SetPoint("TOPLEFT", self, 8, -67)
+	self.leftPanel:SetPoint("TOPLEFT", self, 8, -37)
 	self.leftPanel:SetPoint("BOTTOMRIGHT", self, "BOTTOMLEFT", 300, 32)
 
 	-- WATER JUMP
