@@ -6,7 +6,6 @@ local _, L = ...
 
 -- L["author"] = ""
 -- L["Main"] = ""
--- L["%s Configuration"] = ""
 -- L["ConfigPanelTitle"] = ""
 -- L["Class settings"] = ""
 -- L["Modifier"] = ""
