@@ -367,54 +367,53 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
-				</Frames>
-			</Frame>
-
-			<Frame parentKey="shownPanel" useParentLevel="false" inherits="InsetFrameTemplate" hidden="true">
-				<Size y="26"/>
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.filtersPanel" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
-					<Anchor point="TOPRIGHT" relativeKey="$parent.filtersPanel" relativePoint="BOTTOMRIGHT" x="0" y="-2"/>
-				</Anchors>
-				<Layers>
-					<Layer level="ARTWORK">
-						<FontString parentKey="text" inherits="GameFontNormal" justifyH="LEFT">
-							<Anchors>
-								<Anchor point="LEFT" x="8" y="-1"/>
-							</Anchors>
-						</FontString>
-						<FontString parentKey="count" inherits="GameFontHighlight" justifyH="LEFT">
-							<Anchors>
-								<Anchor point="LEFT" relativeKey="$parent.text" relativePoint="RIGHT" x="2" y="0"/>
-							</Anchors>
-						</FontString>
-						<FontString parentKey="filters" inherits="GameFontHighlight" justifyH="RIGHT" maxLines="1">
-							<Size y="22"/>
-							<Anchors>
-								<Anchor point="LEFT" relativeKey="$parent.count" relativePoint="RIGHT" x="4" y="0"/>
-								<Anchor point="RIGHT" x="-28" y="0"/>
-							</Anchors>
-							<Scripts>
-								<OnEnter>
-									if self:IsTruncated() then
-										GameTooltip:SetOwner(self, "ANCHOR_TOP")
-										GameTooltip:AddLine(self:GetText(), nil, nil, nil, true)
-										GameTooltip:Show()
-									end
-								</OnEnter>
-								<OnLeave>
-									GameTooltip:Hide()
-								</OnLeave>
-							</Scripts>
-						</FontString>
-					</Layer>
-				</Layers>
-				<Frames>
-					<Button parentKey="clear" inherits="MJClearButtonTemplate">
+					<Frame parentKey="shownPanel" useParentLevel="false" inherits="InsetFrameTemplate" hidden="true">
+						<Size y="26"/>
 						<Anchors>
-							<Anchor point="RIGHT" x="-5" y="0"/>
+							<Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
+							<Anchor point="TOPRIGHT" relativeKey="$parent" relativePoint="BOTTOMRIGHT" x="0" y="-2"/>
 						</Anchors>
-					</Button>
+						<Layers>
+							<Layer level="ARTWORK">
+								<FontString parentKey="text" inherits="GameFontNormal" justifyH="LEFT">
+									<Anchors>
+										<Anchor point="LEFT" x="8" y="-1"/>
+									</Anchors>
+								</FontString>
+								<FontString parentKey="count" inherits="GameFontHighlight" justifyH="LEFT">
+									<Anchors>
+										<Anchor point="LEFT" relativeKey="$parent.text" relativePoint="RIGHT" x="2" y="0"/>
+									</Anchors>
+								</FontString>
+								<FontString parentKey="filters" inherits="GameFontHighlight" justifyH="RIGHT" maxLines="1">
+									<Size y="22"/>
+									<Anchors>
+										<Anchor point="LEFT" relativeKey="$parent.count" relativePoint="RIGHT" x="4" y="0"/>
+										<Anchor point="RIGHT" x="-28" y="0"/>
+									</Anchors>
+									<Scripts>
+										<OnEnter>
+											if self:IsTruncated() then
+												GameTooltip:SetOwner(self, "ANCHOR_TOP")
+												GameTooltip:AddLine(self:GetText(), nil, nil, nil, true)
+												GameTooltip:Show()
+											end
+										</OnEnter>
+										<OnLeave>
+											GameTooltip:Hide()
+										</OnLeave>
+									</Scripts>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Frames>
+							<Button parentKey="clear" inherits="MJClearButtonTemplate">
+								<Anchors>
+									<Anchor point="RIGHT" x="-5" y="0"/>
+								</Anchors>
+							</Button>
+						</Frames>
+					</Frame>
 				</Frames>
 			</Frame>
 

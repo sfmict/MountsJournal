@@ -153,7 +153,7 @@ function journal:init()
 	self.gridToggleButton = self.filtersPanel.gridToggleButton
 	self.searchBox = self.filtersPanel.searchBox
 	self.filtersBar = self.filtersPanel.filtersBar
-	self.shownPanel = self.bgFrame.shownPanel
+	self.shownPanel = self.filtersPanel.shownPanel
 	self.leftInset = self.bgFrame.leftInset
 	self.mountDisplay = self.bgFrame.mountDisplay
 	self.modelScene = self.mountDisplay.modelScene
