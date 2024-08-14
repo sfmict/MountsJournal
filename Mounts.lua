@@ -221,7 +221,7 @@ end
 function mounts:setUsableRepairMounts()
 	wipe(self.usableRepairMounts)
 	if not self.config.repairSelectedMount then
-		for spellID in pairs(self.specificDB.repair) do
+		for spellID in pairs(ns.specificDB.repair) do
 			local mountID = C_MountJournal.GetMountFromSpell(spellID)
 			local _,_,_,_,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 			if isCollected and not shouldHideOnChar then
