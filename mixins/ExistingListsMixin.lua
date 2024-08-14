@@ -1,12 +1,13 @@
-local _, L = ...
+local _, ns = ...
+local L = ns.L
 
 
 MJExistingListsMixin = {}
 
 
 function MJExistingListsMixin:onLoad()
-	self.util = MountsJournalUtil
-	self.journal = MountsJournalFrame
+	self.util = ns.util
+	self.journal = ns.journal
 
 	self.searchBox:SetScript("OnTextChanged", function(searchBox)
 		SearchBoxTemplate_OnTextChanged(searchBox)

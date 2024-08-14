@@ -1,8 +1,8 @@
-local addon, L = ...
-local util = MountsJournalUtil
+local addon, ns = ...
+local L, util = ns.L, ns.util
 
 
-MountsJournalFrame:on("MODULES_INIT", function(journal)
+ns.journal:on("MODULES_INIT", function(journal)
 	local dd = LibStub("LibSFDropDown-1.5"):CreateButtonOriginal(journal.modelScene)
 	dd:SetAlpha(.5)
 	dd:SetPoint("LEFT", journal.modelScene.modelControl, "RIGHT", 10, -.5)
@@ -118,7 +118,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		local selectedValue = dd:ddGetSelectedValue()
 		if selectedValue == "custom" then
 			dd.customAnimationPanel:play()
-		else
+		elseif selectedValue then
 			dd:playAnimation(selectedValue)
 		end
 	end)

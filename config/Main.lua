@@ -1,6 +1,8 @@
-local addon, L = ...
-local util, mounts, binding = MountsJournalUtil, MountsJournal, _G[addon.."Binding"]
+local addon, ns = ...
+local L, util, mounts, binding = ns.L, ns.util, ns.mounts, ns.binding
+local specificDB = ns.specificDB
 local config = CreateFrame("FRAME", "MountsJournalConfig")
+ns.config = config
 config:Hide()
 -- config.macroName = "MJMacro"
 -- config.secondMacroName = "MJSecondMacro"
@@ -332,7 +334,7 @@ config:SetScript("OnShow", function(self)
 		self:ddAddButton(info, level)
 
 		info.tooltipWhileDisabled = true
-		for spellID in pairs(mounts.specificDB.repair) do
+		for spellID in pairs(specificDB.repair) do
 			local mountID = C_MountJournal.GetMountFromSpell(spellID)
 			local name, _, icon, _,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
 			if not shouldHideOnChar then
@@ -702,7 +704,7 @@ config:SetScript("OnShow", function(self)
 		mounts:UPDATE_INVENTORY_DURABILITY()
 		mounts:setUsableRepairMounts()
 		mounts:setHerbMount()
-		mounts.pets:setSummonEvery()
+		ns.pets:setSummonEvery()
 		MountsJournalFrame:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 	end
 end)

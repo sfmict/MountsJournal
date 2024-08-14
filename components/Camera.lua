@@ -1,4 +1,5 @@
-local mounts, journal, math = MountsJournal, MountsJournalFrame, math
+local _, ns = ...
+local mounts, journal, math = ns.mounts, ns.journal, math
 
 
 journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera)

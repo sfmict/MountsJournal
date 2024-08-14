@@ -1,7 +1,8 @@
-local addon, L = ...
+local addon, ns = ...
+local L = ns.L
 
 
-MountsJournalFrame:on("MODULES_INIT", function(journal)
+ns.journal:on("MODULES_INIT", function(journal)
 	local dd = LibStub("LibSFDropDown-1.5"):CreateStretchButtonOriginal(journal.mapSettings, nil, 24)
 	dd:SetPoint("TOPLEFT", journal.mapSettings.mapControl, "TOPLEFT", 3, -3)
 	dd:SetPoint("RIGHT", journal.mapSettings.CurrentMap, "LEFT", 2, 0)

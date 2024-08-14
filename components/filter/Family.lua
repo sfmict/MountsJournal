@@ -1,10 +1,10 @@
-local addon, L = ...
-local mounts, journal = MountsJournal, MountsJournalFrame
+local addon, ns = ...
+local L, mounts, journal = ns.L, ns.mounts, ns.journal
+local familyDB = ns.familyDB
 
 
 function journal.filters.family(dd, level, subFamily)
 	local filterFamily = mounts.filters.family
-	local familyDB = mounts.familyDB
 	local info = {}
 	info.keepShownOnClick = true
 	info.isNotRadio = true

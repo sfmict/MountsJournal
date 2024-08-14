@@ -1,4 +1,5 @@
-local util = MountsJournalUtil
+local _, ns = ...
+local util = ns.util
 MJMapCanvasMixin = util.createFromEventsMixin()
 
 

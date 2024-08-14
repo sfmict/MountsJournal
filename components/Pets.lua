@@ -1,7 +1,8 @@
+local _, ns = ...
+local mounts, util = ns.mounts, ns.util
 local random, C_PetJournal, C_Spell, AuraUtil, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, UnitIsAFK, DoEmote = random, C_PetJournal, C_Spell, AuraUtil, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, UnitIsAFK, DoEmote
-local mounts, util = MountsJournal, MountsJournalUtil
 local pets = CreateFrame("FRAME")
-mounts.pets = pets
+ns.pets = pets
 util.setEventsMixin(pets)
 
 

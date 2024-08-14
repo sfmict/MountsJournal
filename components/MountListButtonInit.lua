@@ -1,4 +1,7 @@
-MountsJournalFrame:on("MODULES_INIT", function(journal)
+local _, ns = ...
+
+
+ns.journal:on("MODULES_INIT", function(journal)
 	local function typeClick(btn) journal:mountToggle(btn) end
 	local function mouseDown(btn, mouse) journal.tags:hideDropDown(mouse) end
 	local function dragClick(btn, mouse) journal.tags:dragButtonClick(btn, mouse) end

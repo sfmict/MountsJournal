@@ -1,8 +1,10 @@
+local _, ns = ...
+local mounts = ns.mounts
 local C_UnitAuras, C_Spell, IsSpellKnown = C_UnitAuras, C_Spell, IsSpellKnown
-local mounts = MountsJournal
 local ltl = LibStub("LibThingsLoad-1.0")
 local _,_, raceID = UnitRace("player")
-mounts.additionalMounts = {}
+local additionalMounts = {}
+ns.additionalMounts = additionalMounts
 
 
 local function isActive(self)
@@ -39,7 +41,7 @@ local function createMountFromSpell(spellID, mountType, expansion, modelSceneID)
 		setIsFavorite = setIsFavorite,
 		getIsFavorite = getIsFavorite,
 	}
-	mounts.additionalMounts[t.spellID] = t
+	additionalMounts[t.spellID] = t
 
 	local _, icon = ltl:GetSpellTexture(spellID)
 	t.icon = icon

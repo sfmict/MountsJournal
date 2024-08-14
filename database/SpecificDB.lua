@@ -1,4 +1,7 @@
-MountsJournal.specificDB = {
+local _, ns = ...
+
+
+ns.specificDB = {
 	repair = {
 		[61425] = true, -- 280 Traveler's Tundra Mammoth (Alliance)
 		[61447] = true, -- 284 Traveler's Tundra Mammoth (Horde)

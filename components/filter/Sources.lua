@@ -1,4 +1,5 @@
-local mounts, journal = MountsJournal, MountsJournalFrame
+local _, ns = ...
+local mounts, journal = ns.mounts, ns.journal
 
 
 function journal.filters.sources(btn, level)

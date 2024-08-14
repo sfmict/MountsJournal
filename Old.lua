@@ -1,5 +1,5 @@
-local addon = ...
-local mounts = MountsJournal
+local addon, ns = ...
+local mounts = ns.mounts
 
 
 local function compareVersion(v1, v2)
@@ -295,12 +295,12 @@ function mounts:setOldChanges()
 	if currentVersion == "@project-version@" then currentVersion = "11.0.7" end
 	--@end-do-not-package@
 
-	if compareVersion(currentVersion, self.charDB.lastAddonVersion) then
+	if self.charDB.lastAddonVersion and compareVersion(currentVersion, self.charDB.lastAddonVersion) then
 		updateChar(self)
 		self.charDB.lastAddonVersion = currentVersion
 	end
 
-	if compareVersion(currentVersion, self.globalDB.lastAddonVersion) then
+	if self.globalDB.lastAddonVersion and compareVersion(currentVersion, self.globalDB.lastAddonVersion) then
 		updateGlobal(self)
 		self.globalDB.lastAddonVersion = currentVersion
 	end

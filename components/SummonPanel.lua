@@ -1,5 +1,5 @@
-local addon, L = ...
-local mounts, util = MountsJournal, MountsJournalUtil
+local addon, ns = ...
+local L, mounts, util = ns.L, ns.mounts, ns.util
 local PANEL_WIDTH = 101
 local PANEL_HEIGHT = 65
 

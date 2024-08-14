@@ -1,5 +1,6 @@
-local addon, L = ...
-local mounts, journal = MountsJournal, MountsJournalFrame
+local addon, ns = ...
+local L, mounts, journal = ns.L, ns.mounts, ns.journal
+local specificDB = ns.specificDB
 
 
 function journal.filters.specific(btn, level)
@@ -27,7 +28,7 @@ function journal.filters.specific(btn, level)
 	info.notCheckable = nil
 	local specific = mounts.filters.specific
 
-	for k, t in pairs(mounts.specificDB) do
+	for k, t in pairs(specificDB) do
 		info.text = L[k]
 		info.func = function(_,_,_, value)
 			specific[k] = value

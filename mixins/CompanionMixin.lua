@@ -1,5 +1,5 @@
-local addon, L = ...
-local util = MountsJournalUtil
+local addon, ns = ...
+local L, util = ns.L, ns.util
 local petRandomIcon = "Interface/Icons/INV_Pet_Achievement_CaptureAPetFromEachFamily_Battle" -- select(3, GetSpellInfo(243819))
 
 
@@ -7,8 +7,8 @@ MJSetPetMixin = util.createFromEventsMixin()
 
 
 function MJSetPetMixin:onLoad()
-	self.mounts = MountsJournal
-	self.journal = MountsJournalFrame
+	self.mounts = ns.mounts
+	self.journal = ns.journal
 
 	self:SetScript("OnEnter", function(self)
 		self.highlight:Show()
@@ -142,8 +142,8 @@ function MJCompanionsPanelMixin:onEvent(event, ...) self[event](self, ...) end
 
 
 function MJCompanionsPanelMixin:onLoad()
-	self.util = MountsJournalUtil
-	self.journal = MountsJournalFrame
+	self.util = ns.util
+	self.journal = ns.journal
 
 	self:SetWidth(250)
 	self:SetPoint("TOPLEFT", self.journal.bgFrame, "TOPRIGHT")
@@ -190,7 +190,7 @@ function MJCompanionsPanelMixin:onLoad()
 	self.noPet.name:SetWidth(180)
 	self.noPet.name:SetText(L["No Battle Pet"])
 
-	self.petList = MountsJournal.pets.list
+	self.petList = ns.pets.list
 
 	self.searchBox:SetScript("OnTextChanged", function(searchBox)
 		SearchBoxTemplate_OnTextChanged(searchBox)

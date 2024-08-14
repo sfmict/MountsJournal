@@ -1,5 +1,5 @@
-local addon, L = ...
-local mounts, journal = MountsJournal, MountsJournalFrame
+local addon, ns = ...
+local L, mounts, journal = ns.L, ns.mounts, ns.journal
 
 
 function journal.filters.chance(btn, level)

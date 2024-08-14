@@ -1,6 +1,6 @@
-local addon = ...
+local addon, ns = ...
 local type, select, tremove = type, select, tremove
-local _G, C_MountJournal, AuraUtil = _G, C_MountJournal, AuraUtil
+local C_MountJournal, AuraUtil = C_MountJournal, AuraUtil
 local events, eventsMixin = {}, {}
 
 
@@ -76,8 +76,9 @@ lsfdd:CreateMenuStyle(addon, function(parent)
 end)
 
 
-MountsJournalUtil = {}
-local util = MountsJournalUtil
+local util = {}
+MountsJournalUtil = util
+ns.util = util
 util.addonName = ("%s_ADDON_"):format(addon:upper())
 util.expansion = tonumber(GetBuildInfo():match("(.-)%."))
 util.secureButtonNameMount = addon.."_Mount"
@@ -272,7 +273,7 @@ do
 	local spellID, mountID
 	local function checkMount(auraData)
 		mountID = C_MountJournal.GetMountFromSpell(auraData.spellId)
-		if mountID or _G.MountsJournal.additionalMounts[auraData.spellId] then
+		if mountID or ns.additionalMounts[auraData.spellId] then
 			spellID = auraData.spellId
 			return true
 		end

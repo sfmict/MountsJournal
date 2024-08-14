@@ -1,7 +1,8 @@
+local _, ns = ...
+local mounts, util = ns.mounts, ns.util
 local C_Calendar, pairs, sort = C_Calendar, pairs, sort
-local mounts = MountsJournal
-local calendar = MountsJournalUtil.createFromEventsMixin()
-mounts.calendar = calendar
+local calendar = util.createFromEventsMixin()
+ns.calendar = calendar
 calendar.filterBackup = {}
 
 

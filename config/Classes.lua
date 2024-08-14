@@ -1,6 +1,7 @@
-local addon, L = ...
-local util, mounts = MountsJournalUtil, MountsJournal
+local addon, ns = ...
+local L, util, mounts = ns.L, ns.util, ns.mounts
 local classConfig = CreateFrame("Frame", "MountsJournalConfigClasses")
+ns.classConfig = classConfig
 classConfig:Hide()
 
 

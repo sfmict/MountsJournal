@@ -1,4 +1,7 @@
-MountsJournal.familyDB = {
+local _, ns = ...
+
+
+ns.familyDB = {
 	["Amphibian"] = {
 		["Crawgs"] = 100,
 		["Toads"] = 101,

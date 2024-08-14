@@ -1,6 +1,7 @@
-local addon, L = ...
-local util = MountsJournalUtil
+local addon, ns = ...
+local L, util = ns.L, ns.util
 local aboutConfig = CreateFrame("FRAME", "MountsJournalConfigAbout")
+ns.aboutConfig = aboutConfig
 aboutConfig:Hide()
 
 

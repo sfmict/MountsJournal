@@ -1,7 +1,7 @@
-local mounts = MountsJournal
+local _, ns = ...
 
 
-mounts.newMounts = {
+ns.newMounts = {
 	[1550] = true, -- 359380 Глубинный охотник
 	[1715] = true, -- 405623 Броненосец-волчок
 	[2115] = true, -- 441313 Парение
@@ -44,7 +44,7 @@ mounts.newMounts = {
 }
 
 
-mounts.mountsDB = {
+ns.mountsDB = {
 	[6] = {1, 1806, 64.48}, -- 458 Гнедой конь (Альянс)
 	[7] = {1, 3105, 0}, -- 459 Серый волк
 	[8] = {1, 1806, 0}, -- 468 Белый жеребец
@@ -1293,8 +1293,8 @@ mounts.mountsDB = {
 	[2249] = {11, 2908, 0}, -- 459193 Рука Решкигаал
 	[2262] = {11, 600, 0}, -- 464443 Медведь дружественных приветствий
 }
-setmetatable(mounts.mountsDB, {__index = function(self, key)
-	mounts.newMounts[key] = true
+setmetatable(ns.mountsDB, {__index = function(self, key)
+	ns.newMounts[key] = true
 	self[key] = {tonumber(GetBuildInfo():match("(.-)%.")), 0, 0}
 	return self[key]
 end})

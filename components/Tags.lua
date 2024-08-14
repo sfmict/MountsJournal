@@ -1,6 +1,7 @@
-local addon, L = ...
+local addon, ns = ...
+local L, util, mounts, journal, tags = ns.L, ns.util, ns.mounts, ns.journal, {}
+local mountsDB, familyDB = ns.mountsDB, ns.familyDB
 local pairs, ipairs, next, select, tinsert, wipe = pairs, ipairs, next, select, tinsert, wipe
-local util, mounts, journal, tags = MountsJournalUtil, MountsJournal, MountsJournalFrame, {}
 local ltl = LibStub("LibThingsLoad-1.0")
 journal.tags = tags
 journal:on("MODULES_INIT", function() tags:init() end)
@@ -286,8 +287,7 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 		end
 	--@do-not-package@
 	else
-		local mountDB = mounts.mountsDB[self.menuMountID]
-		local familyDB = mounts.familyDB
+		local mountDB = mountsDB[self.menuMountID]
 
 		local function isChecked(familyID)
 			local ids = mountDB[2]

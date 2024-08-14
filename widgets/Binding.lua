@@ -1,6 +1,7 @@
-local addon = ...
-local util = MountsJournalUtil
+local addon, ns = ...
+local util = ns.util
 local binding = CreateFrame("Frame", addon.."Binding")
+ns.binding = binding
 binding:Hide()
 
 

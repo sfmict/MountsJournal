@@ -1,3 +1,5 @@
+local _, ns = ...
+local util = ns.util
 local type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras = type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras
 local macroFrame = CreateFrame("FRAME")
 
@@ -10,7 +12,8 @@ macroFrame:RegisterEvent("PLAYER_LOGIN")
 
 function macroFrame:PLAYER_LOGIN()
 	self.PLAYER_LOGIN = nil
-	self.mounts = MountsJournal
+	self.additionalMounts = ns.additionalMounts
+	self.mounts = ns.mounts
 	self.config = self.mounts.config
 	self.sFlags = self.mounts.sFlags
 	self.macrosConfig = self.config.macrosConfig
@@ -191,9 +194,9 @@ function macroFrame:PLAYER_LOGIN()
 
 				local additionMount
 				if self.sFlags.targetMount then
-					additionMount = self.mounts.additionalMounts[self.sFlags.targetMount]
+					additionMount = self.additionalMounts[self.sFlags.targetMount]
 				else
-					additionMount = self.mounts.additionalMounts[self.mounts.summonedSpellID]
+					additionMount = self.additionalMounts[self.mounts.summonedSpellID]
 				end
 
 				if additionMount then
@@ -422,7 +425,7 @@ do
 
 	function macroFrame:getBroomData()
 		if not self.config.useMagicBroom
-		or not self.mounts.calendar:isHolidayActive(324) -- Hallow's End
+		or not ns.calendar:isHolidayActive(324) -- Hallow's End
 		or self.sFlags.targetMount
 		or not self.sFlags.groundSpellKnown
 		or self.sFlags.herb
@@ -509,12 +512,12 @@ function macroFrame:getCombatMacro()
 end
 
 
-function MountsJournalUtil.getClassMacro(...)
+function util.getClassMacro(...)
 	return macroFrame:getClassMacro(...)
 end
 
 
-function MountsJournalUtil.refreshMacro()
+function util.refreshMacro()
 	macroFrame:refresh()
 end
 
@@ -523,7 +526,7 @@ MJMacroMixin = {}
 
 
 function MJMacroMixin:onLoad()
-	self.mounts = MountsJournal
+	self.mounts = ns.mounts
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 end
 

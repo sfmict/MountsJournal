@@ -1,5 +1,5 @@
-local addon = ...
-local util = MountsJournalUtil
+local addon, ns = ...
+local util = ns.util
 local mapValidTypes = {
 	[Enum.UIMapType.World] = true,
 	[Enum.UIMapType.Continent] = true,

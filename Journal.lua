@@ -1,7 +1,9 @@
-local addon, L = ...
+local addon, ns = ...
+local L, util, mounts = ns.L, ns.util, ns.mounts
+local newMounts, mountsDB, specificDB = ns.newMounts, ns.mountsDB, ns.specificDB
 local C_MountJournal, C_PetJournal, wipe, tinsert, next, pairs, ipairs, select, type, sort, math = C_MountJournal, C_PetJournal, wipe, tinsert, next, pairs, ipairs, select, type, sort, math
-local util, mounts = MountsJournalUtil, MountsJournal
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
+ns.journal = journal
 journal.mountTypes = util.mountTypes
 util.setEventsMixin(journal)
 
@@ -88,7 +90,7 @@ function journal:init()
 	end
 
 	-- ADDITIONAL MOUNTS
-	for spellID, mount in next, mounts.additionalMounts do
+	for spellID, mount in next, ns.additionalMounts do
 		self.mountIDs[#self.mountIDs + 1] = mount
 	end
 
@@ -1361,7 +1363,7 @@ end
 function journal:getMountInfoExtra(mount)
 	-- expansion, familyID, rarity, creatureDisplayID, descriptionText, sourceText, isSelfMount, mountType, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview
 	if type(mount) == "number" then
-		local mountDB = mounts.mountsDB[mount]
+		local mountDB = mountsDB[mount]
 		return mountDB[1], mountDB[2], mountDB[3], C_MountJournal.GetMountInfoExtraByID(mount)
 	else
 		return mount.expansion, 0, nil, mount.creatureID, mount.description, mount.sourceText, true, mount.mountType, mount.modelSceneID
@@ -1421,7 +1423,7 @@ end
 
 
 local function getQualityColor(mountID)
-	local rarity = mounts.mountsDB[mountID][3]
+	local rarity = mountsDB[mountID][3]
 	if rarity > 50 then
 		return ITEM_QUALITY_COLORS[1].color
 	elseif rarity > 20 then
@@ -1711,7 +1713,7 @@ end
 
 
 function journal:sortMounts()
-	local fSort, db = mounts.filters.sorting, mounts.mountsDB
+	local fSort, db = mounts.filters.sorting, mountsDB
 	local numNeedingFanfare = C_MountJournal.GetNumMountsNeedingFanfare()
 
 	local mCache = setmetatable({}, {__index = function(t, mount)
@@ -2660,13 +2662,13 @@ function journal:getFilterSpecific(spellID, isSelfMount, mountType, mountID)
 	local i = 0
 	if isSelfMount then if filter.transform then return true end
 	else i = i + 1 end
-	if mounts.additionalMounts[spellID] then if filter.additional then return true end
+	if ns.additionalMounts[spellID] then if filter.additional then return true end
 	else i = i + 1 end
 	if mountType == 402 then if filter.rideAlong then return true end
 	else i = i + 1 end
 	if self.mountsWithMultipleModels[mountID] then if filter.multipleModels then return true end
 	else i = i + 1 end
-	for k, t in pairs(mounts.specificDB) do
+	for k, t in pairs(specificDB) do
 		if t[spellID] then if filter[k] then return true end
 		else i = i + 1 end
 	end
@@ -2765,7 +2767,7 @@ end
 
 
 function journal:updateMountsList()
-	local filters, list, newMounts, tags = mounts.filters, self.list, mounts.newMounts, self.tags
+	local filters, list, newMounts, tags = mounts.filters, self.list, newMounts, self.tags
 	local sources, factions, pet, expansions = filters.sources, filters.factions, filters.pet, filters.expansions
 	local text = util.cleanText(self.searchBox:GetText())
 	local numMounts, data = 0

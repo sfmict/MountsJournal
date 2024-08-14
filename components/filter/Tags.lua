@@ -1,5 +1,5 @@
-local addon, L = ...
-local journal = MountsJournalFrame
+local addon, ns = ...
+local L, journal = ns.L, ns.journal
 
 
 function journal.filters.tags(btn, level)

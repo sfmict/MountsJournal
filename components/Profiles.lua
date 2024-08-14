@@ -1,8 +1,8 @@
-local addon, L = ...
-local util = MountsJournalUtil
+local addon, ns = ...
+local L, util = ns.L, ns.util
 
 
-MountsJournalFrame:on("MODULES_INIT", function(journal)
+ns.journal:on("MODULES_INIT", function(journal)
 	local lsfdd = LibStub("LibSFDropDown-1.5")
 	local dd = lsfdd:CreateStretchButtonOriginal(journal.bgFrame, 130, 22)
 	dd:SetPoint("LEFT", journal.summonButton, "RIGHT", 4, -.5)
@@ -166,7 +166,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 		end)
 	end
 
-	dd.mounts = MountsJournal
+	dd.mounts = ns.mounts
 	dd.journal = journal
 	dd.profiles = dd.mounts.profiles
 	dd.charDB = dd.mounts.charDB
@@ -174,7 +174,7 @@ MountsJournalFrame:on("MODULES_INIT", function(journal)
 	dd:SetText(dd.charDB.currentProfileName or DEFAULT)
 
 	-- CALENDAR FRAME
-	local calendar = dd.mounts.calendar
+	local calendar = ns.calendar
 	local calendarFrame = journal.bgFrame.calendarFrame
 
 	local function reloadMenu(level, value)

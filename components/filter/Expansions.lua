@@ -1,5 +1,5 @@
-local addon, L = ...
-local util, mounts, journal = MountsJournalUtil, MountsJournal, MountsJournalFrame
+local addon, ns = ...
+local L, util, mounts, journal = ns.L, ns.util, ns.mounts, ns.journal
 
 
 function journal.filters.expansions(btn, level)
