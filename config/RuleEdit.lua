@@ -1,0 +1,455 @@
+local addon, ns = ...
+local L, util, rules = ns.L, ns.util, ns.rulesConfig
+local ruleEditor = CreateFrame("FRAME", nil, rules)
+rules.ruleEditor = ruleEditor
+ruleEditor:Hide()
+
+
+ruleEditor:SetScript("OnShow", function(self)
+	self:SetScript("OnShow", nil)
+	self:EnableMouse(true)
+	self:SetFrameLevel(1100)
+	self:SetAllPoints()
+	self.bg = self:CreateTexture(nil, "BACKGROUND")
+	self.bg:SetColorTexture(.5, .5, .5, .2)
+	self.bg:SetAllPoints()
+
+	self.mod = {
+		"any",
+		"alt",
+		"ctrl",
+		"shift",
+		"lalt",
+		"ralt",
+		"lctrl",
+		"rctrl",
+		"lshift",
+		"rshift",
+	}
+	self.actionType = {
+		"mount",
+		"spell",
+		"item",
+	}
+
+	-- ADD CONDITION FRAME
+	self.plusFrame = CreateFrame("BUTTON")
+	self.plusFrame.bg = self.plusFrame:CreateTexture(nil, "BACKGROUND")
+	self.plusFrame.bg:SetSize(38, 38)
+	self.plusFrame.bg:SetPoint("CENTER")
+	self.plusFrame.bg:SetTexture("interface/paperdollinfoframe/character-plus")
+	self.plusFrame.bg:SetVertexColor(1, .5, .5)
+	self.plusFrame.highlight = self.plusFrame:CreateTexture(nil, "HIGHLIGHT")
+	self.plusFrame.highlight:SetPoint("TOPLEFT", 4, -4)
+	self.plusFrame.highlight:SetPoint("BOTTOMRIGHT", -4, 4)
+	self.plusFrame.highlight:SetColorTexture(.8, .6, .1, .1)
+	self.plusFrame:SetScript("OnHide", self.Hide)
+	self.plusFrame:SetScript("OnClick", function()
+		self:addCondition()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end)
+
+	-- MENU
+	self.menu = LibStub("LibSFDropDown-1.5"):SetMixin({})
+	self.menu:ddHideWhenButtonHidden(self)
+	self.menu:ddSetDisplayMode(addon)
+	self.menu:ddSetInitFunc(function(dd, level, value)
+		for i = 1, #value do
+			dd:ddAddButton(value[i], level)
+		end
+	end)
+
+	-- POOLS
+	local function resetPoolFunc(pool, f)
+		f:Hide()
+		f:ClearAllPoints()
+		local parent = f:GetParent()
+		if parent then parent.optionValue = nil end
+	end
+	local function btnPoolOnHide(f)
+		self.btnPool:Release(f)
+	end
+	local function initBtnPoolFunc(f)
+		f:Hide()
+		f:SetScript("OnHide", btnPoolOnHide)
+	end
+	self.btnPool = CreateFramePool("BUTTON", nil, "MJConditionDropDownTemplate", resetPoolFunc, false, initBtnPoolFunc)
+
+	local function editPoolOnHide(f)
+		self.editPool:Release(f)
+	end
+	local function initEditPoolFunc(f)
+		f:Hide()
+		f:SetScript("OnHide", editPoolOnHide)
+	end
+	self.editPool = CreateFramePool("EditBox", nil, "MJConditionEditBoxTemplate", resetPoolFunc, false, initEditPoolFunc)
+
+	-- PANELS
+	self.panel = CreateFrame("FRAME", nil, self, "MJDarkPanelTemplate")
+	self.panel:SetPoint("TOPLEFT", 50, -40)
+	self.panel:SetPoint("BOTTOMRIGHT", -50, 40)
+	self.panel:SetBackdropColor(.1, .1, .1, .85)
+
+	self.title = self.panel:CreateFontString(nil, "ARTWORK", "GameFontHighlightLarge")
+	self.title:SetPoint("TOP", 0, -20)
+
+	self.condText = self.panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+	self.condText:SetPoint("TOPLEFT", 40, -60)
+	self.condText:SetText(L["Conditions"])
+
+	self.actionPanel = CreateFrame("FRAME", nil, self.panel, "MJActionPanelTemplate")
+	self.actionPanel:SetPoint("BOTTOMLEFT", 30, 55)
+	self.actionPanel:SetPoint("BOTTOMRIGHT", -30, 55)
+	self.actionPanel.optionType:SetScript("OnClick", function(btn) self:openActionTypeMenu(btn) end)
+
+	self.actionText = self.panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
+	self.actionText:SetPoint("BOTTOMLEFT", self.actionPanel, "TOPLEFT", 10, 10)
+	self.actionText:SetText(L["Action"])
+
+	self.scrollBox = CreateFrame("FRAME", nil, self.panel, "WowScrollBoxList")
+	self.scrollBox:SetPoint("TOPLEFT", self.condText, "BOTTOMLEFT", -10, -10)
+	self.scrollBox:SetPoint("BOTTOMLEFT", self.actionText, "TOPLEFT", -10, 20)
+	self.scrollBox:SetPoint("RIGHT", -55, 0)
+
+	self.scrollBar = CreateFrame("EventFrame", nil, self.panel, "MinimalScrollBar")
+	self.scrollBar:SetPoint("TOPLEFT", self.scrollBox, "TOPRIGHT", 8, -2)
+	self.scrollBar:SetPoint("BOTTOMLEFT", self.scrollBox, "BOTTOMRIGHT", 8, 0)
+
+	self.view = CreateScrollBoxListLinearView()
+	self.view:SetElementInitializer("MJConditionPanelTemplate", function(...) self:conditionButtonInit(...) end)
+	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.scrollBar, self.view)
+
+	-- OK & CANCEL
+	self.cancel = CreateFrame("BUTTON", nil, self.panel, "UIPanelButtonTemplate")
+	self.cancel:SetPoint("BOTTOMRIGHT", -30, 15)
+	self.cancel:SetText(CANCEL)
+	self.cancel:SetScript("OnClick", function(btn)
+		btn:GetParent():GetParent():Hide()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end)
+
+	self.ok = CreateFrame("BUTTON", nil, self.panel, "UIPanelButtonTemplate")
+	self.ok:SetPoint("RIGHT", self.cancel, "LEFT", -5, 0)
+	self.ok:SetText(OKAY)
+	self.ok:SetScript("OnClick", function(btn)
+		rules:saveRule(self.order, self.data)
+		btn:GetParent():GetParent():Hide()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end)
+
+	local width = math.max(self.cancel:GetFontString():GetStringWidth(), self.ok:GetFontString():GetStringWidth()) + 40
+	self.cancel:SetSize(width, 22)
+	self.ok:SetSize(width, 22)
+
+	-- MOUNT SELECT
+	self.mountSelect = CreateFrame("FRAME", nil, self.panel, "MJDarkPanelTemplate")
+	self.mountSelect:Hide()
+	self.mountSelect:EnableMouse(true)
+	self.mountSelect:SetFrameLevel(1200)
+	self.mountSelect:SetAllPoints()
+	self.mountSelect:SetScript("OnShow", function(panel)
+		panel.status = {}
+		local function saveStatus(frame)
+			local status = {}
+			for i = 1, frame:GetNumPoints() do
+				status[i] = {frame:GetPoint(i)}
+			end
+			status.parent = frame:GetParent()
+			status.show = frame:IsShown()
+			panel.status[frame] = status
+
+			frame:SetParent(panel)
+			frame:ClearAllPoints()
+			frame:Show()
+		end
+
+		local filtersPanel = ns.journal.filtersPanel
+		saveStatus(filtersPanel)
+		filtersPanel:SetPoint("TOP", 0, -6)
+
+		local leftInset = ns.journal.leftInset
+		saveStatus(leftInset)
+		leftInset:SetPoint("BOTTOM", 0, 6)
+		ns.journal:setShownCountMounts()
+		ns.journal.tags.selectFunc = function(spellID)
+			self.mountSelect:Hide()
+			self.data.action[2] = spellID
+			self:checkRule()
+			self:setActionValueOption()
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		end
+	end)
+	self.mountSelect:SetScript("OnHide", function(panel)
+		panel:Hide()
+		for frame, status in next, panel.status do
+			frame:ClearAllPoints()
+			for i = 1, #status do
+				frame:SetPoint(unpack(status[i]))
+			end
+			frame:SetParent(status.parent)
+			frame:SetShown(status.show)
+		end
+		ns.journal:setShownCountMounts()
+		ns.journal.tags.selectFunc = nil
+		panel.status = nil
+	end)
+
+	self.mountSelect.close = CreateFrame("BUTTON", nil, self.mountSelect, "UIPanelCloseButtonNoScripts")
+	self.mountSelect.close:SetSize(22, 22)
+	self.mountSelect.close:SetPoint("TOPRIGHT", -4, -7)
+	self.mountSelect.close:SetFrameLevel(self.mountSelect:GetFrameLevel() + 1)
+	self.mountSelect.close:SetScript("OnClick", function(btn)
+		btn:GetParent():Hide()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end)
+end)
+
+
+function ruleEditor:addRule()
+	self:Show()
+	self.title:SetText(L["Add Rule"])
+
+	self.order = nil
+	self.data = {
+		conds = {{false}},
+		action = {},
+	}
+
+	self.actionPanel.optionType:SetText()
+	self:setActionValueOption()
+	self:checkRule()
+	self:updateConditionList()
+end
+
+
+function ruleEditor:editRule(order, data)
+	self:Show()
+	self.title:SetText(L["Edit Rule"])
+
+	self.order = order
+	self.data = util:copyTable(data)
+
+	self.actionPanel.optionType:SetText(rules.actionTypeDisp[data.action[1]])
+	self:setActionValueOption()
+	self:checkRule()
+	self:updateConditionList()
+end
+
+
+function ruleEditor:addCondition()
+	self.data.conds[#self.data.conds + 1] = {false}
+	self:checkRule()
+	self:updateConditionList()
+end
+
+
+function ruleEditor:removeCondition(order)
+	tremove(self.data.conds, order)
+	self:checkRule()
+	self:updateConditionList()
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+end
+
+
+function ruleEditor:checkRule()
+	local check = true
+
+	for i = 1, #self.data.conds - 1 do
+		if not self.data.conds[i][3] then
+			check = false
+			break
+		end
+	end
+
+	if not self.data.action[2] then
+		check = false
+	end
+
+	self.ok:SetEnabled(check)
+end
+
+
+do
+	local lists = {}
+
+	lists["mod"] = function(btnData, func)
+		local list =  {}
+		for i = 1, #ruleEditor.mod do
+			local v = ruleEditor.mod[i]
+			list[i] = {
+				text = rules:getCondValueText(btnData[2], v),
+				value = v,
+				func = func,
+				checked = v == btnData[3],
+			}
+		end
+		return list
+	end
+
+	lists["btn"] = function(btnData, func)
+		local list = {}
+		local i = 1
+		local text = rules:getCondValueText(btnData[2], i)
+		while text do
+			list[i] = {
+				text = text,
+				value = i,
+				func = func,
+				checked = i == btnData[3],
+			}
+
+			i = i + 1
+			text = rules:getCondValueText(btnData[2], i)
+		end
+		return list
+	end
+
+	function ruleEditor:openCondValueMenu(btn, btnData)
+		local function func(f)
+			btnData[3] = f.value
+			btn:SetText(f.text)
+			self:checkRule()
+		end
+		local list = lists[btnData[2]](btnData, func)
+		self.menu:ddToggle(1, list, btn)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end
+end
+
+
+function ruleEditor:setCondValueOption(panel, btnData)
+	if not btnData[2] then return end
+	if not panel.optionValue then
+		panel.optionValue = self.btnPool:Acquire()
+		panel.optionValue:SetParent(panel)
+		panel.optionValue:SetPoint("LEFT", panel.optionType, "RIGHT", 10, 0)
+		panel.optionValue:SetPoint("RIGHT", panel.remove, "LEFT", -10, 0)
+		panel.optionValue:Show()
+	end
+
+	panel.optionValue:SetText(rules:getCondValueText(btnData[2], btnData[3]))
+	panel.optionValue:SetScript("OnClick", function(btn) self:openCondValueMenu(btn, btnData) end)
+end
+
+
+function ruleEditor:openCondTypeMenu(btn, btnData)
+	local function func(f)
+		btnData[2] = f.value
+		btnData[3] = nil
+		btn:SetText(f.text)
+		self:setCondValueOption(btn:GetParent(), btnData)
+		self:checkRule()
+	end
+
+	local list = {}
+	for k, v in next, rules.condTypeDisp do
+		list[#list + 1] = {text = v, value = k, func = func, checked = k == btnData[2]}
+	end
+	sort(list, function(a, b) return a.text < b.text end)
+
+	self.menu:ddToggle(1, list, btn)
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+end
+
+
+function ruleEditor:setActionValueOption()
+	local actionData = self.data.action
+	if not actionData[1] then return end
+
+	local panel = self.actionPanel
+	if panel.optionValue then
+		panel.optionValue:Hide()
+	end
+
+	if actionData[1] == "mount" then
+		panel.optionValue = self.btnPool:Acquire()
+		panel.optionValue:SetScript("OnClick", function()
+			self.mountSelect:Show()
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		end)
+	else
+		panel.optionValue = self.editPool:Acquire()
+		panel.optionValue:SetScript("OnTextChanged", function(editBox)
+			actionData[2] = tonumber(editBox:GetText())
+			self:checkRule()
+		end)
+	end
+
+	panel.optionValue:SetParent(panel)
+	panel.optionValue:SetPoint("LEFT", panel.optionType, "RIGHT", 10, 0)
+	panel.optionValue:SetPoint("RIGHT", -30, 0)
+	panel.optionValue:Show()
+	panel.optionValue:SetText(rules:getActionValueText(actionData))
+end
+
+
+function ruleEditor:openActionTypeMenu(btn)
+	local list = {}
+	local actionData = self.data.action
+
+	local function func(f)
+		actionData[1] = f.value
+		actionData[2] = nil
+		btn:SetText(f.text)
+		self:setActionValueOption()
+		self:checkRule()
+	end
+
+	for i = 1, #self.actionType do
+		local v = self.actionType[i]
+		list[i] = {
+			text = rules.actionTypeDisp[v],
+			value = v,
+			func = func,
+			checked = v == actionData[1],
+		}
+	end
+
+	self.menu:ddToggle(1, list, btn)
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+end
+
+
+function ruleEditor:conditionButtonInit(panel, data)
+	local btnData = data[2]
+	if btnData[1] == "add" then
+		panel.order:SetText("")
+		panel.notCheck:Hide()
+		panel.optionType:Hide()
+		panel.remove:Hide()
+
+		self.plusFrame:SetParent(panel)
+		self.plusFrame:SetAllPoints()
+		self.plusFrame:Show()
+	else
+		panel.order:SetText(data[1])
+
+		panel.notCheck:Show()
+		panel.notCheck:SetChecked(btnData[1])
+		panel.notCheck.Text:SetText(L["Not"])
+		panel.notCheck:SetScript("OnClick",function(btn)
+			local checked = btn:GetChecked()
+			btnData[1] = checked
+			PlaySound(checked and SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON or SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_OFF)
+		end)
+
+		panel.optionType:Show()
+		panel.optionType:SetText(rules.condTypeDisp[btnData[2]])
+		panel.optionType:SetScript("OnClick", function(btn) self:openCondTypeMenu(btn, btnData) end)
+
+		self:setCondValueOption(panel, btnData)
+
+		panel.remove:SetShown(data[1] ~= 1)
+		panel.remove:SetScript("OnClick", function() self:removeCondition(data[1]) end)
+	end
+end
+
+
+function ruleEditor:updateConditionList()
+	self.dataProvider = CreateDataProvider()
+	for i = 1, #self.data.conds do
+		self.dataProvider:Insert({i, self.data.conds[i]})
+	end
+	self.dataProvider:Insert({#self.data.conds + 1, {"add"}})
+	self.scrollBox:SetDataProvider(self.dataProvider, ScrollBoxConstants.RetainScrollPosition)
+end

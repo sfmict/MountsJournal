@@ -1,0 +1,15 @@
+<Ui>
+	<Script file="Main.lua"/>
+	<Script file="Types.lua"/>
+	<Script file="Selected.lua"/>
+	<Script file="Sources.lua"/>
+	<Script file="Specific.lua"/>
+	<Script file="Family.lua"/>
+	<Script file="Factions.lua"/>
+	<Script file="Pet.lua"/>
+	<Script file="Expansions.lua"/>
+	<Script file="Rarity.lua"/>
+	<Script file="Chance.lua"/>
+	<Script file="Tags.lua"/>
+	<Script file="Sorting.lua"/>
+</Ui>

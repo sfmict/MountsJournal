@@ -2,6 +2,7 @@ local _, ns = ...
 local util = ns.util
 local type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras = type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras
 local macroFrame = CreateFrame("FRAME")
+ns.macroFrame = macroFrame
 
 
 macroFrame:SetScript("OnEvent", function(self, event, ...)
@@ -18,21 +19,15 @@ function macroFrame:PLAYER_LOGIN()
 	self.sFlags = self.mounts.sFlags
 	self.macrosConfig = self.config.macrosConfig
 	self.charMacrosConfig = self.mounts.charDB.macrosConfig
+	self.conditions = ns.conditions
+	self.actions = ns.actions
+	self.checkRules = {}
 	-- remove outdated items
 	self.charMacrosConfig.itemSlot16 = nil
 	self.charMacrosConfig.itemSlot17 = nil
 	-- ---------------------
 	self.class = select(2, UnitClass("player"))
 	self.fishingRodID = 133755
-
-	local function loadFunc(funcStr)
-		local loadedFunc, err = loadstring(funcStr)
-		if err then
-			geterrorhandler()(err)
-		else
-			return loadedFunc()
-		end
-	end
 
 	local classOptionMacro = ""
 	local defMacro = ""
@@ -209,14 +204,73 @@ function macroFrame:PLAYER_LOGIN()
 		end
 	]]
 
-	self.getClassOptionMacro = loadFunc(classOptionMacro)
-	self.getDefMacro = loadFunc(defMacro)
+	self.getClassOptionMacro = self:loadString(classOptionMacro)
+	self.getDefMacro = self:loadString(defMacro)
+	self:setRuleFuncs()
 
 	self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 
 	self:refresh()
 	self:getClassMacro(self.class, function() self:refresh() end)
+end
+
+
+function macroFrame:loadString(funcStr)
+	local loadedFunc, err = loadstring(funcStr)
+	if err then
+		geterrorhandler()(err)
+	else
+		return loadedFunc()
+	end
+end
+
+
+macroFrame.rulesConfig = {
+	{
+		{
+			conds = {
+				{false, "btn", 3},
+			},
+			action = {"mount", 122708},
+		},
+		{
+			conds = {
+				{false, "btn", 4},
+			},
+			action = {"spell", 2645},
+		}
+	},
+	{
+		{
+			conds = {
+				{false, "mod", "rshift"},
+				{true, "mod", "alt"},
+				{false, "btn", 1},
+				{false, "btn", 5},
+			},
+			action = {"mount", 122708},
+		}
+	},
+}
+
+
+function macroFrame:setRuleFuncs()
+	for i = 1, #self.rulesConfig do
+		local rules = self.rulesConfig[i]
+		local func = "return function(self, button)\n"
+
+		for j = 1, #rules do
+			local rule = rules[j]
+			func = func..("if %sthen\n%send\n"):format(
+				self.conditions:getText(rule.conds),
+				self.actions:getText(rule.action)
+			)
+		end
+
+		func = func.."end"
+		self.checkRules[i] = self:loadString(func)
+	end
 end
 
 
@@ -449,8 +503,11 @@ do
 end
 
 
-function macroFrame:getMacro()
+function macroFrame:getMacro(id, button)
 	self.mounts:setFlags()
+
+	local macro = self.checkRules[id](self, button)
+	if macro then return macro end
 
 	-- UNDERLIGHT ANGLER
 	if self.config.useUnderlightAngler and C_Item.GetItemCount(self.fishingRodID) > 0 then
@@ -537,7 +594,8 @@ end
 
 
 function MJMacroMixin:preClick(button, down)
+	fprint(button)
 	self.mounts.sFlags.forceModifier = self.forceModifier
 	if InCombatLockdown() or down ~= GetCVarBool("ActionButtonUseKeyDown") then return end
-	self:SetAttribute("macrotext", macroFrame:getMacro())
+	self:SetAttribute("macrotext", macroFrame:getMacro(self.id, button))
 end

@@ -263,6 +263,7 @@ function journal:init()
 		PlaySound(SOUNDKIT.UI_TOYBOX_TABS)
 		PanelTemplates_SetTab(self.bgFrame, tab)
 
+		self.bgFrame.settingsBackground:SetShown(tab == 1)
 		self.mountCount:SetShown(tab ~= 1)
 		self.achiev:SetShown(tab ~= 1)
 		self.bgFrame.OpenDynamicFlightSkillTreeButton:SetShown(tab ~= 1 and DragonridingUtil.IsDragonridingUnlocked())
@@ -275,7 +276,6 @@ function journal:init()
 		self.mapSettings:SetShown(tab == 2)
 		self.bgFrame.profilesMenu:SetShown(tab ~= 1)
 		self.mountSpecial:SetShown(tab ~= 1)
-		self.bgFrame.settingsBackground:SetShown(tab == 1)
 
 		if tab == 2 then
 			self.navBar:setMapID(self.mapTabID)

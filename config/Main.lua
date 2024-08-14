@@ -15,7 +15,9 @@ config:RegisterEvent("PLAYER_LOGIN")
 -- BIND MOUNT
 function config:PLAYER_LOGIN()
 	self.bindMount = binding:createButtonBinding(util.secureButtonNameMount, ("%s %s %d"):format(addon, SUMMONS, 1), "MJSecureActionButtonTemplate")
+	self.bindMount.secure.id = 1
 	self.bindSecondMount = binding:createButtonBinding(util.secureButtonNameSecondMount, ("%s %s %d"):format(addon, SUMMONS, 2), "MJSecureActionButtonTemplate")
+	self.bindSecondMount.secure.id = 2
 	self.bindSecondMount.secure.forceModifier = true
 	mounts:event("CREATE_BUTTONS"):off("CREATE_BUTTONS")
 end

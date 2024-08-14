@@ -167,7 +167,7 @@ L["Select all favorite mounts by type in the selected zone"] = "Select all favor
 L["Select all mounts by type in selected zone"] = "Select all mounts by type in the selected zone"
 L["Unselect all mounts in selected zone"] = "Unselect all mounts in the selected zone"
 L["Are you sure you want to delete profile %s?"] = "Are you sure you want to delete profile \"%s\"?"
-L["Are you sure you want %s?"] = "Are you sure you want \"%s\"?"
+L["Are you sure you want %s?"] = "Are you sure you want to \"%s\"?"
 -- TAGS
 L["tags"] = "Tags"
 L["No tag"] = "No Tag"

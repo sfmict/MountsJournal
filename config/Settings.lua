@@ -33,6 +33,7 @@ ns.mounts:on("MODULES_INIT", function()
 
 	addTab(L["Main"], ns.config)
 	addTab(L["Class settings"], ns.classConfig)
+	addTab(L["Rules"], ns.rulesConfig)
 	addTab(L["About"], ns.aboutConfig)
 
 	PanelTemplates_SetNumTabs(bg, index)
