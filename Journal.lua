@@ -209,29 +209,34 @@ function journal:init()
 			bgFrame:Hide()
 		end
 	]])
-	sMountJournal:SetFrameRef("slotButton", self.bgFrame.slotButton)
-	sMountJournal:SetFrameRef("DynamicFlightModeButton", self.bgFrame.DynamicFlightModeButton)
-	sMountJournal:SetFrameRef("summon1", self.bgFrame.summon1)
-	sMountJournal:SetFrameRef("summon2", self.bgFrame.summon2)
-	sMountJournal:SetFrameRef("summonButton", self.summonButton)
+	sMountJournal:SetFrameRef("frame1", self.mountCount)
+	sMountJournal:SetFrameRef("frame2", self.bgFrame.slotButton)
+	sMountJournal:SetFrameRef("frame3", self.bgFrame.DynamicFlightModeButton)
+	sMountJournal:SetFrameRef("frame4", self.bgFrame.summon1)
+	sMountJournal:SetFrameRef("frame5", self.bgFrame.summon2)
+	sMountJournal:SetFrameRef("frame6", self.summonButton)
 	sMountJournal:SetAttribute("tabUpdate", [[
-		local slotButton = self:GetFrameRef("slotButton")
-		local DynamicFlightModeButton = self:GetFrameRef("DynamicFlightModeButton")
-		local summon1 = self:GetFrameRef("summon1")
-		local summon2 = self:GetFrameRef("summon2")
-		local summonButton = self:GetFrameRef("summonButton")
-		if self:GetAttribute("tab") ~= 1 then
-			slotButton:Show()
-			if self:GetAttribute("dynamicFlight") then DynamicFlightModeButton:Show() end
-			summon1:Show()
-			summon2:Show()
-			summonButton:Show()
-		else
-			slotButton:Hide()
-			DynamicFlightModeButton:Hide()
-			summon1:Hide()
-			summon2:Hide()
-			summonButton:Hide()
+		local tab = self:GetAttribute("tab")
+		local i = 1
+		while true do
+			local frame = self:GetFrameRef("frame"..i)
+			if frame then
+				if tab == 1 then
+					frame:Hide()
+				else
+					frame:Show()
+				end
+			else
+				break
+			end
+			i = i + 1
+		end
+		for i = 1, self:GetAttribute("numTabs") do
+			if i == tab then
+				self:GetFrameRef("tab"..i):Disable()
+			else
+				self:GetFrameRef("tab"..i):Enable()
+			end
 		end
 	]])
 
@@ -264,7 +269,6 @@ function journal:init()
 		PanelTemplates_SetTab(self.bgFrame, tab)
 
 		self.bgFrame.settingsBackground:SetShown(tab == 1)
-		self.mountCount:SetShown(tab ~= 1)
 		self.achiev:SetShown(tab ~= 1)
 		self.bgFrame.OpenDynamicFlightSkillTreeButton:SetShown(tab ~= 1 and DragonridingUtil.IsDragonridingUnlocked())
 		self.navBar:SetShown(tab == 2)
@@ -288,12 +292,20 @@ function journal:init()
 	end
 
 	self.bgFrame.settingsTab:SetText(L["Settings"])
+	self.bgFrame.settingsTab.Enable = nop
+	self.bgFrame.settingsTab.Disable = nop
 	self.bgFrame.mapTab:SetText(L["Map"])
+	self.bgFrame.mapTab.Enable = nop
+	self.bgFrame.mapTab.Disable = nop
 	self.bgFrame.modelTab:SetText(L["Model"])
+	self.bgFrame.modelTab:Disable()
+	self.bgFrame.modelTab.Enable = nop
+	self.bgFrame.modelTab.Disable = nop
 
 	for i = 1, #self.bgFrame.Tabs do
 		local tab = self.bgFrame.Tabs[i]
 		PanelTabButtonMixin.OnLoad(tab)
+		sMountJournal:SetFrameRef("tab"..i, tab)
 		tab:OnEvent()
 		tab:SetFrameRef("s", sMountJournal)
 		tab:SetAttribute("_onclick", [[
@@ -305,7 +317,8 @@ function journal:init()
 	end
 
 	self.bgFrame.numTabs = 3
-	PanelTemplates_SetTab(self.bgFrame, 3)
+	PanelTemplates_SetTab(self.bgFrame, self.bgFrame.numTabs)
+	sMountJournal:SetAttribute("numTabs", self.bgFrame.numTabs)
 
 	-- DYNAMIC FLIGHT
 	hooksecurefunc(self.MountJournal.ToggleDynamicFlightFlyoutButton, "UpdateVisibility", function()
