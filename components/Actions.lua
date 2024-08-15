@@ -91,7 +91,7 @@ end
 ---------------------------------------------------
 -- macro
 actions.macro = {}
-actions.macro.text = L["Macro"]
+actions.macro.text = MACRO
 
 function actions.macro:getValueText(macroText)
 	return macroText

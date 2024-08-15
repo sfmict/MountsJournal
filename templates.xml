@@ -3051,7 +3051,7 @@
 				<FontString parentKey="action" inherits="GameFontNormal" justifyH="LEFT" maxLines="1">
 					<Anchors>
 						<Anchor point="LEFT" relativeKey="$parent.conds" relativePoint="RIGHT" x="10"/>
-						<Anchor point="RIGHT" x="-67"/>
+						<Anchor point="RIGHT" x="-62"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -3063,22 +3063,22 @@
 				</Anchors>
 			</Button>
 			<Button parentKey="up">
-				<Size x="22" y="22"/>
+				<Size x="17" y="11"/>
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="-40" y="-5"/>
+					<Anchor point="TOPRIGHT" x="-40" y="-12"/>
 				</Anchors>
-				<NormalTexture atlas="hud-MainMenuBar-arrowup-up"/>
-				<PushedTexture atlas="hud-MainMenuBar-arrowup-down"/>
-				<HighlightTexture atlas="hud-MainMenuBar-arrowup-highlight" alphaMode="ADD"/>
+				<NormalTexture atlas="minimal-scrollbar-arrow-top"/>
+				<PushedTexture atlas="minimal-scrollbar-arrow-top-down"/>
+				<HighlightTexture atlas="minimal-scrollbar-arrow-top-over" alphaMode="ADD"/>
 			</Button>
 			<Button parentKey="down">
-				<Size x="22" y="22"/>
+				<Size x="17" y="11"/>
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" x="-40" y="5"/>
+					<Anchor point="BOTTOMRIGHT" x="-40" y="12"/>
 				</Anchors>
-				<NormalTexture atlas="hud-MainMenuBar-arrowdown-up" />
-				<PushedTexture atlas="hud-MainMenuBar-arrowdown-down" />
-				<HighlightTexture atlas="hud-MainMenuBar-arrowdown-highlight" alphaMode="ADD" />
+				<NormalTexture atlas="minimal-scrollbar-arrow-bottom"/>
+				<PushedTexture atlas="minimal-scrollbar-arrow-bottom-down"/>
+				<HighlightTexture atlas="minimal-scrollbar-arrow-bottom-over" alphaMode="ADD"/>
 			</Button>
 		</Frames>
 		<Scripts>

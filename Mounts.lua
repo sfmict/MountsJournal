@@ -31,9 +31,12 @@ function mounts:ADDON_LOADED(addonName)
 		self.globalDB.mountAnimations = self.globalDB.mountAnimations or {}
 		self.globalDB.defProfile = self.globalDB.defProfile or {}
 		self.globalDB.mountsProfiles = self.globalDB.mountsProfiles or {}
-		-- self.globalDB.ruleConfig = self.globalDB.ruleConfig or {}
 		self.globalDB.holidayNames = self.globalDB.holidayNames or {}
 		self.globalDB.help = self.globalDB.help or {}
+		self.globalDB.ruleConfig = self.globalDB.ruleConfig or {
+			{self:getDefaultRule()},
+			{self:getDefaultRule()},
+		}
 
 		self.defProfile = self.globalDB.defProfile
 		self:checkProfile(self.defProfile)
@@ -127,6 +130,14 @@ function mounts:ADDON_LOADED(addonName)
 			{mountID = 1799},
 		}
 	end
+end
+
+
+function mounts:getDefaultRule()
+	return {
+		{false, "btn", 1},
+		action = {"rmount"},
+	}
 end
 
 

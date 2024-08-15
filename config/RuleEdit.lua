@@ -6,10 +6,39 @@ ruleEditor:Hide()
 
 
 ruleEditor:SetScript("OnShow", function(self)
-	self:SetScript("OnShow", nil)
 	self:EnableMouse(true)
 	self:SetFrameLevel(1100)
 	self:SetAllPoints()
+	self:SetScript("OnKeyDown", function(self, key)
+		if key == GetBindingKey("TOGGLEGAMEMENU") then
+			self:Hide()
+			self:SetPropagateKeyboardInput(false)
+		else
+			self:SetPropagateKeyboardInput(true)
+		end
+	end)
+	self:SetScript("OnShow", function(self)
+		self:EnableKeyboard(not InCombatLockdown())
+		self:RegisterEvent("PLAYER_REGEN_DISABLED")
+		self:RegisterEvent("PLAYER_REGEN_ENABLED")
+	end)
+	self:SetScript("OnHide", function(self)
+		self:UnregisterEvent("PLAYER_REGEN_DISABLED")
+		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+	end)
+	self:SetScript("OnEvent", function(self, event)
+		if event == "PLAYER_REGEN_DISABLED" then
+			self:EnableKeyboard(false)
+			self.mountSelect:EnableKeyboard(false)
+		elseif event == "PLAYER_REGEN_ENABLED" then
+			self:EnableKeyboard(true)
+			self.mountSelect:EnableKeyboard(true)
+		end
+	end)
+	self:EnableKeyboard(not InCombatLockdown())
+	self:RegisterEvent("PLAYER_REGEN_DISABLED")
+	self:RegisterEvent("PLAYER_REGEN_ENABLED")
+
 	self.bg = self:CreateTexture(nil, "BACKGROUND")
 	self.bg:SetColorTexture(.5, .5, .5, .2)
 	self.bg:SetAllPoints()
@@ -137,6 +166,8 @@ ruleEditor:SetScript("OnShow", function(self)
 	self.mountSelect:SetFrameLevel(1200)
 	self.mountSelect:SetAllPoints()
 	self.mountSelect:SetScript("OnShow", function(panel)
+		panel:EnableKeyboard(not InCombatLockdown())
+
 		panel.status = {}
 		local function saveStatus(frame)
 			local status = {}
@@ -182,6 +213,7 @@ ruleEditor:SetScript("OnShow", function(self)
 		ns.journal.tags.selectFunc = nil
 		panel.status = nil
 	end)
+	self.mountSelect:SetScript("OnKeyDown", self:GetScript("OnKeyDown"))
 
 	self.mountSelect.close = CreateFrame("BUTTON", nil, self.mountSelect, "UIPanelCloseButtonNoScripts")
 	self.mountSelect.close:SetSize(22, 22)

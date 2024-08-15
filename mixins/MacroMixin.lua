@@ -16,6 +16,7 @@ function macroFrame:PLAYER_LOGIN()
 	self.additionalMounts = ns.additionalMounts
 	self.mounts = ns.mounts
 	self.config = self.mounts.config
+	self.ruleConfig = self.mounts.globalDB.ruleConfig
 	self.sFlags = self.mounts.sFlags
 	self.macrosConfig = self.config.macrosConfig
 	self.charMacrosConfig = self.mounts.charDB.macrosConfig
@@ -224,41 +225,6 @@ function macroFrame:loadString(funcStr)
 		return loadedFunc()
 	end
 end
-
-
-macroFrame.ruleConfig = {
-	{
-		{
-			{false, "btn", 1},
-			action = {"macro", "/run print('\\'%+2\\'')\n/run fprint([[2]])"},
-		},
-		{
-			{false, "btn", 3},
-			action = {"mount", 122708},
-		},
-		{
-			{false, "btn", 4},
-			action = {"spell", 2645},
-		},
-		{
-			{false, "btn", 1},
-			action = {"rmount"},
-		},
-	},
-	{
-		{
-			{false, "mod", "rshift"},
-			{true, "mod", "alt"},
-			{false, "btn", 1},
-			{false, "btn", 5},
-			action = {"mount", 122708},
-		},
-		{
-			{false, "btn", 1},
-			action = {"rmount"},
-		},
-	},
-}
 
 
 function macroFrame:setRuleFuncs()
