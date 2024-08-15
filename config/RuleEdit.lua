@@ -1,5 +1,5 @@
 local addon, ns = ...
-local L, util, rules = ns.L, ns.util, ns.rulesConfig
+local L, util, rules, conds, actions = ns.L, ns.util, ns.ruleConfig, ns.conditions, ns.actions
 local ruleEditor = CreateFrame("FRAME", nil, rules)
 rules.ruleEditor = ruleEditor
 ruleEditor:Hide()
@@ -13,24 +13,6 @@ ruleEditor:SetScript("OnShow", function(self)
 	self.bg = self:CreateTexture(nil, "BACKGROUND")
 	self.bg:SetColorTexture(.5, .5, .5, .2)
 	self.bg:SetAllPoints()
-
-	self.mod = {
-		"any",
-		"alt",
-		"ctrl",
-		"shift",
-		"lalt",
-		"ralt",
-		"lctrl",
-		"rctrl",
-		"lshift",
-		"rshift",
-	}
-	self.actionType = {
-		"mount",
-		"spell",
-		"item",
-	}
 
 	-- ADD CONDITION FRAME
 	self.plusFrame = CreateFrame("BUTTON")
@@ -98,9 +80,16 @@ ruleEditor:SetScript("OnShow", function(self)
 	self.condText:SetText(L["Conditions"])
 
 	self.actionPanel = CreateFrame("FRAME", nil, self.panel, "MJActionPanelTemplate")
-	self.actionPanel:SetPoint("BOTTOMLEFT", 30, 55)
-	self.actionPanel:SetPoint("BOTTOMRIGHT", -30, 55)
+	self.actionPanel:SetPoint("BOTTOMLEFT", 30, 45)
+	self.actionPanel:SetPoint("BOTTOMRIGHT", -30, 45)
 	self.actionPanel.optionType:SetScript("OnClick", function(btn) self:openActionTypeMenu(btn) end)
+	self.actionPanel.macro.editFrame:GetEditBox():HookScript("OnTextChanged", function(editBox, userInput)
+		if userInput then
+			local text = editBox:GetText()
+			self.data.action[2] = #text > 0 and text or nil
+			self:checkRule()
+		end
+	end)
 
 	self.actionText = self.panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 	self.actionText:SetPoint("BOTTOMLEFT", self.actionPanel, "TOPLEFT", 10, 10)
@@ -108,7 +97,7 @@ ruleEditor:SetScript("OnShow", function(self)
 
 	self.scrollBox = CreateFrame("FRAME", nil, self.panel, "WowScrollBoxList")
 	self.scrollBox:SetPoint("TOPLEFT", self.condText, "BOTTOMLEFT", -10, -10)
-	self.scrollBox:SetPoint("BOTTOMLEFT", self.actionText, "TOPLEFT", -10, 20)
+	self.scrollBox:SetPoint("BOTTOMLEFT", self.actionText, "TOPLEFT", -10, 15)
 	self.scrollBox:SetPoint("RIGHT", -55, 0)
 
 	self.scrollBar = CreateFrame("EventFrame", nil, self.panel, "MinimalScrollBar")
@@ -211,7 +200,7 @@ function ruleEditor:addRule()
 
 	self.order = nil
 	self.data = {
-		conds = {{false}},
+		{false},
 		action = {},
 	}
 
@@ -229,7 +218,7 @@ function ruleEditor:editRule(order, data)
 	self.order = order
 	self.data = util:copyTable(data)
 
-	self.actionPanel.optionType:SetText(rules.actionTypeDisp[data.action[1]])
+	self.actionPanel.optionType:SetText(actions[data.action[1]].text)
 	self:setActionValueOption()
 	self:checkRule()
 	self:updateConditionList()
@@ -237,14 +226,14 @@ end
 
 
 function ruleEditor:addCondition()
-	self.data.conds[#self.data.conds + 1] = {false}
+	self.data[#self.data + 1] = {false}
 	self:checkRule()
 	self:updateConditionList()
 end
 
 
 function ruleEditor:removeCondition(order)
-	tremove(self.data.conds, order)
+	tremove(self.data, order)
 	self:checkRule()
 	self:updateConditionList()
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -254,14 +243,15 @@ end
 function ruleEditor:checkRule()
 	local check = true
 
-	for i = 1, #self.data.conds - 1 do
-		if not self.data.conds[i][3] then
+	for i = 1, #self.data do
+		if not self.data[i][3] then
 			check = false
 			break
 		end
 	end
 
-	if not self.data.action[2] then
+	local action = self.data.action
+	if not action[1] or actions[action[1]].getValueText and not action[2] then
 		check = false
 	end
 
@@ -269,51 +259,16 @@ function ruleEditor:checkRule()
 end
 
 
-do
-	local lists = {}
-
-	lists["mod"] = function(btnData, func)
-		local list =  {}
-		for i = 1, #ruleEditor.mod do
-			local v = ruleEditor.mod[i]
-			list[i] = {
-				text = rules:getCondValueText(btnData[2], v),
-				value = v,
-				func = func,
-				checked = v == btnData[3],
-			}
-		end
-		return list
+function ruleEditor:openCondValueMenu(btn, btnData)
+	local function func(f)
+		btnData[3] = f.value
+		btn:SetText(f.text)
+		self:checkRule()
 	end
 
-	lists["btn"] = function(btnData, func)
-		local list = {}
-		local i = 1
-		local text = rules:getCondValueText(btnData[2], i)
-		while text do
-			list[i] = {
-				text = text,
-				value = i,
-				func = func,
-				checked = i == btnData[3],
-			}
-
-			i = i + 1
-			text = rules:getCondValueText(btnData[2], i)
-		end
-		return list
-	end
-
-	function ruleEditor:openCondValueMenu(btn, btnData)
-		local function func(f)
-			btnData[3] = f.value
-			btn:SetText(f.text)
-			self:checkRule()
-		end
-		local list = lists[btnData[2]](btnData, func)
-		self.menu:ddToggle(1, list, btn)
-		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	end
+	local list = conds[btnData[2]]:getValueList(btnData[3], func)
+	self.menu:ddToggle(1, list, btn)
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 end
 
 
@@ -327,7 +282,7 @@ function ruleEditor:setCondValueOption(panel, btnData)
 		panel.optionValue:Show()
 	end
 
-	panel.optionValue:SetText(rules:getCondValueText(btnData[2], btnData[3]))
+	panel.optionValue:SetText(rules:getCondValueText(btnData))
 	panel.optionValue:SetScript("OnClick", function(btn) self:openCondValueMenu(btn, btnData) end)
 end
 
@@ -341,12 +296,7 @@ function ruleEditor:openCondTypeMenu(btn, btnData)
 		self:checkRule()
 	end
 
-	local list = {}
-	for k, v in next, rules.condTypeDisp do
-		list[#list + 1] = {text = v, value = k, func = func, checked = k == btnData[2]}
-	end
-	sort(list, function(a, b) return a.text < b.text end)
-
+	local list = conds:getMenuList(btnData[2], func)
 	self.menu:ddToggle(1, list, btn)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 end
@@ -361,9 +311,22 @@ function ruleEditor:setActionValueOption()
 		panel.optionValue:Hide()
 	end
 
+	if actionData[1] == "macro" then
+		panel:SetHeight(140)
+		panel.optionValue = panel.macro
+		panel.macro.editFrame:GetEditBox():SetText(rules:getActionValueText(actionData) or "")
+		panel.macro:Show()
+		return
+	else
+		panel:SetHeight(50)
+	end
+
+	if actionData[1] == "rmount" then return end
+
 	if actionData[1] == "mount" then
 		panel.optionValue = self.btnPool:Acquire()
 		panel.optionValue:SetScript("OnClick", function()
+			self.menu:ddCloseMenus()
 			self.mountSelect:Show()
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		end)
@@ -379,12 +342,11 @@ function ruleEditor:setActionValueOption()
 	panel.optionValue:SetPoint("LEFT", panel.optionType, "RIGHT", 10, 0)
 	panel.optionValue:SetPoint("RIGHT", -30, 0)
 	panel.optionValue:Show()
-	panel.optionValue:SetText(rules:getActionValueText(actionData))
+	panel.optionValue:SetText(rules:getActionValueText(actionData) or "")
 end
 
 
 function ruleEditor:openActionTypeMenu(btn)
-	local list = {}
 	local actionData = self.data.action
 
 	local function func(f)
@@ -395,16 +357,7 @@ function ruleEditor:openActionTypeMenu(btn)
 		self:checkRule()
 	end
 
-	for i = 1, #self.actionType do
-		local v = self.actionType[i]
-		list[i] = {
-			text = rules.actionTypeDisp[v],
-			value = v,
-			func = func,
-			checked = v == actionData[1],
-		}
-	end
-
+	local list = actions:getMenuList(actionData[1], func)
 	self.menu:ddToggle(1, list, btn)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 end
@@ -434,7 +387,7 @@ function ruleEditor:conditionButtonInit(panel, data)
 		end)
 
 		panel.optionType:Show()
-		panel.optionType:SetText(rules.condTypeDisp[btnData[2]])
+		panel.optionType:SetText(btnData[2] and conds[btnData[2]].text)
 		panel.optionType:SetScript("OnClick", function(btn) self:openCondTypeMenu(btn, btnData) end)
 
 		self:setCondValueOption(panel, btnData)
@@ -447,9 +400,9 @@ end
 
 function ruleEditor:updateConditionList()
 	self.dataProvider = CreateDataProvider()
-	for i = 1, #self.data.conds do
-		self.dataProvider:Insert({i, self.data.conds[i]})
+	for i = 1, #self.data do
+		self.dataProvider:Insert({i, self.data[i]})
 	end
-	self.dataProvider:Insert({#self.data.conds + 1, {"add"}})
+	self.dataProvider:Insert({#self.data + 1, {"add"}})
 	self.scrollBox:SetDataProvider(self.dataProvider, ScrollBoxConstants.RetainScrollPosition)
 end

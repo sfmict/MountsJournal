@@ -1,95 +1,8 @@
 local addon, ns = ...
-local L, util, macroFrame = ns.L, ns.util, ns.macroFrame
+local L, util, macroFrame, conds, actions = ns.L, ns.util, ns.macroFrame, ns.conditions, ns.actions
 local rules = CreateFrame("FRAME", "MountsJournalConfigRules")
-ns.rulesConfig = rules
+ns.ruleConfig = rules
 rules:Hide()
-
-local asd = {
-	{
-		{
-			conds = {
-				{false, "mod", "rshift"},
-				{true, "mod", "alt"},
-				{false, "btn", 1},
-			},
-			action = {"mount", 122708},
-		},
-		{
-			conds = {
-				{false, "mod", "rshift"},
-				{false, "mod", "alt"},
-				{false, "btn", 1},
-			},
-			action = {"mount", 122708},
-		},
-		{
-			conds = {
-				{false, "mod", "rshift"},
-				{true, "mod", "alt"},
-				{false, "btn", 1},
-			},
-			action = {"mount", 122708},
-		},
-		{
-			conds = {
-				{false, "mod", "rshift"},
-				{true, "mod", "alt"},
-				{false, "btn", 1},
-			},
-			action = {"mount", 122708},
-		},
-		{
-			conds = {
-				{false, "mod", "rshift"},
-				{true, "mod", "alt"},
-				{false, "btn", 1},
-			},
-			action = {"mount", 122708},
-		},
-		{
-			conds = {
-				{false, "mod", "rshift"},
-				{true, "mod", "alt"},
-				{false, "btn", 1},
-			},
-			action = {"mount", 122708},
-		},
-		{
-			conds = {
-				{false, "mod", "rshift"},
-				{true, "mod", "alt"},
-				{false, "btn", 1},
-			},
-			action = {"mount", 122708},
-		},
-		{
-			conds = {
-				{false, "mod", "rshift"},
-				{true, "mod", "alt"},
-				{false, "btn", 1},
-			},
-			action = {"mount", 122708},
-		},
-		{
-			conds = {
-				{false, "mod", "rshift"},
-				{true, "mod", "alt"},
-				{false, "btn", 1},
-			},
-			action = {"mount", 122708},
-		},
-	},
-	{
-		{
-			conds = {
-					{false, "mod", "rshift"},
-					{true, "mod", "alt"},
-					{false, "btn", 1},
-				},
-			action = {"mount", 122708},
-		},
-	},
-}
 
 
 rules:SetScript("OnShow", function(self)
@@ -97,17 +10,6 @@ rules:SetScript("OnShow", function(self)
 	self:SetScript("OnHide", function() self.ruleEditor:Hide() end)
 
 	local lsfdd = LibStub("LibSFDropDown-1.5")
-
-	self.condTypeDisp = {
-		mod = L["Modifier"],
-		btn = L["Mouse button"],
-	}
-
-	self.actionTypeDisp = {
-		mount = L["Use Mount"],
-		spell = L["Cast Spell"],
-		item = L["Use Item"],
-	}
 
 	-- VERSION
 	local ver = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
@@ -175,7 +77,7 @@ end)
 
 
 function rules:setSummonRules(n)
-	self.rules = macroFrame.rulesConfig[n]
+	self.rules = macroFrame.ruleConfig[n]
 	self:updateRuleList()
 end
 
@@ -209,49 +111,31 @@ function rules:setRuleOrder(order, delta)
 end
 
 
-function rules:getCondValueText(condType, value)
-	if value == nil then return end
-	if condType == "mod" then
-		if value == "any" then
-			return L["Any"]
-		else
-			return _G[value:upper().."_KEY_TEXT"]
-		end
-	elseif condType == "btn" then
-		return _G["KEY_BUTTON"..value]
-	end
+function rules:getCondValueText(cond)
+	if cond[3] == nil then return end
+	return conds[cond[2]]:getValueText(cond[3])
 end
 
 
 function rules:getActionValueText(action)
-	if action[1] == "mount" then
-		if action[2] then
-			if ns.additionalMounts[action[2]] then
-				return ns.additionalMounts[action[2]].name
-			else
-				local mountID = C_MountJournal.GetMountFromSpell(action[2])
-				if mountID then
-					local name = C_MountJournal.GetMountInfoByID(mountID)
-					return name
-				end
-			end
-		end
-	elseif action[1] == "item" or action[1] == "spell" then
-		return action[2] or ""
-	end
+	if action[2] then	return actions[action[1]]:getValueText(action[2]) end
 end
 
 
-function rules:getCondText(conds)
+function rules:getCondText(conditions)
 	local text = ""
 
-	for i = 1, math.min(#conds, 3) do
-		local cond = conds[i]
+	for i = 1, #conditions > 3 and 2 or #conditions do
+		local cond = conditions[i]
 		text = text..("\n|cff%s%s: %s|r"):format(
 			cond[1] and ("cc4444%s "):format(L["Not"]) or "44cc44",
-			self.condTypeDisp[cond[2]],
-			self:getCondValueText(cond[2], cond[3])
+			conds[cond[2]].text,
+			self:getCondValueText(cond)
 		)
+	end
+
+	if #conditions > 3 then
+		text = text.."\n..."
 	end
 
 	return text:sub(2)
@@ -259,10 +143,12 @@ end
 
 
 function rules:getActionText(action)
-	return ("%s : %s"):format(
-		self.actionTypeDisp[action[1]],
-		self:getActionValueText(action)
-	)
+	local value = self:getActionValueText(action)
+	if value then
+		return ("%s : %s"):format(actions[action[1]].text, value)
+	else
+		return actions[action[1]].text
+	end
 end
 
 
@@ -270,7 +156,7 @@ function rules:ruleButtonInit(btn, data)
 	local btnData = data[2]
 	btn.id = data[1]
 	btn.order:SetText(btn.id)
-	btn.conds:SetText(self:getCondText(btnData.conds))
+	btn.conds:SetText(self:getCondText(btnData))
 	btn.action:SetText(self:getActionText(btnData.action))
 
 	btn:SetScript("OnClick", function(btn)

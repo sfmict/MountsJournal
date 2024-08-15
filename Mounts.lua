@@ -31,6 +31,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.globalDB.mountAnimations = self.globalDB.mountAnimations or {}
 		self.globalDB.defProfile = self.globalDB.defProfile or {}
 		self.globalDB.mountsProfiles = self.globalDB.mountsProfiles or {}
+		-- self.globalDB.ruleConfig = self.globalDB.ruleConfig or {}
 		self.globalDB.holidayNames = self.globalDB.holidayNames or {}
 		self.globalDB.help = self.globalDB.help or {}
 

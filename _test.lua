@@ -151,11 +151,18 @@ function test:PLAYER_ENTERING_WORLD()
 
 	-- local sbg = journal.bgFrame.settingsBackground
 	-- sbg:Show()
+
+	-- local bgWidth = journal.bgFrame:GetWidth()
+	-- for i = 1, sbg:GetNumPoints() do
+	-- 	local point, rframe, rpoint, x, y = sbg:GetPoint(i)
+	-- 	sbg:SetPoint(point, rframe, rpoint, x + bgWidth, y)
+	-- end
+
 	-- sbg:SetSize(sbg:GetSize())
 	-- sbg:ClearAllPoints()
 	-- sbg:SetPoint("TOPLEFT", journal.bgFrame, "TOPRIGHT", 5, -60)
 	-- sbg.Tabs[3]:Click()
-	-- ns.rulesConfig.addRule:Click()
+	-- ns.ruleConfig.addRule:Click()
 
 	-- journal.navBarBtn:Click()
 	-- journal.mapSettings.existingListsToggle:Click()

@@ -17,9 +17,9 @@ Old.lua
 database\SpecificDB.lua
 database\FamilyDB.lua
 database\MountsDB.lua
-config\config.xml
 Journal.lua
 components\components.xml
+config\config.xml
 #@do-not-package@
 _test.lua
 #@end-do-not-package@

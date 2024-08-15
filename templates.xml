@@ -3118,7 +3118,7 @@
 		</ButtonText>
 	</Button>
 
-	<EditBox name="MJConditionEditBoxTemplate" inherits="InputBoxScriptTemplate,MJDarkPanelTemplate" multiLine="false" autoFocus="false" virtual="true">
+	<EditBox name="MJConditionEditBoxTemplate" inherits="InputBoxScriptTemplate,MJDarkPanelTemplate" numeric="true" multiLine="false" autoFocus="false" virtual="true">
 		<Size y="40"/>
 		<FontString inherits="GameFontHighlight" justifyH="LEFT"/>
 		<TextInsets>
@@ -3143,9 +3143,9 @@
 		<Layers>
 			<Layer level="ARTWORK">
 				<FontString parentKey="order" inherits="GameFontNormalLarge" justifyH="CENTER">
-					<Size x="20"/>
+					<Size x="26"/>
 					<Anchors>
-						<Anchor point="LEFT" x="5"/>
+						<Anchor point="LEFT" x="2"/>
 					</Anchors>
 				</FontString>
 			</Layer>
@@ -3175,9 +3175,71 @@
 		<Frames>
 			<Button parentKey="optionType" inherits="MJConditionDropDownTemplate">
 				<Anchors>
-					<Anchor point="LEFT" x="30"/>
+					<Anchor point="TOPLEFT" x="30" y="-5"/>
 					<Anchor point="RIGHT" relativePoint="CENTER" x="-5"/>
 				</Anchors>
+			</Button>
+			<Button parentKey="macro" useParentLevel="true" inherits="BackdropTemplate" hidden="true">
+				<Size y="85"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.optionType" relativePoint="BOTTOMLEFT" x="0" y="-5"/>
+					<Anchor point="RIGHT" x="-30"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString parentKey="limitText" inherits="GameFontHighlightSmall">
+							<Size x="0" y="5"/>
+							<Anchors>
+								<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" x="-5" y="10"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Frames>
+					<EventFrame parentKey="scrollBar" enableMouse="true" inherits="WowTrimScrollBar">
+						<Anchors>
+							<Anchor point="TOPRIGHT" x="-4" y="-5"/>
+							<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
+						</Anchors>
+					</EventFrame>
+					<Frame parentKey="editFrame" inherits="ScrollingEditBoxTemplate"/>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						self:SetBackdrop({
+							bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+							edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+							tile = true,
+							tileEdge = true,
+							tileSize = 16,
+							edgeSize = 16,
+							insets = { left = 4, right = 4, top = 4, bottom = 4 },
+						})
+						self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR:GetRGB())
+						self:SetBackdropBorderColor(FRIENDS_GRAY_COLOR:GetRGB())
+
+						local anchorsToFrame = {
+							CreateAnchor("TOPLEFT", self, "TOPLEFT", 8, -8),
+							CreateAnchor("BOTTOMRIGHT", self, "BOTTOMRIGHT", -8, 8),
+						}
+						local anchorsToBar = {
+							CreateAnchor("TOPLEFT", self, "TOPLEFT", 8, -8),
+							CreateAnchor("BOTTOMRIGHT", self.scrollBar, "BOTTOMLEFT", -3, 4),
+						}
+						local scrollBox = self.editFrame:GetScrollBox()
+						ScrollUtil.RegisterScrollBoxWithScrollBar(scrollBox, self.scrollBar)
+						ScrollUtil.AddManagedScrollBarVisibilityBehavior(scrollBox, self.scrollBar, anchorsToBar, anchorsToFrame)
+
+						local editBox = self.editFrame:GetEditBox()
+						editBox:SetMaxLetters(255)
+						editBox:HookScript("OnTextChanged", function(editBox, userInput)
+							self.limitText:SetFormattedText(MACROFRAME_CHAR_LIMIT, editBox:GetNumLetters())
+						end)
+					</OnLoad>
+					<OnClick>
+						self.editFrame:GetEditBox():SetFocus()
+					</OnClick>
+				</Scripts>
 			</Button>
 		</Frames>
 	</Frame>
