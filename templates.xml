@@ -173,7 +173,7 @@
 
 			<Button parentKey="DynamicFlightModeButton"  inherits="DynamicFlightFlyoutButtonTemplate,MJSecureActionButtonUpTemplate" mixin="MJDynamicFlightModeButtonMixin">
 				<Anchors>
-					<Anchor point="RIGHT" relativeKey="$parent.OpenDynamicFlightSkillTreeButton" relativePoint="LEFT" x="-3" y="0"/>
+					<Anchor point="RIGHT" relativeKey="$parent.summon1" relativePoint="LEFT" x="-53" y="0"/>
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
