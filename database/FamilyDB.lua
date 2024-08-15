@@ -10,6 +10,7 @@ ns.familyDB = {
 		["Blood Ticks"] = 200,
 		["Scorpions"] = 201,
 		["Spiders"] = 202,
+		["Undercrawlers"] = 203,
 	},
 	["Bats"] = 300,
 	["Birds"] = {
@@ -149,6 +150,7 @@ ns.familyDB = {
 		["Water Striders"] = 2010,
 		["Skyrazor"] = 2011,
 		["Skyflayer"] = 2012,
+		["Bees"] = 2013,
 	},
 	["Jellyfish"] = 2100,
 	["Mollusc"] = {
