@@ -394,11 +394,11 @@ function mounts:setMountsList()
 	while mapInfo do
 		for i = 1, #self.priorityProfiles do
 			local profile, list = self.priorityProfiles[i]
+			local zoneMounts = profile.zoneMountsFromProfile and self.defProfile.zoneMounts or profile.zoneMounts
 
 			if mapInfo.mapID == self.defMountsListID then
 				list = profile
 			else
-				local zoneMounts = profile.zoneMountsFromProfile and self.defProfile.zoneMounts or profile.zoneMounts
 				list = zoneMounts[mapInfo.mapID]
 
 				if list and not self.mapFlags and list.flags.enableFlags then

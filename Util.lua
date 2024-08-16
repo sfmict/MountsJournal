@@ -85,12 +85,10 @@ util.secureButtonNameMount = addon.."_Mount"
 util.secureButtonNameSecondMount = addon.."_SecondMount"
 
 
--- 1 FLY, 2 GROUND, 3 SWIMMING, 4 DRAGONRIDING
+-- 1 FLY, 2 GROUND, 3 SWIMMING
 util.mountTypes = setmetatable({
 	[242] = 1,
 	[247] = 1,
-	-- [248] = 1,
-	-- [398] = 1,
 	[402] = 1,
 	[407] = {1, 3},
 	[411] = 1,
@@ -100,6 +98,8 @@ util.mountTypes = setmetatable({
 	[436] = {1, 3},
 	[437] = 1,
 	[442] = 1,
+	[444] = 1,
+	[445] = 1,
 	[230] = 2,
 	[241] = 2,
 	[284] = 2,
