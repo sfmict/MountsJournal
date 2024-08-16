@@ -1,11 +1,11 @@
 local _, ns = ...
-local L = ns.L
+local L, macroFrame = ns.L, ns.macroFrame
 local actions = {}
 ns.actions = actions
 
 
 ---------------------------------------------------
--- mount
+-- rmount
 actions.rmount = {}
 actions.rmount.text = L["Random Mount"]
 
@@ -31,13 +31,33 @@ function actions.mount:getValueText(spellID)
 end
 
 function actions.mount:getFuncText(spellID)
+	local vars = {"GetTime"}
+	if macroFrame.druidDismount then
+		vars[2] = "GetSpecialization"
+	end
 	return ([[
-		if self.additionalMounts[%d] then
-			return self.additionalMounts[%d].macro
+		self.mounts:setFlags()
+		%s
+		-- EXIT VEHICLE
+		if self.sFlags.inVehicle then
+			return "/leavevehicle"
+		-- DISMOUNT
+		elseif self.sFlags.isMounted then
+			if not self.lastUseTime or GetTime() - self.lastUseTime > .5 then
+				return "/dismount"
+			end
+		-- MOUNT
 		else
-			return '/run MountsJournal:summon(%d)'
+			macro = self:getDefMacro()
+			if self.additionalMounts[%d] then
+				macro = self:addLine(macro, self.additionalMounts[%d].macro)
+			else
+				macro = self:addLine(macro, '/run MountsJournal:summon(%d)')
+			end
+			return macro
 		end
-	]]):format(spellID, spellID, spellID)
+	]]):format(macroFrame.druidDismount or "", spellID, spellID, spellID),
+	vars
 end
 
 

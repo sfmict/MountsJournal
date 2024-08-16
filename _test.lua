@@ -43,6 +43,9 @@ test:RegisterEvent("ADDON_LOADED")
 -- test:RegisterAllEvents()
 
 test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
+test:RegisterEvent("PET_BATTLE_OPENING_START")
+test:RegisterEvent("PET_BATTLE_OPENING_DONE")
+test:RegisterEvent("PET_BATTLE_CLOSE")
 -- test:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
 -- test:RegisterEvent("CHAT_MSG_CURRENCY")
 

@@ -45,25 +45,25 @@ end
 
 function conds.mod:getFuncText(value)
 	if value == "any" then
-		return "IsModifierKeyDown()"
+		return "IsModifierKeyDown()", "IsModifierKeyDown"
 	elseif value == "alt" then
-		return "IsAltKeyDown()"
+		return "IsAltKeyDown()", "IsAltKeyDown"
 	elseif value == "ctrl" then
-		return "IsControlKeyDown()"
+		return "IsControlKeyDown()", "IsControlKeyDown"
 	elseif value == "shift" then
-		return "IsShiftKeyDown()"
+		return "IsShiftKeyDown()", "IsShiftKeyDown"
 	elseif value == "lalt" then
-		return "IsLeftAltKeyDown()"
+		return "IsLeftAltKeyDown()", "IsLeftAltKeyDown"
 	elseif value == "ralt" then
-		return "IsRightAltKeyDown()"
+		return "IsRightAltKeyDown()", "IsRightAltKeyDown"
 	elseif value == "lctrl" then
-		return "IsLeftControlKeyDown()"
+		return "IsLeftControlKeyDown()", "IsLeftControlKeyDown"
 	elseif value == "rctrl" then
-		return "IsRightoControlKeyDown()"
+		return "IsRightoControlKeyDown()", "IsRightoControlKeyDown"
 	elseif value == "lshift" then
-		return "IsLeftShiftKeyDown()"
+		return "IsLeftShiftKeyDown()", "IsLeftShiftKeyDown"
 	elseif value == "rshift" then
-		return "IsRightShiftKeyDown()"
+		return "IsRightShiftKeyDown()", "IsRightShiftKeyDown"
 	else
 		return "false"
 	end
@@ -130,11 +130,14 @@ end
 
 function conds:getFuncText(conds)
 	local text = ""
+	local vars = {}
 	for i = 1, #conds do
-		local cond = conds[i]
+		local cond, var = conds[i]
+		local condText, var = self[cond[2]]:getFuncText(cond[3])
+		if var then vars[#vars + 1] = var end
 		if i ~= 1 then text = text.."and " end
 		if cond[1] then text = text.."not " end
-		text = text..self[cond[2]]:getFuncText(cond[3]).."\n"
+		text = text..condText.."\n"
 	end
-	return text
+	return text, #vars > 0 and vars
 end
