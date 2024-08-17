@@ -223,7 +223,7 @@ function macroFrame:setRuleFuncs()
 			local actionText, actionVars = self.actions:getFuncText(rule.action)
 			addKeys(condVars, keys)
 			addKeys(actionVars, keys)
-			func = func..("if %sthen\n%send\n"):format(condText, actionText)
+			func = ("%sif %sthen\n%send\n"):format(func, condText, actionText)
 		end
 
 		if next(keys) then
