@@ -989,7 +989,7 @@
 							<Anchor point="LEFT" relativeKey="$parent.relationMap" relativePoint="RIGHT" x="0" y="0"/>
 						</Anchors>
 					</Button>
-					<Frame parentKey="existingLists" inherits="TooltipBackdropTemplate" enableMouse="true" mixin="MJExistingListsMixin" hidden="true">
+					<Frame parentKey="existingLists" inherits="MJDarkPanelTemplate" enableMouse="true" mixin="MJExistingListsMixin" hidden="true">
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeKey="$parent.$parent" relativePoint="TOPRIGHT"/>
 							<Anchor point="BOTTOMLEFT" relativeKey="$parent.$parent" relativePoint="BOTTOMRIGHT"/>
@@ -998,14 +998,14 @@
 							<EditBox inherits="SearchBoxTemplate" parentKey="searchBox" letters="40">
 								<Size y="20"/>
 								<Anchors>
-									<Anchor point="TOPLEFT" x="10" y="-4"/>
-									<Anchor point="TOPRIGHT" x="-5"/>
+									<Anchor point="TOPLEFT" x="8" y="-6"/>
+									<Anchor point="TOPRIGHT" x="-3" y="-6"/>
 								</Anchors>
 							</EditBox>
 							<Frame parentKey="scrollBox" inherits="WowScrollBoxList">
 								<Anchors>
-									<Anchor point="TOPLEFT" x="5" y="-26"/>
-									<Anchor point="BOTTOMRIGHT" x="-26" y="5"/>
+									<Anchor point="TOPLEFT" x="5" y="-28"/>
+									<Anchor point="BOTTOMRIGHT" x="-26" y="7"/>
 								</Anchors>
 							</Frame>
 							<EventFrame parentKey="scrollBar" inherits="MinimalScrollBar">
@@ -1939,7 +1939,6 @@
 				self:SetBackdropColor(0, 0, 0, .5)
 				self:SetBackdropBorderColor(.3, .3, .3, .8)
 			</OnLoad>
-			<OnEditFocusGained>self:HighlightText()</OnEditFocusGained>
 			<OnEnterPressed function="EditBox_ClearFocus"/>
 			<OnEnter>if self:IsEnabled() then self:SetBackdropBorderColor(.5, .5, .5, .8) end</OnEnter>
 			<OnLeave>self:SetBackdropBorderColor(.3, .3, .3, .8)</OnLeave>
@@ -2348,6 +2347,7 @@
 		<Scripts>
 			<OnLoad>
 				self:SetAttribute("type", "click")
+				self:RegisterForClicks("AnyUp")
 				self:RegisterForDrag("LeftButton")
 			</OnLoad>
 			<OnLeave>
@@ -2765,19 +2765,19 @@
 		</Scripts>
 	</Button>
 
-	<Frame name="MJCompanionsPanel" inherits="TooltipBackdropTemplate" mixin="MJCompanionsPanelMixin" enableMouse="true" hidden="true" virtual="true">
+	<Frame name="MJCompanionsPanel" inherits="MJDarkPanelTemplate" mixin="MJCompanionsPanelMixin" enableMouse="true" hidden="true" virtual="true">
 		<Frames>
 			<Frame parentKey="controlPanel" useParentLevel="false" inherits="InsetFrameTemplate">
 				<Size y="26"/>
 				<Anchors>
-					<Anchor point="TOPLEFT" x="4" y="-4"/>
-					<Anchor point="TOPRIGHT" x="-4" y="-4"/>
+					<Anchor point="TOPLEFT" x="2" y="-5"/>
+					<Anchor point="TOPRIGHT" x="-2" y="-5"/>
 				</Anchors>
 			</Frame>
 			<Button parentKey="closeButton" inherits="UIPanelCloseButtonNoScripts">
 				<Size x="22" y="22"/>
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="-6.9" y="-7.1"/>
+					<Anchor point="RIGHT" relativeKey="$parent.controlPanel" relativePoint="RIGHT" x="-3" y="-1"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
@@ -2805,14 +2805,14 @@
 			</Frame>
 			<Button parentKey="clearFilters" inherits="MJClearButtonTemplate" hidden="true">
 				<Anchors>
-					<Anchor point="RIGHT" relativeKey="$parent.filtersPanel" x="-3"/>
+					<Anchor point="RIGHT" relativeKey="$parent.filtersPanel" x="-4"/>
 				</Anchors>
 			</Button>
 			<Frame parentKey="controlButtons" useParentLevel="false" inherits="InsetFrameTemplate">
 				<Size y="129"/>
 				<Anchors>
-					<Anchor point="BOTTOMLEFT" x="4" y="4"/>
-					<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
+					<Anchor point="BOTTOMLEFT" x="2" y="5"/>
+					<Anchor point="BOTTOMRIGHT" x="-2" y="5"/>
 				</Anchors>
 			</Frame>
 			<Button parentKey="randomFavoritePet" inherits="MJPetListButton">
@@ -2986,5 +2986,268 @@
 				end
 			</OnLoad>
 		</Scripts>
+	</Frame>
+
+	<Frame name="MJDarkPanelTemplate" inherits="BackdropTemplate" virtual="true">
+		<Scripts>
+			<OnLoad>
+				self:SetBackdrop(MountsJournalUtil.darkPanelBackdrop)
+				self:SetBackdropColor(.1, .1, .1, .8)
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+	<Frame name="MJOptionPanelTemplate" inherits="BackdropTemplate" virtual="true">
+		<Size y="50"/>
+		<Scripts>
+			<OnLoad>
+				self:SetBackdrop(MountsJournalUtil.sliderPanelBackdrop)
+				self:SetBackdropColor(.1, .1, .1, .5)
+				self:SetBackdropBorderColor(.1, .1, .1, .5)
+			</OnLoad>
+		</Scripts>
+	</Frame>
+
+	<Button name="MJRemoveButtonTemplate" alpha=".5" virtual="true">
+		<Size x="20" y="20"/>
+		<NormalTexture file="Interface/BUTTONS/UI-GroupLoot-Pass-Up"/>
+		<PushedTexture file="Interface/BUTTONS/UI-GroupLoot-Pass-Up">
+			<Size x="20" y="20"/>
+			<Anchors>
+				<Anchor point="CENTER" x="-1" y="-1"/>
+			</Anchors>
+		</PushedTexture>
+		<Scripts>
+			<OnEnter>self:SetAlpha(1)</OnEnter>
+			<OnLeave>self:SetAlpha(.5)</OnLeave>
+		</Scripts>
+	</Button>
+
+	<Button name="MJRulePanelTemplate" inherits="MJOptionPanelTemplate" virtual="true">
+		<Size y="55"/>
+		<Layers>
+			<Layer level="BORDER">
+				<Texture parentKey="highlight" hidden="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="4" y="-4"/>
+						<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
+					</Anchors>
+					<Color r=".8" g=".6" b=".1" a=".1"/>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<FontString parentKey="order" inherits="GameFontNormalLarge" justifyH="CENTER">
+					<Size x="20"/>
+					<Anchors>
+						<Anchor point="LEFT" x="5"/>
+					</Anchors>
+				</FontString>
+				<FontString parentKey="conds" inherits="GameFontNormal" justifyH="LEFT" maxLines="3">
+					<Anchors>
+						<Anchor point="LEFT" x="30"/>
+						<Anchor point="RIGHT" relativePoint="CENTER" x="-21"/>
+					</Anchors>
+				</FontString>
+				<FontString parentKey="action" inherits="GameFontNormal" justifyH="LEFT" maxLines="1">
+					<Anchors>
+						<Anchor point="LEFT" relativeKey="$parent.conds" relativePoint="RIGHT" x="10"/>
+						<Anchor point="RIGHT" x="-62"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button parentKey="remove" inherits="MJRemoveButtonTemplate">
+				<Anchors>
+					<Anchor point="RIGHT" x="-10"/>
+				</Anchors>
+			</Button>
+			<Button parentKey="up">
+				<Size x="17" y="11"/>
+				<Anchors>
+					<Anchor point="TOPRIGHT" x="-40" y="-12"/>
+				</Anchors>
+				<NormalTexture atlas="minimal-scrollbar-arrow-top"/>
+				<PushedTexture atlas="minimal-scrollbar-arrow-top-down"/>
+				<HighlightTexture atlas="minimal-scrollbar-arrow-top-over" alphaMode="ADD"/>
+			</Button>
+			<Button parentKey="down">
+				<Size x="17" y="11"/>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT" x="-40" y="12"/>
+				</Anchors>
+				<NormalTexture atlas="minimal-scrollbar-arrow-bottom"/>
+				<PushedTexture atlas="minimal-scrollbar-arrow-bottom-down"/>
+				<HighlightTexture atlas="minimal-scrollbar-arrow-bottom-over" alphaMode="ADD"/>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnEnter>self.highlight:Show()</OnEnter>
+			<OnLeave>self.highlight:Hide()</OnLeave>
+		</Scripts>
+	</Button>
+
+	<Button name="MJConditionDropDownTemplate" inherits="MJDarkPanelTemplate" virtual="true">
+		<Size y="40"/>
+		<KeyValues>
+			<KeyValue key="LibSFDropDownNoGMEvent" value="true" type="boolean"/>
+		</KeyValues>
+		<NormalTexture parentKey="normal" file="Interface/ChatFrame/UI-ChatIcon-ScrollDown-Up">
+			<Size x="26" y="26"/>
+			<Anchors>
+				<Anchor point="RIGHT" x="-4"/>
+			</Anchors>
+		</NormalTexture>
+		<PushedTexture file="Interface/ChatFrame/UI-ChatIcon-ScrollDown-Down">
+			<Size x="26" y="26"/>
+			<Anchors>
+				<Anchor point="RIGHT" x="-4"/>
+			</Anchors>
+		</PushedTexture>
+		<HighlightTexture file="Interface/Buttons/UI-Common-MouseHilight" alphaMode="ADD">
+			<Size x="26" y="26"/>
+			<Anchors>
+				<Anchor point="RIGHT" x="-4"/>
+			</Anchors>
+		</HighlightTexture>
+		<ButtonText inherits="GameFontHighlight" maxLines="1" justifyH="LEFT" parentKey="text">
+			<Anchors>
+				<Anchor point="LEFT" x="10" y="0"/>
+				<Anchor point="RIGHT" relativeKey="$parent.normal" relativePoint="LEFT" x="-5" y="0"/>
+			</Anchors>
+		</ButtonText>
+	</Button>
+
+	<EditBox name="MJConditionEditBoxTemplate" inherits="InputBoxScriptTemplate,MJDarkPanelTemplate" numeric="true" multiLine="false" autoFocus="false" virtual="true">
+		<Size y="40"/>
+		<FontString inherits="GameFontHighlight" justifyH="LEFT"/>
+		<TextInsets>
+			<AbsInset left="10" right="10"/>
+		</TextInsets>
+		<Frames>
+			<Frame parentKey="border" inherits="InsetFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="3" y="-5"/>
+					<Anchor point="BOTTOMRIGHT" x="-3" y="6"/>
+				</Anchors>
+			</Frame>
+		</Frames>
+		<Scripts>
+			<OnLoad inherit="prepend">
+				self:SetBackdropColor(0, 0, 0, .9)
+			</OnLoad>
+			<OnEnter>
+				if self.tooltip then
+					GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 0, 0)
+					GameTooltip:SetText(self.tooltip, nil, nil, nil, nil, true)
+					GameTooltip:Show()
+				end
+			</OnEnter>
+			<OnLeave function="GameTooltip_Hide"/>
+		</Scripts>
+	</EditBox>
+
+	<Frame name="MJConditionPanelTemplate" inherits="MJOptionPanelTemplate" virtual="true">
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString parentKey="order" inherits="GameFontNormalLarge" justifyH="CENTER">
+					<Size x="26"/>
+					<Anchors>
+						<Anchor point="LEFT" x="2"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<CheckButton parentKey="notCheck" inherits="MJCheckButtonTemplate">
+				<HitRectInsets left="0" right="-30" top="0" bottom="0"/>
+				<Anchors>
+					<Anchor point="LEFT" x="30"/>
+				</Anchors>
+			</CheckButton>
+			<Button parentKey="optionType" inherits="MJConditionDropDownTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativeKey="$parent.notCheck.Text" relativePoint="RIGHT" x="10"/>
+					<Anchor point="RIGHT" relativePoint="CENTER" x="20"/>
+				</Anchors>
+			</Button>
+			<Button parentKey="remove" inherits="MJRemoveButtonTemplate">
+				<Anchors>
+					<Anchor point="RIGHT" x="-10"/>
+				</Anchors>
+			</Button>
+		</Frames>
+	</Frame>
+
+	<Frame name="MJActionPanelTemplate" inherits="MJOptionPanelTemplate" virtual="true">
+		<Frames>
+			<Button parentKey="optionType" inherits="MJConditionDropDownTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="30" y="-5"/>
+					<Anchor point="RIGHT" relativePoint="CENTER" x="-5"/>
+				</Anchors>
+			</Button>
+			<Button parentKey="macro" useParentLevel="true" inherits="BackdropTemplate" hidden="true">
+				<Size y="85"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeKey="$parent.optionType" relativePoint="BOTTOMLEFT" x="0" y="-5"/>
+					<Anchor point="RIGHT" x="-30"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString parentKey="limitText" inherits="GameFontHighlightSmall">
+							<Size x="0" y="5"/>
+							<Anchors>
+								<Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" x="-5" y="10"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Frames>
+					<EventFrame parentKey="scrollBar" enableMouse="true" inherits="WowTrimScrollBar">
+						<Anchors>
+							<Anchor point="TOPRIGHT" x="-4" y="-5"/>
+							<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
+						</Anchors>
+					</EventFrame>
+					<Frame parentKey="editFrame" inherits="ScrollingEditBoxTemplate"/>
+				</Frames>
+				<Scripts>
+					<OnLoad>
+						self:SetBackdrop({
+							bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+							edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+							tile = true,
+							tileEdge = true,
+							tileSize = 16,
+							edgeSize = 16,
+							insets = { left = 4, right = 4, top = 4, bottom = 4 },
+						})
+						self:SetBackdropColor(TOOLTIP_DEFAULT_BACKGROUND_COLOR:GetRGB())
+						self:SetBackdropBorderColor(FRIENDS_GRAY_COLOR:GetRGB())
+
+						local anchorsToFrame = {
+							CreateAnchor("TOPLEFT", self, "TOPLEFT", 8, -8),
+							CreateAnchor("BOTTOMRIGHT", self, "BOTTOMRIGHT", -8, 8),
+						}
+						local anchorsToBar = {
+							CreateAnchor("TOPLEFT", self, "TOPLEFT", 8, -8),
+							CreateAnchor("BOTTOMRIGHT", self.scrollBar, "BOTTOMLEFT", -3, 4),
+						}
+						local scrollBox = self.editFrame:GetScrollBox()
+						ScrollUtil.RegisterScrollBoxWithScrollBar(scrollBox, self.scrollBar)
+						ScrollUtil.AddManagedScrollBarVisibilityBehavior(scrollBox, self.scrollBar, anchorsToBar, anchorsToFrame)
+
+						local editBox = self.editFrame:GetEditBox()
+						editBox:SetMaxLetters(255)
+						editBox:HookScript("OnTextChanged", function(editBox, userInput)
+							self.limitText:SetFormattedText(MACROFRAME_CHAR_LIMIT, editBox:GetNumLetters())
+						end)
+					</OnLoad>
+					<OnClick>self.editFrame:GetEditBox():SetFocus()</OnClick>
+					<OnHide>self:Hide()</OnHide>
+				</Scripts>
+			</Button>
+		</Frames>
 	</Frame>
 </Ui>

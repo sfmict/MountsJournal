@@ -1,0 +1,17 @@
+<Ui>
+	<Script file="Tags.lua"/>
+	<Script file="Camera.lua"/>
+	<Script file="MountAnimations.lua"/>
+	<Script file="DungeonRaidButton.lua"/>
+	<Script file="Profiles.lua"/>
+	<Script file="Help.lua"/>
+	<Script file="Hyperlinks.lua"/>
+	<Script file="Pets.lua"/>
+	<Script file="Calendar.lua"/>
+	<Script file="AdditionalMounts.lua"/>
+	<Script file="MountListButtonInit.lua"/>
+	<Script file="SummonPanel.lua"/>
+	<Script file="Conditions.lua"/>
+	<Script file="Actions.lua"/>
+	<Include file="filter\filter.xml"/>
+</Ui>

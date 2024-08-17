@@ -2,6 +2,7 @@ local _, ns = ...
 local util = ns.util
 local type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras = type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras
 local macroFrame = CreateFrame("FRAME")
+ns.macroFrame = macroFrame
 
 
 macroFrame:SetScript("OnEvent", function(self, event, ...)
@@ -15,24 +16,19 @@ function macroFrame:PLAYER_LOGIN()
 	self.additionalMounts = ns.additionalMounts
 	self.mounts = ns.mounts
 	self.config = self.mounts.config
+	self.ruleConfig = self.mounts.globalDB.ruleConfig
 	self.sFlags = self.mounts.sFlags
 	self.macrosConfig = self.config.macrosConfig
 	self.charMacrosConfig = self.mounts.charDB.macrosConfig
+	self.conditions = ns.conditions
+	self.actions = ns.actions
+	self.checkRules = {}
 	-- remove outdated items
 	self.charMacrosConfig.itemSlot16 = nil
 	self.charMacrosConfig.itemSlot17 = nil
 	-- ---------------------
 	self.class = select(2, UnitClass("player"))
 	self.fishingRodID = 133755
-
-	local function loadFunc(funcStr)
-		local loadedFunc, err = loadstring(funcStr)
-		if err then
-			geterrorhandler()(err)
-		else
-			return loadedFunc()
-		end
-	end
 
 	local classOptionMacro = ""
 	local defMacro = ""
@@ -46,22 +42,22 @@ function macroFrame:PLAYER_LOGIN()
 			local IsFalling, GetTime, GetUnitSpeed, C_UnitAuras = IsFalling, GetTime, GetUnitSpeed, C_UnitAuras
 		]]
 	elseif self.class == "DRUID" then
-		classOptionMacro = classOptionMacro..[[
-			local GetShapeshiftForm, GetShapeshiftFormInfo, GetSpecialization, GetTime = GetShapeshiftForm, GetShapeshiftFormInfo, GetSpecialization, GetTime
-
-			local function getFormSpellID()
-				local shapeshiftIndex = GetShapeshiftForm()
-				if shapeshiftIndex > 0 then
-					local _,_,_, spellID = GetShapeshiftFormInfo(shapeshiftIndex)
-					return spellID
-				end
+		local GetShapeshiftForm, GetShapeshiftFormInfo = GetShapeshiftForm, GetShapeshiftFormInfo
+		self.getFormSpellID = function()
+			local shapeshiftIndex = GetShapeshiftForm()
+			if shapeshiftIndex > 0 then
+				local _,_,_, spellID = GetShapeshiftFormInfo(shapeshiftIndex)
+				return spellID
 			end
+		end
+		self.specializationSpellIDs = {
+			24858, -- moonkin
+			768, -- cat
+			5487, -- bear
+		}
 
-			local specializationSpellIDs = {
-				24858, -- moonkin
-				768, -- cat
-				5487, -- bear
-			}
+		classOptionMacro = classOptionMacro..[[
+			local GetSpecialization, GetTime = GetSpecialization, GetTime
 		]]
 		defMacro = defMacro..[[
 			local GetShapeshiftFormID = GetShapeshiftFormID
@@ -137,16 +133,16 @@ function macroFrame:PLAYER_LOGIN()
 			end
 		]]
 	elseif self.class == "DRUID" then
-		classOptionMacro = classOptionMacro..[[
+		self.druidDismount = [[
 			-- DRUID LAST FORM
 			-- 768 - cat form
 			-- 783 - travel form
 			-- 24858 - moonkin form
 			if self.classConfig.useLastDruidForm then
-				local spellID = getFormSpellID()
+				local spellID = self.getFormSpellID()
 
 				if self.classConfig.useDruidFormSpecialization then
-					self.charMacrosConfig.lastDruidFormSpellID = specializationSpellIDs[GetSpecialization()]
+					self.charMacrosConfig.lastDruidFormSpellID = self.specializationSpellIDs[GetSpecialization()]
 				end
 
 				if self.charMacrosConfig.lastDruidFormSpellID
@@ -168,6 +164,7 @@ function macroFrame:PLAYER_LOGIN()
 				end
 			end
 		]]
+		classOptionMacro = classOptionMacro..self.druidDismount
 		defMacro = defMacro..[[
 			local curFormID = GetShapeshiftFormID()
 			-- 1:CAT, 3:STAG, 5:BEAR, 36:TREANT
@@ -181,42 +178,66 @@ function macroFrame:PLAYER_LOGIN()
 		end
 	]]
 	defMacro = defMacro..[[
-			if self.magicBroom then
-				if self.magicBroom.itemID then
-					macro = self:addLine(macro, "/use item:"..self.magicBroom.itemID) -- USE ITEM BROOM
-				elseif self.magicBroom.mountID then
-					local name = C_MountJournal.GetMountInfoByID(self.magicBroom.mountID)
-					macro = self:addLine(macro, "/use "..name) -- USE MOUNT BROOM
-				end
-				self.lastUseTime = GetTime()
-			else
-				self.mounts:setSummonMount(true)
-
-				local additionMount
-				if self.sFlags.targetMount then
-					additionMount = self.additionalMounts[self.sFlags.targetMount]
-				else
-					additionMount = self.additionalMounts[self.mounts.summonedSpellID]
-				end
-
-				if additionMount then
-					macro = self:addLine(macro, additionMount.macro)
-				else
-					macro = self:addLine(macro, "/run MountsJournal:summon()")
-				end
-			end
 			return macro
 		end
 	]]
 
-	self.getClassOptionMacro = loadFunc(classOptionMacro)
-	self.getDefMacro = loadFunc(defMacro)
+	self.getClassOptionMacro = self:loadString(classOptionMacro)
+	self.getDefMacro = self:loadString(defMacro)
+	self:setRuleFuncs()
 
 	self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 
 	self:refresh()
 	self:getClassMacro(self.class, function() self:refresh() end)
+end
+
+
+function macroFrame:loadString(funcStr)
+	local loadedFunc, err = loadstring(funcStr)
+	if err then
+		geterrorhandler()(err)
+	else
+		return loadedFunc()
+	end
+end
+
+
+function macroFrame:setRuleFuncs()
+	local function addKeys(vars, keys)
+		if not vars then return end
+		for i = 1, #vars do
+			keys[vars[i]] = true
+		end
+	end
+
+	for i = 1, #self.ruleConfig do
+		local rules = self.ruleConfig[i]
+		local keys = {}
+		local func = "return function(self, button)\n"
+
+		for j = 1, #rules do
+			local rule = rules[j]
+			local condText, condVars = self.conditions:getFuncText(rule)
+			local actionText, actionVars = self.actions:getFuncText(rule.action)
+			addKeys(condVars, keys)
+			addKeys(actionVars, keys)
+			func = func..("if %sthen\n%send\n"):format(condText, actionText)
+		end
+
+		if next(keys) then
+			local vars = {}
+			for k in next, keys do
+				vars[#vars + 1] = k
+			end
+			local varsText = table.concat(vars, ", ")
+			func = ("local %s = %s\n%s"):format(varsText, varsText, func)
+		end
+
+		func = func.."end"
+		self.checkRules[i] = self:loadString(func)
+	end
 end
 
 
@@ -449,9 +470,7 @@ do
 end
 
 
-function macroFrame:getMacro()
-	self.mounts:setFlags()
-
+function macroFrame:getMacro(id, button)
 	-- UNDERLIGHT ANGLER
 	if self.config.useUnderlightAngler and C_Item.GetItemCount(self.fishingRodID) > 0 then
 		self.fishingSlotID = GetInventoryItemID("player", 28)
@@ -491,6 +510,31 @@ function macroFrame:getMacro()
 	-- MOUNT
 	else
 		macro = self:getDefMacro()
+
+		if self.magicBroom then
+			if self.magicBroom.itemID then
+				macro = self:addLine(macro, "/use item:"..self.magicBroom.itemID) -- USE ITEM BROOM
+			elseif self.magicBroom.mountID then
+				local name = C_MountJournal.GetMountInfoByID(self.magicBroom.mountID)
+				macro = self:addLine(macro, "/use "..name) -- USE MOUNT BROOM
+			end
+			self.lastUseTime = GetTime()
+		else
+			self.mounts:setSummonMount(true)
+
+			local additionMount
+			if self.sFlags.targetMount then
+				additionMount = self.additionalMounts[self.sFlags.targetMount]
+			else
+				additionMount = self.additionalMounts[self.mounts.summonedSpellID]
+			end
+
+			if additionMount then
+				macro = self:addLine(macro, additionMount.macro)
+			else
+				macro = self:addLine(macro, "/run MountsJournal:summon()")
+			end
+		end
 	end
 
 	return macro or ""
@@ -537,7 +581,8 @@ end
 
 
 function MJMacroMixin:preClick(button, down)
-	self.mounts.sFlags.forceModifier = self.forceModifier
 	if InCombatLockdown() or down ~= GetCVarBool("ActionButtonUseKeyDown") then return end
-	self:SetAttribute("macrotext", macroFrame:getMacro())
+	self.mounts.sFlags.forceModifier = self.forceModifier
+	self.mounts:setFlags()
+	self:SetAttribute("macrotext", macroFrame.checkRules[self.id](macroFrame, button))
 end
