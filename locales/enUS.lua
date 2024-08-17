@@ -12,6 +12,7 @@ L["SecondMountTooltipTitle"] = "If the modifier is hold or “%s 2” is used:"
 L["SecondMountTooltipDescription"] = "If you are in water then a non-waterfowl mount will be summoned.\n\nIf you are on land and you can fly then a ground mount will be summoned."
 L["Drag to create a summon panel"] = "Drag to create a summon panel"
 L["UseBindingTooltip"] = "Use settings for key bindings"
+L["Summon panel"] = "Summon panel"
 L["Left-button to drag"] = "Left-button to drag"
 L["Right-button to open context menu"] = "Right-button to open context menu"
 L["Strata of panel"] = "Strata of panel"
@@ -382,7 +383,6 @@ L["Yaks"] = "Yaks"
 L["Yetis"] = "Yetis"
 
 setmetatable(L, {__index = function(self, key)
-	fprint(key)
 	self[key] = key or ""
 	return key
 end})

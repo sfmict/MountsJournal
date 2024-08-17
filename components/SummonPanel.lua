@@ -1,12 +1,12 @@
 local addon, ns = ...
-local L, mounts, util = ns.L, ns.mounts, ns.util
+local L, mounts, util, journal = ns.L, ns.mounts, ns.util, ns.journal
 local PANEL_WIDTH = 101
 local PANEL_HEIGHT = 65
 
 
 -- PANEL
 local panel = CreateFrame("FRAME", nil, UIParent, "TooltipBackdropTemplate")
-mounts.summonPanel = panel
+ns.summonPanel = panel
 panel:SetFrameLevel(1000)
 panel:SetMovable(true)
 panel:SetScript("OnEvent", function(self)
@@ -18,17 +18,16 @@ panel:SetScript("OnEvent", function(self)
 	end
 end)
 
-local drag = CreateFrame("BUTTON", nil, panel)
+local drag = CreateFrame("FRAME", nil, panel)
 panel.drag = drag
 drag:SetFrameLevel(1000)
-drag:RegisterForClicks("RightButtonUp")
+drag:EnableMouse(true)
 drag:RegisterForDrag("LeftButton")
 drag:SetScript("OnDragStart", function(self)
 	local panel = self:GetParent()
 	if panel.config.isLocked then return end
 	panel.NineSlice:Hide()
 	panel.resize:Hide()
-	panel.contextMenu:ddCloseMenus()
 	panel:StartMoving()
 	panel.isDrag = true
 end)
@@ -184,62 +183,80 @@ function panel:stopDrag()
 end
 
 
--- CONTEXT MENU
-local contextMenu = LibStub("LibSFDropDown-1.5"):SetMixin({})
-panel.contextMenu = contextMenu
-contextMenu:ddSetDisplayMode("menu")
-contextMenu:ddHideWhenButtonHidden(panel.drag)
-contextMenu:ddSetNoGlobalMouseEvent(true, panel.drag)
+journal:on("MODULES_INIT", function(journal)
+	-- CONTEXT MENU
+	local dd = journal.bgFrame.summonPanelSettings
+	LibStub("LibSFDropDown-1.5"):SetMixin(dd)
+	dd:ddSetDisplayMode("menu")
+	dd:ddHideWhenButtonHidden()
+	dd:ddSetNoGlobalMouseEvent(true)
+	dd:SetShown(panel.config.isShown)
 
-contextMenu:ddSetInitFunc(function(self, level, value)
-	local info = {}
+	panel:HookScript("OnShow", function(self)
+		dd:SetShown(journal.bgFrame.summon1:IsShown())
+	end)
+	panel:HookScript("OnHide", function()
+		dd:Hide()
+	end)
 
-	if level == 1 then
-		info.notCheckable = true
-		info.text = panel.config.isLocked and UNLOCK or LOCK
-		info.func =  function() panel:setLocked(not panel.config.isLocked) end
-		self:ddAddButton(info, level)
+	dd:ddSetInitFunc(function(dd, level, value)
+		local info = {}
 
-		info.hasArrow = true
-		info.text = L["Strata of panel"]
-		info.value = "strata"
-		self:ddAddButton(info, level)
+		if level == 1 then
+			info.notCheckable = true
+			info.isTitle = true
+			info.text = L["Summon panel"]
+			dd:ddAddButton(info, level)
 
-		info.hasArrow = nil
-		info.disabled = InCombatLockdown()
-		info.text = L["Reset size"]
-		info.func = function() panel:setSize(1) end
-		self:ddAddButton(info, level)
+			dd:ddAddSeparator(level)
 
-		info.text = HIDE
-		info.func = function() panel:setShown(false) end
-		self:ddAddButton(info, level)
-	elseif value == "strata" then
-		local strata = {[0] = "MEDIUM", "HIGH", "DIALOG", "FULLSCREEN"}
+			info.isTitle = nil
+			info.text = panel.config.isLocked and UNLOCK or LOCK
+			info.func =  function() panel:setLocked(not panel.config.isLocked) end
+			dd:ddAddButton(info, level)
 
-		local function func(btn)
-			panel:setStrata(btn.value)
-			self:ddRefresh(level)
+			info.hasArrow = true
+			info.text = L["Strata of panel"]
+			info.value = "strata"
+			dd:ddAddButton(info, level)
+
+			info.hasArrow = nil
+			info.disabled = InCombatLockdown()
+			info.text = L["Reset size"]
+			info.func = function() panel:setSize(1) end
+			dd:ddAddButton(info, level)
+
+			info.text = HIDE
+			info.func = function() panel:setShown(false) end
+			dd:ddAddButton(info, level)
+		elseif value == "strata" then
+			local strata = {[0] = "MEDIUM", "HIGH", "DIALOG", "FULLSCREEN"}
+
+			local function func(btn)
+				panel:setStrata(btn.value)
+				dd:ddRefresh(level)
+			end
+
+			local function checked(btn)
+				return btn.value == panel.config.frameStrata
+			end
+
+			info.disabled = InCombatLockdown()
+			info.keepShownOnClick = true
+			for i = 0, #strata do
+				info.text = strata[i]
+				info.value = i
+				info.func = func
+				info.checked = checked
+				dd:ddAddButton(info, level)
+			end
 		end
+	end)
 
-		local function checked(btn)
-			return btn.value == panel.config.frameStrata
-		end
-
-		info.disabled = InCombatLockdown()
-		info.keepShownOnClick = true
-		for i = 0, #strata do
-			info.text = strata[i]
-			info.value = i
-			info.func = func
-			info.checked = checked
-			self:ddAddButton(info, level)
-		end
-	end
-end)
-
-panel.drag:SetScript("OnClick", function(self)
-	contextMenu:ddToggle(1, nil, "cursor")
+	dd:SetScript("OnClick", function(dd)
+		dd:ddToggle(1, nil, dd)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end)
 end)
 
 
@@ -257,7 +274,6 @@ mounts:on("CREATE_BUTTONS", function()
 	summon1:SetNormalTexture(413588)
 	summon1.icon = summon1:GetNormalTexture()
 	summon1:SetAttribute("clickbutton", _G[util.secureButtonNameMount])
-	summon1:HookScript("OnClick", function() contextMenu:ddCloseMenus() end)
 	summon1:SetScript("OnEnter", function(btn)
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
 		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 1\"")
@@ -266,13 +282,12 @@ mounts:on("CREATE_BUTTONS", function()
 		if not panel.config.isLocked then
 			GameTooltip_AddColoredLine(GameTooltip, leftIcon..L["Left-button to drag"], NIGHT_FAE_BLUE_COLOR, false)
 		end
-		GameTooltip_AddColoredLine(GameTooltip, rightIcon..L["Right-button to open context menu"], NIGHT_FAE_BLUE_COLOR, false)
+		-- GameTooltip_AddColoredLine(GameTooltip, rightIcon..L["Right-button to open context menu"], NIGHT_FAE_BLUE_COLOR, false)
 		if InCombatLockdown() then
 			GameTooltip_AddErrorLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT)
 		end
 		GameTooltip:Show()
 	end)
-	contextMenu:ddSetNoGlobalMouseEvent(true, summon1)
 
 	local summon2 = CreateFrame("BUTTON", nil, panel, "MJSecureMacroButtonTemplate")
 	panel.summon2 = summon2
@@ -280,7 +295,6 @@ mounts:on("CREATE_BUTTONS", function()
 	summon2:SetNormalTexture(631718)
 	summon2.icon = summon2:GetNormalTexture()
 	summon2:SetAttribute("clickbutton", _G[util.secureButtonNameSecondMount])
-	summon2:HookScript("OnClick", function() contextMenu:ddCloseMenus() end)
 	summon2:SetScript("OnEnter", function(btn)
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
 		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 2\"")
@@ -289,13 +303,12 @@ mounts:on("CREATE_BUTTONS", function()
 		if not panel.config.isLocked then
 			GameTooltip_AddColoredLine(GameTooltip, leftIcon..L["Left-button to drag"], NIGHT_FAE_BLUE_COLOR, false)
 		end
-		GameTooltip_AddColoredLine(GameTooltip, rightIcon..L["Right-button to open context menu"], NIGHT_FAE_BLUE_COLOR, false)
+		-- GameTooltip_AddColoredLine(GameTooltip, rightIcon..L["Right-button to open context menu"], NIGHT_FAE_BLUE_COLOR, false)
 		if InCombatLockdown() then
 			GameTooltip_AddErrorLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT)
 		end
 		GameTooltip:Show()
 	end)
-	contextMenu:ddSetNoGlobalMouseEvent(true, summon2)
 
 	panel:setStrata()
 	panel:setSize()
