@@ -3136,6 +3136,14 @@
 			<OnLoad inherit="prepend">
 				self:SetBackdropColor(0, 0, 0, .9)
 			</OnLoad>
+			<OnEnter>
+				if self.tooltip then
+					GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 0, 0)
+					GameTooltip:SetText(self.tooltip, nil, nil, nil, nil, true)
+					GameTooltip:Show()
+				end
+			</OnEnter>
+			<OnLeave function="GameTooltip_Hide"/>
 		</Scripts>
 	</EditBox>
 
@@ -3236,9 +3244,8 @@
 							self.limitText:SetFormattedText(MACROFRAME_CHAR_LIMIT, editBox:GetNumLetters())
 						end)
 					</OnLoad>
-					<OnClick>
-						self.editFrame:GetEditBox():SetFocus()
-					</OnClick>
+					<OnClick>self.editFrame:GetEditBox():SetFocus()</OnClick>
+					<OnHide>self:Hide()</OnHide>
 				</Scripts>
 			</Button>
 		</Frames>

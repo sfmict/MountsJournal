@@ -1,5 +1,5 @@
 local addon, ns = ...
-local L, util, macroFrame, conds, actions = ns.L, ns.util, ns.macroFrame, ns.conditions, ns.actions
+local L, util, mounts, macroFrame, conds, actions = ns.L, ns.util, ns.mounts, ns.macroFrame, ns.conditions, ns.actions
 local rules = CreateFrame("FRAME", "MountsJournalConfigRules")
 ns.ruleConfig = rules
 rules:Hide()
@@ -18,9 +18,18 @@ rules:SetScript("OnShow", function(self)
 	ver:SetJustifyH("RIGHT")
 	ver:SetText(C_AddOns.GetAddOnMetadata(addon, "Version"))
 
+	-- TITLE
+	self.title = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	self.title:SetPoint("TOP", 0, -30)
+	self.title:SetPoint("LEFT", 60, 0)
+	self.title:SetPoint("RIGHT", -60, 0)
+	self.title:SetText(L["RULES_TITLE"])
+	self.title:SetJustifyH("LEFT")
+
 	-- SUMMONS
 	self.summons = lsfdd:CreateButton(self)
-	self.summons:SetPoint("TOPLEFT", 30, -30)
+	self.summons:SetPoint("LEFT", 30, 0)
+	self.summons:SetPoint("TOP", self.title, "BOTTOM", 0, -30)
 	self.summons:ddSetSelectedValue(1)
 	self.summons:ddSetSelectedText(SUMMONS.." 1")
 
@@ -41,12 +50,23 @@ rules:SetScript("OnShow", function(self)
 	end)
 
 	-- ADD RULE BUTTOM
-	self.addRule = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
-	self.addRule:SetPoint("LEFT", self.summons, "RIGHT", 10, 0)
-	self.addRule:SetText(L["Add Rule"])
-	self.addRule:SetSize(self.addRule:GetFontString():GetStringWidth() + 40, 22)
-	self.addRule:SetScript("OnClick", function()
+	self.addRuleBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
+	self.addRuleBtn:SetPoint("LEFT", self.summons, "RIGHT", 10, 0)
+	self.addRuleBtn:SetText(L["Add Rule"])
+	self.addRuleBtn:SetSize(self.addRuleBtn:GetFontString():GetStringWidth() + 40, 22)
+	self.addRuleBtn:SetScript("OnClick", function()
 		self.ruleEditor:addRule()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end)
+
+	-- RESET BUTTON
+	self.resetRulesBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
+	self.resetRulesBtn:SetPoint("TOP", self.addRuleBtn)
+	self.resetRulesBtn:SetPoint("RIGHT", -30, 0)
+	self.resetRulesBtn:SetText(L["Reset Rules"])
+	self.resetRulesBtn:SetSize(self.resetRulesBtn:GetFontString():GetStringWidth() + 40, 22)
+	self.resetRulesBtn:SetScript("OnClick", function()
+		self:resetRules()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
 
@@ -79,6 +99,16 @@ end)
 function rules:setSummonRules(n)
 	self.rules = macroFrame.ruleConfig[n]
 	self:updateRuleList()
+end
+
+
+function rules:resetRules()
+	StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(L["Reset Rules"]), nil, function()
+		wipe(self.rules)
+		self.rules[1] = mounts:getDefaultRule()
+		self:updateRuleList()
+		macroFrame:setRuleFuncs()
+	end)
 end
 
 
@@ -128,7 +158,7 @@ function rules:getCondText(conditions)
 	for i = 1, #conditions > 3 and 2 or #conditions do
 		local cond = conditions[i]
 		text = text..("\n|cff%s%s: %s|r"):format(
-			cond[1] and ("cc4444%s "):format(L["Not"]) or "44cc44",
+			cond[1] and ("cc4444%s "):format(L["NOT_CONDITION"]) or "44cc44",
 			conds[cond[2]].text,
 			self:getCondValueText(cond)
 		)

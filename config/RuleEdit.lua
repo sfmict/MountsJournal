@@ -334,11 +334,18 @@ function ruleEditor:openCondTypeMenu(btn, btnData)
 end
 
 
+function ruleEditor:getActionTooltip(actionData)
+	local action = actions[actionData[1]]
+	return action.getDescription and action:getDescription()
+end
+
+
 function ruleEditor:setActionValueOption()
 	local actionData = self.data.action
+	local panel = self.actionPanel
+	panel:SetHeight(50)
 	if not actionData[1] then return end
 
-	local panel = self.actionPanel
 	if panel.optionValue then
 		panel.optionValue:Hide()
 	end
@@ -349,8 +356,6 @@ function ruleEditor:setActionValueOption()
 		panel.macro.editFrame:GetEditBox():SetText(rules:getActionValueText(actionData) or "")
 		panel.macro:Show()
 		return
-	else
-		panel:SetHeight(50)
 	end
 
 	if actionData[1] == "rmount" then return end
@@ -375,6 +380,7 @@ function ruleEditor:setActionValueOption()
 	panel.optionValue:SetPoint("RIGHT", -30, 0)
 	panel.optionValue:Show()
 	panel.optionValue:SetText(rules:getActionValueText(actionData) or "")
+	panel.optionValue.tooltip = self:getActionTooltip(actionData)
 end
 
 
@@ -411,7 +417,7 @@ function ruleEditor:conditionButtonInit(panel, data)
 
 		panel.notCheck:Show()
 		panel.notCheck:SetChecked(btnData[1])
-		panel.notCheck.Text:SetText(L["Not"])
+		panel.notCheck.Text:SetText(L["NOT_CONDITION"])
 		panel.notCheck:SetScript("OnClick",function(btn)
 			local checked = btn:GetChecked()
 			btnData[1] = checked

@@ -11,7 +11,7 @@ conds.mod.text = L["Modifier"]
 
 function conds.mod:getValueText(value)
 	if value == "any" then
-		return L["Any"]
+		return L["ANY_MODIFIER"]
 	else
 		return _G[value:upper().."_KEY_TEXT"]
 	end

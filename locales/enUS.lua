@@ -132,6 +132,22 @@ L["Enable arrow buttons to browse mounts"] = "Enable arrow buttons to browse mou
 L["Open links in %s"] = "Open links in %s"
 L["Click opens in"] = "Click opens in"
 L["Show wowhead link in mount preview"] = "Show wowhead link in mount preview"
+L["Rules"] = "Rules"
+L["RULES_TITLE"] = "Rules for mounting. The rules are checked in order, and the first rule in which all conditions match executes the action."
+L["Add Rule"] = "Add Rule"
+L["Reset Rules"] = "Reset Rules"
+L["Remove Rule %d"] = "Remove Rule %d"
+L["NOT_CONDITION"] = "Not"
+L["Conditions"] = "Conditions"
+L["Action"] = "Action"
+L["Edit Rule"] = "Edit Rule"
+L["ANY_MODIFIER"] = "Any"
+L["Mouse button"] = "Mouse button"
+L["Random Mount"] = "Random Mount"
+L["Mount"] = "Mount"
+L["Use Item"] = "Use Item"
+L["Use Inventory Item"] = "Use Inventory Item"
+L["Cast Spell"] = "Cast Spell"
 L["About"] = "About"
 L["Help with translation of %s. Thanks."] = "Help with translation of %s. Thanks."
 L["Localization Translators:"] = "Localization Translators:"
@@ -366,6 +382,7 @@ L["Yaks"] = "Yaks"
 L["Yetis"] = "Yetis"
 
 setmetatable(L, {__index = function(self, key)
+	fprint(key)
 	self[key] = key or ""
 	return key
 end})
