@@ -142,8 +142,8 @@ end
 
 
 function rules:getCondValueText(cond)
-	if cond[3] == nil then return end
-	return conds[cond[2]]:getValueText(cond[3])
+	if cond[3] == nil then return "" end
+	return conds[cond[2]]:getValueText(cond[3]) or ""
 end
 
 

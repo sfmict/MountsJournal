@@ -5,7 +5,7 @@ ns.conditions = conds
 
 
 ---------------------------------------------------
--- mod
+-- mod MODIFIER
 conds.mod = {}
 conds.mod.text = L["Modifier"]
 
@@ -71,7 +71,7 @@ end
 
 
 ---------------------------------------------------
--- btn
+-- btn MOUSE BUTTON
 conds.btn = {}
 conds.btn.text = L["Mouse button"]
 
@@ -108,6 +108,57 @@ function conds.btn:getFuncText(value)
 	end
 end
 
+
+---------------------------------------------------
+-- mcond MACRO CONDITIONS
+conds.mcond = {}
+conds.mcond.text = L["Macro condition"]
+
+function conds.mcond:getDescription()
+	return [[|cffffffffexists
+help
+dead
+party, raid
+unithasvehicleui
+canexitvehicle
+channeling, channeling:spellName
+equipped:type, worn:type
+flyable
+flying
+form:n, stance:n
+group, group:party, group:raid
+indoors, outdoors
+known:name, known:spellID
+mounted
+pet:name, pet:family
+petbattle
+pvpcombat
+resting
+spec:n, spec:n1/n2
+stealth
+swimming
+actionbar:n, bar:n, bar:n1/n2/...
+bonusbar, bonusbar:n
+button:n, btn:n1/n2/...
+cursor
+extrabar
+modifier, mod, mod:key, mod:action
+overridebar
+possessbar
+shapeshift
+vehicleui|r
+
+[mod:shift,swimming][btn:2]
+]]
+end
+
+function conds.mcond:getValueText(value)
+	return value
+end
+
+function conds.mcond:getFuncText(value)
+	return ("SecureCmdOptionParse('%s')\n"):format(value:gsub("['\\]", "\\%1")), "SecureCmdOptionParse"
+end
 
 ---------------------------------------------------
 -- METHODS

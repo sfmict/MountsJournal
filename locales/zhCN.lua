@@ -146,6 +146,7 @@ L["Show wowhead link in mount preview"] = "在坐骑预览中显示wowhead链接
 -- L["Action"] = ""
 -- L["Edit Rule"] = ""
 -- L["ANY_MODIFIER"] = ""
+-- L["Macro condition"] = ""
 -- L["Mouse button"] = ""
 -- L["Random Mount"] = ""
 -- L["Mount"] = ""

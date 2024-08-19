@@ -146,6 +146,7 @@ local L = ns.L
 -- L["Action"] = ""
 -- L["Edit Rule"] = ""
 -- L["ANY_MODIFIER"] = ""
+-- L["Macro condition"] = ""
 -- L["Mouse button"] = ""
 -- L["Random Mount"] = ""
 -- L["Mount"] = ""

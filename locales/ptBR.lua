@@ -146,6 +146,7 @@ L["Enable arrow buttons to browse mounts"] = "Ative os botões de seta para nave
 -- L["Action"] = ""
 -- L["Edit Rule"] = ""
 -- L["ANY_MODIFIER"] = ""
+-- L["Macro condition"] = ""
 -- L["Mouse button"] = ""
 -- L["Random Mount"] = ""
 -- L["Mount"] = ""

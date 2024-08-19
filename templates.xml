@@ -3165,8 +3165,8 @@
 			</OnLoad>
 			<OnEnter>
 				if self.tooltip then
-					GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 0, 0)
-					GameTooltip:SetText(self.tooltip, nil, nil, nil, nil, true)
+					GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
+					GameTooltip:SetText(self.tooltip, nil, nil, nil, nil, false)
 					GameTooltip:Show()
 				end
 			</OnEnter>

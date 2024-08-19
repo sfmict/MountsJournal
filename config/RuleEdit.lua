@@ -22,6 +22,7 @@ ruleEditor:SetScript("OnShow", function(self)
 		self:RegisterEvent("PLAYER_REGEN_DISABLED")
 		self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	end)
+	self:GetScript("OnShow")(self)
 	self:SetScript("OnHide", function(self)
 		self:UnregisterEvent("PLAYER_REGEN_DISABLED")
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
@@ -35,9 +36,6 @@ ruleEditor:SetScript("OnShow", function(self)
 			self.mountSelect:EnableKeyboard(true)
 		end
 	end)
-	self:EnableKeyboard(not InCombatLockdown())
-	self:RegisterEvent("PLAYER_REGEN_DISABLED")
-	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 
 	self.bg = self:CreateTexture(nil, "BACKGROUND")
 	self.bg:SetColorTexture(.5, .5, .5, .2)
@@ -291,6 +289,12 @@ function ruleEditor:checkRule()
 end
 
 
+function ruleEditor:getCondTooltip(condData)
+	local cond = conds[condData[2]]
+	return cond.getDescription and cond:getDescription()
+end
+
+
 function ruleEditor:openCondValueMenu(btn, btnData)
 	local function func(f)
 		btnData[3] = f.value
@@ -306,16 +310,31 @@ end
 
 function ruleEditor:setCondValueOption(panel, btnData)
 	if not btnData[2] then return end
-	if not panel.optionValue then
-		panel.optionValue = self.btnPool:Acquire()
-		panel.optionValue:SetParent(panel)
-		panel.optionValue:SetPoint("LEFT", panel.optionType, "RIGHT", 10, 0)
-		panel.optionValue:SetPoint("RIGHT", panel.remove, "LEFT", -10, 0)
-		panel.optionValue:Show()
+
+	if panel.optionValue then
+		panel.optionValue:Hide()
 	end
 
+	local cond = conds[btnData[2]]
+	if cond.getValueList then
+		panel.optionValue = self.btnPool:Acquire()
+		panel.optionValue:SetScript("OnClick", function(btn) self:openCondValueMenu(btn, btnData) end)
+	else
+		panel.optionValue = self.editPool:Acquire()
+		panel.optionValue:SetNumeric(cond.isNumeric)
+		panel.optionValue:SetScript("OnTextChanged", function(editBox)
+			local text = editBox:GetText()
+			btnData[3] = #text > 0 and text or nil
+			self:checkRule()
+		end)
+	end
+
+	panel.optionValue:SetParent(panel)
+	panel.optionValue:SetPoint("LEFT", panel.optionType, "RIGHT", 10, 0)
+	panel.optionValue:SetPoint("RIGHT", panel.remove, "LEFT", -10, 0)
+	panel.optionValue:Show()
 	panel.optionValue:SetText(rules:getCondValueText(btnData))
-	panel.optionValue:SetScript("OnClick", function(btn) self:openCondValueMenu(btn, btnData) end)
+	panel.optionValue.tooltip = self:getCondTooltip(btnData)
 end
 
 
@@ -369,6 +388,7 @@ function ruleEditor:setActionValueOption()
 		end)
 	else
 		panel.optionValue = self.editPool:Acquire()
+		panel.optionValue:SetNumeric(true)
 		panel.optionValue:SetScript("OnTextChanged", function(editBox)
 			actionData[2] = tonumber(editBox:GetText())
 			self:checkRule()
@@ -403,7 +423,7 @@ end
 
 function ruleEditor:conditionButtonInit(panel, data)
 	local btnData = data[2]
-	if btnData[1] == "add" then
+	if btnData == "add" then
 		panel.order:SetText("")
 		panel.notCheck:Hide()
 		panel.optionType:Hide()
@@ -441,6 +461,6 @@ function ruleEditor:updateConditionList()
 	for i = 1, #self.data do
 		self.dataProvider:Insert({i, self.data[i]})
 	end
-	self.dataProvider:Insert({#self.data + 1, {"add"}})
+	self.dataProvider:Insert({#self.data + 1, "add"})
 	self.scrollBox:SetDataProvider(self.dataProvider, ScrollBoxConstants.RetainScrollPosition)
 end
