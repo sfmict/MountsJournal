@@ -2358,7 +2358,7 @@
 		</Scripts>
 	</Button>
 
-	<Button name="MJSecureMacroButtonTemplate" inherits="MJSecureActionButtonUpTemplate" virtual="true">
+	<Button name="MJIconButtonTemplate" virtual="true">
 		<Size x="33" y="33"/>
 		<Layers>
 			<Layer level="OVERLAY">
@@ -2371,6 +2371,9 @@
 			</Layer>
 		</Layers>
 		<HighlightTexture parentKey="highlight" file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
+	</Button>
+
+	<Button name="MJSecureMacroButtonTemplate" inherits="MJIconButtonTemplate,MJSecureActionButtonUpTemplate" virtual="true">
 		<Scripts>
 			<OnLoad>
 				self:SetAttribute("type", "click")
