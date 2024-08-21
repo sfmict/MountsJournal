@@ -142,6 +142,29 @@ util.editBoxBackdrop = {
 }
 
 
+util.sliderPanelBackdrop = {
+	bgFile = "Interface/Buttons/UI-SliderBar-Background",
+	edgeFile = "Interface/Buttons/UI-SliderBar-Border",
+	tile = true,
+	-- tileEdge = true,
+	tileSize = 8,
+	edgeSize = 2,
+	insets = {left = 1, right = 1, top = 1, bottom = 1},
+}
+
+
+util.darkPanelBackdrop = {
+	bgFile = "Interface/ChatFrame/ChatFrameBackground",
+	-- bgFile = "Interface/Buttons/UI-SliderBar-Background",
+	edgeFile = "Interface/Buttons/UI-SliderBar-Border",
+	tile = true,
+	tileEdge = true,
+	tileSize = 8,
+	edgeSize = 8,
+	insets = {left = 3, right = 3, top = 6, bottom = 6},
+}
+
+
 function util.setMixin(obj, mixin)
 	for k, v in pairs(mixin) do
 		obj[k] = v

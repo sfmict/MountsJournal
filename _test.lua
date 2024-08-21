@@ -1,5 +1,6 @@
 local addon, ns = ...
 local L, mounts, config, journal = ns.L, ns.mounts, ns.config, ns.journal
+mounts.mountsDB = ns.mountsDB
 local test = CreateFrame("Frame")
 test:RegisterEvent("PLAYER_ENTERING_WORLD")
 
@@ -42,6 +43,9 @@ test:RegisterEvent("ADDON_LOADED")
 -- test:RegisterAllEvents()
 
 test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
+test:RegisterEvent("PET_BATTLE_OPENING_START")
+test:RegisterEvent("PET_BATTLE_OPENING_DONE")
+test:RegisterEvent("PET_BATTLE_CLOSE")
 -- test:RegisterEvent("CURRENCY_DISPLAY_UPDATE")
 -- test:RegisterEvent("CHAT_MSG_CURRENCY")
 
@@ -151,11 +155,18 @@ function test:PLAYER_ENTERING_WORLD()
 
 	-- local sbg = journal.bgFrame.settingsBackground
 	-- sbg:Show()
+
+	-- local bgWidth = journal.bgFrame:GetWidth()
+	-- for i = 1, sbg:GetNumPoints() do
+	-- 	local point, rframe, rpoint, x, y = sbg:GetPoint(i)
+	-- 	sbg:SetPoint(point, rframe, rpoint, x + bgWidth, y)
+	-- end
+
 	-- sbg:SetSize(sbg:GetSize())
 	-- sbg:ClearAllPoints()
 	-- sbg:SetPoint("TOPLEFT", journal.bgFrame, "TOPRIGHT", 5, -60)
 	-- sbg.Tabs[3]:Click()
-	-- ns.rulesConfig.addRule:Click()
+	-- ns.ruleConfig.addRule:Click()
 
 	-- journal.navBarBtn:Click()
 	-- journal.mapSettings.existingListsToggle:Click()
