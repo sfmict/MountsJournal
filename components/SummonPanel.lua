@@ -6,7 +6,7 @@ local PANEL_HEIGHT = 65
 
 -- PANEL
 local panel = CreateFrame("FRAME", nil, UIParent, "TooltipBackdropTemplate")
-ns.summonPanel = panel
+journal.summonPanel = panel
 panel:SetFrameLevel(1000)
 panel:SetMovable(true)
 panel:SetScript("OnEvent", function(self)
