@@ -138,6 +138,7 @@ function macroFrame:PLAYER_LOGIN()
 			-- 768 - cat form
 			-- 783 - travel form
 			-- 24858 - moonkin form
+			-- 210053 - mount form
 			if self.classConfig.useLastDruidForm then
 				local spellID = self.getFormSpellID()
 
@@ -150,6 +151,7 @@ function macroFrame:PLAYER_LOGIN()
 				and (self.sFlags.isMounted
 					  or self.sFlags.inVehicle
 					  or spellID == 783
+					  or spellID == 210053
 					  or self.sFlags.isIndoors and spellID == 768) then
 					return self:addLine(self:getDismountMacro(), "/cast "..self:getSpellName(self.charMacrosConfig.lastDruidFormSpellID))
 				end
