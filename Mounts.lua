@@ -688,6 +688,10 @@ do
 		[1464] = true,
 		-- Legion
 		[1220] = true,
+		-- TWW
+		[2552] = true,
+		[2601] = true,
+		[2662] = true,
 	}
 
 	function mounts:setFlags()
