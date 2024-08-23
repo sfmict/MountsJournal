@@ -35,8 +35,15 @@ function actions.mount:getFuncText(spellID)
 	if macroFrame.druidDismount then
 		vars[#vars + 1] = "GetSpecialization"
 	end
+
+	local macro
+	if macroFrame.additionalMounts[spellID] then
+		macro = macroFrame.additionalMounts[spellID].macro
+	else
+		macro = ('/run MountsJournal:summon(%d)'):format(spellID)
+	end
+
 	return ([[
-		self.mounts:setFlags()
 		%s
 		-- EXIT VEHICLE
 		if self.sFlags.inVehicle then
@@ -48,15 +55,9 @@ function actions.mount:getFuncText(spellID)
 			end
 		-- MOUNT
 		else
-			macro = self:getDefMacro()
-			if self.additionalMounts[%d] then
-				macro = self:addLine(macro, self.additionalMounts[%d].macro)
-			else
-				macro = self:addLine(macro, '/run MountsJournal:summon(%d)')
-			end
-			return macro
+			return self:addLine(self:getDefMacro(), '%s')
 		end
-	]]):format(macroFrame.druidDismount or "", spellID, spellID, spellID),
+	]]):format(macroFrame.druidDismount or "", macro:gsub("[\\']", "\\%1")),
 	vars
 end
 

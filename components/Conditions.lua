@@ -157,8 +157,85 @@ function conds.mcond:getValueText(value)
 end
 
 function conds.mcond:getFuncText(value)
-	return ("SecureCmdOptionParse('%s')\n"):format(value:gsub("['\\]", "\\%1")), "SecureCmdOptionParse"
+	return ("SecureCmdOptionParse('%s')"):format(value:gsub("['\\]", "\\%1")), "SecureCmdOptionParse"
 end
+
+
+---------------------------------------------------
+-- class
+conds.class = {}
+conds.class.text = CLASS
+
+function conds.class:getValueText(value)
+	local localized, className = GetClassInfo(value)
+	local classColor = C_ClassColor.GetClassColor(className)
+	return classColor:WrapTextInColorCode(localized)
+end
+
+function conds.class:getValueList(value, func)
+	local list = {}
+
+	for i = 1, GetNumClasses() do
+		list[i] = {
+			text = self:getValueText(i),
+			value = i,
+			func = func,
+			checked = i == value,
+		}
+	end
+
+	return list
+end
+
+function conds.class:getFuncText(value)
+	local _,_, id = UnitClass("player")
+	return id == value and "true" or "false"
+end
+
+
+---------------------------------------------------
+-- spec
+conds.spec = {}
+conds.spec.text = SPECIALIZATION
+
+function conds.spec:getValueText(value)
+	local _, name, _,_,_, className, class = GetSpecializationInfoByID(value)
+	local classColor = C_ClassColor.GetClassColor(className)
+	return name and ("%s - %s"):format(classColor:WrapTextInColorCode(class), name)
+end
+
+function conds.spec:getValueList(value, func)
+	local list = {}
+
+	for i = 1, GetNumClasses() do
+		local localized, className = GetClassInfo(i)
+		for j = 1, GetNumSpecializationsForClassID(i) do
+			local id = GetSpecializationInfoForClassID(i, j)
+			list[#list + 1] = {
+				text = self:getValueText(id),
+				value = id,
+				func = func,
+				checked = id == value,
+			}
+		end
+	end
+
+	return list
+end
+
+function conds.spec:getFuncText(value)
+	local index
+	for i = 1,  GetNumSpecializations() do
+		if value == GetSpecializationInfo(i) then
+			index = i
+		end
+	end
+	if index then
+		return "GetSpecialization() == "..index, "GetSpecialization"
+	end
+	return "false"
+end
+
 
 ---------------------------------------------------
 -- METHODS

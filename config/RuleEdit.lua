@@ -63,9 +63,11 @@ ruleEditor:SetScript("OnShow", function(self)
 	self.menu:ddHideWhenButtonHidden(self)
 	self.menu:ddSetDisplayMode(addon)
 	self.menu:ddSetInitFunc(function(dd, level, value)
-		for i = 1, #value do
-			dd:ddAddButton(value[i], level)
-		end
+		local info = {
+			list = value,
+			listMaxSize = 30,
+		}
+		dd:ddAddButton(info, level)
 	end)
 
 	-- POOLS
