@@ -8,21 +8,17 @@ config:Hide()
 -- config.secondMacroName = "MJSecondMacro"
 
 
-config:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
-config:RegisterEvent("PLAYER_LOGIN")
-
-
 -- BIND MOUNT
-function config:PLAYER_LOGIN()
-	self.bindSummon1 = binding:createButtonBinding(util.secureButtonNameMount, ("%s %s %d"):format(addon, SUMMONS, 1), "MJSecureActionButtonTemplate")
-	self.bindSummon1.secure.id = 1
+mounts:on("ADDON_INIT", function(self)
+	config.bindSummon1 = binding:createButtonBinding(util.secureButtonNameMount, ("%s %s %d"):format(addon, SUMMONS, 1), "MJSecureActionButtonTemplate")
+	config.bindSummon1.secure.id = 1
 
-	self.bindSummon2 = binding:createButtonBinding(util.secureButtonNameSecondMount, ("%s %s %d"):format(addon, SUMMONS, 2), "MJSecureActionButtonTemplate")
-	self.bindSummon2.secure.id = 2
-	self.bindSummon2.secure.forceModifier = true
+	config.bindSummon2 = binding:createButtonBinding(util.secureButtonNameSecondMount, ("%s %s %d"):format(addon, SUMMONS, 2), "MJSecureActionButtonTemplate")
+	config.bindSummon2.secure.id = 2
+	config.bindSummon2.secure.forceModifier = true
 
-	mounts:event("CREATE_BUTTONS"):off("CREATE_BUTTONS")
-end
+	self:event("CREATE_BUTTONS"):off("CREATE_BUTTONS")
+end)
 
 
 -- SHOW CONFIG

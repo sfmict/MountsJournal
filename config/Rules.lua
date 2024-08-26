@@ -1,13 +1,13 @@
 local addon, ns = ...
-local L, util, mounts, macroFrame, conds, actions = ns.L, ns.util, ns.mounts, ns.macroFrame, ns.conditions, ns.actions
+local L, util, mounts, macroFrame, conds, actions, calendar = ns.L, ns.util, ns.mounts, ns.macroFrame, ns.conditions, ns.actions, ns.calendar
 local rules = CreateFrame("FRAME", "MountsJournalConfigRules")
 ns.ruleConfig = rules
 rules:Hide()
 
 
 rules:SetScript("OnShow", function(self)
-	self:SetScript("OnShow", nil)
-	self:SetScript("OnHide", function() self.ruleEditor:Hide() end)
+	self:SetScript("OnShow", function(self) self:updateRuleList() end)
+	self:SetScript("OnHide", function(self) self.ruleEditor:Hide() end)
 
 	local lsfdd = LibStub("LibSFDropDown-1.5")
 
@@ -119,6 +119,7 @@ function rules:saveRule(order, data)
 	tinsert(self.rules, order or 1, data)
 	self:updateRuleList()
 	macroFrame:setRuleFuncs()
+	calendar:checkHolidayNames()
 end
 
 
@@ -127,6 +128,7 @@ function rules:removeRule(order)
 		tremove(self.rules, order)
 		self:updateRuleList()
 		macroFrame:setRuleFuncs()
+		calendar:checkHolidayNames()
 	end)
 end
 

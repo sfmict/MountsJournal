@@ -164,6 +164,7 @@ function pets:setSummonEvery()
 		self:stopTicker()
 	end
 end
+pets:on("ADDON_INIT", pets.setSummonEvery)
 
 
 function pets:setPetJournalFiltersBackup()

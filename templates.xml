@@ -3057,7 +3057,7 @@
 		<Size y="55"/>
 		<Layers>
 			<Layer level="BORDER">
-				<Texture parentKey="highlight" hidden="true">
+				<Texture parentKey="highlight" alpha="0">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="4" y="-4"/>
 						<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
@@ -3067,9 +3067,9 @@
 			</Layer>
 			<Layer level="ARTWORK">
 				<FontString parentKey="order" inherits="GameFontNormalLarge" justifyH="CENTER">
-					<Size x="20"/>
+					<Size x="28"/>
 					<Anchors>
-						<Anchor point="LEFT" x="5"/>
+						<Anchor point="LEFT" x="1"/>
 					</Anchors>
 				</FontString>
 				<FontString parentKey="conds" inherits="GameFontNormal" justifyH="LEFT" maxLines="3">
@@ -3086,6 +3086,11 @@
 				</FontString>
 			</Layer>
 		</Layers>
+		<Animations>
+			<AnimationGroup parentKey="highlightLeave" setToFinalAlpha="true">
+				<Alpha parentKey="alpha" smoothing="IN_OUT" duration=".3" order="1" fromAlpha="1" toAlpha="0"/>
+			</AnimationGroup>
+		</Animations>
 		<Frames>
 			<Button parentKey="remove" inherits="MJRemoveButtonTemplate">
 				<Anchors>
@@ -3112,8 +3117,16 @@
 			</Button>
 		</Frames>
 		<Scripts>
-			<OnEnter>self.highlight:Show()</OnEnter>
-			<OnLeave>self.highlight:Hide()</OnLeave>
+			<OnLoad inherit="prepend">
+				self.highlightLeave.alpha:SetTarget(self.highlight)
+			</OnLoad>
+			<OnEnter>
+				self.highlightLeave:Stop()
+				self.highlight:SetAlpha(1)
+			</OnEnter>
+			<OnLeave>
+				self.highlightLeave:Restart()
+			</OnLeave>
 		</Scripts>
 	</Button>
 
@@ -3140,7 +3153,8 @@
 				<Anchor point="RIGHT" x="-4"/>
 			</Anchors>
 		</HighlightTexture>
-		<ButtonText inherits="GameFontHighlight" maxLines="1" justifyH="LEFT" parentKey="text">
+		<NormalFont style="GameFontHighlight"/>
+		<ButtonText maxLines="1" justifyH="LEFT" parentKey="text">
 			<Anchors>
 				<Anchor point="LEFT" x="10" y="0"/>
 				<Anchor point="RIGHT" relativeKey="$parent.normal" relativePoint="LEFT" x="-5" y="0"/>

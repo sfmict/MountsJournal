@@ -168,8 +168,10 @@ conds.class.text = CLASS
 
 function conds.class:getValueText(value)
 	local localized, className = GetClassInfo(value)
-	local classColor = C_ClassColor.GetClassColor(className)
-	return classColor:WrapTextInColorCode(localized)
+	if localized then
+		local classColor = C_ClassColor.GetClassColor(className)
+		return classColor:WrapTextInColorCode(localized)
+	end
 end
 
 function conds.class:getValueList(value, func)
@@ -200,15 +202,16 @@ conds.spec.text = SPECIALIZATION
 
 function conds.spec:getValueText(value)
 	local _, name, _,_,_, className, class = GetSpecializationInfoByID(value)
-	local classColor = C_ClassColor.GetClassColor(className)
-	return name and ("%s - %s"):format(classColor:WrapTextInColorCode(class), name)
+	if name then
+		local classColor = C_ClassColor.GetClassColor(className)
+		return ("%s - %s"):format(classColor:WrapTextInColorCode(class), name)
+	end
 end
 
 function conds.spec:getValueList(value, func)
 	local list = {}
 
 	for i = 1, GetNumClasses() do
-		local localized, className = GetClassInfo(i)
 		for j = 1, GetNumSpecializationsForClassID(i) do
 			local id = GetSpecializationInfoForClassID(i, j)
 			list[#list + 1] = {
@@ -238,6 +241,101 @@ end
 
 
 ---------------------------------------------------
+-- zt ZONE TYPE
+conds.zt = {}
+conds.zt.text = L["Zone type"]
+
+function conds.zt:getValueText(value)
+	if value == "scenario" then
+		return TRACKER_HEADER_SCENARIO
+	elseif value == "party" then
+		return TRACKER_HEADER_DUNGEON
+	elseif value == "raid" then
+		return RAID
+	elseif value == "arena" then
+		return ARENA
+	elseif value == "pvp" then
+		return BATTLEGROUND
+	end
+end
+
+function conds.zt:getValueList(value, func)
+	local zoneTypes = {
+		"scenario",
+		"party",
+		"raid",
+		"arena",
+		"pvp"
+	}
+	local list = {}
+	for i = 1, #zoneTypes do
+		local v = zoneTypes[i]
+		list[i] = {
+			text = self:getValueText(v),
+			value = v,
+			func = func,
+			checked = v == value,
+		}
+	end
+	sort(list, function(a, b) return a.text < b.text end)
+	return list
+end
+
+function conds.zt:getFuncText(value)
+	return ("self.mounts.instanceType == '%s'"):format(value)
+end
+
+
+---------------------------------------------------
+-- holiday
+conds.holiday = {}
+conds.holiday.text = CALENDAR_FILTER_HOLIDAYS
+
+function conds.holiday:getValueText(value)
+	local holidayName = ns.calendar:getHolidayName(value)
+	return ("%s (%d)"):format(holidayName or RED_FONT_COLOR:WrapTextInColorCode(L["Nameless holiday"]), value)
+end
+
+function conds.holiday:getValueList(value, cb, dd, notReset)
+	local list = {custom = true}
+	list[1] = {
+		customFrame = ns.journal.bgFrame.calendarFrame,
+		OnLoad = function(frame)
+			local value = function() return self:getValueList(value, cb, dd, true) end
+			frame:init(1, value, dd)
+		end
+	}
+	local subList = {}
+	list[2] = {list = subList}
+
+	if not notReset then ns.calendar:setCurrentDate() end
+
+	local func = function(btn, arg1)
+		ns.calendar:saveHolidayName(btn.value, arg1)
+		cb(btn)
+	end
+
+	local eList = ns.calendar:getHolidayList()
+	for i = 1, #eList do
+		local e = eList[i]
+		subList[i] = {
+			text = ("%s (%d)"):format(e.isActive and ("%s |cff00cc00%s|r"):format(e.name, SPEC_ACTIVE) or e.name, e.eventID),
+			arg1 = e.name,
+			value = e.eventID,
+			func = func,
+			checked = e.eventID == value,
+		}
+	end
+
+	return list
+end
+
+function conds.holiday:getFuncText(value)
+	return ("self.calendar:isHolidayActive(%d)"):format(value)
+end
+
+
+---------------------------------------------------
 -- METHODS
 function conds:getMenuList(value, func)
 	local list = {}
@@ -257,7 +355,7 @@ end
 
 
 function conds:getFuncText(conds)
-	local text = ""
+	local text = conds.action[1] ~= "rmount" and "not profileLoad\nand " or ""
 	local vars = {}
 	for i = 1, #conds do
 		local cond, var = conds[i]

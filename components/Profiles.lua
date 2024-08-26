@@ -90,8 +90,6 @@ ns.journal:on("MODULES_INIT", function(journal)
 			self.profiles[profileName] = nil
 			if self.charDB.currentProfileName == profileName then
 				self:setProfile()
-			else
-				self.mounts:setDB()
 			end
 		end)
 	end
@@ -173,27 +171,6 @@ ns.journal:on("MODULES_INIT", function(journal)
 	dd.profileNames = {}
 	dd:SetText(dd.charDB.currentProfileName or DEFAULT)
 
-	-- CALENDAR FRAME
-	local calendar = ns.calendar
-	local calendarFrame = journal.bgFrame.calendarFrame
-
-	local function reloadMenu(level, value)
-		dd:ddCloseMenus(level)
-		local menu = lsfdd:GetMenu(level)
-		dd:ddToggle(level, value, menu.anchorFrame)
-	end
-
-	calendarFrame.prevMonthButton:SetScript("OnClick", function()
-		PlaySound(SOUNDKIT.IG_ABILITY_PAGE_TURN)
-		calendar:setPreviousMonth()
-		reloadMenu(calendarFrame.level, calendarFrame.value)
-	end)
-	calendarFrame.nextMonthButton:SetScript("OnClick", function()
-		PlaySound(SOUNDKIT.IG_ABILITY_PAGE_TURN)
-		calendar:setNextMonth()
-		reloadMenu(calendarFrame.level, calendarFrame.value)
-	end)
-
 	-- DROPDOWN
 	dd:ddSetDisplayMode(addon)
 	dd:ddSetInitFunc(function(self, level, value)
@@ -240,36 +217,6 @@ ns.journal:on("MODULES_INIT", function(journal)
 
 			info.text = L["New profile"]
 			info.value = "new"
-			self:ddAddButton(info, level)
-
-			self:ddAddSeparator(level)
-
-			info.notCheckable = nil
-			info.isNotRadio = true
-			info.text = L["Areans and Battlegrounds"]
-			info.value = "pvp"
-			info.checked = function() return self.charDB.profileBySpecializationPVP.enable end
-			info.func = function(_,_,_, checked)
-				self.charDB.profileBySpecializationPVP.enable = checked
-				self.mounts:setDB()
-			end
-			self:ddAddButton(info, level)
-
-			info.checked = nil
-			info.func = nil
-			info.notCheckable = true
-			info.text = CALENDAR_FILTER_HOLIDAYS
-			info.value = "holidays"
-			self:ddAddButton(info, level)
-
-			info.notCheckable = nil
-			info.text = L["By Specialization"]
-			info.value = "specialization"
-			info.checked = function() return self.charDB.profileBySpecialization.enable end
-			info.func = function(_,_,_, checked)
-				self.charDB.profileBySpecialization.enable = checked
-				self.mounts:setDB()
-			end
 			self:ddAddButton(info, level)
 
 		elseif value == "settings" then -- PROFILE SETTINGS
@@ -347,197 +294,6 @@ ns.journal:on("MODULES_INIT", function(journal)
 			info.text = L["Copy current"]
 			info.func = function() self:createProfile(true) end
 			self:ddAddButton(info, level)
-
-		elseif value == "specialization" then -- SPECS
-			info.notCheckable = true
-			info.isTitle = true
-			info.text = L["By Specialization"]
-			self:ddAddButton(info, level)
-
-			self:ddAddSeparator(level)
-
-			info.notCheckable = nil
-			info.isTitle = nil
-			info.notCheckable = true
-			info.hasArrow = true
-			info.keepShownOnClick = true
-
-			for i = 1, GetNumSpecializations() do
-				info.text = select(2, GetSpecializationInfo(i))
-				info.value = i
-				self:ddAddButton(info, level)
-			end
-
-		elseif value == "pvp" then -- PVP
-			info.notCheckable = true
-			info.isTitle = true
-			info.text = L["Areans and Battlegrounds"]
-			self:ddAddButton(info, level)
-
-			self:ddAddSeparator(level)
-
-			info.notCheckable = nil
-			info.isTitle = nil
-			info.notCheckable = true
-			info.hasArrow = true
-			info.keepShownOnClick = true
-
-			for i = 1, GetNumSpecializations() do
-				info.text = select(2, GetSpecializationInfo(i))
-				info.value = i + 10
-				self:ddAddButton(info, level)
-			end
-
-		elseif value == "holidays" then -- HOLIDAYS
-			info.customFrame = calendarFrame
-			info.OnLoad = function(frame)
-				frame.level = level
-				frame.value = value
-				local year, monthName = calendar:getSelectedDate()
-				frame.yearText:SetText(year)
-				frame.monthText:SetText(monthName)
-			end
-			self:ddAddButton(info, level)
-
-			info.customFrame = nil
-			info.OnLoad = nil
-			info.list = {}
-
-			local list, selected = calendar:getHolidayList()
-
-			for i = 1, #list do
-				local e = list[i]
-
-				if not e.profile then
-					selected = false
-				elseif selected == false then
-					selected = true
-					info.list[#info.list + 1] = {
-						keepShownOnClick = true,
-						disabled = true,
-						notCheckable = true,
-						iconOnly = true,
-						icon = "Interface/Common/UI-TooltipDivider-Transparent",
-						iconInfo = {
-							tSizeX = 0,
-							tSizeY = 8,
-						},
-					}
-				end
-
-				local eInfo = {
-					isNotRadio = true,
-					hasArrow = true,
-					keepShownOnClick = true,
-					text = function()
-						local e = list[i]
-						local name = e.name or "NO DATA NAME"
-						if e.isActive then name = name.." (|cff00cc00"..SPEC_ACTIVE.."|r)" end
-						return e.profile and "["..e.profile.order.."] "..name or name
-					end,
-					value = e,
-					func = function(btn, _,_, checked)
-						local e = btn.value
-						calendar:setEventProfileEnabled(e.eventID, checked, e.name)
-						reloadMenu(calendarFrame.level, calendarFrame.value)
-					end,
-					checked = function(btn)
-						btn.value = list[i]
-						return list[i].profile and list[i].profile.enabled
-					end
-				}
-				if e.profile then
-					eInfo.order = function(btn, step)
-						calendar:setEventProfileOrder(btn.value.eventID, step)
-						calendar:sortHolidays(list)
-						reloadMenu(level + 1, list[i])
-					end
-				end
-				info.list[#info.list + 1] = eInfo
-			end
-			self:ddAddButton(info, level)
-
-		elseif type(value) == "number" then -- PROFILE BY SPEC
-			local profileBy
-			if value < 10 then
-				profileBy = self.charDB.profileBySpecialization
-			else
-				value = value - 10
-				profileBy = self.charDB.profileBySpecializationPVP
-			end
-
-			info.notCheckable = true
-			info.isTitle = true
-			info.text = select(2, GetSpecializationInfo(value))
-			self:ddAddButton(info, level)
-
-			self:ddAddSeparator(level)
-
-			info.list = {
-				{
-					keepShownOnClick = true,
-					arg1 = value,
-					text = DEFAULT,
-					checked = function(btn)
-						return profileBy[btn.arg1] == nil
-					end,
-					func = function(_, arg1)
-						profileBy[arg1] = nil
-						self.mounts:setDB()
-						self:ddRefresh(level)
-					end,
-				}
-			}
-			for _, profileName in ipairs(self.profileNames) do
-				tinsert(info.list, {
-					keepShownOnClick = true,
-					arg1 = value,
-					text = profileName,
-					checked = function(btn)
-						return profileBy[btn.arg1] == btn.text
-					end,
-					func = function(btn, arg1)
-						profileBy[arg1] = btn.text
-						self.mounts:setDB()
-						self:ddRefresh(level)
-					end,
-				})
-			end
-			self:ddAddButton(info, level)
-
-		elseif type(value) == "table" then -- PROFILE BY HOLIDAY
-			info.notCheckable = true
-			info.isTitle = true
-			info.text = value.name
-			self:ddAddButton(info, level)
-
-			self:ddAddSeparator(level)
-
-			info.list = {
-				{
-					keepShownOnClick = true,
-					arg1 = value,
-					text = DEFAULT,
-					checked = not (value.profile and value.profile.profileName),
-					func = function(_, e)
-						calendar:setEventProfileName(e.eventID)
-						reloadMenu(calendarFrame.level, calendarFrame.value)
-					end,
-				}
-			}
-			for _, profileName in ipairs(self.profileNames) do
-				tinsert(info.list, {
-					keepShownOnClick = true,
-					arg1 = value,
-					text = profileName,
-					checked = value.profile and value.profile.profileName == profileName,
-					func = function(btn, e)
-						calendar:setEventProfileName(e.eventID, btn.text, e.name)
-						reloadMenu(calendarFrame.level, calendarFrame.value)
-					end,
-				})
-			end
-			self:ddAddButton(info, level)
 		end
 	end)
 
@@ -546,7 +302,6 @@ ns.journal:on("MODULES_INIT", function(journal)
 		wipe(self.profileNames)
 		for k in pairs(self.profiles) do tinsert(self.profileNames, k) end
 		sort(self.profileNames)
-		calendar:setCurrentDate()
 		self:ddToggle(1, nil, self, 112, 17)
 	end)
 end)

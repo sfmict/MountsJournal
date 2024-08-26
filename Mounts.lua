@@ -94,9 +94,9 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalChar = MountsJournalChar or {}
 		self.charDB = MountsJournalChar
 		self.charDB.macrosConfig = self.charDB.macrosConfig or {}
-		self.charDB.profileBySpecialization = self.charDB.profileBySpecialization or {}
-		self.charDB.profileBySpecializationPVP = self.charDB.profileBySpecializationPVP or {}
-		self.charDB.holidayProfiles = self.charDB.holidayProfiles or {}
+		if self.charDB.currentProfileName and not self.profiles[self.charDB.currentProfileName] then
+			self.charDB.currentProfileName = nil
+		end
 
 		-- Списки
 		self.swimmingVashjir = {
@@ -136,7 +136,7 @@ end
 function mounts:getDefaultRule()
 	return {
 		{false, "btn", 1},
-		action = {"rmount"},
+		action = {"rmount", 0},
 	}
 end
 
@@ -161,8 +161,7 @@ function mounts:PLAYER_LOGIN()
 	self:setHandleWaterJump(self.config.waterJump)
 	self:setHerbMount()
 	self:init()
-	ns.pets:setSummonEvery()
-	ns.calendar:init()
+	self:event("ADDON_INIT"):off("ADDON_INIT")
 
 	-- MAP CHANGED
 	-- self:RegisterEvent("NEW_WMO_CHUNK")
@@ -178,7 +177,7 @@ function mounts:PLAYER_LOGIN()
 	self:RegisterEvent("NEW_MOUNT_ADDED")
 
 	-- SPEC CHANGED
-	self:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
+	-- self:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
 
 	-- PET USABLE
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
@@ -186,7 +185,7 @@ function mounts:PLAYER_LOGIN()
 	self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
 
 	-- CALENDAR
-	self:on("CALENDAR_UPDATE_EVENT_LIST", self.setDB)
+	-- self:on("CALENDAR_UPDATE_EVENT_LIST", self.setDB)
 end
 
 
@@ -265,11 +264,7 @@ end
 function mounts:PLAYER_ENTERING_WORLD()
 	local _, instanceType, _,_,_,_,_, instanceID = GetInstanceInfo()
 	self.instanceID = instanceID
-	local pvp = instanceType == "arena" or instanceType == "pvp"
-	if self.pvp ~= pvp then
-		self.pvp = pvp
-		self:setDB()
-	end
+	self.instanceType = instanceType
 end
 
 
@@ -297,9 +292,15 @@ do
 	local timer
 	function mounts:UNIT_SPELLCAST_START(_,_, spellID)
 		local petID
-		for i = 1, #self.priorityProfiles do
-			petID = self.priorityProfiles[i].petForMount[spellID]
-			if petID then break end
+		if self.fromPriority then
+			for i = 1, #self.priorityProfiles do
+				petID = self.priorityProfiles[i].petForMount[spellID]
+				if petID then break end
+			end
+			self.fromPriority = nil
+		else
+			local profile = self.profiles[self.charDB.currentProfileName] or self.defProfile
+			petID = profile.petForMount[spellID]
 		end
 
 		if petID then
@@ -397,51 +398,55 @@ function mounts:setModifier(modifier)
 end
 
 
-function mounts:setMountsList()
-	self.mapInfo = C_Map.GetMapInfo(MapUtil.GetDisplayableMapForPlayer())
+function mounts:resetMountsList()
 	self.mapFlags = nil
 	wipe(self.list)
+	wipe(self.priorityProfiles)
+end
+
+
+function mounts:setMountsList(profile)
+	if not profile then return end
+	self.priorityProfiles[#self.priorityProfiles + 1] = profile
+	if self.mapFlags and self.list.fly and self.list.ground and self.list.swimming then return end
 
 	local mapInfo = self.mapInfo
 	while mapInfo do
-		for i = 1, #self.priorityProfiles do
-			local profile, list = self.priorityProfiles[i]
-			local zoneMounts = profile.zoneMountsFromProfile and self.defProfile.zoneMounts or profile.zoneMounts
+		local zoneMounts, list = profile.zoneMountsFromProfile and self.defProfile.zoneMounts or profile.zoneMounts
 
-			if mapInfo.mapID == self.defMountsListID then
-				list = profile
-			else
-				list = zoneMounts[mapInfo.mapID]
+		if mapInfo.mapID == self.defMountsListID then
+			list = profile
+		else
+			list = zoneMounts[mapInfo.mapID]
 
-				if list and not self.mapFlags and list.flags.enableFlags then
-					self.mapFlags = list.flags
-				end
+			if list and not self.mapFlags and list.flags.enableFlags then
+				self.mapFlags = list.flags
 			end
+		end
 
-			if list then
-				if not (self.list.fly and self.list.ground and self.list.swimming) then
-					while list and list.listFromID do
-						if list.listFromID == self.defMountsListID then
-							list = profile
-						else
-							list = zoneMounts[list.listFromID]
-						end
+		if list then
+			if not (self.list.fly and self.list.ground and self.list.swimming) then
+				while list and list.listFromID do
+					if list.listFromID == self.defMountsListID then
+						list = profile
+					else
+						list = zoneMounts[list.listFromID]
 					end
-					if list then
-						if not self.list.fly and next(list.fly) then
-							self.list.fly = list.fly
-							self.list.flyWeight = profile.mountsWeight
-						end
-						if not self.list.ground and next(list.ground) then
-							self.list.ground = list.ground
-							self.list.groundWeight = profile.mountsWeight
-						end
-						if not self.list.swimming and next(list.swimming) then
-							self.list.swimming = list.swimming
-							self.list.swimmingWeight = profile.mountsWeight
-						end
+				end
+				if list then
+					if not self.list.fly and next(list.fly) then
+						self.list.fly = list.fly
+						self.list.flyWeight = profile.mountsWeight
 					end
-				elseif self.mapFlags then return end
+					if not self.list.ground and next(list.ground) then
+						self.list.ground = list.ground
+						self.list.groundWeight = profile.mountsWeight
+					end
+					if not self.list.swimming and next(list.swimming) then
+						self.list.swimming = list.swimming
+						self.list.swimmingWeight = profile.mountsWeight
+					end
+				end
 			end
 		end
 
@@ -451,56 +456,14 @@ function mounts:setMountsList()
 			mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
 		end
 	end
+end
 
+
+function mounts:setEmptyList()
 	if not self.list.fly then self.list.fly = self.empty end
 	if not self.list.ground then self.list.ground = self.empty end
 	if not self.list.swimming then self.list.swimming = self.empty end
 end
--- mounts.NEW_WMO_CHUNK = mounts.setMountsList
--- mounts.ZONE_CHANGED = mounts.setMountsList
--- mounts.ZONE_CHANGED_INDOORS = mounts.setMountsList
--- mounts.ZONE_CHANGED_NEW_AREA = mounts.setMountsList
-
-
-function mounts:setDB()
-	local profileName
-	for i = 1, GetNumSpecializations() do
-		profileName = self.charDB.profileBySpecialization[i]
-		if profileName and not self.profiles[profileName] then
-			self.charDB.profileBySpecialization[i] = nil
-		end
-		profileName = self.charDB.profileBySpecializationPVP[i]
-		if profileName and not self.profiles[profileName] then
-			self.charDB.profileBySpecializationPVP[i] = nil
-		end
-	end
-
-	if self.charDB.currentProfileName and not self.profiles[self.charDB.currentProfileName] then
-		self.charDB.currentProfileName = nil
-	end
-
-	wipe(self.priorityProfiles)
-
-	if self.pvp and self.charDB.profileBySpecializationPVP.enable then
-		profileName = self.charDB.profileBySpecializationPVP[GetSpecialization()]
-		self.priorityProfiles[1] = self.profiles[profileName] or self.defProfile
-	end
-
-	local holidayProfiles = ns.calendar:getHolidayProfileNames()
-	for i = 1, #holidayProfiles do
-		self.priorityProfiles[#self.priorityProfiles + 1] = self.profiles[holidayProfiles[i].profileName] or self.defProfile
-	end
-
-	if self.charDB.profileBySpecialization.enable then
-		profileName = self.charDB.profileBySpecialization[GetSpecialization()]
-		self.priorityProfiles[#self.priorityProfiles + 1] = self.profiles[profileName] or self.defProfile
-	end
-
-	profileName = self.charDB.currentProfileName
-	self.db = self.profiles[profileName] or self.defProfile
-	self.priorityProfiles[#self.priorityProfiles + 1] = self.db
-end
-mounts.PLAYER_SPECIALIZATION_CHANGED = mounts.setDB
 
 
 function mounts:setHandleWaterJump(enable)
@@ -695,7 +658,7 @@ do
 	}
 
 	function mounts:setFlags()
-		self:setMountsList()
+		self.mapInfo = C_Map.GetMapInfo(MapUtil.GetDisplayableMapForPlayer())
 		local flags = self.sFlags
 		local groundSpellKnown, flySpellKnown = self:getSpellKnown()
 		local isFloating = self:isFloating()
@@ -730,18 +693,16 @@ end
 
 function mounts:errorSummon()
 	UIErrorsFrame:AddMessage(InCombatLockdown() and SPELL_FAILED_AFFECTING_COMBAT or L["ERR_MOUNT_NO_SELECTED"], 1, .1, .1, 1)
+	self.fromPriority = nil
 end
 
 
 function mounts:setSummonMount(withAdditional)
 	self.withAdditional = withAdditional
 	self.summonedSpellID = nil
+	self.fromPriority = true
 	local flags = self.sFlags
-	if flags.inVehicle then
-		VehicleExit()
-	elseif flags.isMounted then
-		Dismount()
-	elseif not flags.groundSpellKnown then
+	if not flags.groundSpellKnown then
 		if not (flags.swimming and self:setUsableID(self.list.swimming, self.list.swimmingWeight) or self:setUsableID(self.lowLevel, self.db.mountsWeight)) then
 			self:errorSummon()
 		end
@@ -773,7 +734,15 @@ function mounts:init()
 		if not SecureCmdOptionParse(msg) then return end
 		self.sFlags.forceModifier = nil
 		self:setFlags()
-		self:setSummonMount()
-		self:summon()
+		local flags = self.sFlags
+		if flags.inVehicle then
+			VehicleExit()
+		elseif flags.isMounted then
+			Dismount()
+		else
+			ns.macroFrame.checkRules[1](ns.macroFrame, "LeftButton", true)
+			self:setSummonMount()
+			self:summon()
+		end
 	end
 end

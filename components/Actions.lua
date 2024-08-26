@@ -1,5 +1,5 @@
 local _, ns = ...
-local L, macroFrame = ns.L, ns.macroFrame
+local L, macroFrame, mounts = ns.L, ns.macroFrame, ns.mounts
 local actions = {}
 ns.actions = actions
 
@@ -9,8 +9,68 @@ ns.actions = actions
 actions.rmount = {}
 actions.rmount.text = L["Random Mount"]
 
-function actions.rmount:getFuncText()
-	return "return self:getMacro()\n"
+function actions.rmount:getValueText(profileName)
+	if profileName == 0 then
+		return L["Selected profile"]
+	elseif profileName == 1 then
+		return DEFAULT
+	else
+		return mounts.profiles[profileName] and profileName or RED_FONT_COLOR:WrapTextInColorCode(profileName)
+	end
+end
+
+function actions.rmount:getValueList(value, func)
+	local list = {}
+	list[1] = {
+		text = L["Selected profile"],
+		func = func,
+		value = 0,
+		checked = value == 0,
+	}
+	list[2] = {
+		text = DEFAULT,
+		value = 1,
+		func = func,
+		checked = value == 1,
+	}
+
+	local profiles = {}
+	for k in next, mounts.profiles do profiles[#profiles + 1] = k end
+	sort(profiles)
+
+	for i = 1, #profiles do
+		local profile = profiles[i]
+		list[#list + 1] = {
+			text = profile,
+			value = profile,
+			func = func,
+			checked = value == profile,
+		}
+	end
+
+	return list
+end
+
+function actions.rmount:getFuncText(value)
+	if value == 0 then
+		return [[
+			local profileName = self.mounts.charDB.currentProfileName
+			local profile = self.mounts.profiles[profileName] or self.mounts.defProfile
+			self.mounts:setMountsList(profile)
+			profileLoad = true
+		]]
+	elseif value == 1 then
+		return [[
+			self.mounts:setMountsList(self.mounts.defProfile)
+			profileLoad = true
+		]]
+	else
+		return ([[
+			local profile = self.mounts.profiles['%s']
+			self.mounts:setMountsList(profile)
+			profileLoad = true
+		]]):format(value:gsub("[\\']", "\\%1"))
+	end
 end
 
 ---------------------------------------------------

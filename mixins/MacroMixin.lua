@@ -3,17 +3,17 @@ local util = ns.util
 local type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras = type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras
 local macroFrame = CreateFrame("FRAME")
 ns.macroFrame = macroFrame
+util.setEventsMixin(macroFrame)
 
 
 macroFrame:SetScript("OnEvent", function(self, event, ...)
 	self[event](self, ...)
 end)
-macroFrame:RegisterEvent("PLAYER_LOGIN")
 
 
-function macroFrame:PLAYER_LOGIN()
-	self.PLAYER_LOGIN = nil
+macroFrame:on("ADDON_INIT", function(self)
 	self.additionalMounts = ns.additionalMounts
+	self.calendar = ns.calendar
 	self.mounts = ns.mounts
 	self.config = self.mounts.config
 	self.ruleConfig = self.mounts.globalDB.ruleConfig
@@ -23,10 +23,6 @@ function macroFrame:PLAYER_LOGIN()
 	self.conditions = ns.conditions
 	self.actions = ns.actions
 	self.checkRules = {}
-	-- remove outdated items
-	self.charMacrosConfig.itemSlot16 = nil
-	self.charMacrosConfig.itemSlot17 = nil
-	-- ---------------------
 	self.class = select(2, UnitClass("player"))
 	self.fishingRodID = 133755
 
@@ -193,7 +189,7 @@ function macroFrame:PLAYER_LOGIN()
 
 	self:refresh()
 	self:getClassMacro(self.class, function() self:refresh() end)
-end
+end)
 
 
 function macroFrame:loadString(funcStr)
@@ -217,7 +213,10 @@ function macroFrame:setRuleFuncs()
 	for i = 1, #self.ruleConfig do
 		local rules = self.ruleConfig[i]
 		local keys = {}
-		local func = "return function(self, button)\n"
+		local func = [[
+return function(self, button, profileLoad)
+	self.mounts:resetMountsList()
+		]]
 
 		for j = 1, #rules do
 			local rule = rules[j]
@@ -237,7 +236,13 @@ function macroFrame:setRuleFuncs()
 			func = ("local %s = %s\n%s"):format(varsText, varsText, func)
 		end
 
-		func = func.."end"
+		func = func..[[
+	self.mounts:setEmptyList()
+	return self:getMacro()
+end
+		]]
+
+		-- if i == 1 then fprint(dumpe, func) end
 		self.checkRules[i] = self:loadString(func)
 	end
 end

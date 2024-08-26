@@ -118,7 +118,7 @@ function calendar:getHolidayList()
 		local numEvents = C_Calendar.GetNumDayEvents(0, day)
 		for i = 1, numEvents do
 			local e = C_Calendar.GetDayEvent(0, day, i)
-			if not (addedIDs[e.eventID] or self.holidayProfiles[e.eventID]) then
+			if not addedIDs[e.eventID] then
 				holidays[#holidays + 1] = {
 					eventID = e.eventID,
 					name = e.title,
@@ -131,88 +131,41 @@ function calendar:getHolidayList()
 
 	self:restoreBackup()
 
-	for eventID, data in pairs(self.holidayProfiles) do
-		holidays[#holidays + 1] = {
-			eventID = eventID,
-			name = self.holidayNames[eventID],
-			isActive = self.activeHolidays[eventID],
-			profile = data,
-		}
-	end
-
-	self:sortHolidays(holidays)
 	return holidays
 end
 
 
-function calendar:createEventProfile(eventID, enabled, profileName)
-	self.numHolidayProfiles = self.numHolidayProfiles + 1
-	self.holidayProfiles[eventID] = {
-		enabled = enabled,
-		profileName = profileName,
-		order = self.numHolidayProfiles,
-	}
+function calendar:getHolidayName(eventID)
+	return self.holidayNames[eventID]
 end
 
 
-function calendar:removeEventProfile(eventID)
-	local order = self.holidayProfiles[eventID].order
-	self.holidayProfiles[eventID] = nil
-	self.numHolidayProfiles = self.numHolidayProfiles - 1
-
-	for eventID, data in pairs(self.holidayProfiles) do
-		if data.order > order then
-			data.order = data.order - 1
-		end
-	end
-
-	for lang, holidayNames in pairs(mounts.globalDB.holidayNames) do
-		holidayNames[eventID] = nil
-	end
+function calendar:saveHolidayName(eventID, name)
+	self.holidayNames[eventID] = name
 end
 
 
-function calendar:setEventProfileEnabled(eventID, enabled, eventName)
-	if self.holidayProfiles[eventID] then
-		self.holidayProfiles[eventID].enabled = enabled
-		if not (enabled or self.holidayProfiles[eventID].profileName) then
-			self:removeEventProfile(eventID)
-		end
-	elseif enabled then
-		self:createEventProfile(eventID, enabled)
-		self.holidayNames[eventID] = eventName
-	end
-	self:event("CALENDAR_UPDATE_EVENT_LIST")
-end
-
-
-function calendar:setEventProfileName(eventID, name, eventName)
-	if self.holidayProfiles[eventID] then
-		self.holidayProfiles[eventID].profileName = name
-		if not (name or self.holidayProfiles[eventID].enabled) then
-			self:removeEventProfile(eventID)
-		end
-	elseif name then
-		self:createEventProfile(eventID, nil, name)
-		self.holidayNames[eventID] = eventName
-	end
-	self:event("CALENDAR_UPDATE_EVENT_LIST")
-end
-
-
-function calendar:setEventProfileOrder(eventID, step)
-	local curOrder = self.holidayProfiles[eventID].order
-	local newOrder = curOrder + step
-	if newOrder > 0 and newOrder <= self.numHolidayProfiles then
-		for _, data in pairs(self.holidayProfiles) do
-			if data.order == newOrder then
-				data.order = curOrder
-				break
+do
+	local function getRemove(self, eventID)
+		for _, summon in ipairs(self.ruleConfig) do
+			for _, rule in ipairs(summon) do
+				for _, cond in ipairs(rule) do
+					if cond[2] == "holiday" and cond[3] == eventID then return end
+				end
 			end
 		end
-		self.holidayProfiles[eventID].order = newOrder
+		return true
 	end
-	self:event("CALENDAR_UPDATE_EVENT_LIST")
+
+	function calendar:checkHolidayNames()
+		for lang, holidayNames in next, mounts.globalDB.holidayNames do
+			for eventID in next, holidayNames do
+				if getRemove(self, eventID) then
+					holidayNames[eventID] = nil
+				end
+			end
+		end
+	end
 end
 
 
@@ -260,50 +213,23 @@ function calendar:isHolidayActive(eventID)
 end
 
 
-function calendar:getHolidayProfileNames()
-	for eventID, data in pairs(self.holidayProfiles) do
-		if data.profileName and not self.profiles[data.profileName] then
-			data.profileName = nil
-			if not data.enabled then
-				self:removeEventProfile(eventID)
-			end
-		end
-	end
-
-	local profileNames = {}
-	for eventID in pairs(self.activeHolidays) do
-		local data = self.holidayProfiles[eventID]
-		if data and data.enabled then
-			profileNames[#profileNames + 1] = data
-			order = data.order
-		end
-	end
-
-	sort(profileNames, function(p1, p2) return p1.order < p2.order end)
-	return profileNames
-end
-
-
-function calendar:init()
-	self.init = nil
-
-	self.profiles = mounts.profiles
-	self.holidayProfiles = mounts.charDB.holidayProfiles
-	self.numHolidayProfiles = 0
-	for eventID in pairs(self.holidayProfiles) do
-		self.numHolidayProfiles = self.numHolidayProfiles + 1
-	end
+calendar:on("ADDON_INIT", function(self)
 	self:updateTodayEvents()
 
+	self.ruleConfig = mounts.globalDB.ruleConfig
 	self.holidayNames = mounts.globalDB.holidayNames[GetLocale()] or {}
 	mounts.globalDB.holidayNames[GetLocale()] = self.holidayNames
 	local names = self.holidayNames
-
 	local numNoName = 0
-	for eventID, profile in pairs(self.holidayProfiles) do
-		if not names[eventID] then
-			numNoName = numNoName + 1
-			names[eventID] = false
+
+	for _, summon in ipairs(self.ruleConfig) do
+		for _, rule in ipairs(summon) do
+			for _, cond in ipairs(rule) do
+				if cond[2] == "holiday" and not names[cond[3]] then
+					numNoName = numNoName + 1
+					names[cond[3]] = false
+				end
+			end
 		end
 	end
 
@@ -313,6 +239,7 @@ function calendar:init()
 
 	local date = C_DateAndTime.GetCurrentCalendarTime()
 	local year = date.year - 2
+	date.year = date.year + 1
 	C_Calendar.SetAbsMonth(date.month, date.year)
 
 	while numNoName ~= 0 and date.year > year do
@@ -339,4 +266,4 @@ function calendar:init()
 	end
 
 	self:restoreBackup()
-end
+end)

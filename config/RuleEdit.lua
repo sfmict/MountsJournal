@@ -63,11 +63,14 @@ ruleEditor:SetScript("OnShow", function(self)
 	self.menu:ddHideWhenButtonHidden(self)
 	self.menu:ddSetDisplayMode(addon)
 	self.menu:ddSetInitFunc(function(dd, level, value)
-		local info = {
-			list = value,
-			listMaxSize = 30,
-		}
-		dd:ddAddButton(info, level)
+		if value.custom then
+			for i = 1, #value do
+				dd:ddAddButton(value[i], level)
+			end
+		else
+			local info = {list = value, listMaxSize = 30}
+			dd:ddAddButton(info, level)
+		end
 	end)
 
 	-- POOLS
@@ -276,7 +279,8 @@ function ruleEditor:checkRule()
 	local check = true
 
 	for i = 1, #self.data do
-		if not self.data[i][3] then
+		local cond = self.data[i]
+		if not cond[2] or conds[cond[2]].getValueText and not cond[3] then
 			check = false
 			break
 		end
@@ -304,7 +308,7 @@ function ruleEditor:openCondValueMenu(btn, btnData)
 		self:checkRule()
 	end
 
-	local list = conds[btnData[2]]:getValueList(btnData[3], func)
+	local list = conds[btnData[2]]:getValueList(btnData[3], func, self.menu)
 	self.menu:ddToggle(1, list, btn)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 end
@@ -361,6 +365,19 @@ function ruleEditor:getActionTooltip(actionData)
 end
 
 
+function ruleEditor:openActionValueMenu(btn, actionData)
+	local function func(f)
+		actionData[2] = f.value
+		btn:SetText(f.text)
+		self:checkRule()
+	end
+
+	local list = actions[actionData[1]]:getValueList(actionData[2], func)
+	self.menu:ddToggle(1, list, btn)
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+end
+
+
 function ruleEditor:setActionValueOption()
 	local actionData = self.data.action
 	local panel = self.actionPanel
@@ -379,9 +396,11 @@ function ruleEditor:setActionValueOption()
 		return
 	end
 
-	if actionData[1] == "rmount" then return end
-
-	if actionData[1] == "mount" then
+	local action = actions[actionData[1]]
+	if action.getValueList then
+		panel.optionValue = self.btnPool:Acquire()
+		panel.optionValue:SetScript("OnClick", function(btn) self:openActionValueMenu(btn, actionData) end)
+	elseif actionData[1] == "mount" then
 		panel.optionValue = self.btnPool:Acquire()
 		panel.optionValue:SetScript("OnClick", function()
 			self.menu:ddCloseMenus()
@@ -412,7 +431,7 @@ function ruleEditor:openActionTypeMenu(btn)
 	local function func(f)
 		actionData[1] = f.value
 		actionData[2] = nil
-		btn:SetText(f.text)
+		btn.text:SetText(f.text)
 		self:setActionValueOption()
 		self:checkRule()
 	end

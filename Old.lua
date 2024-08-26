@@ -224,6 +224,15 @@ local function updateGlobal(self)
 		self.filters.multipleModels = nil
 		self.defFilters.multipleModels = nil
 	end
+
+	-- IF < 11.0.17 GLOBAL
+	if compareVersion("11.0.17", self.globalDB.lastAddonVersion) then
+		for i, summon in ipairs(self.globalDB.ruleConfig) do
+			for j, rule in ipairs(summon) do
+				if not rule.action[2] then rule.action[2] = 0 end
+			end
+		end
+	end
 end
 
 
@@ -280,9 +289,66 @@ local function updateChar(self)
 		self.charDB.macrosConfig.soarSummoningChance = nil
 	end
 
-	-- IF < 11.0.0 CHAR
-	if compareVersion("11.0.0", self.globalDB.lastAddonVersion) then
+	-- IF < 11.0.17 CHAR
+	if compareVersion("11.0.17", self.charDB.lastAddonVersion) then
+		self.charDB.macrosConfig.itemSlot16 = nil
+		self.charDB.macrosConfig.itemSlot17 = nil
 		self.charDB.macrosConfig.useIfNotDragonridable = nil
+
+		if self.charDB.profileBySpecialization then
+			if self.charDB.profileBySpecialization.enable then
+				for i = 1,  GetNumSpecializations() do
+					local profileName = self.charDB.profileBySpecialization[i] or 1
+					local specID = GetSpecializationInfo(i)
+					local rule = {
+						{false, "spec", specID},
+						action = {"rmount", profileName},
+					}
+					tinsert(self.globalDB.ruleConfig[1], 1, rule)
+				end
+			end
+			self.charDB.profileBySpecialization = nil
+		end
+
+		if self.charDB.holidayProfiles then
+			local holidays = {}
+			for eventID, data in next, self.charDB.holidayProfiles do
+				if data.enabled then
+					holidays[#holidays + 1] = {eventID, data.profileName or 1, data.order}
+				end
+			end
+			sort(holidays, function(a, b) return a[3] > b[3] end)
+			for i, data in ipairs(holidays) do
+				local rule = {
+					{false, "holiday", data[1]},
+					action = {"rmount", data[2]},
+				}
+				tinsert(self.globalDB.ruleConfig[1], 1, rule)
+			end
+			self.charDB.holidayProfiles = nil
+		end
+
+		if self.charDB.profileBySpecializationPVP then
+			if self.charDB.profileBySpecializationPVP.enable then
+				for i = 1,  GetNumSpecializations() do
+					local profileName = self.charDB.profileBySpecializationPVP[i] or 1
+					local specID = GetSpecializationInfo(i)
+					local rule1 = {
+						{false, "spec", specID},
+						{false, "zt", "arena"},
+						action = {"rmount", profileName},
+					}
+					local rule2 = {
+						{false, "spec", specID},
+						{false, "zt", "pvp"},
+						action = {"rmount", profileName},
+					}
+					tinsert(self.globalDB.ruleConfig[1], 1, rule1)
+					tinsert(self.globalDB.ruleConfig[1], 1, rule2)
+				end
+			end
+			self.charDB.profileBySpecializationPVP = nil
+		end
 	end
 end
 
@@ -292,7 +358,7 @@ function mounts:setOldChanges()
 
 	local currentVersion = C_AddOns.GetAddOnMetadata(addon, "Version")
 	--@do-not-package@
-	if currentVersion == "@project-version@" then currentVersion = "11.0.7" end
+	if currentVersion == "@project-version@" then currentVersion = "11.0.17" end
 	--@end-do-not-package@
 
 	if self.charDB.lastAddonVersion and compareVersion(currentVersion, self.charDB.lastAddonVersion) then
