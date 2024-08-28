@@ -323,6 +323,8 @@ function ruleEditor:setCondValueOption(panel, btnData)
 	end
 
 	local cond = conds[btnData[2]]
+	if not cond.getValueText then return end
+
 	if cond.getValueList then
 		panel.optionValue = self.btnPool:Acquire()
 		panel.optionValue:SetScript("OnClick", function(btn) self:openCondValueMenu(btn, btnData) end)

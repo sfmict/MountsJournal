@@ -337,6 +337,16 @@ end
 
 
 ---------------------------------------------------
+-- falling
+conds.falling = {}
+conds.falling.text = STRING_ENVIRONMENTAL_DAMAGE_FALLING
+
+function conds.falling:getFuncText()
+	return "IsFalling()", "IsFalling"
+end
+
+
+---------------------------------------------------
 -- METHODS
 function conds:getMenuList(value, func)
 	local list = {}

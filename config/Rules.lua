@@ -159,11 +159,12 @@ function rules:getCondText(conditions)
 
 	for i = 1, #conditions > 3 and 2 or #conditions do
 		local cond = conditions[i]
-		text = ("%s\n|cff%s%s: %s|r"):format(
+		local valueText = self:getCondValueText(cond)
+		text = ("%s\n|cff%s%s%s|r"):format(
 			text,
 			cond[1] and ("cc4444%s "):format(L["NOT_CONDITION"]) or "44cc44",
 			conds[cond[2]].text,
-			self:getCondValueText(cond)
+			valueText == "" and valueText or ": "..valueText
 		)
 	end
 
