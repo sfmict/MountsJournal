@@ -347,6 +347,38 @@ end
 
 
 ---------------------------------------------------
+-- fs FLIGHT STYLE
+conds.fs = {}
+conds.fs.text = L["Flight style"]
+
+function conds.fs:getValueText(value)
+	return value == 1 and DYNAMIC_FLIGHT or L["Steady"]
+end
+
+function conds.fs:getValueList(value, func)
+	local list = {}
+	for i = 1, 2 do
+		list[i] = {
+			text = self:getValueText(i),
+			value = i,
+			func = func,
+			checked = i == value,
+		}
+	end
+	return list
+end
+
+function conds.fs:getFuncText(value)
+	local spellID = C_MountJournal.GetDynamicFlightModeSpellID()
+	if value == 1 then
+		return ("C_Spell.GetSpellTexture(%d) ~= 5142726"):format(spellID), "C_Spell"
+	else
+		return ("C_Spell.GetSpellTexture(%d) == 5142726"):format(spellID), "C_Spell"
+	end
+end
+
+
+---------------------------------------------------
 -- METHODS
 function conds:getMenuList(value, func)
 	local list = {}
