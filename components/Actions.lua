@@ -91,11 +91,6 @@ function actions.mount:getValueText(spellID)
 end
 
 function actions.mount:getFuncText(spellID)
-	local vars = {"GetTime"}
-	if macroFrame.druidDismount then
-		vars[#vars + 1] = "GetSpecialization"
-	end
-
 	local macro
 	if macroFrame.additionalMounts[spellID] then
 		macro = macroFrame.additionalMounts[spellID].macro
@@ -117,8 +112,8 @@ function actions.mount:getFuncText(spellID)
 		else
 			return self:addLine(self:getDefMacro(), '%s')
 		end
-	]]):format(macroFrame.druidDismount or "", macro:gsub("[\\']", "\\%1")),
-	vars
+	]]):format(macroFrame.classDismount or "", macro:gsub("[\\']", "\\%1")),
+	{"GetTime"}
 end
 
 

@@ -372,6 +372,7 @@ L["Are you sure you want to delete tag %s?"] = "確定您想要刪除標籤%s嗎
 -- L["Undead Steeds"] = ""
 -- L["Undead Wolves"] = ""
 -- L["Undercrawlers"] = ""
+-- L["Underlights"] = ""
 -- L["Ungulates"] = ""
 -- L["Ur'zul"] = ""
 -- L["Vehicles"] = ""

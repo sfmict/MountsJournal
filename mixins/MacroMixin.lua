@@ -46,6 +46,7 @@ macroFrame:on("ADDON_INIT", function(self)
 				return spellID
 			end
 		end
+		self.GetSpecialization = GetSpecialization
 		self.specializationSpellIDs = {
 			24858, -- moonkin
 			768, -- cat
@@ -53,7 +54,7 @@ macroFrame:on("ADDON_INIT", function(self)
 		}
 
 		classOptionMacro = classOptionMacro..[[
-			local GetSpecialization, GetTime = GetSpecialization, GetTime
+			local GetTime = GetTime
 		]]
 		defMacro = defMacro..[[
 			local GetShapeshiftFormID = GetShapeshiftFormID
@@ -129,7 +130,7 @@ macroFrame:on("ADDON_INIT", function(self)
 			end
 		]]
 	elseif self.class == "DRUID" then
-		self.druidDismount = [[
+		self.classDismount = [[
 			-- DRUID LAST FORM
 			-- 768 - cat form
 			-- 783 - travel form
@@ -139,7 +140,7 @@ macroFrame:on("ADDON_INIT", function(self)
 				local spellID = self.getFormSpellID()
 
 				if self.classConfig.useDruidFormSpecialization then
-					self.charMacrosConfig.lastDruidFormSpellID = self.specializationSpellIDs[GetSpecialization()]
+					self.charMacrosConfig.lastDruidFormSpellID = self.specializationSpellIDs[self.GetSpecialization()]
 				end
 
 				if self.charMacrosConfig.lastDruidFormSpellID
@@ -162,7 +163,7 @@ macroFrame:on("ADDON_INIT", function(self)
 				end
 			end
 		]]
-		classOptionMacro = classOptionMacro..self.druidDismount
+		classOptionMacro = classOptionMacro..self.classDismount
 		defMacro = defMacro..[[
 			local curFormID = GetShapeshiftFormID()
 			-- 1:CAT, 3:STAG, 5:BEAR, 36:TREANT

@@ -372,6 +372,7 @@ L["Are you sure you want to delete tag %s?"] = "¿Está seguro de que desea elim
 -- L["Undead Steeds"] = ""
 -- L["Undead Wolves"] = ""
 -- L["Undercrawlers"] = ""
+-- L["Underlights"] = ""
 -- L["Ungulates"] = ""
 -- L["Ur'zul"] = ""
 -- L["Vehicles"] = ""

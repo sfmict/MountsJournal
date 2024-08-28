@@ -117,6 +117,7 @@ ns.familyDB = {
 		["Fish"] = 1600,
 		["Seahorses"] = 1601,
 		["Stingrays"] = 1602,
+		["Underlights"] = 1603,
 	},
 	["Gargoyle"] = 1700,
 	["Horses"] = {
