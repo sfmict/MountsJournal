@@ -352,7 +352,7 @@ conds.fs = {}
 conds.fs.text = L["Flight style"]
 
 function conds.fs:getValueText(value)
-	return value == 1 and DYNAMIC_FLIGHT or L["Steady"]
+	return value == 1 and DYNAMIC_FLIGHT or L["Steady Flight"]
 end
 
 function conds.fs:getValueList(value, func)
