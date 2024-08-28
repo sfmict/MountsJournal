@@ -209,12 +209,12 @@ function journal:init()
 			bgFrame:Hide()
 		end
 	]])
+	sMountJournal:SetFrameRef("DynamicFlightModeButton", self.bgFrame.DynamicFlightModeButton)
 	sMountJournal:SetFrameRef("frame1", self.mountCount)
 	sMountJournal:SetFrameRef("frame2", self.bgFrame.slotButton)
-	sMountJournal:SetFrameRef("frame3", self.bgFrame.DynamicFlightModeButton)
-	sMountJournal:SetFrameRef("frame4", self.bgFrame.summon1)
-	sMountJournal:SetFrameRef("frame5", self.bgFrame.summon2)
-	sMountJournal:SetFrameRef("frame6", self.summonButton)
+	sMountJournal:SetFrameRef("frame3", self.bgFrame.summon1)
+	sMountJournal:SetFrameRef("frame4", self.bgFrame.summon2)
+	sMountJournal:SetFrameRef("frame5", self.summonButton)
 	sMountJournal:SetAttribute("tabUpdate", [[
 		local tab = self:GetAttribute("tab")
 		local i = 1
@@ -230,6 +230,12 @@ function journal:init()
 				break
 			end
 			i = i + 1
+		end
+		local DynamicFlightModeButton = self:GetFrameRef("DynamicFlightModeButton")
+		if tab ~= 1 and self:GetAttribute("isDragonRidingUnlocked") then
+			DynamicFlightModeButton:Show()
+		else
+			DynamicFlightModeButton:Hide()
 		end
 		for i = 1, self:GetAttribute("numTabs") do
 			if i == tab then
@@ -329,6 +335,7 @@ function journal:init()
 		sMountJournal:SetAttribute("dynamicFlight", isDragonRidingUnlocked)
 		self.bgFrame.OpenDynamicFlightSkillTreeButton:SetShown(show)
 		self.bgFrame.DynamicFlightModeButton:SetShown(show)
+		sMountJournal:SetAttribute("isDragonRidingUnlocked", isDragonRidingUnlocked)
 	end)
 
 	-- CLOSE BUTTON
