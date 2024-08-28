@@ -192,6 +192,7 @@ ruleEditor:SetScript("OnShow", function(self)
 
 		local leftInset = ns.journal.leftInset
 		saveStatus(leftInset)
+		leftInset:SetPoint("TOPRIGHT", ns.journal.filtersPanel, "BOTTOMRIGHT", -17, -2)
 		leftInset:SetPoint("BOTTOM", 0, 6)
 		ns.journal:setShownCountMounts()
 		ns.journal.tags.selectFunc = function(spellID)
@@ -304,7 +305,7 @@ end
 function ruleEditor:openCondValueMenu(btn, btnData)
 	local function func(f)
 		btnData[3] = f.value
-		btn:SetText(f.text)
+		btn:SetText(rules:getCondValueText(btnData))
 		self:checkRule()
 	end
 
@@ -368,7 +369,7 @@ end
 function ruleEditor:openActionValueMenu(btn, actionData)
 	local function func(f)
 		actionData[2] = f.value
-		btn:SetText(f.text)
+		btn:SetText(rules:getActionValueText(actionData))
 		self:checkRule()
 	end
 

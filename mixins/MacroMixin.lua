@@ -242,7 +242,6 @@ return function(self, button, profileLoad)
 end
 		]]
 
-		-- if i == 1 then fprint(dumpe, func) end
 		self.checkRules[i] = self:loadString(func)
 	end
 end

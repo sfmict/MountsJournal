@@ -90,17 +90,7 @@ end
 
 function calendar:sortHolidays(list)
 	sort(list, function(e1, e2)
-		if not e1.profile and e2.profile then return true
-		elseif e1.profile and not e2.profile then return false
-		elseif e1.profile and e2.profile then
-			return e1.profile.order < e2.profile.order
-		end
-
-		if e1.name and e2.name then
-			if e1.name ~= e2.name then return e1.name < e2.name end
-		elseif e1.name and not e2.name then return true
-		elseif not e1.name and e2.name then return false end
-
+		if e1.name ~= e2.name then return e1.name < e2.name end
 		return e1.eventID < e2.eventID
 	end)
 end
@@ -131,6 +121,7 @@ function calendar:getHolidayList()
 
 	self:restoreBackup()
 
+	self:sortHolidays(holidays)
 	return holidays
 end
 
@@ -204,7 +195,6 @@ function calendar:updateTodayEvents()
 	self:restoreBackup()
 
 	C_Timer.After(secondsToUpdate - GetServerTime() % 60, function() self:updateTodayEvents() end)
-	self:event("CALENDAR_UPDATE_EVENT_LIST")
 end
 
 

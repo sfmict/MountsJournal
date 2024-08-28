@@ -178,11 +178,12 @@ function conds.class:getValueList(value, func)
 	local list = {}
 
 	for i = 1, GetNumClasses() do
+		local _,_, id = GetClassInfo(i)
 		list[i] = {
-			text = self:getValueText(i),
-			value = i,
+			text = self:getValueText(id),
+			value = id,
 			func = func,
-			checked = i == value,
+			checked = id == value,
 		}
 	end
 
@@ -319,7 +320,7 @@ function conds.holiday:getValueList(value, cb, dd, notReset)
 	for i = 1, #eList do
 		local e = eList[i]
 		subList[i] = {
-			text = ("%s (%d)"):format(e.isActive and ("%s |cff00cc00%s|r"):format(e.name, SPEC_ACTIVE) or e.name, e.eventID),
+			text = ("%s (%d)"):format(e.isActive and ("%s (|cff00cc00%s|r)"):format(e.name, SPEC_ACTIVE) or e.name, e.eventID),
 			arg1 = e.name,
 			value = e.eventID,
 			func = func,
