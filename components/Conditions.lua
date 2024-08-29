@@ -339,10 +339,40 @@ end
 ---------------------------------------------------
 -- falling
 conds.falling = {}
-conds.falling.text = STRING_ENVIRONMENTAL_DAMAGE_FALLING
+conds.falling.text = L["The player is falling"]
 
 function conds.falling:getFuncText()
 	return "IsFalling()", "IsFalling"
+end
+
+
+---------------------------------------------------
+-- moving
+conds.moving = {}
+conds.moving.text = L["The player is moving"]
+
+function conds.moving:getFuncText()
+	return "self:isMovingOrFalling()"
+end
+
+
+---------------------------------------------------
+-- swimming
+conds.swimming = {}
+conds.swimming.text = L["The player is swimming"]
+
+function conds.swimming:getFuncText()
+	return "self.sFlags.swimming"
+end
+
+
+---------------------------------------------------
+-- flyable
+conds.flyable = {}
+conds.flyable.text = L["Flyable area"]
+
+function conds.flyable:getFuncText()
+	return "self.sFlags.fly"
 end
 
 

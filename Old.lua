@@ -225,11 +225,11 @@ local function updateGlobal(self)
 		self.defFilters.multipleModels = nil
 	end
 
-	-- IF < 11.0.18 GLOBAL
-	if compareVersion("11.0.18", self.globalDB.lastAddonVersion) then
+	-- IF < 11.0.19 GLOBAL
+	if compareVersion("11.0.19", self.globalDB.lastAddonVersion) then
 		for i, summon in ipairs(self.globalDB.ruleConfig) do
 			for j, rule in ipairs(summon) do
-				if not rule.action[2] then rule.action[2] = 0 end
+				if rule.action[1] == "rmount" and not rule.action[2] then rule.action[2] = 0 end
 			end
 		end
 	end
@@ -358,7 +358,7 @@ function mounts:setOldChanges()
 
 	local currentVersion = C_AddOns.GetAddOnMetadata(addon, "Version")
 	--@do-not-package@
-	if currentVersion == "@project-version@" then currentVersion = "11.0.18" end
+	if currentVersion == "@project-version@" then currentVersion = "11.0.19" end
 	--@end-do-not-package@
 
 	if self.charDB.lastAddonVersion and compareVersion(currentVersion, self.charDB.lastAddonVersion) then

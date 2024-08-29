@@ -477,6 +477,11 @@ do
 end
 
 
+function macroFrame:isMovingOrFalling()
+	return GetUnitSpeed("player") > 0 or IsFalling()
+end
+
+
 function macroFrame:getMacro(id, button)
 	-- UNDERLIGHT ANGLER
 	if self.config.useUnderlightAngler and C_Item.GetItemCount(self.fishingRodID) > 0 then
@@ -511,7 +516,7 @@ function macroFrame:getMacro(id, button)
 	-- CLASSMACRO
 	elseif self.macro and
 		(self.class == "DRUID" and self.classConfig.useMacroAlways
-		or not self.magicBroom and (self.sFlags.isIndoors or GetUnitSpeed("player") > 0 or IsFalling()))
+		or not self.magicBroom and (self.sFlags.isIndoors or self:isMovingOrFalling()))
 	then
 		macro = self.macro
 	-- MOUNT
