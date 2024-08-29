@@ -54,9 +54,7 @@ end
 function actions.rmount:getFuncText(value)
 	if value == 0 then
 		return [[
-			local profileName = self.mounts.charDB.currentProfileName
-			local profile = self.mounts.profiles[profileName] or self.mounts.defProfile
-			self.mounts:setMountsList(profile)
+			self.mounts:setMountsList(self.mounts.sp)
 			profileLoad = true
 		]]
 	elseif value == 1 then

@@ -94,9 +94,6 @@ function mounts:ADDON_LOADED(addonName)
 		MountsJournalChar = MountsJournalChar or {}
 		self.charDB = MountsJournalChar
 		self.charDB.macrosConfig = self.charDB.macrosConfig or {}
-		if self.charDB.currentProfileName and not self.profiles[self.charDB.currentProfileName] then
-			self.charDB.currentProfileName = nil
-		end
 
 		-- Списки
 		self.swimmingVashjir = {
@@ -156,6 +153,7 @@ function mounts:PLAYER_LOGIN()
 	self:setOldChanges()
 
 	-- INIT
+	self:setSelectedProfile()
 	self:setUsableRepairMounts()
 	self:setModifier(self.config.modifier)
 	self:setHandleWaterJump(self.config.waterJump)
@@ -176,16 +174,13 @@ function mounts:PLAYER_LOGIN()
 	self:RegisterEvent("SKILL_LINES_CHANGED")
 	self:RegisterEvent("NEW_MOUNT_ADDED")
 
-	-- SPEC CHANGED
-	-- self:RegisterUnitEvent("PLAYER_SPECIALIZATION_CHANGED", "player")
-
 	-- PET USABLE
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
 
-	-- CALENDAR
-	-- self:on("CALENDAR_UPDATE_EVENT_LIST", self.setDB)
+	-- PRFILE CHANGED
+	self:on("UPDATE_PROFILE", self.setSelectedProfile)
 end
 
 
@@ -466,6 +461,14 @@ function mounts:setEmptyList()
 end
 
 
+function mounts:setSelectedProfile()
+	if self.charDB.currentProfileName and not self.profiles[self.charDB.currentProfileName] then
+		self.charDB.currentProfileName = nil
+	end
+	self.sp = self.profiles[self.charDB.currentProfileName] or self.defProfile
+end
+
+
 function mounts:setHandleWaterJump(enable)
 	if type(enable) == "boolean" then
 		self.config.waterJump = enable
@@ -703,26 +706,26 @@ function mounts:setSummonMount(withAdditional)
 	self.fromPriority = true
 	local flags = self.sFlags
 	if not flags.groundSpellKnown then
-		if not (flags.swimming and self:setUsableID(self.list.swimming, self.list.swimmingWeight) or self:setUsableID(self.lowLevel, self.db.mountsWeight)) then
+		if not (flags.swimming and self:setUsableID(self.list.swimming, self.list.swimmingWeight) or self:setUsableID(self.lowLevel, self.sp.mountsWeight)) then
 			self:errorSummon()
 		end
 	-- repair mounts
-	elseif not (flags.useRepair and self:setUsableID(self.usableRepairMounts, self.db.mountsWeight))
+	elseif not (flags.useRepair and self:setUsableID(self.usableRepairMounts, self.sp.mountsWeight))
 	-- target's mount
 	and not (flags.targetMount and self:summon(flags.targetMount))
 	-- swimming
 	and not (flags.swimming and (
-		flags.isVashjir and self:setUsableID(self.swimmingVashjir, self.db.mountsWeight)
+		flags.isVashjir and self:setUsableID(self.swimmingVashjir, self.sp.mountsWeight)
 		or self:setUsableID(self.list.swimming, self.list.swimmingWeight)
 	))
 	-- herbMount
-	and not (flags.herb and self:setUsableID(self.herbalismMounts, self.db.mountsWeight))
+	and not (flags.herb and self:setUsableID(self.herbalismMounts, self.sp.mountsWeight))
 	-- fly
 	and not (flags.fly and self:setUsableID(self.list.fly, self.list.flyWeight))
 	-- ground
 	and not self:setUsableID(self.list.ground, self.list.groundWeight)
 	and not self:setUsableID(self.list.fly, self.list.flyWeight)
-	and not self:setUsableID(self.lowLevel, self.db.mountsWeight) then
+	and not self:setUsableID(self.lowLevel, self.sp.mountsWeight) then
 		self:errorSummon()
 	end
 end
