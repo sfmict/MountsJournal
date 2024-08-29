@@ -92,3 +92,52 @@ else
 	runningWild.creatureID = UnitSex("player") == 2 and 34344 or 37389
 	runningWild.isShown = false
 end
+
+
+-- TRAVEL FORM
+local travelForm = createMountFromSpell(783, 442, 2, 4)
+
+travelForm.isShown = raceID == 4
+                  or raceID == 6
+                  or raceID == 8
+                  or raceID == 22
+                  or raceID == 28
+                  or raceID == 31
+                  or raceID == 32
+
+if raceID == 6 then -- Tauren
+	travelForm.creatureID = 21244
+elseif raceID == 8 then -- Troll
+	travelForm.creatureID = 37730
+elseif raceID == 22 then -- Worgen
+	travelForm.creatureID = 37729
+elseif raceID == 28 then -- Highmountain Tauren
+	travelForm.creatureID = 81439
+elseif raceID == 31 then -- Zandalari Troll
+	travelForm.creatureID = 91215
+elseif raceID == 32 then -- Kul Tiran
+	travelForm.creatureID = 88351
+else -- Night Elf
+	travelForm.creatureID = 21243
+end
+
+travelForm.allCreature = {
+	21243, -- Night Elf
+	21244, -- Tauren
+	37729, -- Worgen
+	37730, -- Troll
+	81439, -- Highmountain Tauren
+	88351, -- Kul Tiran
+	91215, -- Zandalari Troll
+	74305, -- Lunarwing Night Elf
+	74304, -- Lunarwing Tauren, Highmountain Tauren
+	74307, -- Lunarwing Worgen, Kul Tiran
+	74306, -- Lunarwing Troll, Zandalari Troll
+}
+
+function travelForm:canUse()
+	return IsSpellKnown(self.spellID)
+	   and C_Spell.IsSpellUsable(self.spellID)
+	   and C_Spell.GetSpellCooldown(self.spellID).startTime == 0
+	   and C_Spell.GetSpellCooldown(61304).startTime == 0
+end

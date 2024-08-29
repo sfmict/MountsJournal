@@ -91,6 +91,7 @@ function journal:init()
 
 	-- ADDITIONAL MOUNTS
 	for spellID, mount in next, ns.additionalMounts do
+		if mount.allCreature then self.mountsWithMultipleModels[mount] = true end
 		self.mountIDs[#self.mountIDs + 1] = mount
 	end
 
@@ -921,13 +922,13 @@ function journal:init()
 
 	self.multipleMountBtn:ddSetInitFunc(function(btn, level)
 		local info = {}
-		local allCreatureDisplays = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
+		local allCreatureDisplays = self:getMountAllCreatureDisplayInfo(self.selectedMountID)
 		local func = function(_, creatureID)
 			self:updateMountDisplay(true, creatureID)
 		end
 
 		for i = 1, #allCreatureDisplays do
-			local creatureID = allCreatureDisplays[i].creatureDisplayID
+			local creatureID = allCreatureDisplays[i]
 			info.text = MODEL.." "..i
 			info.arg1 = creatureID
 			info.func = func
@@ -940,16 +941,13 @@ function journal:init()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		if mouseBtn == "LeftButton" then
 			btn:ddCloseMenus()
-			local allCreatureDisplays, index = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
+			local allCreatureDisplays = self:getMountAllCreatureDisplayInfo(self.selectedMountID)
 			for i = 1, #allCreatureDisplays do
-				if self.mountDisplay.lastCreatureID == allCreatureDisplays[i].creatureDisplayID then
-					index = i
+				if self.mountDisplay.lastCreatureID == allCreatureDisplays[i] then
+					local index = Wrap(i + 1, #allCreatureDisplays)
+					self:updateMountDisplay(true, allCreatureDisplays[index])
 					break
 				end
-			end
-			if index then
-				index = Wrap(index + 1, #allCreatureDisplays)
-				self:updateMountDisplay(true, allCreatureDisplays[index].creatureDisplayID)
 			end
 		else
 			btn:ddToggle(1, nil, btn, 30, 30)
@@ -1420,6 +1418,20 @@ function journal:getMountInfoExtra(mount)
 		return mountDB[1], mountDB[2], mountDB[3], C_MountJournal.GetMountInfoExtraByID(mount)
 	else
 		return mount.expansion, 0, nil, mount.creatureID, mount.description, mount.sourceText, true, mount.mountType, mount.modelSceneID
+	end
+end
+
+
+function journal:getMountAllCreatureDisplayInfo(mount)
+	if type(mount) == "number" then
+		local allCreatureDisplays = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
+		local list = {}
+		for i = 1, #allCreatureDisplays do
+			list[i] = allCreatureDisplays[i].creatureDisplayID
+		end
+		return list
+	else
+		return mount.allCreature
 	end
 end
 
