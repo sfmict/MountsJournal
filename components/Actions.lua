@@ -163,7 +163,7 @@ function actions.iitem:getDescription()
 	local description = ""
 	for i = 1, #list do
 		local slot = list[i]
-		description = description..("%s = %s"):format(list[i], i)
+		description = ("%s%s = %s\n"):format(description, list[i], i)
 	end
 	return description
 end

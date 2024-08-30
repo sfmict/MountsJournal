@@ -295,33 +295,31 @@ end
 function util.checkAura(unit, spellID, filter)
 	local GetAuraSlots, GetAuraDataBySlot, count, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
 	repeat
-		ctok, a,b,c,d,e =  GetAuraSlots(unit, filter, 5, ctok)
+		ctok, a,b,c,d,e = GetAuraSlots(unit, filter, 5, ctok)
 		while a do
-			local data = GetAuraDataBySlot(unit, a)
-			if data.spellId == spellID then return true end
-			a,b,c,d = b,c,d,e
+			if GetAuraDataBySlot(unit, a).spellId == spellID then return true end
+			a,b,c,d,e = b,c,d,e
 		end
 	until not ctok
 	return false
 end
 
 
-do
-	local spellID, mountID
-	local function checkMount(auraData)
-		mountID = C_MountJournal.GetMountFromSpell(auraData.spellId)
-		if mountID or ns.additionalMounts[auraData.spellId] then
-			spellID = auraData.spellId
-			return true
+function util.getUnitMount(unit)
+	local GetAuraSlots, GetAuraDataBySlot, count, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
+	local filter = unit == "player" and "HELPFUL PLAYER" or "HELPFUL"
+	repeat
+		ctok, a,b,c,d,e = GetAuraSlots(unit, filter, 5, ctok)
+		while a do
+			local data = GetAuraDataBySlot(unit, a)
+			local mountID = C_MountJournal.GetMountFromSpell(data.spellId)
+			if mountID or ns.additionalMounts[data.spellId] then
+				spellID = data.spellId
+				return spellID, mountID
+			end
+			a,b,c,d,e = b,c,d,e
 		end
-	end
-
-	function util.getUnitMount(unit)
-		spellID = nil
-		mountID = nil
-		AuraUtil.ForEachAura(unit, "HELPFUL", nil, checkMount, true)
-		return spellID, mountID
-	end
+	until not ctok
 end
 
 
