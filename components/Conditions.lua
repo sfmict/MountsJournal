@@ -357,6 +357,16 @@ end
 
 
 ---------------------------------------------------
+-- indoors
+conds.indoors = {}
+conds.indoors.text = L["The player is indoors"]
+
+function conds.indoors:getFuncText()
+	return "self.sFlags.isIndoors"
+end
+
+
+---------------------------------------------------
 -- swimming
 conds.swimming = {}
 conds.swimming.text = L["The player is swimming"]
@@ -364,6 +374,27 @@ conds.swimming.text = L["The player is swimming"]
 function conds.swimming:getFuncText()
 	return "self.sFlags.swimming"
 end
+
+
+---------------------------------------------------
+-- mounted
+conds.mounted = {}
+conds.mounted.text = L["The player is mounted"]
+
+function conds.mounted:getFuncText()
+	return "self.sFlags.isMounted"
+end
+
+
+---------------------------------------------------
+-- vehicle
+conds.vehicle = {}
+conds.vehicle.text = L["The player is within an vehicle"]
+
+function conds.vehicle:getFuncText()
+	return "self.sFlags.inVehicle"
+end
+
 
 
 ---------------------------------------------------
@@ -405,6 +436,101 @@ function conds.fs:getFuncText(value)
 	else
 		return ("C_Spell.GetSpellTexture(%d) == 5142726"):format(spellID), "C_Spell"
 	end
+end
+
+
+---------------------------------------------------
+-- hitem HAVE ITEM
+conds.hitem = {}
+conds.hitem.text = L["Have item"]
+conds.hitem.isNumeric = true
+
+function conds.hitem:getDescription()
+	return "ItemID"
+end
+
+function conds.hitem:getValueText(value)
+	return tostring(value or "")
+end
+
+function conds.hitem:getFuncText(value)
+	return ("C_Item.GetItemCount(%d) > 0"):format(value), "C_Item"
+end
+
+
+---------------------------------------------------
+-- ritem READY ITEM
+conds.ritem = {}
+conds.ritem.text = L["Item is ready"]
+conds.ritem.isNumeric = true
+
+function conds.ritem:getDescription()
+	return "ItemID"
+end
+
+function conds.ritem:getValueText(value)
+	return tostring(value or "")
+end
+
+function conds.ritem:getFuncText(value)
+	return ("C_Container.GetItemCooldown(%d) == 0"):format(value)
+end
+
+
+---------------------------------------------------
+-- rspell READY SPELL
+conds.rspell = {}
+conds.rspell.text = L["Spell is ready"]
+conds.rspell.isNumeric = true
+
+function conds.rspell:getDescription()
+	return "SpellID (61304 for GCD)"
+end
+
+function conds.rspell:getValueText(value)
+	return tostring(value or "")
+end
+
+function conds.rspell:getFuncText(value)
+	return ("self:isSpellReady(%d)"):format(value)
+end
+
+
+---------------------------------------------------
+-- hbuff HAS BUFF
+conds.hbuff = {}
+conds.hbuff.text = L["The player has a buff"]
+conds.hbuff.isNumeric = true
+
+function conds.hbuff:getDescription()
+	return "SpellID"
+end
+
+function conds.hbuff:getValueText(value)
+	return tostring(value or "")
+end
+
+function conds.hbuff:getFuncText(value)
+	return ("self:hasPlayerBuff(%d)"):format(value)
+end
+
+
+---------------------------------------------------
+-- hdebuff HAS BUFF
+conds.hdebuff = {}
+conds.hdebuff.text = L["The player has a debuff"]
+conds.hdebuff.isNumeric = true
+
+function conds.hdebuff:getDescription()
+	return "SpellID"
+end
+
+function conds.hdebuff:getValueText(value)
+	return tostring(value or "")
+end
+
+function conds.hdebuff:getFuncText(value)
+	return ("self:hasPlayerDebuff(%d)"):format(value)
 end
 
 

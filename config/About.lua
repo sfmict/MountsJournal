@@ -59,12 +59,12 @@ aboutConfig:SetScript("OnShow", function(self)
 	translators:SetText(L["Localization Translators:"])
 
 	local langs, last = {
-		{"deDE", "SlayerEGT, Asraael, Flammenengel92, scienetic, fredundaunted"},
+		{"deDE", "SlayerEGT, EinPallux , Flammenengel92, scienetic, fredundaunted"},
 		{"esMX", "Pedrorco"},
-		{"frFR", "6urvan, Asraael, okaboo, Braincell1980, macumbafeh"},
+		{"frFR", "6urvan, EinPallux, macumbafeh, Zazou, Braincell1980"},
 		{"ptBR", "LutzPS"},
-		{"zhCN", "萌丶汉丶纸, kuaishan"},
-		{"zhTW", "BNS333"},
+		{"zhCN", "萌丶汉丶纸, LvWind"},
+		{"zhTW", "BNS333, Bright009"},
 	}
 
 	for _, l in ipairs(langs) do

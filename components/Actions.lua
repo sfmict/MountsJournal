@@ -124,12 +124,12 @@ function actions.item:getDescription()
 	return "ItemID"
 end
 
-function actions.item:getValueText(spellID)
-	return tostring(spellID or "")
+function actions.item:getValueText(itemID)
+	return tostring(itemID or "")
 end
 
 function actions.item:getFuncText(itemID)
-	return ("return '/use item:%d'\n"):format(itemID)
+	return ("return '/use item:%d'"):format(itemID)
 end
 
 
@@ -163,7 +163,7 @@ function actions.iitem:getDescription()
 	local description = ""
 	for i = 1, #list do
 		local slot = list[i]
-		description = description..("%s = %s\n"):format(list[i], i)
+		description = description..("%s = %s"):format(list[i], i)
 	end
 	return description
 end
@@ -173,7 +173,7 @@ function actions.iitem:getValueText(spellID)
 end
 
 function actions.iitem:getFuncText(slot)
-	return ("return '/use %d'\n"):format(slot)
+	return ("return '/use %d'"):format(slot)
 end
 
 
@@ -210,7 +210,7 @@ function actions.macro:getValueText(macroText)
 end
 
 function actions.macro:getFuncText(macroText)
-	return ("return '%s'\n"):format(macroText:gsub("['\n\\]", "\\%1"))
+	return ("return '%s'"):format(macroText:gsub("['\n\\]", "\\%1"))
 end
 
 

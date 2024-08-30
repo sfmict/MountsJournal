@@ -225,7 +225,7 @@ return function(self, button, profileLoad)
 			local actionText, actionVars = self.actions:getFuncText(rule.action)
 			addKeys(condVars, keys)
 			addKeys(actionVars, keys)
-			func = ("%sif %sthen\n%send\n"):format(func, condText, actionText)
+			func = ("%sif %sthen\n%s\nend\n"):format(func, condText, actionText)
 		end
 
 		if next(keys) then
@@ -477,9 +477,28 @@ do
 end
 
 
+----------------------------------------
+-- CONDITION / ATION UTILS
 function macroFrame:isMovingOrFalling()
 	return GetUnitSpeed("player") > 0 or IsFalling()
 end
+
+
+function macroFrame:isSpellReady(spellID)
+	local cdInfo = C_Spell.GetSpellCooldown(spellID)
+	return cdInfo and cdInfo.startTime == 0
+end
+
+
+function macroFrame:hasPlayerBuff(spellID)
+	return util.checkAura("player", spellID, "HELPFUL")
+end
+
+
+function macroFrame:hasPlayerDebuff(spellID)
+	return util.checkAura("player", spellID, "HARMFUL")
+end
+----------------------------------------
 
 
 function macroFrame:getMacro(id, button)

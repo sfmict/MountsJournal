@@ -333,7 +333,11 @@ function ruleEditor:setCondValueOption(panel, btnData)
 		panel.optionValue:SetNumeric(cond.isNumeric)
 		panel.optionValue:SetScript("OnTextChanged", function(editBox)
 			local text = editBox:GetText()
-			btnData[3] = #text > 0 and text or nil
+			if cond.isNumeric then
+				btnData[3] = tonumber(text)
+			else
+				btnData[3] = #text > 0 and text or nil
+			end
 			self:checkRule()
 		end)
 	end

@@ -1,6 +1,6 @@
 local addon, ns = ...
 local type, select, tremove = type, select, tremove
-local C_MountJournal, AuraUtil = C_MountJournal, AuraUtil
+local C_MountJournal, C_UnitAuras, AuraUtil = C_MountJournal, C_UnitAuras, AuraUtil
 local events, eventsMixin = {}, {}
 
 
@@ -289,6 +289,20 @@ end
 
 function util.cleanText(text)
 	return text:trim():lower()
+end
+
+
+function util.checkAura(unit, spellID, filter)
+	local GetAuraSlots, GetAuraDataBySlot, count, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
+	repeat
+		ctok, a,b,c,d,e =  GetAuraSlots(unit, filter, 5, ctok)
+		while a do
+			local data = GetAuraDataBySlot(unit, a)
+			if data.spellId == spellID then return true end
+			a,b,c,d = b,c,d,e
+		end
+	until not ctok
+	return false
 end
 
 
