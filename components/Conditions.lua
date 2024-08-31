@@ -535,6 +535,100 @@ end
 
 
 ---------------------------------------------------
+-- faction
+conds.faction = {}
+conds.faction.text = FACTION
+
+function conds.faction:getValueText(value)
+	return FACTION_LABELS[value]
+end
+
+function conds.faction:getValueList(value, func)
+	local list = {}
+	for i = 0, #PLAYER_FACTION_GROUP do
+		list[#list + 1] = {
+			text = self:getValueText(i),
+			value = i,
+			func = func,
+			checked = i == value
+		}
+	end
+	return list
+end
+
+
+function conds.faction:getFuncText(value)
+	local faction = PLAYER_FACTION_GROUP[value]
+	return ("UnitFactionGroup('player') == '%s'"):format(faction:gsub("['\\]", "\\%1")), "UnitFactionGroup"
+end
+
+
+---------------------------------------------------
+-- race
+conds.race = {}
+conds.race.text = RACE
+
+local RACE_KEYS = {
+	1, -- Human
+	2, -- Orc
+	3, -- Dwarf
+	4, -- NightElf
+	5, -- Scourge
+	6, -- Tauren
+	7, -- Gnome
+	8, -- Troll
+	9, -- Goblin
+	10, -- BloodElf
+	11, -- Draenei
+	22, -- Worgen
+	24, -- Pandaren
+	27, -- Nightborne
+	28, -- HighmountainTauren
+	29, -- VoidElf
+	30, -- LightforgedDraenei
+	31, -- ZandalariTroll
+	32, -- KulTiran
+	34, -- DarkIronDwarf
+	35, -- Vulpera
+	36, -- MagharOrc
+	37, -- Mechagnome
+	52, -- Dracthyr
+	84, -- EarthenDwarf
+}
+local RACE_LABELS = {}
+
+for i = 1, #RACE_KEYS do
+	local info = C_CreatureInfo.GetRaceInfo(RACE_KEYS[i])
+	RACE_KEYS[i] = info.clientFileString
+	RACE_LABELS[info.clientFileString] = info.raceName
+end
+sort(RACE_KEYS, function(a,b) return RACE_LABELS[a] < RACE_LABELS[b] end)
+
+function conds.race:getValueText(value)
+	return RACE_LABELS[value]
+end
+
+function conds.race:getValueList(value, func)
+	local list = {}
+	for i = 1, #RACE_KEYS do
+		local v = RACE_KEYS[i]
+		list[#list + 1] = {
+			text = self:getValueText(v),
+			value = v,
+			func = func,
+			checked = v == value,
+		}
+	end
+	return list
+end
+
+function conds.race:getFuncText(value)
+	local _, key = UnitRace("player")
+	return key == value and "true" or "false"
+end
+
+
+---------------------------------------------------
 -- METHODS
 function conds:getMenuList(value, func)
 	local list = {}

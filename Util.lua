@@ -314,8 +314,7 @@ function util.getUnitMount(unit)
 			local data = GetAuraDataBySlot(unit, a)
 			local mountID = C_MountJournal.GetMountFromSpell(data.spellId)
 			if mountID or ns.additionalMounts[data.spellId] then
-				spellID = data.spellId
-				return spellID, mountID
+				return data.spellId, mountID
 			end
 			a,b,c,d,e = b,c,d,e
 		end
