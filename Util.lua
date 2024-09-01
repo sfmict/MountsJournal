@@ -60,18 +60,29 @@ function eventsMixin:event(event, ...)
 end
 
 
-local scale = WorldFrame:GetWidth() / GetPhysicalScreenSize() / UIParent:GetScale()
 local menuBackdrop = {
 	bgFile = "Interface/ChatFrame/ChatFrameBackground",
 	edgeFile = "Interface/ChatFrame/ChatFrameBackground",
-	tile = true, edgeSize = 1 * scale, tileSize = 5 * scale,
+	tile = true, edgeSize = 2, tileSize = 5,
 }
 local lsfdd = LibStub("LibSFDropDown-1.5")
+
+local menuOnUpdate = function(self, elapsed)
+	local r,g,b,a = self:GetBackdropBorderColor()
+	if r > .4 then self.delta = -.3
+	elseif r < .1 then self.delta = .3 end
+	elapsed = elapsed * self.delta
+	r = r + elapsed
+	self:SetBackdropBorderColor(r, r, r, a)
+end
+
 lsfdd:CreateMenuStyle(addon, function(parent)
 	local f = CreateFrame("FRAME", nil, parent, "BackdropTemplate")
 	f:SetBackdrop(menuBackdrop)
 	f:SetBackdropColor(.06, .06, .1, .9)
-	f:SetBackdropBorderColor(.5, .5, .5, .8)
+	f:SetBackdropBorderColor(.3, .3, .3, .8)
+	f:SetScript("OnUpdate", menuOnUpdate)
+	f.delta = .3
 	return f
 end)
 
@@ -120,7 +131,7 @@ util.mountTypes = setmetatable({
 
 util.filterButtonBackdrop = {
 	edgeFile = "Interface/AddOns/MountsJournal/textures/border",
-	edgeSize = 8 * scale,
+	edgeSize = 8,
 }
 
 
@@ -129,8 +140,8 @@ util.optionsPanelBackdrop = {
 	edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
 	tile = true,
 	tileEdge = true,
-	tileSize = 14 * scale,
-	edgeSize = 14 * scale,
+	tileSize = 14,
+	edgeSize = 14,
 	insets = {left = 4, right = 4, top = 4, bottom = 4}
 }
 
@@ -138,7 +149,7 @@ util.optionsPanelBackdrop = {
 util.editBoxBackdrop = {
 	bgFile = "Interface/ChatFrame/ChatFrameBackground",
 	edgeFile = "Interface/ChatFrame/ChatFrameBackground",
-	tile = true, edgeSize = 1 * scale, tileSize = 5 * scale,
+	tile = true, edgeSize = 1, tileSize = 5,
 }
 
 
