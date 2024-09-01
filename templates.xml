@@ -2386,6 +2386,51 @@
 		</Scripts>
 	</Button>
 
+	<Button name="MJSecureBarButtonTemplate" inherits="MJSecureActionButtonUpTemplate" virtual="true">
+		<Size x="45" y="45"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="icon"/>
+				<MaskTexture parentKey="IconMask" atlas="UI-HUD-ActionBar-IconFrame-Mask" hWrapMode="CLAMPTOBLACKADDITIVE" vWrapMode="CLAMPTOBLACKADDITIVE">
+					<Anchors>
+						<Anchor point="CENTER" relativeKey="$parent.icon"/>
+					</Anchors>
+					<MaskedTextures>
+						<MaskedTexture childKey="icon"/>
+					</MaskedTextures>
+				</MaskTexture>
+			</Layer>
+		</Layers>
+		<NormalTexture name="$parentNormalTexture" parentKey="NormalTexture" atlas="UI-HUD-ActionBar-IconFrame">
+			<Size x="46" y="45"/>
+			<Anchors>
+				<Anchor point="TOPLEFT"/>
+			</Anchors>
+		</NormalTexture>
+		<PushedTexture atlas="UI-HUD-ActionBar-IconFrame-Down" parentKey="PushedTexture">
+			<Size x="46" y="45"/>
+			<Anchors>
+				<Anchor point="TOPLEFT"/>
+			</Anchors>
+		</PushedTexture>
+		<HighlightTexture atlas="UI-HUD-ActionBar-IconFrame-Mouseover" parentKey="HighlightTexture">
+			<Size x="46" y="45"/>
+			<Anchors>
+				<Anchor point="TOPLEFT"/>
+			</Anchors>
+		</HighlightTexture>
+		<Scripts>
+			<OnLoad>
+				self:SetAttribute("type", "click")
+				self:RegisterForClicks("AnyUp")
+				self:RegisterForDrag("LeftButton")
+			</OnLoad>
+			<OnLeave>
+				GameTooltip:Hide()
+			</OnLeave>
+		</Scripts>
+	</Button>
+
 	<Frame name="MJModelPanningFrame" parent="UIParent" enableMouse="true" hidden="true" frameStrata="DIALOG" clampedToScreen="true">
 		<Size x="32" y="32"/>
 		<Layers>

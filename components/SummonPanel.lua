@@ -1,11 +1,10 @@
 local addon, ns = ...
 local L, mounts, util, journal = ns.L, ns.mounts, ns.util, ns.journal
-local PANEL_WIDTH = 101
-local PANEL_HEIGHT = 65
+local BTN_SIZE = 45
 
 
 -- PANEL
-local panel = CreateFrame("FRAME", nil, UIParent, "TooltipBackdropTemplate")
+local panel = CreateFrame("FRAME", nil, UIParent)
 journal.summonPanel = panel
 panel:SetFrameLevel(1000)
 panel:SetMovable(true)
@@ -18,74 +17,42 @@ panel:SetScript("OnEvent", function(self)
 	end
 end)
 
-local drag = CreateFrame("FRAME", nil, panel)
-panel.drag = drag
-drag:SetFrameLevel(1000)
-drag:EnableMouse(true)
-drag:RegisterForDrag("LeftButton")
-drag:SetScript("OnDragStart", function(self)
-	local panel = self:GetParent()
-	if panel.config.isLocked then return end
-	panel.NineSlice:Hide()
-	panel.resize:Hide()
-	panel:StartMoving()
-	panel.isDrag = true
+panel:SetClampedToScreen(true)
+panel:EnableMouse(true)
+panel:RegisterForDrag("LeftButton")
+panel:SetScript("OnDragStart", function(self)
+	if self:isLocked() then return end
+	self.isDrag = true
+	GameTooltip:Hide()
+	self:StartMoving()
 end)
-drag:SetScript("OnDragStop", function(self)
-	local panel = self:GetParent()
-	if panel.isDrag then
-		panel.isDrag = nil
-		panel.NineSlice:Show()
-		panel.resize:Show()
-		panel:StopMovingOrSizing()
-		panel:savePosition()
+panel:SetScript("OnDragStop", function(self)
+	if self.isDrag then
+		self.isDrag = nil
+		self:StopMovingOrSizing()
+		self:savePosition()
 	end
 end)
 
-
--- RESIZE
-local resize = CreateFrame("BUTTON", nil, panel)
-panel.resize = resize
-resize:SetNormalTexture("Interface/ChatFrame/UI-ChatIM-SizeGrabber-Up")
-resize:SetHighlightTexture("Interface/ChatFrame/UI-ChatIM-SizeGrabber-Highlight")
-resize:SetPushedTexture("Interface/ChatFrame/UI-ChatIM-SizeGrabber-Down")
-resize:SetSize(16, 16)
-resize:SetPoint("BOTTOMRIGHT")
-resize:RegisterForDrag("LeftButton")
-
-resize:SetScript("OnMouseDown", function(self)
-	local x, y = GetCursorPosition()
-	local scale = self:GetEffectiveScale()
-	self.x = x / scale
-	self.y = y / scale
-	self.width, self.height = self:GetParent():GetSize()
-end)
-
-local function resizeOnUpdate(self)
-	local x, y = GetCursorPosition()
-	local scale = self:GetEffectiveScale()
-	local width = self.width + x / scale - self.x
-	local height = self.height + self.y - y / scale
-	local k = math.max(width / PANEL_WIDTH, height / PANEL_HEIGHT)
-	if k < .5 then k = .5
-	elseif k > 3 then k = 3 end
-	self:GetParent():setSize(k)
+local function fade(self, elapsed)
+	self.timer = self.timer - elapsed
+	if self.timer <= 0 then
+		self:SetScript("OnUpdate", nil)
+		self:SetAlpha(self.config.fade)
+	else
+		self:SetAlpha(self.config.fade - self.deltaAlpha * self.timer)
+	end
 end
-
-resize:SetScript("OnDragStart", function(self)
-	self:SetScript("OnUpdate", resizeOnUpdate)
-end)
-
-resize:SetScript("OnDragStop", function(self)
+panel:SetScript("OnEnter", function(self)
+	self:SetAlpha(1)
 	self:SetScript("OnUpdate", nil)
 end)
-
-resize:SetScript("OnEnter", function()
-	if SetCursor then SetCursor("UI_RESIZE_CURSOR") end
-end)
-
-resize:SetScript("OnLeave", function()
-	if SetCursor then SetCursor(nil) end
+panel:SetScript("OnLeave", function(self)
+	if self.config.fade < 1 then
+		self.timer = 1
+		self.deltaAlpha = (self.config.fade - 1) * self.timer
+		self:SetScript("OnUpdate", fade)
+	end
 end)
 
 
@@ -110,8 +77,9 @@ end
 
 function panel:savePosition()
 	local scale = self:GetEffectiveScale()
-	self.config.x = self:GetLeft() * scale
-	self.config.y = self:GetTop() * scale
+	local x, y = self:GetCenter()
+	self.config.x = x * scale
+	self.config.y = y * scale
 	self:setPosition()
 end
 
@@ -120,7 +88,7 @@ function panel:setPosition()
 	if InCombatLockdown() or not self:IsShown() then return end
 	self:ClearAllPoints()
 	local scale = self:GetEffectiveScale()
-	self:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", self.config.x / scale,  self.config.y / scale)
+	self:SetPoint("CENTER", UIParent, "BOTTOMLEFT", self.config.x / scale,  self.config.y / scale)
 end
 
 
@@ -131,7 +99,6 @@ function panel:setShown(show)
 	if show then
 		self:setPosition()
 	else
-		self:setStrata(2)
 		self:setLocked(false)
 	end
 end
@@ -139,15 +106,11 @@ end
 
 function panel:setLocked(lock)
 	self.config.isLocked = lock
-	self.NineSlice:SetShown(not lock)
-	self.resize:SetShown(not lock)
-	self.drag:ClearAllPoints()
-	if lock then
-		self.drag:SetPoint("TOPLEFT", self.summon1.border)
-		self.drag:SetPoint("BOTTOMRIGHT", self.summon2.border)
-	else
-		self.drag:SetAllPoints()
-	end
+end
+
+
+function panel:isLocked()
+	return self.config.isLocked
 end
 
 
@@ -155,39 +118,61 @@ function panel:setSize(kSize)
 	if InCombatLockdown() then return end
 	if kSize then self.config.kSize = kSize end
 	local kSize = self.config.kSize
+	local padding = 2
 
-	self:SetSize(PANEL_WIDTH * kSize, PANEL_HEIGHT * kSize)
-	self.summon1:SetSize(33 * kSize, 33 * kSize)
-	self.summon1.border:SetSize(35 * kSize, 35 * kSize)
-	self.summon1:SetPoint("RIGHT", self, "CENTER", -2 * kSize, 0)
-	self.summon2:SetSize(33 * kSize, 33 * kSize)
-	self.summon2.border:SetSize(35 * kSize, 35 * kSize)
-	self.summon2:SetPoint("LEFT", self, "CENTER", 2 * kSize, 0)
+	self.summon1:SetScale(kSize)
+	self.summon1:SetPoint("TOPLEFT")
+	self.summon2:SetScale(kSize)
+	self.summon2:SetPoint("TOPLEFT", BTN_SIZE + padding / kSize, 0)
+
+	local width = (BTN_SIZE * kSize + padding) * 2 - padding
+	local height = BTN_SIZE * kSize
+	self:SetSize(width, height)
 end
 
 
 function panel:startDrag()
-	if InCombatLockdown() or self.config.isLocked then return end
-	local x, y = GetCursorPosition()
-	local scale = self:GetEffectiveScale()
-	local width, height = self:GetSize()
-	self.config.x = x - width / 2 * scale
-	self.config.y = y + height / 2 * scale
+	if InCombatLockdown() or self:isLocked() then return end
+	self.config.x, self.config.y = GetCursorPosition()
 	self:setShown(true)
-	self.drag:GetScript("OnDragStart")(self.drag)
+	self:GetScript("OnDragStart")(self)
 end
 
 
 function panel:stopDrag()
-	self.drag:GetScript("OnDragStop")(self.drag)
+	self:GetScript("OnDragStop")(self)
+end
+
+
+function panel:setFade(value)
+	self.config.fade = value
+	self:SetAlpha(value)
 end
 
 
 journal:on("MODULES_INIT", function(journal)
+	-- FADE OUT
+	panel.fade = CreateFrame("FRAME", nil, nil, "MJSliderFrameTemplate")
+	panel.fade:setOnChanged(function(frame, value)
+		panel:setFade(value)
+	end)
+	panel.fade:setStep(.1)
+	panel.fade:setMinMax(0, 1)
+	panel.fade:setText(L["Fade out (opacity)"])
+
+	-- RESIZE
+	panel.resize = CreateFrame("FRAME", nil, nil, "MJSliderFrameTemplate")
+	panel.resize:setOnChanged(function(frame, value)
+		panel:setSize(value / BTN_SIZE)
+	end)
+	panel.resize:setStep(1)
+	panel.resize:setMinMax(20, 90)
+	panel.resize:setText(L["Button size"])
+
 	-- CONTEXT MENU
 	local dd = journal.bgFrame.summonPanelSettings
 	LibStub("LibSFDropDown-1.5"):SetMixin(dd)
-	dd:ddSetDisplayMode("menu")
+	dd:ddSetDisplayMode(addon)
 	dd:ddHideWhenButtonHidden()
 	dd:ddSetNoGlobalMouseEvent(true)
 	dd:SetShown(panel.config.isShown)
@@ -211,8 +196,8 @@ journal:on("MODULES_INIT", function(journal)
 			dd:ddAddSeparator(level)
 
 			info.isTitle = nil
-			info.text = panel.config.isLocked and UNLOCK or LOCK
-			info.func =  function() panel:setLocked(not panel.config.isLocked) end
+			info.text = panel:isLocked() and UNLOCK or LOCK
+			info.func =  function() panel:setLocked(not panel:isLocked()) end
 			dd:ddAddButton(info, level)
 
 			info.hasArrow = true
@@ -220,6 +205,20 @@ journal:on("MODULES_INIT", function(journal)
 			info.value = "strata"
 			dd:ddAddButton(info, level)
 
+			info.customFrame = panel.fade
+			info.OnLoad = function(frame)
+				frame:setValue(panel.config.fade)
+			end
+			dd:ddAddButton(info)
+
+			info.customFrame = panel.resize
+			info.OnLoad = function(frame)
+				frame:SetEnabled(not InCombatLockdown())
+				frame:setValue(math.floor(BTN_SIZE * panel.config.kSize + .5))
+			end
+			dd:ddAddButton(info)
+
+			info.customFrame = nil
 			info.hasArrow = nil
 			info.disabled = InCombatLockdown()
 			info.text = L["Reset size"]
@@ -265,21 +264,25 @@ mounts:on("CREATE_BUTTONS", function()
 	panel.config = mounts.globalDB.summonPanelConfig
 	panel.config.frameStrata = panel.config.frameStrata or 2
 	panel.config.kSize = panel.config.kSize or 1
+	panel.config.fade = panel.config.fade or 1
 	local leftIcon = "|A:newplayertutorial-icon-mouse-leftbutton:0:0|a "
-	local rightIcon = "|A:newplayertutorial-icon-mouse-rightbutton:0:0|a "
+	-- local rightIcon = "|A:newplayertutorial-icon-mouse-rightbutton:0:0|a "
 
-	local summon1 = CreateFrame("BUTTON", nil, panel, "MJSecureMacroButtonTemplate")
+	local summon1 = CreateFrame("BUTTON", nil, panel, "MJSecureBarButtonTemplate")
 	panel.summon1 = summon1
 	summon1:SetPropagateMouseClicks(true)
-	summon1:SetNormalTexture(413588)
-	summon1.icon = summon1:GetNormalTexture()
+	summon1:SetPropagateMouseMotion(true)
+	-- summon1:SetNormalTexture(413588)
+	-- summon1.icon = summon1:GetNormalTexture()
+	summon1.icon:SetTexture(413588)
 	summon1:SetAttribute("clickbutton", _G[util.secureButtonNameMount])
 	summon1:SetScript("OnEnter", function(btn)
-		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+		if panel.isDrag then return end
+		GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
 		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 1\"")
 		GameTooltip:AddLine(L["Normal mount summon"])
-		GameTooltip:AddLine("\n")
-		if not panel.config.isLocked then
+		if not panel:isLocked() then
+			GameTooltip:AddLine("\n")
 			GameTooltip_AddColoredLine(GameTooltip, leftIcon..L["Left-button to drag"], NIGHT_FAE_BLUE_COLOR, false)
 		end
 		-- GameTooltip_AddColoredLine(GameTooltip, rightIcon..L["Right-button to open context menu"], NIGHT_FAE_BLUE_COLOR, false)
@@ -289,18 +292,21 @@ mounts:on("CREATE_BUTTONS", function()
 		GameTooltip:Show()
 	end)
 
-	local summon2 = CreateFrame("BUTTON", nil, panel, "MJSecureMacroButtonTemplate")
+	local summon2 = CreateFrame("BUTTON", nil, panel, "MJSecureBarButtonTemplate")
 	panel.summon2 = summon2
 	summon2:SetPropagateMouseClicks(true)
-	summon2:SetNormalTexture(631718)
-	summon2.icon = summon2:GetNormalTexture()
+	summon2:SetPropagateMouseMotion(true)
+	-- summon2:SetNormalTexture(631718)
+	-- summon2.icon = summon2:GetNormalTexture()
+	summon2.icon:SetTexture(631718)
 	summon2:SetAttribute("clickbutton", _G[util.secureButtonNameSecondMount])
 	summon2:SetScript("OnEnter", function(btn)
-		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+		if panel.isDrag then return end
+		GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
 		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 2\"")
 		GameTooltip_AddNormalLine(GameTooltip, L["SecondMountTooltipDescription"]:gsub("\n\n", "\n"))
-		GameTooltip:AddLine("\n")
-		if not panel.config.isLocked then
+		if not panel:isLocked() then
+			GameTooltip:AddLine("\n")
 			GameTooltip_AddColoredLine(GameTooltip, leftIcon..L["Left-button to drag"], NIGHT_FAE_BLUE_COLOR, false)
 		end
 		-- GameTooltip_AddColoredLine(GameTooltip, rightIcon..L["Right-button to open context menu"], NIGHT_FAE_BLUE_COLOR, false)
@@ -313,7 +319,7 @@ mounts:on("CREATE_BUTTONS", function()
 	panel:setStrata()
 	panel:setSize()
 	panel:setShown(panel.config.isShown)
-	panel:setLocked(panel.config.isLocked)
+	panel:GetScript("OnLeave")(panel)
 	panel:RegisterEvent("UI_SCALE_CHANGED")
 	hooksecurefunc(UIParent, "SetScale", function() panel:GetScript("OnEvent")(panel) end)
 end)

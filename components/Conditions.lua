@@ -473,7 +473,7 @@ function conds.ritem:getValueText(value)
 end
 
 function conds.ritem:getFuncText(value)
-	return ("C_Container.GetItemCooldown(%d) == 0"):format(value)
+	return ("C_Container.GetItemCooldown(%d) == 0"):format(value), "C_Container"
 end
 
 
@@ -516,7 +516,7 @@ end
 
 
 ---------------------------------------------------
--- hdebuff HAS BUFF
+-- hdebuff HAS DEBUFF
 conds.hdebuff = {}
 conds.hdebuff.text = L["The player has a debuff"]
 conds.hdebuff.isNumeric = true
@@ -550,7 +550,7 @@ function conds.faction:getValueList(value, func)
 			text = self:getValueText(i),
 			value = i,
 			func = func,
-			checked = i == value
+			checked = i == value,
 		}
 	end
 	return list
