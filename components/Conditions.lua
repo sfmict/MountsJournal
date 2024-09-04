@@ -629,6 +629,24 @@ end
 
 
 ---------------------------------------------------
+-- zone
+conds.zone = {}
+conds.zone.text = ZONE
+
+function conds.zone:getDescription()
+	return L["Zone Name/Subzone Name"]
+end
+
+function conds.zone:getValueText(value)
+	return value
+end
+
+function conds.zone:getFuncText(value)
+	return ("self:zoneMatch('/%s/')"):format(value:gsub("['\\]", "\\%1"))
+end
+
+
+---------------------------------------------------
 -- METHODS
 function conds:getMenuList(value, func)
 	local list = {}

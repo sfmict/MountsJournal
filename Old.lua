@@ -375,8 +375,6 @@ function mounts:setOldChanges()
 	if currentVersion == "@project-version@" then currentVersion = "v11.0.25" end
 	--@end-do-not-package@
 
-	self.globalDB.lastAddonVersion = "v11.0.24"
-
 	if not self.charDB.lastAddonVersion then self.charDB.lastAddonVersion = "v11.0.10" end
 	if not self.globalDB.lastAddonVersion then self.globalDB.lastAddonVersion = "v11.0.10" end
 

@@ -1,6 +1,6 @@
 local _, ns = ...
 local util = ns.util
-local type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras = type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras
+local type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText = type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText
 local macroFrame = CreateFrame("FRAME")
 ns.macroFrame = macroFrame
 util.setEventsMixin(macroFrame)
@@ -523,6 +523,12 @@ end
 
 function macroFrame:hasPlayerDebuff(spellID)
 	return util.checkAura("player", spellID, "HARMFUL")
+end
+
+
+function macroFrame:zoneMatch(zoneText)
+	local cz = ("/%s/%s/%s/%s/"):format(GetRealZoneText(), GetSubZoneText(), GetZoneText(), GetMinimapZoneText()):gsub("//", "/")
+	return cz:match(zoneText) and true
 end
 ----------------------------------------
 
