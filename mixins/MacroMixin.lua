@@ -16,7 +16,7 @@ macroFrame:on("ADDON_INIT", function(self)
 	self.calendar = ns.calendar
 	self.mounts = ns.mounts
 	self.config = self.mounts.config
-	self.ruleConfig = self.mounts.globalDB.ruleConfig
+	self.ruleSetConfig = self.mounts.globalDB.ruleSets
 	self.sFlags = self.mounts.sFlags
 	self.macrosConfig = self.config.macrosConfig
 	self.charMacrosConfig = self.mounts.charDB.macrosConfig
@@ -183,7 +183,7 @@ macroFrame:on("ADDON_INIT", function(self)
 
 	self.getClassOptionMacro = self:loadString(classOptionMacro)
 	self.getDefMacro = self:loadString(defMacro)
-	self:setRuleFuncs()
+	self:setRuleSet()
 
 	self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
@@ -191,6 +191,32 @@ macroFrame:on("ADDON_INIT", function(self)
 	self:refresh()
 	self:getClassMacro(self.class, function() self:refresh() end)
 end)
+
+
+function macroFrame:setRuleSet(ruleSetName)
+	if ruleSetName then
+		self.mounts.charDB.currentRuleSetName = ruleSetName
+	end
+	local currentRuleSetName, currentRuleSet, default = self.mounts.charDB.currentRuleSetName
+
+	for i = 1, #self.ruleSetConfig do
+		local ruleSet = self.ruleSetConfig[i]
+		if ruleSet.name == currentRuleSetName then
+			currentRuleSet = ruleSet
+		end
+		if ruleSet.isDefault then
+			default = ruleSet
+		end
+	end
+
+	if not currentRuleSet then
+		self.mounts.charDB.currentRuleSetName = nil
+		currentRuleSet = default
+	end
+
+	self.currentRuleSet = currentRuleSet
+	self:setRuleFuncs()
+end
 
 
 function macroFrame:loadString(funcStr)
@@ -211,8 +237,8 @@ function macroFrame:setRuleFuncs()
 		end
 	end
 
-	for i = 1, #self.ruleConfig do
-		local rules = self.ruleConfig[i]
+	for i = 1, #self.currentRuleSet do
+		local rules = self.currentRuleSet[i]
 		local keys = {}
 		local func = [[
 return function(self, button, profileLoad)

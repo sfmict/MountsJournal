@@ -100,8 +100,8 @@ ruleEditor:SetScript("OnShow", function(self)
 
 	-- PANELS
 	self.panel = CreateFrame("FRAME", nil, self, "MJDarkPanelTemplate")
-	self.panel:SetPoint("TOPLEFT", 50, -40)
-	self.panel:SetPoint("BOTTOMRIGHT", -50, 40)
+	self.panel:SetPoint("TOPLEFT", 40, -40)
+	self.panel:SetPoint("BOTTOMRIGHT", -40, 40)
 	self.panel:SetBackdropColor(.1, .1, .1, .85)
 
 	self.title = self.panel:CreateFontString(nil, "ARTWORK", "GameFontHighlightLarge")

@@ -1,5 +1,6 @@
 local addon, ns = ...
 local L, util = ns.L, ns.util
+local strcmputf8i = strcmputf8i
 
 
 ns.journal:on("MODULES_INIT", function(journal)
@@ -301,7 +302,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		wipe(self.profileNames)
 		for k in pairs(self.profiles) do tinsert(self.profileNames, k) end
-		sort(self.profileNames)
+		sort(self.profileNames, function(a, b) return strcmputf8i(a, b) < 0 end)
 		self:ddToggle(1, nil, self, 112, 17)
 	end)
 end)

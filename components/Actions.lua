@@ -1,5 +1,6 @@
 local _, ns = ...
 local L, macroFrame, mounts = ns.L, ns.macroFrame, ns.mounts
+local strcmputf8i = strcmputf8i
 local actions = {}
 ns.actions = actions
 
@@ -36,7 +37,7 @@ function actions.rmount:getValueList(value, func)
 
 	local profiles = {}
 	for k in next, mounts.profiles do profiles[#profiles + 1] = k end
-	sort(profiles)
+	sort(profiles, function(a, b) return strcmputf8i(a, b) < 0 end)
 
 	for i = 1, #profiles do
 		local profile = profiles[i]

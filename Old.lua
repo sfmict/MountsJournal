@@ -227,10 +227,22 @@ local function updateGlobal(self)
 
 	-- IF < 11.0.19 GLOBAL
 	if compareVersion("11.0.19", self.globalDB.lastAddonVersion) then
-		for i, summon in ipairs(self.globalDB.ruleConfig) do
-			for j, rule in ipairs(summon) do
-				if rule.action[1] == "rmount" and not rule.action[2] then rule.action[2] = 0 end
+		if self.globalDB.ruleConfig then
+			for i, summon in ipairs(self.globalDB.ruleConfig) do
+				for j, rule in ipairs(summon) do
+					if rule.action[1] == "rmount" and not rule.action[2] then rule.action[2] = 0 end
+				end
 			end
+		end
+	end
+
+	-- IF < 11.0.25 GLOBAL
+	if compareVersion("11.0.25", self.globalDB.lastAddonVersion) then
+		if self.globalDB.ruleConfig then
+			for i, rules in ipairs(self.globalDB.ruleConfig) do
+				self.globalDB.ruleSets[1][i] = rules
+			end
+			self.globalDB.ruleConfig = nil
 		end
 	end
 end
@@ -295,6 +307,8 @@ local function updateChar(self)
 		self.charDB.macrosConfig.itemSlot17 = nil
 		self.charDB.macrosConfig.useIfNotDragonridable = nil
 
+		local rules = self.globalDB.ruleConfig and self.globalDB.ruleConfig[1] or self.globalDB.ruleSets[1][1]
+
 		if self.charDB.profileBySpecialization then
 			if self.charDB.profileBySpecialization.enable then
 				for i = 1,  GetNumSpecializations() do
@@ -304,7 +318,7 @@ local function updateChar(self)
 						{false, "spec", specID},
 						action = {"rmount", profileName},
 					}
-					tinsert(self.globalDB.ruleConfig[1], 1, rule)
+					tinsert(rules, 1, rule)
 				end
 			end
 			self.charDB.profileBySpecialization = nil
@@ -323,7 +337,7 @@ local function updateChar(self)
 					{false, "holiday", data[1]},
 					action = {"rmount", data[2]},
 				}
-				tinsert(self.globalDB.ruleConfig[1], 1, rule)
+				tinsert(rules, 1, rule)
 			end
 			self.charDB.holidayProfiles = nil
 		end
@@ -343,8 +357,8 @@ local function updateChar(self)
 						{false, "zt", "pvp"},
 						action = {"rmount", profileName},
 					}
-					tinsert(self.globalDB.ruleConfig[1], 1, rule1)
-					tinsert(self.globalDB.ruleConfig[1], 1, rule2)
+					tinsert(rules, 1, rule1)
+					tinsert(rules, 1, rule2)
 				end
 			end
 			self.charDB.profileBySpecializationPVP = nil
@@ -358,8 +372,10 @@ function mounts:setOldChanges()
 
 	local currentVersion = C_AddOns.GetAddOnMetadata(addon, "Version")
 	--@do-not-package@
-	if currentVersion == "@project-version@" then currentVersion = "v11.0.19" end
+	if currentVersion == "@project-version@" then currentVersion = "v11.0.25" end
 	--@end-do-not-package@
+
+	self.globalDB.lastAddonVersion = "v11.0.24"
 
 	if not self.charDB.lastAddonVersion then self.charDB.lastAddonVersion = "v11.0.10" end
 	if not self.globalDB.lastAddonVersion then self.globalDB.lastAddonVersion = "v11.0.10" end

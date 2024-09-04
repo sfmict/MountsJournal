@@ -138,10 +138,12 @@ end
 
 do
 	local function getRemove(self, eventID)
-		for _, summon in ipairs(self.ruleConfig) do
-			for _, rule in ipairs(summon) do
-				for _, cond in ipairs(rule) do
-					if cond[2] == "holiday" and cond[3] == eventID then return end
+		for _, ruleSet in ipairs(self.ruleSets) do
+			for _, rules in ipairs(ruleSet) do
+				for _, rule in ipairs(rules) do
+					for _, cond in ipairs(rule) do
+						if cond[2] == "holiday" and cond[3] == eventID then return end
+					end
 				end
 			end
 		end
@@ -206,18 +208,20 @@ end
 calendar:on("ADDON_INIT", function(self)
 	self:updateTodayEvents()
 
-	self.ruleConfig = mounts.globalDB.ruleConfig
+	self.ruleSets = mounts.globalDB.ruleSets
 	self.holidayNames = mounts.globalDB.holidayNames[GetLocale()] or {}
 	mounts.globalDB.holidayNames[GetLocale()] = self.holidayNames
 	local names = self.holidayNames
 	local numNoName = 0
 
-	for _, summon in ipairs(self.ruleConfig) do
-		for _, rule in ipairs(summon) do
-			for _, cond in ipairs(rule) do
-				if cond[2] == "holiday" and not names[cond[3]] then
-					numNoName = numNoName + 1
-					names[cond[3]] = false
+	for _, ruleSet in ipairs(self.ruleSets) do
+		for _, rules in ipairs(ruleSet) do
+			for _, rule in ipairs(rules) do
+				for _, cond in ipairs(rule) do
+					if cond[2] == "holiday" and not names[cond[3]] then
+						numNoName = numNoName + 1
+						names[cond[3]] = false
+					end
 				end
 			end
 		end

@@ -33,10 +33,12 @@ function mounts:ADDON_LOADED(addonName)
 		self.globalDB.mountsProfiles = self.globalDB.mountsProfiles or {}
 		self.globalDB.holidayNames = self.globalDB.holidayNames or {}
 		self.globalDB.help = self.globalDB.help or {}
-		self.globalDB.ruleConfig = self.globalDB.ruleConfig or {
-			{self:getDefaultRule()},
-			{self:getDefaultRule()},
+		self.globalDB.ruleSets = self.globalDB.ruleSets or {
+			{name = DEFAULT, isDefault = true}
 		}
+		for i = 1, #self.globalDB.ruleSets do
+			self:checkRuleSet(self.globalDB.ruleSets[i])
+		end
 
 		self.defProfile = self.globalDB.defProfile
 		self:checkProfile(self.defProfile)
@@ -135,6 +137,13 @@ function mounts:getDefaultRule()
 		{false, "btn", 1},
 		action = {"rmount", 0},
 	}
+end
+
+
+function mounts:checkRuleSet(ruleSet)
+	for i = 1, 2 do
+		ruleSet[i] = ruleSet[i] or {self:getDefaultRule()}
+	end
 end
 
 

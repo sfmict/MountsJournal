@@ -1,5 +1,6 @@
 local addon, ns = ...
 local L, util, mounts, macroFrame, conds, actions, calendar = ns.L, ns.util, ns.mounts, ns.macroFrame, ns.conditions, ns.actions, ns.calendar
+local strcmputf8i = strcmputf8i
 local rules = CreateFrame("FRAME", "MountsJournalConfigRules")
 ns.ruleConfig = rules
 rules:Hide()
@@ -11,6 +12,49 @@ rules:SetScript("OnShow", function(self)
 
 	local lsfdd = LibStub("LibSFDropDown-1.5")
 
+	StaticPopupDialogs[util.addonName.."NEW_RULE_SET"] = {
+		text = addon..": "..L["New rule set"],
+		button1 = ACCEPT,
+		button2 = CANCEL,
+		hasEditBox = 1,
+		maxLetters = 48,
+		editBoxWidth = 350,
+		hideOnEscape = 1,
+		whileDead = 1,
+		OnAccept = function(self, cb) self:Hide() cb(self) end,
+		EditBoxOnEnterPressed = function(self)
+			StaticPopup_OnClick(self:GetParent(), 1)
+		end,
+		EditBoxOnEscapePressed = function(self)
+			self:GetParent():Hide()
+		end,
+		OnShow = function(self)
+			self.editBox:SetText(UnitName("player").." - "..GetRealmName())
+			self.editBox:HighlightText()
+		end,
+	}
+	local function ruleSetExistsAccept(popup, data)
+		if not popup then return end
+		popup:Hide()
+		self:createRuleSet(data)
+	end
+	StaticPopupDialogs[util.addonName.."RULE_SET_EXISTS"] = {
+		text = addon..": "..L["A rule set with the same name exists."],
+		button1 = OKAY,
+		hideOnEscape = 1,
+		whileDead = 1,
+		OnAccept = ruleSetExistsAccept,
+		OnCancel = ruleSetExistsAccept,
+	}
+	StaticPopupDialogs[util.addonName.."DELETE_RULE_SET"] = {
+		text = addon..": "..L["Are you sure you want to delete rule set %s?"],
+		button1 = DELETE,
+		button2 = CANCEL,
+		hideOnEscape = 1,
+		whileDead = 1,
+		OnAccept = function(self, cb) self:Hide() cb() end,
+	}
+
 	-- VERSION
 	local ver = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 	ver:SetPoint("TOPRIGHT", -40, 15)
@@ -18,9 +62,81 @@ rules:SetScript("OnShow", function(self)
 	ver:SetJustifyH("RIGHT")
 	ver:SetText(C_AddOns.GetAddOnMetadata(addon, "Version"))
 
+	-- RULE SETS
+	self.ruleSets = lsfdd:CreateStretchButton(self, 150, 22)
+	self.ruleSets:SetPoint("TOPRIGHT", -20, -20)
+	self.ruleSets:SetText(macroFrame.currentRuleSet.name)
+	self.ruleSets:ddSetDisplayMode(addon)
+
+	self.ruleSets:ddSetInitFunc(function(dd, level)
+		local info = {}
+
+		if level == 1 then
+			local function selectRuleSet(btn)
+				self:selectRuleSet(btn.value)
+			end
+
+			local function removeRuleSet(btn)
+				self:removeRuleSet(btn.value)
+			end
+
+			info.list = {}
+			for i, ruleSet in ipairs(macroFrame.ruleSetConfig) do
+				local subInfo = {
+					text = ruleSet.isDefault and ("%s %s"):format(ruleSet.name, DARKGRAY_COLOR:WrapTextInColorCode(DEFAULT)) or ruleSet.name,
+					value = ruleSet.name,
+					checked = ruleSet.name == macroFrame.currentRuleSet.name,
+					func = selectRuleSet,
+				}
+				if #macroFrame.ruleSetConfig > 1 then
+					subInfo.remove = removeRuleSet
+				end
+				tinsert(info.list, subInfo)
+			end
+			dd:ddAddButton(info)
+			info.list = nil
+
+			dd:ddAddSeparator(level)
+
+			info.keepShownOnClick = true
+			info.notCheckable = true
+			info.hasArrow = true
+			info.text = L["New rule set"]
+			dd:ddAddButton(info, level)
+
+			if not macroFrame.currentRuleSet.isDefault then
+				info.keepShownOnClick = nil
+				info.hasArrow = nil
+				info.text = L["Set as default"]
+				info.func = function()
+					for i, ruleSet in ipairs(macroFrame.ruleSetConfig) do
+						ruleSet.isDefault = nil
+					end
+					macroFrame.currentRuleSet.isDefault = true
+				end
+				dd:ddAddButton(info, level)
+			end
+		else
+			info.notCheckable = true
+
+			info.text = L["Create"]
+			info.func = function() self:createRuleSet() end
+			dd:ddAddButton(info, level)
+
+			info.text = L["Copy current"]
+			info.func = function() self:createRuleSet(true) end
+			dd:ddAddButton(info, level)
+		end
+	end)
+
+	-- RULE SETS TEXT
+	local ruleSetsText = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	ruleSetsText:SetPoint("RIGHT", self.ruleSets, "LEFT", -5, 0)
+	ruleSetsText:SetText(L["Rule Sets"])
+
 	-- TITLE
 	self.title = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	self.title:SetPoint("TOP", 0, -30)
+	self.title:SetPoint("TOP", 0, -60)
 	self.title:SetPoint("LEFT", 60, 0)
 	self.title:SetPoint("RIGHT", -60, 0)
 	self.title:SetText(L["RULES_TITLE"])
@@ -28,16 +144,13 @@ rules:SetScript("OnShow", function(self)
 
 	-- SUMMONS
 	self.summons = lsfdd:CreateButton(self)
-	self.summons:SetPoint("LEFT", 30, 0)
-	self.summons:SetPoint("TOP", self.title, "BOTTOM", 0, -30)
-	self.summons:ddSetSelectedValue(1)
-	self.summons:ddSetSelectedText(SUMMONS.." 1")
+	self.summons:SetPoint("LEFT", 20, 0)
+	self.summons:SetPoint("TOP", self.title, "BOTTOM", 0, -15)
 
 	self.summons:ddSetInitFunc(function(dd)
 		local info = {}
 
 		local function func(btn)
-			dd:ddSetSelectedValue(btn.value)
 			self:setSummonRules(btn.value)
 		end
 
@@ -62,7 +175,7 @@ rules:SetScript("OnShow", function(self)
 	-- RESET BUTTON
 	self.resetRulesBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
 	self.resetRulesBtn:SetPoint("TOP", self.addRuleBtn)
-	self.resetRulesBtn:SetPoint("RIGHT", -30, 0)
+	self.resetRulesBtn:SetPoint("RIGHT", -20, 0)
 	self.resetRulesBtn:SetText(L["Reset Rules"])
 	self.resetRulesBtn:SetSize(self.resetRulesBtn:GetFontString():GetStringWidth() + 40, 22)
 	self.resetRulesBtn:SetScript("OnClick", function()
@@ -83,11 +196,11 @@ rules:SetScript("OnShow", function(self)
 
 	local scrollBoxAnchorsWithBar = {
 		CreateAnchor("TOPLEFT", self.summons, "BOTTOMLEFT", 0, -20),
-		CreateAnchor("BOTTOMRIGHT", -50, 30),
+		CreateAnchor("BOTTOMRIGHT", -42, 20),
 	}
 	local scrollBoxAnchorsWithoutBar = {
 		scrollBoxAnchorsWithBar[1],
-		CreateAnchor("BOTTOMRIGHT", -30, 30),
+		CreateAnchor("BOTTOMRIGHT", -20, 20),
 	}
 	ScrollUtil.AddManagedScrollBarVisibilityBehavior(self.scrollBox, self.scrollBar, scrollBoxAnchorsWithBar, scrollBoxAnchorsWithoutBar)
 
@@ -96,8 +209,58 @@ rules:SetScript("OnShow", function(self)
 end)
 
 
+function rules:selectRuleSet(ruleSetName)
+	macroFrame:setRuleSet(ruleSetName)
+	self.ruleSets:SetText(macroFrame.currentRuleSet.name)
+	self:setSummonRules(self.summonN)
+end
+
+
+function rules:createRuleSet(copy)
+	StaticPopup_Show(util.addonName.."NEW_RULE_SET", nil, nil, function(popup)
+		local text = popup.editBox:GetText()
+		if text and text ~= "" then
+			for i, ruleSet in ipairs(macroFrame.ruleSetConfig) do
+				if ruleSet.name == text then
+					StaticPopup_Show(util.addonName.."RULE_SET_EXISTS", nil, nil, copy)
+					return
+				end
+			end
+			local ruleSet = copy and util:copyTable(macroFrame.currentRuleSet) or {}
+			ruleSet.name = text
+			ruleSet.isDefault = nil
+			mounts:checkRuleSet(ruleSet)
+			tinsert(macroFrame.ruleSetConfig, ruleSet)
+			sort(macroFrame.ruleSetConfig, function(a, b) return strcmputf8i(a.name, b.name) < 0 end)
+			self:selectRuleSet(text)
+		end
+	end)
+end
+
+
+function rules:removeRuleSet(ruleSetName)
+	StaticPopup_Show(util.addonName.."DELETE_RULE_SET", NORMAL_FONT_COLOR:WrapTextInColorCode(ruleSetName), nil, function()
+		for i, ruleSet in ipairs(macroFrame.ruleSetConfig) do
+			if ruleSet.name == ruleSetName then
+				tremove(macroFrame.ruleSetConfig, i)
+				if ruleSet.isDefault then
+					macroFrame.ruleSetConfig[1].isDefault = true
+				end
+				break
+			end
+		end
+		if macroFrame.currentRuleSet.name == ruleSetName then
+			self:selectRuleSet()
+		end
+	end)
+end
+
+
 function rules:setSummonRules(n)
-	self.rules = macroFrame.ruleConfig[n]
+	self.summonN = n
+	self.rules = macroFrame.currentRuleSet[n]
+	self.summons:ddSetSelectedValue(n)
+	self.summons:ddSetSelectedText(("%s %d"):format(SUMMONS, n))
 	self:updateRuleList()
 end
 
