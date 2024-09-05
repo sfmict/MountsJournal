@@ -643,11 +643,6 @@ do
 end
 
 
-function mounts:isWaterWalkLocation()
-	return self.mapFlags and self.mapFlags.waterWalkOnly or false
-end
-
-
 do
 	local isFlyableOverride = {
 		-- Draenor
@@ -677,7 +672,6 @@ do
 		local isFlyableLocation = flySpellKnown
 		                          and (IsFlyableArea() or isFlyableOverride[self.instanceID])
 		                          and self:isFlyLocation(self.instanceID)
-		                          and not (self.mapFlags and self.mapFlags.groundOnly)
 
 		flags.modifier = self.modifier() or flags.forceModifier
 		flags.isSubmerged = IsSubmerged()
@@ -692,14 +686,24 @@ do
 		            and (not flags.modifier or flags.isSubmerged)
 		flags.waterWalk = isFloating
 		                  or not isFlyableLocation and flags.modifier
-		                  or self:isWaterWalkLocation()
 		flags.useRepair = flags.repair and not flags.fly
 		                  or flags.flyableRepair and flags.fly
 		                  or self:notEnoughFreeSlots()
-		flags.herb = self.herbMount and (not self.config.herbMountsOnZones
-		                                 or self.mapFlags and self.mapFlags.herbGathering)
 		flags.targetMount = self:getTargetMount()
 	end
+end
+
+
+function mounts:updateFlagsWithMap()
+	local flags = self.sFlags
+	local groundOnly = self.mapFlags and self.mapFlags.groundOnly
+
+	flags.fly = flags.fly and not groundOnly
+	flags.waterWalk = flags.waterWalk
+	                  or groundOnly and flags.modifier
+	                  or self.mapFlags and self.mapFlags.waterWalkOnly
+	flags.herb = self.herbMount and (not self.config.herbMountsOnZones
+		                                 or self.mapFlags and self.mapFlags.herbGathering)
 end
 
 

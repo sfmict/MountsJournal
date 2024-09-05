@@ -77,11 +77,11 @@ end
 actions.mount = {}
 actions.mount.text = L["Mount"]
 
-function actions.mount:getValueText(spellID)
-	if ns.additionalMounts[spellID] then
-		return ns.additionalMounts[spellID].name
+function actions.mount:getValueText(value)
+	if ns.additionalMounts[value] then
+		return ns.additionalMounts[value].name
 	else
-		local mountID = C_MountJournal.GetMountFromSpell(spellID)
+		local mountID = C_MountJournal.GetMountFromSpell(value)
 		if mountID then
 			local name = C_MountJournal.GetMountInfoByID(mountID)
 			return name
@@ -89,14 +89,7 @@ function actions.mount:getValueText(spellID)
 	end
 end
 
-function actions.mount:getFuncText(spellID)
-	local macro
-	if macroFrame.additionalMounts[spellID] then
-		macro = macroFrame.additionalMounts[spellID].macro
-	else
-		macro = ('/run MountsJournal:summon(%d)'):format(spellID)
-	end
-
+function actions.mount:getFuncText(value)
 	return ([[
 		%s
 		-- EXIT VEHICLE
@@ -109,9 +102,9 @@ function actions.mount:getFuncText(spellID)
 			end
 		-- MOUNT
 		else
-			return self:addLine(self:getDefMacro(), '%s')
+			self.useMount = %s
 		end
-	]]):format(macroFrame.classDismount or "", macro:gsub("[\\']", "\\%1")),
+	]]):format(macroFrame.classDismount or "", value),
 	{"GetTime"}
 end
 
@@ -125,12 +118,12 @@ function actions.item:getDescription()
 	return "ItemID"
 end
 
-function actions.item:getValueText(itemID)
-	return tostring(itemID or "")
+function actions.item:getValueText(value)
+	return tostring(value or "")
 end
 
-function actions.item:getFuncText(itemID)
-	return ("return '/use item:%d'"):format(itemID)
+function actions.item:getFuncText(value)
+	return ("return '/use item:%d'"):format(value)
 end
 
 
@@ -169,9 +162,7 @@ function actions.iitem:getDescription()
 	return description
 end
 
-function actions.iitem:getValueText(spellID)
-	return tostring(spellID or "")
-end
+actions.iitem.getValueText = actions.item.getValueText
 
 function actions.iitem:getFuncText(slot)
 	return ("return '/use %d'"):format(slot)
@@ -187,17 +178,15 @@ function actions.spell:getDescription()
 	return "SpellID"
 end
 
-function actions.spell:getValueText(spellID)
-	return tostring(spellID or "")
-end
+actions.spell.getValueText = actions.item.getValueText
 
-function actions.spell:getFuncText(spellID)
+function actions.spell:getFuncText(value)
 	return ([[
 		local spellName = self:getSpellName(%d)
 		if spellName then
 			return '/cast '..spellName
 		end
-	]]):format(spellID)
+	]]):format(value)
 end
 
 
@@ -206,12 +195,12 @@ end
 actions.macro = {}
 actions.macro.text = MACRO
 
-function actions.macro:getValueText(macroText)
-	return macroText
+function actions.macro:getValueText(value)
+	return value
 end
 
-function actions.macro:getFuncText(macroText)
-	return ("return '%s'"):format(macroText:gsub("['\n\\]", "\\%1"))
+function actions.macro:getFuncText(value)
+	return ("return '%s'"):format(value:gsub("['\n\\]", "\\%1"))
 end
 
 

@@ -2343,6 +2343,7 @@
 			<OnLoad method="onLoad"/>
 			<OnEvent method="onEvent"/>
 			<PreClick method="preClick"/>
+			<PostClick method="postClick"/>
 		</Scripts>
 	</Frame>
 

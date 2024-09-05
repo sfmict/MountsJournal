@@ -469,9 +469,7 @@ function conds.ritem:getDescription()
 	return "ItemID"
 end
 
-function conds.ritem:getValueText(value)
-	return tostring(value or "")
-end
+conds.ritem.getValueText = conds.hitem.getValueText
 
 function conds.ritem:getFuncText(value)
 	return ("C_Container.GetItemCooldown(%d) == 0"):format(value), "C_Container"
@@ -488,9 +486,7 @@ function conds.rspell:getDescription()
 	return "SpellID (61304 for GCD)"
 end
 
-function conds.rspell:getValueText(value)
-	return tostring(value or "")
-end
+conds.rspell.getValueText = conds.hitem.getValueText
 
 function conds.rspell:getFuncText(value)
 	return ("self:isSpellReady(%d)"):format(value)
@@ -507,9 +503,7 @@ function conds.hbuff:getDescription()
 	return "SpellID"
 end
 
-function conds.hbuff:getValueText(value)
-	return tostring(value or "")
-end
+conds.hbuff.getValueText = conds.hitem.getValueText
 
 function conds.hbuff:getFuncText(value)
 	return ("self:hasPlayerBuff(%d)"):format(value)
@@ -526,9 +520,7 @@ function conds.hdebuff:getDescription()
 	return "SpellID"
 end
 
-function conds.hdebuff:getValueText(value)
-	return tostring(value or "")
-end
+conds.hdebuff.getValueText = conds.hitem.getValueText
 
 function conds.hdebuff:getFuncText(value)
 	return ("self:hasPlayerDebuff(%d)"):format(value)
@@ -666,7 +658,8 @@ end
 
 
 function conds:getFuncText(conds)
-	local text = conds.action[1] ~= "rmount" and "not profileLoad\nand " or ""
+	local text = conds.action[1] ~= "rmount" and "not (profileLoad or self.useMount)\nand " or ""
+
 	local vars = {}
 	for i = 1, #conds do
 		local cond, var = conds[i]
