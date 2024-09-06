@@ -686,9 +686,6 @@ do
 		            and (not flags.modifier or flags.isSubmerged)
 		flags.waterWalk = isFloating
 		                  or not isFlyableLocation and flags.modifier
-		flags.useRepair = flags.repair and not flags.fly
-		                  or flags.flyableRepair and flags.fly
-		                  or self:notEnoughFreeSlots()
 		flags.targetMount = self:getTargetMount()
 	end
 end
@@ -703,7 +700,10 @@ function mounts:updateFlagsWithMap()
 	                  or groundOnly and flags.modifier
 	                  or self.mapFlags and self.mapFlags.waterWalkOnly
 	flags.herb = self.herbMount and (not self.config.herbMountsOnZones
-		                                 or self.mapFlags and self.mapFlags.herbGathering)
+	                                 or self.mapFlags and self.mapFlags.herbGathering)
+	flags.useRepair = flags.repair and not flags.fly
+	                  or flags.flyableRepair and flags.fly
+	                  or self:notEnoughFreeSlots()
 end
 
 
