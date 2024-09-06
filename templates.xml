@@ -318,6 +318,8 @@
 				</Frames>
 				<Scripts>
 					<OnLoad method="onLoad"/>
+					<OnShow method="onShow"/>
+					<OnHide method="onHide"/>
 				</Scripts>
 			</Frame>
 

@@ -70,6 +70,17 @@ function MJNavBarMixin:onLoad()
 end
 
 
+function MJNavBarMixin:onShow()
+	self:setMapID(self.tabMapID)
+end
+
+
+function MJNavBarMixin:onHide()
+	self.tabMapID = self.mapID
+	self:setDefMap()
+end
+
+
 function MJNavBarMixin:refresh()
 	local hierarchy = {}
 	local mapInfo = C_Map.GetMapInfo(self.mapID)
