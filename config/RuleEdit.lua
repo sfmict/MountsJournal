@@ -116,6 +116,7 @@ ruleEditor:SetScript("OnShow", function(self)
 	self.actionPanel:SetPoint("BOTTOMRIGHT", -30, 45)
 	self.actionPanel.optionType:SetScript("OnClick", function(btn) self:openActionTypeMenu(btn) end)
 	self.actionPanel.macro.editFrame:GetEditBox():HookScript("OnTextChanged", function(editBox, userInput)
+		self.actionPanel.macro.limitText:SetFormattedText(editBox.CHAR_LIMIT, editBox:GetNumLetters())
 		if userInput then
 			local text = editBox:GetText()
 			self.data.action[2] = #text > 0 and text or nil
@@ -395,16 +396,18 @@ function ruleEditor:setActionValueOption()
 		panel.optionValue:Hide()
 	end
 
-	if actionData[1] == "macro" then
+	local action = actions[actionData[1]]
+	if action.maxLetters then
 		panel:SetHeight(140)
 		panel.optionValue = panel.macro
-		panel.macro.editFrame:GetEditBox():SetText(rules:getActionValueText(actionData) or "")
+		local editBox = panel.macro.editFrame:GetEditBox()
+		editBox.CHAR_LIMIT = MACROFRAME_CHAR_LIMIT:gsub("255", action.maxLetters)
+		editBox:SetMaxLetters(action.maxLetters)
+		editBox:SetText(rules:getActionValueText(actionData) or "")
+		editBox:GetScript("OnTextChanged")(editBox)
 		panel.macro:Show()
 		return
-	end
-
-	local action = actions[actionData[1]]
-	if action.getValueList then
+	elseif action.getValueList then
 		panel.optionValue = self.btnPool:Acquire()
 		panel.optionValue:SetScript("OnClick", function(btn) self:openActionValueMenu(btn, actionData) end)
 	elseif actionData[1] == "mount" then

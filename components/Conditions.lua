@@ -658,7 +658,13 @@ end
 
 
 function conds:getFuncText(conds)
-	local text = conds.action[1] ~= "rmount" and "not (profileLoad or self.useMount)\nand " or ""
+	local text = ""
+	if conds.action[1] ~= "rmount" then
+		text = "not (profileLoad or self.useMount)\nand "
+		if conds.action[1] == "pmacro" then
+			text = text.."not self.preUseMacro\nand "
+		end
+	end
 
 	local vars = {}
 	for i = 1, #conds do

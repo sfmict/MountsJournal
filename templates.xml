@@ -3327,12 +3327,6 @@
 						local scrollBox = self.editFrame:GetScrollBox()
 						ScrollUtil.RegisterScrollBoxWithScrollBar(scrollBox, self.scrollBar)
 						ScrollUtil.AddManagedScrollBarVisibilityBehavior(scrollBox, self.scrollBar, anchorsToBar, anchorsToFrame)
-
-						local editBox = self.editFrame:GetEditBox()
-						editBox:SetMaxLetters(255)
-						editBox:HookScript("OnTextChanged", function(editBox, userInput)
-							self.limitText:SetFormattedText(MACROFRAME_CHAR_LIMIT, editBox:GetNumLetters())
-						end)
 					</OnLoad>
 					<OnClick>self.editFrame:GetEditBox():SetFocus()</OnClick>
 					<OnHide>self:Hide()</OnHide>

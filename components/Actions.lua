@@ -194,6 +194,7 @@ end
 -- macro
 actions.macro = {}
 actions.macro.text = MACRO
+actions.macro.maxLetters = 255
 
 function actions.macro:getValueText(value)
 	return value
@@ -201,6 +202,20 @@ end
 
 function actions.macro:getFuncText(value)
 	return ("return '%s'"):format(value:gsub("['\n\\]", "\\%1"))
+end
+
+
+---------------------------------------------------
+-- pmacro PRE MACRO
+actions.pmacro = {}
+actions.pmacro.text = L["Use macro before mounting"]
+actions.pmacro.description = L["PMACRO_DESCRIPTION"]
+actions.pmacro.maxLetters = 200
+
+actions.pmacro.getValueText = actions.macro.getValueText
+
+function actions.pmacro:getFuncText(value)
+	return ("self.preUseMacro = '%s'"):format(value:gsub("'\n\\", "\\%1"))
 end
 
 
@@ -215,6 +230,7 @@ function actions:getMenuList(value, func)
 		"item",
 		"iitem",
 		"macro",
+		"pmacro",
 	}
 	for i = 1, #types do
 		local v = types[i]
@@ -226,6 +242,12 @@ function actions:getMenuList(value, func)
 			checked = v == value,
 			arg1 = action.getDescription and action:getDescription(),
 		}
+		if action.description then
+			list[i].OnTooltipShow = function(btn, tooltip)
+				GameTooltip_SetTitle(tooltip, action.text)
+				tooltip:AddLine(action.description, nil, nil, nil, true)
+			end
+		end
 	end
 	return list
 end
