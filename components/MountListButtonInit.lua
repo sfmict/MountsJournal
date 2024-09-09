@@ -17,11 +17,56 @@ ns.journal:on("MODULES_INIT", function(journal)
 		elseif f.spellID then
 			GameTooltip:SetSpellByID(f.spellID)
 		end
+
+		if not journal.mountDisplay:IsShown() then
+			local _,_,_, creatureID, _,_, isSelfMount, _, modelSceneID, animID, spellVisualKitID = journal:getMountInfoExtra(f.mountID)
+			MJTooltipModel.model:SetFromModelSceneID(modelSceneID)
+			local mountActor = MJTooltipModel.model:GetActorByTag("unwrapped")
+			if not mountActor then return end
+
+			if creatureID == "player" then
+				MJTooltipModel.model:GetActorByTag("player-rider"):ClearModel()
+				local sheathWeapons = true
+				local autoDress = true
+				local hideWeapons = false
+				local usePlayerNativeForm = true
+				if mountActor:SetModelByUnit("player", sheathWeapons, autoDress, hideWeapons, usePlayerNativeForm) then
+					mountActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
+					mountActor:SetAnimation(618)
+				else
+					mountActor:ClearModel()
+				end
+			else
+				if not creatureID then
+					local allCreatureDisplays = C_MountJournal.GetMountAllCreatureDisplayInfoByID(f.mountID)
+					if allCreatureDisplays and #allCreatureDisplays > 0 then
+						creatureID = allCreatureDisplays[1].creatureDisplayID
+					end
+				end
+				if creatureID then
+					mountActor:SetModelByCreatureDisplayID(creatureID, true)
+					if isSelfMount then
+						mountActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
+						mountActor:SetAnimation(618)
+					else
+						mountActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.Anim)
+						mountActor:SetAnimation(0)
+					end
+					MJTooltipModel.model:AttachPlayerToMount(mountActor, animID, isSelfMount, disablePlayerMountPreview or not GetCVarBool("mountJournalShowPlayer"), spellVisualKitID, PlayerUtil.ShouldUseNativeFormInModelScene())
+				end
+			end
+			if creatureID then
+				MJTooltipModel:ClearAllPoints()
+				MJTooltipModel:SetPoint("BOTTOMLEFT", GameTooltip, "BOTTOMRIGHT", -2, 0)
+				MJTooltipModel:Show()
+			end
+		end
 	end
 
 	local function onLeave(self)
 		self.highlight:Hide()
 		GameTooltip:Hide()
+		MJTooltipModel:Hide()
 	end
 
 	journal.view:RegisterCallback(journal.view.Event.OnAcquiredFrame, function(owner, frame, elementData, new)

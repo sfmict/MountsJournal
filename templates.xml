@@ -2697,22 +2697,14 @@
 	</Frame>
 
 	<Frame name="MJTooltipModel" inherits="TooltipBackdropTemplate" parent="UIParent" frameStrata="TOOLTIP" hidden="true">
-		<Size x="150" y="150"/>
-		<Anchors>
-			<Anchor point="TOPLEFT" relativeTo="GameTooltip" relativePoint="BOTTOMLEFT" y="3"/>
-		</Anchors>
+		<Size x="200" y="200"/>
 		<Frames>
-			<PlayerModel parentKey="model">
+			<ModelScene parentKey="model" inherits="NonInteractableModelSceneMixinTemplate">
+				<Size x="184" y="184"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="8" y="-8"/>
-					<Anchor point="BOTTOMRIGHT" x="-8" y="8"/>
 				</Anchors>
-				<Scripts>
-					<OnLoad>
-						 self:SetRotation(-MODELFRAME_DEFAULT_ROTATION)
-					</OnLoad>
-				</Scripts>
-			 </PlayerModel>
+			</ModelScene>
 		</Frames>
 	</Frame>
 
@@ -2826,14 +2818,23 @@
 				end
 			</OnClick>
 			<OnEnter>
-				if self.displayID then
+				if self.displayID and self.speciesID then
 					GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 					GameTooltip:SetText(self.subName:IsShown() and self.subName:GetText() or self.name:GetText(), 1, 1, 1)
 					GameTooltip:Show()
-					MJTooltipModel.model:SetDisplayInfo(self.displayID)
-					MJTooltipModel.model:SetDoBlend(false)
-					MJTooltipModel.model:SetAnimation(742, 0)
-					MJTooltipModel:Show()
+
+					local cardModelSceneID, loadoutModelSceneID = C_PetJournal.GetPetModelSceneInfoBySpeciesID(self.speciesID)
+					MJTooltipModel.model:SetFromModelSceneID(loadoutModelSceneID)
+
+					local battlePetActor = MJTooltipModel.model:GetActorByTag("pet")
+					if battlePetActor then
+						battlePetActor:SetModelByCreatureDisplayID(self.displayID)
+						battlePetActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
+
+						MJTooltipModel:ClearAllPoints()
+						MJTooltipModel:SetPoint("TOPLEFT", GameTooltip, "BOTTOMLEFT", 0, 2)
+						MJTooltipModel:Show()
+					end
 				end
 			</OnEnter>
 			<OnLeave>

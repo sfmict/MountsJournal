@@ -24,8 +24,8 @@ function actions.rmount:getValueList(value, func)
 	local list = {}
 	list[1] = {
 		text = L["Selected profile"],
-		func = func,
 		value = 0,
+		func = func,
 		checked = value == 0,
 	}
 	list[2] = {
