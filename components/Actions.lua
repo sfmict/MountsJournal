@@ -215,7 +215,7 @@ actions.pmacro.maxLetters = 200
 actions.pmacro.getValueText = actions.macro.getValueText
 
 function actions.pmacro:getFuncText(value)
-	return ("self.preUseMacro = '%s'"):format(value:gsub("'\n\\", "\\%1"))
+	return ("self.preUseMacro = '%s'"):format(value:gsub("['\n\\]", "\\%1"))
 end
 
 
