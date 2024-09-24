@@ -1,5 +1,6 @@
 <Ui>
 	<Script file="Main.lua"/>
+	<Script file="IconData.lua"/>
 	<Script file="Classes.lua"/>
 	<Script file="Rules.lua"/>
 	<Script file="RuleEdit.lua"/>

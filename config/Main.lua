@@ -1,5 +1,5 @@
 local addon, ns = ...
-local L, util, mounts, binding = ns.L, ns.util, ns.mounts, ns.binding
+local L, util, mounts, binding, journal = ns.L, ns.util, ns.mounts, ns.binding, ns.journal
 local specificDB = ns.specificDB
 local config = CreateFrame("FRAME", "MountsJournalConfig")
 ns.config = config
@@ -95,9 +95,17 @@ config:SetScript("OnShow", function(self)
 	self.waterJump.tooltipRequirement = L["WaterJumpDescription"]
 	self.waterJump:HookScript("OnClick", enableBtns)
 
+	-- SUMMON 1 ICON
+	self.summon1Icon = CreateFrame("BUTTON", nil, self.leftPanel, "MJIconButtonTemplate")
+	self.summon1Icon:SetPoint("TOPLEFT", self.waterJump, "BOTTOMLEFT", 3, -12)
+	self.summon1Icon:SetScript("OnClick", function(btn)
+		self.iconData:init(btn, enableBtns)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end)
+
 	-- SUMMON 1
 	local summon1 = self.leftPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-	summon1:SetPoint("TOPLEFT", self.waterJump, "BOTTOMLEFT", 0, -20)
+	summon1:SetPoint("BOTTOMLEFT", self.summon1Icon, "BOTTOMRIGHT", 10, 0)
 	summon1:SetText(SUMMONS.." 1")
 
 	-- CREATE MACRO
@@ -117,7 +125,7 @@ config:SetScript("OnShow", function(self)
 	-- BIND MOUNT 1
 	self.bindSummon1:SetParent(self.leftPanel)
 	self.bindSummon1:SetSize(258, 22)
-	self.bindSummon1:SetPoint("TOPLEFT", summon1, "BOTTOMLEFT", 0, -10)
+	self.bindSummon1:SetPoint("TOPLEFT", self.summon1Icon, "BOTTOMLEFT", -3, -8)
 
 	-- HELP PLATE SECOND MOUNT
 	local helpPlateSecond = CreateFrame("FRAME", nil, self.leftPanel, "MJHelpPlate")
@@ -148,9 +156,17 @@ config:SetScript("OnShow", function(self)
 		end
 	end)
 
+	-- SUMMON 2 ICON
+	self.summon2Icon = CreateFrame("BUTTON", nil, self.leftPanel, "MJIconButtonTemplate")
+	self.summon2Icon:SetPoint("TOPLEFT", modifierText, "BOTTOMLEFT", 3, -12)
+	self.summon2Icon:SetScript("OnClick", function(btn)
+		self.iconData:init(btn, enableBtns)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end)
+
 	-- SUMMON 2
 	local summon2 = self.leftPanel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-	summon2:SetPoint("TOPLEFT", modifierText, "BOTTOMLEFT", 0, -20)
+	summon2:SetPoint("BOTTOMLEFT", self.summon2Icon, "BOTTOMRIGHT", 10, 0)
 	summon2:SetText(SUMMONS.." 2")
 
 	-- CREATE SECOND MACRO
@@ -170,7 +186,7 @@ config:SetScript("OnShow", function(self)
 	-- BIND MOUNT 2
 	self.bindSummon2:SetParent(self.leftPanel)
 	self.bindSummon2:SetSize(258, 22)
-	self.bindSummon2:SetPoint("TOPLEFT", summon2, "BOTTOMLEFT", 0, -10)
+	self.bindSummon2:SetPoint("TOPLEFT", self.summon2Icon, "BOTTOMLEFT", -3, -8)
 
 	-- UNBOUND MESSAGE
 	binding.unboundMessage:SetParent(self)
@@ -613,6 +629,8 @@ config:SetScript("OnShow", function(self)
 		modifierCombobox:ddSetSelectedValue(mounts.config.modifier)
 		modifierCombobox:ddSetSelectedText(_G[mounts.config.modifier.."_KEY"])
 		self.waterJump:SetChecked(mounts.config.waterJump)
+		self.summon1Icon:SetNormalTexture(mounts.config.summon1Icon)
+		self.summon2Icon:SetNormalTexture(mounts.config.summon2Icon)
 		self.useHerbMounts:SetChecked(mounts.config.useHerbMounts)
 		for _, child in ipairs(self.useHerbMounts.childs) do
 			child:SetChecked(child:checkFunc())
@@ -669,6 +687,13 @@ config:SetScript("OnShow", function(self)
 	self:OnRefresh()
 	self:SetScript("OnShow", self.OnRefresh)
 
+	local function updateBtnIcon(i)
+		local icon = self["summon"..i.."Icon"]:GetNormalTexture():GetTexture()
+		mounts.config["summon"..i.."Icon"] = icon
+		journal.bgFrame["summon"..i]:SetNormalTexture(icon)
+		journal.summonPanel["summon"..i].icon:SetTexture(icon)
+	end
+
 	-- COMMIT
 	self.OnCommit = function(self)
 		binding.unboundMessage:Hide()
@@ -698,6 +723,8 @@ config:SetScript("OnShow", function(self)
 		mounts.config.openHyperlinks = self.openLinks:GetChecked()
 		mounts.config.showWowheadLink = self.showWowheadLink:GetChecked()
 
+		updateBtnIcon(1)
+		updateBtnIcon(2)
 		binding:saveBinding()
 		mounts:setHandleWaterJump(self.waterJump:GetChecked())
 		mounts:setModifier(self.modifierCombobox:ddGetSelectedValue())

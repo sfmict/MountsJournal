@@ -2364,7 +2364,7 @@
 	<Button name="MJIconButtonTemplate" virtual="true">
 		<Size x="33" y="33"/>
 		<Layers>
-			<Layer level="OVERLAY">
+			<Layer level="OVERLAY" textureSubLevel="2">
 				<Texture parentKey="border" inherits="ActionBarFlyoutButton-IconFrame">
 					<Size x="35" y="35"/>
 					<Anchors>
@@ -2374,6 +2374,19 @@
 			</Layer>
 		</Layers>
 		<HighlightTexture parentKey="highlight" file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
+	</Button>
+
+	<Button name="MJIconButtonSelectedTemplate" inherits="MJIconButtonTemplate" virtual="true">
+		<Layers>
+			<Layer level="OVERLAY" textureSubLevel="1">
+				<Texture atlas="PetList-ButtonSelect" parentKey="selectedTexture" hidden="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="2" y="-1"/>
+						<Anchor point="BOTTOMRIGHT" x="-2" y="1"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
 	</Button>
 
 	<Button name="MJSecureMacroButtonTemplate" inherits="MJIconButtonTemplate,MJSecureActionButtonUpTemplate" virtual="true">
