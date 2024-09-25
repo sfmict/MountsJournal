@@ -3,6 +3,7 @@ local mounts = ns.mounts
 local C_UnitAuras, C_Spell, IsSpellKnown = C_UnitAuras, C_Spell, IsSpellKnown
 local ltl = LibStub("LibThingsLoad-1.0")
 local _,_, raceID = UnitRace("player")
+local _,_, classID = UnitClass("player")
 local additionalMounts = {}
 ns.additionalMounts = additionalMounts
 
@@ -97,13 +98,7 @@ end
 -- TRAVEL FORM
 local travelForm = createMountFromSpell(783, 442, 2, 4)
 
-travelForm.isShown = raceID == 4
-                  or raceID == 6
-                  or raceID == 8
-                  or raceID == 22
-                  or raceID == 28
-                  or raceID == 31
-                  or raceID == 32
+travelForm.isShown = classID == 11
 
 if raceID == 6 then -- Tauren
 	travelForm.creatureID = 21244
