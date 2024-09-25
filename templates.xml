@@ -2373,6 +2373,7 @@
 				</Texture>
 			</Layer>
 		</Layers>
+		<NormalTexture parentKey="icon"/>
 		<HighlightTexture parentKey="highlight" file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
 	</Button>
 
@@ -2417,7 +2418,7 @@
 				</MaskTexture>
 			</Layer>
 		</Layers>
-		<NormalTexture name="$parentNormalTexture" parentKey="NormalTexture" atlas="UI-HUD-ActionBar-IconFrame">
+		<NormalTexture parentKey="NormalTexture" atlas="UI-HUD-ActionBar-IconFrame">
 			<Size x="46" y="45"/>
 			<Anchors>
 				<Anchor point="TOPLEFT"/>

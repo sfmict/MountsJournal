@@ -198,7 +198,7 @@ iconData:SetScript("OnShow", function(self)
 	self.ok:SetPoint("RIGHT", self.cancel, "LEFT", -5, 0)
 	self.ok:SetText(OKAY)
 	self.ok:SetScript("OnClick", function(btn)
-		self.btn:SetNormalTexture(self.selectedIcon)
+		self.btn.icon:SetTexture(self.selectedIcon)
 		self.func()
 		btn:GetParent():Hide()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -232,8 +232,8 @@ function iconData:init(btn, func)
 		self.func = func
 		self:SetPoint("LEFT", btn, "RIGHT", 5, 0)
 		self:Show()
-		self.selectedIcon = btn:GetNormalTexture():GetTexture()
-		self.selectedIconBtn:SetNormalTexture(self.selectedIcon)
+		self.selectedIcon = btn.icon:GetTexture()
+		self.selectedIconBtn.icon:SetTexture(self.selectedIcon)
 		self:refreshFilters()
 		self:scrollToSelectedIcon()
 	end
@@ -348,15 +348,15 @@ end
 
 do
 	local function click(btn)
-		iconData.selectedIcon = btn:GetNormalTexture():GetTexture()
-		iconData.selectedIconBtn:SetNormalTexture(iconData.selectedIcon)
+		iconData.selectedIcon = btn.icon:GetTexture()
+		iconData.selectedIconBtn.icon:SetTexture(iconData.selectedIcon)
 		iconData:updateList()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end
 
 	function iconData:btnInit(btn, index)
 		local icon = self:getIconByIndex(index)
-		btn:SetNormalTexture(icon)
+		btn.icon:SetTexture(icon)
 		btn.selectedTexture:SetShown(icon == self.selectedIcon)
 		btn:SetScript("OnClick", click)
 	end

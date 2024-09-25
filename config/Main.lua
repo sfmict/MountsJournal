@@ -629,8 +629,8 @@ config:SetScript("OnShow", function(self)
 		modifierCombobox:ddSetSelectedValue(mounts.config.modifier)
 		modifierCombobox:ddSetSelectedText(_G[mounts.config.modifier.."_KEY"])
 		self.waterJump:SetChecked(mounts.config.waterJump)
-		self.summon1Icon:SetNormalTexture(mounts.config.summon1Icon)
-		self.summon2Icon:SetNormalTexture(mounts.config.summon2Icon)
+		self.summon1Icon.icon:SetTexture(mounts.config.summon1Icon)
+		self.summon2Icon.icon:SetTexture(mounts.config.summon2Icon)
 		self.useHerbMounts:SetChecked(mounts.config.useHerbMounts)
 		for _, child in ipairs(self.useHerbMounts.childs) do
 			child:SetChecked(child:checkFunc())
@@ -688,9 +688,9 @@ config:SetScript("OnShow", function(self)
 	self:SetScript("OnShow", self.OnRefresh)
 
 	local function updateBtnIcon(i)
-		local icon = self["summon"..i.."Icon"]:GetNormalTexture():GetTexture()
+		local icon = self["summon"..i.."Icon"].icon:GetTexture()
 		mounts.config["summon"..i.."Icon"] = icon
-		journal.bgFrame["summon"..i]:SetNormalTexture(icon)
+		journal.bgFrame["summon"..i].icon:SetTexture(icon)
 		journal.summonPanel["summon"..i].icon:SetTexture(icon)
 	end
 
