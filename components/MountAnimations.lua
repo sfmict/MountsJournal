@@ -28,7 +28,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 		OnAccept = function(_, cb) cb() end,
 	}
 
-	dd.animations = MountsJournal.globalDB.mountAnimations
+	dd.animations = ns.mounts.globalDB.mountAnimations
 	dd.animationList = {
 		{
 			name = L["Default"],
@@ -254,8 +254,8 @@ MJMountCustomAnimationMixin = {}
 
 
 function MJMountCustomAnimationMixin:onLoad()
-	self.journal = MountsJournalFrame
-	self.animations = MountsJournal.globalDB.mountAnimations
+	self.journal = ns.journal
+	self.animations = ns.mounts.globalDB.mountAnimations
 	self.animationsCombobox = self:GetParent().animationsCombobox
 	if type(self.animations.current) ~= "number" then
 		self.animations.current = 0

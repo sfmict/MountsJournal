@@ -22,7 +22,7 @@ function MJNavBarMixin:onLoad()
 	self.navList = {self.homeButton}
 	self.widthBuffer = 20
 	self.overlay:SetFrameLevel(self:GetFrameLevel() + 50)
-	self.defMapID = MountsJournal.defMountsListID
+	self.defMapID = ns.mounts.defMountsListID
 
 	self.dropDown = LibStub("LibSFDropDown-1.5"):SetMixin({})
 	self.dropDown:ddHideWhenButtonHidden(self)

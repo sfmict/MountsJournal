@@ -732,7 +732,7 @@ config:SetScript("OnShow", function(self)
 		mounts:setUsableRepairMounts()
 		mounts:setHerbMount()
 		ns.pets:setSummonEvery()
-		MountsJournalFrame:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
+		journal:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 	end
 end)
 

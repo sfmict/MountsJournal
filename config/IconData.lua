@@ -140,8 +140,8 @@ iconData:SetScript("OnShow", function(self)
 
 		return a.name < b.name
 	end)
-	tinsert(self.extraIcons, 1, {type = "mount", name = addon..1, icon = 413588})
-	tinsert(self.extraIcons, 2, {type = "mount", name = addon..2, icon = 631718})
+	tinsert(self.extraIcons, 1, {type = "mount", name = SUMMONS.." 1", icon = 413588})
+	tinsert(self.extraIcons, 2, {type = "mount", name = SUMMONS.." 2", icon = 631718})
 
 	-- SELECTED ICON
 	self.selectedIconBtn = CreateFrame("BUTTON", nil, self, "MJIconButtonTemplate")
@@ -208,17 +208,24 @@ iconData:SetScript("OnShow", function(self)
 	self.cancel:SetSize(width, 22)
 	self.ok:SetSize(width, 22)
 
-	-- SHOW / HIDE
+	-- SHOW / HIDE / EVENTS
 	self:SetScript("OnShow", function(self)
 		local top = self.btn:GetTop() - self.btn:GetHeight() / 2 + self:GetHeight() / 2
 		if top > config:GetTop() then
 			self:SetPoint("TOP", 0, -10)
 		end
+		self:RegisterEvent("GLOBAL_MOUSE_DOWN")
 	end)
 	self:GetScript("OnShow")(self)
 	self:SetScript("OnHide", function(self)
 		self:ClearAllPoints()
 		self:Hide()
+		self:UnregisterEvent("GLOBAL_MOUSE_DOWN")
+	end)
+	self:SetScript("OnEvent", function(self, event, button)
+		if not self:IsMouseOver() and (button == "LeftButton" or button == "RightButton") then
+			self:Hide()
+		end
 	end)
 end)
 
@@ -327,7 +334,7 @@ function iconData:getIconByIndex(index)
 			index = index - numIcons
 		end
 		if self.filters.item then
-			if index <= #self.item then return self.item[index] end
+			return self.item[index]
 		end
 	end
 end

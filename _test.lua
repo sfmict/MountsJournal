@@ -149,7 +149,7 @@ function test:PLAYER_ENTERING_WORLD()
 	-- 	C_AddOns.LoadAddOn("Blizzard_Collections")
 	-- end
 	-- ShowUIPanel(CollectionsJournal)
-	-- MountsJournalFrame.bgFrame.profilesMenu:Click()
+	-- journal.bgFrame.profilesMenu:Click()
 	-- CollectionsJournal_SetTab(CollectionsJournal, COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS) -- DISABLE
 	-- journal.mountDisplay.info.petSelectionBtn:Click()
 
@@ -184,7 +184,7 @@ function test:PLAYER_ENTERING_WORLD()
 	-- if true then return end
 
 	-- LOAD CHARACTER FORM
-	-- local modelScene = MountsJournalFrame.mountDisplay.modelScene
+	-- local modelScene = journal.mountDisplay.modelScene
 
 	-- local function loadPlayer()
 	-- 	local mountActor = modelScene:GetActorByTag("unwrapped")

@@ -2,8 +2,8 @@ local _, ns = ...
 local L = ns.L
 
 
-ns.mounts:on("MODULES_INIT", function()
-	local bg, activeContent = MountsJournalFrame.bgFrame.settingsBackground
+ns.journal:on("MODULES_INIT", function(journal)
+	local bg, activeContent = journal.bgFrame.settingsBackground
 
 	local function onTabClick(self)
 		PanelTemplates_SetTab(bg, self.id)

@@ -1,6 +1,6 @@
 local addon, ns = ...
 local type, select, tremove = type, select, tremove
-local C_MountJournal, C_UnitAuras, AuraUtil = C_MountJournal, C_UnitAuras, AuraUtil
+local C_MountJournal, C_UnitAuras, AuraUtil, UnitExists = C_MountJournal, C_UnitAuras, AuraUtil, UnitExists
 local events, eventsMixin = {}, {}
 
 
@@ -71,8 +71,7 @@ local menuOnUpdate = function(self, elapsed)
 	local r,g,b,a = self:GetBackdropBorderColor()
 	if r > .4 then self.delta = -.3
 	elseif r < .1 then self.delta = .3 end
-	elapsed = elapsed * self.delta
-	r = r + elapsed
+	r = r + elapsed * self.delta
 	self:SetBackdropBorderColor(r, r, r, a)
 end
 
@@ -304,6 +303,7 @@ end
 
 
 function util.checkAura(unit, spellID, filter)
+	if not UnitExists(unit) then return false end
 	local GetAuraSlots, GetAuraDataBySlot, count, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
 	repeat
 		ctok, a,b,c,d,e = GetAuraSlots(unit, filter, 5, ctok)
@@ -317,6 +317,7 @@ end
 
 
 function util.getUnitMount(unit)
+	if not UnitExists(unit) then return end
 	local GetAuraSlots, GetAuraDataBySlot, count, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
 	local filter = unit == "player" and "HELPFUL PLAYER" or "HELPFUL"
 	repeat
