@@ -705,6 +705,11 @@
 									</OnMouseUp>
 								</Scripts>
 							</Button>
+							<Frame parentKey="mountHint" inherits="MJHelpPlate" scale=".7" alpha=".5">
+								<Anchors>
+									<Anchor point="TOP" relativeKey="$parent.modelSceneSettingsButton" relativePoint="BOTTOM" y="15"/>
+								</Anchors>
+							</Frame>
 						</Frames>
 					</Frame>
 					<ModelScene parentKey="modelScene" useParentLevel="true" inherits="WrappedAndUnwrappedModelScene">

@@ -908,6 +908,78 @@ function journal:init()
 		btn:ddToggle(1, nil, btn, 0, 0)
 	end)
 
+	-- MODEL SCENE MOUNT HINT
+	local msMountHint = self.mountDisplay.info.mountHint
+	msMountHint:SetScript("OnEnter", function(btn)
+		btn.highlight:Show()
+		btn:SetAlpha(1)
+		GameTooltip:SetOwner(btn, "ANCHOR_NONE")
+		GameTooltip:SetPoint("RIGHT", btn, "LEFT", 14, 0)
+
+		local name, _,_,_,_,_,_,_, faction = self:getMountInfo(self.selectedMountID)
+		local expansion, familyID, _,_,_,_,_, mountType = self:getMountInfoExtra(self.selectedMountID)
+		GameTooltip:SetText(name, nil, nil, nil, nil, true)
+
+		-- type
+		local mType, typeStr = self.mountTypes[mountType]
+		if type(mType) == "table" then
+			typeStr = L["MOUNT_TYPE_"..mType[1]]
+			for i = 2, #mType do
+				typeStr = ("%s, %s"):format(typeStr, L["MOUNT_TYPE_"..mType[i]])
+			end
+		else
+			typeStr = L["MOUNT_TYPE_"..mType]
+		end
+		GameTooltip:AddDoubleLine(L["types"], typeStr, 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
+
+		-- family
+		local function getPath(FID)
+			for name, k in next, ns.familyDB do
+				if type(k) == "number" then
+					if FID == k then return L[name] end
+				else
+					for subName, id in next, k do
+						if FID == id then return ("%s / %s"):format(L[name], L[subName]) end
+					end
+				end
+			end
+		end
+
+		if type(familyID) == "table" then
+			for i = 1, #familyID do
+				GameTooltip:AddDoubleLine(i == 1 and L["Family"] or " ", getPath(familyID[i]), 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
+			end
+		else
+			GameTooltip:AddDoubleLine(L["Family"], getPath(familyID), 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
+		end
+
+		-- faction
+		GameTooltip:AddDoubleLine(L["factions"], L["MOUNT_FACTION_"..((faction or 2) + 1)], 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
+
+		-- expanstion
+		GameTooltip:AddDoubleLine(EXPANSION_FILTER_TEXT, _G["EXPANSION_NAME"..(expansion - 1)], 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
+
+		-- tags
+		local mTags = self.tags.mountTags[self.selectedSpellID]
+		if mTags then
+			GameTooltip:AddDoubleLine(L["tags"], table.concat(GetKeysArray(mTags), ", "), 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
+		end
+
+		GameTooltip:Show()
+	end)
+
+	msMountHint:SetScript("OnLeave", function(btn)
+		btn.highlight:Hide()
+		btn:SetAlpha(.5)
+		GameTooltip:Hide()
+	end)
+
+	self:on("MOUNT_SELECT", function()
+		if msMountHint:IsMouseOver() then
+			msMountHint:GetScript("OnEnter")(msMountHint)
+		end
+	end)
+
 	-- MODEL SCENE MULTIPLE BUTTON
 	lsfdd:SetMixin(self.multipleMountBtn)
 	self.multipleMountBtn:RegisterForClicks("LeftButtonUp", "RightButtonUp")

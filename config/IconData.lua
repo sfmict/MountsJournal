@@ -223,7 +223,9 @@ iconData:SetScript("OnShow", function(self)
 		self:UnregisterEvent("GLOBAL_MOUSE_DOWN")
 	end)
 	self:SetScript("OnEvent", function(self, event, button)
-		if not self:IsMouseOver() and (button == "LeftButton" or button == "RightButton") then
+		if not (self:IsMouseOver() or self.btn:IsMouseOver())
+		and (button == "LeftButton" or button == "RightButton")
+		then
 			self:Hide()
 		end
 	end)
