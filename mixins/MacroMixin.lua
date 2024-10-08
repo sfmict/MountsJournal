@@ -546,6 +546,14 @@ function macroFrame:zoneMatch(zoneText)
 	local cz = ("/%s/%s/%s/%s/"):format(GetRealZoneText(), GetSubZoneText(), GetZoneText(), GetMinimapZoneText()):gsub("//", "/")
 	return cz:match(zoneText) and true
 end
+
+
+function macroFrame:checkMap(mapID)
+	local mapList = self.mounts.mapList
+	for i = 1, #mapList do
+		if mapList[i] == mapID then return true end
+	end
+end
 ----------------------------------------
 
 

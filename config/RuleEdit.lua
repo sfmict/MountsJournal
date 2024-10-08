@@ -31,9 +31,11 @@ ruleEditor:SetScript("OnShow", function(self)
 		if event == "PLAYER_REGEN_DISABLED" then
 			self:EnableKeyboard(false)
 			self.mountSelect:EnableKeyboard(false)
+			self.mapSelect:EnableKeyboard(false)
 		elseif event == "PLAYER_REGEN_ENABLED" then
 			self:EnableKeyboard(true)
 			self.mountSelect:EnableKeyboard(true)
+			self.mapSelect:EnableKeyboard(true)
 		end
 	end)
 
@@ -142,26 +144,110 @@ ruleEditor:SetScript("OnShow", function(self)
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.scrollBar, self.view)
 
 	-- OK & CANCEL
-	self.cancel = CreateFrame("BUTTON", nil, self.panel, "UIPanelButtonTemplate")
+	self.cancel, self.ok = util.createCancelOk(self.panel)
 	self.cancel:SetPoint("BOTTOMRIGHT", -30, 15)
-	self.cancel:SetText(CANCEL)
+
 	self.cancel:SetScript("OnClick", function(btn)
 		btn:GetParent():GetParent():Hide()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
 
-	self.ok = CreateFrame("BUTTON", nil, self.panel, "UIPanelButtonTemplate")
-	self.ok:SetPoint("RIGHT", self.cancel, "LEFT", -5, 0)
-	self.ok:SetText(OKAY)
 	self.ok:SetScript("OnClick", function(btn)
 		rules:saveRule(self.order, self.data)
 		btn:GetParent():GetParent():Hide()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
 
-	local width = math.max(self.cancel:GetFontString():GetStringWidth(), self.ok:GetFontString():GetStringWidth()) + 40
-	self.cancel:SetSize(width, 22)
-	self.ok:SetSize(width, 22)
+	-- modal utils
+	local function saveStatus(panel, frame)
+		local status = {}
+		for i = 1, frame:GetNumPoints() do
+			status[i] = {frame:GetPoint(i)}
+		end
+		status.parent = frame:GetParent()
+		status.show = frame:IsShown()
+		panel.status[frame] = status
+
+		frame:SetParent(panel)
+		frame:ClearAllPoints()
+		frame:Show()
+	end
+
+	local function restoreStatus(panel)
+		for frame, status in next, panel.status do
+			frame:ClearAllPoints()
+			for i = 1, #status do
+				frame:SetPoint(unpack(status[i]))
+			end
+			frame:SetParent(status.parent)
+			frame:SetShown(status.show)
+		end
+	end
+
+	-- MAP SELECT
+	self.mapSelect = CreateFrame("FRAME", nil, self.panel, "MJDarkPanelTemplate")
+	self.mapSelect:Hide()
+	self.mapSelect:EnableMouse(true)
+	self.mapSelect:SetFrameLevel(1200)
+	self.mapSelect:SetAllPoints()
+	self.mapSelect:SetScript("OnShow", function(panel)
+		panel:EnableKeyboard(not InCombatLockdown())
+		panel.status = {}
+
+		local navBar = ns.journal.navBar
+		saveStatus(panel, navBar)
+		navBar:SetPoint("TOPLEFT", 15, -15)
+		navBar:SetPoint("TOPRIGHT", -15, 15)
+		panel.tabMapID = navBar.tabMapID
+		navBar.tabMapID = panel.condData[3] or navBar.defMapID
+
+		local worldMap = ns.journal.worldMap
+		saveStatus(panel, worldMap)
+		worldMap:SetPoint("TOPLEFT", navBar, "BOTTOMLEFT")
+		worldMap:SetPoint("BOTTOMRIGHT", -15, 82)
+
+		local mapControl = ns.journal.mapSettings.mapControl
+		saveStatus(panel, mapControl)
+		mapControl:SetPoint("TOPLEFT", worldMap, "BOTTOMLEFT")
+		mapControl:SetPoint("TOPRIGHT", worldMap, "BOTTOMRIGHT")
+
+		local currentMap = ns.journal.mapSettings.CurrentMap
+		saveStatus(panel, currentMap)
+		currentMap:SetPoint("LEFT", mapControl, 134, 0)
+		currentMap:SetPoint("RIGHt", mapControl, -3, 0)
+
+		local dnr = ns.journal.mapSettings.dnr
+		saveStatus(panel, dnr)
+		dnr:SetPoint("TOPLEFT", mapControl, 3, -3)
+		dnr:SetPoint("RIGHT", currentMap, "LEFT", 2, 0)
+	end)
+	self.mapSelect:SetScript("OnHide", function(panel)
+		panel:Hide()
+		restoreStatus(panel)
+		ns.journal.navBar.tabMapID = panel.tabMapID
+		panel.tabMapID = nil
+		panel.status = nil
+		panel.panel = nil
+		panel.condData = nil
+	end)
+	self.mapSelect:SetScript("OnKeyDown", self:GetScript("OnKeyDown"))
+
+	self.mapSelect.cancel, self.mapSelect.ok = util.createCancelOk(self.mapSelect)
+	self.mapSelect.cancel:SetPoint("BOTTOMRIGHT", -30, 15)
+
+	self.mapSelect.cancel:SetScript("OnClick", function(btn)
+		btn:GetParent():Hide()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end)
+
+	self.mapSelect.ok:SetScript("OnClick", function(btn)
+		local panel = btn:GetParent()
+		panel.condData[3] = ns.journal.navBar.mapID
+		self:checkRule()
+		self:setCondValueOption(panel.panel, panel.condData)
+		panel:Hide()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end)
 
 	-- MOUNT SELECT
 	self.mountSelect = CreateFrame("FRAME", nil, self.panel, "MJDarkPanelTemplate")
@@ -171,28 +257,14 @@ ruleEditor:SetScript("OnShow", function(self)
 	self.mountSelect:SetAllPoints()
 	self.mountSelect:SetScript("OnShow", function(panel)
 		panel:EnableKeyboard(not InCombatLockdown())
-
 		panel.status = {}
-		local function saveStatus(frame)
-			local status = {}
-			for i = 1, frame:GetNumPoints() do
-				status[i] = {frame:GetPoint(i)}
-			end
-			status.parent = frame:GetParent()
-			status.show = frame:IsShown()
-			panel.status[frame] = status
-
-			frame:SetParent(panel)
-			frame:ClearAllPoints()
-			frame:Show()
-		end
 
 		local filtersPanel = ns.journal.filtersPanel
-		saveStatus(filtersPanel)
+		saveStatus(panel, filtersPanel)
 		filtersPanel:SetPoint("TOP", 0, -6)
 
 		local leftInset = ns.journal.leftInset
-		saveStatus(leftInset)
+		saveStatus(panel, leftInset)
 		leftInset:SetPoint("TOPRIGHT", ns.journal.filtersPanel, "BOTTOMRIGHT", -17, -2)
 		leftInset:SetPoint("BOTTOM", 0, 6)
 		ns.journal:setShownCountMounts()
@@ -206,14 +278,7 @@ ruleEditor:SetScript("OnShow", function(self)
 	end)
 	self.mountSelect:SetScript("OnHide", function(panel)
 		panel:Hide()
-		for frame, status in next, panel.status do
-			frame:ClearAllPoints()
-			for i = 1, #status do
-				frame:SetPoint(unpack(status[i]))
-			end
-			frame:SetParent(status.parent)
-			frame:SetShown(status.show)
-		end
+		restoreStatus(panel)
 		ns.journal:setShownCountMounts()
 		ns.journal.tags.selectFunc = nil
 		panel.status = nil
@@ -329,6 +394,15 @@ function ruleEditor:setCondValueOption(panel, btnData)
 	if cond.getValueList then
 		panel.optionValue = self.btnPool:Acquire()
 		panel.optionValue:SetScript("OnClick", function(btn) self:openCondValueMenu(btn, btnData) end)
+	elseif btnData[2] == "map" then
+		panel.optionValue = self.btnPool:Acquire()
+		panel.optionValue:SetScript("OnClick", function()
+			self.menu:ddCloseMenus()
+			self.mapSelect.panel = panel
+			self.mapSelect.condData = btnData
+			self.mapSelect:Show()
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		end)
 	else
 		panel.optionValue = self.editPool:Acquire()
 		panel.optionValue:SetNumeric(cond.isNumeric)

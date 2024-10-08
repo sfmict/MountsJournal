@@ -114,6 +114,7 @@ function mounts:ADDON_LOADED(addonName)
 
 		self.sFlags = {}
 		self.priorityProfiles = {}
+		self.mapList = {}
 		self.list = {}
 		self.empty = {}
 
@@ -411,19 +412,36 @@ function mounts:resetMountsList()
 end
 
 
+function mounts:setMapList()
+	wipe(self.mapList)
+	local mapList = self.mapList
+	local mapInfo = self.mapInfo
+
+	while mapInfo do
+		mapList[#mapList + 1] = mapInfo.mapID
+
+		if mapInfo.parentMapID == 0 and mapInfo.mapID ~= self.defMountsListID then
+			mapInfo = C_Map.GetMapInfo(self.defMountsListID)
+		else
+			mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
+		end
+	end
+end
+
+
 function mounts:setMountsList(profile)
 	if not profile then return end
 	self.priorityProfiles[#self.priorityProfiles + 1] = profile
 	if self.mapFlags and self.list.fly and self.list.ground and self.list.swimming then return end
 
-	local mapInfo = self.mapInfo
-	while mapInfo do
+	for i = 1, #self.mapList do
+		local mapID = self.mapList[i]
 		local zoneMounts, list = profile.zoneMountsFromProfile and self.defProfile.zoneMounts or profile.zoneMounts
 
-		if mapInfo.mapID == self.defMountsListID then
+		if mapID == self.defMountsListID then
 			list = profile
 		else
-			list = zoneMounts[mapInfo.mapID]
+			list = zoneMounts[mapID]
 
 			if list and not self.mapFlags and list.flags.enableFlags then
 				self.mapFlags = list.flags
@@ -454,12 +472,6 @@ function mounts:setMountsList(profile)
 					end
 				end
 			end
-		end
-
-		if mapInfo.parentMapID == 0 and mapInfo.mapID ~= self.defMountsListID then
-			mapInfo = C_Map.GetMapInfo(self.defMountsListID)
-		else
-			mapInfo = C_Map.GetMapInfo(mapInfo.parentMapID)
 		end
 	end
 end
@@ -689,6 +701,8 @@ do
 		flags.waterWalk = isFloating
 		                  or not isFlyableLocation and flags.modifier
 		flags.targetMount = self:getTargetMount()
+
+		self:setMapList()
 	end
 end
 

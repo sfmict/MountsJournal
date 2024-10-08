@@ -146,7 +146,6 @@ function journal:init()
 
 	self.mountCount = self.bgFrame.mountCount
 	self.achiev = self.bgFrame.achiev
-	self.navBarBtn = self.bgFrame.navBarBtn
 	self.navBar = self.bgFrame.navBar
 	self.worldMap = self.bgFrame.worldMap
 	self.mapSettings = self.bgFrame.mapSettings

@@ -485,8 +485,8 @@
 
 			<Frame parentKey="rightInset" useParentLevel="true" inherits="InsetFrameTemplate">
 				<Anchors>
-					<Anchor point="TOPRIGHT" relativeKey="$parent.navBarBtn" relativePoint="BOTTOMRIGHT" x="-4" y="0"/>
 					<Anchor point="TOPLEFT" relativeKey="$parent.filtersPanel" relativePoint="TOPRIGHT" x="1" y="0"/>
+					<Anchor point="RIGHT" x="-4"/>
 					<Anchor point="BOTTOM" x="0" y="26"/>
 				</Anchors>
 			</Frame>

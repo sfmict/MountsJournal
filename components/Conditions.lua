@@ -629,12 +629,25 @@ function conds.zone:getDescription()
 	return L["Zone Name/Subzone Name"]
 end
 
-function conds.zone:getValueText(value)
-	return value
-end
+conds.zone.getValueText = conds.mcond.getValueText
 
 function conds.zone:getFuncText(value)
 	return ("self:zoneMatch('/%s/')"):format(value:gsub("['\\]", "\\%1"))
+end
+
+
+---------------------------------------------------
+-- map
+conds.map = {}
+conds.map.text = L["Map"]
+
+function conds.map:getValueText(value)
+	local mapInfo = C_Map.GetMapInfo(value)
+	if mapInfo then return mapInfo.name end
+end
+
+function conds.map:getFuncText(value)
+	return ("self:checkMap(%d)"):format(value)
 end
 
 

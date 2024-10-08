@@ -186,27 +186,20 @@ iconData:SetScript("OnShow", function(self)
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.scrollBar, self.view)
 
 	-- OK & CANCEL
-	self.cancel = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
+	self.cancel, self.ok = util.createCancelOk(self)
 	self.cancel:SetPoint("BOTTOMRIGHT", -30, 10)
-	self.cancel:SetText(CANCEL)
+
 	self.cancel:SetScript("OnClick", function(btn)
 		btn:GetParent():Hide()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
 
-	self.ok = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
-	self.ok:SetPoint("RIGHT", self.cancel, "LEFT", -5, 0)
-	self.ok:SetText(OKAY)
 	self.ok:SetScript("OnClick", function(btn)
 		self.btn.icon:SetTexture(self.selectedIcon)
 		self.func()
 		btn:GetParent():Hide()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
-
-	local width = math.max(self.cancel:GetFontString():GetStringWidth(), self.ok:GetFontString():GetStringWidth()) + 40
-	self.cancel:SetSize(width, 22)
-	self.ok:SetSize(width, 22)
 
 	-- SHOW / HIDE / EVENTS
 	self:SetScript("OnShow", function(self)

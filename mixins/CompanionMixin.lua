@@ -306,9 +306,11 @@ end
 
 function MJCompanionsPanelMixin:scrollToSelectedPet()
 	local selectedPetID = self.journal.petForMount[self.journal.selectedSpellID]
-	self.scrollBox:ScrollToElementDataByPredicate(function(data)
-		return data.petID == selectedPetID
-	end)
+	if selectedPetID and type(selectedPetID) ~= "number" then
+		self.scrollBox:ScrollToElementDataByPredicate(function(data)
+			return data.petID == selectedPetID
+		end)
+	end
 end
 
 

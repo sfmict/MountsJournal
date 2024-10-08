@@ -414,3 +414,19 @@ do
 		hooksecurefunc(fontString, "SetText", fontString_SetText)
 	end
 end
+
+
+function util.createCancelOk(parent)
+	local cancel = CreateFrame("BUTTON", nil, parent, "UIPanelButtonTemplate")
+	cancel:SetText(CANCEL)
+
+	local ok = CreateFrame("BUTTON", nil, parent, "UIPanelButtonTemplate")
+	ok:SetPoint("RIGHT", cancel, "LEFT", -5, 0)
+	ok:SetText(OKAY)
+
+	local width = math.max(cancel:GetFontString():GetStringWidth(), ok:GetFontString():GetStringWidth()) + 40
+	cancel:SetSize(width, 22)
+	ok:SetSize(width, 22)
+
+	return cancel, ok
+end
