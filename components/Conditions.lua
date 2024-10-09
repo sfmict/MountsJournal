@@ -642,12 +642,41 @@ conds.map = {}
 conds.map.text = L["Map"]
 
 function conds.map:getValueText(value)
-	local mapInfo = C_Map.GetMapInfo(value)
-	if mapInfo then return mapInfo.name end
+	if value == ns.mounts.defMountsListID then
+		return WORLD
+	else
+		local mapInfo = ns.util.getMapFullNameInfo(value)
+		if mapInfo then return mapInfo.name end
+	end
 end
 
 function conds.map:getFuncText(value)
 	return ("self:checkMap(%d)"):format(value)
+end
+
+
+---------------------------------------------------
+-- instance
+conds.instance = {}
+conds.instance.text = INSTANCE
+
+function conds.instance:getDescription()
+	return {
+		INSTANCE.." or InstanceID",
+		{INSTANCE , ns.mounts.instanceName},
+		{"InstanceID", ns.mounts.instanceID},
+	}
+end
+
+conds.instance.getValueText = conds.mcond.getValueText
+
+function conds.instance:getFuncText(value)
+	if value:trim():match("%D") then
+		return ("self.mounts.instanceName == '%s'"):format(value:gsub("['\\]", "\\%1"))
+	elseif tonumber(value) then
+		return ("self.mounts.instanceID == %d"):format(tonumber(value))
+	end
+	return "false"
 end
 
 

@@ -269,9 +269,10 @@ end
 
 
 function mounts:PLAYER_ENTERING_WORLD()
-	local _, instanceType, _,_,_,_,_, instanceID = GetInstanceInfo()
-	self.instanceID = instanceID
+	local instanceName, instanceType, _,_,_,_,_, instanceID = GetInstanceInfo()
+	self.instanceName = instanceName
 	self.instanceType = instanceType
+	self.instanceID = instanceID
 end
 
 

@@ -204,7 +204,7 @@ ruleEditor:SetScript("OnShow", function(self)
 		local worldMap = ns.journal.worldMap
 		saveStatus(panel, worldMap)
 		worldMap:SetPoint("TOPLEFT", navBar, "BOTTOMLEFT")
-		worldMap:SetPoint("BOTTOMRIGHT", -15, 82)
+		worldMap:SetPoint("BOTTOMRIGHT", -15, 78)
 
 		local mapControl = ns.journal.mapSettings.mapControl
 		saveStatus(panel, mapControl)

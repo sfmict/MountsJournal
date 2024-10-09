@@ -304,7 +304,7 @@ end
 
 function util.checkAura(unit, spellID, filter)
 	if not UnitExists(unit) then return false end
-	local GetAuraSlots, GetAuraDataBySlot, count, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
+	local GetAuraSlots, GetAuraDataBySlot, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
 	repeat
 		ctok, a,b,c,d,e = GetAuraSlots(unit, filter, 5, ctok)
 		while a do
@@ -318,7 +318,7 @@ end
 
 function util.getUnitMount(unit)
 	if not UnitExists(unit) then return end
-	local GetAuraSlots, GetAuraDataBySlot, count, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
+	local GetAuraSlots, GetAuraDataBySlot, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
 	local filter = unit == "player" and "HELPFUL PLAYER" or "HELPFUL"
 	repeat
 		ctok, a,b,c,d,e = GetAuraSlots(unit, filter, 5, ctok)

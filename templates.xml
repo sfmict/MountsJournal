@@ -3228,6 +3228,16 @@
 				<Anchor point="RIGHT" relativeKey="$parent.normal" relativePoint="LEFT" x="-5" y="0"/>
 			</Anchors>
 		</ButtonText>
+		<Scripts>
+			<OnEnter>
+				if self.text:IsTruncated() then
+					GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+					GameTooltip:SetText(self.text:GetText())
+					GameTooltip:Show()
+				end
+			</OnEnter>
+			<OnLeave function="GameTooltip_Hide"/>
+		</Scripts>
 	</Button>
 
 	<EditBox name="MJConditionEditBoxTemplate" inherits="InputBoxScriptTemplate,MJDarkPanelTemplate" numeric="true" multiLine="false" autoFocus="false" virtual="true">
@@ -3251,7 +3261,19 @@
 			<OnEnter>
 				if self.tooltip then
 					GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
-					GameTooltip:SetText(self.tooltip, nil, nil, nil, nil, false)
+					if type(self.tooltip) == "string" then
+						GameTooltip:SetText(self.tooltip, nil, nil, nil, nil, false)
+					else
+						GameTooltip:SetText(self.tooltip[1], nil, nil, nil, nil, false)
+						for i = 2, #self.tooltip do
+							local text = self.tooltip[i]
+							if type(text) == "string" then
+								GameTooltip:AddLine(text, 1, 1, 1, 1, false)
+							else
+								GameTooltip:AddDoubleLine(text[1], text[2], 1, 1, 1, 1, 1, 1)
+							end
+						end
+					end
 					GameTooltip:Show()
 				end
 			</OnEnter>
