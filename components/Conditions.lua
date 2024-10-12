@@ -681,6 +681,54 @@ end
 
 
 ---------------------------------------------------
+-- difficulty
+conds.difficulty = {}
+conds.difficulty.text = LFG_LIST_DIFFICULTY
+
+function conds.difficulty:getValueText(value)
+	if value == 0 then return WORLD end
+	local name, instanceType, _,_,_,_,_, isLFR, minPlayers, maxPlayers = GetDifficultyInfo(value)
+
+	if name then
+		local n = {name}
+
+		if instanceType == "raid" then
+			n[#n + 1] = LEGENDARY_ORANGE_COLOR:WrapTextInColorCode(RAID)
+		elseif instanceType == "party" then
+			n[#n + 1] = EPIC_PURPLE_COLOR:WrapTextInColorCode(LFG_TYPE_DUNGEON)
+		end
+
+		if isLFR then n[#n + 1] = HEIRLOOM_BLUE_COLOR:WrapTextInColorCode(("%d - %d"):format(minPlayers, maxPlayers)) end
+		if IsLegacyDifficulty(value) then n[#n + 1] = ARTIFACT_GOLD_COLOR:WrapTextInColorCode(LFG_LIST_LEGACY) end
+
+		return table.concat(n, " | ")
+	end
+end
+
+function conds.difficulty:getValueList(value, func)
+	local ids = {0}
+	for k, id in next, DifficultyUtil.ID do ids[#ids + 1] = id end
+	sort(ids)
+
+	local list = {}
+	for i = 1, #ids do
+		local id = ids[i]
+		list[i] = {
+			text = self:getValueText(id),
+			value = id,
+			func = func,
+			checked = id == value,
+		}
+	end
+	return list
+end
+
+function conds.difficulty:getFuncText(value)
+	return ("self.mounts.difficultyID == %d"):format(value)
+end
+
+
+---------------------------------------------------
 -- METHODS
 function conds:getMenuList(value, func)
 	local list = {}

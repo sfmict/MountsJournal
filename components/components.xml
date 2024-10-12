@@ -13,5 +13,6 @@
 	<Script file="SummonPanel.lua"/>
 	<Script file="Conditions.lua"/>
 	<Script file="Actions.lua"/>
+	<Script file="RuleUtils.lua"/>
 	<Include file="filter\filter.xml"/>
 </Ui>

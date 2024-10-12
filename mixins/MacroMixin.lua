@@ -1,6 +1,6 @@
 local _, ns = ...
 local util = ns.util
-local type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText = type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText
+local type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras = type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras
 local macroFrame = CreateFrame("FRAME")
 ns.macroFrame = macroFrame
 util.setEventsMixin(macroFrame)
@@ -519,42 +519,9 @@ do
 end
 
 
-----------------------------------------
--- CONDITION / ATION UTILS
 function macroFrame:isMovingOrFalling()
 	return GetUnitSpeed("player") > 0 or IsFalling()
 end
-
-
-function macroFrame:isSpellReady(spellID)
-	local cdInfo = C_Spell.GetSpellCooldown(spellID)
-	return cdInfo and cdInfo.startTime == 0
-end
-
-
-function macroFrame:hasPlayerBuff(spellID)
-	return util.checkAura("player", spellID, "HELPFUL")
-end
-
-
-function macroFrame:hasPlayerDebuff(spellID)
-	return util.checkAura("player", spellID, "HARMFUL")
-end
-
-
-function macroFrame:zoneMatch(zoneText)
-	local cz = ("/%s/%s/%s/%s/"):format(GetRealZoneText(), GetSubZoneText(), GetZoneText(), GetMinimapZoneText()):gsub("//", "/")
-	return cz:match(zoneText) and true
-end
-
-
-function macroFrame:checkMap(mapID)
-	local mapList = self.mounts.mapList
-	for i = 1, #mapList do
-		if mapList[i] == mapID then return true end
-	end
-end
-----------------------------------------
 
 
 function macroFrame:getMacro(id, button)
