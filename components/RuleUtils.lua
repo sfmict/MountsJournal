@@ -31,3 +31,113 @@ function macroFrame:checkMap(mapID)
 		if mapList[i] == mapID then return true end
 	end
 end
+
+
+function macroFrame:isTransmogSetActive(setID)
+	local setInfo = C_TransmogSets.GetSetInfo(setID)
+	if not (setInfo and setInfo.validForCharacter) then return end
+
+	for k, transmogSlot in next, TRANSMOG_SLOTS do
+		if not transmogSlot.location:IsSecondary()
+		or TransmogUtil.IsSecondaryTransmoggedForItemLocation(TransmogUtil.GetItemLocationFromTransmogLocation(transmogSlot.location))
+		then
+			local sourceIDs = C_TransmogSets.GetSourceIDsForSlot(setID, transmogSlot.location.slotID)
+			local baseSourceID, _, appliedSourceID = C_Transmog.GetSlotVisualInfo(transmogSlot.location)
+			local sourceID = appliedSourceID > 0 and appliedSourceID or baseSourceID
+			if #sourceIDs > 0 and not tContains(sourceIDs, sourceID) then return end
+		end
+	end
+	return true
+end
+
+
+do
+	local typeAappearance, typeIllusion, modMain, modSecondary, noTransmogID = Enum.TransmogType.Appearance, Enum.TransmogType.Illusion, Enum.TransmogModification.Main, Enum.TransmogModification.Secondary, Constants.Transmog.NoTransmogID
+	local mainHandID, offHandID, shoulderID = INVSLOT_MAINHAND, INVSLOT_OFFHAND, INVSLOT_SHOULDER
+	local modelScene = CreateFrame("modelScene", nil, nil, "NonInteractableModelSceneMixinTemplate")
+	modelScene:Hide()
+	modelScene:SetSize(100, 100)
+	modelScene:SetFromModelSceneID(290)
+
+	local function getEffectiveTransmogID(transmogLocation)
+		local itemLocation = TransmogUtil.GetItemLocationFromTransmogLocation(transmogLocation)
+		if not C_Item.DoesItemExist(itemLocation) then return noTransmogID end
+
+		local function GetTransmogIDFrom(fn)
+			local itemTransmogInfo = fn(itemLocation)
+			return TransmogUtil.GetRelevantTransmogID(itemTransmogInfo, transmogLocation)
+		end
+
+		local appliedTransmogID = GetTransmogIDFrom(C_Item.GetAppliedItemTransmogInfo)
+		if appliedTransmogID == noTransmogID then
+			return GetTransmogIDFrom(C_Item.GetBaseItemTransmogInfo)
+		else
+			return appliedTransmogID
+		end
+	end
+
+	local function refreshItemModel(actor, slotID)
+		local transmogLocation = TransmogUtil.GetTransmogLocation(slotID, typeAappearance, modMain)
+		local appearanceID = getEffectiveTransmogID(transmogLocation)
+
+		if appearanceID ~= noTransmogID then
+			local secondaryAppearanceID = noTransmogID
+			local illusionID = noTransmogID
+
+			if transmogLocation:IsEitherHand() then
+				local dependendLocation = TransmogUtil.GetTransmogLocation(slotID, typeIllusion, modMain)
+				illusionID = getEffectiveTransmogID(dependendLocation)
+			else
+				local dependendLocation = TransmogUtil.GetTransmogLocation(slotID, typeAappearance, modSecondary)
+				secondaryAppearanceID = getEffectiveTransmogID(dependendLocation)
+			end
+
+			local itemTransmogInfo = actor:GetItemTransmogInfo(slotID)
+			itemTransmogInfo.appearanceID = appearanceID
+			itemTransmogInfo.secondaryAppearanceID = secondaryAppearanceID
+			itemTransmogInfo.illusionID = illusionID
+
+			if transmogLocation:IsMainHand() then
+				local mainHandCategoryID = C_Transmog.GetSlotEffectiveCategory(transmogLocation)
+				local isLegionArtifact = TransmogUtil.IsCategoryLegionArtifact(mainHandCategoryID)
+				itemTransmogInfo:ConfigureSecondaryForMainHand(isLegionArtifact)
+				-- don't specify a slot for ranged weapons
+				if mainHandCategoryID and TransmogUtil.IsCategoryRangedWeapon(mainHandCategoryID) then
+					slotID = nil
+				end
+			end
+			actor:SetItemTransmogInfo(itemTransmogInfo, slotID)
+		end
+	end
+
+	function macroFrame:isTtransmogOutfitActive(name)
+		local outfitID
+		for _, id in ipairs(C_TransmogCollection.GetOutfits()) do
+			if name == C_TransmogCollection.GetOutfitInfo(id) then
+				outfitID = id
+				break
+			end
+		end
+		if not outfitID then return end
+
+		local outfitItemTransmogInfoList = C_TransmogCollection.GetOutfitItemTransmogInfoList(outfitID)
+		if not outfitItemTransmogInfoList then return end
+
+		local actor = modelScene:GetPlayerActor()
+		actor:SetModelByUnit("player", false, true, false, true)
+		refreshItemModel(actor, shoulderID)
+		refreshItemModel(actor, offHandID)
+		refreshItemModel(actor, mainHandID)
+
+		local currentItemTransmogInfoList = actor:GetItemTransmogInfoList()
+		if not currentItemTransmogInfoList then return end
+
+		for slotID = 1, #currentItemTransmogInfoList do
+			local itemTransmogInfo = currentItemTransmogInfoList[slotID]
+			if itemTransmogInfo.appearanceID ~= Constants.Transmog.NoTransmogID and not itemTransmogInfo:IsEqual(outfitItemTransmogInfoList[slotID]) then
+				return
+			end
+		end
+		return true
+	end
+end

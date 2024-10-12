@@ -729,6 +729,116 @@ end
 
 
 ---------------------------------------------------
+-- tmog TRANSMOG
+conds.tmog = {}
+conds.tmog.text = PERKS_VENDOR_CATEGORY_TRANSMOG
+
+function conds.tmog:getValueText(value)
+	if type(value) == "number" then
+		local setInfo = C_TransmogSets.GetSetInfo(value)
+		if setInfo then
+			if setInfo.description then
+				return ("%s - %s (%s)"):format(WARDROBE_SETS, setInfo.name, setInfo.description)
+			else
+				return ("%s - %s"):format(WARDROBE_SETS, setInfo.name)
+			end
+		end
+	else
+		return ("%s - %s"):format(TRANSMOG_OUTFIT_HYPERLINK_TEXT:match("|t(.*)"), value)
+	end
+end
+
+function conds.tmog:getValueList(value, func)
+	local outfitList = {}
+	for i, id in ipairs(C_TransmogCollection.GetOutfits()) do
+		local name, icon = C_TransmogCollection.GetOutfitInfo(id)
+		outfitList[i] = {
+			text = name,
+			value = name,
+			icon = icon,
+			func = func,
+			checked = name == value,
+		}
+	end
+
+	if #outfitList == 0 then
+		outfitList[1] = {
+			notCheckable = true,
+			disabled = true,
+			text = EMPTY,
+		}
+	end
+
+	local function set_OnEnter(btn)
+		MJTooltipModel.model:SetFromModelSceneID(290)
+		local actor = MJTooltipModel.model:GetPlayerActor()
+		actor:SetModelByUnit("player", false, false, false, true)
+
+		local primaryAppearances = C_TransmogSets.GetSetPrimaryAppearances(btn.value)
+		for i = 1, #primaryAppearances do
+			actor:TryOn(primaryAppearances[i].appearanceID)
+		end
+
+		MJTooltipModel:ClearAllPoints()
+		MJTooltipModel:SetPoint("LEFT", btn, "RIGHT", 5, 0)
+		MJTooltipModel:Show()
+	end
+
+	local function Set_OnLeave(btn)
+		MJTooltipModel:Hide()
+	end
+
+	local setList = {}
+	for i, set in ipairs(C_TransmogSets.GetUsableSets()) do
+		local setInfo = C_TransmogSets.GetSetInfo(set.setID)
+		setList[i] = {
+			text = setInfo.description and ("%s (%s)"):format(setInfo.name, setInfo.description) or setInfo.name,
+			value = set.setID,
+			func = func,
+			checked = set.setID == value,
+			OnEnter = set_OnEnter,
+			OnLeave = Set_OnLeave,
+		}
+	end
+	sort(setList, function(a, b) return strcmputf8i(a.text, b.text) < 0 end)
+
+	if #setList == 0 then
+		setList[1] = {
+			notCheckable = true,
+			disabled = true,
+			text = EMPTY,
+		}
+	end
+
+	return {
+		{
+			keepShownOnClick = true,
+			notCheckable = true,
+			hasArrow = true,
+			text = TRANSMOG_OUTFIT_HYPERLINK_TEXT:match("|t(.*)"),
+			value = outfitList,
+		},
+		{
+			keepShownOnClick = true,
+			notCheckable = true,
+			hasArrow = true,
+			text = WARDROBE_SETS,
+			value = setList,
+		},
+	}
+end
+
+function conds.tmog:getFuncText(value)
+	if type(value) == "number" then
+		return ("self:isTransmogSetActive(%d)"):format(value)
+	else
+		return ("self:isTtransmogOutfitActive('%s')"):format(value:gsub("['\\]", "\\%1"))
+	end
+	return "false"
+end
+
+
+---------------------------------------------------
 -- METHODS
 function conds:getMenuList(value, func)
 	local list = {}
