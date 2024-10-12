@@ -834,7 +834,6 @@ function conds.tmog:getFuncText(value)
 	else
 		return ("self:isTtransmogOutfitActive('%s')"):format(value:gsub("['\\]", "\\%1"))
 	end
-	return "false"
 end
 
 
