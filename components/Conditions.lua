@@ -784,7 +784,7 @@ function conds.tmog:getValueList(value, func)
 		MJTooltipModel:Show()
 	end
 
-	local function Set_OnLeave(btn)
+	local function set_OnLeave(btn)
 		MJTooltipModel:Hide()
 	end
 
@@ -797,7 +797,7 @@ function conds.tmog:getValueList(value, func)
 			func = func,
 			checked = set.setID == value,
 			OnEnter = set_OnEnter,
-			OnLeave = Set_OnLeave,
+			OnLeave = set_OnLeave,
 		}
 	end
 	sort(setList, function(a, b) return strcmputf8i(a.text, b.text) < 0 end)

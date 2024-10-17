@@ -41,10 +41,11 @@ function macroFrame:isTransmogSetActive(setID)
 		if not transmogSlot.location:IsSecondary()
 		or TransmogUtil.IsSecondaryTransmoggedForItemLocation(TransmogUtil.GetItemLocationFromTransmogLocation(transmogSlot.location))
 		then
-			local sourceIDs = C_TransmogSets.GetSourceIDsForSlot(setID, transmogSlot.location.slotID)
-			local baseSourceID, _, appliedSourceID = C_Transmog.GetSlotVisualInfo(transmogSlot.location)
-			local sourceID = appliedSourceID > 0 and appliedSourceID or baseSourceID
-			if #sourceIDs > 0 and not tContains(sourceIDs, sourceID) then return end
+			local sourceIDs = C_TransmogSets.GetSourceIDsForSlot(setID, transmogSlot.location:GetSlotID())
+			if #sourceIDs > 0 then
+				local baseSourceID, _, appliedSourceID = C_Transmog.GetSlotVisualInfo(transmogSlot.location)
+				if tContains(sourceIDs, appliedSourceID > 0 and appliedSourceID or baseSourceID) then return end
+			end
 		end
 	end
 	return true
@@ -54,7 +55,7 @@ end
 do
 	local typeAappearance, typeIllusion, modMain, modSecondary, noTransmogID = Enum.TransmogType.Appearance, Enum.TransmogType.Illusion, Enum.TransmogModification.Main, Enum.TransmogModification.Secondary, Constants.Transmog.NoTransmogID
 	local mainHandID, offHandID, shoulderID = INVSLOT_MAINHAND, INVSLOT_OFFHAND, INVSLOT_SHOULDER
-	local modelScene = CreateFrame("modelScene", nil, nil, "NonInteractableModelSceneMixinTemplate")
+	local modelScene = CreateFrame("ModelScene", nil, nil, "NonInteractableModelSceneMixinTemplate")
 	modelScene:Hide()
 	modelScene:SetSize(100, 100)
 	modelScene:SetFromModelSceneID(290)
