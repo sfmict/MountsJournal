@@ -838,6 +838,44 @@ end
 
 
 ---------------------------------------------------
+-- sex
+conds.sex = {}
+conds.sex.text = L["Sex"]
+
+function conds.sex:getValueText(value)
+	local unit, sex = (":"):split(value, 2)
+	if sex == "2" then
+		sex = MALE
+	elseif sex == "3" then
+		sex = FEMALE
+	else
+		sex = UNKNOWN
+	end
+	return ("%s - %s"):format(unit:upper(), sex)
+end
+
+function conds.sex:getValueList(value, func)
+	local list = {}
+	for i, unit in ipairs({"player", "target", "focus"}) do
+		for j = 3, 1, -1 do
+			local v = ("%s:%d"):format(unit, j)
+			list[#list + 1] = {
+				text = self:getValueText(v),
+				value = v,
+				func = func,
+				checked = v == value,
+			}
+		end
+	end
+	return list
+end
+
+function conds.sex:getFuncText(value)
+	local unit, sex = (":"):split(value, 2)
+	return ("UnitSex('%s') == %s"):format(unit, sex), "UnitSex"
+end
+
+---------------------------------------------------
 -- METHODS
 function conds:getMenuList(value, func)
 	local list = {}

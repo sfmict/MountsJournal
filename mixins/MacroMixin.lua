@@ -607,7 +607,7 @@ function macroFrame:getCombatMacro()
 	elseif self.macro and self.class == "DRUID" and self.classConfig.useMacroAlways then
 		macro = self:addLine(macro, self.macro)
 	else
-		macro = self:addLine(macro, "/mount")
+		macro = self:addLine(macro, "/mount notNilModifier")
 	end
 
 	return macro
@@ -639,9 +639,9 @@ end
 
 
 function MJMacroMixin:preClick(button, down)
+	self.mounts.sFlags.forceModifier = self.forceModifier
 	self.notUsable = InCombatLockdown() or down ~= GetCVarBool("ActionButtonUseKeyDown")
 	if self.notUsable then return end
-	self.mounts.sFlags.forceModifier = self.forceModifier
 	self.mounts:setFlags()
 	macroFrame.useMount = false
 	self:SetAttribute("macrotext", macroFrame.checkRules[self.id](macroFrame, button))
