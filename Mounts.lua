@@ -727,7 +727,6 @@ end
 
 function mounts:errorSummon()
 	UIErrorsFrame:AddMessage(InCombatLockdown() and SPELL_FAILED_AFFECTING_COMBAT or L["ERR_MOUNT_NO_SELECTED"], 1, .1, .1, 1)
-	self.fromPriority = nil
 end
 
 
@@ -738,7 +737,8 @@ function mounts:setSummonMount(withAdditional)
 	local flags = self.sFlags
 	if not flags.groundSpellKnown then
 		if not (flags.swimming and self:setUsableID(self.list.swimming, self.list.swimmingWeight) or self:setUsableID(self.lowLevel, self.sp.mountsWeight)) then
-			self:errorSummon()
+			self.fromPriority = nil
+			if not self.noError then self:errorSummon() end
 		end
 	-- repair mounts
 	elseif not (flags.useRepair and self:setUsableID(self.usableRepairMounts, self.sp.mountsWeight))
@@ -757,28 +757,41 @@ function mounts:setSummonMount(withAdditional)
 	and not self:setUsableID(self.list.ground, self.list.groundWeight)
 	and not self:setUsableID(self.list.fly, self.list.flyWeight)
 	and not self:setUsableID(self.lowLevel, self.sp.mountsWeight) then
-		self:errorSummon()
+		self.fromPriority = nil
+		if not self.noError then self:errorSummon() end
 	end
 end
 
 
 function mounts:init()
-	SLASH_MOUNTSJOURNAL1 = "/mount"
-	SlashCmdList["MOUNTSJOURNAL"] = function(msg)
-		if not SecureCmdOptionParse(msg) then return end
+	self.init = nil
+	local flags = self.sFlags
+	local function summon(msg)
 		if msg ~= "notNilModifier" then
-			self.sFlags.forceModifier = nil
+			if not SecureCmdOptionParse(msg) then return end
+			flags.forceModifier = nil
 		end
 		self:setFlags()
-		local flags = self.sFlags
 		if flags.inVehicle then
 			VehicleExit()
 		elseif flags.isMounted then
 			Dismount()
 		else
-			ns.macroFrame.checkRules[1](ns.macroFrame, "LeftButton", true)
+			local ruleID = flags.forceModifier and 2 or 1
+			ns.macroFrame.checkRules[ruleID](ns.macroFrame, "LeftButton", true)
 			self:setSummonMount()
 			self:summon()
 		end
+	end
+
+	SLASH_MOUNTSJOURNAL1 = "/mount"
+	SlashCmdList["MOUNTSJOURNAL"] = summon
+
+	SLASH_MOUNTSJOURNAL_NO_ERROR1 = "/mountNoError"
+	SLASH_MOUNTSJOURNAL_NO_ERROR2 = "/mne"
+	SlashCmdList["MOUNTSJOURNAL_NO_ERROR"] = function(msg)
+		self.noError = true
+		summon(msg)
+		self.noError = nil
 	end
 end
