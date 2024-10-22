@@ -875,6 +875,54 @@ function conds.sex:getFuncText(value)
 	return ("UnitSex('%s') == %s"):format(unit, sex), "UnitSex"
 end
 
+
+---------------------------------------------------
+-- tl TALENT LOADOUT
+conds.tl = {}
+conds.tl.text = L["Talent loadout"]
+
+function conds.tl:getValueText(value)
+	local configID, guid = (":"):split(value, 2)
+	local configInfo = C_Traits.GetConfigInfo(tonumber(configID))
+	if configInfo then
+		return configInfo.name
+	else
+		local _,_,_,_,_, name, realmName = GetPlayerInfoByGUID(guid)
+		if realmName == "" then realmName = GetRealmName() end
+		return ("ID:%s - %s - %s"):format(configID, name, realmName)
+	end
+end
+
+function conds.tl:getValueList(value, func)
+	local list = {}
+	local guid = UnitGUID("player")
+	for i = 1, GetNumSpecializations() do
+		local specID, specName = GetSpecializationInfo(i)
+		local configIDs = C_ClassTalents.GetConfigIDsBySpecID(specID)
+		for j = 1, #configIDs do
+			local configID = configIDs[j]
+			local configInfo = C_Traits.GetConfigInfo(configID)
+			local v = ("%d:%s"):format(configID, guid)
+			list[#list + 1] = {
+				text = ("%s - %s (ID:%d)"):format(configInfo.name, specName, configID),
+				value = v,
+				func = func,
+				checked = v == value,
+			}
+		end
+	end
+	return list
+end
+
+function conds.tl:getFuncText(value)
+	local configID = (":"):split(value, 2)
+	if C_Traits.GetConfigInfo(tonumber(configID)) then
+		return ("self:checkTalent(%s)"):format(configID)
+	end
+	return "false"
+end
+
+
 ---------------------------------------------------
 -- METHODS
 function conds:getMenuList(value, func)
