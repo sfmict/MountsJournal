@@ -1,43 +1,42 @@
 local addon, ns = ...
-local type, select, tremove = type, select, tremove
+local type, tremove, next = type, tremove, next
 local C_MountJournal, C_UnitAuras, AuraUtil, UnitExists = C_MountJournal, C_UnitAuras, AuraUtil, UnitExists
 local events, eventsMixin = {}, {}
 
 
 function eventsMixin:on(event, func)
-	if type(event) ~= "string" or type(func) ~= "function" then return end
+	if type(event) ~= "string" or type(func) ~= "function" then return self end
 	local event, name = ("."):split(event, 2)
 
 	if not events[event] then
 		events[event] = {}
 	end
-	events[event][#events[event] + 1] = {
-		name = name,
-		func = func,
-		self = self,
-	}
+	local handlerList = events[event]
+	local k = name or func
+	local handler = function(...) func(self, ...) end
+
+	if handlerList[k] then
+		handlerList[handlerList[k]] = handler
+	else
+		local index = #handlerList + 1
+		handlerList[index] = handler
+		handlerList[k] = index
+	end
 	return self
 end
 
 
 function eventsMixin:off(event, func)
-	if type(event) ~= "string" then return end
+	if type(event) ~= "string" then return self end
 	local event, name = ("."):split(event, 2)
 
 	local handlerList = events[event]
 	if handlerList then
-		if name ~= nil or type(func) == "function" then
-			local i = 1
-			local handler = handlerList[i]
-			while handler do
-				if (not name or handler.name == name) and (not func or handler.func == func) then
-					tremove(handlerList, i)
-				else
-					i = i + 1
-				end
-				handler = handlerList[i]
-			end
-			if #handlerList == 0 then
+		local k = name or func
+		if k then
+			tremove(handlerList, handlerList[k])
+			handlerList[k] = nil
+			if not next(handlerList) then
 				events[event] = nil
 			end
 		else
@@ -52,8 +51,7 @@ function eventsMixin:event(event, ...)
 	local handlerList = events[event]
 	if handlerList then
 		for i = 1, #handlerList do
-			local handler = handlerList[i]
-			handler.func(handler.self, ...)
+			handlerList[i](...)
 		end
 	end
 	return self
