@@ -2,6 +2,8 @@ local _, ns = ...
 local L = {}
 ns.L = L
 
+L.auctioneer = MINIMAP_TRACKING_AUCTIONEER
+
 L["author"] = "Author"
 L["Main"] = "Main"
 L["ConfigPanelTitle"] = "Global settings"

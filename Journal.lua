@@ -2803,7 +2803,7 @@ function journal:getFilterSpecific(spellID, isSelfMount, mountType, mountID)
 		if t[spellID] then if filter[k] then return true end
 		else i = i + 1 end
 	end
-	return i == 6 and filter.rest
+	return i == 7 and filter.rest
 end
 
 

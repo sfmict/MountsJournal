@@ -8,6 +8,10 @@ ns.specificDB = {
 		[122708] = true, -- 460 Grand Expedition Yak
 		[264058] = true, -- 1039 Mighty Caravan Brutosaur
 	},
+	auctioneer = {
+		[264058] = true, -- 1039 Mighty Caravan Brutosaur
+		[465235] = true, -- 2265 Trader's Gilded Brutosaur
+	},
 	passenger = {
 		[55531] = true, -- 240 Mechano-Hog (Horde)
 		[60424] = true, -- 275 Mekgineer's Chopper (Alliance)
@@ -27,5 +31,6 @@ ns.specificDB = {
 		[264058] = true, -- 1039 Mighty Caravan Brutosaur
 		[307256] = true, -- 1287 Explorer's Jungle Hopper
 		[307263] = true, -- 1288 Explorer's Dunetrekker
+		[465235] = true, -- 2265 Trader's Gilded Brutosaur
 	}
 }
