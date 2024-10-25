@@ -145,6 +145,9 @@ end
 
 
 function macroFrame:checkTalent(configID)
-	local specID = GetSpecializationInfo(GetSpecialization())
-	return configID == C_ClassTalents.GetLastSelectedSavedConfigID(specID)
+	local specIndex = GetSpecialization()
+	if specIndex then
+		local specID = GetSpecializationInfo(specIndex)
+		return configID == C_ClassTalents.GetLastSelectedSavedConfigID(specID)
+	end
 end

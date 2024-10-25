@@ -889,13 +889,14 @@ function conds.tl:getValueText(value)
 	else
 		local _,_,_,_,_, name, realmName = GetPlayerInfoByGUID(guid)
 		if realmName == "" then realmName = GetRealmName() end
-		return ("ID:%s - %s - %s"):format(configID, name, realmName)
+		return ("ID:%s - %s - %s"):format(configID, name or "??", realmName or "??")
 	end
 end
 
 function conds.tl:getValueList(value, func)
 	local list = {}
 	local guid = UnitGUID("player")
+
 	for i = 1, GetNumSpecializations() do
 		local specID, specName = GetSpecializationInfo(i)
 		local configIDs = C_ClassTalents.GetConfigIDsBySpecID(specID)
@@ -911,6 +912,15 @@ function conds.tl:getValueList(value, func)
 			}
 		end
 	end
+
+	if #list == 0 then
+		list[1] = {
+			notCheckable = true,
+			disabled = true,
+			text = EMPTY,
+		}
+	end
+
 	return list
 end
 
