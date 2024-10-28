@@ -2123,7 +2123,7 @@ do
 		end
 
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		btn:ddToggle(1, btn.maps, btn, 116, 21)
+		btn:ddToggle(1, btn.maps, btn, 121, 17)
 	end
 end
 

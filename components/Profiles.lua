@@ -303,6 +303,6 @@ ns.journal:on("MODULES_INIT", function(journal)
 		wipe(self.profileNames)
 		for k in pairs(self.profiles) do tinsert(self.profileNames, k) end
 		sort(self.profileNames, function(a, b) return strcmputf8i(a, b) < 0 end)
-		self:ddToggle(1, nil, self, 112, 17)
+		self:ddToggle(1, nil, self, 117, 13)
 	end)
 end)

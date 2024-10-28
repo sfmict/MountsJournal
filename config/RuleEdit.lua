@@ -1,43 +1,16 @@
 local addon, ns = ...
 local L, util, rules, conds, actions = ns.L, ns.util, ns.ruleConfig, ns.conditions, ns.actions
-local ruleEditor = CreateFrame("FRAME", nil, rules)
+local ruleEditor = CreateFrame("FRAME", nil, rules, "MJEscHideTemplate")
 rules.ruleEditor = ruleEditor
 ruleEditor:Hide()
 
 
-ruleEditor:SetScript("OnShow", function(self)
+local escOnShow = ruleEditor:GetScript("OnShow")
+ruleEditor:HookScript("OnShow", function(self)
 	self:EnableMouse(true)
 	self:SetFrameLevel(1100)
 	self:SetAllPoints()
-	self:SetScript("OnKeyDown", function(self, key)
-		if key == GetBindingKey("TOGGLEGAMEMENU") then
-			self:Hide()
-			self:SetPropagateKeyboardInput(false)
-		else
-			self:SetPropagateKeyboardInput(true)
-		end
-	end)
-	self:SetScript("OnShow", function(self)
-		self:EnableKeyboard(not InCombatLockdown())
-		self:RegisterEvent("PLAYER_REGEN_DISABLED")
-		self:RegisterEvent("PLAYER_REGEN_ENABLED")
-	end)
-	self:GetScript("OnShow")(self)
-	self:SetScript("OnHide", function(self)
-		self:UnregisterEvent("PLAYER_REGEN_DISABLED")
-		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-	end)
-	self:SetScript("OnEvent", function(self, event)
-		if event == "PLAYER_REGEN_DISABLED" then
-			self:EnableKeyboard(false)
-			self.mountSelect:EnableKeyboard(false)
-			self.mapSelect:EnableKeyboard(false)
-		elseif event == "PLAYER_REGEN_ENABLED" then
-			self:EnableKeyboard(true)
-			self.mountSelect:EnableKeyboard(true)
-			self.mapSelect:EnableKeyboard(true)
-		end
-	end)
+	self:SetScript("OnShow", escOnShow)
 
 	self.bg = self:CreateTexture(nil, "BACKGROUND")
 	self.bg:SetColorTexture(.5, .5, .5, .2)
@@ -185,13 +158,12 @@ ruleEditor:SetScript("OnShow", function(self)
 	end
 
 	-- MAP SELECT
-	self.mapSelect = CreateFrame("FRAME", nil, self.panel, "MJDarkPanelTemplate")
+	self.mapSelect = CreateFrame("FRAME", nil, self.panel, "MJDarkPanelTemplate,MJEscHideTemplate")
 	self.mapSelect:Hide()
 	self.mapSelect:EnableMouse(true)
 	self.mapSelect:SetFrameLevel(1200)
 	self.mapSelect:SetAllPoints()
-	self.mapSelect:SetScript("OnShow", function(panel)
-		panel:EnableKeyboard(not InCombatLockdown())
+	self.mapSelect:HookScript("OnShow", function(panel)
 		panel.status = {}
 
 		local navBar = ns.journal.navBar
@@ -221,7 +193,7 @@ ruleEditor:SetScript("OnShow", function(self)
 		dnr:SetPoint("TOPLEFT", mapControl, 3, -3)
 		dnr:SetPoint("RIGHT", currentMap, "LEFT", 2, 0)
 	end)
-	self.mapSelect:SetScript("OnHide", function(panel)
+	self.mapSelect:HookScript("OnHide", function(panel)
 		panel:Hide()
 		restoreStatus(panel)
 		ns.journal.navBar.tabMapID = panel.tabMapID
@@ -230,7 +202,6 @@ ruleEditor:SetScript("OnShow", function(self)
 		panel.panel = nil
 		panel.condData = nil
 	end)
-	self.mapSelect:SetScript("OnKeyDown", self:GetScript("OnKeyDown"))
 
 	self.mapSelect.cancel, self.mapSelect.ok = util.createCancelOk(self.mapSelect)
 	self.mapSelect.cancel:SetPoint("BOTTOMRIGHT", -30, 15)
@@ -250,13 +221,12 @@ ruleEditor:SetScript("OnShow", function(self)
 	end)
 
 	-- MOUNT SELECT
-	self.mountSelect = CreateFrame("FRAME", nil, self.panel, "MJDarkPanelTemplate")
+	self.mountSelect = CreateFrame("FRAME", nil, self.panel, "MJDarkPanelTemplate,MJEscHideTemplate")
 	self.mountSelect:Hide()
 	self.mountSelect:EnableMouse(true)
 	self.mountSelect:SetFrameLevel(1200)
 	self.mountSelect:SetAllPoints()
-	self.mountSelect:SetScript("OnShow", function(panel)
-		panel:EnableKeyboard(not InCombatLockdown())
+	self.mountSelect:HookScript("OnShow", function(panel)
 		panel.status = {}
 
 		local filtersPanel = ns.journal.filtersPanel
@@ -276,14 +246,13 @@ ruleEditor:SetScript("OnShow", function(self)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		end
 	end)
-	self.mountSelect:SetScript("OnHide", function(panel)
+	self.mountSelect:HookScript("OnHide", function(panel)
 		panel:Hide()
 		restoreStatus(panel)
 		ns.journal:setShownCountMounts()
 		ns.journal.tags.selectFunc = nil
 		panel.status = nil
 	end)
-	self.mountSelect:SetScript("OnKeyDown", self:GetScript("OnKeyDown"))
 
 	self.mountSelect.close = CreateFrame("BUTTON", nil, self.mountSelect, "UIPanelCloseButtonNoScripts")
 	self.mountSelect.close:SetSize(22, 22)

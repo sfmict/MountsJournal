@@ -485,10 +485,11 @@ macroFrame.MOUNT_JOURNAL_USABILITY_CHANGED = macroFrame.autoEquip
 do
 	local function isBroomUsable(data)
 		if data.mountID then
-			local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(data.mountID)
-			return isUsable
+			local _, spellID, _,_, isUsable = C_MountJournal.GetMountInfoByID(data.mountID)
+			return isUsable and C_Spell.IsSpellUsable(spellID)
 		elseif data.itemID then
 			return C_Item.GetItemCount(data.itemID) > 0
+			       and (not macroFrame.sFlags.fly or C_Spell.GetSpellTexture(436854) == 5142726)
 		end
 	end
 

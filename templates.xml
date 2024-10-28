@@ -3086,6 +3086,31 @@
 		</Scripts>
 	</Frame>
 
+	<Frame name="MJEscHideTemplate" hidden="true" virtual="true">
+		<Scripts>
+			<OnKeyDown>
+				if key == GetBindingKey("TOGGLEGAMEMENU") then
+					self:Hide()
+					self:SetPropagateKeyboardInput(false)
+				else
+					self:SetPropagateKeyboardInput(true)
+				end
+			</OnKeyDown>
+			<OnShow>
+				self:EnableKeyboard(not InCombatLockdown())
+				self:RegisterEvent("PLAYER_REGEN_DISABLED")
+				self:RegisterEvent("PLAYER_REGEN_ENABLED")
+			</OnShow>
+			<OnHide>
+				self:UnregisterEvent("PLAYER_REGEN_DISABLED")
+				self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+			</OnHide>
+			<OnEvent>
+				self:EnableKeyboard(event == "PLAYER_REGEN_ENABLED")
+			</OnEvent>
+		</Scripts>
+	</Frame>
+
 	<Frame name="MJDarkPanelTemplate" inherits="BackdropTemplate" virtual="true">
 		<Scripts>
 			<OnLoad>

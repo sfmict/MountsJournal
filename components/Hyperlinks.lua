@@ -21,6 +21,7 @@ hooksecurefunc("HandleModifiedItemClick", function(link)
 				C_AddOns.LoadAddOn("Blizzard_Collections")
 			end
 			ShowUIPanel(CollectionsJournal)
+			CollectionsJournal_SetTab(ns.journal.CollectionsJournal, 1)
 			ns.journal:setSelectedMount(mountID)
 		end
 	end
