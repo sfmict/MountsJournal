@@ -110,6 +110,28 @@ end
 
 
 ---------------------------------------------------
+-- dmount DISMOUNT
+actions.dmount = {}
+actions.dmount.text = BINDING_NAME_DISMOUNT
+
+function actions.dmount:getFuncText()
+	return ([[
+		%s
+		-- EXIT VEHICLE
+		if self.sFlags.inVehicle then
+			return "/leavevehicle"
+		-- DISMOUNT
+		elseif self.sFlags.isMounted then
+			if not self.lastUseTime or GetTime() - self.lastUseTime > .5 then
+				return "/dismount"
+			end
+		end
+	]]):format(macroFrame.classDismount or ""),
+	{"GetTime"}
+end
+
+
+---------------------------------------------------
 -- item
 actions.item = {}
 actions.item.text = L["Use Item"]
@@ -226,6 +248,7 @@ function actions:getMenuList(value, func)
 	local types = {
 		"rmount",
 		"mount",
+		"dmount",
 		"spell",
 		"item",
 		"iitem",

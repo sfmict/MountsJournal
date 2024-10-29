@@ -440,6 +440,8 @@ function ruleEditor:setActionValueOption()
 	end
 
 	local action = actions[actionData[1]]
+	if not action.getValueText then return end
+
 	if action.maxLetters then
 		panel:SetHeight(140)
 		panel.optionValue = panel.macro
