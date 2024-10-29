@@ -1121,13 +1121,13 @@ function journal:init()
 		if InCombatLockdown() then return end
 		if type(self.selectedMountID) == "number" then
 			self:useMount(self.selectedMountID)
-			btn:SetAttribute("spell", nil)
+			btn:SetAttribute("macrotext", nil)
 		elseif self.selectedMountID then
 			if self.selectedMountID:isActive() then
-				btn:SetAttribute("spell", nil)
+				btn:SetAttribute("macrotext", nil)
 				Dismount()
 			else
-				btn:SetAttribute("spell", self.selectedMountID.spellID)
+				btn:SetAttribute("macrotext", self.selectedMountID.macro)
 			end
 		end
 	end)
@@ -1472,7 +1472,7 @@ function journal:getMountInfo(mount)
 	if type(mount) == "number" then
 		return C_MountJournal.GetMountInfoByID(mount)
 	else
-		return mount.name, mount.spellID, mount.icon, mount:isActive(), mount:isUsable(), 0, mount:getIsFavorite(), false, nil, not mount.isShown, true
+		return mount.name, mount.spellID, mount.icon, mount:isActive(), mount:isUsable(), 0, mount:getIsFavorite(), false, nil, not mount.isShown, mount:isCollected()
 	end
 end
 
@@ -1483,7 +1483,7 @@ function journal:getMountInfoExtra(mount)
 		local mountDB = mountsDB[mount]
 		return mountDB[1], mountDB[2], mountDB[3], C_MountJournal.GetMountInfoExtraByID(mount)
 	else
-		return mount.expansion, 0, nil, mount.creatureID, mount.description, mount.sourceText, true, mount.mountType, mount.modelSceneID
+		return mount.expansion, 0, nil, mount.creatureID, mount.description, mount.sourceText, mount.selfMount, mount.mountType, mount.modelSceneID, 0, 0
 	end
 end
 
@@ -1876,7 +1876,7 @@ function journal:sortMounts()
 			t[mount] = {
 				name = mount.name,
 				isFavorite = mount:getIsFavorite(),
-				isCollected = true,
+				isCollected = mount:isCollected(),
 				spellID = mount.spellID,
 				needsFanfare = false,
 				additional = true,

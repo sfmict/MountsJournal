@@ -1064,7 +1064,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						self:SetAttribute("type", "spell")
+						self:SetAttribute("type", "macro")
 					</OnLoad>
 					<OnLeave function="GameTooltip_Hide"/>
 				</Scripts>

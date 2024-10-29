@@ -167,6 +167,7 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 			info.text = UNWRAP
 		elseif active then
 			info.text = BINDING_NAME_DISMOUNT
+			info.disabled = not (isUsable and isMount)
 		else
 			info.text = MOUNT
 			info.disabled = not (isUsable and isMount)
@@ -208,7 +209,7 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 				info.OnLoad = nil
 			end
 
-			info.disabled = not (isCollected and journal:isCanFavorite(self.menuMountID))
+			info.disabled = not ((isCollected or not isMount) and journal:isCanFavorite(self.menuMountID))
 			info.text = isFavorite and BATTLE_PET_UNFAVORITE or BATTLE_PET_FAVORITE
 			info.func = function() journal:setIsFavorite(self.menuMountID, not isFavorite) end
 			btn:ddAddButton(info, level)
