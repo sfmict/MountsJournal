@@ -7,6 +7,7 @@ ns.specificDB = {
 		[61447] = true, -- 284 Traveler's Tundra Mammoth (Horde)
 		[122708] = true, -- 460 Grand Expedition Yak
 		[264058] = true, -- 1039 Mighty Caravan Brutosaur
+		[457485] = true, -- 2237 Grizzly Hills Packmaster
 	},
 	auctioneer = {
 		[264058] = true, -- 1039 Mighty Caravan Brutosaur
