@@ -220,11 +220,15 @@ local createMountFromItem do
 		additionalMounts[t.spellID] = t
 
 		t.icon = ltl:GetItemIcon(itemID)
-		t.name = ltl:GetItemName(itemID)
+		t.name = ""
 		t.sourceText = ""
 		t.description = ""
 		t.macro = "/use item:"..itemID
 		t.updateFunc = updateFunc
+
+		ltl:Items(itemID):Then(function()
+			t.name = ltl:GetItemName(itemID)
+		end)
 
 		local tooltipInfo = C_TooltipInfo.GetItemByID(itemID)
 		t:updateFunc(tooltipInfo)
