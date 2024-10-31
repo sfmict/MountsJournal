@@ -409,6 +409,16 @@ end
 
 
 ---------------------------------------------------
+-- dead
+conds.dead = {}
+conds.dead.text = L["The player is dead"]
+
+function conds.dead:getFuncText()
+	return "UnitIsDead('Player')", "UnitIsDead"
+end
+
+
+---------------------------------------------------
 -- fs FLIGHT STYLE
 conds.fs = {}
 conds.fs.text = L["Flight style"]
@@ -465,14 +475,29 @@ conds.ritem = {}
 conds.ritem.text = L["Item is ready"]
 conds.ritem.isNumeric = true
 
-function conds.ritem:getDescription()
-	return "ItemID"
-end
+conds.ritem.getDescription = conds.hitem.getDescription
 
 conds.ritem.getValueText = conds.hitem.getValueText
 
 function conds.ritem:getFuncText(value)
 	return ("C_Container.GetItemCooldown(%d) == 0"):format(value), "C_Container"
+end
+
+
+---------------------------------------------------
+-- kspell KNOWN SPELL
+conds.kspell = {}
+conds.kspell.text = L["Spell is known"]
+conds.kspell.isNumeric = true
+
+function conds.kspell:getDescription()
+	return "SpellID"
+end
+
+conds.kspell.getValueText = conds.hitem.getValueText
+
+function conds.kspell:getFuncText(value)
+	return ("IsPlayerSpell(%d)"):format(value), "IsPlayerSpell"
 end
 
 
@@ -499,9 +524,7 @@ conds.hbuff = {}
 conds.hbuff.text = L["The player has a buff"]
 conds.hbuff.isNumeric = true
 
-function conds.hbuff:getDescription()
-	return "SpellID"
-end
+conds.hbuff.getDescription = conds.kspell.getDescription
 
 conds.hbuff.getValueText = conds.hitem.getValueText
 
@@ -516,9 +539,7 @@ conds.hdebuff = {}
 conds.hdebuff.text = L["The player has a debuff"]
 conds.hdebuff.isNumeric = true
 
-function conds.hdebuff:getDescription()
-	return "SpellID"
-end
+conds.hdebuff.getDescription = conds.kspell.getDescription
 
 conds.hdebuff.getValueText = conds.hitem.getValueText
 
