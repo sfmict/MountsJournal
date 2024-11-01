@@ -955,6 +955,122 @@ end
 
 
 ---------------------------------------------------
+-- mtrack MINIMAP TRACKING
+conds.mtrack = {}
+conds.mtrack.text = TRACKING
+
+function conds.mtrack:getValueText(value)
+	local k, v = (":"):split(value, 2)
+	v = tonumber(v)
+	for i = 1, C_Minimap.GetNumTrackingTypes() do
+		if C_Minimap.GetTrackingFilter(i)[k] == v then
+			local trackingInfo = C_Minimap.GetTrackingInfo(i)
+			return ("%s %s"):format(trackingInfo.name, GRAY_FONT_COLOR:WrapTextInColorCode("("..value..")"))
+		end
+	end
+	return value
+end
+
+function conds.mtrack:getValueList(value, func)
+	local list = {}
+	local showAll = GetCVarBool("minimapTrackingShowAll")
+
+	local OPTIONAL_FILTERS = {
+		[Enum.MinimapTrackingFilter.Banker] = true,
+		[Enum.MinimapTrackingFilter.Auctioneer] = true,
+		[Enum.MinimapTrackingFilter.Barber] = true,
+		[Enum.MinimapTrackingFilter.TrainerProfession] = true,
+		[Enum.MinimapTrackingFilter.AccountCompletedQuests] = true,
+		[Enum.MinimapTrackingFilter.TrivialQuests] = true,
+		[Enum.MinimapTrackingFilter.Transmogrifier] = true,
+		[Enum.MinimapTrackingFilter.Mailbox] = true,
+	}
+
+	local TRACKING_SPELL_OVERRIDE_ATLAS = {
+		[43308] = "professions_tracking_fish", -- Find Fish
+		[2580] = "professions_tracking_ore", -- Find Minerals 1
+		[8388] = "professions_tracking_ore", -- Find Minerals 2
+		[2383] = "professions_tracking_herb", -- Find Herbs 1
+		[8387] = "professions_tracking_herb", -- Find Herbs 2
+		[122026] = "WildBattlePetCapturable", -- Track Pets
+	}
+
+	local hunterList = {}
+	local townfolkList = {}
+	local regularList = {}
+
+	for i = 1, C_Minimap.GetNumTrackingTypes() do
+		local filter = C_Minimap.GetTrackingFilter(i)
+		if showAll or OPTIONAL_FILTERS[filter.filterID] or filter.spellID then
+			local trackingInfo = C_Minimap.GetTrackingInfo(i)
+			local v = filter.filterID and "filterID:"..filter.filterID or "spellID:"..filter.spellID
+
+			local info = {
+				text = ("%s %s"):format(trackingInfo.name, GRAY_FONT_COLOR:WrapTextInColorCode("("..v..")")),
+				value = v,
+				func = func,
+				checked = v == value,
+			}
+
+			if TRACKING_SPELL_OVERRIDE_ATLAS[trackingInfo.spellID] then
+				local atlasInfo = C_Texture.GetAtlasInfo(TRACKING_SPELL_OVERRIDE_ATLAS[trackingInfo.spellID])
+				info.icon = atlasInfo.file
+				info.iconInfo = {
+					tCoordLeft = atlasInfo.leftTexCoord,
+					tCoordRight = atlasInfo.rightTexCoord,
+					tCoordTop = atlasInfo.topTexCoord,
+					tCoordBottom = atlasInfo.bottomTexCoord,
+				}
+			else
+				info.icon = trackingInfo.texture
+			end
+
+			if trackingInfo.subType == HUNTER_TRACKING then
+				hunterList[#hunterList + 1] = info
+			elseif showAll and trackingInfo.subType == TOWNSFOLK_TRACKING then
+				townfolkList[#townfolkList + 1] = info
+			else
+				regularList[#regularList + 1] = info
+			end
+		end
+	end
+
+	if #hunterList == 1 then
+		list[#list + 1] = hunterList[1]
+	elseif #hunterList > 1 then
+		list[#list + 1] = {
+			keepShownOnClick = true,
+			notCheckable = true,
+			text = HUNTER_TRACKING_TEXT,
+			hasArrow = true,
+			value = hunterList,
+		}
+	end
+
+	if #townfolkList > 0 then
+		list[#list + 1] = {
+			keepShownOnClick = true,
+			notCheckable = true,
+			text = TOWNSFOLK_TRACKING_TEXT,
+			hasArrow = true,
+			value = townfolkList,
+		}
+	end
+
+	for i = 1, #regularList do
+		list[#list + 1] = regularList[i]
+	end
+
+	return list
+end
+
+function conds.mtrack:getFuncText(value)
+	local k, v = (":"):split(value, 2)
+	return ("self:checkTracking('%s', %s)"):format(k, v)
+end
+
+
+---------------------------------------------------
 -- METHODS
 function conds:getMenuList(value, func)
 	local list = {}
