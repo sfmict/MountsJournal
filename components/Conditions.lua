@@ -1071,6 +1071,38 @@ end
 
 
 ---------------------------------------------------
+-- prof PROFESSION
+conds.prof = {}
+conds.prof.text = PROFESSIONS_BUTTON
+
+function conds.prof:getValueText(value)
+	return C_TradeSkillUI.GetTradeSkillDisplayName(value)
+end
+
+function conds.prof:getValueList(value, func)
+	local list = {}
+	for id in next, WORLD_QUEST_ICONS_BY_PROFESSION do
+		local icon = C_TradeSkillUI.GetTradeSkillTexture(id)
+		if icon then
+			list[#list + 1] = {
+				text = self:getValueText(id),
+				icon = icon,
+				value = id,
+				func = func,
+				checked = id == value,
+			}
+		end
+	end
+	sort(list, function(a, b) return strcmputf8i(a.text, b.text) < 0 end)
+	return list
+end
+
+function conds.prof:getFuncText(value)
+	return ("self.mounts.profs[%d]"):format(value)
+end
+
+
+---------------------------------------------------
 -- METHODS
 function conds:getMenuList(value, func)
 	local list = {}
