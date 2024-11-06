@@ -1,6 +1,6 @@
 local _, ns = ...
 local macroFrame, util = ns.macroFrame, ns.util
-local C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_Transmog, C_TransmogSets, C_TransmogCollection, C_Transmog, TransmogUtil, TRANSMOG_SLOTS, tContains, GetSpecialization, GetSpecializationInfo, C_ClassTalents = C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_Transmog, C_TransmogSets, C_TransmogCollection, C_Transmog, TransmogUtil, TRANSMOG_SLOTS, tContains, GetSpecialization, GetSpecializationInfo, C_ClassTalents
+local C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_Transmog, C_TransmogSets, C_TransmogCollection, C_Transmog, TransmogUtil, TRANSMOG_SLOTS, tContains, GetSpecialization, GetSpecializationInfo, C_ClassTalents, C_Minimap = C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_Transmog, C_TransmogSets, C_TransmogCollection, C_Transmog, TransmogUtil, TRANSMOG_SLOTS, tContains, GetSpecialization, GetSpecializationInfo, C_ClassTalents, C_Minimap
 
 
 function macroFrame:isSpellReady(spellID)
@@ -149,5 +149,14 @@ function macroFrame:checkTalent(configID)
 	if specIndex then
 		local specID = GetSpecializationInfo(specIndex)
 		return configID == C_ClassTalents.GetLastSelectedSavedConfigID(specID)
+	end
+end
+
+
+function macroFrame:checkTracking(key, value)
+	for i = 1, C_Minimap.GetNumTrackingTypes() do
+		if C_Minimap.GetTrackingFilter(i)[key] == value then
+			return C_Minimap.GetTrackingInfo(i).active
+		end
 	end
 end

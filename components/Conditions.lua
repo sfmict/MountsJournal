@@ -409,6 +409,16 @@ end
 
 
 ---------------------------------------------------
+-- dead
+conds.dead = {}
+conds.dead.text = L["The player is dead"]
+
+function conds.dead:getFuncText()
+	return "UnitIsDead('Player')", "UnitIsDead"
+end
+
+
+---------------------------------------------------
 -- fs FLIGHT STYLE
 conds.fs = {}
 conds.fs.text = L["Flight style"]
@@ -465,14 +475,29 @@ conds.ritem = {}
 conds.ritem.text = L["Item is ready"]
 conds.ritem.isNumeric = true
 
-function conds.ritem:getDescription()
-	return "ItemID"
-end
+conds.ritem.getDescription = conds.hitem.getDescription
 
 conds.ritem.getValueText = conds.hitem.getValueText
 
 function conds.ritem:getFuncText(value)
 	return ("C_Container.GetItemCooldown(%d) == 0"):format(value), "C_Container"
+end
+
+
+---------------------------------------------------
+-- kspell KNOWN SPELL
+conds.kspell = {}
+conds.kspell.text = L["Spell is known"]
+conds.kspell.isNumeric = true
+
+function conds.kspell:getDescription()
+	return "SpellID"
+end
+
+conds.kspell.getValueText = conds.hitem.getValueText
+
+function conds.kspell:getFuncText(value)
+	return ("IsPlayerSpell(%d)"):format(value), "IsPlayerSpell"
 end
 
 
@@ -499,9 +524,7 @@ conds.hbuff = {}
 conds.hbuff.text = L["The player has a buff"]
 conds.hbuff.isNumeric = true
 
-function conds.hbuff:getDescription()
-	return "SpellID"
-end
+conds.hbuff.getDescription = conds.kspell.getDescription
 
 conds.hbuff.getValueText = conds.hitem.getValueText
 
@@ -516,9 +539,7 @@ conds.hdebuff = {}
 conds.hdebuff.text = L["The player has a debuff"]
 conds.hdebuff.isNumeric = true
 
-function conds.hdebuff:getDescription()
-	return "SpellID"
-end
+conds.hdebuff.getDescription = conds.kspell.getDescription
 
 conds.hdebuff.getValueText = conds.hitem.getValueText
 
@@ -930,6 +951,154 @@ function conds.tl:getFuncText(value)
 		return ("self:checkTalent(%s)"):format(configID)
 	end
 	return "false"
+end
+
+
+---------------------------------------------------
+-- mtrack MINIMAP TRACKING
+conds.mtrack = {}
+conds.mtrack.text = TRACKING
+
+function conds.mtrack:getValueText(value)
+	local k, v = (":"):split(value, 2)
+	v = tonumber(v)
+	for i = 1, C_Minimap.GetNumTrackingTypes() do
+		if C_Minimap.GetTrackingFilter(i)[k] == v then
+			local trackingInfo = C_Minimap.GetTrackingInfo(i)
+			return ("%s %s"):format(trackingInfo.name, GRAY_FONT_COLOR:WrapTextInColorCode("("..value..")"))
+		end
+	end
+	return value
+end
+
+function conds.mtrack:getValueList(value, func)
+	local list = {}
+	local showAll = GetCVarBool("minimapTrackingShowAll")
+
+	local OPTIONAL_FILTERS = {
+		[Enum.MinimapTrackingFilter.Banker] = true,
+		[Enum.MinimapTrackingFilter.Auctioneer] = true,
+		[Enum.MinimapTrackingFilter.Barber] = true,
+		[Enum.MinimapTrackingFilter.TrainerProfession] = true,
+		[Enum.MinimapTrackingFilter.AccountCompletedQuests] = true,
+		[Enum.MinimapTrackingFilter.TrivialQuests] = true,
+		[Enum.MinimapTrackingFilter.Transmogrifier] = true,
+		[Enum.MinimapTrackingFilter.Mailbox] = true,
+	}
+
+	local TRACKING_SPELL_OVERRIDE_ATLAS = {
+		[43308] = "professions_tracking_fish", -- Find Fish
+		[2580] = "professions_tracking_ore", -- Find Minerals 1
+		[8388] = "professions_tracking_ore", -- Find Minerals 2
+		[2383] = "professions_tracking_herb", -- Find Herbs 1
+		[8387] = "professions_tracking_herb", -- Find Herbs 2
+		[122026] = "WildBattlePetCapturable", -- Track Pets
+	}
+
+	local hunterList = {}
+	local townfolkList = {}
+	local regularList = {}
+
+	for i = 1, C_Minimap.GetNumTrackingTypes() do
+		local filter = C_Minimap.GetTrackingFilter(i)
+		if showAll or OPTIONAL_FILTERS[filter.filterID] or filter.spellID then
+			local trackingInfo = C_Minimap.GetTrackingInfo(i)
+			local v = filter.filterID and "filterID:"..filter.filterID or "spellID:"..filter.spellID
+
+			local info = {
+				text = ("%s %s"):format(trackingInfo.name, GRAY_FONT_COLOR:WrapTextInColorCode("("..v..")")),
+				value = v,
+				func = func,
+				checked = v == value,
+			}
+
+			if TRACKING_SPELL_OVERRIDE_ATLAS[trackingInfo.spellID] then
+				local atlasInfo = C_Texture.GetAtlasInfo(TRACKING_SPELL_OVERRIDE_ATLAS[trackingInfo.spellID])
+				info.icon = atlasInfo.file
+				info.iconInfo = {
+					tCoordLeft = atlasInfo.leftTexCoord,
+					tCoordRight = atlasInfo.rightTexCoord,
+					tCoordTop = atlasInfo.topTexCoord,
+					tCoordBottom = atlasInfo.bottomTexCoord,
+				}
+			else
+				info.icon = trackingInfo.texture
+			end
+
+			if trackingInfo.subType == HUNTER_TRACKING then
+				hunterList[#hunterList + 1] = info
+			elseif showAll and trackingInfo.subType == TOWNSFOLK_TRACKING then
+				townfolkList[#townfolkList + 1] = info
+			else
+				regularList[#regularList + 1] = info
+			end
+		end
+	end
+
+	if #hunterList == 1 then
+		list[#list + 1] = hunterList[1]
+	elseif #hunterList > 1 then
+		list[#list + 1] = {
+			keepShownOnClick = true,
+			notCheckable = true,
+			text = HUNTER_TRACKING_TEXT,
+			hasArrow = true,
+			value = hunterList,
+		}
+	end
+
+	if #townfolkList > 0 then
+		list[#list + 1] = {
+			keepShownOnClick = true,
+			notCheckable = true,
+			text = TOWNSFOLK_TRACKING_TEXT,
+			hasArrow = true,
+			value = townfolkList,
+		}
+	end
+
+	for i = 1, #regularList do
+		list[#list + 1] = regularList[i]
+	end
+
+	return list
+end
+
+function conds.mtrack:getFuncText(value)
+	local k, v = (":"):split(value, 2)
+	return ("self:checkTracking('%s', %s)"):format(k, v)
+end
+
+
+---------------------------------------------------
+-- prof PROFESSION
+conds.prof = {}
+conds.prof.text = PROFESSIONS_BUTTON
+
+function conds.prof:getValueText(value)
+	return C_TradeSkillUI.GetTradeSkillDisplayName(value)
+end
+
+function conds.prof:getValueList(value, func)
+	local list = {}
+	for id in next, WORLD_QUEST_ICONS_BY_PROFESSION do
+		local icon = C_TradeSkillUI.GetTradeSkillTexture(id)
+		if icon then
+			list[#list + 1] = {
+				text = self:getValueText(id),
+				icon = icon,
+				value = id,
+				func = func,
+				checked = id == value,
+			}
+		end
+	end
+	sort(list, function(a, b) return strcmputf8i(a.text, b.text) < 0 end)
+	return list
+end
+
+function conds.prof:getFuncText(value)
+	return ("self.mounts.profs[%d]"):format(value)
 end
 
 

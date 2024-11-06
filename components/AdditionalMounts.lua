@@ -25,13 +25,26 @@ mounts:RegisterEvent("TOOLTIP_DATA_UPDATE")
 
 
 ----------------------------------------------------------------------
+-- METHODS
+local function isActive(self)
+	return C_UnitAuras.GetPlayerAuraBySpellID(self.spellID)
+end
+
+
+local function setIsFavorite(self, enabled)
+	mounts.additionalFavorites[self.spellID] = enabled or nil
+	mounts:event("UPDATE_FAVORITES")
+end
+
+
+local function getIsFavorite(self)
+	return mounts.additionalFavorites[self.spellID]
+end
+
+
+----------------------------------------------------------------------
 -- SPELL AS A MOUNT
 local createMountFromSpell do
-	local function isActive(self)
-		return C_UnitAuras.GetPlayerAuraBySpellID(self.spellID)
-	end
-
-
 	local function isUsable(self)
 		return IsSpellKnown(self.spellID)
 		   and C_Spell.IsSpellUsable(self.spellID)
@@ -39,17 +52,6 @@ local createMountFromSpell do
 
 
 	local function isCollected() return true end
-
-
-	local function setIsFavorite(self, enabled)
-		mounts.additionalFavorites[self.spellID] = enabled or nil
-		mounts:event("UPDATE_FAVORITES")
-	end
-
-
-	local function getIsFavorite(self)
-		return mounts.additionalFavorites[self.spellID]
-	end
 
 
 	function createMountFromSpell(spellID, mountType, expansion, modelSceneID)
@@ -169,11 +171,6 @@ end
 ----------------------------------------------------------------------
 -- ITEM AS A MOUNT
 local createMountFromItem do
-	local function isActive(self)
-		return C_UnitAuras.GetPlayerAuraBySpellID(self.spellID)
-	end
-
-
 	local function isUsable(self)
 		return self:isCollected() and C_Spell.IsSpellUsable(self.spellID)
 	end
@@ -186,17 +183,6 @@ local createMountFromItem do
 
 	local function isCollected(self)
 		return C_Item.GetItemCount(self.itemID) > 0
-	end
-
-
-	local function setIsFavorite(self, enabled)
-		mounts.additionalFavorites[self.spellID] = enabled or nil
-		mounts:event("UPDATE_FAVORITES")
-	end
-
-
-	local function getIsFavorite(self)
-		return mounts.additionalFavorites[self.spellID]
 	end
 
 

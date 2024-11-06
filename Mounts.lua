@@ -169,7 +169,7 @@ function mounts:PLAYER_LOGIN()
 	self:setUsableRepairMounts()
 	self:setModifier(self.config.modifier)
 	self:setHandleWaterJump(self.config.waterJump)
-	self:setHerbMount()
+	self:updateProfs()
 	self:init()
 	self:event("ADDON_INIT"):off("ADDON_INIT")
 
@@ -600,22 +600,30 @@ function mounts:getSpellKnown()
 end
 
 
+function mounts:updateProfs()
+	self.profs = {}
+	for i, id in next, {GetProfessions()} do
+		local _,_,_,_,_,_, skillLineID = GetProfessionInfo(id)
+		self.profs[skillLineID] = true
+	end
+	self:setHerbMount()
+end
+mounts.SKILL_LINES_CHANGED = mounts.updateProfs
+
+
 function mounts:setHerbMount()
-	if self.config.useHerbMounts then
-		local prof1, prof2 = GetProfessions()
-		if prof1 and select(7, GetProfessionInfo(prof1)) == 182 or prof2 and select(7, GetProfessionInfo(prof2)) == 182 then
-			for spellID in next, self.herbalismMounts do
-				local mountID = C_MountJournal.GetMountFromSpell(spellID)
-				if select(11, C_MountJournal.GetMountInfoByID(mountID)) then
-					self.herbMount = true
-					return
-				end
+	if self.config.useHerbMounts and self.profs[182] then
+		for spellID in next, self.herbalismMounts do
+			local mountID = C_MountJournal.GetMountFromSpell(spellID)
+			local _,_,_,_,_,_,_,_,_,_, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+			if isCollected then
+				self.herbMount = true
+				return
 			end
 		end
 	end
 	self.herbMount = false
 end
-mounts.SKILL_LINES_CHANGED = mounts.setHerbMount
 
 
 do
