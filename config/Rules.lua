@@ -313,43 +313,33 @@ end
 
 function rules:getCondValueText(cond)
 	if cond[3] == nil then return "" end
-	return conds[cond[2]]:getValueText(cond[3]) or ""
+	return conds[cond[2]]:getValueText(cond[3]) or RED_FONT_COLOR:WrapTextInColorCode(tostringall(cond[3]))
 end
 
 
 function rules:getActionValueText(action)
-	if action[2] then	return actions[action[1]]:getValueText(action[2]) end
+	if action[2] == nil then return "" end
+	return actions[action[1]]:getValueText(action[2]) or RED_FONT_COLOR:WrapTextInColorCode(tostringall(action[2]))
 end
 
 
-function rules:getCondText(conditions)
-	local text = ""
-
-	for i = 1, #conditions > 3 and 2 or #conditions do
-		local cond = conditions[i]
-		local valueText = self:getCondValueText(cond)
-		text = ("%s\n|cff%s%s%s|r"):format(
-			text,
-			cond[1] and ("cc4444%s "):format(L["NOT_CONDITION"]) or "44cc44",
-			conds[cond[2]].text,
-			valueText == "" and valueText or ": "..valueText
-		)
-	end
-
-	if #conditions > 3 then
-		text = text.."\n..."
-	end
-
-	return text:sub(2)
+function rules:getCondText(cond)
+	if not cond then return end
+	local value = self:getCondValueText(cond)
+	return ("|cff%s%s%s|r"):format(
+		cond[1] and ("cc4444%s "):format(L["NOT_CONDITION"]) or "44cc44",
+		conds[cond[2]].text,
+		value == "" and value or " : "..value
+	)
 end
 
 
 function rules:getActionText(action)
 	local value = self:getActionValueText(action)
-	if value then
-		return ("%s : %s"):format(actions[action[1]].text, value)
-	else
+	if value == "" then
 		return actions[action[1]].text
+	else
+		return ("%s : %s"):format(actions[action[1]].text, value)
 	end
 end
 
@@ -358,8 +348,27 @@ function rules:ruleButtonInit(btn, data)
 	local btnData = data[2]
 	btn.id = data[1]
 	btn.order:SetText(btn.id)
-	btn.conds:SetText(self:getCondText(btnData))
 	btn.action:SetText(self:getActionText(btnData.action))
+
+	btn.cond2:ClearAllPoints()
+	if #btnData == 2 then
+		btn.cond2:SetPoint("TOPLEFT", btn, "LEFT", 30, 0)
+	else
+		btn.cond2:SetPoint("LEFT", 30, 0)
+	end
+	btn.cond2:SetPoint("RIGHT", btn, "CENTER", -21, 0)
+
+	if #btnData == 1 then
+		btn.cond1:SetText()
+		btn.cond2:SetText(self:getCondText(btnData[1]))
+		btn.cond3:SetText()
+	else
+		for i = 1, 3 do
+			local text = self:getCondText(btnData[i])
+			if i == 3 and #btnData > 3 then text = text.."…" end
+			btn["cond"..i]:SetText(text)
+		end
+	end
 
 	btn:SetScript("OnClick", function(btn)
 		self.ruleEditor:editRule(btn.id, btnData)

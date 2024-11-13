@@ -3165,15 +3165,27 @@
 						<Anchor point="LEFT" x="1"/>
 					</Anchors>
 				</FontString>
-				<FontString parentKey="conds" inherits="GameFontNormal" justifyH="LEFT" maxLines="3">
+				<FontString parentKey="cond2" inherits="GameFontNormal" wordwrap="false" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="LEFT" x="30"/>
 						<Anchor point="RIGHT" relativePoint="CENTER" x="-21"/>
 					</Anchors>
 				</FontString>
+				<FontString parentKey="cond1" inherits="GameFontNormal" wordwrap="false" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeKey="$parent.cond2" relativePoint="TOPLEFT" y="1"/>
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.cond2" relativePoint="TOPRIGHT" y="1"/>
+					</Anchors>
+				</FontString>
+				<FontString parentKey="cond3" inherits="GameFontNormal" wordwrap="false" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.cond2" relativePoint="BOTTOMLEFT" y="-1"/>
+						<Anchor point="TOPRIGHT" relativeKey="$parent.cond2" relativePoint="BOTTOMRIGHT" y="-1"/>
+					</Anchors>
+				</FontString>
 				<FontString parentKey="action" inherits="GameFontNormal" justifyH="LEFT" maxLines="1">
 					<Anchors>
-						<Anchor point="LEFT" relativeKey="$parent.conds" relativePoint="RIGHT" x="10"/>
+						<Anchor point="LEFT" relativePoint="CENTER" x="-11"/>
 						<Anchor point="RIGHT" x="-62"/>
 					</Anchors>
 				</FontString>

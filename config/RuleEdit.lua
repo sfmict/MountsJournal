@@ -453,7 +453,7 @@ function ruleEditor:setActionValueOption()
 		local editBox = panel.macro.editFrame:GetEditBox()
 		editBox.CHAR_LIMIT = MACROFRAME_CHAR_LIMIT:gsub("255", action.maxLetters)
 		editBox:SetMaxLetters(action.maxLetters)
-		editBox:SetText(rules:getActionValueText(actionData) or "")
+		editBox:SetText(rules:getActionValueText(actionData))
 		editBox:GetScript("OnTextChanged")(editBox)
 		panel.macro:Show()
 		return
@@ -480,7 +480,7 @@ function ruleEditor:setActionValueOption()
 	panel.optionValue:SetPoint("LEFT", panel.optionType, "RIGHT", 10, 0)
 	panel.optionValue:SetPoint("RIGHT", -30, 0)
 	panel.optionValue:Show()
-	panel.optionValue:SetText(rules:getActionValueText(actionData) or "")
+	panel.optionValue:SetText(rules:getActionValueText(actionData))
 	panel.optionValue.tooltip = self:getActionTooltip(actionData)
 end
 
