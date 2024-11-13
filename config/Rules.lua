@@ -204,6 +204,11 @@ rules:SetScript("OnShow", function(self)
 	}
 	ScrollUtil.AddManagedScrollBarVisibilityBehavior(self.scrollBox, self.scrollBar, scrollBoxAnchorsWithBar, scrollBoxAnchorsWithoutBar)
 
+	-- EVENTS
+	macroFrame:on("RULE_LIST_UPDATE", function()
+		if self:IsShown() then self:updateRuleList() end
+	end)
+
 	-- INIT
 	self:setSummonRules(1)
 end)

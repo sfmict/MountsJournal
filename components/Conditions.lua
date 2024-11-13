@@ -908,9 +908,7 @@ function conds.tl:getValueText(value)
 	if configInfo then
 		return configInfo.name
 	else
-		local _,_,_,_,_, name, realmName = GetPlayerInfoByGUID(guid)
-		if realmName == "" then realmName = GetRealmName() end
-		return ("ID:%s - %s - %s"):format(configID, name or "??", realmName or "??")
+		return ("ID:%s - %s"):format(configID, ns.macroFrame:getNameByGUID(guid))
 	end
 end
 
@@ -926,7 +924,7 @@ function conds.tl:getValueList(value, func)
 			local configInfo = C_Traits.GetConfigInfo(configID)
 			local v = ("%d:%s"):format(configID, guid)
 			list[#list + 1] = {
-				text = ("%s - %s (ID:%d)"):format(configInfo.name, specName, configID),
+				text = ("%s - %s |cff808080(ID:%d)|r"):format(configInfo.name, specName, configID),
 				value = v,
 				func = func,
 				checked = v == value,
@@ -960,13 +958,18 @@ conds.mtrack = {}
 conds.mtrack.text = TRACKING
 
 function conds.mtrack:getValueText(value)
-	local k, v = (":"):split(value, 2)
+	local k, v, name = (":"):split(value, 2)
 	v = tonumber(v)
 	for i = 1, C_Minimap.GetNumTrackingTypes() do
 		if C_Minimap.GetTrackingFilter(i)[k] == v then
-			local trackingInfo = C_Minimap.GetTrackingInfo(i)
-			return ("%s %s"):format(trackingInfo.name, GRAY_FONT_COLOR:WrapTextInColorCode("("..value..")"))
+			name = C_Minimap.GetTrackingInfo(i).name
 		end
+	end
+	if not name and k == "spellID" then
+		name = C_Spell.GetSpellName(v)
+	end
+	if name then
+		return ("%s |cff808080(%s)|r"):format(name, value)
 	end
 	return value
 end
@@ -1006,7 +1009,7 @@ function conds.mtrack:getValueList(value, func)
 			local v = filter.filterID and "filterID:"..filter.filterID or "spellID:"..filter.spellID
 
 			local info = {
-				text = ("%s %s"):format(trackingInfo.name, GRAY_FONT_COLOR:WrapTextInColorCode("("..v..")")),
+				text = ("%s |cff808080(%s)|r"):format(trackingInfo.name, v),
 				value = v,
 				func = func,
 				checked = v == value,
@@ -1099,6 +1102,60 @@ end
 
 function conds.prof:getFuncText(value)
 	return ("self.mounts.profs[%d]"):format(value)
+end
+
+
+---------------------------------------------------
+-- equips EQUIPMENT SET
+conds.equips = {}
+conds.equips.text = PAPERDOLL_EQUIPMENTMANAGER
+
+function conds.equips:getValueText(value)
+	local setID, guid = (":"):split(value, 2)
+	if guid == UnitGUID("player") then
+		local name = C_EquipmentSet.GetEquipmentSetInfo(tonumber(setID))
+		if name then
+			return name
+		else
+			return RED_FONT_COLOR:WrapTextInColorCode(("ID:%s"):format(setID))
+		end
+	end
+	return ("ID:%s - %s"):format(setID, ns.macroFrame:getNameByGUID(guid))
+end
+
+function conds.equips:getValueList(value, func)
+	local list = {}
+	local guid = UnitGUID("player")
+
+	for i, setID in ipairs(C_EquipmentSet.GetEquipmentSetIDs()) do
+		local name, iconFileID = C_EquipmentSet.GetEquipmentSetInfo(setID)
+		local v = ("%d:%s"):format(setID, guid)
+		list[i] = {
+			text = ("%s |cff808080(ID:%d)|r"):format(name, setID),
+			icon = iconFileID,
+			value = v,
+			func = func,
+			checked = v == value,
+		}
+	end
+
+	if #list == 0 then
+		list[1] = {
+			notCheckable = true,
+			disabled = true,
+			text = EMPTY,
+		}
+	end
+
+	return list
+end
+
+function conds.equips:getFuncText(value)
+	local setID, guid = (":"):split(value, 2)
+	if guid == UnitGUID("player") then
+		return ("self:checkEquipmentSet(%s)"):format(setID)
+	end
+	return "false"
 end
 
 

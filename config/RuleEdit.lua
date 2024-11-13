@@ -262,6 +262,11 @@ ruleEditor:HookScript("OnShow", function(self)
 		btn:GetParent():Hide()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
+
+	-- EVENTS
+	ns.macroFrame:on("RULE_LIST_UPDATE", function()
+		if self:IsShown() then self:updateConditionList() end
+	end)
 end)
 
 

@@ -1,6 +1,6 @@
 local _, ns = ...
 local macroFrame, util = ns.macroFrame, ns.util
-local C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_Transmog, C_TransmogSets, C_TransmogCollection, C_Transmog, TransmogUtil, TRANSMOG_SLOTS, tContains, GetSpecialization, GetSpecializationInfo, C_ClassTalents, C_Minimap = C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_Transmog, C_TransmogSets, C_TransmogCollection, C_Transmog, TransmogUtil, TRANSMOG_SLOTS, tContains, GetSpecialization, GetSpecializationInfo, C_ClassTalents, C_Minimap
+local C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_Transmog, C_TransmogSets, C_TransmogCollection, C_Transmog, TransmogUtil, TRANSMOG_SLOTS, tContains, GetSpecialization, GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, GetPlayerInfoByGUID = C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_Transmog, C_TransmogSets, C_TransmogCollection, C_Transmog, TransmogUtil, TRANSMOG_SLOTS, tContains, GetSpecialization, GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, GetPlayerInfoByGUID
 
 
 function macroFrame:isSpellReady(spellID)
@@ -158,5 +158,62 @@ function macroFrame:checkTracking(key, value)
 		if C_Minimap.GetTrackingFilter(i)[key] == value then
 			return C_Minimap.GetTrackingInfo(i).active
 		end
+	end
+end
+
+
+function macroFrame:checkEquipmentSet(setID)
+	local _,_,_, isEquipped = C_EquipmentSet.GetEquipmentSetInfo(setID)
+	return isEquipped
+end
+
+
+do
+	local updateFrame = CreateFrame("FRAME")
+	local guids = {}
+
+	local function update(self, elapsed)
+		self.time = self.time - elapsed
+
+		if self.time <= 0 then
+			local updated = false
+			for guid in next, guids do
+				if GetPlayerInfoByGUID(guid) then
+					guids[guid] = nil
+					updated = true
+				end
+			end
+
+			if updated then
+				macroFrame:event("RULE_LIST_UPDATE")
+				if not next(guids) then
+					self:SetScript("OnUpdate", nil)
+					return
+				end
+			end
+
+			self.attempts = self.attempts - 1
+			if self.attempts == 0 then
+				wipe(guids)
+				self:SetScript("OnUpdate", nil)
+				return
+			end
+			self.time = .5
+		end
+	end
+
+	function macroFrame:getNameByGUID(guid)
+		local _,_,_,_,_, name, realmName = GetPlayerInfoByGUID(guid)
+
+		if name then
+			if realmName == "" then realmName = GetRealmName() end
+			return ("%s - %s"):format(name, realmName)
+		end
+
+		updateFrame.time = .5
+		updateFrame.attempts = 5
+		guids[guid] = true
+		updateFrame:SetScript("OnUpdate", update)
+		return "?? - ??"
 	end
 end
