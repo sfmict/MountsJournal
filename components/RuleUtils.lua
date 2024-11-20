@@ -170,31 +170,23 @@ end
 
 do
 	local updateFrame = CreateFrame("FRAME")
-	local guids = {}
 
 	local function update(self, elapsed)
 		self.time = self.time - elapsed
 
 		if self.time <= 0 then
-			local updated = false
-			for guid in next, guids do
+			for guid in next, self.guids do
 				if GetPlayerInfoByGUID(guid) then
-					guids[guid] = nil
-					updated = true
-				end
-			end
-
-			if updated then
-				macroFrame:event("RULE_LIST_UPDATE")
-				if not next(guids) then
+					self.guids = nil
 					self:SetScript("OnUpdate", nil)
+					macroFrame:event("RULE_LIST_UPDATE")
 					return
 				end
 			end
 
 			self.attempts = self.attempts - 1
 			if self.attempts == 0 then
-				wipe(guids)
+				self.guids = nil
 				self:SetScript("OnUpdate", nil)
 				return
 			end
@@ -212,8 +204,21 @@ do
 
 		updateFrame.time = .5
 		updateFrame.attempts = 5
-		guids[guid] = true
+		updateFrame.guids = updateFrame.guids or {}
+		updateFrame.guids[guid] = true
 		updateFrame:SetScript("OnUpdate", update)
 		return "?? - ??"
+	end
+end
+
+
+function macroFrame:isMapFlagActive(flag, profileName)
+	local profile = profileName == "" and self.mounts.defProfile or self.mounts.profiles[profileName]
+	if profile then
+		local mapList = self.mounts.mapList
+		for i = 1, #mapList do
+			local list = profile.zoneMounts[mapList[i]]
+			if list and list.flags.enableFlags then return list.flags[flag] end
+		end
 	end
 end

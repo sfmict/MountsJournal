@@ -3,6 +3,8 @@ local L = {}
 ns.L = L
 
 L.auctioneer = MINIMAP_TRACKING_AUCTIONEER
+L.spells = SPELLS
+L.items = ITEMS
 
 L["author"] = "Author"
 L["Main"] = "Main"
@@ -101,6 +103,7 @@ L["Y-axis accseleration"] = "Y-axis Accseleration"
 L["Minimum y-axis speed"] = "Minimum Y-axis Speed"
 L["Model"] = "Model"
 L["Map"] = "Map"
+L["Map flags"] = "Map flags"
 L["Settings"] = "Settings"
 L["Dungeons and Raids"] = "Dungeons and Raids"
 L["Current Location"] = "Current Location"

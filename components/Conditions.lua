@@ -677,6 +677,81 @@ end
 
 
 ---------------------------------------------------
+-- mapf MAP FLAGS
+conds.mapf = {}
+conds.mapf.text = L["Map flags"]
+
+function conds.mapf:getValueText(value)
+	local flag, profile = (":"):split(value, 2)
+
+	local flags = {
+		groundOnly = L["Ground Mounts Only"],
+		waterWalkOnly = L["Water Walking"],
+		herbGathering = L["Herb Gathering"],
+	}
+
+	if profile == "" then
+		profile = DEFAULT
+	elseif not ns.mounts.profiles[profile] then
+		profile = RED_FONT_COLOR:WrapTextInColorCode(profile)
+	end
+
+	return ("%s - %s"):format(profile, flags[flag])
+end
+
+function conds.mapf:getValueList(value, func)
+	local list = {}
+
+	local flags = {
+		groundOnly = L["Ground Mounts Only"],
+		waterWalkOnly = L["Water Walking"],
+		herbGathering = L["Herb Gathering"],
+	}
+
+	local profiles = {}
+	for k in next, ns.mounts.profiles do profiles[#profiles + 1] = k end
+	sort(profiles, function(a, b) return strcmputf8i(a, b) < 0 end)
+	tinsert(profiles, 1, DEFAULT)
+
+	list[1] = {
+		notCheckable = true,
+		isTitle = true,
+		text = L["Profiles"],
+	}
+
+	for i = 1, #profiles do
+		local profileName = profiles[i]
+		local flagList = {}
+
+		for k, name in next, flags do
+			local v = ("%s:%s"):format(k, profileName == DEFAULT and "" or profileName)
+			flagList[#flagList + 1] = {
+				text = name,
+				value = v,
+				func = func,
+				checked = v == value,
+			}
+		end
+
+		list[i + 1] = {
+			keepShownOnClick = true,
+			notCheckable = true,
+			hasArrow =  true,
+			text = profileName,
+			value = flagList,
+		}
+	end
+
+	return list
+end
+
+function conds.mapf:getFuncText(value)
+	local flag, profile = (":"):split(value, 2)
+	return ("self:isMapFlagActive('%s', '%s')"):format(flag, profile:gsub("['\\]", "\\%1"))
+end
+
+
+---------------------------------------------------
 -- instance
 conds.instance = {}
 conds.instance.text = INSTANCE

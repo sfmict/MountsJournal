@@ -102,6 +102,7 @@ local L = ns.L
 -- L["Minimum y-axis speed"] = ""
 -- L["Model"] = ""
 -- L["Map"] = ""
+-- L["Map flags"] = ""
 -- L["Settings"] = ""
 -- L["Dungeons and Raids"] = ""
 -- L["Current Location"] = ""
