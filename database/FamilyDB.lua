@@ -229,5 +229,9 @@ ns.familyDB = {
 		["Wilderlings"] = 3104,
 		["Wolves"] = 3105,
 	},
+	["additional"] = {
+		["spells"] = 1,
+		["items"] = 2,
+	},
 	["rest"] = 0,
 }
