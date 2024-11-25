@@ -244,6 +244,7 @@ function macroFrame:setRuleFuncs()
 return function(self, button, profileLoad)
 	self.mounts:resetMountsList()
 	self.preUseMacro = nil
+	self.useMount = nil
 		]]
 
 		for j = 1, #rules do
@@ -644,7 +645,6 @@ function MJMacroMixin:preClick(button, down)
 	self.notUsable = InCombatLockdown() or down ~= GetCVarBool("ActionButtonUseKeyDown")
 	if self.notUsable then return end
 	self.mounts:setFlags()
-	macroFrame.useMount = false
 	self:SetAttribute("macrotext", macroFrame.checkRules[self.id](macroFrame, button))
 end
 
