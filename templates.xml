@@ -718,7 +718,7 @@
 							<Anchor point="BOTTOMRIGHT" x="-1" y="1"/>
 						</Anchors>
 						<Frames>
-							<Button parentKey="multipleMountBtn" alpha=".5">
+							<Button parentKey="multipleMountBtn" alpha="0">
 								<Size x="34" y="34"/>
 								<Anchors>
 									<Anchor point="BOTTOMLEFT" x="13" y="5.5"/>
@@ -745,10 +745,13 @@
 								</Layers>
 								<Scripts>
 									<OnEnter>
+										local parent = self:GetParent()
+										parent:GetScript("OnEnter")(parent)
 										self:SetAlpha(1)
 									</OnEnter>
 									<OnLeave>
-										self:SetAlpha(.5)
+										local parent = self:GetParent()
+										parent:GetScript("OnLeave")(parent)
 									</OnLeave>
 									<OnMouseDown>
 										self.icon:SetPoint("CENTER", 1, -1)
@@ -760,7 +763,7 @@
 									</OnMouseUp>
 								</Scripts>
 							</Button>
-							<Frame parentKey="modelControl" alpha=".5">
+							<Frame parentKey="modelControl" alpha="0">
 								<Anchors>
 									<Anchor point="BOTTOM" x="-72" y="10"/>
 								</Anchors>
@@ -864,7 +867,7 @@
 									</Button>
 								</Frames>
 							</Frame>
-							<CheckButton parentKey="playerToggle" alpha=".5" scale=".5">
+							<CheckButton parentKey="playerToggle" alpha="0" scale=".5">
 								<Size x="77" y="77"/>
 								<Anchors>
 									<Anchor point="LEFT" relativeKey="$parent.modelControl" relativePoint="RIGHT" x="301" y="1"/>
@@ -905,14 +908,29 @@
 								</CheckedTexture>
 								<Scripts>
 									<OnEnter>
+										local parent = self:GetParent()
+										parent:GetScript("OnEnter")(parent)
 										self:SetAlpha(1)
 									</OnEnter>
 									<OnLeave>
-										self:SetAlpha(.5)
+										local parent = self:GetParent()
+										parent:GetScript("OnLeave")(parent)
 									</OnLeave>
 								</Scripts>
 							</CheckButton>
 						</Frames>
+						<Scripts>
+							<OnEnter>
+								self.multipleMountBtn:SetAlpha(.5)
+								self.modelControl:SetAlpha(.5)
+								self.playerToggle:SetAlpha(.5)
+							</OnEnter>
+							<OnLeave>
+								self.multipleMountBtn:SetAlpha(0)
+								self.modelControl:SetAlpha(0)
+								self.playerToggle:SetAlpha(0)
+							</OnLeave>
+						</Scripts>
 					</ModelScene>
 				</Frames>
 			</Frame>
@@ -2510,8 +2528,15 @@
 				self.icon:SetPoint("CENTER", 0, 0)
 				PlaySound(SOUNDKIT.IG_INVENTORY_ROTATE_CHARACTER)
 			</OnMouseUp>
-			<OnEnter>self:GetParent():SetAlpha(1)</OnEnter>
-			<OnLeave>self:GetParent():SetAlpha(.5)</OnLeave>
+			<OnEnter>
+				local modelScene = self:GetParent():GetParent()
+				modelScene:GetScript("OnEnter")(modelScene)
+				self:GetParent():SetAlpha(1)
+			</OnEnter>
+			<OnLeave>
+				local modelScene = self:GetParent():GetParent()
+				modelScene:GetScript("OnLeave")(modelScene)
+			</OnLeave>
 		</Scripts>
 	</Button>
 

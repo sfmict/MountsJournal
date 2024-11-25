@@ -555,9 +555,16 @@ function journal:init()
 	end)
 
 	-- WOWHEAD LINK
+	self.mountDisplay.info.link:HookScript("OnEnter", function()
+		self.modelScene:GetScript("OnEnter")(self.modelScene)
+	end)
+	self.mountDisplay.info.link:HookScript("OnLeave", function()
+		self.modelScene:GetScript("OnLeave")(self.modelScene)
+	end)
 	util.setCopyBox(self.mountDisplay.info.link)
 
 	local langButton = self.mountDisplay.info.linkLang
+	langButton:SetPropagateMouseMotion(true)
 	langButton:SetText(mounts.config.wowheadLinkLang)
 
 	lsfdd:SetMixin(langButton)
@@ -617,6 +624,7 @@ function journal:init()
 	-- MOUNT DESCRIPTION TOGGLE
 	local mountDescriptionToggle = self.mountDisplay.info.mountDescriptionToggle
 	mountDescriptionToggle.vertical = true
+	mountDescriptionToggle:SetPropagateMouseMotion(true)
 	mountDescriptionToggle:SetChecked(mounts.config.mountDescriptionToggle)
 
 	local function setShownDescription(btn)
@@ -838,6 +846,8 @@ function journal:init()
 
 	-- MODEL SCENE SETTINGS
 	local mssBtn = self.mountDisplay.info.modelSceneSettingsButton
+	mssBtn:SetPropagateMouseMotion(true)
+
 	lsfdd:SetMixin(mssBtn)
 	mssBtn:ddSetDisplayMode(addon)
 	mssBtn:ddHideWhenButtonHidden()
@@ -909,6 +919,7 @@ function journal:init()
 
 	-- MODEL SCENE MOUNT HINT
 	local msMountHint = self.mountDisplay.info.mountHint
+	msMountHint:SetPropagateMouseMotion(true)
 	msMountHint:SetScript("OnEnter", function(btn)
 		btn.highlight:Show()
 		btn:SetAlpha(1)

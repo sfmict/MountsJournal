@@ -4,20 +4,27 @@ local L, util = ns.L, ns.util
 
 ns.journal:on("MODULES_INIT", function(journal)
 	local dd = LibStub("LibSFDropDown-1.5"):CreateButtonOriginal(journal.modelScene)
-	dd:SetAlpha(.5)
+	dd:SetAlpha(0)
 	dd:SetPoint("LEFT", journal.modelScene.modelControl, "RIGHT", 10, -.5)
 	journal.modelScene.animationsCombobox = dd
 
-	dd:SetScript("OnEnter", function(self) self:SetAlpha(1) end)
-	dd:SetScript("OnLeave", function(self) self:SetAlpha(.5) end)
-	dd.Button:HookScript("OnEnter", function(btn)
-		local parent = btn:GetParent()
-		parent:GetScript("OnEnter")(parent)
+	journal.modelScene:HookScript("OnEnter", function(self)
+		self.animationsCombobox:SetAlpha(.5)
 	end)
-	dd.Button:HookScript("OnLeave", function(btn)
-		local parent = btn:GetParent()
+	journal.modelScene:HookScript("OnLeave", function(self)
+		self.animationsCombobox:SetAlpha(0)
+	end)
+
+	dd:SetScript("OnEnter", function(self)
+		local parent = self:GetParent()
+		parent:GetScript("OnEnter")(parent)
+		self:SetAlpha(1)
+	end)
+	dd:SetScript("OnLeave", function(self)
+		local parent = self:GetParent()
 		parent:GetScript("OnLeave")(parent)
 	end)
+	dd.Button:SetPropagateMouseMotion(true)
 
 	StaticPopupDialogs[util.addonName.."DELETE_MOUNT_ANIMATION"] = {
 		text = addon..": "..L["Are you sure you want to delete animation %s?"],

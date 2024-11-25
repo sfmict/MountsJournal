@@ -7,6 +7,7 @@ MJSetPetMixin = util.createFromEventsMixin()
 
 
 function MJSetPetMixin:onLoad()
+	self:SetPropagateMouseMotion(true)
 	self.mounts = ns.mounts
 	self.journal = ns.journal
 
