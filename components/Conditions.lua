@@ -1038,6 +1038,7 @@ function conds.mtrack:getValueText(value)
 	for i = 1, C_Minimap.GetNumTrackingTypes() do
 		if C_Minimap.GetTrackingFilter(i)[k] == v then
 			name = C_Minimap.GetTrackingInfo(i).name
+			break
 		end
 	end
 	if not name and k == "spellID" then

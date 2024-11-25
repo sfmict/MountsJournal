@@ -183,6 +183,30 @@ rules:SetScript("OnShow", function(self)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
 
+	-- RULE CLICKS
+	local function btnClick(btn)
+		self.ruleEditor:editRule(btn.id, btn.data)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end
+	local function btnUpClick(btn)
+		self:setRuleOrder(btn:GetParent().id, -1)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end
+	local function btnDownClick(btn)
+		self:setRuleOrder(btn:GetParent().id, 1)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end
+	local function btnRemoveClick(btn) self:removeRule(btn:GetParent().id) end
+
+	local function onAcqure(owner, btn, data, new)
+		if new then
+			btn:SetScript("OnClick", btnClick)
+			btn.up:SetScript("OnClick", btnUpClick)
+			btn.down:SetScript("OnClick", btnDownClick)
+			btn.remove:SetScript("OnClick", btnRemoveClick)
+		end
+	end
+
 	-- SCROLL
 	self.scrollBox = CreateFrame("FRAME", nil, self, "WowScrollBoxList")
 
@@ -192,6 +216,7 @@ rules:SetScript("OnShow", function(self)
 
 	self.view = CreateScrollBoxListLinearView()
 	self.view:SetElementInitializer("MJRulePanelTemplate", function(...) self:ruleButtonInit(...) end)
+	self.view:RegisterCallback(self.view.Event.OnAcquiredFrame, onAcqure, self)
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.scrollBar, self.view)
 
 	local scrollBoxAnchorsWithBar = {
@@ -345,49 +370,32 @@ end
 
 
 function rules:ruleButtonInit(btn, data)
-	local btnData = data[2]
 	btn.id = data[1]
+	btn.data = data[2]
 	btn.order:SetText(btn.id)
-	btn.action:SetText(self:getActionText(btnData.action))
+	btn.action:SetText(self:getActionText(btn.data.action))
+	btn.up:SetShown(btn.id > 1)
+	btn.down:SetShown(#self.rules > btn.id)
 
 	btn.cond2:ClearAllPoints()
-	if #btnData == 2 then
+	if #btn.data == 2 then
 		btn.cond2:SetPoint("TOPLEFT", btn, "LEFT", 30, 0)
 	else
 		btn.cond2:SetPoint("LEFT", 30, 0)
 	end
 	btn.cond2:SetPoint("RIGHT", btn, "CENTER", -21, 0)
 
-	if #btnData == 1 then
+	if #btn.data == 1 then
 		btn.cond1:SetText()
-		btn.cond2:SetText(self:getCondText(btnData[1]))
+		btn.cond2:SetText(self:getCondText(btn.data[1]))
 		btn.cond3:SetText()
 	else
 		for i = 1, 3 do
-			local text = self:getCondText(btnData[i])
-			if i == 3 and #btnData > 3 then text = text.."…" end
+			local text = self:getCondText(btn.data[i])
+			if i == 3 and #btn.data > 3 then text = text.."…" end
 			btn["cond"..i]:SetText(text)
 		end
 	end
-
-	btn:SetScript("OnClick", function(btn)
-		self.ruleEditor:editRule(btn.id, btnData)
-		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	end)
-
-	btn.up:SetShown(btn.id > 1)
-	btn.up:SetScript("OnClick", function(btn)
-		self:setRuleOrder(btn:GetParent().id, -1)
-		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	end)
-
-	btn.down:SetShown(#self.rules > btn.id)
-	btn.down:SetScript("OnClick", function(btn)
-		self:setRuleOrder(btn:GetParent().id, 1)
-		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	end)
-
-	btn.remove:SetScript("OnClick", function(btn) self:removeRule(btn:GetParent().id) end)
 end
 
 

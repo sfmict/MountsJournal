@@ -1848,51 +1848,50 @@ function journal:sortMounts()
 	local numNeedingFanfare = C_MountJournal.GetNumMountsNeedingFanfare()
 
 	local mCache = setmetatable({}, {__index = function(t, mount)
+		local data = {}
 		if type(mount) == "number" then
 			local name, spellID, _,_,_,_, isFavorite, _,_,_, isCollected = C_MountJournal.GetMountInfoByID(mount)
-			t[mount] = {
-				name = name,
-				isFavorite = isFavorite,
-				isCollected = isCollected,
-				spellID = spellID,
-			}
+			data.name = name
+			data.isFavorite = isFavorite
+			data.isCollected = isCollected
+			data.spellID = spellID
 			if numNeedingFanfare > 0 and C_MountJournal.NeedsFanfare(mount) then
-				t[mount].needFanfare = true
+				data.needFanfare = true
 				numNeedingFanfare = numNeedingFanfare - 1
 			end
 			if fSort.by == "type" then
 				local _,_,_,_, mType = C_MountJournal.GetMountInfoExtraByID(mount)
 				mType = self.mountTypes[mType]
-				t[mount].by = type(mType) == "number" and mType or mType[1]
+				data.by = type(mType) == "number" and mType or mType[1]
 			elseif fSort.by == "family" then
 				local family = db[mount][2]
-				t[mount].by = type(family) == "number" and family or family[1]
+				data.by = type(family) == "number" and family or family[1]
 			elseif fSort.by == "expansion" then
-				t[mount].by = db[mount][1]
+				data.by = db[mount][1]
 			elseif fSort.by == "rarity" then
-				t[mount].by = db[mount][3]
+				data.by = db[mount][3]
 			end
 		else
-			t[mount] = {
-				name = mount.name,
-				isFavorite = mount:getIsFavorite(),
-				isCollected = mount:isCollected(),
-				spellID = mount.spellID,
-				needsFanfare = false,
-				additional = true,
-			}
+			data.name = mount.name
+			data.isFavorite = mount:getIsFavorite()
+			data.isCollected = mount:isCollected()
+			data.spellID = mount.spellID
+			data.needsFanfare = false
+			data.additional = true
 			if fSort.by == "type" then
 				local mType = self.mountTypes[mount.mountType]
-				t[mount].by = type(mType) == "number" and mType or mType[1]
+				data.by = type(mType) == "number" and mType or mType[1]
 			elseif fSort.by == "family" then
-				t[mount].by = 0
+				local family = mount.familyID
+				data.by = type(family) == "number" and family or family[1]
 			elseif fSort.by == "expansion" then
-				t[mount].by = mount.expansion
+				data.by = mount.expansion
 			elseif fSort.by == "rarity" then
-				t[mount].by = 100
+				data.by = 100
 			end
 		end
-		return t[mount]
+		t[mount] = data
+		return data
 	end})
 
 	sort(self.mountIDs, function(a, b)

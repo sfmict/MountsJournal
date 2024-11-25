@@ -17,7 +17,7 @@ end)
 
 
 local function button_OnEnter(self)
-	local key = GetBindingKey(self.command)
+	local key = select(self.index, GetBindingKey(self.command))
 	if key then
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 		GameTooltip_AddHighlightLine(GameTooltip, KEY_BINDING_NAME_AND_KEY:format(GetBindingName(self.command), GetBindingText(key)))
@@ -35,7 +35,7 @@ local function button_OnMouseWheel(self, delta)
 end
 
 
-function binding:createButtonBinding(name, description, secureTemplate, macro)
+function binding:createBindingButton(index, name, command)
 	local button = CreateFrame("Button", nil, nil, "UIMenuButtonStretchTemplate")
 	button.selectedHighlight = button:CreateTexture(nil, "OVERLAY")
 	button.selectedHighlight:SetTexture("Interface/Buttons/UI-Silver-Button-Select")
@@ -44,12 +44,9 @@ function binding:createButtonBinding(name, description, secureTemplate, macro)
 	button.selectedHighlight:SetBlendMode("ADD")
 	button.selectedHighlight:Hide()
 	button:RegisterForClicks("AnyUp")
-	button.secure = CreateFrame("Button", name, UIParent, secureTemplate or "SecureActionButtonTemplate")
-	button.secure:RegisterForClicks("AnyUp", "AnyDown")
-	button.secure:SetAttribute("type", "macro")
-	if macro then button.secure:SetAttribute("macrotext", macro) end
-	button.command = "CLICK "..name..":LeftButton"
-	_G["BINDING_NAME_"..button.command] = description or name
+	button:SetHeight(22)
+	button.index = index
+	button.command = command
 	button:SetScript("OnEnter", button_OnEnter)
 	button:SetScript("OnLeave", button_OnLeave)
 	button:SetScript("OnShow", button_OnShow)
@@ -62,15 +59,36 @@ function binding:createButtonBinding(name, description, secureTemplate, macro)
 end
 
 
-function binding:setButtonText(button)
-	local key1 = GetBindingKey(button.command)
+function binding:createBindingButtons(name, description, secureTemplate)
+	local command = "CLICK "..name..":LeftButton"
+	local button1 = self:createBindingButton(1, name, command)
+	local button2 = self:createBindingButton(2, name, command)
+	button2:SetPoint("TOPLEFT", button1, "BOTTOMLEFT", 0, -5)
+	button2:SetPoint("TOPRIGHT", button1, "BOTTOMRIGHT", 0, -5)
 
-	if key1 then
-		button:SetText(GetBindingText(key1))
+	local secure = CreateFrame("Button", name, UIParent, secureTemplate or "SecureActionButtonTemplate")
+	secure:RegisterForClicks("AnyUp", "AnyDown")
+	secure:SetAttribute("type", "macro")
+
+	_G["BINDING_NAME_"..command] = description or name
+	return button1, button2, secure
+end
+
+
+function binding:setButtonText(button)
+	local key = select(button.index, GetBindingKey(button.command))
+
+	if key then
+		button:SetText(GetBindingText(key))
 		button:SetAlpha(1)
 	else
 		button:SetText(GRAY_FONT_COLOR:WrapTextInColorCode(NOT_BOUND))
 		button:SetAlpha(.8)
+	end
+
+	if button:IsMouseOver() then
+		button:GetScript("OnLeave")(button)
+		button:GetScript("OnEnter")(button)
 	end
 end
 
@@ -82,14 +100,12 @@ function binding:setSelected(button)
 		self.unboundMessage:Hide()
 		button.selectedHighlight:Show()
 		button:GetHighlightTexture():SetAlpha(0)
-	else
-		if self.selected then
-			local button = self.selected
-			self.selected = nil
-			self:Hide()
-			button.selectedHighlight:Hide()
-			button:GetHighlightTexture():SetAlpha(1)
-		end
+	elseif self.selected then
+		local button = self.selected
+		self.selected = nil
+		self:Hide()
+		button.selectedHighlight:Hide()
+		button:GetHighlightTexture():SetAlpha(1)
 	end
 end
 
@@ -103,11 +119,11 @@ function binding:OnClick(button, keyButton)
 			self:setSelected(button)
 		end
 	elseif keyButton == "RightButton" then
+		if self.selected == button then binding:setSelected() end
 		if InCombatLockdown() then return end
-		local key = GetBindingKey(button.command)
+		local key = select(button.index, GetBindingKey(button.command))
 		if key then
-			if self.selected == button then binding:setSelected() end
-			self:setBinding(key, button.command)
+			self:setBinding(key, button.command, button.index)
 			self:event("SET_BINDING")
 		end
 	else
@@ -129,7 +145,7 @@ function binding:OnKeyDown(keyPressed)
 		if not IsKeyPressIgnoredForBinding(keyPressed) then
 			keyPressed = CreateKeyChordStringUsingMetaKeyState(keyPressed)
 
-			self:setBinding(keyPressed, self.selected.command)
+			self:setBinding(keyPressed, self.selected.command, self.selected.index)
 			self:event("SET_BINDING")
 			self:setSelected()
 		end
@@ -139,16 +155,16 @@ binding:SetScript("OnKeyDown", binding.OnKeyDown)
 binding:SetScript("OnGamePadButtonDown", binding.OnKeyDown)
 
 
-function binding:setBinding(key, selectedBinding)
+function binding:setBinding(key, command, index)
 	if InCombatLockdown() then return end
 	local oldAction = GetBindingAction(key)
-	if oldAction ~= "" and oldAction ~= selectedBinding then
+	if oldAction ~= "" and oldAction ~= command then
 		self.unboundMessage:SetText(KEY_UNBOUND_ERROR:format(GetBindingName(oldAction)))
 		self.unboundMessage:Show()
 	end
 
-	local oldKey = GetBindingKey(selectedBinding)
-	if SetBinding(key, selectedBinding) and oldKey then
+	local oldKey = select(index, GetBindingKey(command))
+	if SetBinding(key, command) and oldKey then
 		SetBinding(oldKey, nil)
 	end
 end
