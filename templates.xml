@@ -919,18 +919,6 @@
 								</Scripts>
 							</CheckButton>
 						</Frames>
-						<Scripts>
-							<OnEnter>
-								self.multipleMountBtn:SetAlpha(.5)
-								self.modelControl:SetAlpha(.5)
-								self.playerToggle:SetAlpha(.5)
-							</OnEnter>
-							<OnLeave>
-								self.multipleMountBtn:SetAlpha(0)
-								self.modelControl:SetAlpha(0)
-								self.playerToggle:SetAlpha(0)
-							</OnLeave>
-						</Scripts>
 					</ModelScene>
 				</Frames>
 			</Frame>

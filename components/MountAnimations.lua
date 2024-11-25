@@ -8,13 +8,6 @@ ns.journal:on("MODULES_INIT", function(journal)
 	dd:SetPoint("LEFT", journal.modelScene.modelControl, "RIGHT", 10, -.5)
 	journal.modelScene.animationsCombobox = dd
 
-	journal.modelScene:HookScript("OnEnter", function(self)
-		self.animationsCombobox:SetAlpha(.5)
-	end)
-	journal.modelScene:HookScript("OnLeave", function(self)
-		self.animationsCombobox:SetAlpha(0)
-	end)
-
 	dd:SetScript("OnEnter", function(self)
 		local parent = self:GetParent()
 		parent:GetScript("OnEnter")(parent)

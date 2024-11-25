@@ -554,6 +554,39 @@ function journal:init()
 		self:setScrollGridMounts(checked)
 	end)
 
+	-- MODELSCENE
+	self.modelScene:HookScript("OnEnter", function(modelScene)
+		modelScene:GetParent():SetScript("OnUpdate", nil)
+		modelScene.multipleMountBtn:SetAlpha(.5)
+		modelScene.modelControl:SetAlpha(.5)
+		modelScene.animationsCombobox:SetAlpha(.5)
+		modelScene.playerToggle:SetAlpha(.5)
+	end)
+
+	local function modelSceneControlsHide(mountDisplay, elapsed)
+		mountDisplay.time = mountDisplay.time - elapsed
+		local alpha = .5 / .2 * mountDisplay.time
+		local modelScene = mountDisplay.modelScene
+		if alpha <= 0 then
+			mountDisplay:SetScript("OnUpdate", nil)
+			modelScene.multipleMountBtn:SetAlpha(0)
+			modelScene.modelControl:SetAlpha(0)
+			modelScene.animationsCombobox:SetAlpha(0)
+			modelScene.playerToggle:SetAlpha(0)
+		else
+			modelScene.multipleMountBtn:SetAlpha(alpha)
+			modelScene.modelControl:SetAlpha(alpha)
+			modelScene.animationsCombobox:SetAlpha(alpha)
+			modelScene.playerToggle:SetAlpha(alpha)
+		end
+	end
+
+	self.modelScene:HookScript("OnLeave", function(modelScene)
+		local mountDisplay = modelScene:GetParent()
+		mountDisplay.time = .2
+		mountDisplay:SetScript("OnUpdate", modelSceneControlsHide)
+	end)
+
 	-- WOWHEAD LINK
 	self.mountDisplay.info.link:HookScript("OnEnter", function()
 		self.modelScene:GetScript("OnEnter")(self.modelScene)
