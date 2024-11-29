@@ -2103,7 +2103,7 @@
 					CreateAnchor("BOTTOMRIGHT", self.background, "BOTTOMRIGHT", -8, 8),
 				}
 				local anchorsToBar = {
-					CreateAnchor("TOPLEFT", self.background, "TOPLEFT", 8, -8),
+					anchorsToFrame[1],
 					CreateAnchor("BOTTOMRIGHT", self.scrollBar, "BOTTOMLEFT", -3, 4),
 				}
 				local scrollBox = self.editFrame:GetScrollBox()

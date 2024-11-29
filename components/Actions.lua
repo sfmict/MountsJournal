@@ -6,7 +6,7 @@ ns.actions = actions
 
 
 ---------------------------------------------------
--- rmount
+-- rmount RANDOM MOUNT
 actions.rmount = {}
 actions.rmount.text = L["Random Mount"]
 
@@ -71,6 +71,40 @@ function actions.rmount:getFuncText(value)
 		]]):format(value:gsub("[\\']", "\\%1"))
 	end
 end
+
+
+---------------------------------------------------
+-- rmountr RANDOM MOUNT BY RARITY
+actions.rmountr = {}
+actions.rmountr.text = L["Random Mount by Rarity"]
+actions.rmountr.description = L["The lower the rarity, the higher the chance"]
+
+actions.rmountr.getValueText = actions.rmount.getValueText
+
+actions.rmountr.getValueList = actions.rmount.getValueList
+
+function actions.rmountr:getFuncText(value)
+	local text = [[
+		profileLoad = 1
+		self.sFlags.rarityWeight = true
+	]]
+	if value == 0 then
+		return [[
+			self.mounts:setMountsList(self.mounts.sp)
+		]]..text
+	elseif value == 1 then
+		return [[
+			self.mounts:setMountsList(self.mounts.defProfile)
+		]]..text
+	else
+		return ([[
+			local profile = self.mounts.profiles['%s']
+			self.mounts:setMountsList(profile)
+			%s
+		]]):format(value:gsub("[\\']", "\\%1"), text)
+	end
+end
+
 
 ---------------------------------------------------
 -- mount
@@ -150,7 +184,7 @@ end
 
 
 ---------------------------------------------------
--- iitem
+-- iitem INVENTORY ITEM
 actions.iitem = {}
 actions.iitem.text = L["Use Inventory Item"]
 
@@ -247,6 +281,7 @@ function actions:getMenuList(value, func)
 	local list = {}
 	local types = {
 		"rmount",
+		"rmountr",
 		"mount",
 		"dmount",
 		"spell",

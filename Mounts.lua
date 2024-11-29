@@ -99,7 +99,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.charDB = MountsJournalChar
 		self.charDB.macrosConfig = self.charDB.macrosConfig or {}
 
-		-- Списки
+		-- lists
 		self.swimmingVashjir = {
 			[75207] = true, -- Вайш'ирский морской конек
 		}
@@ -131,6 +131,19 @@ function mounts:ADDON_LOADED(addonName)
 			{itemID = 37011},
 			{mountID = 1799},
 		}
+
+		-- rarity weight
+		self.rarityWeight = setmetatable({}, {__index = function(t, spellID)
+			local rarity
+			if ns.additionalMounts[spellID] then
+				rarity = 100
+			else
+				local mountID = C_MountJournal.GetMountFromSpell(spellID)
+				rarity = ns.mountsDB[mountID][3]
+			end
+			t[spellID] = 100 - math.floor(rarity * .99 + .5)
+			return t[spellID]
+		end})
 	end
 end
 
@@ -549,6 +562,7 @@ end
 
 
 function mounts:setUsableID(ids, mountsWeight)
+	if self.sFlags.rarityWeight then mountsWeight = self.rarityWeight end
 	local weight = 0
 	wipe(self.usableIDs)
 
@@ -697,6 +711,7 @@ do
 		                          and (IsFlyableArea() or isFlyableOverride[self.instanceID])
 		                          and self:isFlyLocation(self.instanceID)
 
+		flags.rarityWeight = false
 		flags.modifier = self.modifier() or flags.forceModifier
 		flags.isSubmerged = IsSubmerged()
 		flags.isIndoors = IsIndoors()

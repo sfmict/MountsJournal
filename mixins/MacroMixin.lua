@@ -631,6 +631,8 @@ MJMacroMixin = {}
 
 function MJMacroMixin:onLoad()
 	self.mounts = ns.mounts
+	self:RegisterForClicks("AnyUp", "AnyDown")
+	self:SetAttribute("type", "macro")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 end
 
