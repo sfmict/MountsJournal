@@ -444,7 +444,7 @@ function mounts:setMapList()
 end
 
 
-function mounts:setMountsList(profile)
+function mounts:setMountsList(profile, mountsWeight)
 	if not profile then return end
 	self.priorityProfiles[#self.priorityProfiles + 1] = profile
 	if self.mapFlags and self.list.fly and self.list.ground and self.list.swimming then return end
@@ -475,15 +475,15 @@ function mounts:setMountsList(profile)
 				if list then
 					if not self.list.fly and next(list.fly) then
 						self.list.fly = list.fly
-						self.list.flyWeight = profile.mountsWeight
+						self.list.flyWeight = mountsWeight or profile.mountsWeight
 					end
 					if not self.list.ground and next(list.ground) then
 						self.list.ground = list.ground
-						self.list.groundWeight = profile.mountsWeight
+						self.list.groundWeight = mountsWeight or profile.mountsWeight
 					end
 					if not self.list.swimming and next(list.swimming) then
 						self.list.swimming = list.swimming
-						self.list.swimmingWeight = profile.mountsWeight
+						self.list.swimmingWeight = mountsWeight or profile.mountsWeight
 					end
 				end
 			end
@@ -562,7 +562,6 @@ end
 
 
 function mounts:setUsableID(ids, mountsWeight)
-	if self.sFlags.rarityWeight then mountsWeight = self.rarityWeight end
 	local weight = 0
 	wipe(self.usableIDs)
 
@@ -711,7 +710,6 @@ do
 		                          and (IsFlyableArea() or isFlyableOverride[self.instanceID])
 		                          and self:isFlyLocation(self.instanceID)
 
-		flags.rarityWeight = false
 		flags.modifier = self.modifier() or flags.forceModifier
 		flags.isSubmerged = IsSubmerged()
 		flags.isIndoors = IsIndoors()

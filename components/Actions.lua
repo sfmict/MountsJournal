@@ -84,24 +84,22 @@ actions.rmountr.getValueText = actions.rmount.getValueText
 actions.rmountr.getValueList = actions.rmount.getValueList
 
 function actions.rmountr:getFuncText(value)
-	local text = [[
-		profileLoad = 1
-		self.sFlags.rarityWeight = true
-	]]
 	if value == 0 then
 		return [[
-			self.mounts:setMountsList(self.mounts.sp)
-		]]..text
+			self.mounts:setMountsList(self.mounts.sp, self.mounts.rarityWeight)
+			profileLoad = 1
+		]]
 	elseif value == 1 then
 		return [[
-			self.mounts:setMountsList(self.mounts.defProfile)
-		]]..text
+			self.mounts:setMountsList(self.mounts.defProfile, self.mounts.rarityWeight)
+			profileLoad = 1
+		]]
 	else
 		return ([[
 			local profile = self.mounts.profiles['%s']
-			self.mounts:setMountsList(profile)
-			%s
-		]]):format(value:gsub("[\\']", "\\%1"), text)
+			self.mounts:setMountsList(profile, self.mounts.rarityWeight)
+			profileLoad = 1
+		]]):format(value:gsub("[\\']", "\\%1"))
 	end
 end
 
