@@ -801,9 +801,16 @@ function mounts:init()
 			Dismount()
 		else
 			local ruleID = flags.forceModifier and 2 or 1
-			ns.macroFrame.checkRules[ruleID](ns.macroFrame, "LeftButton", true)
-			self:setSummonMount()
-			self:summon()
+			local profileLoad = true
+			local noMacro = true
+			local action = ns.macroFrame.checkRules[ruleID](ns.macroFrame, "LeftButton", profileLoad, noMacro)
+			if action == true then return end
+			if ns.macroFrame.useMount then
+				self:summon(ns.macroFrame.useMount)
+			else
+				self:setSummonMount()
+				self:summon()
+			end
 		end
 	end
 

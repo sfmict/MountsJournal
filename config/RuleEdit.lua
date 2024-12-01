@@ -338,7 +338,7 @@ end
 
 function ruleEditor:getCondTooltip(condData)
 	local cond = conds[condData[2]]
-	return cond.getDescription and cond:getDescription()
+	return cond.getValueDescription and cond:getValueDescription()
 end
 
 
@@ -417,7 +417,7 @@ end
 
 function ruleEditor:getActionTooltip(actionData)
 	local action = actions[actionData[1]]
-	return action.getDescription and action:getDescription()
+	return action.getValueDescription and action:getValueDescription()
 end
 
 

@@ -115,7 +115,7 @@ end
 conds.mcond = {}
 conds.mcond.text = L["Macro condition"]
 
-function conds.mcond:getDescription()
+function conds.mcond:getValueDescription()
 	return [[|cffffffffexists
 help
 dead
@@ -456,7 +456,7 @@ conds.hitem = {}
 conds.hitem.text = L["Have item"]
 conds.hitem.isNumeric = true
 
-function conds.hitem:getDescription()
+function conds.hitem:getValueDescription()
 	return "ItemID"
 end
 
@@ -475,7 +475,7 @@ conds.ritem = {}
 conds.ritem.text = L["Item is ready"]
 conds.ritem.isNumeric = true
 
-conds.ritem.getDescription = conds.hitem.getDescription
+conds.ritem.getValueDescription = conds.hitem.getValueDescription
 
 conds.ritem.getValueText = conds.hitem.getValueText
 
@@ -490,7 +490,7 @@ conds.kspell = {}
 conds.kspell.text = L["Spell is known"]
 conds.kspell.isNumeric = true
 
-function conds.kspell:getDescription()
+function conds.kspell:getValueDescription()
 	return "SpellID"
 end
 
@@ -507,7 +507,7 @@ conds.rspell = {}
 conds.rspell.text = L["Spell is ready"]
 conds.rspell.isNumeric = true
 
-function conds.rspell:getDescription()
+function conds.rspell:getValueDescription()
 	return "SpellID (61304 for GCD)"
 end
 
@@ -524,7 +524,7 @@ conds.hbuff = {}
 conds.hbuff.text = L["The player has a buff"]
 conds.hbuff.isNumeric = true
 
-conds.hbuff.getDescription = conds.kspell.getDescription
+conds.hbuff.getValueDescription = conds.kspell.getValueDescription
 
 conds.hbuff.getValueText = conds.hitem.getValueText
 
@@ -539,7 +539,7 @@ conds.hdebuff = {}
 conds.hdebuff.text = L["The player has a debuff"]
 conds.hdebuff.isNumeric = true
 
-conds.hdebuff.getDescription = conds.kspell.getDescription
+conds.hdebuff.getValueDescription = conds.kspell.getValueDescription
 
 conds.hdebuff.getValueText = conds.hitem.getValueText
 
@@ -646,7 +646,7 @@ end
 conds.zone = {}
 conds.zone.text = ZONE
 
-function conds.zone:getDescription()
+function conds.zone:getValueDescription()
 	return L["Zone Name/Subzone Name"]
 end
 
@@ -756,7 +756,7 @@ end
 conds.instance = {}
 conds.instance.text = INSTANCE
 
-function conds.instance:getDescription()
+function conds.instance:getValueDescription()
 	return {
 		INSTANCE.." or InstanceID",
 		{INSTANCE , ns.mounts.instanceName},
@@ -1256,9 +1256,14 @@ end
 
 function conds:getFuncText(conds)
 	local text = ""
-	if conds.action[1] ~= "rmount" then
-		text = "not (profileLoad or self.useMount)\nand "
-		if conds.action[1] == "pmacro" then
+	local actionType = conds.action[1]
+	if actionType ~= "rmount" and actionType ~= "rmountr" then
+		if actionType == "mount" then
+			text = "(profileLoad ~= 1 and not self.useMount)\nand "
+		else
+			text = "not (profileLoad or self.useMount)\nand "
+		end
+		if actionType == "pmacro" then
 			text = text.."not self.preUseMacro\nand "
 		end
 	end

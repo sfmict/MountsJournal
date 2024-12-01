@@ -241,7 +241,7 @@ function macroFrame:setRuleFuncs()
 		local rules = self.currentRuleSet[i]
 		local keys = {}
 		local func = [[
-return function(self, button, profileLoad)
+return function(self, button, profileLoad, noMacro)
 	self.mounts:resetMountsList()
 	self.preUseMacro = nil
 	self.useMount = nil
@@ -283,7 +283,7 @@ return function(self, button, profileLoad)
 	end
 
 	self.mounts:setEmptyList()
-	return self:getMacro()
+	return self:getMacro(noMacro)
 end
 		]]
 		self.checkRules[i] = self:loadString(func)
@@ -440,7 +440,8 @@ local function isNotFishingBuff()
 end
 
 
-function macroFrame:getFishingRodMacro()
+function macroFrame:updateFishingRod()
+	if InCombatLockdown() then return end
 	if self.fishingSlotID == self.fishingRodID then
 		if self.charMacrosConfig.itemSlot28 then
 			EquipItemByName(self.charMacrosConfig.itemSlot28)
@@ -455,8 +456,6 @@ function macroFrame:getFishingRodMacro()
 		self.charMacrosConfig.itemSlot28 = GetInventoryItemLink("player", 28)
 		EquipItemByName(self.fishingRodID)
 	end
-
-	return ""
 end
 
 
@@ -526,7 +525,7 @@ function macroFrame:isMovingOrFalling()
 end
 
 
-function macroFrame:getMacro(id, button)
+function macroFrame:getMacro(noMacro)
 	-- UNDERLIGHT ANGLER
 	if self.config.useUnderlightAngler and C_Item.GetItemCount(self.fishingRodID) > 0 then
 		self.fishingSlotID = GetInventoryItemID("player", 28)
@@ -538,9 +537,12 @@ function macroFrame:getMacro(id, button)
 			and not self.sFlags.isSubmerged
 			and GetUnitSpeed("player") > 0
 		then
-			return self:getFishingRodMacro()
+			self:updateFishingRod()
+			return noMacro or ""
 		end
 	end
+
+	if noMacro then return end
 
 	-- MAGIC BROOM IS USABLE
 	self.magicBroom = self:getBroomData()

@@ -56,18 +56,18 @@ function actions.rmount:getFuncText(value)
 	if value == 0 then
 		return [[
 			self.mounts:setMountsList(self.mounts.sp)
-			profileLoad = true
+			profileLoad = 1
 		]]
 	elseif value == 1 then
 		return [[
 			self.mounts:setMountsList(self.mounts.defProfile)
-			profileLoad = true
+			profileLoad = 1
 		]]
 	else
 		return ([[
 			local profile = self.mounts.profiles['%s']
 			self.mounts:setMountsList(profile)
-			profileLoad = true
+			profileLoad = 1
 		]]):format(value:gsub("[\\']", "\\%1"))
 	end
 end
@@ -135,10 +135,10 @@ function actions.mount:getFuncText(value)
 				return "/dismount"
 			end
 		-- MOUNT
-		else
+		elseif not (noMacro and self.additionalMounts[%s]) then
 			self.useMount = %s
 		end
-	]]):format(macroFrame.classDismount or "", value),
+	]]):format(macroFrame.classDismount or "", value, value),
 	{"GetTime"}
 end
 
@@ -170,7 +170,7 @@ end
 actions.item = {}
 actions.item.text = L["Use Item"]
 
-function actions.item:getDescription()
+function actions.item:getValueDescription()
 	return "ItemID"
 end
 
@@ -188,7 +188,7 @@ end
 actions.iitem = {}
 actions.iitem.text = L["Use Inventory Item"]
 
-function actions.iitem:getDescription()
+function actions.iitem:getValueDescription()
 	local list = {
 		INVTYPE_HEAD,
 		INVTYPE_NECK,
@@ -213,7 +213,7 @@ function actions.iitem:getDescription()
 	local description = ""
 	for i = 1, #list do
 		local slot = list[i]
-		description = ("%s%s = %s\n"):format(description, list[i], i)
+		description = ("%s%s = %s\n"):format(description, i, list[i])
 	end
 	return description
 end
@@ -230,7 +230,7 @@ end
 actions.spell = {}
 actions.spell.text = L["Cast Spell"]
 
-function actions.spell:getDescription()
+function actions.spell:getValueDescription()
 	return "SpellID"
 end
 
@@ -298,7 +298,6 @@ function actions:getMenuList(value, func)
 			value = v,
 			func = func,
 			checked = v == value,
-			arg1 = action.getDescription and action:getDescription(),
 		}
 		if action.description then
 			list[i].OnTooltipShow = function(btn, tooltip)
