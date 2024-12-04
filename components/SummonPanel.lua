@@ -268,12 +268,14 @@ mounts:on("CREATE_BUTTONS", function()
 	local leftIcon = "|A:newplayertutorial-icon-mouse-leftbutton:0:0|a "
 	-- local rightIcon = "|A:newplayertutorial-icon-mouse-rightbutton:0:0|a "
 
+	-- SUMMON 1
+	local summon1Handler = _G[util.secureButtonNameMount]
 	local summon1 = CreateFrame("BUTTON", nil, panel, "MJSecureBarButtonTemplate")
 	panel.summon1 = summon1
 	summon1:SetPropagateMouseClicks(true)
 	summon1:SetPropagateMouseMotion(true)
 	summon1.icon:SetTexture(mounts.config.summon1Icon)
-	summon1:SetAttribute("clickbutton", _G[util.secureButtonNameMount])
+	summon1:SetAttribute("clickbutton", summon1Handler)
 	summon1:SetScript("OnEnter", function(btn)
 		if panel.isDrag then return end
 		GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
@@ -290,12 +292,17 @@ mounts:on("CREATE_BUTTONS", function()
 		GameTooltip:Show()
 	end)
 
+	summon1Handler:HookScript("OnMouseDown", function() summon1:GetPushedTexture():Show() end)
+	summon1Handler:HookScript("OnMouseUp", function() summon1:GetPushedTexture():Hide() end)
+
+	-- SUMMON 2
+	local summon2Handler = _G[util.secureButtonNameSecondMount]
 	local summon2 = CreateFrame("BUTTON", nil, panel, "MJSecureBarButtonTemplate")
 	panel.summon2 = summon2
 	summon2:SetPropagateMouseClicks(true)
 	summon2:SetPropagateMouseMotion(true)
 	summon2.icon:SetTexture(mounts.config.summon2Icon)
-	summon2:SetAttribute("clickbutton", _G[util.secureButtonNameSecondMount])
+	summon2:SetAttribute("clickbutton", summon2Handler)
 	summon2:SetScript("OnEnter", function(btn)
 		if panel.isDrag then return end
 		GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
@@ -311,6 +318,9 @@ mounts:on("CREATE_BUTTONS", function()
 		end
 		GameTooltip:Show()
 	end)
+
+	summon2Handler:HookScript("OnMouseDown", function() summon2:GetPushedTexture():Show() end)
+	summon2Handler:HookScript("OnMouseUp", function() summon2:GetPushedTexture():Hide() end)
 
 	panel:setStrata()
 	panel:setSize()

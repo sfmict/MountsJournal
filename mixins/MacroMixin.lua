@@ -569,6 +569,10 @@ function macroFrame:getMacro(noMacro)
 	else
 		macro = self:getDefMacro()
 
+		if self.preUseMacro then
+			macro = self:addLine(macro, self.preUseMacro)
+		end
+
 		if self.magicBroom then
 			if self.magicBroom.itemID then
 				macro = self:addLine(macro, "/use item:"..self.magicBroom.itemID) -- USE ITEM BROOM
@@ -585,10 +589,6 @@ function macroFrame:getMacro(noMacro)
 				additionMount = self.additionalMounts[self.sFlags.targetMount]
 			else
 				additionMount = self.additionalMounts[self.mounts.summonedSpellID]
-			end
-
-			if self.preUseMacro then
-				macro = self:addLine(macro, self.preUseMacro)
 			end
 
 			if additionMount then
