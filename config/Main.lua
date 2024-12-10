@@ -366,25 +366,22 @@ config:SetScript("OnShow", function(self)
 	self.magicBroomCombobox = lsfdd:CreateButton(self.magicBroomGroup, 230)
 	self.magicBroomCombobox:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 20, -8)
 
-	self.magicBroomCombobox.Button:SetScript("OnClick", function(btn)
-		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-
-		if not btn.promise then
+	ltl:SetScriptAfter(self.magicBroomCombobox.Button, "OnClick", "Items",
+		function(btn)
+			btn:GetParent():Disable()
 			local t = {}
 			for i, data in ipairs(mounts.magicBrooms) do
 				if data.itemID then t[#t + 1] = data.itemID end
 			end
-			btn.promise = ltl:Items(t)
-		end
-
-		local parent = btn:GetParent()
-		parent:Disable()
-
-		btn.promise:Then(function()
+			return t
+		end,
+		function(btn)
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+			local parent = btn:GetParent()
 			parent:Enable()
 			parent:ddToggle(1, nil, parent)
-		end)
-	end)
+		end
+	)
 
 	self.magicBroomCombobox:ddSetInitFunc(function(self, level)
 		local info = {}
