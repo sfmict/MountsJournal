@@ -19,7 +19,9 @@ function journal.filters.family(dd, level, subFamily)
 		for k in next, familyDB[subFamily] do
 			sortedNames[#sortedNames + 1] = {k, L[k]}
 		end
-		sort(sortedNames, function(a, b) return a[2] < b[2] end)
+		sort(sortedNames, function(a, b)
+			return b[1] == "Others" or a[1] ~= "Others" and strcmputf8i(a[2], b[2]) < 0
+		end)
 
 		widgets[1].OnClick = function(btn)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -37,6 +39,7 @@ function journal.filters.family(dd, level, subFamily)
 
 		for i, name in ipairs(sortedNames) do
 			info.text = name[2]
+			info.icon = ns.familyDBIcons[subFamily][name[1]]
 			info.value = familyDB[subFamily][name[1]]
 			info.widgets = widgets
 			info.func = func
@@ -66,7 +69,9 @@ function journal.filters.family(dd, level, subFamily)
 		for k in next, familyDB do
 			sortedNames[#sortedNames + 1] = {k, L[k]}
 		end
-		sort(sortedNames, function(a, b) return a[2] < b[2] end)
+		sort(sortedNames, function(a, b)
+			return b[1] == "rest" or a[1] ~= "rest" and strcmputf8i(a[2], b[2]) < 0
+		end)
 
 		widgets[1].OnClick = function(btn)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -114,20 +119,20 @@ function journal.filters.family(dd, level, subFamily)
 
 		local list = {}
 		for i, name in ipairs(sortedNames) do
-			local subInfo = {
-				keepShownOnClick = true,
-				isNotRadio = true,
-			}
+			local subInfo = {}
+			subInfo.keepShownOnClick = true
+			subInfo.isNotRadio = true
+			subInfo.text = name[2]
 
 			if type(familyDB[name[1]]) == "number" then
-				subInfo.text = name[2]
+				subInfo.icon = ns.familyDBIcons[name[1]]
 				subInfo.value = familyDB[name[1]]
 				subInfo.widgets = widgets
 				subInfo.func = func
 				subInfo.checked = check
 			else
 				subInfo.hasArrow = true
-				subInfo.text = name[2]
+				subInfo.icon = ns.familyDBIcons[name[1]][0]
 				subInfo.value = {"family", name[1]}
 				subInfo.widgets = subWidgets
 				subInfo.func = subFunc

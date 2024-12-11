@@ -28,8 +28,15 @@ function journal.filters.specific(btn, level)
 	info.notCheckable = nil
 	local specific = mounts.filters.specific
 
+	local icons = {
+		repair = 136241,
+		auctioneer = 136452,
+		passenger = 134248,
+	}
+
 	for k, t in pairs(specificDB) do
 		info.text = L[k]
+		info.icon = icons[k]
 		info.func = function(_,_,_, value)
 			specific[k] = value
 			journal:updateMountsList()
@@ -39,6 +46,7 @@ function journal.filters.specific(btn, level)
 	end
 
 	info.text = L["Ride Along"]
+	info.icon = 618976
 	info.func = function(_,_,_, value)
 		specific.rideAlong = value
 		journal:updateMountsList()
@@ -47,6 +55,7 @@ function journal.filters.specific(btn, level)
 	btn:ddAddButton(info, level)
 
 	info.text = L["transform"]
+	info.icon = 461140
 	info.func = function(_,_,_, value)
 		specific.transform = value
 		journal:updateMountsList()
@@ -55,6 +64,7 @@ function journal.filters.specific(btn, level)
 	btn:ddAddButton(info, level)
 
 	info.text = L["Multiple Models"]
+	info.icon = 237185
 	info.func = function(_,_,_, value)
 		specific.multipleModels = value
 		journal:updateMountsList()
@@ -63,6 +73,7 @@ function journal.filters.specific(btn, level)
 	btn:ddAddButton(info, level)
 
 	info.text = L["additional"]
+	info.icon = ns.familyDBIcons.additional[0]
 	info.func = function(_,_,_, value)
 		specific.additional = value
 		journal:updateMountsList()
@@ -71,6 +82,7 @@ function journal.filters.specific(btn, level)
 	btn:ddAddButton(info, level)
 
 	info.text = L["rest"]
+	info.icon = 413588
 	info.func = function(_,_,_, value)
 		specific.rest = value
 		journal:updateMountsList()

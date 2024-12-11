@@ -335,7 +335,9 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 			for k in next, familyDB do
 				sortedNames[#sortedNames + 1] = {k, L[k]}
 			end
-			sort(sortedNames, function(a, b) return a[2] < b[2] end)
+			sort(sortedNames, function(a, b)
+				return b[1] == "rest" or a[1] ~= "rest" and strcmputf8i(a[2], b[2]) < 0
+			end)
 
 			local func = function(button, _,_, checked)
 				setFamilyID(button.value, checked)
@@ -360,20 +362,20 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 
 			local list = {}
 			for i, name in ipairs(sortedNames) do
-				local subInfo = {
-					keepShownOnClick = true,
-					isNotRadio = true,
-				}
+				local subInfo = {}
+				subInfo.keepShownOnClick = true
+				subInfo.isNotRadio = true
+				subInfo.text = name[2]
 
 				if type(familyDB[name[1]]) == "number" then
 					subInfo.disabled = name[1] == "rest"
-					subInfo.text = name[2]
+					subInfo.icon = ns.familyDBIcons[name[1]]
 					subInfo.value = familyDB[name[1]]
 					subInfo.func = func
 					subInfo.checked = check
 				else
 					subInfo.hasArrow = true
-					subInfo.text = name[2]
+					subInfo.icon = ns.familyDBIcons[name[1]][0]
 					subInfo.value = name[1]
 					subInfo.func = subFunc
 					subInfo.checked = subCheck
@@ -393,7 +395,9 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 			for k in next, familyDB[value] do
 				sortedNames[#sortedNames + 1] = {k, L[k]}
 			end
-			sort(sortedNames, function(a, b) return a[2] < b[2] end)
+			sort(sortedNames, function(a, b)
+				return b[1] == "Others" or a[1] ~= "Others" and strcmputf8i(a[2], b[2]) < 0
+			end)
 
 			local func = function(button, _,_, checked)
 				setFamilyID(button.value, checked)
@@ -402,6 +406,7 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 
 			for i, name in ipairs(sortedNames) do
 				info.text = name[2]
+				info.icon = ns.familyDBIcons[value][name[1]]
 				info.value = familyDB[value][name[1]]
 				info.func = func
 				info.checked = check

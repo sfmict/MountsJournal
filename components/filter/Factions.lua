@@ -24,10 +24,24 @@ function journal.filters.factions(btn, level)
 	end
 	btn:ddAddButton(info, level)
 
+	local icons = {
+		2565244,
+		2565243,
+		200286,
+	}
+	local iconInfo = {
+		tCoordLeft = .25,
+		tCoordRight = .85,
+		tCoordTop = .2,
+		tCoordBottom = .8,
+	}
+
 	info.notCheckable = nil
 	local factions = mounts.filters.factions
 	for i = 1, 3 do
 		info.text = L["MOUNT_FACTION_"..i]
+		info.icon = icons[i]
+		info.iconInfo = i == 3 and iconInfo or nil
 		info.func = function(_,_,_, value)
 			factions[i] = value
 			journal:updateMountsList()

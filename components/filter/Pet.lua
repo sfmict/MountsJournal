@@ -24,10 +24,25 @@ function journal.filters.pet(btn, level)
 	end
 	btn:ddAddButton(info, level)
 
+	local icons = {
+		922035,
+		652131,
+		647701,
+		136509,
+	}
+	local iconInfo = {
+		tCoordLeft = .13125,
+		tCoordRight = .7125,
+		tCoordTop = .13125,
+		tCoordBottom = .7125,
+	}
+
 	info.notCheckable = nil
 	local pet = mounts.filters.pet
 	for i = 1, 4 do
 		info.text = L["PET_"..i]
+		info.icon = icons[i]
+		info.iconInfo = i == 1 and iconInfo or nil
 		info.func = function(_,_,_, value)
 			pet[i] = value
 			journal:updateMountsList()
