@@ -35,6 +35,12 @@ pets:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 pets:RegisterEvent("UI_ERROR_MESSAGE")
 
 
+function pets:dismiss()
+	local petID = C_PetJournal.GetSummonedPetGUID()
+	if petID then C_PetJournal.SummonPetByGUID(petID) end
+end
+
+
 function pets:summon(petID)
 	if C_PetJournal.PetIsSummonable(petID) and C_PetJournal.GetSummonedPetGUID() ~= petID then
 		C_PetJournal.SummonPetByGUID(petID)

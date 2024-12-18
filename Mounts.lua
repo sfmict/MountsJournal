@@ -287,6 +287,15 @@ function mounts:PLAYER_ENTERING_WORLD()
 	self.instanceType = instanceType
 	self.difficultyID = difficultyID
 	self.instanceID = instanceID
+
+	if difficultyID ~= 0 then
+		local groupType = util.getGroupType()
+		if groupType == "raid" and self.config.noPetInRaid
+		or groupType == "group" and self.config.noPetInGroup
+		then
+			ns.pets:dismiss()
+		end
+	end
 end
 
 
