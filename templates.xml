@@ -2563,7 +2563,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button parentKey="minus" inherits="MJPlusMinusButtonTemplate">
+			<Button parentKey="minus" propagateMouseInput="Motion" inherits="MJPlusMinusButtonTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT"/>
 				</Anchors>
@@ -2571,7 +2571,7 @@
 					<OnLoad>self.icon:SetTexCoord(.625, 1, 0, .4375)</OnLoad>
 				</Scripts>
 			</Button>
-			<EditBox parentKey="animationNum" numeric="true" letters="10" multiLine="false" autoFocus="false">
+			<EditBox parentKey="animationNum" propagateMouseInput="Motion" numeric="true" letters="10" multiLine="false" autoFocus="false">
 				<Size x="80" y="22"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.minus" relativePoint="RIGHT" x="-2"/>
@@ -2588,7 +2588,7 @@
 					<OnLoad>self:SetTextInsets(2, 2, 0, 0)</OnLoad>
 				</Scripts>
 			</EditBox>
-			<Button parentKey="plus" inherits="MJPlusMinusButtonTemplate">
+			<Button parentKey="plus" propagateMouseInput="Motion" inherits="MJPlusMinusButtonTemplate">
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.animationNum" relativePoint="RIGHT" x="-2"/>
 				</Anchors>
@@ -2596,7 +2596,7 @@
 					<OnLoad>self.icon:SetTexCoord(0, .4375, 0, .4375)</OnLoad>
 				</Scripts>
 			</Button>
-			<Button inherits="UIPanelButtonTemplate" parentKey="playButton">
+			<Button parentKey="playButton" propagateMouseInput="Motion" inherits="UIPanelButtonTemplate">
 				<Size x="26" y="22"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.plus" relativePoint="RIGHT" x="0"/>
@@ -2612,7 +2612,7 @@
 					</Layer>
 				</Layers>
 			</Button>
-			<Button inherits="UIPanelButtonTemplate" parentKey="stopButton">
+			<Button parentKey="stopButton" propagateMouseInput="Motion" inherits="UIPanelButtonTemplate">
 				<Size x="26" y="22"/>
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.playButton" relativePoint="RIGHT"/>
@@ -2628,7 +2628,7 @@
 					</Layer>
 				</Layers>
 			</Button>
-			<CheckButton parentKey="isKit" inherits="MJCheckButtonTemplate">
+			<CheckButton parentKey="isKit" propagateMouseInput="Motion" inherits="MJCheckButtonTemplate">
 				<HitRectInsets>
 					<AbsInset left="0" right="-35" top="0" bottom="0"/>
 				</HitRectInsets>
@@ -2636,7 +2636,7 @@
 					<Anchor point="TOPLEFT" y="-21"/>
 				</Anchors>
 			</CheckButton>
-			<CheckButton parentKey="loop" inherits="MJCheckButtonTemplate">
+			<CheckButton parentKey="loop" propagateMouseInput="Motion" inherits="MJCheckButtonTemplate">
 				<HitRectInsets>
 					<AbsInset left="0" right="-40" top="0" bottom="0"/>
 				</HitRectInsets>
@@ -2644,7 +2644,7 @@
 					<Anchor point="LEFT" relativeKey="$parent.isKit.Text" relativePoint="RIGHT" x="4"/>
 				</Anchors>
 			</CheckButton>
-			<EditBox inherits="InputBoxInstructionsTemplate" parentKey="nameBox" letters="15" autoFocus="false">
+			<EditBox parentKey="nameBox" propagateMouseInput="Motion" inherits="InputBoxInstructionsTemplate" letters="15" autoFocus="false">
 				<Size x="80" y="20"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" x="7" y="2"/>
@@ -2713,7 +2713,7 @@
 					</OnTextChanged>
 				</Scripts>
 			</EditBox>
-			<Button inherits="UIPanelButtonTemplate" text="SAVE" parentKey="save">
+			<Button parentKey="save" propagateMouseInput="Motion" inherits="UIPanelButtonTemplate" text="SAVE">
 				<Size x="80" y="22"/>
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT" x="-3" y="2"/>
@@ -3253,29 +3253,20 @@
 		<KeyValues>
 			<KeyValue key="LibSFDropDownNoGMEvent" value="true" type="boolean"/>
 		</KeyValues>
-		<NormalTexture parentKey="normal" file="Interface/ChatFrame/UI-ChatIcon-ScrollDown-Up">
-			<Size x="26" y="26"/>
-			<Anchors>
-				<Anchor point="RIGHT" x="-4"/>
-			</Anchors>
-		</NormalTexture>
-		<PushedTexture file="Interface/ChatFrame/UI-ChatIcon-ScrollDown-Down">
-			<Size x="26" y="26"/>
-			<Anchors>
-				<Anchor point="RIGHT" x="-4"/>
-			</Anchors>
-		</PushedTexture>
-		<HighlightTexture file="Interface/Buttons/UI-Common-MouseHilight" alphaMode="ADD">
-			<Size x="26" y="26"/>
-			<Anchors>
-				<Anchor point="RIGHT" x="-4"/>
-			</Anchors>
-		</HighlightTexture>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture parentKey="arrow" atlas="common-dropdown-a-button" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="RIGHT" x="-4" y="-3"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
 		<NormalFont style="GameFontHighlight"/>
 		<ButtonText maxLines="1" justifyH="LEFT" parentKey="text">
 			<Anchors>
 				<Anchor point="LEFT" x="10" y="0"/>
-				<Anchor point="RIGHT" relativeKey="$parent.normal" relativePoint="LEFT" x="-5" y="0"/>
+				<Anchor point="RIGHT" relativeKey="$parent.arrow" relativePoint="LEFT" x="-5" y="0"/>
 			</Anchors>
 		</ButtonText>
 		<Scripts>
@@ -3285,8 +3276,40 @@
 					GameTooltip:SetText(self.text:GetText())
 					GameTooltip:Show()
 				end
+				if not self:IsEnabled() then return end
+				if self.down then
+					self.arrow:SetAtlas("common-dropdown-a-button-pressedhover", true)
+				else
+					self.arrow:SetAtlas("common-dropdown-a-button-hover", true)
+				end
 			</OnEnter>
-			<OnLeave function="GameTooltip_Hide"/>
+			<OnLeave>
+				GameTooltip_Hide()
+				if not self:IsEnabled() then return end
+				if self.down then
+					self.arrow:SetAtlas("common-dropdown-a-button-pressed", true)
+				else
+					self.arrow:SetAtlas("common-dropdown-a-button", true)
+				end
+			</OnLeave>
+			<OnMouseDown>
+				self.down = true
+				if not self:IsEnabled() then return end
+				if self:IsMouseOver() then
+					self.arrow:SetAtlas("common-dropdown-a-button-pressedhover", true)
+				else
+					self.arrow:SetAtlas("common-dropdown-a-button-pressed", true)
+				end
+			</OnMouseDown>
+			<OnMouseUp>
+				self.down = nil
+				if not self:IsEnabled() then return end
+				if self:IsMouseOver() then
+					self.arrow:SetAtlas("common-dropdown-a-button-hover", true)
+				else
+					self.arrow:SetAtlas("common-dropdown-a-button", true)
+				end
+			</OnMouseUp>
 		</Scripts>
 	</Button>
 

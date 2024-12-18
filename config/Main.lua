@@ -65,8 +65,8 @@ config:SetScript("OnShow", function(self)
 	local function createGropPanel(parent, numCheck, numComboBox)
 		local group = CreateFrame("FRAME", nil, parent, "MJOptionsPanel")
 		group:SetPoint("RIGHT", parent:GetParent(), 0, 0)
-		-- check = 26 + 3, combobox = 24 + 8 + 1
-		group:SetHeight(29 * numCheck + 33 * (numComboBox or 0) + 3)
+		-- check = 26 + 3, combobox = 25 + 8 + 2
+		group:SetHeight(29 * numCheck + 35 * (numComboBox or 0) + 3)
 		return group
 	end
 
@@ -130,15 +130,15 @@ config:SetScript("OnShow", function(self)
 	modifierText:SetText(L["Modifier"]..":")
 
 	-- MODIFIER COMBOBOX
-	local modifierCombobox = lsfdd:CreateButton(self.leftPanel)
-	self.modifierCombobox = modifierCombobox
-	modifierCombobox:SetPoint("LEFT", modifierText, "RIGHT", 7, 0)
-	modifierCombobox:ddSetInitFunc(function(self, level)
+	self.modifierCombobox = lsfdd:CreateModernButtonOriginal(self.leftPanel)
+	self.modifierCombobox:SetPoint("LEFT", modifierText, "RIGHT", 7, 0)
+	self.modifierCombobox:ddSetDisplayMode(addon)
+	self.modifierCombobox:ddSetInitFunc(function(self, level)
 		local info = {}
 		for i, modifier in ipairs({"ALT", "CTRL", "SHIFT", "NONE"}) do
 			info.text = _G[modifier.."_KEY"]
 			info.value = modifier
-			info.checked = function(btn) return modifierCombobox:ddGetSelectedValue() == btn.value end
+			info.checked = function(btn) return self:ddGetSelectedValue() == btn.value end
 			info.func = function(btn)
 				self:ddSetSelectedValue(btn.value)
 				enableBtns()
@@ -312,8 +312,9 @@ config:SetScript("OnShow", function(self)
 	util.setCheckboxChild(self.freeSlots, self.freeSlotsNum)
 
 	-- REPAIR MOUNTS COMBOBOX
-	self.repairMountsCombobox = lsfdd:CreateButton(self.repairGroup, 230)
-	self.repairMountsCombobox:SetPoint("TOPLEFT", self.freeSlots, "BOTTOMLEFT", 0, -8)
+	self.repairMountsCombobox = lsfdd:CreateModernButtonOriginal(self.repairGroup, 230)
+	self.repairMountsCombobox:SetPoint("TOPLEFT", self.freeSlots, "BOTTOMLEFT", 2, -8)
+	self.repairMountsCombobox:ddSetDisplayMode(addon)
 	self.repairMountsCombobox:ddSetInitFunc(function(self, level)
 		local info = {}
 
@@ -363,12 +364,12 @@ config:SetScript("OnShow", function(self)
 	self.useMagicBroom:HookScript("OnClick", enableBtns)
 
 	-- MAGIC BROOM COMBOBOX
-	self.magicBroomCombobox = lsfdd:CreateButton(self.magicBroomGroup, 230)
+	self.magicBroomCombobox = lsfdd:CreateModernButtonOriginal(self.magicBroomGroup, 230)
 	self.magicBroomCombobox:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 20, -8)
+	self.magicBroomCombobox:ddSetDisplayMode(addon)
 
-	ltl:SetScriptAfter(self.magicBroomCombobox.Button, "OnClick", "Items",
+	ltl:SetScriptAfter(self.magicBroomCombobox, "OnClick", "Items",
 		function(btn)
-			btn:GetParent():Disable()
 			local t = {}
 			for i, data in ipairs(mounts.magicBrooms) do
 				if data.itemID then t[#t + 1] = data.itemID end
@@ -377,9 +378,7 @@ config:SetScript("OnShow", function(self)
 		end,
 		function(btn)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			local parent = btn:GetParent()
-			parent:Enable()
-			parent:ddToggle(1, nil, parent)
+			btn:ddToggle(1, nil, btn, -5, 0)
 		end
 	)
 
@@ -601,8 +600,8 @@ config:SetScript("OnShow", function(self)
 	-- REFRESH
 	self.OnRefresh = function(self)
 		binding.unboundMessage:Hide()
-		modifierCombobox:ddSetSelectedValue(mounts.config.modifier)
-		modifierCombobox:ddSetSelectedText(_G[mounts.config.modifier.."_KEY"])
+		self.modifierCombobox:ddSetSelectedValue(mounts.config.modifier)
+		self.modifierCombobox:ddSetSelectedText(_G[mounts.config.modifier.."_KEY"])
 		self.waterJump:SetChecked(mounts.config.waterJump)
 		self.summon1Icon.icon:SetTexture(mounts.config.summon1Icon)
 		self.summon2Icon.icon:SetTexture(mounts.config.summon2Icon)

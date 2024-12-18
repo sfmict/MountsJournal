@@ -3,9 +3,10 @@ local L, util = ns.L, ns.util
 
 
 ns.journal:on("MODULES_INIT", function(journal)
-	local dd = LibStub("LibSFDropDown-1.5"):CreateButtonOriginal(journal.modelScene)
+	local dd = LibStub("LibSFDropDown-1.5"):CreateModernButtonOriginal(journal.modelScene)
+	dd:ddSetDisplayMode(addon)
 	dd:SetAlpha(0)
-	dd:SetPoint("LEFT", journal.modelScene.modelControl, "RIGHT", 10, -.5)
+	dd:SetPoint("LEFT", journal.modelScene.modelControl, "RIGHT", 10, 0)
 	journal.modelScene.animationsCombobox = dd
 
 	dd:SetScript("OnEnter", function(self)
@@ -17,7 +18,6 @@ ns.journal:on("MODULES_INIT", function(journal)
 		local parent = self:GetParent()
 		parent:GetScript("OnLeave")(parent)
 	end)
-	dd.Button:SetPropagateMouseMotion(true)
 
 	StaticPopupDialogs[util.addonName.."DELETE_MOUNT_ANIMATION"] = {
 		text = addon..": "..L["Are you sure you want to delete animation %s?"],

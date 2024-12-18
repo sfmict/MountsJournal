@@ -63,7 +63,7 @@ rules:SetScript("OnShow", function(self)
 	ver:SetText(C_AddOns.GetAddOnMetadata(addon, "Version"))
 
 	-- RULE SETS
-	self.ruleSets = lsfdd:CreateStretchButton(self, 150, 22)
+	self.ruleSets = lsfdd:CreateStretchButtonOriginal(self, 150, 22)
 	self.ruleSets:SetPoint("TOPRIGHT", -20, -20)
 	self.ruleSets:SetText(macroFrame.currentRuleSet.name)
 	self.ruleSets:ddSetDisplayMode(addon)
@@ -143,9 +143,10 @@ rules:SetScript("OnShow", function(self)
 	self.title:SetJustifyH("LEFT")
 
 	-- SUMMONS
-	self.summons = lsfdd:CreateButton(self)
+	self.summons = lsfdd:CreateModernButtonOriginal(self)
 	self.summons:SetPoint("LEFT", 20, 0)
 	self.summons:SetPoint("TOP", self.title, "BOTTOM", 0, -15)
+	self.summons:ddSetDisplayMode(addon)
 
 	self.summons:ddSetInitFunc(function(dd)
 		local info = {}
@@ -156,6 +157,7 @@ rules:SetScript("OnShow", function(self)
 
 		for i = 1, 2 do
 			info.text = SUMMONS.." "..i
+			info.icon = mounts.config["summon"..i.."Icon"]
 			info.value = i
 			info.func = func
 			dd:ddAddButton(info)
@@ -290,7 +292,7 @@ function rules:setSummonRules(n)
 	self.summonN = n
 	self.rules = macroFrame.currentRuleSet[n]
 	self.summons:ddSetSelectedValue(n)
-	self.summons:ddSetSelectedText(("%s %d"):format(SUMMONS, n))
+	self.summons:ddSetSelectedText(("%s %d"):format(SUMMONS, n), mounts.config["summon"..n.."Icon"])
 	self:updateRuleList()
 end
 
