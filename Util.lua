@@ -37,7 +37,7 @@ function eventsMixin:off(event, func)
 			if handlerList[k] then
 				tremove(handlerList, handlerList[k])
 				handlerList[k] = nil
-				if not next(handlerList) then
+				if #handlerList == 0 then
 					events[event] = nil
 				end
 			end
