@@ -167,6 +167,7 @@ end
 -- item
 actions.item = {}
 actions.item.text = L["Use Item"]
+actions.item.isNumeric = true
 
 function actions.item:getValueDescription()
 	return "ItemID"
@@ -185,6 +186,7 @@ end
 -- iitem INVENTORY ITEM
 actions.iitem = {}
 actions.iitem.text = L["Use Inventory Item"]
+actions.iitem.isNumeric = true
 
 function actions.iitem:getValueDescription()
 	local list = {
@@ -227,6 +229,7 @@ end
 -- spell
 actions.spell = {}
 actions.spell.text = L["Cast Spell"]
+actions.spell.isNumeric = true
 
 function actions.spell:getValueDescription()
 	return "SpellID"
@@ -274,6 +277,19 @@ end
 
 
 ---------------------------------------------------
+-- sstate SET STATE
+actions.sstate = {}
+actions.sstate.text = L["Set State"]
+actions.sstate.description = L["Set a state that can be read in conditions using \"Get State\""]
+
+actions.sstate.getValueText = actions.macro.getValueText
+
+function actions.sstate:getFuncText(value)
+	return ("self.state['%s'] = true"):format(value:gsub("['\\]", "\\%1"))
+end
+
+
+---------------------------------------------------
 -- METHODS
 function actions:getMenuList(value, func)
 	local list = {}
@@ -287,6 +303,7 @@ function actions:getMenuList(value, func)
 		"iitem",
 		"macro",
 		"pmacro",
+		"sstate",
 	}
 	for i = 1, #types do
 		local v = types[i]

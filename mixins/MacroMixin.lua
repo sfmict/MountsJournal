@@ -22,6 +22,7 @@ macroFrame:on("ADDON_INIT", function(self)
 	self.charMacrosConfig = self.mounts.charDB.macrosConfig
 	self.conditions = ns.conditions
 	self.actions = ns.actions
+	self.state = {}
 	self.checkRules = {}
 	self.class = select(2, UnitClass("player"))
 	self.fishingRodID = 133755
@@ -241,10 +242,12 @@ function macroFrame:setRuleFuncs()
 		local rules = self.currentRuleSet[i]
 		local keys = {}
 		local func = [[
+local wipe = wipe
 return function(self, button, profileLoad, noMacro)
 	self.mounts:resetMountsList()
 	self.preUseMacro = nil
 	self.useMount = nil
+	wipe(self.state)
 		]]
 
 		for j = 1, #rules do

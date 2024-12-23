@@ -469,9 +469,14 @@ function ruleEditor:setActionValueOption()
 		end)
 	else
 		panel.optionValue = self.editPool:Acquire()
-		panel.optionValue:SetNumeric(true)
+		panel.optionValue:SetNumeric(action.isNumeric)
 		panel.optionValue:SetScript("OnTextChanged", function(editBox)
-			actionData[2] = tonumber(editBox:GetText())
+			local text = editBox:GetText()
+			if action.isNumeric then
+				actionData[2] = tonumber(text)
+			else
+				actionData[2] = #text > 0 and text or nil
+			end
 			self:checkRule()
 		end)
 	end

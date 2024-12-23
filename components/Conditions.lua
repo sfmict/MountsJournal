@@ -1236,6 +1236,19 @@ end
 
 
 ---------------------------------------------------
+-- gstate GET STATE
+conds.gstate = {}
+conds.gstate.text = L["Get State"]
+conds.gstate.description = L["Get a state that can be set in actions using \"Set State\""]
+
+conds.gstate.getValueText = conds.mcond.getValueText
+
+function conds.gstate:getFuncText(value)
+	return ("self.state['%s']"):format(value:gsub("['\\]", "\\%1"))
+end
+
+
+---------------------------------------------------
 -- METHODS
 function conds:getMenuList(value, func)
 	local list = {}
@@ -1247,6 +1260,12 @@ function conds:getMenuList(value, func)
 				func = func,
 				checked = k == value,
 			}
+			if v.description then
+				list[#list].OnTooltipShow = function(btn, tooltip)
+					GameTooltip_SetTitle(tooltip, v.text)
+					tooltip:AddLine(v.description, nil, nil, nil, true)
+				end
+			end
 		end
 	end
 	sort(list, function(a, b) return strcmputf8i(a.text, b.text) < 0 end)
