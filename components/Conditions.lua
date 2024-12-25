@@ -296,7 +296,7 @@ conds.holiday.text = CALENDAR_FILTER_HOLIDAYS
 
 function conds.holiday:getValueText(value)
 	local holidayName = ns.calendar:getHolidayName(value)
-	return ("%s (%d)"):format(holidayName or RED_FONT_COLOR:WrapTextInColorCode(L["Nameless holiday"]), value)
+	return ("%s |cff808080(ID:%d)|r"):format(holidayName or RED_FONT_COLOR:WrapTextInColorCode(L["Nameless holiday"]), value)
 end
 
 function conds.holiday:getValueList(value, cb, dd, notReset)
@@ -322,7 +322,7 @@ function conds.holiday:getValueList(value, cb, dd, notReset)
 	for i = 1, #eList do
 		local e = eList[i]
 		subList[i] = {
-			text = ("%s (%d)"):format(e.isActive and ("%s (|cff00cc00%s|r)"):format(e.name, SPEC_ACTIVE) or e.name, e.eventID),
+			text = ("%s |cff808080(ID:%d)|r"):format(e.isActive and ("%s (|cff00cc00%s|r)"):format(e.name, SPEC_ACTIVE) or e.name, e.eventID),
 			arg1 = e.name,
 			value = e.eventID,
 			func = func,

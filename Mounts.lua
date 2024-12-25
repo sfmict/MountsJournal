@@ -134,13 +134,8 @@ function mounts:ADDON_LOADED(addonName)
 
 		-- rarity weight
 		self.rarityWeight = setmetatable({}, {__index = function(t, spellID)
-			local rarity
-			if ns.additionalMounts[spellID] then
-				rarity = 100
-			else
-				local mountID = C_MountJournal.GetMountFromSpell(spellID)
-				rarity = ns.mountsDB[mountID][3]
-			end
+			local mountID = C_MountJournal.GetMountFromSpell(spellID)
+			local rarity = mountID and ns.mountsDB[mountID][3] or 100
 			t[spellID] = 100 - math.floor(rarity * .99 + .5)
 			return t[spellID]
 		end})
