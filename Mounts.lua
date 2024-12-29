@@ -277,20 +277,22 @@ end
 
 
 function mounts:PLAYER_ENTERING_WORLD()
-	local instanceName, instanceType, difficultyID, _,_,_,_, instanceID = GetInstanceInfo()
-	self.instanceName = instanceName
-	self.instanceType = instanceType
-	self.difficultyID = difficultyID
-	self.instanceID = instanceID
+	C_Timer.After(0, function()
+		local instanceName, instanceType, difficultyID, _,_,_,_, instanceID = GetInstanceInfo()
+		self.instanceName = instanceName
+		self.instanceType = instanceType
+		self.difficultyID = difficultyID
+		self.instanceID = instanceID
 
-	if difficultyID ~= 0 then
-		local groupType = util.getGroupType()
-		if groupType == "raid" and self.config.noPetInRaid
-		or groupType == "group" and self.config.noPetInGroup
-		then
-			ns.pets:dismiss()
+		if difficultyID ~= 0 then
+			local groupType = util.getGroupType()
+			if groupType == "raid" and self.config.noPetInRaid
+			or groupType == "group" and self.config.noPetInGroup
+			then
+				ns.pets:dismiss()
+			end
 		end
-	end
+	end)
 end
 
 
