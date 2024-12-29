@@ -1253,7 +1253,45 @@ conds.gstate = {}
 conds.gstate.text = L["Get State"]
 conds.gstate.description = L["Get a state that can be set in actions using \"Set State\""]
 
-conds.gstate.getValueText = conds.mcond.getValueText
+function conds.gstate:getValueText(value)
+	local rules = ns.ruleConfig.rules
+	for i = 1, #rules do
+		local action = rules[i].action
+		if action[1] == "sstate" and action[2] == value then
+			return value
+		end
+	end
+	return RED_FONT_COLOR:WrapTextInColorCode(value)
+end
+
+function conds.gstate:getValueList(value, func)
+	local list = {}
+	local rules = ns.ruleConfig.rules
+
+	for i = 1, #rules do
+		local action = rules[i].action
+		if action[1] == "sstate" then
+			list[#list + 1] = {
+				text = action[2],
+				value = action[2],
+				func = func,
+				checked = action[2] == value,
+			}
+		end
+	end
+
+	if #list == 0 then
+		list[1] = {
+			notCheckable = true,
+			disabled = true,
+			text = EMPTY,
+		}
+	elseif #list > 1 then
+		sort(list, function(a, b) return strcmputf8i(a.text, b.text) < 0 end)
+	end
+
+	return list
+end
 
 function conds.gstate:getFuncText(value)
 	return ("self.state['%s']"):format(value:gsub("['\\]", "\\%1"))
