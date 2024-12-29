@@ -3,6 +3,7 @@ local L, util, rules, conds, actions = ns.L, ns.util, ns.ruleConfig, ns.conditio
 local ruleEditor = CreateFrame("FRAME", nil, rules, "MJEscHideTemplate")
 rules.ruleEditor = ruleEditor
 ruleEditor:Hide()
+ruleEditor:SetScript("OnHide", ruleEditor.Hide)
 
 
 local escOnShow = ruleEditor:GetScript("OnShow")

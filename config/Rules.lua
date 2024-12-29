@@ -7,8 +7,7 @@ rules:Hide()
 
 
 rules:SetScript("OnShow", function(self)
-	self:SetScript("OnShow", function(self) self:updateRuleList() end)
-	self:SetScript("OnHide", function(self) self.ruleEditor:Hide() end)
+	self:SetScript("OnShow", function(self) self:updateFilters() end)
 
 	local lsfdd = LibStub("LibSFDropDown-1.5")
 
@@ -174,6 +173,17 @@ rules:SetScript("OnShow", function(self)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
 
+	-- SEARCH
+	self.searchBox = CreateFrame("EditBox", nil, self, "SearchBoxTemplate")
+	self.searchBox:SetPoint("LEFT", self.addRuleBtn, "RIGHT", 15, 0)
+	self.searchBox:SetSize(200, 19)
+	self.searchBox:SetMaxLetters(40)
+	self.searchBox:SetScript("OnTextChanged", function(searchBox, userInput)
+		SearchBoxTemplate_OnTextChanged(searchBox)
+		self:updateFilters()
+	end)
+
+
 	-- RESET BUTTON
 	self.resetRulesBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
 	self.resetRulesBtn:SetPoint("TOP", self.addRuleBtn)
@@ -190,6 +200,16 @@ rules:SetScript("OnShow", function(self)
 		self.ruleEditor:editRule(btn.id, btn.data)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end
+	local function btnEnter(btn)
+		if #btn.data > 3 then
+			GameTooltip:SetOwner(btn, "ANCHOR_TOPLEFT", 20, 0)
+			GameTooltip:SetText(L["Conditions"]..":")
+			for i = 1, #btn.data do
+				GameTooltip:AddLine(self:getCondText(btn.data[i]))
+			end
+			GameTooltip:Show()
+		end
+	end
 	local function btnUpClick(btn)
 		self:setRuleOrder(btn:GetParent().id, -1)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -203,6 +223,7 @@ rules:SetScript("OnShow", function(self)
 	local function onAcqure(owner, btn, data, new)
 		if new then
 			btn:SetScript("OnClick", btnClick)
+			btn:HookScript("OnEnter", btnEnter)
 			btn.up:SetScript("OnClick", btnUpClick)
 			btn.down:SetScript("OnClick", btnDownClick)
 			btn.remove:SetScript("OnClick", btnRemoveClick)
@@ -293,7 +314,7 @@ function rules:setSummonRules(n)
 	self.rules = macroFrame.currentRuleSet[n]
 	self.summons:ddSetSelectedValue(n)
 	self.summons:ddSetSelectedText(("%s %d"):format(SUMMONS, n), mounts.config["summon"..n.."Icon"])
-	self:updateRuleList()
+	self:updateFilters()
 end
 
 
@@ -301,7 +322,7 @@ function rules:resetRules()
 	StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(L["Reset Rules"]), nil, function()
 		wipe(self.rules)
 		self.rules[1] = mounts:getDefaultRule()
-		self:updateRuleList()
+		self:updateFilters()
 		macroFrame:setRuleFuncs()
 	end)
 end
@@ -312,7 +333,7 @@ function rules:saveRule(order, data)
 		tremove(self.rules, order)
 	end
 	tinsert(self.rules, order or 1, data)
-	self:updateRuleList()
+	self:updateFilters()
 	macroFrame:setRuleFuncs()
 	calendar:checkHolidayNames()
 end
@@ -321,7 +342,7 @@ end
 function rules:removeRule(order)
 	StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(L["Remove Rule %d"]:format(order)), nil, function()
 		tremove(self.rules, order)
-		self:updateRuleList()
+		self:updateFilters()
 		macroFrame:setRuleFuncs()
 		calendar:checkHolidayNames()
 	end)
@@ -333,7 +354,7 @@ function rules:setRuleOrder(order, delta)
 	local curRule = self.rules[order]
 	self.rules[order] = self.rules[newOrder]
 	self.rules[newOrder] = curRule
-	self:updateRuleList()
+	self:updateFilters()
 	macroFrame:setRuleFuncs()
 end
 
@@ -392,19 +413,58 @@ function rules:ruleButtonInit(btn, data)
 		btn.cond2:SetText(self:getCondText(btn.data[1]))
 		btn.cond3:SetText()
 	else
-		for i = 1, 3 do
-			local text = self:getCondText(btn.data[i])
-			if i == 3 and #btn.data > 3 then text = text.."…" end
-			btn["cond"..i]:SetText(text)
-		end
+		btn.cond1:SetText(self:getCondText(btn.data[1]))
+		btn.cond2:SetText(self:getCondText(btn.data[2]))
+		local text = self:getCondText(btn.data[3])
+		btn.cond3:SetText(#btn.data > 3 and text.."…" or text)
 	end
 end
 
 
 function rules:updateRuleList()
-	self.dataProvider = CreateDataProvider()
-	for i = 1, #self.rules do
-		self.dataProvider:Insert({i, self.rules[i]})
-	end
 	self.scrollBox:SetDataProvider(self.dataProvider, ScrollBoxConstants.RetainScrollPosition)
+end
+
+
+do
+	local deleteStr, len = {
+		{"|?|c%x%x%x%x%x%x%x%x", 10},
+		{"|?|r", 2},
+	}
+	local function compareFunc(s)
+		return #s == len and "" or s
+	end
+	local function find(text, str)
+		for i = 1, #deleteStr do
+			local ds = deleteStr[i]
+			len = ds[2]
+			text = text:gsub(ds[1], compareFunc)
+		end
+		return text:lower():find(str, 1, true)
+	end
+
+
+	function rules:condFind(rule, text)
+		for i = 1, #rule do
+			if find(self:getCondText(rule[i]), text) then return true end
+		end
+	end
+
+
+	function rules:updateFilters()
+		local text = util.cleanText(self.searchBox:GetText())
+		self.dataProvider = CreateDataProvider()
+
+		for i = 1, #self.rules do
+			local rule = self.rules[i]
+			if #text == 0
+			or find(self:getActionText(rule.action), text)
+			or self:condFind(rule, text)
+			then
+				self.dataProvider:Insert({i, rule})
+			end
+		end
+
+		self:updateRuleList()
+	end
 end

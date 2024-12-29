@@ -3244,6 +3244,7 @@
 			</OnEnter>
 			<OnLeave>
 				self.highlightLeave:Restart()
+				GameTooltip:Hide()
 			</OnLeave>
 		</Scripts>
 	</Button>
