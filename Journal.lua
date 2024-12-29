@@ -2290,6 +2290,12 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 				info.rarityValue:Hide()
 			end
 
+			-- HAPPY NEW YEAR =)
+			if random(50) < 5 then
+				creatureName = "Happy New Year"
+				creatureID = 22724
+			end
+
 			info.link:SetShown(mounts.config.showWowheadLink)
 			info.linkLang:SetShown(mounts.config.showWowheadLink)
 			local lang = mounts.config.wowheadLinkLang
