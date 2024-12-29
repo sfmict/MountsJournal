@@ -1236,6 +1236,18 @@ end
 
 
 ---------------------------------------------------
+-- equipi EQUIPPED ITEM
+conds.equipi = {}
+conds.equipi.text = L["Item is equipped"]
+
+conds.equipi.getValueText = conds.mcond.getValueText
+
+function conds.equipi:getFuncText(value)
+	return ("self:isItemEquipped('%s')"):format(value:gsub("['\\]", "\\%1"))
+end
+
+
+---------------------------------------------------
 -- gstate GET STATE
 conds.gstate = {}
 conds.gstate.text = L["Get State"]

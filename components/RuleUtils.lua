@@ -222,3 +222,12 @@ function macroFrame:isMapFlagActive(flag, profileName)
 		end
 	end
 end
+
+
+function macroFrame:isItemEquipped(item)
+	if C_Item.IsEquippedItem(item)
+	or C_Item.IsEquippedItemType(item)
+	then
+		return true
+	end
+end
