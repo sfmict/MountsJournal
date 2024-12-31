@@ -43,6 +43,7 @@ end
 
 
 function pets:summon(petID)
+	if InCombatLockdown() then return end
 	if C_PetJournal.PetIsSummonable(petID) and C_PetJournal.GetSummonedPetGUID() ~= petID then
 		C_PetJournal.SummonPetByGUID(petID)
 	end
@@ -50,6 +51,7 @@ end
 
 
 function pets:summonRandomPet(isFavorite)
+	if InCombatLockdown() then return end
 	local list = isFavorite and self.favoritesList or self.list
 	local num = #list
 
