@@ -1,6 +1,6 @@
 local addon, ns = ...
 local L, util = ns.L, ns.util
-local C_MountJournal, C_Map, C_Spell, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container = C_MountJournal, C_Map, C_Spell, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container
+local C_MountJournal, C_Map, C_Spell, C_Timer, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container = C_MountJournal, C_Map, C_Spell, C_Timer, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container
 local mounts = CreateFrame("Frame", "MountsJournal")
 ns.mounts = mounts
 util.setEventsMixin(mounts)

@@ -163,7 +163,7 @@ rules:SetScript("OnShow", function(self)
 		end
 	end)
 
-	-- ADD RULE BUTTOM
+	-- ADD RULE BUTTON
 	self.addRuleBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
 	self.addRuleBtn:SetPoint("LEFT", self.summons, "RIGHT", 10, 0)
 	self.addRuleBtn:SetText(L["Add Rule"])
@@ -182,7 +182,6 @@ rules:SetScript("OnShow", function(self)
 		SearchBoxTemplate_OnTextChanged(searchBox)
 		self:updateFilters()
 	end)
-
 
 	-- RESET BUTTON
 	self.resetRulesBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
