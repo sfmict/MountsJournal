@@ -24,6 +24,8 @@ function journal.filters.expansions(btn, level)
 	end
 	btn:ddAddButton(info, level)
 
+	info.notCheckable = nil
+
 	local colors = {
 		"D6AB7D", -- classic
 		"E43E5A", -- burning crusade
@@ -50,17 +52,15 @@ function journal.filters.expansions(btn, level)
 		5409250,
 		5907274,
 	}
-	local iconInfo = {
+	info.iconInfo = {
 		tSizeX = 40,
 		tSizeY = 20,
 	}
 
-	info.notCheckable = nil
 	local expansions = mounts.filters.expansions
 	for i = util.expansion, 1, -1 do
 		info.text = ("|cff%s%s|r"):format(colors[i] or "E8E8E8", _G["EXPANSION_NAME"..(i - 1)])
 		info.icon = icons[i] or [[Interface\EncounterJournal\UI-EJ-BOSS-Default]]
-		info.iconInfo = iconInfo
 		info.func = function(_,_,_, value)
 			expansions[i] = value
 			journal:updateMountsList()
