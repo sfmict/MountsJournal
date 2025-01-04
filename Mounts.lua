@@ -1,6 +1,6 @@
 local addon, ns = ...
 local L, util = ns.L, ns.util
-local C_MountJournal, C_Map, C_Spell, C_Timer, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container = C_MountJournal, C_Map, C_Spell, C_Timer, MapUtil, next, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container
+local C_MountJournal, C_Map, C_Spell, C_Timer, MapUtil, next, rawget, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container = C_MountJournal, C_Map, C_Spell, C_Timer, MapUtil, next, rawget, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container
 local mounts = CreateFrame("Frame", "MountsJournal")
 ns.mounts = mounts
 util.setEventsMixin(mounts)
@@ -33,6 +33,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.globalDB.mountsProfiles = self.globalDB.mountsProfiles or {}
 		self.globalDB.holidayNames = self.globalDB.holidayNames or {}
 		self.globalDB.help = self.globalDB.help or {}
+		self.globalDB.stat = self.globalDB.stat or {}
 		self.globalDB.ruleSets = self.globalDB.ruleSets or {
 			{name = DEFAULT, isDefault = true}
 		}
@@ -94,6 +95,10 @@ function mounts:ADDON_LOADED(addonName)
 		self.cameraConfig.yAcceleration = self.cameraConfig.yAcceleration or -1
 		self.cameraConfig.yMinAcceleration = nil
 		self.cameraConfig.yMinSpeed = self.cameraConfig.yMinSpeed or 0
+		self.stat = setmetatable(self.globalDB.stat, {__index = function(t, k)
+			t[k] = {0, 0, 0}
+			return t[k]
+		end})
 
 		MountsJournalChar = MountsJournalChar or {}
 		self.charDB = MountsJournalChar
@@ -198,6 +203,11 @@ function mounts:PLAYER_LOGIN()
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
+
+	-- TRACKING
+	local spellID = util.getUnitMount("player")
+	if spellID then self:startTracking(spellID) end
 
 	-- PRFILE CHANGED
 	self:on("UPDATE_PROFILE", self.setSelectedProfile)
@@ -303,11 +313,13 @@ end
 
 function mounts:PLAYER_REGEN_DISABLED()
 	self:UnregisterEvent("UNIT_SPELLCAST_START")
+	self:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 end
 
 
 function mounts:PLAYER_REGEN_ENABLED()
 	self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
 end
 
 
@@ -355,6 +367,65 @@ do
 			end
 		end
 	end
+end
+
+
+do
+	local GetGlidingInfo, GetUnitSpeed, mountStat = C_PlayerInfo.GetGlidingInfo, GetUnitSpeed
+	local function tracking(self, elapsed)
+		local isGliding, _, speed = GetGlidingInfo()
+		if not isGliding then
+			speed = GetUnitSpeed("player")
+		end
+		if speed > 0 then
+			mountStat[2] = mountStat[2] + elapsed
+			mountStat[3] = mountStat[3] + speed * elapsed
+		end
+		self:event("MOUNT_SPEED_UPDATE", speed)
+	end
+
+
+	function mounts:startTracking(spellID)
+		mountStat = self.stat[spellID]
+		self:SetScript("OnUpdate", tracking)
+		self:RegisterEvent("COMPANION_UPDATE")
+	end
+end
+
+
+function mounts:UNIT_SPELLCAST_SUCCEEDED(_,_, spellID)
+	if ns.additionalMounts[spellID] or C_MountJournal.GetMountFromSpell(spellID) then
+		local mountStat = self.stat[spellID]
+		mountStat[1] = mountStat[1] + 1
+		self:event("MOUNT_SUMMONED")
+		self:startTracking(spellID)
+	end
+end
+
+
+function mounts:COMPANION_UPDATE(companionType)
+	if companionType == "MOUNT" and not util.getUnitMount("player") then
+		self:SetScript("OnUpdate", nil)
+		self:UnregisterEvent("COMPANION_UPDATE")
+	end
+end
+
+
+function mounts:getMountSummons(spellID)
+	local mountStat = rawget(self.stat, spellID)
+	return mountStat and mountStat[1] or 0
+end
+
+
+function mounts:getMountTime(spellID)
+	local mountStat = rawget(self.stat, spellID)
+	return mountStat and mountStat[2] or 0
+end
+
+
+function mounts:getMountDistance(spellID)
+	local mountStat = rawget(self.stat, spellID)
+	return mountStat and mountStat[3] or 0
 end
 
 

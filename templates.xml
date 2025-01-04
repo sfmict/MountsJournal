@@ -484,6 +484,15 @@
 			</Frame>
 
 			<Frame parentKey="rightInset" useParentLevel="true" inherits="InsetFrameTemplate">
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString parentKey="mountSpeed" inherits="GameFontNormal" justifyH="RIGHT" hidden="true">
+							<Anchors>
+								<Anchor point="BOTTOMRIGHT" x="-36" y="-19"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.filtersPanel" relativePoint="TOPRIGHT" x="1" y="0"/>
 					<Anchor point="RIGHT" x="-4"/>

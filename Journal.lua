@@ -32,6 +32,7 @@ function journal:init()
 	local lsfdd = LibStub("LibSFDropDown-1.5")
 	local texPath = "Interface/AddOns/MountsJournal/textures/"
 	self.mountIDs = C_MountJournal.GetMountIDs()
+	self.isMetric = GetLocale() ~= "enUS"
 
 	-- FILTERS INIT
 	local filtersMeta = {__index = function(self, key)
@@ -116,11 +117,14 @@ function journal:init()
 		self:RegisterEvent("PLAYER_REGEN_DISABLED")
 		self:RegisterEvent("PLAYER_REGEN_ENABLED")
 		self:RegisterUnitEvent("UNIT_PORTRAIT_UPDATE", "player")
+		self:on("MOUNT_SPEED_UPDATE", self.updateSpeed)
 		self:updateCollectionTabs()
 		self.leftInset:EnableKeyboard(not InCombatLockdown())
 		self:updateMountsList()
 		self:updateMountDisplay(true)
-		self.mountSpecial:SetEnabled(IsMounted())
+		local isMounted = IsMounted()
+		self.mountSpecial:SetEnabled(isMounted)
+		self.mountSpeed:SetShown(isMounted)
 	end)
 
 	self.bgFrame:SetScript("OnHide", function()
@@ -131,6 +135,7 @@ function journal:init()
 		self:UnregisterEvent("PLAYER_REGEN_DISABLED")
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 		self:UnregisterEvent("UNIT_PORTRAIT_UPDATE")
+		self:off("MOUNT_SPEED_UPDATE", self.updateSpeed)
 		self:updateCollectionTabs()
 	end)
 
@@ -165,6 +170,7 @@ function journal:init()
 	self.summonButton = self.bgFrame.summonButton
 	self.percentSlider = self.bgFrame.percentSlider
 	self.mountSpecial = self.bgFrame.mountSpecial
+	self.mountSpeed = self.bgFrame.rightInset.mountSpeed
 
 	-- USE MountsJournal BUTTON
 	self.useMountsJournalButton:SetParent(self.CollectionsJournal)
@@ -951,6 +957,10 @@ function journal:init()
 	end)
 
 	-- MODEL SCENE MOUNT HINT
+	local function addTooltipLine(k, v)
+		GameTooltip:AddDoubleLine(k, v, 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
+	end
+
 	local msMountHint = self.mountDisplay.info.mountHint
 	msMountHint:SetPropagateMouseMotion(true)
 	msMountHint:SetScript("OnEnter", function(btn)
@@ -973,7 +983,7 @@ function journal:init()
 		else
 			typeStr = L["MOUNT_TYPE_"..mType]
 		end
-		GameTooltip:AddDoubleLine(L["types"], typeStr, 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
+		addTooltipLine(L["types"], typeStr)
 
 		-- family
 		local function getPath(FID)
@@ -990,22 +1000,36 @@ function journal:init()
 
 		if type(familyID) == "table" then
 			for i = 1, #familyID do
-				GameTooltip:AddDoubleLine(i == 1 and L["Family"] or " ", getPath(familyID[i]), 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
+				addTooltipLine(i == 1 and L["Family"] or " ", getPath(familyID[i]))
 			end
 		else
-			GameTooltip:AddDoubleLine(L["Family"], getPath(familyID), 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
+			addTooltipLine(L["Family"], getPath(familyID))
 		end
 
 		-- faction
-		GameTooltip:AddDoubleLine(L["factions"], L["MOUNT_FACTION_"..((faction or 2) + 1)], 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
+		addTooltipLine(L["factions"], L["MOUNT_FACTION_"..((faction or 2) + 1)])
 
 		-- expanstion
-		GameTooltip:AddDoubleLine(EXPANSION_FILTER_TEXT, _G["EXPANSION_NAME"..(expansion - 1)], 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
+		addTooltipLine(EXPANSION_FILTER_TEXT, _G["EXPANSION_NAME"..(expansion - 1)])
 
 		-- tags
 		local mTags = self.tags.mountTags[self.selectedSpellID]
 		if mTags then
-			GameTooltip:AddDoubleLine(L["tags"], table.concat(GetKeysArray(mTags), ", "), 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
+			addTooltipLine(L["tags"], table.concat(GetKeysArray(mTags), ", "))
+		end
+
+		-- statistic
+		local summons = mounts:getMountSummons(self.selectedSpellID)
+		if summons > 0 then addTooltipLine(SUMMONS, summons) end
+
+		local mountTime = mounts:getMountTime(self.selectedSpellID)
+		if mountTime > 0 then addTooltipLine(L["Travel time"], SecondsToClock(mountTime)) end
+
+		local mountDistance = mounts:getMountDistance(self.selectedSpellID)
+		if mountDistance > 0 then
+			addTooltipLine(L["Travel distance"], ("%s = %s"):format(self:getImperialFormat(mountDistance), self:getMetricFormat(mountDistance)))
+			local avgSpeed = mountTime > 0 and mountDistance / (mountTime / 3600) or 0
+			addTooltipLine(L["Avg. speed"], ("%s/h = %s/h"):format(self:getImperialFormat(avgSpeed), self:getMetricFormat(avgSpeed)))
 		end
 
 		GameTooltip:Show()
@@ -1017,11 +1041,14 @@ function journal:init()
 		GameTooltip:Hide()
 	end)
 
-	self:on("MOUNT_SELECT", function()
+	local function updateMountHint()
 		if msMountHint:IsMouseOver() then
 			msMountHint:GetScript("OnEnter")(msMountHint)
 		end
-	end)
+	end
+
+	self:on("MOUNT_SELECT", updateMountHint)
+		 :on("MOUNT_SUMMONED", updateMountHint)
 
 	-- MODEL SCENE MULTIPLE BUTTON
 	lsfdd:SetMixin(self.multipleMountBtn)
@@ -1247,11 +1274,12 @@ function journal:init()
 	end)
 
 	-- MOUNT SPECIAL
+	local isMounted = IsMounted()
 	self.mountSpecial:SetText("!")
 	self.mountSpecial.normal = self.mountSpecial:GetFontString()
 	self.mountSpecial.normal:ClearAllPoints()
 	self.mountSpecial.normal:SetPoint("CENTER")
-	self.mountSpecial:SetEnabled(IsMounted())
+	self.mountSpecial:SetEnabled(isMounted)
 	self.mountSpecial:SetScript("OnEnter", function(btn)
 		GameTooltip:SetOwner(btn, "ANCHOR_TOP")
 		GameTooltip_SetTitle(GameTooltip, "/MountSpecial")
@@ -1264,6 +1292,9 @@ function journal:init()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		DoEmote("MountSpecial")
 	end)
+
+	-- MOUNT SPEED
+	self.mountSpeed:SetShown(isMounted)
 
 	-- FANFARE
 	hooksecurefunc(C_MountJournal, "ClearFanfare", function(mountID)
@@ -1297,6 +1328,7 @@ function journal:init()
 	self:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 	self:RegisterUnitEvent("UNIT_PORTRAIT_UPDATE", "player")
+	self:on("MOUNT_SPEED_UPDATE", self.updateSpeed)
 
 	self:updateCollectionTabs()
 	self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
@@ -1506,8 +1538,36 @@ function journal:COMPANION_UPDATE(companionType)
 		self:updateScrollMountList()
 		self.tags.doNotHideMenu = nil
 		self:updateMountDisplay()
-		self.mountSpecial:SetEnabled(not not util.getUnitMount("player"))
+		local isMounted = not not util.getUnitMount("player")
+		self.mountSpecial:SetEnabled(isMounted)
+		self.mountSpeed:SetShown(isMounted)
 	end
+end
+
+
+function journal:getImperialFormat(distance)
+	if distance < 1760 then
+		return math.floor(distance).." yd"
+	elseif distance < 1760000 then
+		return (math.floor(distance / 1760 * 10) / 10).." mi"
+	end
+	return math.floor(distance / 1760).." mi"
+end
+
+function journal:getMetricFormat(distance)
+	distance = distance * .9144
+	if distance < 1000 then
+		return math.floor(distance).." m"
+	elseif distance < 1000000 then
+		return (math.floor(distance / 1000 * 10) / 10).." km"
+	end
+	return math.floor(distance / 1000).." km"
+end
+
+
+function journal:updateSpeed(speed)
+	speed = speed * 3600
+	self.mountSpeed:SetText((self.isMetric and self:getMetricFormat(speed) or self:getImperialFormat(speed)).."/h")
 end
 
 
@@ -1914,6 +1974,12 @@ function journal:sortMounts()
 				data.by = db[mount][1]
 			elseif fSort.by == "rarity" then
 				data.by = db[mount][3]
+			elseif fSort.by == "summons" then
+				data.by = mounts:getMountSummons(spellID)
+			elseif fSort.by == "time" then
+				data.by = mounts:getMountTime(spellID)
+			elseif fSort.by == "distance" then
+				data.by = mounts:getMountDistance(spellID)
 			end
 		else
 			data.name = mount.name
@@ -1932,6 +1998,12 @@ function journal:sortMounts()
 				data.by = mount.expansion
 			elseif fSort.by == "rarity" then
 				data.by = 100
+			elseif fSort.by == "summons" then
+				data.by = mounts:getMountSummons(data.spellID)
+			elseif fSort.by == "time" then
+				data.by = mounts:getMountTime(data.spellID)
+			elseif fSort.by == "distance" then
+				data.by = mounts:getMountDistance(data.spellID)
 			end
 		end
 		t[mount] = data

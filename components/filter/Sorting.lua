@@ -46,6 +46,24 @@ function journal.filters.sorting(btn, level)
 	info.checked = check
 	btn:ddAddButton(info, level)
 
+	info.text = SUMMONS
+	info.arg1 = "summons"
+	info.func = func
+	info.checked = check
+	btn:ddAddButton(info, level)
+
+	info.text = L["Travel time"]
+	info.arg1 = "time"
+	info.func = func
+	info.checked = check
+	btn:ddAddButton(info, level)
+
+	info.text = L["Travel distance"]
+	info.arg1 = "distance"
+	info.func = func
+	info.checked = check
+	btn:ddAddButton(info, level)
+
 	btn:ddAddSeparator(level)
 
 	info.isNotRadio = true
