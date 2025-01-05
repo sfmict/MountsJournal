@@ -198,6 +198,11 @@ L["PMACRO_DESCRIPTION"] = "Регистрирует макрос для испо
 L["About"] = "О аддоне"
 L["Help with translation of %s. Thanks."] = "Помогите с переводом %s. Спасибо."
 L["Localization Translators:"] = "Переводчики локализаций:"
+L["ABBR_YARD"] = "|4ярд:ярда:ярдов;"
+L["ABBR_MILE"] = "|4миля:мили:миль;"
+L["ABBR_METER"] = "м"
+L["ABBR_KILOMETER"] = "км"
+L["ABBR_HOUR"] = "ч"
 -- ANIMATIONS
 L["Default"] = "По умолчанию"
 L["Mount special"] = "Особая"

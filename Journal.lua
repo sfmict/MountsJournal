@@ -1029,7 +1029,7 @@ function journal:init()
 		if mountDistance > 0 then
 			addTooltipLine(L["Travel distance"], ("%s = %s"):format(self:getImperialFormat(mountDistance), self:getMetricFormat(mountDistance)))
 			local avgSpeed = mountTime > 0 and mountDistance / (mountTime / 3600) or 0
-			addTooltipLine(L["Avg. speed"], ("%s/h = %s/h"):format(self:getImperialFormat(avgSpeed), self:getMetricFormat(avgSpeed)))
+			addTooltipLine(L["Avg. speed"], ("%s/%s = %s/%s"):format(self:getImperialFormat(avgSpeed), L["ABBR_HOUR"], self:getMetricFormat(avgSpeed), L["ABBR_HOUR"]))
 		end
 
 		GameTooltip:Show()
@@ -1547,27 +1547,28 @@ end
 
 function journal:getImperialFormat(distance)
 	if distance < 1760 then
-		return math.floor(distance).." yd"
+		return math.floor(distance).." "..L["ABBR_YARD"]
 	elseif distance < 1760000 then
-		return (math.floor(distance / 1760 * 10) / 10).." mi"
+		return (math.floor(distance / 1760 * 10) / 10).." "..L["ABBR_MILE"]
 	end
-	return math.floor(distance / 1760).." mi"
+	return math.floor(distance / 1760).." "..L["ABBR_MILE"]
 end
+
 
 function journal:getMetricFormat(distance)
 	distance = distance * .9144
 	if distance < 1000 then
-		return math.floor(distance).." m"
+		return math.floor(distance).." "..L["ABBR_METER"]
 	elseif distance < 1000000 then
-		return (math.floor(distance / 1000 * 10) / 10).." km"
+		return (math.floor(distance / 1000 * 10) / 10).." "..L["ABBR_KILOMETER"]
 	end
-	return math.floor(distance / 1000).." km"
+	return math.floor(distance / 1000).." "..L["ABBR_KILOMETER"]
 end
 
 
 function journal:updateSpeed(speed)
 	speed = speed * 3600
-	self.mountSpeed:SetText((self.isMetric and self:getMetricFormat(speed) or self:getImperialFormat(speed)).."/h")
+	self.mountSpeed:SetText((self.isMetric and self:getMetricFormat(speed) or self:getImperialFormat(speed)).."/"..L["ABBR_HOUR"])
 end
 
 
