@@ -35,8 +35,8 @@ local function button_OnMouseWheel(self, delta)
 end
 
 
-function binding:createBindingButton(index, command)
-	local button = CreateFrame("Button", nil, nil, "UIMenuButtonStretchTemplate")
+function binding:createBindingButton(parent, index, command)
+	local button = CreateFrame("Button", nil, parent, "UIMenuButtonStretchTemplate")
 	button.selectedHighlight = button:CreateTexture(nil, "OVERLAY")
 	button.selectedHighlight:SetTexture("Interface/Buttons/UI-Silver-Button-Select")
 	button.selectedHighlight:SetPoint("TOPLEFT", 0, -3)
@@ -59,11 +59,11 @@ function binding:createBindingButton(index, command)
 end
 
 
-function binding:createBindingButtons(name, description, secureTemplate)
+function binding:createBindingButtons(name, parent, description, secureTemplate)
 	local secure = CreateFrame("Button", name, nil, secureTemplate or "SecureActionButtonTemplate")
 	local command = "CLICK "..name..":LeftButton"
-	local button1 = self:createBindingButton(1, command)
-	local button2 = self:createBindingButton(2, command)
+	local button1 = self:createBindingButton(parent, 1, command)
+	local button2 = self:createBindingButton(parent, 2, command)
 	button2:SetPoint("TOPLEFT", button1, "BOTTOMLEFT", 0, -5)
 	button2:SetPoint("TOPRIGHT", button1, "BOTTOMRIGHT", 0, -5)
 

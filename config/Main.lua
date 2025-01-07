@@ -10,12 +10,12 @@ config:Hide()
 
 -- BIND MOUNT
 mounts:on("ADDON_INIT", function(self)
-	local button1, button2, secure = binding:createBindingButtons(util.secureButtonNameMount, ("%s %s %d"):format(addon, SUMMONS, 1), "MJSecureActionButtonTemplate")
+	local button1, button2, secure = binding:createBindingButtons(util.secureButtonNameMount, config, ("%s %s %d"):format(addon, SUMMONS, 1), "MJSecureActionButtonTemplate")
 	config.bindSummon1Key1 = button1
 	config.bindSummon1Key2 = button2
 	secure.id = 1
 
-	button1, button2, secure = binding:createBindingButtons(util.secureButtonNameSecondMount, ("%s %s %d"):format(addon, SUMMONS, 2), "MJSecureActionButtonTemplate")
+	button1, button2, secure = binding:createBindingButtons(util.secureButtonNameSecondMount, config, ("%s %s %d"):format(addon, SUMMONS, 2), "MJSecureActionButtonTemplate")
 	config.bindSummon2Key1 = button1
 	config.bindSummon2Key2 = button2
 	secure.id = 2
