@@ -70,6 +70,9 @@ function mounts:ADDON_LOADED(addonName)
 		if self.config.showWowheadLink == nil then
 			self.config.showWowheadLink = true
 		end
+		if self.config.statCollection == nil then
+			self.config.statCollection = true
+		end
 		self.config.useRepairMountsDurability = self.config.useRepairMountsDurability or 41
 		self.config.useRepairFlyableDurability = self.config.useRepairFlyableDurability or 31
 		self.config.useRepairFreeSlotsNum = self.config.useRepairFreeSlotsNum or 1
@@ -398,9 +401,11 @@ do
 
 
 	function mounts:startTracking(spellID, auraInstanceID)
-		mountStat = self.stat[spellID]
-		self:SetScript("OnUpdate", tracking)
 		self.isTracking = auraInstanceID
+		if self.config.statCollection then
+			mountStat = self.stat[spellID]
+			self:SetScript("OnUpdate", tracking)
+		end
 	end
 end
 

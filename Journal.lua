@@ -125,7 +125,7 @@ function journal:init()
 		self:updateMountDisplay(true)
 		local isMounted = not not util.getUnitMount("player")
 		self.mountSpecial:SetEnabled(isMounted)
-		self.mountSpeed:SetShown(isMounted)
+		self.mountSpeed:SetShown(mounts.config.statCollection and isMounted)
 	end)
 
 	self.bgFrame:SetScript("OnHide", function()
@@ -348,7 +348,34 @@ function journal:init()
 	self.bgFrame.closeButton:SetAttribute("clickbutton", self.CollectionsJournal.CloseButton)
 
 	-- MOUNT COUNT
+	local function addTooltipDLine(k, v)
+		GameTooltip:AddDoubleLine(k, v, 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
+	end
+
 	self.mountCount.collectedLabel:SetText(L["Collected:"])
+	self.mountCount:SetScript("OnLeave", GameTooltip_Hide)
+	self.mountCount:SetScript("OnEnter", function(frame)
+		local summons, mountTime, mountDistance = 0, 0, 0
+		for k, v in next, mounts.stat do
+			summons = summons + v[1]
+			mountTime = mountTime + v[2]
+			mountDistance = mountDistance + v[3]
+		end
+		if summons == 0 and mountTime == 0 and mountDistance == 0 then return end
+
+		GameTooltip:SetOwner(frame, "ANCHOR_TOPLEFT")
+		GameTooltip:SetText(TOTAL)
+
+		if summons > 0 then addTooltipDLine(SUMMONS, summons) end
+		if mountTime > 0 then addTooltipDLine(L["Travel time"], SecondsToClock(mountTime)) end
+		if mountDistance > 0 then
+			addTooltipDLine(L["Travel distance"], ("%s = %s"):format(self:getImperialFormat(mountDistance), self:getMetricFormat(mountDistance)))
+			local avgSpeed = mountTime > 0 and mountDistance / (mountTime / 3600) or 0
+			addTooltipDLine(L["Avg. speed"], ("%s/%s = %s/%s"):format(self:getImperialFormat(avgSpeed), L["ABBR_HOUR"], self:getMetricFormat(avgSpeed), L["ABBR_HOUR"]))
+		end
+
+		GameTooltip:Show()
+	end)
 	self:updateCountMounts()
 	self:RegisterEvent("COMPANION_LEARNED")
 	self:RegisterEvent("COMPANION_UNLEARNED")
@@ -959,10 +986,6 @@ function journal:init()
 	end)
 
 	-- MODEL SCENE MOUNT HINT
-	local function addTooltipLine(k, v)
-		GameTooltip:AddDoubleLine(k, v, 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
-	end
-
 	local msMountHint = self.mountDisplay.info.mountHint
 	msMountHint:SetPropagateMouseMotion(true)
 	msMountHint:SetScript("OnEnter", function(btn)
@@ -985,7 +1008,7 @@ function journal:init()
 		else
 			typeStr = L["MOUNT_TYPE_"..mType]
 		end
-		addTooltipLine(L["types"], typeStr)
+		addTooltipDLine(L["types"], typeStr)
 
 		-- family
 		local function getPath(FID)
@@ -1002,36 +1025,36 @@ function journal:init()
 
 		if type(familyID) == "table" then
 			for i = 1, #familyID do
-				addTooltipLine(i == 1 and L["Family"] or " ", getPath(familyID[i]))
+				addTooltipDLine(i == 1 and L["Family"] or " ", getPath(familyID[i]))
 			end
 		else
-			addTooltipLine(L["Family"], getPath(familyID))
+			addTooltipDLine(L["Family"], getPath(familyID))
 		end
 
 		-- faction
-		addTooltipLine(L["factions"], L["MOUNT_FACTION_"..((faction or 2) + 1)])
+		addTooltipDLine(L["factions"], L["MOUNT_FACTION_"..((faction or 2) + 1)])
 
 		-- expanstion
-		addTooltipLine(EXPANSION_FILTER_TEXT, _G["EXPANSION_NAME"..(expansion - 1)])
+		addTooltipDLine(EXPANSION_FILTER_TEXT, _G["EXPANSION_NAME"..(expansion - 1)])
 
 		-- tags
 		local mTags = self.tags.mountTags[self.selectedSpellID]
 		if mTags then
-			addTooltipLine(L["tags"], table.concat(GetKeysArray(mTags), ", "))
+			addTooltipDLine(L["tags"], table.concat(GetKeysArray(mTags), ", "))
 		end
 
 		-- statistic
 		local summons = mounts:getMountSummons(self.selectedSpellID)
-		if summons > 0 then addTooltipLine(SUMMONS, summons) end
+		if summons > 0 then addTooltipDLine(SUMMONS, summons) end
 
 		local mountTime = mounts:getMountTime(self.selectedSpellID)
-		if mountTime > 0 then addTooltipLine(L["Travel time"], SecondsToClock(mountTime)) end
+		if mountTime > 0 then addTooltipDLine(L["Travel time"], SecondsToClock(mountTime)) end
 
 		local mountDistance = mounts:getMountDistance(self.selectedSpellID)
 		if mountDistance > 0 then
-			addTooltipLine(L["Travel distance"], ("%s = %s"):format(self:getImperialFormat(mountDistance), self:getMetricFormat(mountDistance)))
+			addTooltipDLine(L["Travel distance"], ("%s = %s"):format(self:getImperialFormat(mountDistance), self:getMetricFormat(mountDistance)))
 			local avgSpeed = mountTime > 0 and mountDistance / (mountTime / 3600) or 0
-			addTooltipLine(L["Avg. speed"], ("%s/%s = %s/%s"):format(self:getImperialFormat(avgSpeed), L["ABBR_HOUR"], self:getMetricFormat(avgSpeed), L["ABBR_HOUR"]))
+			addTooltipDLine(L["Avg. speed"], ("%s/%s = %s/%s"):format(self:getImperialFormat(avgSpeed), L["ABBR_HOUR"], self:getMetricFormat(avgSpeed), L["ABBR_HOUR"]))
 		end
 
 		GameTooltip:Show()
@@ -1291,7 +1314,7 @@ function journal:init()
 	end)
 
 	-- MOUNT SPEED
-	self.mountSpeed:SetShown(isMounted)
+	self.mountSpeed:SetShown(mounts.config.statCollection and isMounted)
 
 	-- FANFARE
 	hooksecurefunc(C_MountJournal, "ClearFanfare", function(mountID)
@@ -1536,7 +1559,7 @@ function journal:updateMounted(isMounted)
 	self.tags.doNotHideMenu = nil
 	self:updateMountDisplay()
 	self.mountSpecial:SetEnabled(isMounted)
-	self.mountSpeed:SetShown(isMounted)
+	self.mountSpeed:SetShown(mounts.config.statCollection and isMounted)
 end
 
 

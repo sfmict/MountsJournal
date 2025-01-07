@@ -555,10 +555,19 @@ config:SetScript("OnShow", function(self)
 	self.showWowheadLink.Text:SetText(L["Show wowhead link in mount preview"])
 	self.showWowheadLink:HookScript("OnClick", enableBtns)
 
+	-- STATISTIC COLLECTION
+	self.statisticCollection = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.statisticCollection:SetPoint("TOPLEFT", self.showWowheadLink, "BOTTOMLEFT", 0, -15)
+	self.statisticCollection.Text:SetPoint("RIGHT", self.rightPanelScroll)
+	self.statisticCollection.Text:SetText(L["Enable statistic collection"])
+	self.statisticCollection.tooltipText = L["Enable statistic collection"]
+	self.statisticCollection.tooltipRequirement = L["STATISTIC_DESCRIPTION"]
+	self.statisticCollection:HookScript("OnClick", enableBtns)
+
 	-- RESET HELP
 	self.resetHelp = CreateFrame("BUTTON", nil, self.rightPanelScroll.child, "UIPanelButtonTemplate")
 	self.resetHelp:SetSize(128, 22)
-	self.resetHelp:SetPoint("TOPLEFT", self.showWowheadLink, "BOTTOMLEFT", 0, -15)
+	self.resetHelp:SetPoint("TOPLEFT", self.statisticCollection, "BOTTOMLEFT", 0, -15)
 	self.resetHelp:SetText(RESET_TUTORIALS)
 	self.resetHelp:SetScript("OnClick", function(btn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -654,6 +663,7 @@ config:SetScript("OnShow", function(self)
 		self.arrowButtons:SetChecked(mounts.config.arrowButtonsBrowse)
 		self.openLinks:SetChecked(mounts.config.openHyperlinks)
 		self.showWowheadLink:SetChecked(mounts.config.showWowheadLink)
+		self.statisticCollection:SetChecked(mounts.config.statCollection)
 		self.resetHelp:Enable()
 		self.cancelBtn:Disable()
 		self.applyBtn:Disable()
@@ -696,6 +706,7 @@ config:SetScript("OnShow", function(self)
 		mounts.config.arrowButtonsBrowse = self.arrowButtons:GetChecked()
 		mounts.config.openHyperlinks = self.openLinks:GetChecked()
 		mounts.config.showWowheadLink = self.showWowheadLink:GetChecked()
+		mounts.config.statCollection = self.statisticCollection:GetChecked()
 
 		updateBtnIcon(1)
 		updateBtnIcon(2)
