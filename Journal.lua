@@ -1,7 +1,7 @@
 local addon, ns = ...
 local L, util, mounts = ns.L, ns.util, ns.mounts
 local newMounts, mountsDB, specificDB = ns.newMounts, ns.mountsDB, ns.specificDB
-local C_MountJournal, C_PetJournal, wipe, tinsert, next, pairs, ipairs, select, type, sort, math = C_MountJournal, C_PetJournal, wipe, tinsert, next, pairs, ipairs, select, type, sort, math
+local C_MountJournal, C_PetJournal, wipe, tinsert, next, pairs, ipairs, select, type, sort, math, InCombatLockdown = C_MountJournal, C_PetJournal, wipe, tinsert, next, pairs, ipairs, select, type, sort, math, InCombatLockdown
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
 ns.journal = journal
 journal.mountTypes = util.mountTypes
@@ -118,11 +118,12 @@ function journal:init()
 		self:RegisterEvent("PLAYER_REGEN_ENABLED")
 		self:RegisterUnitEvent("UNIT_PORTRAIT_UPDATE", "player")
 		self:on("MOUNT_SPEED_UPDATE", self.updateSpeed)
+		self:on("MOUNTED_UPDATE", self.updateMounted)
 		self:updateCollectionTabs()
 		self.leftInset:EnableKeyboard(not InCombatLockdown())
 		self:updateMountsList()
 		self:updateMountDisplay(true)
-		local isMounted = IsMounted()
+		local isMounted = not not util.getUnitMount("player")
 		self.mountSpecial:SetEnabled(isMounted)
 		self.mountSpeed:SetShown(isMounted)
 	end)
@@ -136,6 +137,7 @@ function journal:init()
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 		self:UnregisterEvent("UNIT_PORTRAIT_UPDATE")
 		self:off("MOUNT_SPEED_UPDATE", self.updateSpeed)
+		self:off("MOUNTED_UPDATE", self.updateMounted)
 		self:updateCollectionTabs()
 	end)
 
@@ -1194,12 +1196,7 @@ function journal:init()
 			self:useMount(self.selectedMountID)
 			btn:SetAttribute("macrotext", nil)
 		elseif self.selectedMountID then
-			if self.selectedMountID:isActive() then
-				btn:SetAttribute("macrotext", nil)
-				Dismount()
-			else
-				btn:SetAttribute("macrotext", self.selectedMountID.macro)
-			end
+			btn:SetAttribute("macrotext", self.selectedMountID.macro)
 		end
 	end)
 
@@ -1274,7 +1271,7 @@ function journal:init()
 	end)
 
 	-- MOUNT SPECIAL
-	local isMounted = IsMounted()
+	local isMounted = not not util.getUnitMount("player")
 	self.mountSpecial:SetText("!")
 	self.mountSpecial.normal = self.mountSpecial:GetFontString()
 	self.mountSpecial.normal:ClearAllPoints()
@@ -1329,6 +1326,7 @@ function journal:init()
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 	self:RegisterUnitEvent("UNIT_PORTRAIT_UPDATE", "player")
 	self:on("MOUNT_SPEED_UPDATE", self.updateSpeed)
+	self:on("MOUNTED_UPDATE", self.updateMounted)
 
 	self:updateCollectionTabs()
 	self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
@@ -1532,15 +1530,19 @@ function journal:updateCollectionTabs()
 end
 
 
+function journal:updateMounted(isMounted)
+	self.tags.doNotHideMenu = true
+	self:updateScrollMountList()
+	self.tags.doNotHideMenu = nil
+	self:updateMountDisplay()
+	self.mountSpecial:SetEnabled(isMounted)
+	self.mountSpeed:SetShown(isMounted)
+end
+
+
 function journal:COMPANION_UPDATE(companionType)
-	if companionType == "MOUNT" then
-		self.tags.doNotHideMenu = true
-		self:updateScrollMountList()
-		self.tags.doNotHideMenu = nil
-		self:updateMountDisplay()
-		local isMounted = not not util.getUnitMount("player")
-		self.mountSpecial:SetEnabled(isMounted)
-		self.mountSpeed:SetShown(isMounted)
+	if companionType == "MOUNT" and InCombatLockdown() then
+		self:updateMounted(not not util.getUnitMount("player"))
 	end
 end
 

@@ -203,11 +203,12 @@ function mounts:PLAYER_LOGIN()
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
 	self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
-	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
 
 	-- TRACKING
-	local spellID = util.getUnitMount("player")
-	if spellID then self:startTracking(spellID) end
+	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
+	self:RegisterUnitEvent("UNIT_AURA", "player")
+	local spellID, mountID, auraInstanceID = util.getUnitMount("player")
+	if spellID then self:startTracking(spellID, auraInstanceID) end
 
 	-- PRFILE CHANGED
 	self:on("UPDATE_PROFILE", self.setSelectedProfile)
@@ -314,12 +315,14 @@ end
 function mounts:PLAYER_REGEN_DISABLED()
 	self:UnregisterEvent("UNIT_SPELLCAST_START")
 	self:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	if not self.isTracking then self:UnregisterEvent("UNIT_AURA") end
 end
 
 
 function mounts:PLAYER_REGEN_ENABLED()
 	self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
 	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
+	self:RegisterUnitEvent("UNIT_AURA", "player")
 end
 
 
@@ -370,6 +373,15 @@ do
 end
 
 
+function mounts:UNIT_SPELLCAST_SUCCEEDED(_,_, spellID)
+	if ns.additionalMounts[spellID] or C_MountJournal.GetMountFromSpell(spellID) then
+		local mountStat = self.stat[spellID]
+		mountStat[1] = mountStat[1] + 1
+		self:event("MOUNT_SUMMONED")
+	end
+end
+
+
 do
 	local GetGlidingInfo, GetUnitSpeed, mountStat = C_PlayerInfo.GetGlidingInfo, GetUnitSpeed
 	local function tracking(self, elapsed)
@@ -385,28 +397,42 @@ do
 	end
 
 
-	function mounts:startTracking(spellID)
+	function mounts:startTracking(spellID, auraInstanceID)
 		mountStat = self.stat[spellID]
 		self:SetScript("OnUpdate", tracking)
-		self:RegisterEvent("COMPANION_UPDATE")
+		self.isTracking = auraInstanceID
 	end
 end
 
 
-function mounts:UNIT_SPELLCAST_SUCCEEDED(_,_, spellID)
-	if ns.additionalMounts[spellID] or C_MountJournal.GetMountFromSpell(spellID) then
-		local mountStat = self.stat[spellID]
-		mountStat[1] = mountStat[1] + 1
-		self:event("MOUNT_SUMMONED")
-		self:startTracking(spellID)
+function mounts:UNIT_AURA(_, data)
+	if data.removedAuraInstanceIDs and self.isTracking then
+		for i = 1, #data.removedAuraInstanceIDs do
+			if data.removedAuraInstanceIDs[i] == self.isTracking then
+				self:SetScript("OnUpdate", nil)
+				self.isTracking = nil
+				if InCombatLockdown() then
+					self:UnregisterEvent("UNIT_AURA")
+				end
+				self:event("MOUNTED_UPDATE", false)
+				break
+			end
+		end
 	end
-end
-
-
-function mounts:COMPANION_UPDATE(companionType)
-	if companionType == "MOUNT" and not util.getUnitMount("player") then
-		self:SetScript("OnUpdate", nil)
-		self:UnregisterEvent("COMPANION_UPDATE")
+	if data.addedAuras and not self.isTracking then
+		for i = 1, #data.addedAuras do
+			local auras = data.addedAuras[i]
+			local spellID
+			if ns.additionalMountBuffs[auras.spellId] then
+				spellID = ns.additionalMountBuffs[auras.spellId].spellID
+			elseif C_MountJournal.GetMountFromSpell(auras.spellId) then
+				spellID = auras.spellId
+			end
+			if spellID then
+				self:startTracking(spellID, auras.auraInstanceID)
+				self:event("MOUNTED_UPDATE", true)
+			end
+		end
 	end
 end
 

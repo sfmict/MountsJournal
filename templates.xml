@@ -488,7 +488,7 @@
 					<Layer level="BACKGROUND">
 						<FontString parentKey="mountSpeed" inherits="GameFontNormal" justifyH="RIGHT" hidden="true">
 							<Anchors>
-								<Anchor point="BOTTOMRIGHT" x="-36" y="-19"/>
+								<Anchor point="BOTTOMRIGHT" x="-36" y="-18"/>
 							</Anchors>
 						</FontString>
 					</Layer>

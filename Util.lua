@@ -327,9 +327,11 @@ function util.getUnitMount(unit)
 		ctok, a,b,c,d,e = GetAuraSlots(unit, filter, 5, ctok)
 		while a do
 			local data = GetAuraDataBySlot(unit, a)
-			local mountID = C_MountJournal.GetMountFromSpell(data.spellId)
-			if mountID or ns.additionalMounts[data.spellId] then
-				return data.spellId, mountID
+			if ns.additionalMountBuffs[data.spellId] then
+				return ns.additionalMountBuffs[data.spellId].spellID, nil, data.auraInstanceID
+			else
+				local mountID = C_MountJournal.GetMountFromSpell(data.spellId)
+				if mountID then return data.spellId, mountID, data.auraInstanceID end
 			end
 			a,b,c,d,e = b,c,d,e
 		end

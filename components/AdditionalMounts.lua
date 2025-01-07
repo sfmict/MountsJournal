@@ -6,7 +6,9 @@ local ltl = LibStub("LibThingsLoad-1.0")
 local _,_, raceID = UnitRace("player")
 local _,_, classID = UnitClass("player")
 local additionalMounts = {}
+local additionalMountBuffs = {}
 ns.additionalMounts = additionalMounts
+ns.additionalMountBuffs = additionalMountBuffs
 
 
 ----------------------------------------------------------------------
@@ -27,7 +29,7 @@ mounts:RegisterEvent("TOOLTIP_DATA_UPDATE")
 ----------------------------------------------------------------------
 -- METHODS
 local function isActive(self)
-	return C_UnitAuras.GetPlayerAuraBySpellID(self.spellID)
+	return C_UnitAuras.GetPlayerAuraBySpellID(self.buffID)
 end
 
 
@@ -54,9 +56,10 @@ local createMountFromSpell do
 	local function isCollected() return true end
 
 
-	function createMountFromSpell(spellID, mountType, expansion, modelSceneID)
+	function createMountFromSpell(spellID, mountType, expansion, modelSceneID, buffID)
 		local t = {
 			spellID = spellID,
+			buffID = buffID or spellID,
 			mountType = mountType,
 			expansion = expansion,
 			modelSceneID = modelSceneID,
@@ -70,6 +73,7 @@ local createMountFromSpell do
 			familyID = 1,
 		}
 		additionalMounts[t.spellID] = t
+		additionalMountBuffs[t.buffID] = t
 
 		local _, icon = ltl:GetSpellTexture(spellID)
 		t.icon = icon
@@ -91,7 +95,7 @@ end
 
 ----------------------------------------------------------------------
 -- SOAR
-local soar = createMountFromSpell(369536, 442, 10, 4)
+local soar = createMountFromSpell(369536, 442, 10, 4, 430747)
 
 if raceID == 52 or raceID == 70 then
 	soar.creatureID = "player"
@@ -128,7 +132,6 @@ end
 ----------------------------------------------------------------------
 -- TRAVEL FORM
 local travelForm = createMountFromSpell(783, 442, 2, 4)
-
 travelForm.isShown = classID == 11
 
 if raceID == 6 then -- Tauren
@@ -191,6 +194,7 @@ local createMountFromItem do
 		local t = {
 			itemID = itemID,
 			spellID = spellID,
+			buffID = spellID,
 			creatureID = creatureID,
 			mountType = mountType,
 			expansion = expansion,
@@ -206,6 +210,7 @@ local createMountFromItem do
 			getIsFavorite = getIsFavorite,
 		}
 		additionalMounts[t.spellID] = t
+		additionalMountBuffs[t.buffID] = t
 
 		t.icon = ltl:GetItemIcon(itemID)
 		t.name = ""
