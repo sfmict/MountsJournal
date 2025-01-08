@@ -367,7 +367,7 @@ function journal:init()
 		GameTooltip:SetText(TOTAL)
 
 		if summons > 0 then addTooltipDLine(SUMMONS, summons) end
-		if mountTime > 0 then addTooltipDLine(L["Travel time"], SecondsToClock(mountTime)) end
+		if mountTime > 0 then addTooltipDLine(L["Travel time"], util.getTimeBreakDown(mountTime)) end
 		if mountDistance > 0 then
 			addTooltipDLine(L["Travel distance"], ("%s = %s"):format(self:getImperialFormat(mountDistance), self:getMetricFormat(mountDistance)))
 			local avgSpeed = mountTime > 0 and mountDistance / (mountTime / 3600) or 0
@@ -1048,7 +1048,7 @@ function journal:init()
 		if summons > 0 then addTooltipDLine(SUMMONS, summons) end
 
 		local mountTime = mounts:getMountTime(self.selectedSpellID)
-		if mountTime > 0 then addTooltipDLine(L["Travel time"], SecondsToClock(mountTime)) end
+		if mountTime > 0 then addTooltipDLine(L["Travel time"], util.getTimeBreakDown(mountTime)) end
 
 		local mountDistance = mounts:getMountDistance(self.selectedSpellID)
 		if mountDistance > 0 then

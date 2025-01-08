@@ -435,3 +435,15 @@ function util.createCancelOk(parent)
 
 	return cancel, ok
 end
+
+
+function util.getTimeBreakDown(time)
+	local d,h,m,s = ChatFrame_TimeBreakDown(time)
+	if d > 0 then
+		return ("%d:%.2d:%.2d:%.2d"):format(d,h,m,s)
+	elseif h > 0 then
+		return ("%.2d:%.2d:%.2d"):format(h,m,s)
+	else
+		return ("%.2d:%.2d"):format(m,s)
+	end
+end
