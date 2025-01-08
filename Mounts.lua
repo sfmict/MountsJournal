@@ -406,20 +406,31 @@ do
 			mountStat = self.stat[spellID]
 			self:SetScript("OnUpdate", tracking)
 		end
+		self:event("MOUNTED_UPDATE", true)
 	end
 end
 
 
+function mounts:stopTracking()
+	self:SetScript("OnUpdate", nil)
+	self.isTracking = nil
+	if InCombatLockdown() then
+		self:UnregisterEvent("UNIT_AURA")
+	end
+	self:event("MOUNTED_UPDATE", false)
+end
+
+
 function mounts:UNIT_AURA(_, data)
+	if data.isFullUpdate then
+		self:stopTracking()
+		local spellID, mountID, auraInstanceID = util.getUnitMount("player")
+		if spellID then self:startTracking(spellID, auraInstanceID) end
+	end
 	if data.removedAuraInstanceIDs and self.isTracking then
 		for i = 1, #data.removedAuraInstanceIDs do
 			if data.removedAuraInstanceIDs[i] == self.isTracking then
-				self:SetScript("OnUpdate", nil)
-				self.isTracking = nil
-				if InCombatLockdown() then
-					self:UnregisterEvent("UNIT_AURA")
-				end
-				self:event("MOUNTED_UPDATE", false)
+				self:stopTracking()
 				break
 			end
 		end
@@ -433,10 +444,7 @@ function mounts:UNIT_AURA(_, data)
 			elseif C_MountJournal.GetMountFromSpell(auras.spellId) then
 				spellID = auras.spellId
 			end
-			if spellID then
-				self:startTracking(spellID, auras.auraInstanceID)
-				self:event("MOUNTED_UPDATE", true)
-			end
+			if spellID then self:startTracking(spellID, auras.auraInstanceID) end
 		end
 	end
 end
