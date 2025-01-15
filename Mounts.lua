@@ -202,6 +202,12 @@ function mounts:PLAYER_LOGIN()
 	self:RegisterEvent("SKILL_LINES_CHANGED")
 	self:RegisterEvent("NEW_MOUNT_ADDED")
 
+	hooksecurefunc(C_MountJournal, "ClearFanfare", function(mountID)
+		local _, spellID = C_MountJournal.GetMountInfoByID(mountID)
+		self:addMountDate(spellID)
+		self:autoAddNewMount(spellID)
+	end)
+
 	-- PET USABLE
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
@@ -437,15 +443,26 @@ function mounts:UNIT_AURA(_, data)
 	end
 	if data.addedAuras and not self.isTracking then
 		for i = 1, #data.addedAuras do
-			local auras = data.addedAuras[i]
+			local aura = data.addedAuras[i]
 			local spellID
-			if ns.additionalMountBuffs[auras.spellId] then
-				spellID = ns.additionalMountBuffs[auras.spellId].spellID
-			elseif C_MountJournal.GetMountFromSpell(auras.spellId) then
-				spellID = auras.spellId
+			if ns.additionalMountBuffs[aura.spellId] then
+				spellID = ns.additionalMountBuffs[aura.spellId].spellID
+			elseif C_MountJournal.GetMountFromSpell(aura.spellId) then
+				spellID = aura.spellId
 			end
-			if spellID then self:startTracking(spellID, auras.auraInstanceID) end
+			if spellID then
+				self:startTracking(spellID, aura.auraInstanceID)
+				break
+			end
 		end
+	end
+end
+
+
+function mounts:addMountDate(spellID, time)
+	local mountStat = self.stat[spellID]
+	if not mountStat[4] then
+		mountStat[4] = time or GetServerTime()
 	end
 end
 
@@ -470,6 +487,7 @@ end
 
 function mounts:NEW_MOUNT_ADDED(mountID)
 	local _, spellID = C_MountJournal.GetMountInfoByID(mountID)
+	self:addMountDate(spellID)
 	self:autoAddNewMount(spellID)
 	if self.herbalismMounts[spellID] then self:setHerbMount() end
 end

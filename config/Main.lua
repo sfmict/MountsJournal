@@ -559,9 +559,9 @@ config:SetScript("OnShow", function(self)
 	self.statisticCollection = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
 	self.statisticCollection:SetPoint("TOPLEFT", self.showWowheadLink, "BOTTOMLEFT", 0, -15)
 	self.statisticCollection.Text:SetPoint("RIGHT", self.rightPanelScroll)
-	self.statisticCollection.Text:SetText(L["Enable statistic collection"])
-	self.statisticCollection.tooltipText = L["Enable statistic collection"]
-	self.statisticCollection.tooltipRequirement = L["STATISTIC_DESCRIPTION"]
+	self.statisticCollection.Text:SetText(L["Enable statistics collection"])
+	self.statisticCollection.tooltipText = L["Enable statistics collection"]
+	self.statisticCollection.tooltipRequirement = L["STATISTICS_DESCRIPTION"]
 	self.statisticCollection:HookScript("OnClick", enableBtns)
 
 	-- RESET HELP

@@ -164,7 +164,7 @@
 				</Scripts>
 			</Button>
 
-			<Button parentKey="OpenDynamicFlightSkillTreeButton" inherits="DynamicFlightFlyoutButtonTemplate" mixin="MJDynamicFlightSkillTreeButtonMixin">
+			<Button parentKey="OpenDynamicFlightSkillTreeButton" inherits="MJDynamicFlightFlyoutButtonTemplate" mixin="MJDynamicFlightSkillTreeButtonMixin">
 				<Anchors>
 					<Anchor point="RIGHT" relativeKey="$parent.summon1" relativePoint="LEFT" x="-35" y="0"/>
 				</Anchors>
@@ -198,7 +198,7 @@
 				</Scripts>
 			</Button>
 
-			<Button parentKey="DynamicFlightModeButton"  inherits="DynamicFlightFlyoutButtonTemplate,MJSecureActionButtonUpTemplate" mixin="MJDynamicFlightModeButtonMixin">
+			<Button parentKey="DynamicFlightModeButton"  inherits="MJDynamicFlightFlyoutButtonTemplate,MJSecureActionButtonUpTemplate" mixin="MJDynamicFlightModeButtonMixin">
 				<Anchors>
 					<Anchor point="RIGHT" relativeKey="$parent.summon1" relativePoint="LEFT" x="-68" y="0"/>
 				</Anchors>
@@ -1372,6 +1372,28 @@
 		</Frames>
 	</Frame>
 
+	<Button name="MJDynamicFlightFlyoutButtonTemplate" virtual="true">
+		<Size x="30" y="30"/>
+		<NormalTexture parentKey="NormalTexture" atlas="UI-HUD-ActionBar-IconFrame">
+			<Size x="31" y="31"/>
+			<Anchors>
+				<Anchor point="TOPLEFT"/>
+			</Anchors>
+		</NormalTexture>
+		<PushedTexture atlas="UI-HUD-ActionBar-IconFrame-Down" parentKey="PushedTexture">
+			<Size x="31" y="31"/>
+			<Anchors>
+				<Anchor point="TOPLEFT"/>
+			</Anchors>
+		</PushedTexture>
+		<HighlightTexture atlas="UI-HUD-ActionBar-IconFrame-Mouseover" parentKey="HighlightTexture">
+			<Size x="31" y="31"/>
+			<Anchors>
+				<Anchor point="TOPLEFT"/>
+			</Anchors>
+		</HighlightTexture>
+	</Button>
+
 	<Button name="MJTabTemplate" virtual="true">
 		<Size x="88" y="24"/>
 		<Layers>
@@ -2392,8 +2414,11 @@
 					</Anchors>
 				</Texture>
 			</Layer>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="icon" setAllPoints="true"/>
+			</Layer>
 		</Layers>
-		<NormalTexture parentKey="icon"/>
+		<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
 		<HighlightTexture parentKey="highlight" file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
 	</Button>
 

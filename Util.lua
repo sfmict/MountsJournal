@@ -1,4 +1,5 @@
 local addon, ns = ...
+local L = ns.L
 local type, tremove, next, tostring = type, tremove, next, tostring
 local C_MountJournal, C_UnitAuras, UnitExists = C_MountJournal, C_UnitAuras, UnitExists
 local events, eventsMixin = {}, {}
@@ -101,7 +102,6 @@ util.secureButtonNameSecondMount = addon.."_SecondMount"
 util.mountTypes = setmetatable({
 	[242] = 1,
 	[247] = 1,
-	[248] = 1,
 	[402] = 1,
 	[407] = {1, 3},
 	[411] = 1,
@@ -445,5 +445,60 @@ function util.getTimeBreakDown(time)
 		return ("%.2d:%.2d:%.2d"):format(h,m,s)
 	else
 		return ("%.2d:%.2d"):format(m,s)
+	end
+end
+
+
+do
+	local ABBR_YARD = " "..L["ABBR_YARD"]
+	local ABBR_MILE = " "..L["ABBR_MILE"]
+	function util.getImperialFormat(distance)
+		if distance < 1760 then
+			return math.floor(distance)..ABBR_YARD
+		elseif distance < 1760000 then
+			return (math.floor(distance / 1760 * 10) / 10)..ABBR_MILE
+		end
+		return math.floor(distance / 1760)..ABBR_MILE
+	end
+end
+
+
+do
+	local ABBR_METER = " "..L["ABBR_METER"]
+	local ABBR_KILOMETER = " "..L["ABBR_KILOMETER"]
+	function util.getMetricFormat(distance)
+		distance = distance * .9144
+		if distance < 1000 then
+			return math.floor(distance)..ABBR_METER
+		elseif distance < 1000000 then
+			return (math.floor(distance / 1000 * 10) / 10)..ABBR_KILOMETER
+		end
+		return math.floor(distance / 1000)..ABBR_KILOMETER
+	end
+end
+
+
+do
+	local text = "%s = %s"
+	function util:getFormattedDistance(distance)
+		return text:format(self.getImperialFormat(distance), self.getMetricFormat(distance))
+	end
+end
+
+
+do
+	local text = "%s/"..L["ABBR_HOUR"].." = %s/"..L["ABBR_HOUR"]
+	function util:getFormattedAvgSpeed(distance, time)
+		local avgSpeed = time > 0 and distance / time * 3600 or 0
+		return text:format(self.getImperialFormat(avgSpeed), self.getMetricFormat(avgSpeed))
+	end
+end
+
+
+do
+	local text = "%s/"..L["ABBR_HOUR"]
+	local speedFormat = GetLocale() ~= "enUS" and util.getMetricFormat or util.getImperialFormat
+	function util:getFormattedSpeed(speed)
+		return text:format(speedFormat(speed * 3600))
 	end
 end

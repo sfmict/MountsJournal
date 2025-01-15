@@ -32,7 +32,6 @@ function journal:init()
 	local lsfdd = LibStub("LibSFDropDown-1.5")
 	local texPath = "Interface/AddOns/MountsJournal/textures/"
 	self.mountIDs = C_MountJournal.GetMountIDs()
-	self.isMetric = GetLocale() ~= "enUS"
 
 	-- FILTERS INIT
 	local filtersMeta = {__index = function(self, key)
@@ -121,7 +120,12 @@ function journal:init()
 		self:on("MOUNTED_UPDATE", self.updateMounted)
 		self:updateCollectionTabs()
 		self.leftInset:EnableKeyboard(not InCombatLockdown())
-		self:updateMountsList()
+		local by = mounts.filters.sorting.by
+		if by == "summons" or by == "time" or by == "distance" then
+			self:sortMounts()
+		else
+			self:updateMountsList()
+		end
 		self:updateMountDisplay(true)
 		local isMounted = not not util.getUnitMount("player")
 		self.mountSpecial:SetEnabled(isMounted)
@@ -337,7 +341,6 @@ function journal:init()
 		if InCombatLockdown() then return end
 		local isDragonRidingUnlocked = DragonridingUtil.IsDragonridingUnlocked()
 		local show = isDragonRidingUnlocked and PanelTemplates_GetSelectedTab(self.bgFrame) ~= 1
-		sMountJournal:SetAttribute("dynamicFlight", isDragonRidingUnlocked)
 		self.bgFrame.OpenDynamicFlightSkillTreeButton:SetShown(show)
 		self.bgFrame.DynamicFlightModeButton:SetShown(show)
 		sMountJournal:SetAttribute("isDragonRidingUnlocked", isDragonRidingUnlocked)
@@ -369,9 +372,8 @@ function journal:init()
 		if summons > 0 then addTooltipDLine(SUMMONS, summons) end
 		if mountTime > 0 then addTooltipDLine(L["Travel time"], util.getTimeBreakDown(mountTime)) end
 		if mountDistance > 0 then
-			addTooltipDLine(L["Travel distance"], ("%s = %s"):format(self:getImperialFormat(mountDistance), self:getMetricFormat(mountDistance)))
-			local avgSpeed = mountTime > 0 and mountDistance / (mountTime / 3600) or 0
-			addTooltipDLine(L["Avg. speed"], ("%s/%s = %s/%s"):format(self:getImperialFormat(avgSpeed), L["ABBR_HOUR"], self:getMetricFormat(avgSpeed), L["ABBR_HOUR"]))
+			addTooltipDLine(L["Travel distance"], util:getFormattedDistance(mountDistance))
+			addTooltipDLine(L["Avg. speed"], util:getFormattedAvgSpeed(mountDistance, mountTime))
 		end
 
 		GameTooltip:Show()
@@ -1052,9 +1054,8 @@ function journal:init()
 
 		local mountDistance = mounts:getMountDistance(self.selectedSpellID)
 		if mountDistance > 0 then
-			addTooltipDLine(L["Travel distance"], ("%s = %s"):format(self:getImperialFormat(mountDistance), self:getMetricFormat(mountDistance)))
-			local avgSpeed = mountTime > 0 and mountDistance / (mountTime / 3600) or 0
-			addTooltipDLine(L["Avg. speed"], ("%s/%s = %s/%s"):format(self:getImperialFormat(avgSpeed), L["ABBR_HOUR"], self:getMetricFormat(avgSpeed), L["ABBR_HOUR"]))
+			addTooltipDLine(L["Travel distance"], util:getFormattedDistance(mountDistance))
+			addTooltipDLine(L["Avg. speed"], util:getFormattedAvgSpeed(mountDistance, mountTime))
 		end
 
 		GameTooltip:Show()
@@ -1073,7 +1074,7 @@ function journal:init()
 	end
 
 	self:on("MOUNT_SELECT", updateMountHint)
-		 :on("MOUNT_SUMMONED", updateMountHint)
+	    :on("MOUNT_SUMMONED", updateMountHint)
 
 	-- MODEL SCENE MULTIPLE BUTTON
 	lsfdd:SetMixin(self.multipleMountBtn)
@@ -1570,30 +1571,8 @@ function journal:COMPANION_UPDATE(companionType)
 end
 
 
-function journal:getImperialFormat(distance)
-	if distance < 1760 then
-		return math.floor(distance).." "..L["ABBR_YARD"]
-	elseif distance < 1760000 then
-		return (math.floor(distance / 1760 * 10) / 10).." "..L["ABBR_MILE"]
-	end
-	return math.floor(distance / 1760).." "..L["ABBR_MILE"]
-end
-
-
-function journal:getMetricFormat(distance)
-	distance = distance * .9144
-	if distance < 1000 then
-		return math.floor(distance).." "..L["ABBR_METER"]
-	elseif distance < 1000000 then
-		return (math.floor(distance / 1000 * 10) / 10).." "..L["ABBR_KILOMETER"]
-	end
-	return math.floor(distance / 1000).." "..L["ABBR_KILOMETER"]
-end
-
-
 function journal:updateSpeed(speed)
-	speed = speed * 3600
-	self.mountSpeed:SetText((self.isMetric and self:getMetricFormat(speed) or self:getImperialFormat(speed)).."/"..L["ABBR_HOUR"])
+	self.mountSpeed:SetText(util:getFormattedSpeed(speed))
 end
 
 
