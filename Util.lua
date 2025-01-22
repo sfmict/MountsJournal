@@ -437,6 +437,11 @@ function util.createCancelOk(parent)
 end
 
 
+function util.addTooltipDLine(s1, s2)
+	GameTooltip:AddDoubleLine(s1, s2, 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
+end
+
+
 function util.getTimeBreakDown(time)
 	local d,h,m,s = ChatFrame_TimeBreakDown(time)
 	if d > 0 then
@@ -456,7 +461,7 @@ do
 		if distance < 1760 then
 			return math.floor(distance)..ABBR_YARD
 		elseif distance < 1760000 then
-			return (math.floor(distance / 1760 * 10) / 10)..ABBR_MILE
+			return (math.floor(distance / 176) / 10)..ABBR_MILE
 		end
 		return math.floor(distance / 1760)..ABBR_MILE
 	end
@@ -471,7 +476,7 @@ do
 		if distance < 1000 then
 			return math.floor(distance)..ABBR_METER
 		elseif distance < 1000000 then
-			return (math.floor(distance / 1000 * 10) / 10)..ABBR_KILOMETER
+			return (math.floor(distance / 100) / 10)..ABBR_KILOMETER
 		end
 		return math.floor(distance / 1000)..ABBR_KILOMETER
 	end

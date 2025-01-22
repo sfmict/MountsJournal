@@ -351,10 +351,6 @@ function journal:init()
 	self.bgFrame.closeButton:SetAttribute("clickbutton", self.CollectionsJournal.CloseButton)
 
 	-- MOUNT COUNT
-	local function addTooltipDLine(k, v)
-		GameTooltip:AddDoubleLine(k, v, 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
-	end
-
 	self.mountCount.collectedLabel:SetText(L["Collected:"])
 	self.mountCount:SetScript("OnLeave", GameTooltip_Hide)
 	self.mountCount:SetScript("OnEnter", function(frame)
@@ -369,11 +365,11 @@ function journal:init()
 		GameTooltip:SetOwner(frame, "ANCHOR_TOPLEFT")
 		GameTooltip:SetText(TOTAL)
 
-		if summons > 0 then addTooltipDLine(SUMMONS, summons) end
-		if mountTime > 0 then addTooltipDLine(L["Travel time"], util.getTimeBreakDown(mountTime)) end
+		if summons > 0 then util.addTooltipDLine(SUMMONS, summons) end
+		if mountTime > 0 then util.addTooltipDLine(L["Travel time"], util.getTimeBreakDown(mountTime)) end
 		if mountDistance > 0 then
-			addTooltipDLine(L["Travel distance"], util:getFormattedDistance(mountDistance))
-			addTooltipDLine(L["Avg. speed"], util:getFormattedAvgSpeed(mountDistance, mountTime))
+			util.addTooltipDLine(L["Travel distance"], util:getFormattedDistance(mountDistance))
+			util.addTooltipDLine(L["Avg. speed"], util:getFormattedAvgSpeed(mountDistance, mountTime))
 		end
 
 		GameTooltip:Show()
@@ -1010,7 +1006,7 @@ function journal:init()
 		else
 			typeStr = L["MOUNT_TYPE_"..mType]
 		end
-		addTooltipDLine(L["types"], typeStr)
+		util.addTooltipDLine(L["types"], typeStr)
 
 		-- family
 		local function getPath(FID)
@@ -1027,35 +1023,35 @@ function journal:init()
 
 		if type(familyID) == "table" then
 			for i = 1, #familyID do
-				addTooltipDLine(i == 1 and L["Family"] or " ", getPath(familyID[i]))
+				util.addTooltipDLine(i == 1 and L["Family"] or " ", getPath(familyID[i]))
 			end
 		else
-			addTooltipDLine(L["Family"], getPath(familyID))
+			util.addTooltipDLine(L["Family"], getPath(familyID))
 		end
 
 		-- faction
-		addTooltipDLine(L["factions"], L["MOUNT_FACTION_"..((faction or 2) + 1)])
+		util.addTooltipDLine(L["factions"], L["MOUNT_FACTION_"..((faction or 2) + 1)])
 
 		-- expanstion
-		addTooltipDLine(EXPANSION_FILTER_TEXT, _G["EXPANSION_NAME"..(expansion - 1)])
+		util.addTooltipDLine(EXPANSION_FILTER_TEXT, _G["EXPANSION_NAME"..(expansion - 1)])
 
 		-- tags
 		local mTags = self.tags.mountTags[self.selectedSpellID]
 		if mTags then
-			addTooltipDLine(L["tags"], table.concat(GetKeysArray(mTags), ", "))
+			util.addTooltipDLine(L["tags"], table.concat(GetKeysArray(mTags), ", "))
 		end
 
 		-- statistic
 		local summons = mounts:getMountSummons(self.selectedSpellID)
-		if summons > 0 then addTooltipDLine(SUMMONS, summons) end
+		if summons > 0 then util.addTooltipDLine(SUMMONS, summons) end
 
 		local mountTime = mounts:getMountTime(self.selectedSpellID)
-		if mountTime > 0 then addTooltipDLine(L["Travel time"], util.getTimeBreakDown(mountTime)) end
+		if mountTime > 0 then util.addTooltipDLine(L["Travel time"], util.getTimeBreakDown(mountTime)) end
 
 		local mountDistance = mounts:getMountDistance(self.selectedSpellID)
 		if mountDistance > 0 then
-			addTooltipDLine(L["Travel distance"], util:getFormattedDistance(mountDistance))
-			addTooltipDLine(L["Avg. speed"], util:getFormattedAvgSpeed(mountDistance, mountTime))
+			util.addTooltipDLine(L["Travel distance"], util:getFormattedDistance(mountDistance))
+			util.addTooltipDLine(L["Avg. speed"], util:getFormattedAvgSpeed(mountDistance, mountTime))
 		end
 
 		GameTooltip:Show()
