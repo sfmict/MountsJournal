@@ -4,6 +4,8 @@
 	<Script file="Classes.lua"/>
 	<Script file="Rules.lua"/>
 	<Script file="RuleEdit.lua"/>
+	<Script file="CodeEdit.lua"/>
+	<Script file="Snippets.lua"/>
 	<Script file="About.lua"/>
 	<Script file="Settings.lua"/>
 </Ui>

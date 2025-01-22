@@ -61,9 +61,15 @@ rules:SetScript("OnShow", function(self)
 	ver:SetJustifyH("RIGHT")
 	ver:SetText(C_AddOns.GetAddOnMetadata(addon, "Version"))
 
+	-- RULE SETS TEXT
+	local ruleSetsText = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	ruleSetsText:SetHeight(22)
+	ruleSetsText:SetPoint("TOPLEFT", 20, -20)
+	ruleSetsText:SetText(L["Rule Sets"])
+
 	-- RULE SETS
 	self.ruleSets = lsfdd:CreateStretchButtonOriginal(self, 150, 22)
-	self.ruleSets:SetPoint("TOPRIGHT", -20, -20)
+	self.ruleSets:SetPoint("LEFT", ruleSetsText, "RIGHT", 5, 0)
 	self.ruleSets:SetText(macroFrame.currentRuleSet.name)
 	self.ruleSets:ddSetDisplayMode(addon)
 
@@ -128,10 +134,14 @@ rules:SetScript("OnShow", function(self)
 		end
 	end)
 
-	-- RULE SETS TEXT
-	local ruleSetsText = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	ruleSetsText:SetPoint("RIGHT", self.ruleSets, "LEFT", -5, 0)
-	ruleSetsText:SetText(L["Rule Sets"])
+	-- SNIPPET TOGGLE
+	self.snippetToggle = CreateFrame("CheckButton", nil, self, "MJArrowToggleText")
+	self.snippetToggle:SetPoint("TOPRIGHT", -20, -20)
+	self.snippetToggle.text:SetText(L["Code Snippets"])
+	self.snippetToggle:SetWidth(self.snippetToggle.text:GetStringWidth() + 31)
+	self.snippetToggle:HookScript("OnClick", function(btn)
+		ns.snippets:SetShown(btn:GetChecked())
+	end)
 
 	-- TITLE
 	self.title = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")

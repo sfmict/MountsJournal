@@ -1175,22 +1175,13 @@
 				</Frames>
 			</Frame>
 
-			<Frame parentKey="settingsBackground" inherits="InsetFrameTemplate" hidden="true">
+			<Frame parentKey="settingsBackground" inherits="MJOptionBackgroundTemplate" hidden="true">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativePoint="TOPLEFT" y="-60" x="4"/>
 					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" x="-4" y="26"/>
 				</Anchors>
 
 				<Layers>
-					<Layer level="BACKGROUND">
-						<Texture parentKey="BackgroundTile" atlas="collections-background-tile" useAtlasSize="true" vertTile="true" horizTile="true">
-							<Anchors>
-								<Anchor point="TOPLEFT" x="4" y="-4" />
-								<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
-							</Anchors>
-						</Texture>
-					</Layer>
-
 					<Layer level="BORDER" textureSubLevel="2">
 						<Texture parentKey="ShadowCornerTopLeft" atlas="collections-background-shadow-large" useAtlasSize="true">
 							<Anchors>
@@ -1252,67 +1243,6 @@
 						</Texture>
 					</Layer>
 
-					<Layer level="OVERLAY">
-						<Texture parentKey="OverlayShadowTopLeft" atlas="collections-background-shadow-small" useAtlasSize="true">
-							<Anchors>
-								<Anchor point="TOPLEFT" relativeKey="$parent.BackgroundTile"/>
-							</Anchors>
-						</Texture>
-
-						<Texture parentKey="OverlayShadowTopRight" atlas="collections-background-shadow-small" useAtlasSize="true">
-							<Anchors>
-								<Anchor point="TOPRIGHT" relativeKey="$parent.BackgroundTile"/>
-							</Anchors>
-							<TexCoords left="1" right="0" top="0" bottom="1"/>
-						</Texture>
-
-						<Texture parentKey="OverlayShadowBottomLeft" atlas="collections-background-shadow-small" useAtlasSize="true">
-							<Anchors>
-								<Anchor point="BOTTOMLEFT" relativeKey="$parent.BackgroundTile"/>
-							</Anchors>
-							<TexCoords left="0" right="1" top="1" bottom="0"/>
-						</Texture>
-
-						<Texture parentKey="OverlayShadowBottomRight" atlas="collections-background-shadow-small" useAtlasSize="true">
-							<Anchors>
-								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.BackgroundTile"/>
-							</Anchors>
-							<TexCoords left="1" right="0" top="1" bottom="0"/>
-						</Texture>
-
-						<Texture parentKey="OverlayShadowTop" atlas="collections-background-shadow-small" useAtlasSize="true">
-							<Anchors>
-								<Anchor point="TOPLEFT" relativeKey="$parent.OverlayShadowTopLeft" relativePoint="TOPRIGHT" x="0" y="0"/>
-								<Anchor point="TOPRIGHT" relativeKey="$parent.OverlayShadowTopRight" relativePoint="TOPLEFT" x="0" y="0"/>
-							</Anchors>
-							<TexCoords left="0.9999" right="1" top="0" bottom="1"/>
-						</Texture>
-
-						<Texture parentKey="OverlayShadowLeft" atlas="collections-background-shadow-small" useAtlasSize="true">
-							<Anchors>
-								<Anchor point="TOPLEFT" relativeKey="$parent.OverlayShadowTopLeft" relativePoint="BOTTOMLEFT"/>
-								<Anchor point="BOTTOMLEFT" relativeKey="$parent.OverlayShadowBottomLeft" relativePoint="TOPLEFT"/>
-							</Anchors>
-							<TexCoords left="0" right="1" top="0.9999" bottom="1"/>
-						</Texture>
-
-						<Texture parentKey="OverlayShadowRight" atlas="collections-background-shadow-small" useAtlasSize="true">
-							<Anchors>
-								<Anchor point="TOPRIGHT" relativeKey="$parent.OverlayShadowTopRight" relativePoint="BOTTOMRIGHT"/>
-								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.OverlayShadowBottomRight" relativePoint="TOPRIGHT"/>
-							</Anchors>
-							<TexCoords left="1" right="0" top="0.9999" bottom="1"/>
-						</Texture>
-
-						<Texture parentKey="OverlayShadowBottom" atlas="collections-background-shadow-small" useAtlasSize="true">
-							<Anchors>
-								<Anchor point="BOTTOMLEFT" relativeKey="$parent.OverlayShadowBottomLeft" relativePoint="BOTTOMRIGHT" x="0" y="0"/>
-								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.OverlayShadowBottomRight" relativePoint="BOTTOMLEFT" x="0" y="0"/>
-							</Anchors>
-							<TexCoords left="0.9999" right="1" top="1" bottom="0"/>
-						</Texture>
-					</Layer>
-
 					<Layer level="ARTWORK" textureSubLevel="1">
 						<Texture parentKey="BGCornerFilagreeBottomLeft" atlas="collections-background-filagree" useAtlasSize="true">
 							<Anchors>
@@ -1328,23 +1258,6 @@
 							<TexCoords left="1.0" right="0.0" top="0.0" bottom="1.0"/>
 						</Texture>
 					</Layer>
-
-					<Layer level="BORDER" textureSubLevel="1">
-						<Texture parentKey="ShadowLineTop" atlas="_collections-background-line" useAtlasSize="true" horizTile="true">
-							<Anchors>
-								<Anchor point="TOPLEFT" relativeKey="$parent.BackgroundTile" x="0" y="-9" />
-								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.BackgroundTile" relativePoint="TOPRIGHT" x="0" y="-13"/>
-							</Anchors>
-						</Texture>
-
-						<Texture parentKey="ShadowLineBottom" atlas="_collections-background-line" useAtlasSize="true" horizTile="true">
-							<Anchors>
-								<Anchor point="TOPLEFT" relativeKey="$parent.BackgroundTile" relativePoint="BOTTOMLEFT" x="0" y="13" />
-								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.BackgroundTile" x="0" y="9"/>
-							</Anchors>
-						</Texture>
-					</Layer>
-
 				</Layers>
 			</Frame>
 
@@ -1370,6 +1283,96 @@
 			</Button>
 
 		</Frames>
+	</Frame>
+
+	<Frame name="MJOptionBackgroundTemplate" inherits="InsetFrameTemplate" virtual="true">
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="BackgroundTile" atlas="collections-background-tile" useAtlasSize="true" vertTile="true" horizTile="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="4" y="-4" />
+						<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+
+			<Layer level="OVERLAY">
+				<Texture parentKey="OverlayShadowTopLeft" atlas="collections-background-shadow-small" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.BackgroundTile"/>
+					</Anchors>
+				</Texture>
+
+				<Texture parentKey="OverlayShadowTopRight" atlas="collections-background-shadow-small" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="TOPRIGHT" relativeKey="$parent.BackgroundTile"/>
+					</Anchors>
+					<TexCoords left="1" right="0" top="0" bottom="1"/>
+				</Texture>
+
+				<Texture parentKey="OverlayShadowBottomLeft" atlas="collections-background-shadow-small" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeKey="$parent.BackgroundTile"/>
+					</Anchors>
+					<TexCoords left="0" right="1" top="1" bottom="0"/>
+				</Texture>
+
+				<Texture parentKey="OverlayShadowBottomRight" atlas="collections-background-shadow-small" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.BackgroundTile"/>
+					</Anchors>
+					<TexCoords left="1" right="0" top="1" bottom="0"/>
+				</Texture>
+
+				<Texture parentKey="OverlayShadowTop" atlas="collections-background-shadow-small" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.OverlayShadowTopLeft" relativePoint="TOPRIGHT" x="0" y="0"/>
+						<Anchor point="TOPRIGHT" relativeKey="$parent.OverlayShadowTopRight" relativePoint="TOPLEFT" x="0" y="0"/>
+					</Anchors>
+					<TexCoords left="0.9999" right="1" top="0" bottom="1"/>
+				</Texture>
+
+				<Texture parentKey="OverlayShadowLeft" atlas="collections-background-shadow-small" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.OverlayShadowTopLeft" relativePoint="BOTTOMLEFT"/>
+						<Anchor point="BOTTOMLEFT" relativeKey="$parent.OverlayShadowBottomLeft" relativePoint="TOPLEFT"/>
+					</Anchors>
+					<TexCoords left="0" right="1" top="0.9999" bottom="1"/>
+				</Texture>
+
+				<Texture parentKey="OverlayShadowRight" atlas="collections-background-shadow-small" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="TOPRIGHT" relativeKey="$parent.OverlayShadowTopRight" relativePoint="BOTTOMRIGHT"/>
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.OverlayShadowBottomRight" relativePoint="TOPRIGHT"/>
+					</Anchors>
+					<TexCoords left="1" right="0" top="0.9999" bottom="1"/>
+				</Texture>
+
+				<Texture parentKey="OverlayShadowBottom" atlas="collections-background-shadow-small" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeKey="$parent.OverlayShadowBottomLeft" relativePoint="BOTTOMRIGHT" x="0" y="0"/>
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.OverlayShadowBottomRight" relativePoint="BOTTOMLEFT" x="0" y="0"/>
+					</Anchors>
+					<TexCoords left="0.9999" right="1" top="1" bottom="0"/>
+				</Texture>
+			</Layer>
+
+			<Layer level="BORDER" textureSubLevel="1">
+				<Texture parentKey="ShadowLineTop" atlas="_collections-background-line" useAtlasSize="true" horizTile="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.BackgroundTile" x="0" y="-9" />
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.BackgroundTile" relativePoint="TOPRIGHT" x="0" y="-13"/>
+					</Anchors>
+				</Texture>
+
+				<Texture parentKey="ShadowLineBottom" atlas="_collections-background-line" useAtlasSize="true" horizTile="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.BackgroundTile" relativePoint="BOTTOMLEFT" x="0" y="13" />
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.BackgroundTile" x="0" y="9"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
 	</Frame>
 
 	<Button name="MJDynamicFlightFlyoutButtonTemplate" virtual="true">
@@ -2320,21 +2323,56 @@
 			<OnMouseDown>
 				if self:IsEnabled() then
 					self:SetTextures("Interface/Buttons/UI-Silver-Button-Down")
-					local point, _,_, x, y = self.icon:GetPoint(1)
-					self.icon:SetPoint(point, x - 1, y - 1)
+					self.icon:AdjustPointsOffset(-1, -1)
 				end
 			</OnMouseDown>
 			<OnMouseUp>
 				if self:IsEnabled() then
 					self:SetTextures("Interface/Buttons/UI-Silver-Button-Up")
-					local point, _,_, x, y = self.icon:GetPoint(1)
-					self.icon:SetPoint(point, x + 1, y + 1)
+					self.icon:AdjustPointsOffset(1, 1)
 				end
 			</OnMouseUp>
 			<OnClick>
 				self:setPointArrow(self:GetChecked())
 				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			</OnClick>
+		</Scripts>
+	</CheckButton>
+
+	<CheckButton name="MJArrowToggleText" inherits="MJArrowToggle" virtual="true">
+		<Size y="22"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString parentKey="text" inherits="GameFontHighlightSmall" justifyH="CENTER" wordwrap="false">
+					<Anchors>
+						<Anchor point="LEFT" x="5"/>
+						<Anchor point="RIGHT" relativeKey="$parent.icon" relativePoint="LEFT" x="0"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<HighlightTexture file="Interface\Buttons\UI-Silver-Button-Highlight" alphaMode="ADD">
+			<TexCoords left="0" right="1.0" top="0.03" bottom="0.7175"/>
+		</HighlightTexture>
+		<Scripts>
+			<OnLoad inherit="prepend">
+				self.icon:ClearAllPoints()
+				self.icon:SetPoint("RIGHT", -5, 0)
+			</OnLoad>
+			<OnMouseDown>
+				if self:IsEnabled() then
+					self:SetTextures("Interface/Buttons/UI-Silver-Button-Down")
+					self.icon:AdjustPointsOffset(-1, -1)
+					self.text:AdjustPointsOffset(-1, -1)
+				end
+			</OnMouseDown>
+			<OnMouseUp>
+				if self:IsEnabled() then
+					self:SetTextures("Interface/Buttons/UI-Silver-Button-Up")
+					self.icon:AdjustPointsOffset(1, 1)
+					self.text:AdjustPointsOffset(1, 1)
+				end
+			</OnMouseUp>
 		</Scripts>
 	</CheckButton>
 
@@ -3178,6 +3216,38 @@
 		</Scripts>
 	</Frame>
 
+	<Frame name="MJHighlightAnimationTemplate" virtual="true">
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="highlight" alpha="0">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="4" y="-4"/>
+						<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
+					</Anchors>
+					<Color r=".8" g=".6" b=".1" a=".1"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Animations>
+			<AnimationGroup parentKey="highlightLeave" setToFinalAlpha="true">
+				<Alpha parentKey="alpha" smoothing="IN_OUT" duration=".3" order="1" fromAlpha="1" toAlpha="0"/>
+			</AnimationGroup>
+		</Animations>
+		<Scripts>
+			<OnLoad inherit="prepend">
+				self.highlightLeave.alpha:SetTarget(self.highlight)
+			</OnLoad>
+			<OnEnter>
+				self.highlightLeave:Stop()
+				self.highlight:SetAlpha(1)
+			</OnEnter>
+			<OnLeave>
+				self.highlightLeave:Restart()
+				GameTooltip:Hide()
+			</OnLeave>
+		</Scripts>
+	</Frame>
+
 	<Button name="MJRemoveButtonTemplate" alpha=".5" virtual="true">
 		<Size x="20" y="20"/>
 		<NormalTexture file="Interface/BUTTONS/UI-GroupLoot-Pass-Up"/>
@@ -3193,18 +3263,9 @@
 		</Scripts>
 	</Button>
 
-	<Button name="MJRulePanelTemplate" inherits="MJOptionPanelTemplate" virtual="true">
+	<Button name="MJRulePanelTemplate" inherits="MJOptionPanelTemplate,MJHighlightAnimationTemplate" virtual="true">
 		<Size y="55"/>
 		<Layers>
-			<Layer level="BORDER">
-				<Texture parentKey="highlight" alpha="0">
-					<Anchors>
-						<Anchor point="TOPLEFT" x="4" y="-4"/>
-						<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
-					</Anchors>
-					<Color r=".8" g=".6" b=".1" a=".1"/>
-				</Texture>
-			</Layer>
 			<Layer level="ARTWORK">
 				<FontString parentKey="order" inherits="GameFontNormalLarge" justifyH="CENTER">
 					<Size x="28"/>
@@ -3238,11 +3299,6 @@
 				</FontString>
 			</Layer>
 		</Layers>
-		<Animations>
-			<AnimationGroup parentKey="highlightLeave" setToFinalAlpha="true">
-				<Alpha parentKey="alpha" smoothing="IN_OUT" duration=".3" order="1" fromAlpha="1" toAlpha="0"/>
-			</AnimationGroup>
-		</Animations>
 		<Frames>
 			<Button parentKey="remove" inherits="MJRemoveButtonTemplate">
 				<Anchors>
@@ -3268,19 +3324,6 @@
 				<HighlightTexture atlas="minimal-scrollbar-arrow-bottom-over" alphaMode="ADD"/>
 			</Button>
 		</Frames>
-		<Scripts>
-			<OnLoad inherit="prepend">
-				self.highlightLeave.alpha:SetTarget(self.highlight)
-			</OnLoad>
-			<OnEnter>
-				self.highlightLeave:Stop()
-				self.highlight:SetAlpha(1)
-			</OnEnter>
-			<OnLeave>
-				self.highlightLeave:Restart()
-				GameTooltip:Hide()
-			</OnLeave>
-		</Scripts>
 	</Button>
 
 	<Button name="MJConditionDropDownTemplate" inherits="MJDarkPanelTemplate" virtual="true">
@@ -3473,7 +3516,7 @@
 							CreateAnchor("BOTTOMRIGHT", self, "BOTTOMRIGHT", -8, 8),
 						}
 						local anchorsToBar = {
-							CreateAnchor("TOPLEFT", self, "TOPLEFT", 8, -8),
+							anchorsToFrame[1],
 							CreateAnchor("BOTTOMRIGHT", self.scrollBar, "BOTTOMLEFT", -3, 4),
 						}
 						local scrollBox = self.editFrame:GetScrollBox()
@@ -3486,4 +3529,46 @@
 			</Button>
 		</Frames>
 	</Frame>
+
+	<Button name="MJSnippetListPanelTemplate" inherits="MJOptionPanelTemplate,MJHighlightAnimationTemplate" virtual="true">
+		<Size y="70"/>
+		<Layers>
+			<Layer level="BACKGROUND" textureSubLevel="2">
+				<Texture parentKey="codeBG">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="5" y="-30"/>
+						<Anchor point="BOTTOMRIGHT" x="-5" y="5"/>
+					</Anchors>
+					<Color r="0" g="0" b="0" a=".3"/>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK">
+				<FontString parentKey="name" inherits="GameFontNormal" wordwrap="false" justifyH="CENTER">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="5" y="-10"/>
+						<Anchor point="TOPRIGHT" x="-30" y="-8"/>
+					</Anchors>
+				</FontString>
+				<FontString parentKey="code" inherits="GameFontHighlightSmall" justifyH="LEFT" justifyV="TOP" wordwrap="true">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.codeBG" x="2" y="-2"/>
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.codeBG" x="-2" y="2"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button parentKey="remove" inherits="MJRemoveButtonTemplate">
+				<Anchors>
+					<Anchor point="TOPRIGHT" x="-5" y="-5"/>
+				</Anchors>
+			</Button>
+		</Frames>
+		<Scripts>
+			<OnLoad inherit="prepend">
+				self:SetBackdropColor(.1, .1, .1, .7)
+				self:SetBackdropBorderColor(.1, .1, .1, .7)
+			</OnLoad>
+		</Scripts>
+	</Button>
 </Ui>
