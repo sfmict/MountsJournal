@@ -7,7 +7,7 @@ codeEdit:Hide()
 
 
 local escOnShow = codeEdit:GetScript("OnShow")
-codeEdit:HookScript("OnShow", function(self)
+codeEdit:SetScript("OnShow", function(self)
 	self:EnableMouse(true)
 	self:SetFrameLevel(1600)
 	self:SetPoint("TOPLEFT", ns.journal.bgFrame, 0, -18)
@@ -16,8 +16,10 @@ codeEdit:HookScript("OnShow", function(self)
 
 	self:SetScript("OnShow", escOnShow)
 	self:HookScript("OnHide", function(self)
-		self.history = nil
-		self.historyPos = nil
+		if not self:IsShown() then
+			self.history = nil
+			self.historyPos = nil
+		end
 	end)
 
 	StaticPopupDialogs[util.addonName.."SAVE_CODE"] = {
@@ -42,6 +44,7 @@ codeEdit:HookScript("OnShow", function(self)
 			self:SetPropagateKeyboardInput(true)
 		end
 	end)
+	escOnShow(self)
 
 	-- EDITOR THEMES
 	local editorThemes= {
@@ -167,7 +170,7 @@ codeEdit:HookScript("OnShow", function(self)
 
 	-- CONTROL BTNS
 	self.cancelBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
-	self.cancelBtn:SetPoint("BOTTOMRIGHT", -40, 20)
+	self.cancelBtn:SetPoint("BOTTOMRIGHT", -35, 20)
 	self.cancelBtn:SetText(CANCEL)
 	self.cancelBtn:SetScript("OnClick", function(btn)
 		btn:GetParent():Hide()
@@ -188,7 +191,7 @@ codeEdit:HookScript("OnShow", function(self)
 
 	-- SETTINGS
 	self.settings = LibStub("LibSFDropDown-1.5"):CreateStretchButtonOriginal(self, 150, 22)
-	self.settings:SetPoint("TOPRIGHT", -40, -30)
+	self.settings:SetPoint("TOPRIGHT", -35, -30)
 	self.settings:SetText(SETTINGS)
 
 	self.settings:ddSetInitFunc(function(dd, level, value)
@@ -292,18 +295,19 @@ codeEdit:HookScript("OnShow", function(self)
 	self.editBox = self.editFrame:GetEditBox()
 
 	self.editBox:HookScript("OnKeyDown", function(editBox, key)
-		if InCombatLockdown() or not IsControlKeyDown() then return end
-		self.skipAddHistory = true
+		if not IsControlKeyDown() then return end
 
 		if key == "S" then
 			self.completeBtn:Click()
 		elseif key == "Z" then
+			self.skipAddHistory = true
 			if IsShiftKeyDown() then
 				self:setHistory(-1)
 			else
 				self:setHistory(1)
 			end
 		elseif key == "Y" then
+			self.skipAddHistory = true
 			self:setHistory(-1)
 		end
 	end)
@@ -401,13 +405,12 @@ end
 
 function codeEdit:addHistory()
 	local cursorPos = self.editBox:GetCursorPosition()
-	local text = self.line.GetText(self.editBox)
+	local text = self.line.GetText(self.editBox):trim()
 	text, cursorPos = IndentationLib.stripWowColorsWithPos(text, cursorPos)
-	if self.history[1] and self.history[1][1] == text then return end
+	if self.history[self.historyPos] and self.history[self.historyPos][1] == text then return end
 	-- remove history before position
-	for i = 2, self.historyPos do
-		table.remove(self.history, 1)
-	end
+	for i = 2, self.historyPos do table.remove(self.history, 1) end
+	-- insert new
 	table.insert(self.history, 1, {text, cursorPos - 1})
 	-- remove overlimit (50)
 	for i = 51, #self.history do self.history[i] = nil end
