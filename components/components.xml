@@ -14,5 +14,7 @@
 	<Script file="Conditions.lua"/>
 	<Script file="Actions.lua"/>
 	<Script file="RuleUtils.lua"/>
+	<Script file="SnippetEnv.lua"/>
+	<Script file="ForAllIndentsAndPurposes.lua"/>
 	<Include file="filter\filter.xml"/>
 </Ui>

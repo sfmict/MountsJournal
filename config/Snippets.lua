@@ -1,7 +1,7 @@
 local addon, ns = ...
-local L, util, codeEdit, rules = ns.L, ns.util, ns.codeEdit, ns.ruleConfig
+local L, util, codeEdit = ns.L, ns.util, ns.codeEdit
 local strcmputf8i = strcmputf8i
-local snippets = CreateFrame("FRAME", "MountsJournalSnippets", rules, "DefaultPanelTemplate")
+local snippets = CreateFrame("FRAME", "MountsJournalSnippets", ns.ruleConfig, "DefaultPanelTemplate")
 ns.snippets = snippets
 snippets:Hide()
 
@@ -12,11 +12,12 @@ snippets:SetScript("OnShow", function(self)
 	self:SetWidth(300)
 	self:SetPoint("TOPLEFT", ns.journal.bgFrame, "TOPRIGHT", -4, 0)
 	self:SetPoint("BOTTOMLEFT", ns.journal.bgFrame, "BOTTOMRIGHT", -5, 0)
-	self:SetMouseClickEnabled(true)
+	self:EnableMouse(true)
 	self:SetTitle(L["Code Snippets"])
 
+	self.snippets = ns.mounts.globalDB.snippets
 	self.newName = L["Snippet"].."(%d)"
-	self.defSnippet = "if true then\n  return true\nend"
+	self.defSnippet = "if true then\nreturn true\nend\nreturn false"
 
 	-- DIALOGS
 	local function ruleSetExistsAccept(popup)
@@ -107,23 +108,6 @@ snippets:SetScript("OnShow", function(self)
 	self.view:RegisterCallback(self.view.Event.OnAcquiredFrame, onAcqure, self)
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.scrollBar, self.view)
 
-	self.snippets = {
-		["asd1"] = "if asd and asd2 and asd3 and asd4 and asd5 and asd6 then\n   return true\nend",
-		["asd2"] = "return true",
-		["asd3"] = "return true",
-		["asd4"] = "return true",
-		["asd5"] = "return true",
-		["asd6"] = "return true",
-		["asd7"] = "return true",
-		["asd8"] = "return true",
-		["asd9"] = "return true",
-		["asd10"] = "return true",
-		["asd11"] = "return true",
-		["asd12"] = "return true",
-		["asd13"] = "return true",
-		["asd14"] = "return true",
-	}
-
 	-- INIT
 	self:updateFilters()
 end)
@@ -136,35 +120,65 @@ function snippets:getCount()
 end
 
 
-function snippets:add(name, code)
-	if self.snippets[name] then
-		StaticPopup_Show(util.addonName.."SNIPPET_EXISTS")
-		return
+do
+	local function updateSpaces(s)
+		local str = "\n"
+		for i = 1, #s:gsub("%s*\n", "") / ns.mounts.globalDB.editorTabSpaces do
+			str = str.." "
+		end
+		return str
 	end
-	self.snippets[name] = code
-	self:updateFilters()
-	return true
-end
+	local function minimize(code)
+		return code:gsub("%s*\n%s*", updateSpaces)
+	end
 
 
-function snippets:edit(oldName, name, code)
-	if oldName ~= name then
+	function snippets:add(name, code)
 		if self.snippets[name] then
 			StaticPopup_Show(util.addonName.."SNIPPET_EXISTS")
 			return
 		end
-		self.snippets[oldName] = nil
+		self.snippets[name] = minimize(code)
+		self:updateFilters()
+		ns.mounts:event("RULE_LIST_UPDATE")
+		return true
 	end
-	self.snippets[name] = code
-	self:updateFilters()
-	return true
+
+
+	function snippets:edit(oldName, name, code)
+		if oldName ~= name then
+			if self.snippets[name] then
+				StaticPopup_Show(util.addonName.."SNIPPET_EXISTS")
+				return
+			end
+			self.snippets[oldName] = nil
+			for _, ruleSet in ipairs(ns.macroFrame.ruleSetConfig) do
+				for _, rules in ipairs(ruleSet) do
+					for _, rule in ipairs(rules) do
+						for _, cond in ipairs(rule) do
+							if cond[2] == "snip" and cond[3] == oldName then
+								cond[3] = name
+							end
+						end
+					end
+				end
+			end
+		end
+		ns.macroFrame:resetSnippet(oldName)
+		self.snippets[name] = minimize(code)
+		self:updateFilters()
+		ns.mounts:event("RULE_LIST_UPDATE")
+		return true
+	end
 end
 
 
 function snippets:remove(name)
 	StaticPopup_Show(util.addonName.."DELETE_SNIPPET", NORMAL_FONT_COLOR:WrapTextInColorCode(name), nil, function()
+		ns.macroFrame:resetSnippet(name)
 		self.snippets[name] = nil
 		self:updateFilters()
+		ns.mounts:event("RULE_LIST_UPDATE")
 	end)
 end
 
@@ -172,7 +186,7 @@ end
 function snippets:btnInit(btn, data)
 	btn.sName = data[2]
 	btn.name:SetText(data[2])
-	btn.code:SetText(self.snippets[data[2]])
+	btn.code:SetText(self.snippets[data[2]]:gsub("[|]", "|%1"))
 end
 
 

@@ -3221,8 +3221,8 @@
 			<Layer level="BACKGROUND">
 				<Texture parentKey="highlight" alpha="0">
 					<Anchors>
-						<Anchor point="TOPLEFT" x="4" y="-4"/>
-						<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
+						<Anchor point="TOPLEFT" x="3" y="-3"/>
+						<Anchor point="BOTTOMRIGHT" x="-3" y="3"/>
 					</Anchors>
 					<Color r=".8" g=".6" b=".1" a=".1"/>
 				</Texture>
@@ -3530,7 +3530,7 @@
 		</Frames>
 	</Frame>
 
-	<Button name="MJSnippetListPanelTemplate" inherits="MJOptionPanelTemplate,MJHighlightAnimationTemplate" virtual="true">
+	<Button name="MJSnippetListPanelTemplate" inherits="BackdropTemplate,MJHighlightAnimationTemplate" virtual="true">
 		<Size y="70"/>
 		<Layers>
 			<Layer level="BACKGROUND" textureSubLevel="2">
@@ -3566,9 +3566,17 @@
 		</Frames>
 		<Scripts>
 			<OnLoad inherit="prepend">
+				self:SetBackdrop(MountsJournalUtil.sliderPanelBackdrop)
 				self:SetBackdropColor(.1, .1, .1, .7)
 				self:SetBackdropBorderColor(.1, .1, .1, .7)
 			</OnLoad>
+			<OnEnter inherit="prepend">
+				if self.name:IsTruncated() then
+					GameTooltip:SetOwner(self, "ANCHOR_TOP")
+					GameTooltip:AddLine(self.name:GetText(), nil, nil, nil, true)
+					GameTooltip:Show()
+				end
+			</OnEnter>
 		</Scripts>
 	</Button>
 </Ui>

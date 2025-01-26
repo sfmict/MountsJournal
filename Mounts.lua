@@ -34,6 +34,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.globalDB.holidayNames = self.globalDB.holidayNames or {}
 		self.globalDB.help = self.globalDB.help or {}
 		self.globalDB.stat = self.globalDB.stat or {}
+		self.globalDB.snippets = self.globalDB.snippets or {}
 		self.globalDB.ruleSets = self.globalDB.ruleSets or {
 			{name = DEFAULT, isDefault = true}
 		}

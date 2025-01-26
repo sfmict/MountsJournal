@@ -1299,6 +1299,50 @@ end
 
 
 ---------------------------------------------------
+-- snip SNIPPET
+conds.snip = {}
+conds.snip.text = L["Code Snippet"]
+
+function conds.snip:getValueText(value)
+	if ns.macroFrame.snippets[value] then
+		return value
+	end
+	return RED_FONT_COLOR:WrapTextInColorCode(value)
+end
+
+
+function conds.snip:getValueList(value, func)
+	local list = {}
+
+	for name in next, ns.macroFrame.snippets do
+		list[#list + 1] = {
+			text = name,
+			value = name,
+			func = func,
+			checked = name == value,
+		}
+	end
+
+	if #list > 1 then
+		sort(list, function(a, b) return strcmputf8i(a.text, b.text) < 0 end)
+	elseif #list == 0 then
+		list[1] = {
+			notCheckable = true,
+			disabled = true,
+			text = EMPTY,
+		}
+	end
+
+	return list
+end
+
+
+function conds.snip:getFuncText(value)
+	return ("self:callSnippet('%s')"):format(value:gsub("['\\]", "\\%1"))
+end
+
+
+---------------------------------------------------
 -- METHODS
 function conds:getMenuList(value, func)
 	local list = {}

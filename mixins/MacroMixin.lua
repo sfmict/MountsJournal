@@ -17,6 +17,7 @@ macroFrame:on("ADDON_INIT", function(self)
 	self.mounts = ns.mounts
 	self.config = self.mounts.config
 	self.ruleSetConfig = self.mounts.globalDB.ruleSets
+	self.snippets = ns.mounts.globalDB.snippets
 	self.sFlags = self.mounts.sFlags
 	self.macrosConfig = self.config.macrosConfig
 	self.charMacrosConfig = self.mounts.charDB.macrosConfig

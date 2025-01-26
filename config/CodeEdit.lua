@@ -1,5 +1,6 @@
 local addon, ns = ...
-local L = ns.L
+local L, util, macroFrame, mounts = ns.L, ns.util, ns.macroFrame, ns.mounts
+local IndentationLib = IndentationLib
 local codeEdit = CreateFrame("FRAME", "MountsJournalCodeEdit", ns.ruleConfig, "MJDarkPanelTemplate,MJEscHideTemplate")
 ns.codeEdit = codeEdit
 codeEdit:Hide()
@@ -7,19 +8,162 @@ codeEdit:Hide()
 
 local escOnShow = codeEdit:GetScript("OnShow")
 codeEdit:HookScript("OnShow", function(self)
-	self:SetScript("OnShow", escOnShow)
 	self:EnableMouse(true)
 	self:SetFrameLevel(1600)
 	self:SetPoint("TOPLEFT", ns.journal.bgFrame, 0, -18)
 	self:SetPoint("BOTTOMRIGHT", ns.snippets)
+	self:SetBackdropColor(.1, .1, .1, .9)
+
+	self:SetScript("OnShow", escOnShow)
+	self:HookScript("OnHide", function(self)
+		self.history = nil
+		self.historyPos = nil
+	end)
+
+	StaticPopupDialogs[util.addonName.."SAVE_CODE"] = {
+		text = addon..": "..L["Do you want to save changes?"],
+		button1 = YES,
+		button2 = NO,
+		button3 = CANCEL,
+		whileDead = 1,
+		selectCallbackByIndex = true,
+		OnButton1 = function(self, cb) self:Hide() cb() end,
+		OnButton2 = function(self) self:Hide() codeEdit:Hide() end,
+		OnButton3 = function(self) self:Hide() end,
+	}
+
+	self:SetScript("OnKeyDown", function(self, key)
+		if key == GetBindingKey("TOGGLEGAMEMENU") then
+			StaticPopup_Show(util.addonName.."SAVE_CODE", nil, nil, function()
+				self.completeBtn:Click()
+			end)
+			self:SetPropagateKeyboardInput(false)
+		else
+			self:SetPropagateKeyboardInput(true)
+		end
+	end)
+
+	-- EDITOR THEMES
+	local editorThemes= {
+		["Standard"] = {
+			["Table"] = "|c00ff3333",
+			["Arithmetic"] = "|c00ff3333",
+			["Relational"] = "|c00ff3333",
+			["Logical"] = "|c004444ff",
+			["Special"] = "|c00ff3333",
+			["Keyword"] = "|c004444ff",
+			["Comment"] = "|c0000aa00",
+			["Number"] = "|c00ff9900",
+			["String"] = "|c00999999"
+		},
+		["Monokai"] = {
+			["Table"] = "|c00ffffff",
+			["Arithmetic"] = "|c00f92672",
+			["Relational"] = "|c00ff3333",
+			["Logical"] = "|c00f92672",
+			["Special"] = "|c0066d9ef",
+			["Keyword"] = "|c00f92672",
+			["Comment"] = "|c0075715e",
+			["Number"] = "|c00ae81ff",
+			["String"] = "|c00e6db74"
+		},
+		["Obsidian"] = {
+			["Table"] = "|c00AFC0E5",
+			["Arithmetic"] = "|c00E0E2E4",
+			["Relational"] = "|c00B3B689",
+			["Logical"] = "|c0093C763",
+			["Special"] = "|c00AFC0E5",
+			["Keyword"] = "|c0093C763",
+			["Comment"] = "|c0066747B",
+			["Number"] = "|c00FFCD22",
+			["String"] = "|c00EC7600"
+		},
+		["Twilight"] = {
+			["Table"] = "|c00ffffff",
+			["Arithmetic"] = "|c00f92672",
+			["Relational"] = "|cffCDA869",
+			["Logical"] = "|cffCDA869",
+			["Special"] = "|cff66d9ef",
+			["Keyword"] = "|cffCDA869",
+			["Comment"] = "|cff605A60",
+			["Number"] = "|cffCF6137",
+			["String"] = "|cff829D61",
+		},
+	}
+
+	-- default
+	mounts.globalDB.editorTheme = mounts.globalDB.editorTheme or "Twilight"
+	mounts.globalDB.editorTabSpaces = mounts.globalDB.editorTabSpaces or 4
+	mounts.globalDB.editorFontSize = mounts.globalDB.editorFontSize or 12
+
+	local colorScheme = {[0] = "|r"}
+	local function setScheme()
+		local theme = editorThemes[mounts.globalDB.editorTheme]
+		colorScheme[IndentationLib.tokens.TOKEN_SPECIAL] = theme["Special"]
+		colorScheme[IndentationLib.tokens.TOKEN_KEYWORD] = theme["Keyword"]
+		colorScheme[IndentationLib.tokens.TOKEN_COMMENT_SHORT] = theme["Comment"]
+		colorScheme[IndentationLib.tokens.TOKEN_COMMENT_LONG] = theme["Comment"]
+		colorScheme[IndentationLib.tokens.TOKEN_NUMBER] = theme["Number"]
+		colorScheme[IndentationLib.tokens.TOKEN_STRING] = theme["String"]
+
+		colorScheme["..."] = theme["Table"]
+		colorScheme["{"] = theme["Table"]
+		colorScheme["}"] = theme["Table"]
+		colorScheme["["] = theme["Table"]
+		colorScheme["]"] = theme["Table"]
+
+		colorScheme["+"] = theme["Arithmetic"]
+		colorScheme["-"] = theme["Arithmetic"]
+		colorScheme["/"] = theme["Arithmetic"]
+		colorScheme["*"] = theme["Arithmetic"]
+		colorScheme[".."] = theme["Arithmetic"]
+
+		colorScheme["=="] = theme["Relational"]
+		colorScheme["<"] = theme["Relational"]
+		colorScheme["<="] = theme["Relational"]
+		colorScheme[">"] = theme["Relational"]
+		colorScheme[">="] = theme["Relational"]
+		colorScheme["~="] = theme["Relational"]
+
+		colorScheme["and"] = theme["Logical"]
+		colorScheme["or"] = theme["Logical"]
+		colorScheme["not"] = theme["Logical"]
+	end
+	setScheme()
 
 	-- NAME
-	self.nameEdit = CreateFrame("EditBox", nil, self, "InputBoxInstructionsTemplate")
-	self.nameEdit:SetAutoFocus(false)
+	self.nameEdit = CreateFrame("EditBox", nil, self, "InputBoxTemplate")
 	self.nameEdit:SetSize(300, 22)
-	self.nameEdit:SetPoint("TOPLEFT", 40, -40)
-	self.nameEdit:SetScript("OnEscapePressed", EditBox_ClearFocus)
+	self.nameEdit:SetPoint("TOPLEFT", 40, -30)
+	self.nameEdit:SetAutoFocus(false)
 	self.nameEdit:SetScript("OnEnterPressed", EditBox_ClearFocus)
+
+	-- LINE
+	self.lineText = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	self.lineText:SetPoint("LEFT", self.nameEdit, "RIGHT", 40, 0)
+	self.lineText:SetText(L["Line"])
+
+	self.line = CreateFrame("Editbox", nil, self, "InputBoxTemplate")
+	self.line:SetSize(30, 22)
+	self.line:SetPoint("LEFT", self.lineText, "RIGHT", 8, 0)
+	self.line:SetAutoFocus(false)
+	self.line:SetJustifyH("RIGHT")
+	self.line:SetTextInsets(0, 5, 0, 0)
+	self.line:SetNumeric(true)
+
+	self.line:SetScript("OnEnterPressed", function(editBox)
+		local text = editBox.GetText(self.editBox)
+		local line = editBox:GetNumber()
+		local pos = 0
+		while line > 1 and pos do
+			pos = text:find("\n", pos + 1, true)
+			line = line - 1
+		end
+		if pos then
+			self.editBox:SetCursorPosition(pos)
+			self.editBox:SetFocus()
+		end
+	end)
 
 	-- CONTROL BTNS
 	self.cancelBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
@@ -35,12 +179,85 @@ codeEdit:HookScript("OnShow", function(self)
 	self.completeBtn:SetText(COMPLETE)
 	self.completeBtn:SetScript("OnClick", function(btn)
 		local p = btn:GetParent()
-		if p.cb(p.name, p.nameEdit:GetText(), p.editFrame:GetEditBox():GetText()) then p:Hide() end
+		if p.cb(p.name, p.nameEdit:GetText():trim(), p.editBox:GetText():trim()) then p:Hide() end
 	end)
 
 	local width = math.max(self.cancelBtn:GetFontString():GetStringWidth(), self.completeBtn:GetFontString():GetStringWidth()) + 40
 	self.cancelBtn:SetWidth(width)
 	self.completeBtn:SetWidth(width)
+
+	-- SETTINGS
+	self.settings = LibStub("LibSFDropDown-1.5"):CreateStretchButtonOriginal(self, 150, 22)
+	self.settings:SetPoint("TOPRIGHT", -40, -30)
+	self.settings:SetText(SETTINGS)
+
+	self.settings:ddSetInitFunc(function(dd, level, value)
+		local info = {}
+		info.keepShownOnClick = true
+
+		if level == 1 then
+			local check = function(btn) return mounts.globalDB.editorTheme == btn.value end
+			local func = function(btn)
+				mounts.globalDB.editorTheme = btn.value
+				setScheme()
+				self.editBox:SetText(self.editBox:GetText():trim())
+				dd:ddRefresh(level)
+			end
+
+			for name in next, editorThemes do
+				info.text = name
+				info.value = name
+				info.checked = check
+				info.func = func
+				dd:ddAddButton(info, level)
+			end
+
+			dd:ddAddSeparator(level)
+
+			info.notCheckable = true
+			info.hasArrow = true
+			info.text = L["Tab Size"]
+			info.value = "tab"
+			dd:ddAddButton(info, level)
+
+			info.text = FONT_SIZE
+			info.value = "font"
+			dd:ddAddButton(info, level)
+		elseif value == "tab" then
+			local check = function(btn) return btn.value == mounts.globalDB.editorTabSpaces end
+			local func = function(btn)
+				mounts.globalDB.editorTabSpaces = btn.value
+				IndentationLib.enable(self.editBox, colorScheme, mounts.globalDB.editorTabSpaces)
+				self.editBox:SetText(self.editBox:GetText():trim())
+				IndentationLib.indentEditbox(self.editBox)
+				dd:ddRefresh(level)
+			end
+
+			for i = 2, 4 do
+				info.text = i
+				info.value = i
+				info.checked = check
+				info.func = func
+				dd:ddAddButton(info, level)
+			end
+		elseif value == "font" then
+			local check = function(btn) return btn.value == mounts.globalDB.editorFontSize end
+			local func = function(btn)
+				mounts.globalDB.editorFontSize = btn.value
+				local font, size, flags = self.editBox:GetFont()
+				self.editBox:SetFont(font, mounts.globalDB.editorFontSize, flags)
+				dd:ddRefresh(level)
+			end
+
+			for i = 10, 16 do
+				info.text = i
+				info.value = i
+				info.checked = check
+				info.func = func
+				dd:ddAddButton(info, level)
+			end
+		end
+	end)
 
 	-- CODE
 	self.codeBtn = CreateFrame("BUTTON", nil, self, "BackdropTemplate")
@@ -55,13 +272,13 @@ codeEdit:HookScript("OnShow", function(self)
 		edgeSize = 16,
 		insets = { left = 4, right = 4, top = 4, bottom = 4 },
 	})
-	self.codeBtn:SetBackdropColor(.1, .1, .1)
+	self.codeBtn:SetBackdropColor(.05, .05, .05)
 	self.codeBtn:SetBackdropBorderColor(FRIENDS_GRAY_COLOR:GetRGB())
-	self.codeBtn:SetScript("OnClick", function(btn) btn:GetParent().editFrame:GetEditBox():SetFocus() end)
+	self.codeBtn:SetScript("OnClick", function(btn) btn:GetParent().editBox:SetFocus() end)
 
 	self.codeBtn.funcText = self.codeBtn:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	self.codeBtn.funcText:SetPoint("BOTTOMLEFT", self.codeBtn, "TOPLEFT", 2, 0)
-	self.codeBtn.funcText:SetText("function(env)")
+	self.codeBtn.funcText:SetText("function(state)")
 
 	self.codeBtn.endText = self.codeBtn:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	self.codeBtn.endText:SetPoint("TOPLEFT", self.codeBtn, "BOTTOMLEFT", 2, 0)
@@ -72,6 +289,58 @@ codeEdit:HookScript("OnShow", function(self)
 	self.scrollBar:SetPoint("BOTTOMRIGHT", self.codeBtn, -4, 4)
 
 	self.editFrame = CreateFrame("FRAME", nil, self, "ScrollingEditBoxTemplate")
+	self.editBox = self.editFrame:GetEditBox()
+
+	self.editBox:HookScript("OnKeyDown", function(editBox, key)
+		if InCombatLockdown() or not IsControlKeyDown() then return end
+		self.skipAddHistory = true
+
+		if key == "S" then
+			self.completeBtn:Click()
+		elseif key == "Z" then
+			if IsShiftKeyDown() then
+				self:setHistory(-1)
+			else
+				self:setHistory(1)
+			end
+		elseif key == "Y" then
+			self:setHistory(-1)
+		end
+	end)
+
+	self.editBox:HookScript("OnCursorChanged", function(editBox)
+		local text = self.line.GetText(editBox)
+		local pos = editBox:GetCursorPosition()
+		local next = -1
+		local line = 0
+		while next and pos >= next do
+			next = text:find("[\n]", next + 1)
+			line = line + 1
+		end
+		self.line:SetNumber(line)
+	end)
+
+	self.editBox:HookScript("OnTextChanged", function(editBox, userInput)
+		local str = editBox:GetText()
+		if not str or str:trim() == "" then
+			editBox:SetText("")
+		else
+			local func, err = macroFrame.loadSnippet(str)
+			self.errText:SetText(err or "")
+		end
+		if userInput then
+			if self.skipAddHistory == true then
+				self.skipAddHistory = false
+				return
+			end
+			self.updateDelay = .2
+			self:SetScript("OnUpdate", self.updateHistory)
+		end
+	end)
+
+	IndentationLib.enable(self.editBox, colorScheme, mounts.globalDB.editorTabSpaces)
+	local font, size, flags = self.editBox:GetFont()
+	self.editBox:SetFont(font, mounts.globalDB.editorFontSize, flags)
 
 	local anchorsToFrame = {
 		CreateAnchor("TOPLEFT", self.codeBtn, "TOPLEFT", 8, -8),
@@ -84,15 +353,29 @@ codeEdit:HookScript("OnShow", function(self)
 	local scrollBox = self.editFrame:GetScrollBox()
 	ScrollUtil.RegisterScrollBoxWithScrollBar(scrollBox, self.scrollBar)
 	ScrollUtil.AddManagedScrollBarVisibilityBehavior(scrollBox, self.scrollBar, anchorsToBar, anchorsToFrame)
+
+	-- ERROR TEXT
+	self.errText = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	self.errText:SetPoint("TOPLEFT", self.codeBtn, "BOTTOMLEFT", 40, -10)
+	self.errText:SetPoint("RIGHT", self.cancelBtn, "LEFt", -10, 0)
+	self.errText:SetPoint("BOTTOM", 0, 10)
+	self.errText:SetTextColor(1, 0, 0)
+	self.errText:SetJustifyH("LEFT")
+	self.errText:SetJustifyV("TOP")
 end)
 
 
 function codeEdit:open(name, code, cb)
 	self:Show()
+	self.history = {}
+	self.historyPos = 1
 	self.name = name
-	self.nameEdit:SetText(name)
-	self.editFrame:SetText(code)
 	self.cb = cb
+	self.nameEdit:SetText(name)
+	self.nameEdit:SetCursorPosition(0)
+	self.editBox:SetText(code)
+	self.editBox:SetCursorPosition(0)
+	IndentationLib.indentEditbox(self.editBox)
 end
 
 
@@ -103,5 +386,44 @@ end
 
 
 function codeEdit:codeFocus()
-	self.editFrame:GetEditBox():SetFocus()
+	self.editBox:SetFocus()
+end
+
+
+function codeEdit:updateHistory(elapsed)
+	self.updateDelay = self.updateDelay - elapsed
+	if self.updateDelay <= 0 then
+		self:SetScript("OnUpdate", nil)
+		self:addHistory()
+	end
+end
+
+
+function codeEdit:addHistory()
+	local cursorPos = self.editBox:GetCursorPosition()
+	local text = self.line.GetText(self.editBox)
+	text, cursorPos = IndentationLib.stripWowColorsWithPos(text, cursorPos)
+	if self.history[1] and self.history[1][1] == text then return end
+	-- remove history before position
+	for i = 2, self.historyPos do
+		table.remove(self.history, 1)
+	end
+	table.insert(self.history, 1, {text, cursorPos - 1})
+	-- remove overlimit (50)
+	for i = 51, #self.history do self.history[i] = nil end
+	self.historyPos = 1
+end
+
+
+function codeEdit:setHistory(delta)
+	if self.updateDelay > 0 then
+		self:SetScript("OnUpdate", nil)
+		self:addHistory()
+	end
+
+	if self.history[self.historyPos + delta] then
+		self.historyPos = self.historyPos + delta
+		self.line.SetText(self.editBox, self.history[self.historyPos][1])
+		self.editBox:SetCursorPosition(self.history[self.historyPos][2])
+	end
 end
