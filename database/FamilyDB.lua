@@ -184,6 +184,7 @@ ns.familyDB = {
 		["Rabbit"] = 2600,
 		["Rats"] = 2601,
 		["Mudnose"] = 2602,
+		["Mice"] = 2603,
 	},
 	["Rylaks"] = 2700,
 	["Ungulates"] = {
@@ -438,6 +439,7 @@ ns.familyDBIcons = {
 	},
 	["Rodent"] = {
 		[0] = 1450569,
+		["Mice"] = 3016707,
 		["Mudnose"] = 5768106,
 		["Rabbit"] = 4381911,
 		["Rats"] = 1450569,
