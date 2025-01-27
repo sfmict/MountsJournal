@@ -1,6 +1,6 @@
 local addon, ns = ...
 local L, macroFrame = ns.L, ns.macroFrame
-local _G, xpcall = _G, xpcall
+local _G, loadstring, setfenv, pcall = _G, loadstring, setfenv, pcall
 
 
 local blockedFuncs = {

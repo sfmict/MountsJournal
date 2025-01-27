@@ -13,6 +13,7 @@ codeEdit:SetScript("OnShow", function(self)
 	self:SetPoint("TOPLEFT", ns.journal.bgFrame, 0, -18)
 	self:SetPoint("BOTTOMRIGHT", ns.snippets)
 	self:SetBackdropColor(.1, .1, .1, .9)
+	local font = "Interface\\Addons\\MountsJournal\\Fonts\\FiraCode-Regular.ttf"
 
 	self:SetScript("OnShow", escOnShow)
 	self:HookScript("OnHide", function(self)
@@ -82,15 +83,18 @@ codeEdit:SetScript("OnShow", function(self)
 			["String"] = "|c00EC7600"
 		},
 		["Twilight"] = {
-			["Table"] = "|c00ffffff",
-			["Arithmetic"] = "|c00f92672",
-			["Relational"] = "|cffCDA869",
-			["Logical"] = "|cffCDA869",
-			["Special"] = "|cff66d9ef",
-			["Keyword"] = "|cffCDA869",
-			["Comment"] = "|cff605A60",
-			["Number"] = "|cffCF6137",
-			["String"] = "|cff829D61",
+			["Table"] = "|c00FFFFFF",
+			["Arithmetic"] = "|c00CDA869",
+			["Relational"] = "|c00CDA869",
+			["Logical"] = "|c00CDA869",
+			["Special"] = "|c00FFFFFF",
+			["Keyword"] = "|c00CDA869",
+			["Comment"] = "|c00605A60",
+			["Number"] = "|c00CF6137",
+			["String"] = "|c008F9D6A",
+			["Global"] = "|c00F9EE98",
+			["Orange"] = "|c00CF6137",
+			["Text"] = CreateColorFromHexString("FF92a7cd"),
 		},
 	}
 
@@ -131,8 +135,21 @@ codeEdit:SetScript("OnShow", function(self)
 		colorScheme["and"] = theme["Logical"]
 		colorScheme["or"] = theme["Logical"]
 		colorScheme["not"] = theme["Logical"]
+
+		colorScheme["math"] = theme["Orange"] or theme["Keyword"]
+		colorScheme["true"] = theme["Orange"] or theme["Keyword"]
+		colorScheme["false"] = theme["Orange"] or theme["Keyword"]
+		colorScheme["nil"] = theme["Orange"] or theme["Keyword"]
+		colorScheme["table"] = theme["Orange"] or theme["Keyword"]
+		colorScheme["string"] = theme["Orange"] or theme["Keyword"]
+
+		colorScheme["local"] = theme["Global"] or theme["Keyword"]
+		colorScheme["pairs"] = theme["Global"] or theme["Keyword"]
+		colorScheme["iparis"] = theme["Global"] or theme["Keyword"]
+		colorScheme["next"] = theme["Global"] or theme["Keyword"]
+
+		self.editBox:SetTextColor((theme["Text"] or HIGHLIGHT_FONT_COLOR):GetRGB())
 	end
-	setScheme()
 
 	-- NAME
 	self.nameEdit = CreateFrame("EditBox", nil, self, "InputBoxTemplate")
@@ -168,31 +185,11 @@ codeEdit:SetScript("OnShow", function(self)
 		end
 	end)
 
-	-- CONTROL BTNS
-	self.cancelBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
-	self.cancelBtn:SetPoint("BOTTOMRIGHT", -35, 20)
-	self.cancelBtn:SetText(CANCEL)
-	self.cancelBtn:SetScript("OnClick", function(btn)
-		btn:GetParent():Hide()
-		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	end)
-
-	self.completeBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
-	self.completeBtn:SetPoint("RIGHT", self.cancelBtn, "LEFt", -20, 0)
-	self.completeBtn:SetText(COMPLETE)
-	self.completeBtn:SetScript("OnClick", function(btn)
-		local p = btn:GetParent()
-		if p.cb(p.name, p.nameEdit:GetText():trim(), p.editBox:GetText():trim()) then p:Hide() end
-	end)
-
-	local width = math.max(self.cancelBtn:GetFontString():GetStringWidth(), self.completeBtn:GetFontString():GetStringWidth()) + 40
-	self.cancelBtn:SetWidth(width)
-	self.completeBtn:SetWidth(width)
-
 	-- SETTINGS
 	self.settings = LibStub("LibSFDropDown-1.5"):CreateStretchButtonOriginal(self, 150, 22)
 	self.settings:SetPoint("TOPRIGHT", -35, -30)
 	self.settings:SetText(SETTINGS)
+	self.settings:ddSetDisplayMode(addon)
 
 	self.settings:ddSetInitFunc(function(dd, level, value)
 		local info = {}
@@ -247,8 +244,7 @@ codeEdit:SetScript("OnShow", function(self)
 			local check = function(btn) return btn.value == mounts.globalDB.editorFontSize end
 			local func = function(btn)
 				mounts.globalDB.editorFontSize = btn.value
-				local font, size, flags = self.editBox:GetFont()
-				self.editBox:SetFont(font, mounts.globalDB.editorFontSize, flags)
+				self.editBox:SetFont(font, mounts.globalDB.editorFontSize, "")
 				dd:ddRefresh(level)
 			end
 
@@ -261,6 +257,27 @@ codeEdit:SetScript("OnShow", function(self)
 			end
 		end
 	end)
+
+	-- CONTROL BTNS
+	self.cancelBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
+	self.cancelBtn:SetPoint("BOTTOMRIGHT", -35, 20)
+	self.cancelBtn:SetText(CANCEL)
+	self.cancelBtn:SetScript("OnClick", function(btn)
+		btn:GetParent():Hide()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end)
+
+	self.completeBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
+	self.completeBtn:SetPoint("RIGHT", self.cancelBtn, "LEFt", -20, 0)
+	self.completeBtn:SetText(COMPLETE)
+	self.completeBtn:SetScript("OnClick", function(btn)
+		local p = btn:GetParent()
+		if p.cb(p.name, p.nameEdit:GetText():trim(), p.editBox:GetText():trim()) then p:Hide() end
+	end)
+
+	local width = math.max(self.cancelBtn:GetFontString():GetStringWidth(), self.completeBtn:GetFontString():GetStringWidth()) + 40
+	self.cancelBtn:SetWidth(width)
+	self.completeBtn:SetWidth(width)
 
 	-- CODE
 	self.codeBtn = CreateFrame("BUTTON", nil, self, "BackdropTemplate")
@@ -342,9 +359,9 @@ codeEdit:SetScript("OnShow", function(self)
 		end
 	end)
 
+	setScheme()
 	IndentationLib.enable(self.editBox, colorScheme, mounts.globalDB.editorTabSpaces)
-	local font, size, flags = self.editBox:GetFont()
-	self.editBox:SetFont(font, mounts.globalDB.editorFontSize, flags)
+	self.editBox:SetFont(font, mounts.globalDB.editorFontSize, "")
 
 	local anchorsToFrame = {
 		CreateAnchor("TOPLEFT", self.codeBtn, "TOPLEFT", 8, -8),
@@ -404,10 +421,11 @@ end
 
 
 function codeEdit:addHistory()
-	local cursorPos = self.editBox:GetCursorPosition()
+	local cursorPos, success = self.editBox:GetCursorPosition()
 	local text = self.line.GetText(self.editBox):trim()
-	text, cursorPos = IndentationLib.stripWowColorsWithPos(text, cursorPos)
-	if self.history[self.historyPos] and self.history[self.historyPos][1] == text then return end
+
+	success, text, cursorPos = pcall(IndentationLib.stripWowColorsWithPos, text, cursorPos)
+	if not success or self.history[self.historyPos] and self.history[self.historyPos][1] == text then return end
 	-- remove history before position
 	for i = 2, self.historyPos do table.remove(self.history, 1) end
 	-- insert new

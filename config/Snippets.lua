@@ -11,7 +11,7 @@ snippets:SetScript("OnShow", function(self)
 
 	self:SetWidth(300)
 	self:SetPoint("TOPLEFT", ns.journal.bgFrame, "TOPRIGHT", -4, 0)
-	self:SetPoint("BOTTOMLEFT", ns.journal.bgFrame, "BOTTOMRIGHT", -5, 0)
+	self:SetPoint("BOTTOMLEFT", ns.journal.bgFrame, "BOTTOMRIGHT", -4, 0)
 	self:EnableMouse(true)
 	self:SetTitle(L["Code Snippets"])
 
@@ -50,7 +50,7 @@ snippets:SetScript("OnShow", function(self)
 	self.addSnipBtn:SetPoint("RIGHT", -3, 0)
 	self.addSnipBtn:SetText(L["Add Snippet"])
 	self.addSnipBtn:SetScript("OnClick", function()
-		codeEdit:open(self.newName:format(self:getCount() + 1), self.defSnippet, function(_, ...)
+		codeEdit:open(self:getNextName(), self.defSnippet, function(_, ...)
 			return self:add(...)
 		end)
 		codeEdit:nameFocus()
@@ -113,23 +113,26 @@ snippets:SetScript("OnShow", function(self)
 end)
 
 
-function snippets:getCount()
-	local i = 0
-	for n in next, self.snippets do i = i + 1 end
-	return i
+function snippets:getNextName()
+	local i = 1
+	while true do
+		local name = self.newName:format(i)
+		if not self.snippets[name] then return name end
+		i = i + 1
+	end
 end
 
 
 do
 	local function updateSpaces(s)
 		local str = "\n"
-		for i = 1, #s:gsub("%s*\n", "") / ns.mounts.globalDB.editorTabSpaces do
+		for i = 1, #s:gsub(" *\n", "") / ns.mounts.globalDB.editorTabSpaces do
 			str = str.." "
 		end
 		return str
 	end
 	local function minimize(code)
-		return code:gsub("%s*\n%s*", updateSpaces)
+		return code:gsub(" *\n *", updateSpaces)
 	end
 
 
