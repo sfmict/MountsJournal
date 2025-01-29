@@ -183,16 +183,6 @@ rules:SetScript("OnShow", function(self)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
 
-	-- SEARCH
-	self.searchBox = CreateFrame("EditBox", nil, self, "SearchBoxTemplate")
-	self.searchBox:SetPoint("LEFT", self.addRuleBtn, "RIGHT", 15, 0)
-	self.searchBox:SetSize(200, 19)
-	self.searchBox:SetMaxLetters(40)
-	self.searchBox:SetScript("OnTextChanged", function(searchBox, userInput)
-		SearchBoxTemplate_OnTextChanged(searchBox)
-		self:updateFilters()
-	end)
-
 	-- RESET BUTTON
 	self.resetRulesBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
 	self.resetRulesBtn:SetPoint("TOP", self.addRuleBtn)
@@ -202,6 +192,17 @@ rules:SetScript("OnShow", function(self)
 	self.resetRulesBtn:SetScript("OnClick", function()
 		self:resetRules()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end)
+
+	-- SEARCH
+	self.searchBox = CreateFrame("EditBox", nil, self, "SearchBoxTemplate")
+	self.searchBox:SetPoint("LEFT", self.addRuleBtn, "RIGHT", 15, 0)
+	self.searchBox:SetPoint("RIGHT", self.resetRulesBtn, "LEFT", -12, 0)
+	self.searchBox:SetHeight(19)
+	self.searchBox:SetMaxLetters(40)
+	self.searchBox:SetScript("OnTextChanged", function(searchBox, userInput)
+		SearchBoxTemplate_OnTextChanged(searchBox)
+		self:updateFilters()
 	end)
 
 	-- RULE CLICKS

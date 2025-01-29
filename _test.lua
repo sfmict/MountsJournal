@@ -1,8 +1,52 @@
 local addon, ns = ...
 local L, mounts, config, journal = ns.L, ns.mounts, ns.config, ns.journal
 mounts.mountsDB = ns.mountsDB
+mounts.familyDB = ns.familyDB
+mounts.additionalMounts = ns.additionalMounts
 local test = CreateFrame("Frame")
 test:RegisterEvent("PLAYER_ENTERING_WORLD")
+
+
+-- mjclick button
+-- local button = CreateFrame("BUTTON", nil, nil, "SecureActionButtonTemplate")
+-- button:SetAttribute("type", "macro")
+-- button:SetAttribute("macrotext", "/run print(2)")
+
+-- local AB = OPie.ActionBook:compatible(2, 45)
+-- local actionMap = {}
+
+-- local function btnHint(n, ...)
+-- 	local name = ("%s %d"):format(SUMMONS, n == ns.util.secureButtonNameMount and 1 or 2)
+-- 	return true, 1, 123123, name, 0, 0, 0
+-- end
+
+
+-- local function createMJClick(name)
+-- 	local function preClick()
+-- 		ns.mounts:setFlags()
+-- 		AB:UpdateActionSlot(actionMap[name], "macrotext", ns.macroFrame.checkRules[1](ns.macroFrame, "LeftButton"))
+-- 	end
+
+-- 	if not actionMap[name] then
+-- 		-- actionMap[name] = AB:CreateActionSlot(btnHint, name, "attribute", "type", "click", "clickbutton", button)
+-- 		actionMap[name] = AB:CreateActionSlot(btnHint, name, "macrotext", "")
+-- 		fprint("123123123", name)
+-- 		AB:AddObserver("internal.collection.preopen", preClick, actionMap[name])
+-- 	end
+
+-- 	return actionMap[name]
+-- end
+
+-- local function describeMJClick(name)
+-- 	return "MJClick", ("%s %d"):format(SUMMONS, name == ns.util.secureButtonNameMount and 1 or 2), 123123
+-- end
+
+-- AB:RegisterActionType("MJClick", createMJClick, describeMJClick, 1)
+
+-- AB:AugmentCategory(addon, function(_, add)
+-- 	add("MJClick", ns.util.secureButtonNameMount)
+-- 	add("MJClick", ns.util.secureButtonNameSecondMount)
+-- end)
 
 
 local ignoreEvents = {
@@ -172,12 +216,42 @@ function test:PLAYER_ENTERING_WORLD()
 	-- end
 
 	-- JOURNAL OPEN
-	-- if not C_AddOns.IsAddOnLoaded("Blizzard_Collections") then
-	-- 	C_AddOns.LoadAddOn("Blizzard_Collections")
-	-- end
-	-- ShowUIPanel(CollectionsJournal)
+	--local function setTab(tab)
+	--	PlaySound(SOUNDKIT.UI_TOYBOX_TABS)
+	--	PanelTemplates_SetTab(journal.bgFrame, tab)
+
+	--	journal.bgFrame.settingsBackground:SetShown(tab == 1)
+	--	journal.achiev:SetShown(tab ~= 1)
+	--	journal.bgFrame.OpenDynamicFlightSkillTreeButton:SetShown(tab ~= 1 and DragonridingUtil.IsDragonridingUnlocked())
+	--	journal.navBar:SetShown(tab == 2)
+	--	journal.filtersPanel:SetShown(tab ~= 1)
+	--	journal.leftInset:SetShown(tab ~= 1)
+	--	journal.bgFrame.rightInset:SetShown(tab ~= 1)
+	--	journal.mountDisplay:SetShown(tab == 3)
+	--	journal.worldMap:SetShown(tab == 2)
+	--	journal.mapSettings:SetShown(tab == 2)
+	--	journal.bgFrame.profilesMenu:SetShown(tab ~= 1)
+	--	journal.mountSpecial:SetShown(tab ~= 1)
+	--	journal.bgFrame.summonPanelSettings:SetShown(tab ~= 1 and journal.summonPanel:IsShown())
+
+	--	if tab == 2 then
+	--		journal.filtersPanel:SetPoint("TOPLEFT", journal.navBar, "BOTTOMLEFT", -1, -1)
+	--	else
+	--		journal.filtersPanel:SetPoint("TOPLEFT", 4, -60)
+	--	end
+	--end
+
+	 --if not C_AddOns.IsAddOnLoaded("Blizzard_Collections") then
+	 --	C_AddOns.LoadAddOn("Blizzard_Collections")
+	 --end
+	 --ShowUIPanel(CollectionsJournal)
 	-- journal.bgFrame.profilesMenu:Click()
-	-- CollectionsJournal_SetTab(CollectionsJournal, COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS) -- DISABLE
+	 --CollectionsJournal_SetTab(CollectionsJournal, COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS) -- DISABLE
+	 --setTab(1) -- journal tab
+	 --journal.bgFrame.settingsBackground.Tabs[3]:Click() -- setting tab
+	 --ns.ruleConfig.snippetToggle:Click() -- snippets
+	 --ns.snippets.addSnipBtn:Click() -- codeEdit
+
 	-- journal.mountDisplay.info.petSelectionBtn:Click()
 
 	-- local sbg = journal.bgFrame.settingsBackground

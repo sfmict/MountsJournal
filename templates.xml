@@ -3531,7 +3531,7 @@
 	</Frame>
 
 	<Button name="MJSnippetListPanelTemplate" inherits="BackdropTemplate,MJHighlightAnimationTemplate" virtual="true">
-		<Size y="70"/>
+		<Size y="72"/>
 		<Layers>
 			<Layer level="BACKGROUND" textureSubLevel="2">
 				<Texture parentKey="codeBG">
