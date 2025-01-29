@@ -62,7 +62,7 @@ aboutConfig:SetScript("OnShow", function(self)
 		{"deDE", "SlayerEGT, EinPallux , Flammenengel92, scienetic, fredundaunted"},
 		{"esMX", "Pedrorco"},
 		{"frFR", "6urvan, EinPallux, macumbafeh, Zazou, Braincell1980"},
-		{"ptBR", "LutzPS"},
+		{"ptBR", "LutzPS, Thayron147"},
 		{"zhCN", "萌丶汉丶纸, LvWind"},
 		{"zhTW", "BNS333, Bright009"},
 	}

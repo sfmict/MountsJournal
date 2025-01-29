@@ -355,6 +355,7 @@ L["Are you sure you want to delete tag %s?"] = "¿Está seguro de que desea elim
 -- L["Mechanical Steeds"] = ""
 -- L["Mechanostriders"] = ""
 -- L["Mecha-suits"] = ""
+-- L["Mice"] = ""
 -- L["Mollusc"] = ""
 -- L["Moose"] = ""
 -- L["Moth"] = ""
