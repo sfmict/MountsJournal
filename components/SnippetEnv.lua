@@ -99,9 +99,7 @@ do
 				local func, err = loadSnippet(macroFrame.snippets[k])
 				if err then
 					print(addon, k, err)
-					return function() end
-				end
-				if func then
+				elseif func then
 					t[k] = func
 					return func
 				end
