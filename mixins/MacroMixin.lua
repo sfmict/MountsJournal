@@ -242,14 +242,16 @@ function macroFrame:setRuleFuncs()
 	for i = 1, #self.currentRuleSet do
 		local rules = self.currentRuleSet[i]
 		local keys = {}
-		local func = [[
+		local func = ([[
 local wipe = wipe
 return function(self, button, profileLoad, noMacro)
+	self.sFlags.forceModifier = self.currentRuleSet[%d].altMode
+	self.mounts:setFlags()
 	self.mounts:resetMountsList()
 	self.preUseMacro = nil
 	self.useMount = nil
 	wipe(self.state)
-		]]
+		]]):format(i)
 
 		for j = 1, #rules do
 			local rule = rules[j]
@@ -649,10 +651,9 @@ end
 
 
 function MJMacroMixin:preClick(button, down)
-	self.mounts.sFlags.forceModifier = self.forceModifier
+	self.mounts.sFlags.summonID = self.id
 	self.notUsable = InCombatLockdown() or down ~= GetCVarBool("ActionButtonUseKeyDown")
 	if self.notUsable then return end
-	self.mounts:setFlags()
 	self:SetAttribute("macrotext", macroFrame.checkRules[self.id](macroFrame, button))
 end
 

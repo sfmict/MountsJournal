@@ -164,6 +164,9 @@ function mounts:checkRuleSet(ruleSet)
 	for i = 1, 2 do
 		ruleSet[i] = ruleSet[i] or {self:getDefaultRule()}
 	end
+	if ruleSet[2].altMode == nil then
+		ruleSet[2].altMode = true
+	end
 end
 
 
@@ -929,7 +932,8 @@ function mounts:init()
 	local function summon(msg)
 		if msg ~= "notNilModifier" then
 			if not SecureCmdOptionParse(msg) then return end
-			flags.forceModifier = nil
+			flags.forceModifier = false
+			flags.summonID = 1
 		end
 		self:setFlags()
 		if flags.inVehicle then
@@ -937,10 +941,9 @@ function mounts:init()
 		elseif flags.isMounted then
 			Dismount()
 		else
-			local ruleID = flags.forceModifier and 2 or 1
 			local profileLoad = true
 			local noMacro = true
-			local action = ns.macroFrame.checkRules[ruleID](ns.macroFrame, "LeftButton", profileLoad, noMacro)
+			local action = ns.macroFrame.checkRules[flags.summonID](ns.macroFrame, "LeftButton", profileLoad, noMacro)
 			if action == true then return end
 			if ns.macroFrame.useMount then
 				self:summon(ns.macroFrame.useMount)

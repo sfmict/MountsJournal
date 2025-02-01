@@ -19,7 +19,6 @@ mounts:on("ADDON_INIT", function(self)
 	config.bindSummon2Key1 = button1
 	config.bindSummon2Key2 = button2
 	secure.id = 2
-	secure.forceModifier = true
 
 	self:event("CREATE_BUTTONS"):off("CREATE_BUTTONS")
 end)

@@ -155,6 +155,7 @@ L["RULES_TITLE"] = "Rules for mounting. The rules are checked in order, and the 
 L["Add Rule"] = "Add Rule"
 L["Reset Rules"] = "Reset Rules"
 L["Remove Rule %d"] = "Remove Rule %d"
+L["Alternative Mode"] = "Alternative Mode"
 L["NOT_CONDITION"] = "Not"
 L["Conditions"] = "Conditions"
 L["Action"] = "Action"

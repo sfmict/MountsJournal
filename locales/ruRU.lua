@@ -154,6 +154,7 @@ L["RULES_TITLE"] = "Правила призыва маунтов. Правила
 L["Add Rule"] = "Добавить правило"
 L["Reset Rules"] = "Сбросить правила"
 L["Remove Rule %d"] = "Удалить правило %d"
+L["Alternative Mode"] = "Альтернативный режимм"
 L["NOT_CONDITION"] = "Не"
 L["Conditions"] = "Условия"
 L["Action"] = "Действие"
