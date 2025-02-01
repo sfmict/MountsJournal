@@ -138,11 +138,12 @@ macroFrame:on("ADDON_INIT", function(self)
 			-- 783 - travel form
 			-- 24858 - moonkin form
 			-- 210053 - mount form
+			local spellID = self.getFormSpellID()
 			if self.classConfig.useLastDruidForm then
-				local spellID = self.getFormSpellID()
-
 				if self.classConfig.useDruidFormSpecialization then
 					self.charMacrosConfig.lastDruidFormSpellID = self.specializationSpellIDs[self.GetSpecialization()]
+				elseif not self.charMacrosConfig.lastDruidFormSpellID then
+					self.charMacrosConfig.lastDruidFormSpellID = spellID
 				end
 
 				if self.charMacrosConfig.lastDruidFormSpellID
@@ -156,13 +157,17 @@ macroFrame:on("ADDON_INIT", function(self)
 				end
 
 				if not self.classConfig.useDruidFormSpecialization then
-					if spellID and spellID ~= 783 then
-						self.charMacrosConfig.lastDruidFormSpellID = spellID
-						self.lastDruidFormTime = GetTime()
-					elseif not spellID and GetTime() - (self.lastDruidFormTime or 0) > 1 then
+					if spellID then
+						if spellID ~= 783 and spellID ~= 210053 then
+							self.charMacrosConfig.lastDruidFormSpellID = spellID
+							self.lastDruidFormTime = GetTime()
+						end
+					elseif GetTime() - (self.lastDruidFormTime or 0) > 1 then
 						self.charMacrosConfig.lastDruidFormSpellID = nil
 					end
 				end
+			elseif spellID == 783 or spellID == 210053 then
+				return "/cast "..self:getSpellName(spellID)
 			end
 		]]
 		classOptionMacro = classOptionMacro..self.classDismount
