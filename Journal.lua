@@ -288,6 +288,7 @@ function journal:init()
 
 		self.bgFrame.settingsBackground:SetShown(tab == 1)
 		self.achiev:SetShown(tab ~= 1)
+		self.bgFrame.targetMount:SetShown(tab ~= 1)
 		self.bgFrame.OpenDynamicFlightSkillTreeButton:SetShown(tab ~= 1 and DragonridingUtil.IsDragonridingUnlocked())
 		self.navBar:SetShown(tab == 2)
 		self.filtersPanel:SetShown(tab ~= 1)
