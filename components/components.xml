@@ -11,6 +11,7 @@
 	<Script file="AdditionalMounts.lua"/>
 	<Script file="MountListButtonInit.lua"/>
 	<Script file="SummonPanel.lua"/>
+	<Script file="TargetMount.lua"/>
 	<Script file="Conditions.lua"/>
 	<Script file="Actions.lua"/>
 	<Script file="RuleUtils.lua"/>

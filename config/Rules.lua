@@ -173,6 +173,16 @@ rules:SetScript("OnShow", function(self)
 		end
 	end)
 
+	-- ALTERNATIVE MODE
+	self.altMode = CreateFrame("CheckButton", nil, self, "MJCheckButtonTemplate")
+	self.altMode:SetPoint("TOPLEFT", self.summons, "BOTTOMLEFT", 0, -5)
+	self.altMode.Text:SetText(L["Alternative Mode"])
+	self.altMode.tooltipText = L["Alternative Mode"]
+	self.altMode.tooltipRequirement = L["SecondMountTooltipDescription"]
+	self.altMode:HookScript("OnClick", function(btn)
+		self.rules.altMode = btn:GetChecked()
+	end)
+
 	-- ADD RULE BUTTON
 	self.addRuleBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
 	self.addRuleBtn:SetPoint("LEFT", self.summons, "RIGHT", 10, 0)
@@ -253,7 +263,7 @@ rules:SetScript("OnShow", function(self)
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.scrollBar, self.view)
 
 	local scrollBoxAnchorsWithBar = {
-		CreateAnchor("TOPLEFT", self.summons, "BOTTOMLEFT", 0, -20),
+		CreateAnchor("TOPLEFT", self.altMode, "BOTTOMLEFT", 0, -5),
 		CreateAnchor("BOTTOMRIGHT", -42, 20),
 	}
 	local scrollBoxAnchorsWithoutBar = {
@@ -324,6 +334,7 @@ function rules:setSummonRules(n)
 	self.rules = macroFrame.currentRuleSet[n]
 	self.summons:ddSetSelectedValue(n)
 	self.summons:ddSetSelectedText(("%s %d"):format(SUMMONS, n), mounts.config["summon"..n.."Icon"])
+	self.altMode:SetChecked(self.rules.altMode)
 	self:updateFilters()
 end
 

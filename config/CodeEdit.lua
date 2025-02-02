@@ -344,7 +344,7 @@ codeEdit:SetScript("OnShow", function(self)
 	self.editBox:HookScript("OnTextChanged", function(editBox, userInput)
 		local str = editBox:GetText()
 		if not str or str:trim() == "" then
-			editBox:SetText("")
+			self.errText:SetText("")
 		else
 			local func, err = macroFrame.loadSnippet(str)
 			self.errText:SetText(err or "")

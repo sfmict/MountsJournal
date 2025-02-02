@@ -218,6 +218,26 @@
 				</Scripts>
 			</Button>
 
+			<Button parentKey="targetMount" inherits="MJDynamicFlightFlyoutButtonTemplate" hidden="true">
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.DynamicFlightModeButton" relativePoint="LEFT" x="-30"/>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="icon" file="Interface/Icons/MountJournalPortrait" setAllPoints="true"/>
+					</Layer>
+					<Layer level="OVERLAY">
+						<Texture parentKey="checkedTexture" atlas="UI-HUD-ActionBar-IconFrame-Down" alphaMode="ADD" hidden="true">
+							<Size x="34" y="34"/>
+							<Anchors>
+								<Anchor point="CENTER"/>
+							</Anchors>
+							<Color r=".2" g=".5" b=".2"/>
+						</Texture>
+					</Layer>
+				</Layers>
+			</Button>
+
 			<Frame parentKey="navBar" clipChildren="true" inherits="NavBarTemplate" mixin="MJNavBarMixin" hidden="true">
 				<Size x="600" y="32"/>
 				<Anchors>

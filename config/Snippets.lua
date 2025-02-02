@@ -166,6 +166,7 @@ do
 					end
 				end
 			end
+			ns.macroFrame:setRuleFuncs()
 		end
 		ns.macroFrame:resetSnippet(oldName)
 		self.snippets[name] = minimize(code)
