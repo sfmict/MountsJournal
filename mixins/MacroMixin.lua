@@ -605,7 +605,7 @@ function macroFrame:getMacro(noMacro)
 
 			if additionMount then
 				macro = self:addLine(macro, additionMount.macro)
-			elseif not self.useMount then
+			elseif not (self.useMount or self.sFlags.targetMount) then
 				self.useMount = true
 			end
 		end

@@ -63,12 +63,12 @@ local exec_env = setmetatable({}, {
 	end,
 	__metatable = false,
 })
-local cashe = setmetatable({}, {__mode = "v"})
+local cache = setmetatable({}, {__mode = "v"})
 
 
 local function loadSnippet(str)
-	if cashe[str] then
-		return cashe[str]
+	if cache[str] then
+		return cache[str]
 	end
 
 	local loadedFunc, err = loadstring("return function(state) "..str.."\nend")
@@ -78,7 +78,7 @@ local function loadSnippet(str)
 		setfenv(loadedFunc, exec_env)
 		local success, func = pcall(loadedFunc)
 		if success then
-			cashe[str] = func
+			cache[str] = func
 			return func
 		end
 	end

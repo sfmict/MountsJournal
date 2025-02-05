@@ -73,11 +73,15 @@ ns.journal:on("MODULES_INIT", function(journal)
 	tm:SetScript("OnLeave", GameTooltip_Hide)
 
 	tm:SetScript("OnClick", function(self, button)
-		if self.mountID then journal:setSelectedMount(self.mountID) end
-
 		if button == "RightButton" then
 			ns.mounts.config.autoTargetMount = not ns.mounts.config.autoTargetMount
 			self.checkedTexture:SetShown(ns.mounts.config.autoTargetMount)
+
+			if self.mountID and ns.mounts.config.autoTargetMount then
+				journal:setSelectedMount(self.mountID)
+			end
+		elseif self.mountID then
+			journal:setSelectedMount(self.mountID)
 		end
 
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
