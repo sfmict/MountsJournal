@@ -254,6 +254,7 @@ return function(self, button, profileLoad, noMacro)
 	self.mounts:resetMountsList()
 	self.preUseMacro = nil
 	self.useMount = nil
+	self.summonMType = nil
 	wipe(self.state)
 		]]
 
@@ -594,7 +595,11 @@ function macroFrame:getMacro(noMacro)
 			end
 			self.lastUseTime = GetTime()
 		else
-			self.mounts:setSummonMount(true)
+			if self.summonMType then
+				self.mounts:setSummonMountByType(self.summonMType, true)
+			else
+				self.mounts:setSummonMount(true)
+			end
 
 			local additionMount
 			if self.sFlags.targetMount then

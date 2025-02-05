@@ -3311,7 +3311,7 @@
 						<Anchor point="TOPRIGHT" relativeKey="$parent.cond2" relativePoint="BOTTOMRIGHT" y="-1"/>
 					</Anchors>
 				</FontString>
-				<FontString parentKey="action" inherits="GameFontNormal" justifyH="LEFT" maxLines="1">
+				<FontString parentKey="action" inherits="GameFontNormal" justifyH="LEFT" maxLines="3">
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="CENTER" x="-11"/>
 						<Anchor point="RIGHT" x="-62"/>

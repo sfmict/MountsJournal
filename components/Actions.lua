@@ -74,6 +74,89 @@ end
 
 
 ---------------------------------------------------
+-- rmountt RANDOM MOUNT OF SELECTED TYPE
+actions.rmountt = {}
+actions.rmountt.text = L["Random Mount of Selected Type"]
+
+function actions.rmountt:getValueText(value)
+	local mType, profile = (":"):split(value, 2)
+	if profile == "0" then
+		profile = L["Selected profile"]
+	elseif profile == "1" then
+		profile = DEFAULT
+	end
+	return ("%s - %s"):format(profile, L["MOUNT_TYPE_"..mType])
+end
+
+function actions.rmountt:getValueList(value, func)
+	local function getTList(profile)
+		local tList = {}
+		for i = 1, 3 do
+			local v = i..":"..profile
+			tList[i] = {
+				text = L["MOUNT_TYPE_"..i],
+				value = v,
+				func = func,
+				checked = v == value,
+			}
+		end
+		return tList
+	end
+
+	local list = {}
+	list[1] = {
+		notCheckable = true,
+		hasArrow = true,
+		text = L["Selected profile"],
+		value = getTList(0)
+	}
+	list[2] = {
+		notCheckable = true,
+		hasArrow = true,
+		text = DEFAULT,
+		value = getTList(1)
+	}
+
+	local profiles = {}
+	for k in next, mounts.profiles do profiles[#profiles + 1] = k end
+	sort(profiles, function(a, b) return strcmputf8i(a, b) < 0 end)
+
+	for i = 1, #profiles do
+		local profile = profiles[i]
+		list[#list + 1] = {
+			notCheckable = true,
+			hasArrow = true,
+			text = profile,
+			value = getTList(profile),
+		}
+	end
+
+	return list
+end
+
+function actions.rmountt:getFuncText(value)
+	local mType, profile = (":"):split(value, 2)
+
+	if mType == "1" then
+		mType = "fly"
+	elseif mType == "2" then
+		mType = "ground"
+	else
+		mType = "swimming"
+	end
+
+	local str = ("profileLoad = 1\nself.summonMType = '%s'\n"):format(mType)
+	if profile == "0" then
+		return str.."self.mounts:setMountsList(self.mounts.sp)"
+	elseif profile == "1" then
+		return str.."self.mounts:setMountsList(self.mounts.defProfile)"
+	else
+		return ("%sself.mounts:setMountsList(self.mounts.profiles['%s'])"):format(str, profile:gsub("[\\']", "\\%1"))
+	end
+end
+
+
+---------------------------------------------------
 -- rmountr RANDOM MOUNT BY RARITY
 actions.rmountr = {}
 actions.rmountr.text = L["Random Mount by Rarity"]
@@ -100,6 +183,38 @@ function actions.rmountr:getFuncText(value)
 			self.mounts:setMountsList(profile, self.mounts.rarityWeight)
 			profileLoad = 1
 		]]):format(value:gsub("[\\']", "\\%1"))
+	end
+end
+
+
+---------------------------------------------------
+-- rmountt RANDOM MOUNT OF SELECTED TYPE BY RARITY
+actions.rmounttr = {}
+actions.rmounttr.text = L["Random Mount of Selected Type by Rarity"]
+actions.rmounttr.description = L["The lower the rarity, the higher the chance"]
+
+actions.rmounttr.getValueText = actions.rmountt.getValueText
+
+actions.rmounttr.getValueList = actions.rmountt.getValueList
+
+function actions.rmounttr:getFuncText(value)
+	local mType, profile = (":"):split(value, 2)
+
+	if mType == "1" then
+		mType = "fly"
+	elseif mType == "2" then
+		mType = "ground"
+	else
+		mType = "swimming"
+	end
+
+	local str = ("profileLoad = 1\nself.summonMType = '%s'\n"):format(mType)
+	if profile == "0" then
+		return str.."self.mounts:setMountsList(self.mounts.sp, self.mounts.rarityWeight)"
+	elseif profile == "1" then
+		return str.."self.mounts:setMountsList(self.mounts.defProfile, self.mounts.rarityWeight)"
+	else
+		return ("%sself.mounts:setMountsList(self.mounts.profiles['%s'], self.mounts.rarityWeight)"):format(str, profile:gsub("[\\']", "\\%1"))
 	end
 end
 
@@ -295,7 +410,9 @@ function actions:getMenuList(value, func)
 	local list = {}
 	local types = {
 		"rmount",
+		"rmountt",
 		"rmountr",
+		"rmounttr",
 		"mount",
 		"dmount",
 		"spell",
