@@ -971,7 +971,11 @@ function mounts:init()
 			if ns.macroFrame.useMount then
 				self:summon(ns.macroFrame.useMount)
 			else
-				self:setSummonMount()
+				if ns.macroFrame.summonMType then
+					self:setSummonMountByType(ns.macroFrame.summonMType)
+				else
+					self:setSummonMount()
+				end
 				self:summon()
 			end
 		end

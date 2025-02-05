@@ -84,6 +84,8 @@ function actions.rmountt:getValueText(value)
 		profile = L["Selected profile"]
 	elseif profile == "1" then
 		profile = DEFAULT
+	elseif not mounts.profiles[profile] then
+		profile = RED_FONT_COLOR:WrapTextInColorCode(profile)
 	end
 	return ("%s - %s"):format(profile, L["MOUNT_TYPE_"..mType])
 end

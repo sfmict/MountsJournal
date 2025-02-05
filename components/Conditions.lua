@@ -1370,7 +1370,9 @@ end
 function conds:getFuncText(conds)
 	local text = ""
 	local actionType = conds.action[1]
-	if actionType ~= "rmount" and actionType ~= "rmountr" then
+	if actionType ~= "rmount" and actionType ~= "rmountt"
+	and actionType ~= "rmountr" and actionType ~= "rmounttr"
+	then
 		if actionType == "mount" then
 			text = "(profileLoad ~= 1 and not self.useMount)\nand "
 		else
