@@ -147,7 +147,7 @@ function actions.rmountt:getFuncText(value)
 		mType = "swimming"
 	end
 
-	local str = ("profileLoad = 1\nself.summonMType = '%s'\n"):format(mType)
+	local str = ("profileLoad = 2\nself.summonMType = '%s'\n"):format(mType)
 	if profile == "0" then
 		return str.."self.mounts:setMountsList(self.mounts.sp)"
 	elseif profile == "1" then
@@ -190,7 +190,7 @@ end
 
 
 ---------------------------------------------------
--- rmountt RANDOM MOUNT OF SELECTED TYPE BY RARITY
+-- rmounttr RANDOM MOUNT OF SELECTED TYPE BY RARITY
 actions.rmounttr = {}
 actions.rmounttr.text = L["Random Mount of Selected Type by Rarity"]
 actions.rmounttr.description = L["The lower the rarity, the higher the chance"]
@@ -210,7 +210,7 @@ function actions.rmounttr:getFuncText(value)
 		mType = "swimming"
 	end
 
-	local str = ("profileLoad = 1\nself.summonMType = '%s'\n"):format(mType)
+	local str = ("profileLoad = 2\nself.summonMType = '%s'\n"):format(mType)
 	if profile == "0" then
 		return str.."self.mounts:setMountsList(self.mounts.sp, self.mounts.rarityWeight)"
 	elseif profile == "1" then
