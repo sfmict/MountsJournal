@@ -1369,9 +1369,9 @@ end
 
 function conds:getFuncText(conds)
 	local actionType, text = conds.action[1]
-	if actionType == "rmount" and actionType == "rmountt" then
+	if actionType == "rmount" or actionType == "rmountr" then
 		text = "profileLoad ~= 2\nand "
-	elseif actionType == "rmountr" and actionType == "rmounttr" then
+	elseif actionType == "rmountt" or actionType == "rmounttr" then
 		text = "(not profileLoad or profileLoad == true)\nand "
 	else
 		if actionType == "mount" then
