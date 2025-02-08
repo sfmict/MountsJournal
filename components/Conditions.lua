@@ -1373,12 +1373,10 @@ function conds:getFuncText(conds)
 		text = "profileLoad ~= 2\nand "
 	elseif actionType == "rmountt" or actionType == "rmounttr" then
 		text = "(not profileLoad or profileLoad == true)\nand "
+	elseif actionType == "mount" then
+		text = "(not profileLoad or profileLoad == true) and not self.useMount\nand "
 	else
-		if actionType == "mount" then
-			text = "(profileLoad ~= 1 and not self.useMount)\nand "
-		else
-			text = "not (profileLoad or self.useMount)\nand "
-		end
+		text = "not (profileLoad or self.useMount)\nand "
 		if actionType == "pmacro" then
 			text = text.."not self.preUseMacro\nand "
 		end
