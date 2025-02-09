@@ -230,12 +230,36 @@ rules:SetScript("OnShow", function(self)
 			GameTooltip:Show()
 		end
 	end
+	local function btnDown(btn)
+		btn.x, btn.y = GetCursorPosition()
+	end
+	local function btnDragStart(btn)
+		local level = btn:GetFrameLevel()
+		self.cover.id = btn.id
+		self.cover:SetParent(btn)
+		self.cover:SetAllPoints(btn)
+		self.cover:SetFrameLevel(level + 2)
+		self.cover:Show()
+		self.dragBtn:SetSize(btn:GetSize())
+		self.dragBtn:SetFrameLevel(level + 500)
+		self:ruleButtonInit(self.dragBtn, btn:GetElementData(), true)
+		local x, y = GetCursorPosition()
+		local xd, yd = GetCursorDelta()
+		local scale = btn:GetEffectiveScale()
+		x = btn:GetLeft() + (x - btn.x - xd) / scale
+		y = btn:GetBottom() + (y - btn.y - yd) / scale
+		self.dragBtn:SetPoint("BOTTOMLEFT", UIParent, x, y)
+		self.dragBtn:SetScript("OnUpdate", self.dragBtn.onUpdate)
+		self.dragBtn:Show()
+	end
 	local function btnUpClick(btn)
-		self:setRuleOrder(btn:GetParent().id, -1)
+		local parent = btn:GetParent()
+		self:setRuleOrder(parent.id, parent.id - 1)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end
 	local function btnDownClick(btn)
-		self:setRuleOrder(btn:GetParent().id, 1)
+		local parent = btn:GetParent()
+		self:setRuleOrder(parent.id, parent.id + 1)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end
 	local function btnRemoveClick(btn) self:removeRule(btn:GetParent().id) end
@@ -244,6 +268,8 @@ rules:SetScript("OnShow", function(self)
 		if new then
 			btn:SetScript("OnClick", btnClick)
 			btn:HookScript("OnEnter", btnEnter)
+			btn:SetScript("OnMouseDown", btnDown)
+			btn:SetScript("OnDragStart", btnDragStart)
 			btn.up:SetScript("OnClick", btnUpClick)
 			btn.down:SetScript("OnClick", btnDownClick)
 			btn.remove:SetScript("OnClick", btnRemoveClick)
@@ -271,6 +297,87 @@ rules:SetScript("OnShow", function(self)
 		CreateAnchor("BOTTOMRIGHT", -20, 20),
 	}
 	ScrollUtil.AddManagedScrollBarVisibilityBehavior(self.scrollBox, self.scrollBar, scrollBoxAnchorsWithBar, scrollBoxAnchorsWithoutBar)
+
+	-- COVER
+	self.cover = CreateFrame("FRAME")
+	self.cover:Hide()
+	self.cover.bg = self.cover:CreateTexture(nil, "BACKGROUND")
+	self.cover.bg:SetAllPoints()
+	self.cover.bg:SetColorTexture(.2, .2, .2, .6)
+	self.cover:SetScript("OnHide", self.Hide)
+
+	-- SEPARATOR
+	self.separator = CreateFrame("FRAME", nil, self)
+	self.separator:Hide()
+	self.separator:SetHeight(10)
+	self.separator.bg = self.separator:CreateTexture(nil, "BACKGROUND")
+	self.separator.bg:SetAllPoints()
+	self.separator.bg:SetTexture("Interface\\Buttons\\UI-Silver-Button-Highlight")
+	self.separator.bg:SetBlendMode("ADD")
+
+	-- DRAG BUTTON
+	self.dragBtn = CreateFrame("FRAME", nil, self, "MJRulePanelTemplate")
+	self.dragBtn:Hide()
+	self.dragBtn:SetAlpha(.5)
+	self.dragBtn:SetMovable(true)
+	self.dragBtn:SetMouseClickEnabled(false)
+	self.dragBtn:SetMouseMotionEnabled(true)
+	self.dragBtn.remove:Disable()
+	self.dragBtn.up:Disable()
+	self.dragBtn.down:Disable()
+
+	function self.dragBtn.onUpdate(btn, elapsed)
+		local x, y = GetCursorDelta()
+		local scale = btn:GetEffectiveScale()
+		local point, rFrame, rPoint, xPos, yPos = btn:GetPoint()
+		btn:SetPoint(point, rFrame, xPos + x / scale, yPos + y / scale)
+		self.separator:Hide()
+		self.separator.id = nil
+		for i, f in ipairs(self.view:GetFrames()) do
+			if f:IsMouseOver() then
+				if btn.id ~= f.id then
+					self.separator:ClearAllPoints()
+					local x, y = GetCursorPosition()
+					local xc, yc = f:GetCenter()
+					if yc < y / scale then
+						if btn.id + 1 ~= f.id and f:GetTop() <= self.scrollBox:GetTop() then
+							self.separator.id = f.id
+							self.separator:SetPoint("BOTTOMLEFT", f, "TOPLEFT", 5, -5)
+							self.separator:SetPoint("BOTTOMRIGHT", f, "TOPRIGHT", -5, -5)
+							self.separator:Show()
+						end
+					else
+						if btn.id ~= f.id + 1 and math.floor(f:GetBottom() + .5) >=  math.floor(self.scrollBox:GetBottom() + .5) then
+							self.separator.id = f.id + 1
+							self.separator:SetPoint("TOPLEFT", f, "BOTTOMLEFT", 5, 5)
+							self.separator:SetPoint("TOPRIGHT", f, "BOTTOMRIGHT", -5, 5)
+							self.separator:Show()
+						end
+					end
+				end
+				break
+			end
+		end
+	end
+
+	self.dragBtn:SetScript("OnShow", function(btn)
+		btn:RegisterEvent("GLOBAL_MOUSE_UP")
+	end)
+	self.dragBtn:SetScript("OnHide", function(btn)
+		btn:UnregisterEvent("GLOBAL_MOUSE_UP")
+	end)
+	self.dragBtn:SetScript("OnEvent", function(btn)
+		btn:SetScript("OnUpdate", nil)
+		btn:Hide()
+		self.cover.id = nil
+		self.cover:Hide()
+		self.separator:Hide()
+		local id = self.separator.id
+		if id then
+			if id > self.dragBtn.id then id = id - 1 end
+			self:setRuleOrder(self.dragBtn.id, id)
+		end
+	end)
 
 	-- EVENTS
 	macroFrame:on("RULE_LIST_UPDATE", function()
@@ -370,11 +477,10 @@ function rules:removeRule(order)
 end
 
 
-function rules:setRuleOrder(order, delta)
-	local newOrder = order + delta
-	local curRule = self.rules[order]
-	self.rules[order] = self.rules[newOrder]
-	self.rules[newOrder] = curRule
+function rules:setRuleOrder(order, newOrder)
+	local rule = self.rules[order]
+	table.remove(self.rules, order)
+	table.insert(self.rules, newOrder, rule)
 	self:updateFilters()
 	macroFrame:setRuleFuncs()
 end
@@ -413,7 +519,7 @@ function rules:getActionText(action)
 end
 
 
-function rules:ruleButtonInit(btn, data)
+function rules:ruleButtonInit(btn, data, isDrag)
 	btn.id = data[1]
 	btn.data = data[2]
 	btn.order:SetText(btn.id)
@@ -438,6 +544,12 @@ function rules:ruleButtonInit(btn, data)
 		btn.cond2:SetText(self:getCondText(btn.data[2]))
 		local text = self:getCondText(btn.data[3])
 		btn.cond3:SetText(#btn.data > 3 and text.."…" or text)
+	end
+
+	if not isDrag and self.cover.id == btn.id then
+		self.cover:SetParent(btn)
+		self.cover:SetAllPoints(btn)
+		self.cover:Show()
 	end
 end
 
