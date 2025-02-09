@@ -186,7 +186,8 @@ codeEdit:SetScript("OnShow", function(self)
 	end)
 
 	-- SETTINGS
-	self.settings = LibStub("LibSFDropDown-1.5"):CreateStretchButtonOriginal(self, 150, 22)
+	local lsfdd = LibStub("LibSFDropDown-1.5")
+	self.settings = lsfdd:CreateStretchButtonOriginal(self, 150, 22)
 	self.settings:SetPoint("TOPRIGHT", -35, -30)
 	self.settings:SetText(SETTINGS)
 	self.settings:ddSetDisplayMode(addon)
@@ -213,6 +214,9 @@ codeEdit:SetScript("OnShow", function(self)
 			end
 
 			dd:ddAddSeparator(level)
+
+			info.checked = nil
+			info.func = nil
 
 			info.notCheckable = true
 			info.hasArrow = true
@@ -256,6 +260,42 @@ codeEdit:SetScript("OnShow", function(self)
 				dd:ddAddButton(info, level)
 			end
 		end
+	end)
+
+	-- EXAMPLES
+	self.examples = lsfdd:CreateStretchButtonOriginal(self, 150, 22)
+	self.examples:SetPoint("RIGHT", self.settings, "LEFT", -50, 0)
+	self.examples:SetText(L["Examples"])
+	self.examples:ddSetDisplayMode(addon)
+
+	self.condExample = [[
+if true then
+	-- some code
+  return true
+end
+return false -- true / false
+	]]
+
+	self.actionExample = [[
+-- some code
+return "" -- macro text (255 symbols) / nil
+	]]
+
+	self.examples:ddSetInitFunc(function(dd)
+		local info = {}
+		info.notCheckable = true
+
+		info.func = function(btn)
+			self.editBox:SetText(btn.value)
+		end
+
+		info.text = L["Conditions"]
+		info.value = self.condExample
+		dd:ddAddButton(info)
+
+		info.text = L["Action"]
+		info.value = self.actionExample
+		dd:ddAddButton(info)
 	end)
 
 	-- CONTROL BTNS
@@ -394,7 +434,7 @@ function codeEdit:open(name, code, cb)
 	self.cb = cb
 	self.nameEdit:SetText(name)
 	self.nameEdit:SetCursorPosition(0)
-	self.editBox:SetText(code)
+	self.editBox:SetText(code or self.condExample)
 	self.editBox:SetCursorPosition(0)
 	IndentationLib.indentEditbox(self.editBox)
 end

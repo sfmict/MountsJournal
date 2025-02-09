@@ -17,7 +17,6 @@ snippets:SetScript("OnShow", function(self)
 
 	self.snippets = ns.mounts.globalDB.snippets
 	self.newName = L["Snippet"].."(%d)"
-	self.defSnippet = "if true then\nreturn true\nend\nreturn false"
 
 	-- DIALOGS
 	local function ruleSetExistsAccept(popup)
@@ -50,7 +49,7 @@ snippets:SetScript("OnShow", function(self)
 	self.addSnipBtn:SetPoint("RIGHT", -3, 0)
 	self.addSnipBtn:SetText(L["Add Snippet"])
 	self.addSnipBtn:SetScript("OnClick", function()
-		codeEdit:open(self:getNextName(), self.defSnippet, function(_, ...)
+		codeEdit:open(self:getNextName(), nil, function(_, ...)
 			return self:add(...)
 		end)
 		codeEdit:nameFocus()

@@ -409,6 +409,24 @@ end
 
 
 ---------------------------------------------------
+-- snip SNIPPET
+actions.snip = {}
+actions.snip.text = L["Code Snippet"]
+
+actions.snip.getValueText = ns.conditions.snip.getValueText
+
+actions.snip.getValueList = ns.conditions.snip.getValueList
+
+function actions.snip:getFuncText(value)
+	return ([[
+		local text = self:callSnippet('%s')
+		return type(text) == "string" and text or nil
+	]]):format(value:gsub("['\\]", "\\%1")),
+	{"type"}
+end
+
+
+---------------------------------------------------
 -- METHODS
 function actions:getMenuList(value, func)
 	local list = {}
@@ -425,6 +443,7 @@ function actions:getMenuList(value, func)
 		"macro",
 		"pmacro",
 		"sstate",
+		"snip",
 	}
 	for i = 1, #types do
 		local v = types[i]
