@@ -17,12 +17,17 @@ function eventsMixin:on(event, func)
 	local handler = function(...) func(self, ...) end
 
 	if handlerList[k] then
-		handlerList[handlerList[k]] = handler
-	else
-		local index = #handlerList + 1
-		handlerList[index] = handler
-		handlerList[k] = index
+		for i = 1, #handlerList do
+			if handlerList[i] == handlerList[k] then
+				tremove(handlerList, i)
+				break
+			end
+		end
 	end
+
+	local index = #handlerList + 1
+	handlerList[index] = handler
+	handlerList[k] = handler
 	return self
 end
 
@@ -35,8 +40,14 @@ function eventsMixin:off(event, func)
 	if handlerList then
 		if name or func then
 			local k = tostring(self)..(name or tostring(func))
-			if handlerList[k] then
-				tremove(handlerList, handlerList[k])
+			local handler = handlerList[k]
+			if handler then
+				for i = 1, #handlerList do
+					if handlerList[i] == handler then
+						tremove(handlerList, i)
+						break
+					end
+				end
 				handlerList[k] = nil
 				if #handlerList == 0 then
 					events[event] = nil
