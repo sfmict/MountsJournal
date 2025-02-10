@@ -3604,4 +3604,41 @@
 			</OnEnter>
 		</Scripts>
 	</Button>
+
+	<Button name="MJControlBackButtonTemplate" virtual="true">
+		<Size x="28" y="28"/>
+		<Layers>
+			<Layer level="OVERLAY">
+				<Texture parentKey="Icon" atlas="common-icon-undo">
+					<Size x="14" y="14"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<NormalTexture parentKey="NormalTexture" atlas="common-button-square-gray-up"/>
+		<HighlightTexture parentKey="HighlightTexture" file="Interface/Buttons/UI-Common-MouseHilight" alphaMode="ADD" alpha="0.8" setAllPoints="true"/>
+		<PushedTexture parentKey="PushedTexture" atlas="common-button-square-gray-down">
+			<Anchors>
+				<Anchor point="TOPLEFT" x="1" y="-1"/>
+				<Anchor point="BOTTOMRIGHT" x="1" y="-1"/>
+			</Anchors>
+		</PushedTexture>
+		<Scripts>
+			<OnMouseDown>
+				if self:IsEnabled() then
+					self.isPuched = true
+					self.Icon:AdjustPointsOffset(1, -1)
+				end
+			</OnMouseDown>
+			<OnMouseUp>
+				if self:IsEnabled() then
+					self.Icon:AdjustPointsOffset(-1, 1)
+				end
+			</OnMouseUp>
+			<OnDisable>self.Icon:SetDesaturated(true)</OnDisable>
+			<OnEnable>self.Icon:SetDesaturated(false)</OnEnable>
+		</Scripts>
+	</Button>
 </Ui>

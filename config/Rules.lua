@@ -329,8 +329,7 @@ rules:SetScript("OnShow", function(self)
 	function self.dragBtn.onUpdate(btn, elapsed)
 		local x, y = GetCursorDelta()
 		local scale = btn:GetEffectiveScale()
-		local point, rFrame, rPoint, xPos, yPos = btn:GetPoint()
-		btn:SetPoint(point, rFrame, xPos + x / scale, yPos + y / scale)
+		btn:AdjustPointsOffset(x / scale, y / scale)
 		self.separator:Hide()
 		self.separator.id = nil
 		for i, f in ipairs(self.view:GetFrames()) do
