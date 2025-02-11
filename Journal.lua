@@ -389,6 +389,7 @@ function journal:init()
 
 	-- MACRO BUTTONS
 	local summon1 = self.bgFrame.summon1
+	summon1.id = 1
 	summon1.icon:SetTexture(mounts.config.summon1Icon)
 	summon1:SetAttribute("clickbutton", _G[util.secureButtonNameMount])
 	summon1:SetScript("OnDragStart", function()
@@ -403,8 +404,12 @@ function journal:init()
 	end)
 	summon1:SetScript("OnEnter", function(btn)
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 1\"")
-		GameTooltip:AddLine(L["Normal mount summon"])
+		GameTooltip_SetTitle(GameTooltip, ("%s \"%s %d\""):format(addon, SUMMONS, btn.id))
+		if ns.macroFrame.currentRuleSet[btn.id].altMode then
+			GameTooltip_AddNormalLine(GameTooltip, L["SecondMountTooltipDescription"]:gsub("\n\n", "\n"))
+		else
+			GameTooltip:AddLine(L["Normal mount summon"])
+		end
 		GameTooltip_AddColoredLine(GameTooltip, "\n"..L["Drag to create a summon panel"], NIGHT_FAE_BLUE_COLOR, false)
 		GameTooltip_AddColoredLine(GameTooltip, L["UseBindingTooltip"], NIGHT_FAE_BLUE_COLOR, false)
 		if InCombatLockdown() then
@@ -414,6 +419,7 @@ function journal:init()
 	end)
 
 	local summon2 = self.bgFrame.summon2
+	summon2.id = 2
 	summon2.icon:SetTexture(mounts.config.summon2Icon)
 	summon2:SetAttribute("clickbutton", _G[util.secureButtonNameSecondMount])
 	summon2:SetScript("OnDragStart", function()
@@ -427,17 +433,7 @@ function journal:init()
 	summon2:SetScript("OnDragStop", function()
 		self.summonPanel:stopDrag()
 	end)
-	summon2:SetScript("OnEnter", function(btn)
-		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 2\"")
-		GameTooltip_AddNormalLine(GameTooltip, L["SecondMountTooltipDescription"]:gsub("\n\n", "\n"))
-		GameTooltip_AddColoredLine(GameTooltip, "\n"..L["Drag to create a summon panel"], NIGHT_FAE_BLUE_COLOR, false)
-		GameTooltip_AddColoredLine(GameTooltip, L["UseBindingTooltip"], NIGHT_FAE_BLUE_COLOR, false)
-		if InCombatLockdown() then
-			GameTooltip_AddErrorLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT)
-		end
-		GameTooltip:Show()
-	end)
+	summon2:SetScript("OnEnter", summon1:GetScript("OnEnter"))
 
 	-- NAVBAR
 	self:on("MAP_CHANGE", function(self)

@@ -383,6 +383,9 @@ return "" -- macro text (255 symbols) / nil
 		elseif key == "Y" then
 			self.skipAddHistory = true
 			self:setHistory(-1)
+		elseif key == "G" then
+			self.line:SetFocus()
+			self.line:HighlightText()
 		end
 	end)
 
@@ -435,7 +438,7 @@ return "" -- macro text (255 symbols) / nil
 	-- ERROR TEXT
 	self.errText = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	self.errText:SetPoint("TOPLEFT", self.codeBtn, "BOTTOMLEFT", 40, -10)
-	self.errText:SetPoint("RIGHT", self.cancelBtn, "LEFt", -10, 0)
+	self.errText:SetPoint("RIGHT", self.completeBtn, "LEFt", -10, 0)
 	self.errText:SetPoint("BOTTOM", 0, 10)
 	self.errText:SetTextColor(1, 0, 0)
 	self.errText:SetJustifyH("LEFT")

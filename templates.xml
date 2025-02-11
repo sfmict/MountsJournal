@@ -3628,7 +3628,6 @@
 		<Scripts>
 			<OnMouseDown>
 				if self:IsEnabled() then
-					self.isPuched = true
 					self.Icon:AdjustPointsOffset(1, -1)
 				end
 			</OnMouseDown>

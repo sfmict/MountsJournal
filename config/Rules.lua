@@ -346,7 +346,7 @@ rules:SetScript("OnShow", function(self)
 							self.separator:Show()
 						end
 					else
-						if btn.id ~= f.id + 1 and math.floor(f:GetBottom() + .5) >=  math.floor(self.scrollBox:GetBottom() + .5) then
+						if btn.id ~= f.id + 1 and math.floor(f:GetBottom() + .5) >= math.floor(self.scrollBox:GetBottom() + .5) then
 							self.separator.id = f.id + 1
 							self.separator:SetPoint("TOPLEFT", f, "BOTTOMLEFT", 5, 5)
 							self.separator:SetPoint("TOPRIGHT", f, "BOTTOMRIGHT", -5, 5)

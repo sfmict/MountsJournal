@@ -272,6 +272,7 @@ mounts:on("CREATE_BUTTONS", function()
 	local summon1Handler = _G[util.secureButtonNameMount]
 	local summon1 = CreateFrame("BUTTON", nil, panel, "MJSecureBarButtonTemplate")
 	panel.summon1 = summon1
+	summon1.id = 1
 	summon1:SetPropagateMouseClicks(true)
 	summon1:SetPropagateMouseMotion(true)
 	summon1.icon:SetTexture(mounts.config.summon1Icon)
@@ -279,8 +280,12 @@ mounts:on("CREATE_BUTTONS", function()
 	summon1:SetScript("OnEnter", function(btn)
 		if panel.isDrag then return end
 		GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 1\"")
-		GameTooltip:AddLine(L["Normal mount summon"])
+		GameTooltip_SetTitle(GameTooltip, ("%s \"%s %d\""):format(addon, SUMMONS, btn.id))
+		if ns.macroFrame.currentRuleSet[btn.id].altMode then
+			GameTooltip_AddNormalLine(GameTooltip, L["SecondMountTooltipDescription"]:gsub("\n\n", "\n"))
+		else
+			GameTooltip:AddLine(L["Normal mount summon"])
+		end
 		if not panel:isLocked() then
 			GameTooltip:AddLine("\n")
 			GameTooltip_AddColoredLine(GameTooltip, leftIcon..L["Left-button to drag"], NIGHT_FAE_BLUE_COLOR, false)
@@ -299,25 +304,12 @@ mounts:on("CREATE_BUTTONS", function()
 	local summon2Handler = _G[util.secureButtonNameSecondMount]
 	local summon2 = CreateFrame("BUTTON", nil, panel, "MJSecureBarButtonTemplate")
 	panel.summon2 = summon2
+	summon2.id = 2
 	summon2:SetPropagateMouseClicks(true)
 	summon2:SetPropagateMouseMotion(true)
 	summon2.icon:SetTexture(mounts.config.summon2Icon)
 	summon2:SetAttribute("clickbutton", summon2Handler)
-	summon2:SetScript("OnEnter", function(btn)
-		if panel.isDrag then return end
-		GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-		GameTooltip_SetTitle(GameTooltip, addon.." \""..SUMMONS.." 2\"")
-		GameTooltip_AddNormalLine(GameTooltip, L["SecondMountTooltipDescription"]:gsub("\n\n", "\n"))
-		if not panel:isLocked() then
-			GameTooltip:AddLine("\n")
-			GameTooltip_AddColoredLine(GameTooltip, leftIcon..L["Left-button to drag"], NIGHT_FAE_BLUE_COLOR, false)
-		end
-		-- GameTooltip_AddColoredLine(GameTooltip, rightIcon..L["Right-button to open context menu"], NIGHT_FAE_BLUE_COLOR, false)
-		if InCombatLockdown() then
-			GameTooltip_AddErrorLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT)
-		end
-		GameTooltip:Show()
-	end)
+	summon2:SetScript("OnEnter", summon1:GetScript("OnEnter"))
 
 	summon2Handler:HookScript("OnMouseDown", function() summon2:GetPushedTexture():Show() end)
 	summon2Handler:HookScript("OnMouseUp", function() summon2:GetPushedTexture():Hide() end)
