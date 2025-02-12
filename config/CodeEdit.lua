@@ -457,6 +457,7 @@ function codeEdit:open(name, code, cb)
 	self.editBox:SetText(code or self.condExample)
 	self.editBox:SetCursorPosition(0)
 	IndentationLib.indentEditbox(self.editBox)
+	self:addHistory()
 end
 
 
