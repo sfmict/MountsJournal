@@ -266,6 +266,7 @@ rules:SetScript("OnShow", function(self)
 
 	local function onAcqure(owner, btn, data, new)
 		if new then
+			btn:RegisterForDrag("LeftButton")
 			btn:SetScript("OnClick", btnClick)
 			btn:HookScript("OnEnter", btnEnter)
 			btn:SetScript("OnMouseDown", btnDown)

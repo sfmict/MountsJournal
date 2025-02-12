@@ -3344,11 +3344,6 @@
 				<HighlightTexture atlas="minimal-scrollbar-arrow-bottom-over" alphaMode="ADD"/>
 			</Button>
 		</Frames>
-		<Scripts>
-			<OnLoad inherit="prepend">
-				self:RegisterForDrag("LeftButton")
-			</OnLoad>
-		</Scripts>
 	</Button>
 
 	<Button name="MJConditionDropDownTemplate" inherits="MJDarkPanelTemplate" virtual="true">
