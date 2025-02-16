@@ -19,6 +19,10 @@ ns.journal:on("MODULES_INIT", function(journal)
 		end
 		self.icon:SetTexture(icon)
 
+		if self:IsMouseOver() then
+			self:GetScript("OnEnter")(self)
+		end
+
 		if ns.mounts.config.autoTargetMount then
 			journal:setSelectedMount(self.mountID)
 		end
@@ -52,8 +56,22 @@ ns.journal:on("MODULES_INIT", function(journal)
 		self:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	end)
 
+	local function addLines()
+		GameTooltip:AddLine(L["Target Mount"], HIGHLIGHT_FONT_COLOR:GetRGB())
+		GameTooltip:AddLine(L["Shows the mount of current target"])
+		GameTooltip:AddLine("\n|A:newplayertutorial-icon-mouse-leftbutton:0:0|a "..L["Select mount"])
+		GameTooltip:AddLine("|A:newplayertutorial-icon-mouse-rightbutton:0:0|a "..L["Auto select Mount"])
+		GameTooltip:Show()
+	end
+
 	tm:SetScript("OnEnter", function(self)
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+
+		self.oldRefreshData = GameTooltip.RefreshData
+		hooksecurefunc(GameTooltip, "RefreshData", function(GameTooltip, event)
+			GameTooltip:AddLine(" ")
+			addLines()
+		end)
 
 		if type(self.mountID) == "number" then
 			GameTooltip:SetMountBySpellID(self.spellID)
@@ -63,14 +81,13 @@ ns.journal:on("MODULES_INIT", function(journal)
 			GameTooltip:AddLine(" ")
 		end
 
-		GameTooltip:AddLine(L["Target Mount"], HIGHLIGHT_FONT_COLOR:GetRGB())
-		GameTooltip:AddLine(L["Shows the mount of current target"])
-		GameTooltip:AddLine("\n|A:newplayertutorial-icon-mouse-leftbutton:0:0|a "..L["Select mount"])
-		GameTooltip:AddLine("|A:newplayertutorial-icon-mouse-rightbutton:0:0|a "..L["Auto select Mount"])
-		GameTooltip:Show()
+		addLines()
 	end)
 
-	tm:SetScript("OnLeave", GameTooltip_Hide)
+	tm:SetScript("OnLeave", function(self)
+		GameTooltip.RefreshData = self.oldRefreshData
+		GameTooltip:Hide()
+	end)
 
 	tm:SetScript("OnClick", function(self, button)
 		if button == "RightButton" then
