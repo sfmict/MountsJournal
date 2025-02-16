@@ -77,6 +77,8 @@ function journal:init()
 	if mounts.filters.sorting.additionalFirst == nil then
 		mounts.filters.sorting.additionalFirst = true
 	end
+	mounts.filters.sorting.by2 = mounts.filters.sorting.by2 or "name"
+	mounts.filters.sorting.by3 = mounts.filters.sorting.by3 or "name"
 	checkFilters(mounts.defFilters)
 	setmetatable(mounts.defFilters.tags.tags, filtersMeta)
 
@@ -1949,6 +1951,49 @@ function journal:sortMounts()
 	local fSort, db = mounts.filters.sorting, mountsDB
 	local numNeedingFanfare = C_MountJournal.GetNumMountsNeedingFanfare()
 
+	local function getByMountID(by, mount, data)
+		if by == "type" then
+			local _,_,_,_, mType = C_MountJournal.GetMountInfoExtraByID(mount)
+			mType = self.mountTypes[mType]
+			return type(mType) == "number" and mType or mType[1]
+		elseif by == "family" then
+			local family = db[mount][2]
+			return type(family) == "number" and family or family[1]
+		elseif by == "expansion" then
+			return db[mount][1]
+		elseif by == "rarity" then
+			return db[mount][3]
+		elseif by == "summons" then
+			return mounts:getMountSummons(data.spellID)
+		elseif by == "time" then
+			return mounts:getMountTime(data.spellID)
+		elseif by == "distance" then
+			return mounts:getMountDistance(data.spellID)
+		end
+		return data.name
+	end
+
+	local function getByMount(by, mount, data)
+		if by == "type" then
+			local mType = self.mountTypes[mount.mountType]
+			return type(mType) == "number" and mType or mType[1]
+		elseif by == "family" then
+			local family = mount.familyID
+			return type(family) == "number" and family or family[1]
+		elseif by == "expansion" then
+			return mount.expansion
+		elseif by == "rarity" then
+			return 100
+		elseif by == "summons" then
+			return mounts:getMountSummons(data.spellID)
+		elseif by == "time" then
+			return mounts:getMountTime(data.spellID)
+		elseif by == "distance" then
+			return mounts:getMountDistance(data.spellID)
+		end
+		return data.name
+	end
+
 	local mCache = setmetatable({}, {__index = function(t, mount)
 		local data = {}
 		if type(mount) == "number" then
@@ -1961,24 +2006,11 @@ function journal:sortMounts()
 				data.needFanfare = true
 				numNeedingFanfare = numNeedingFanfare - 1
 			end
-			if fSort.by == "type" then
-				local _,_,_,_, mType = C_MountJournal.GetMountInfoExtraByID(mount)
-				mType = self.mountTypes[mType]
-				data.by = type(mType) == "number" and mType or mType[1]
-			elseif fSort.by == "family" then
-				local family = db[mount][2]
-				data.by = type(family) == "number" and family or family[1]
-			elseif fSort.by == "expansion" then
-				data.by = db[mount][1]
-			elseif fSort.by == "rarity" then
-				data.by = db[mount][3]
-			elseif fSort.by == "summons" then
-				data.by = mounts:getMountSummons(spellID)
-			elseif fSort.by == "time" then
-				data.by = mounts:getMountTime(spellID)
-			elseif fSort.by == "distance" then
-				data.by = mounts:getMountDistance(spellID)
-			end
+			data.by = getByMountID(fSort.by, mount, data)
+			data.by2 = fSort.by2 == fSort.by and data.by or getByMountID(fSort.by2, mount, data)
+			if fSort.by3 == fSort.by then data.by3 = data.by
+			elseif fSort.by3 == fSort.by2 then data.by3 = data.by2
+			else data.by3 = getByMountID(fSort.by3, mount, data) end
 		else
 			data.name = mount.name
 			data.isFavorite = mount:getIsFavorite()
@@ -1986,23 +2018,11 @@ function journal:sortMounts()
 			data.spellID = mount.spellID
 			data.needsFanfare = false
 			data.additional = true
-			if fSort.by == "type" then
-				local mType = self.mountTypes[mount.mountType]
-				data.by = type(mType) == "number" and mType or mType[1]
-			elseif fSort.by == "family" then
-				local family = mount.familyID
-				data.by = type(family) == "number" and family or family[1]
-			elseif fSort.by == "expansion" then
-				data.by = mount.expansion
-			elseif fSort.by == "rarity" then
-				data.by = 100
-			elseif fSort.by == "summons" then
-				data.by = mounts:getMountSummons(data.spellID)
-			elseif fSort.by == "time" then
-				data.by = mounts:getMountTime(data.spellID)
-			elseif fSort.by == "distance" then
-				data.by = mounts:getMountDistance(data.spellID)
-			end
+			data.by = getByMount(fSort.by, mount, data)
+			data.by2 = fSort.by2 == fSort.by and data.by or getByMount(fSort.by2, mount, data)
+			if fSort.by3 == fSort.by then data.by3 = data.by
+			elseif fSort.by3 == fSort.by2 then data.by3 = data.by2
+			else data.by3 = getByMount(fSort.by3, mount, data) end
 		end
 		t[mount] = data
 		return data
@@ -2036,16 +2056,14 @@ function journal:sortMounts()
 		end
 
 		-- BY
-		if fSort.by ~= "name" then
-			if ma.by < mb.by then return not fSort.reverse
-			elseif ma.by > mb.by then return fSort.reverse end
-		end
+		if ma.by < mb.by then return not fSort.reverse
+		elseif ma.by > mb.by then return fSort.reverse end
 
-		-- NAME
-		local reverse = fSort.by == "name" and fSort.reverse
+		if ma.by2 < mb.by2 then return not fSort.reverse2
+		elseif ma.by2 > mb.by2 then return fSort.reverse2 end
 
-		if ma.name < mb.name then return not reverse
-		elseif ma.name > mb.name then return reverse end
+		if ma.by3 < mb.by3 then return not fSort.reverse3
+		elseif ma.by3 > mb.by3 then return fSort.reverse3 end
 
 		return ma.spellID < mb.spellID
 	end)
