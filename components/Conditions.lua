@@ -519,6 +519,22 @@ end
 
 
 ---------------------------------------------------
+-- hzspell HAVE ZONE SPELL
+conds.hzspell = {}
+conds.hzspell.text = L["Have zone spell"]
+conds.hzspell.description = HUD_EDIT_MODE_EXTRA_ABILITIES_LABEL
+conds.hzspell.isNumeric = true
+
+conds.hzspell.getValueDescription = conds.kspell.getValueDescription
+
+conds.hzspell.getValueText = conds.hitem.getValueText
+
+function conds.hzspell:getFuncText(value)
+	return ("self:haveZoneSpell(%d)"):format(value)
+end
+
+
+---------------------------------------------------
 -- hbuff HAS BUFF
 conds.hbuff = {}
 conds.hbuff.text = L["The player has a buff"]
