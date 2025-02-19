@@ -185,6 +185,7 @@ function journal:init()
 	sMountJournal:SetFrameRef("randomButton", self.MountJournal.SummonRandomFavoriteButton)
 	sMountJournal:SetFrameRef("useMountsJournalButton", self.useMountsJournalButton)
 	sMountJournal:SetFrameRef("bgFrame", self.bgFrame)
+	sMountJournal:SetFrameRef("CollectionsJournalTab1", CollectionsJournalTab1)
 	sMountJournal:SetAttribute("useDefaultJournal", mounts.config.useDefaultJournal)
 	sMountJournal:SetAttribute("isShow", true)
 	sMountJournal:SetAttribute("_onshow", [[
@@ -199,21 +200,31 @@ function journal:init()
 		local randomButton = self:GetFrameRef("randomButton")
 		local useMountsJournalButton = self:GetFrameRef("useMountsJournalButton")
 		local bgFrame = self:GetFrameRef("bgFrame")
+		local tab, rFrame = self:GetFrameRef("CollectionsJournalTab1")
+
 		if self:GetAttribute("isShow") then
 			useMountsJournalButton:Show()
 			if self:GetAttribute("useDefaultJournal") then
 				randomButton:Show()
 				bgFrame:Hide()
 				useMountsJournalButton:SetPoint("BOTTOMLEFT", "$parent", "BOTTOMLEFT", 281, 2)
+				rFrame = "$parent"
 			else
 				randomButton:Hide()
 				bgFrame:Show()
 				useMountsJournalButton:SetPoint("BOTTOMLEFT", bgFrame, "BOTTOMLEFT", 281, 2)
+				rFrame = bgFrame
 			end
 		else
 			randomButton:Show()
 			useMountsJournalButton:Hide()
 			bgFrame:Hide()
+			rFrame = "$parent"
+		end
+
+		if tab:IsProtected() then
+			local point, _, rPoint, x, y = tab:GetPoint()
+			tab:SetPoint(point, rFrame, rPoint, x, y)
 		end
 	]])
 	sMountJournal:SetFrameRef("DynamicFlightModeButton", self.bgFrame.DynamicFlightModeButton)
@@ -336,7 +347,7 @@ function journal:init()
 	local minWidth, minHeight = self.CollectionsJournal:GetSize()
 	local maxWidth = UIParent:GetWidth() - self.bgFrame:GetLeft() * 2
 	local maxHeight = self.bgFrame:GetTop() - CollectionsJournalTab1:GetHeight()
-	self.minTabWidth = self.CollectionsJournal.Tabs[#self.CollectionsJournal.Tabs]:GetRight() - self.CollectionsJournal:GetLeft() + self.bgFrame:GetRight() - self.bgFrame.Tabs[#self.bgFrame.Tabs]:GetLeft() + 20
+	self.minTabWidth = (self.CollectionsJournal.Tabs[self.CollectionsJournal.numTabs]:GetRight() or 0) - self.CollectionsJournal:GetLeft() + self.bgFrame:GetRight() - self.bgFrame.Tabs[#self.bgFrame.Tabs]:GetLeft() + 20
 	local width = Clamp(mounts.config.journalWidth or minWidth, max(minWidth, self.minTabWidth), maxWidth)
 	local height = Clamp(mounts.config.journalHeight or minHeight, minHeight, maxHeight)
 	self.bgFrame:SetSize(width, height)
@@ -1349,7 +1360,7 @@ function journal:init()
 	self:on("MOUNT_SPEED_UPDATE", self.updateSpeed)
 	self:on("MOUNTED_UPDATE", self.updateMounted)
 
-	self:updateCollectionTabs()
+	self:updateCollectionTabs(true)
 	self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 	self:setMJFiltersBackup()
 	self:hideFrames()
@@ -1543,9 +1554,10 @@ function journal:PLAYER_REGEN_ENABLED()
 end
 
 
-function journal:updateCollectionTabs()
-	local relativeFrame = self.bgFrame:IsShown() and self.bgFrame or CollectionsJournal
+function journal:updateCollectionTabs(force)
 	local tab = CollectionsJournalTab1
+	if tab:IsProtected() and not force then return end
+	local relativeFrame = self.bgFrame:IsShown() and self.bgFrame or CollectionsJournal
 	local point, _, rPoint, x, y = tab:GetPoint()
 	tab:SetPoint(point, relativeFrame, rPoint, x, y)
 end
