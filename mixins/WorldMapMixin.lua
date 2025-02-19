@@ -1,4 +1,4 @@
-local _, ns = ...
+local addon, ns = ...
 local util = ns.util
 MJMapCanvasMixin = util.createFromEventsMixin()
 
@@ -7,16 +7,54 @@ function MJMapCanvasMixin:onLoad()
 	self.navBar = self:GetParent().navBar
 	self.child = self.ScrollContainer.Child
 	self.highlight = self.child.HighlightTexture
+	self.zoom = 0
 	self.detailLayerPool = CreateFramePool("FRAME", self.child, "MapCanvasDetailLayerTemplate")
 	self.explorationLayerPool = CreateTexturePool(self.child.Exploration, "ARTWORK", 0)
-	self.navigation = LibStub("LibSFDropDown-1.5"):CreateButtonOriginal(self)
+	self.navigation = LibStub("LibSFDropDown-1.5"):CreateModernButtonOriginal(self)
 	self.navigation:SetFrameLevel(self:GetFrameLevel() + 10)
-	self.navigation:SetPoint("TOPLEFT", 2, -5)
+	self.navigation:SetPoint("TOPLEFT", 4, -4)
+	self.navigation:ddSetDisplayMode(addon)
 	self.navigation:ddSetInitFunc(function(...) self:dropDownInit(...) end)
 end
 
 
-function MJMapCanvasMixin:onUpdate()
+function MJMapCanvasMixin:setAcceleration(deltaX, deltaY, elapsed)
+	local initialAcceleration = .5
+	self.accX = deltaX / elapsed * initialAcceleration
+	self.accY = deltaY / elapsed * initialAcceleration
+end
+
+
+local function getDeltaAcceleration(curAcc, elapsed)
+	local kAcc = -5
+	local delta = curAcc * elapsed
+	delta = delta + elapsed * delta * kAcc
+	local newAcc = delta / elapsed
+
+	if curAcc >= 0 and newAcc < 0 or curAcc < 0 and newAcc >= 0
+	or newAcc < 5 and newAcc > -5
+	then return end
+
+	return delta, newAcc
+end
+
+
+function MJMapCanvasMixin:updateAcceleration(elapsed)
+	if self.accX then
+		local deltaX, accX = getDeltaAcceleration(self.accX, elapsed)
+		self.accX = accX
+		if deltaX then self:setPanX(deltaX) end
+	end
+
+	if self.accY then
+		local deltaY, accY = getDeltaAcceleration(self.accY, elapsed)
+		self.accY = accY
+		if deltaY then self:setPanY(deltaY) end
+	end
+end
+
+
+function MJMapCanvasMixin:onUpdate(elapsed)
 	-- MAP HIGHLIGHT
 	local fileDataID, atlasID, texPercentageX, texPercentageY, textureX, textureY, scrollChildX, scrollChildY = C_Map.GetMapHighlightInfoAtPosition(self.mapID, self:getCursorPosition())
 
@@ -46,6 +84,17 @@ function MJMapCanvasMixin:onUpdate()
 	else
 		self.highlight:Hide()
 	end
+
+	if self:canPan() then
+		local x, y = GetCursorDelta()
+		local scale = self.child:GetEffectiveScale()
+		x, y = x / scale, y / scale
+		self:setPanX(-x)
+		self:setPanY(y)
+		self:setAcceleration(-x, y, elapsed)
+	elseif self.accX or self.accY then
+		self:updateAcceleration(elapsed)
+	end
 end
 
 
@@ -67,23 +116,6 @@ function MJMapCanvasMixin:dropDownInit(btn, level)
 		info.checked = self.mapID == mapInfo.mapID
 		info.func = goToMap
 		btn:ddAddButton(info, level)
-	end
-end
-
-
-function MJMapCanvasMixin:onClick(btn)
-	if btn == "LeftButton" then
-		local mapInfo = C_Map.GetMapInfoAtPosition(self.mapID, self:getCursorPosition())
-		if mapInfo and mapInfo.mapID ~= self.mapID then
-			self.navBar:setMapID(mapInfo.mapID)
-		end
-	else
-		local mapInfo = C_Map.GetMapInfo(self.mapID)
-		if mapInfo.parentMapID > 0 then
-			self.navBar:setMapID(mapInfo.parentMapID)
-		elseif mapInfo.mapID ~= self.navBar.defMapID then
-			self.navBar:setDefMap()
-		end
 	end
 end
 
@@ -133,7 +165,7 @@ function MJMapCanvasMixin:refreshLayers()
 	self:setCanvasSize(layers[1].layerWidth, layers[1].layerHeight)
 	for index, layerInfo in ipairs(layers) do
 		local detailLayer = self.detailLayerPool:Acquire()
-		detailLayer:SetAllPoints(self.child)
+		detailLayer:SetAllPoints()
 		detailLayer:SetMapAndLayer(self.mapID, index, self)
 		detailLayer:SetGlobalAlpha(1)
 		detailLayer:Show()
@@ -195,29 +227,101 @@ function MJMapCanvasMixin:refreshLayers()
 end
 
 
+function MJMapCanvasMixin:setCanvasScale(scale)
+	local width, height = self.child:GetSize()
+	local sWidth, sHeight = self.ScrollContainer:GetSize()
+	self.curScale = scale
+	self.offsetX = (width - sWidth / scale) * .5
+	self.offsetY = (height - sHeight / scale) * .5
+	self.ScrollContainer:SetHorizontalScroll(self.offsetX)
+	self.ScrollContainer:SetVerticalScroll(self.offsetY)
+	self.child:SetScale(scale)
+	self.accX = nil
+	self.accY = nil
+end
+
+
 function MJMapCanvasMixin:setCanvasSize(width, height)
-	local child = self.child
-	local scroll = self.ScrollContainer
-	child:SetSize(width, height)
-
-	self.currentScale = min(scroll:GetWidth() / child:GetWidth(), scroll:GetHeight() / child:GetHeight())
-	child:SetScale(self.currentScale)
-end
-
-
-function MJMapCanvasMixin:normalizeHorizontalSize(size)
-	return size / self.child:GetWidth()
-end
-
-
-function MJMapCanvasMixin:normalizeVerticalSize(size)
-	return size / self.child:GetHeight()
+	local sWidth, sHeight = self.ScrollContainer:GetSize()
+	self.baseScale = min(sWidth / width, sHeight / height)
+	self.child:SetSize(width, height)
+	self:setCanvasScale(self.baseScale)
 end
 
 
 function MJMapCanvasMixin:getCursorPosition()
 	local x, y = GetCursorPosition()
-	local scale = UIParent:GetEffectiveScale() * self.currentScale
-	x, y = x / scale, y / scale
-	return Saturate(self:normalizeHorizontalSize(x - self.child:GetLeft())), Saturate(self:normalizeVerticalSize(self.child:GetTop() - y))
+	local scale = self.child:GetEffectiveScale()
+	local width, height = self.child:GetSize()
+	return Saturate((x / scale - self.child:GetLeft()) / width),
+	       Saturate((self.child:GetTop() - y / scale) / height)
+end
+
+
+function MJMapCanvasMixin:setPanX(deltaX)
+	local sx = self.ScrollContainer:GetHorizontalScroll()
+	self.ScrollContainer:SetHorizontalScroll(Clamp(sx + deltaX, self.minX, self.maxX))
+end
+
+
+function MJMapCanvasMixin:setPanY(deltaY)
+	local sy = self.ScrollContainer:GetVerticalScroll()
+	self.ScrollContainer:SetVerticalScroll(Clamp(sy + deltaY, self.minY, self.maxY))
+end
+
+
+function MJMapCanvasMixin:onMouseWheel(delta)
+	local oldCurX, oldCurY = self:getCursorPosition()
+	local width, height = self.child:GetSize()
+
+	self.zoom = Clamp(self.zoom + delta, 0, 3)
+	local zoomScale = self.baseScale * (1 + .4 * self.zoom)
+	self:setCanvasScale(zoomScale)
+
+	local deltaX = (width - width * self.baseScale / zoomScale) * .5
+	local deltaY = (height - height * self.baseScale / zoomScale) * .5
+	self.minX = self.offsetX - deltaX
+	self.maxX = self.offsetX + deltaX
+	self.minY = self.offsetY - deltaY
+	self.maxY = self.offsetY + deltaY
+
+	local curX, curY = self:getCursorPosition()
+	self:setPanX((oldCurX - curX) * width)
+	self:setPanY((oldCurY - curY) * height)
+end
+
+
+function MJMapCanvasMixin:canPan()
+	return self.isPaning and self.curScale > self.baseScale
+end
+
+
+function MJMapCanvasMixin:onMouseDown(btn)
+	if btn == "LeftButton" then
+		self.isPaning = true
+		self.curX, self.curY = GetCursorPosition()
+	end
+end
+
+
+function MJMapCanvasMixin:onMouseUp(btn)
+	if btn == "LeftButton" then
+		self.isPaning = false
+		local curX, curY = GetCursorPosition()
+		local deltaX = curX - self.curX
+		local deltaY = curY - self.curY
+		if deltaX * deltaX + deltaY * deltaY <= 3 then
+			local mapInfo = C_Map.GetMapInfoAtPosition(self.mapID, self:getCursorPosition())
+			if mapInfo and mapInfo.mapID ~= self.mapID then
+				self.navBar:setMapID(mapInfo.mapID)
+			end
+		end
+	else
+		local mapInfo = C_Map.GetMapInfo(self.mapID)
+		if mapInfo.parentMapID > 0 then
+			self.navBar:setMapID(mapInfo.parentMapID)
+		elseif mapInfo.mapID ~= self.navBar.defMapID then
+			self.navBar:setDefMap()
+		end
+	end
 end

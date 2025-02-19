@@ -128,7 +128,7 @@ end
 
 function MJNavBarMixin:dropDownToggleClick(btn)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-	self.dropDown:ddToggle(1, btn, btn, 20, 3)
+	self.dropDown:ddToggle(1, btn, btn, 5, 3)
 end
 
 

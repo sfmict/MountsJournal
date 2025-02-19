@@ -2,8 +2,8 @@ local addon, ns = ...
 local util, journal, mounts = ns.util, ns.journal, ns.mounts
 
 
-TooltipDataProcessor.AddTooltipPostCall(TooltipDataProcessor.AllTypes, function(tooltip, data)
-	if not InCombatLockdown() and mounts.config.tooltipMount and data.type == 2 and data.lines then
+TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, function(tooltip, data)
+	if not InCombatLockdown() and mounts.config.tooltipMount and data.lines then
 		for i = 1, #data.lines do
 			local unit = data.lines[i].unitToken
 			if unit then

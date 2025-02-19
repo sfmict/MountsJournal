@@ -955,13 +955,13 @@
 			<Frame parentKey="worldMap" useParentLevel="false" hidden="true" inherits="InsetFrameTemplate" mixin="MJMapCanvasMixin">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.rightInset"/>
-					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.rightInset" y="212"/>
+					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.rightInset" x="0" y="209"/>
 				</Anchors>
 				<Frames>
 					<ScrollFrame parentKey="ScrollContainer">
 						<Anchors>
 							<Anchor point="TOPLEFT" x="4" y="-4"/>
-							<Anchor point="BOTTOMRIGHT" x="-5" y="0"/>
+							<Anchor point="BOTTOMRIGHT" x="-4" y="3"/>
 						</Anchors>
 						<ScrollChild>
 							<Frame parentKey="Child">
@@ -989,7 +989,9 @@
 					<OnShow method="onShow"/>
 					<OnHide method="onHide"/>
 					<OnUpdate method="onUpdate"/>
-					<OnMouseUp method="onClick"/>
+					<OnMouseWheel method="onMouseWheel"/>
+					<OnMouseDown method="onMouseDown"/>
+					<OnMouseUp method="onMouseUp"/>
 				</Scripts>
 			</Frame>
 
