@@ -448,6 +448,22 @@ function util.createCancelOk(parent)
 end
 
 
+function util.getRarityColor(mountID)
+	local rarity = ns.mountsDB[mountID][3]
+	if rarity > 50 then
+		return ITEM_QUALITY_COLORS[1].color
+	elseif rarity > 20 then
+		return ITEM_QUALITY_COLORS[2].color
+	elseif rarity > 10 then
+		return ITEM_QUALITY_COLORS[3].color
+	elseif rarity > 1 then
+		return ITEM_QUALITY_COLORS[4].color
+	else
+		return ITEM_QUALITY_COLORS[5].color
+	end
+end
+
+
 function util.addTooltipDLine(s1, s2)
 	GameTooltip:AddDoubleLine(s1, s2, 1, 1, 1, NIGHT_FAE_BLUE_COLOR.r, NIGHT_FAE_BLUE_COLOR.g, NIGHT_FAE_BLUE_COLOR.b)
 end

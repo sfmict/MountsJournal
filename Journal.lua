@@ -1671,29 +1671,13 @@ local function getColorWeight(weight)
 end
 
 
-local function getQualityColor(mountID)
-	local rarity = mountsDB[mountID][3]
-	if rarity > 50 then
-		return ITEM_QUALITY_COLORS[1].color
-	elseif rarity > 20 then
-		return ITEM_QUALITY_COLORS[2].color
-	elseif rarity > 10 then
-		return ITEM_QUALITY_COLORS[3].color
-	elseif rarity > 1 then
-		return ITEM_QUALITY_COLORS[4].color
-	else
-		return ITEM_QUALITY_COLORS[5].color
-	end
-end
-
-
 function journal:defaultInitMountButton(btn, data)
 	local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = self:getMountInfo(data.mountID)
 
 	local needsFanfare, qualityColor
 	if type(data.mountID) == "number" then
 		needsFanfare = C_MountJournal.NeedsFanfare(data.mountID)
-		qualityColor = getQualityColor(data.mountID)
+		qualityColor = util.getRarityColor(data.mountID)
 	else
 		qualityColor = HIGHLIGHT_FONT_COLOR
 	end
@@ -1770,7 +1754,7 @@ function journal:grid3InitMountButton(btn, data)
 			local needsFanfare, qualityColor
 			if type(mountID) == "number" then
 				needsFanfare = C_MountJournal.NeedsFanfare(mountID)
-				qualityColor = getQualityColor(mountID)
+				qualityColor = util.getRarityColor(mountID)
 			else
 				qualityColor = HIGHLIGHT_FONT_COLOR
 			end
