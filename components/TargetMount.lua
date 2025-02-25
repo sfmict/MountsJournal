@@ -3,6 +3,9 @@ local L = ns.L
 
 
 ns.journal:on("MODULES_INIT", function(journal)
+	local tooltip = CreateFrame("GameTooltip", addon.."Tooltip", UIParent, "GameTooltipTemplate")
+	tooltip:Hide()
+	tooltip:SetScript("OnUpdate", GameTooltip_OnUpdate)
 	local tm = journal.bgFrame.targetMount
 	tm:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	tm.checkedTexture:SetShown(ns.mounts.config.autoTargetMount)
@@ -57,37 +60,33 @@ ns.journal:on("MODULES_INIT", function(journal)
 	end)
 
 	local function addLines()
-		GameTooltip:AddLine(L["Target Mount"], HIGHLIGHT_FONT_COLOR:GetRGB())
-		GameTooltip:AddLine(L["Shows the mount of current target"])
-		GameTooltip:AddLine("\n|A:newplayertutorial-icon-mouse-leftbutton:0:0|a "..L["Select mount"])
-		GameTooltip:AddLine("|A:newplayertutorial-icon-mouse-rightbutton:0:0|a "..L["Auto select Mount"])
-		GameTooltip:Show()
+		tooltip:AddLine(L["Target Mount"], HIGHLIGHT_FONT_COLOR:GetRGB())
+		tooltip:AddLine(L["Shows the mount of current target"])
+		tooltip:AddLine("\n|A:newplayertutorial-icon-mouse-leftbutton:0:0|a "..L["Select mount"])
+		tooltip:AddLine("|A:newplayertutorial-icon-mouse-rightbutton:0:0|a "..L["Auto select Mount"])
+		tooltip:Show()
 	end
 
-	tm:SetScript("OnEnter", function(self)
-		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+	hooksecurefunc(tooltip, "RefreshData", function(tooltip, event)
+		tooltip:AddLine(" ")
+		addLines()
+	end)
 
-		self.oldRefreshData = GameTooltip.RefreshData
-		hooksecurefunc(GameTooltip, "RefreshData", function(GameTooltip, event)
-			GameTooltip:AddLine(" ")
-			addLines()
-		end)
+	tm:SetScript("OnEnter", function(self)
+		tooltip:SetOwner(self, "ANCHOR_RIGHT")
 
 		if type(self.mountID) == "number" then
-			GameTooltip:SetMountBySpellID(self.spellID)
-			GameTooltip:AddLine(" ")
+			tooltip:SetMountBySpellID(self.spellID)
+			tooltip:AddLine(" ")
 		elseif self.spellID then
-			GameTooltip:SetSpellByID(self.spellID)
-			GameTooltip:AddLine(" ")
+			tooltip:SetSpellByID(self.spellID)
+			tooltip:AddLine(" ")
 		end
 
 		addLines()
 	end)
 
-	tm:SetScript("OnLeave", function(self)
-		GameTooltip.RefreshData = self.oldRefreshData
-		GameTooltip:Hide()
-	end)
+	tm:SetScript("OnLeave", function(self) tooltip:Hide() end)
 
 	tm:SetScript("OnClick", function(self, button)
 		if button == "RightButton" then

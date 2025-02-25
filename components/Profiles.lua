@@ -48,6 +48,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 	local function profileExistsAccept(popup, data)
 		if not popup then return end
 		popup:Hide()
+		if not dd.lastProfileName then return end
 		local dialog = StaticPopup_Show(util.addonName.."NEW_PROFILE", nil, nil, data)
 		if dialog and dd.lastProfileName then
 			dialog.editBox:SetText(dd.lastProfileName)
@@ -165,6 +166,33 @@ ns.journal:on("MODULES_INIT", function(journal)
 		end)
 	end
 
+	function dd:export()
+		local profile = self.mounts.charDB.currentProfileName and self.mounts.profiles[self.mounts.charDB.currentProfileName] or self.mounts.defProfile
+		ns.dataDialog:open({
+			type = "export",
+			data = {type = "profile", data = profile}
+		})
+	end
+
+	function dd:import()
+		ns.dataDialog:open({
+			type = "import",
+			defName = UnitName("player").." - "..GetRealmName(),
+			valid = function(data) return data.type == "profile" and type(data.data) == "table" end,
+			save = function(data, name)
+				if self.profiles[name] ~= nil then
+					self.lastProfileName = nil
+					StaticPopup_Show(util.addonName.."PROFILE_EXISTS")
+					return
+				end
+				self.profiles[name] = data.data
+				self.mounts:checkProfile(self.profiles[name])
+				self:setProfile(name)
+				return true
+			end
+		})
+	end
+
 	dd.mounts = ns.mounts
 	dd.journal = journal
 	dd.profiles = dd.mounts.profiles
@@ -218,6 +246,19 @@ ns.journal:on("MODULES_INIT", function(journal)
 
 			info.text = L["New profile"]
 			info.value = "new"
+			self:ddAddButton(info, level)
+
+			self:ddAddSeparator(level)
+
+			info.keepShownOnClick = nil
+			info.hasArrow = nil
+
+			info.text = L["Export"]
+			info.func = function() self:export() end
+			self:ddAddButton(info, level)
+
+			info.text = L["Import"]
+			info.func = function() self:import() end
 			self:ddAddButton(info, level)
 
 		elseif value == "settings" then -- PROFILE SETTINGS

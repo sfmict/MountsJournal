@@ -271,17 +271,17 @@ ruleEditor:HookScript("OnShow", function(self)
 end)
 
 
-function ruleEditor:addRule()
+function ruleEditor:addRule(data)
 	self:Show()
 	self.title:SetText(L["Add Rule"])
 
 	self.order = nil
-	self.data = {
+	self.data = data or {
 		{false},
 		action = {},
 	}
 
-	self.actionPanel.optionType:SetText()
+	self.actionPanel.optionType:SetText(self.data.action[1] and actions[self.data.action[1]].text or "")
 	self:setActionValueOption()
 	self:checkRule()
 	self:updateConditionList()

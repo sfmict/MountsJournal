@@ -2,4 +2,6 @@
 	<Script file="libs\LibStub\LibStub.lua"/>
 	<Include file="libs\LibSFDropDown\LibSFDropDown.xml"/>
 	<Include file="libs\LibThingsLoad\LibThingsLoad.xml"/>
+	<Include file="libs\LibSerialize\lib.xml"/>
+	<Include file="libs\LibDeflate\lib.xml"/>
 </UI>

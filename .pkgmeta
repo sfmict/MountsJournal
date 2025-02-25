@@ -10,6 +10,13 @@ externals:
 		site: https://www.curseforge.com/wow/addons/libthingsload
 		url: https://github.com/sfmict/LibThingsLoad
 		tag: latest
+	libs/LibSerialize:
+		url: https://github.com/rossnichols/LibSerialize
+		tag: latest
+	libs/LibDeflate:
+		site: https://www.curseforge.com/wow/addons/libdeflate
+		url: https://github.com/SafeteeWoW/LibDeflate
+		tag: latest
 
 enable-nolib-creation: no
 
@@ -19,3 +26,12 @@ ignore:
 	- _test\.lua
 	- libs/.*\.toc$
 	- libs/LibStub/tests
+	- libs/LibSerialize/archive
+	- libs/LibSerialize/buildreadme.lua
+	- libs/LibSerialize/tests.lua
+	- libs/LibDeflate/docs
+	- libs/LibDeflate/examples
+	- libs/LibDeflate/dev_docs
+	- libs/LibDeflate/rockspecs
+	- libs/LibDeflate/tests
+	- libs/LibDeflate/tools

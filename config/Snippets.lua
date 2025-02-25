@@ -1,5 +1,5 @@
 local addon, ns = ...
-local L, util, codeEdit = ns.L, ns.util, ns.codeEdit
+local L, util, codeEdit, dataDialog = ns.L, ns.util, ns.codeEdit, ns.dataDialog
 local strcmputf8i = strcmputf8i
 local snippets = CreateFrame("FRAME", "MountsJournalSnippets", ns.ruleConfig, "DefaultPanelTemplate")
 ns.snippets = snippets
@@ -56,9 +56,20 @@ snippets:SetScript("OnShow", function(self)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
 
+	-- IMPORT BUTTON
+	self.importBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
+	self.importBtn:SetHeight(24)
+	self.importBtn:SetPoint("TOPLEFT", self.addSnipBtn, "BOTTOMLEFT", 0, -2)
+	self.importBtn:SetPoint("TOPRIGHT", self.addSnipBtn, "BOTTOMRIGHT", 0, -2)
+	self.importBtn:SetText(L["Import Snippet"])
+	self.importBtn:SetScript("OnClick", function()
+		self:import()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end)
+
 	-- SEARCH
 	self.searchBox = CreateFrame("EditBox", nil, self, "SearchBoxTemplate")
-	self.searchBox:SetPoint("TOP", self.addSnipBtn, "BOTTOM", 0, -2)
+	self.searchBox:SetPoint("TOP", self.importBtn, "BOTTOM", 0, -2)
 	self.searchBox:SetPoint("LEFT", 14, 0)
 	self.searchBox:SetPoint("RIGHT", -4, 0)
 	self.searchBox:SetHeight(20)
@@ -75,11 +86,16 @@ snippets:SetScript("OnShow", function(self)
 	self.bg:SetPoint("BOTTOMRIGHT", -20, 6)
 
 	-- SNIPEET CLICKS
-	local function click(btn)
-		codeEdit:open(btn.sName, self.snippets[btn.sName], function(...)
-			return self:edit(...)
-		end)
-		codeEdit:codeFocus()
+	local function click(btn, button)
+		if button == "LeftButton" then
+			codeEdit:open(btn.sName, self.snippets[btn.sName], function(...)
+				return self:edit(...)
+			end)
+			codeEdit:codeFocus()
+		else
+			self.snipMenu:ddToggle(1, btn, "cursor")
+		end
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end
 
 	local function removeClick(btn)
@@ -88,6 +104,7 @@ snippets:SetScript("OnShow", function(self)
 
 	local function onAcqure(owner, btn, data, new)
 		if new then
+			btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 			btn:SetScript("OnClick", click)
 			btn.remove:SetScript("OnClick", removeClick)
 		end
@@ -106,6 +123,28 @@ snippets:SetScript("OnShow", function(self)
 	self.view:SetElementInitializer("MJSnippetListPanelTemplate", function(...) self:btnInit(...) end)
 	self.view:RegisterCallback(self.view.Event.OnAcquiredFrame, onAcqure, self)
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.scrollBar, self.view)
+
+	-- SNIPPET MENU
+	self.snipMenu = LibStub("LibSFDropDown-1.5"):SetMixin({})
+	self.snipMenu:ddSetDisplayMode(addon)
+	self.snipMenu:ddHideWhenButtonHidden(self.scrollBox)
+
+	self.snipMenu:ddSetInitFunc(function(dd, level, btn)
+		local info = {}
+		info.notCheckable = true
+
+		info.text = L["Export"]
+		info.func = function() self:export(btn.sName) end
+		dd:ddAddButton(info, level)
+
+		info.text = DELETE
+		info.func = function() self:remove(btn.sName) end
+		dd:ddAddButton(info, level)
+
+		info.func = nil
+		info.text = CANCEL
+		dd:ddAddButton(info, level)
+	end)
 
 	-- INIT
 	self:updateFilters()
@@ -183,6 +222,34 @@ function snippets:remove(name)
 		self:updateFilters()
 		ns.mounts:event("RULE_LIST_UPDATE")
 	end)
+end
+
+
+function snippets:export(name)
+	local snippet = self.snippets[name]
+	if not snippet then return end
+	dataDialog:open({
+		type = "export",
+		data = {type = "snippet", name = name, code = snippet}
+	})
+end
+
+
+function snippets:import()
+	dataDialog:open({
+		type = "import",
+		valid = function(data)
+			if data.type ~= "snippet"
+			or type(data.name) ~= "string"
+			or type(data.code) ~= "string"
+			then return end
+			codeEdit:open(data.name, data.code, function(_, ...)
+				return self:add(...)
+			end)
+			codeEdit:codeFocus()
+			dataDialog:Hide()
+		end,
+	})
 end
 
 

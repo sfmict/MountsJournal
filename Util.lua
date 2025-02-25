@@ -534,3 +534,25 @@ do
 		return text:format(speedFormat(speed * 3600))
 	end
 end
+
+
+do
+	local libSerialize = LibStub("LibSerialize")
+	local libDeflate = LibStub("LibDeflate")
+	local comm = LibStub("AceComm-3.0")
+
+	function util.getPrintFromData(data)
+		local serialized = libSerialize:Serialize(data)
+		local compressed = libDeflate:CompressDeflate(serialized)
+		return libDeflate:EncodeForPrint(compressed)
+	end
+
+	function util.getDataFromPrint(str)
+		local decoded = libDeflate:DecodeForPrint(str)
+		if not decoded then return end
+		local decompressed = libDeflate:DecompressDeflate(decoded)
+		if not decompressed then return end
+		local success, data = libSerialize:Deserialize(decompressed)
+		if success then return data end
+	end
+end

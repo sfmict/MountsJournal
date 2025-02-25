@@ -1,5 +1,5 @@
 local addon, ns = ...
-local L, util, mounts, macroFrame, conds, actions, calendar = ns.L, ns.util, ns.mounts, ns.macroFrame, ns.conditions, ns.actions, ns.calendar
+local L, util, mounts, macroFrame, conds, actions, calendar, dataDialog = ns.L, ns.util, ns.mounts, ns.macroFrame, ns.conditions, ns.actions, ns.calendar, ns.dataDialog
 local strcmputf8i = strcmputf8i
 local rules = CreateFrame("FRAME", "MountsJournalConfigRules")
 ns.ruleConfig = rules
@@ -35,7 +35,7 @@ rules:SetScript("OnShow", function(self)
 	local function ruleSetExistsAccept(popup, data)
 		if not popup then return end
 		popup:Hide()
-		self:createRuleSet(data)
+		if self.isCreate then self:createRuleSet(data) end
 	end
 	StaticPopupDialogs[util.addonName.."RULE_SET_EXISTS"] = {
 		text = addon..": "..L["A rule set with the same name exists."],
@@ -109,9 +109,10 @@ rules:SetScript("OnShow", function(self)
 			info.text = L["New rule set"]
 			dd:ddAddButton(info, level)
 
+			info.hasArrow = nil
+			info.keepShownOnClick = nil
+
 			if not macroFrame.currentRuleSet.isDefault then
-				info.keepShownOnClick = nil
-				info.hasArrow = nil
 				info.text = L["Set as default"]
 				info.func = function()
 					for i, ruleSet in ipairs(macroFrame.ruleSetConfig) do
@@ -121,6 +122,16 @@ rules:SetScript("OnShow", function(self)
 				end
 				dd:ddAddButton(info, level)
 			end
+
+			dd:ddAddSeparator(level)
+
+			info.text = L["Export"]
+			info.func = function() self:exportRuleSet() end
+			dd:ddAddButton(info, level)
+
+			info.text = L["Import"]
+			info.func = function() self:importRuleSet() end
+			dd:ddAddButton(info, level)
 		else
 			info.notCheckable = true
 
@@ -193,6 +204,16 @@ rules:SetScript("OnShow", function(self)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
 
+	-- IMPORT RULE BUTTON
+	self.importRuleBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
+	self.importRuleBtn:SetPoint("LEFT", self.addRuleBtn, "RIGHT", 10, 0)
+	self.importRuleBtn:SetText(L["Import Rule"])
+	self.importRuleBtn:SetSize(self.importRuleBtn:GetFontString():GetStringWidth() + 40, 22)
+	self.importRuleBtn:SetScript("OnClick", function()
+		self:importRule()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end)
+
 	-- RESET BUTTON
 	self.resetRulesBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
 	self.resetRulesBtn:SetPoint("TOP", self.addRuleBtn)
@@ -206,9 +227,9 @@ rules:SetScript("OnShow", function(self)
 
 	-- SEARCH
 	self.searchBox = CreateFrame("EditBox", nil, self, "SearchBoxTemplate")
-	self.searchBox:SetPoint("LEFT", self.addRuleBtn, "RIGHT", 15, 0)
-	self.searchBox:SetPoint("RIGHT", self.resetRulesBtn, "LEFT", -12, 0)
-	self.searchBox:SetHeight(19)
+	self.searchBox:SetPoint("RIGHT", self.resetRulesBtn, -2, 0)
+	self.searchBox:SetPoint("BOTTOM", self.altMode, 0, 2)
+	self.searchBox:SetSize(200, 19)
 	self.searchBox:SetMaxLetters(40)
 	self.searchBox:SetScript("OnTextChanged", function(searchBox, userInput)
 		SearchBoxTemplate_OnTextChanged(searchBox)
@@ -216,8 +237,12 @@ rules:SetScript("OnShow", function(self)
 	end)
 
 	-- RULE CLICKS
-	local function btnClick(btn)
-		self.ruleEditor:editRule(btn.id, btn.data)
+	local function btnClick(btn, button)
+		if button == "LeftButton" then
+			self.ruleEditor:editRule(btn.id, btn.data)
+		else
+			self.ruleMenu:ddToggle(1, btn, "cursor")
+		end
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end
 	local function btnEnter(btn)
@@ -266,6 +291,7 @@ rules:SetScript("OnShow", function(self)
 
 	local function onAcqure(owner, btn, data, new)
 		if new then
+			btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 			btn:RegisterForDrag("LeftButton")
 			btn:SetScript("OnClick", btnClick)
 			btn:HookScript("OnEnter", btnEnter)
@@ -379,9 +405,40 @@ rules:SetScript("OnShow", function(self)
 		end
 	end)
 
+	-- RULE MENU
+	self.ruleMenu = lsfdd:SetMixin({})
+	self.ruleMenu:ddSetDisplayMode(addon)
+	self.ruleMenu:ddHideWhenButtonHidden(self.scrollBox)
+
+	self.ruleMenu:ddSetInitFunc(function(dd, level, btn)
+		local info = {}
+		info.notCheckable = true
+
+		info.text = L["Export"]
+		info.func = function() self:exportRule(btn.id) end
+		dd:ddAddButton(info, level)
+
+		info.text = DELETE
+		info.func = function() self:removeRule(btn.id) end
+		dd:ddAddButton(info, level)
+
+		info.func = nil
+		info.text = CANCEL
+		dd:ddAddButton(info, level)
+	end)
+
+	self.scrollBox:RegisterCallback(self.scrollBox.Event.OnDataRangeChanged, function()
+		if self.doNotHideMenu then return end
+		self.ruleMenu:ddOnHide()
+	end)
+
 	-- EVENTS
 	macroFrame:on("RULE_LIST_UPDATE", function()
-		if self:IsShown() then self:updateRuleList() end
+		if self:IsShown() then
+			self.doNotHideMenu = true
+			self:updateRuleList()
+			self.doNotHideMenu = nil
+		end
 	end)
 
 	-- INIT
@@ -402,6 +459,7 @@ function rules:createRuleSet(copy)
 		if text and text ~= "" then
 			for i, ruleSet in ipairs(macroFrame.ruleSetConfig) do
 				if ruleSet.name == text then
+					self.isCreate = true
 					StaticPopup_Show(util.addonName.."RULE_SET_EXISTS", nil, nil, copy)
 					return
 				end
@@ -483,6 +541,87 @@ function rules:setRuleOrder(order, newOrder)
 	table.insert(self.rules, newOrder, rule)
 	self:updateFilters()
 	macroFrame:setRuleFuncs()
+end
+
+
+function rules:checkRule(rule)
+	if not (type(rule) == "table" and rule.action and actions[rule.action[1]]) then return end
+	for i = 1, #rule do
+		if not conds[rule[i][2]] then return end
+	end
+	return true
+end
+
+
+function rules:exportRule(order)
+	dataDialog:open({
+		type = "export",
+		data = {type = "rule", data = self.rules[order]},
+	})
+end
+
+
+function rules:importRule()
+	dataDialog:open({
+		type = "import",
+		valid = function(data)
+			if data.type ~= "rule" then return end
+			local rule = data.data
+			if self:checkRule(rule) then
+				self.ruleEditor:addRule(rule)
+				ns.dataDialog:Hide()
+			end
+		end
+	})
+end
+
+
+function rules:exportRuleSet()
+	local ruleSet = util:copyTable(macroFrame.currentRuleSet)
+	ruleSet.name = nil
+	ruleSet.isDefault = nil
+	dataDialog:open({
+		type = "export",
+		data = {type = "ruleSet", data = ruleSet}
+	})
+end
+
+
+function rules:importRuleSet()
+	dataDialog:open({
+		type = "import",
+		defName = UnitName("player").." - "..GetRealmName(),
+		valid = function(data)
+			if data.type ~= "ruleSet" then return end
+			local ruleSet = data.data
+			if type(ruleSet) == "table" then
+				for _, rules in ipairs(ruleSet) do
+					if type(rules) ~= "table" then return end
+					for _, rule in ipairs(rules) do
+						if not self:checkRule(rule) then return end
+					end
+				end
+				return true
+			end
+		end,
+		save = function(data, name)
+			for i, ruleSet in ipairs(macroFrame.ruleSetConfig) do
+				if ruleSet.name == name then
+					self.isCreate = nil
+					StaticPopup_Show(util.addonName.."RULE_SET_EXISTS")
+					return
+				end
+			end
+			local ruleSet = data.data
+			ruleSet.name = name
+			ruleSet.isDefault = nil
+			mounts:checkRuleSet(ruleSet)
+			tinsert(macroFrame.ruleSetConfig, ruleSet)
+			sort(macroFrame.ruleSetConfig, function(a, b) return strcmputf8i(a.name, b.name) < 0 end)
+			self:selectRuleSet(name)
+			return true
+		end,
+	})
 end
 
 
