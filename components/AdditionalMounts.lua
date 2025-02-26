@@ -1,6 +1,6 @@
 local _, ns = ...
 local mounts = ns.mounts
-local C_UnitAuras, C_Spell, IsSpellKnown = C_UnitAuras, C_Spell, IsSpellKnown
+local C_UnitAuras, C_Spell, C_ZoneAbility, IsSpellKnown, FindSpellOverrideByID = C_UnitAuras, C_Spell, C_ZoneAbility, IsSpellKnown, FindSpellOverrideByID
 local C_Item, C_Container = C_Item, C_Container
 local ltl = LibStub("LibThingsLoad-1.0")
 local _,_, raceID = UnitRace("player")
@@ -69,6 +69,7 @@ local createMountFromSpell do
 			isCollected = isCollected,
 			setIsFavorite = setIsFavorite,
 			getIsFavorite = getIsFavorite,
+			isShown = true,
 			selfMount = true,
 			familyID = 1,
 		}
@@ -170,6 +171,33 @@ function travelForm:canUse()
 	   and C_Spell.GetSpellCooldown(self.spellID).startTime == 0
 	   and C_Spell.GetSpellCooldown(61304).startTime == 0
 end
+
+
+----------------------------------------------------------------------
+-- G-99 Breakneck
+local breakneck = createMountFromSpell(460013, 230, 11, 4)
+
+breakneck.creatureID = 124253
+breakneck.allCreature = {
+	124253,
+	125048,
+	125049,
+	125050,
+	125051,
+	--125052,
+}
+
+function breakneck:isUsable()
+	if mounts.instanceID ~= 2706 then return false end
+	if self:isActive() then return true end
+	local zoneAbilities = C_ZoneAbility.GetActiveAbilities()
+	for i = 1, #zoneAbilities do
+		local abilitySpellID = zoneAbilities[i].spellID
+		if self.spellID == (FindSpellOverrideByID(abilitySpellID) or abilitySpellID) then return true end
+	end
+	return false
+end
+breakneck.canUse = breakneck.isUsable
 
 
 ----------------------------------------------------------------------

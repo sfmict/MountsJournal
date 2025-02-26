@@ -110,6 +110,7 @@ function journal:init()
 		self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 		self:RegisterEvent("PLAYER_REGEN_DISABLED")
 		self:RegisterEvent("PLAYER_REGEN_ENABLED")
+		self:RegisterEvent("SPELLS_CHANGED")
 		self:RegisterUnitEvent("UNIT_PORTRAIT_UPDATE", "player")
 		self:on("MOUNT_SPEED_UPDATE", self.updateSpeed)
 		self:on("MOUNTED_UPDATE", self.updateMounted)
@@ -134,6 +135,7 @@ function journal:init()
 		self:UnregisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 		self:UnregisterEvent("PLAYER_REGEN_DISABLED")
 		self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+		self:UnregisterEvent("SPELLS_CHANGED")
 		self:UnregisterEvent("UNIT_PORTRAIT_UPDATE")
 		self:off("MOUNT_SPEED_UPDATE", self.updateSpeed)
 		self:off("MOUNTED_UPDATE", self.updateMounted)
@@ -1356,6 +1358,7 @@ function journal:init()
 	self:RegisterEvent("COMPANION_UPDATE")
 	self:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
+	self:RegisterEvent("SPELLS_CHANGED")
 	self:RegisterUnitEvent("UNIT_PORTRAIT_UPDATE", "player")
 	self:on("MOUNT_SPEED_UPDATE", self.updateSpeed)
 	self:on("MOUNTED_UPDATE", self.updateMounted)
@@ -1563,11 +1566,17 @@ function journal:updateCollectionTabs(force)
 end
 
 
-function journal:updateMounted(isMounted)
+function journal:updateListAndDisplay()
 	self.tags.doNotHideMenu = true
 	self:updateScrollMountList()
 	self.tags.doNotHideMenu = nil
 	self:updateMountDisplay()
+end
+journal.SPELLS_CHANGED = journal.updateListAndDisplay
+
+
+function journal:updateMounted(isMounted)
+	self:updateListAndDisplay()
 	self.mountSpecial:SetEnabled(isMounted)
 	self.mountSpeed:SetShown(mounts.config.statCollection and isMounted)
 end
@@ -2349,7 +2358,7 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 		local isMount = type(self.selectedMountID) == "number"
 		local needsFanfare = isMount and C_MountJournal.NeedsFanfare(self.selectedMountID)
 
-		if self.mountDisplay.lastMountID ~= self.selectedMountID or forceSceneChange then
+		if self.mountDisplay.lastMountID ~= self.selectedMountID or forceSceneChange or MountJournal_GetPendingMountChanges() then
 			local _,_, rarity, creatureDisplayID, descriptionText, sourceText, isSelfMount, mountType, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = self:getMountInfoExtra(self.selectedMountID)
 			if not creatureID then
 				if self.mountDisplay.lastMountID == self.selectedMountID then
