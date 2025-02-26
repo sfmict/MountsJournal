@@ -365,7 +365,7 @@ return "" -- macro text (255 symbols) / nil
 	self.scrollBar:SetPoint("TOPRIGHT", self.codeBtn, -4, -5)
 	self.scrollBar:SetPoint("BOTTOMRIGHT", self.codeBtn, -4, 4)
 
-	self.editFrame = CreateFrame("FRAME", nil, self, "ScrollingEditBoxTemplate")
+	self.editFrame = CreateFrame("FRAME", nil, self, "MJScrollingEditBoxTemplate")
 	self.editBox = self.editFrame:GetEditBox()
 
 	self.editBox:HookScript("OnKeyDown", function(editBox, key)
@@ -422,6 +422,8 @@ return "" -- macro text (255 symbols) / nil
 	setScheme()
 	IndentationLib.enable(self.editBox, colorScheme, mounts.globalDB.editorTabSpaces)
 	self.editBox:SetFont(font, mounts.globalDB.editorFontSize, "")
+	local scrollBox = self.editFrame:GetScrollBox()
+	--scrollBox:GetView():SetPanExtent(self.editBox:GetFontHeight())
 
 	local anchorsToFrame = {
 		CreateAnchor("TOPLEFT", self.codeBtn, "TOPLEFT", 8, -8),
@@ -431,7 +433,6 @@ return "" -- macro text (255 symbols) / nil
 		anchorsToFrame[1],
 		CreateAnchor("BOTTOMRIGHT", self.scrollBar, "BOTTOMLEFT", -3, 4),
 	}
-	local scrollBox = self.editFrame:GetScrollBox()
 	ScrollUtil.RegisterScrollBoxWithScrollBar(scrollBox, self.scrollBar)
 	ScrollUtil.AddManagedScrollBarVisibilityBehavior(scrollBox, self.scrollBar, anchorsToBar, anchorsToFrame)
 

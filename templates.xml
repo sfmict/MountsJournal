@@ -2074,7 +2074,7 @@
 					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.background" x="-4" y="4"/>
 				</Anchors>
 			</EventFrame>
-			<Frame parentKey="editFrame" inherits="ScrollingEditBoxTemplate"/>
+			<Frame parentKey="editFrame" inherits="MJScrollingEditBoxTemplate"/>
 			<CheckButton parentKey="enable" inherits="MJCheckButtonTemplate">
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" relativeKey="$parent.background" relativePoint="TOPLEFT" x="10" y="-3"/>
@@ -3517,7 +3517,7 @@
 							<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
 						</Anchors>
 					</EventFrame>
-					<Frame parentKey="editFrame" inherits="ScrollingEditBoxTemplate"/>
+					<Frame parentKey="editFrame" inherits="MJScrollingEditBoxTemplate"/>
 				</Frames>
 				<Scripts>
 					<OnLoad>
@@ -3637,4 +3637,14 @@
 			<OnEnable>self.Icon:SetDesaturated(false)</OnEnable>
 		</Scripts>
 	</Button>
+
+	<Frame name="MJScrollingEditBoxTemplate" inherits="ScrollingEditBoxTemplate" virtual="true">
+		<Scripts>
+			<OnLoad inherit="append">
+				local editBox = self:GetEditBox()
+				editBox:HookScript("OnEnterPressed", function(self) self:Insert("\n") end)
+				editBox:HookScript("OnEscapePressed", function(self) self:ClearFocus() end)
+			</OnLoad>
+		</Scripts>
+	</Frame>
 </Ui>

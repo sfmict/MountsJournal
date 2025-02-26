@@ -55,7 +55,7 @@ dataDialog:HookScript("OnShow", function(self)
 	self.scrollBar:SetPoint("TOPRIGHT", self.codeBtn, -4, -5)
 	self.scrollBar:SetPoint("BOTTOMRIGHT", self.codeBtn, -4, 4)
 
-	self.editFrame = CreateFrame("FRAME", nil, self.codeBtn, "ScrollingEditBoxTemplate")
+	self.editFrame = CreateFrame("FRAME", nil, self.codeBtn, "MJScrollingEditBoxTemplate")
 	self.editBox = self.editFrame:GetEditBox()
 
 	self.editBox:HookScript("OnTextChanged", function(editBox)
