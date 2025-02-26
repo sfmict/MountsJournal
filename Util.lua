@@ -124,6 +124,8 @@ util.mountTypes = setmetatable({
 	[442] = 1,
 	[444] = 1,
 	[445] = 1,
+	[446] = 1,
+	[447] = 1,
 	[230] = 2,
 	[241] = 2,
 	[284] = 2,
@@ -539,7 +541,7 @@ end
 do
 	local libSerialize = LibStub("LibSerialize")
 	local libDeflate = LibStub("LibDeflate")
-	local comm = LibStub("AceComm-3.0")
+	--local comm = LibStub("AceComm-3.0")
 
 	function util.getPrintFromData(data)
 		local serialized = libSerialize:Serialize(data)

@@ -118,6 +118,7 @@ ns.familyDB = {
 		["Seahorses"] = 1601,
 		["Stingrays"] = 1602,
 		["Underlights"] = 1603,
+		["Eels"] = 1604,
 	},
 	["Gargoyle"] = 1700,
 	["Horses"] = {
@@ -129,6 +130,7 @@ ns.familyDB = {
 		["Mountain Horses"] = 1805,
 		["Steeds"] = 1806,
 		["Undead Steeds"] = 1807,
+		["Darkmoon Chargers"] = 1808,
 	},
 	["Humanoids"] = {
 		["Gorger"] = 1900,
@@ -152,6 +154,7 @@ ns.familyDB = {
 		["Skyrazor"] = 2011,
 		["Skyflayer"] = 2012,
 		["Bees"] = 2013,
+		["Butterflies"] = 2014,
 	},
 	["Jellyfish"] = 2100,
 	["Mollusc"] = {
@@ -365,6 +368,7 @@ ns.familyDBIcons = {
 	},
 	["Fish"] = {
 		[0] = 433440,
+		["Eels"] = 5946611,
 		["Fish"] = 1339352,
 		["Seahorses"] = 433440,
 		["Stingrays"] = 2127651,
@@ -374,6 +378,7 @@ ns.familyDBIcons = {
 	["Horses"] = {
 		[0] = 132226,
 		["Chargers"] = 136103,
+		["Darkmoon Chargers"] = 6375542,
 		["Demonic Steeds"] = 237534,
 		["Flying Steeds"] = 132251,
 		["Horned Steeds"] = 132226,
@@ -396,6 +401,7 @@ ns.familyDBIcons = {
 		["Aqir Flyers"] = 2914896,
 		["Bees"] = 2027853,
 		["Beetle"] = 4508509,
+		["Butterflies"] = 6382036,
 		["Flies"] = 3896744,
 		["Gorm"] = 3084141,
 		["Krolusks"] = 1573602,
