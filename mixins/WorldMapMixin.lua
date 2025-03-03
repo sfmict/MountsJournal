@@ -9,7 +9,8 @@ function MJMapCanvasMixin:onLoad()
 	self.highlight = self.child.HighlightTexture
 	self.zoom = 0
 	self.detailLayerPool = CreateFramePool("FRAME", self.child, "MapCanvasDetailLayerTemplate")
-	self.explorationLayerPool = CreateTexturePool(self.child.Exploration, "ARTWORK", 0)
+	self.explorationLayerPool = CreateTexturePool(self.child.Exploration, "ARTWORK", 1)
+	self.highlightRectPool = CreateTexturePool(self.child.Exploration, "ARTWORK", 1)
 	self.navigation = LibStub("LibSFDropDown-1.5"):CreateModernButtonOriginal(self)
 	self.navigation:SetFrameLevel(self:GetFrameLevel() + 10)
 	self.navigation:SetPoint("TOPLEFT", 4, -4)
@@ -85,6 +86,21 @@ function MJMapCanvasMixin:onUpdate(elapsed)
 		self.highlight:Hide()
 	end
 
+	-- HIGHTLIGHT RECT
+	local highlightIndex
+	-- first find if any have the mouse over
+	for highlightRect in self.highlightRectPool:EnumerateActive() do
+		if highlightRect:IsMouseOver() then
+			highlightIndex = highlightRect.index
+			break
+		end
+	end
+	-- now show all who match the same index
+	for highlightRect in self.highlightRectPool:EnumerateActive() do
+		highlightRect.texture:SetShown(highlightRect.index == highlightIndex)
+	end
+
+	-- ACCSELERATION
 	if self:canPan() then
 		local x, y = GetCursorDelta()
 		local scale = self.child:GetEffectiveScale()
@@ -172,6 +188,7 @@ function MJMapCanvasMixin:refreshLayers()
 	end
 
 	self.explorationLayerPool:ReleaseAll()
+	self.highlightRectPool:ReleaseAll()
 	local exploredMapTextures = C_MapExplorationInfo.GetExploredMapTextures(self.mapID)
 	if exploredMapTextures then
 		local tileWidth = layers[1].tileWidth
@@ -181,6 +198,7 @@ function MJMapCanvasMixin:refreshLayers()
 			local numTexturesWide = ceil(exploredTextureInfo.textureWidth/tileWidth)
 			local numTexturesTall = ceil(exploredTextureInfo.textureHeight/tileHeight)
 			local texturePixelWidth, textureFileWidth, texturePixelHeight, textureFileHeight
+			local textureSubLevel = exploredTextureInfo.isDrawOnTopLayer and 2 or 1
 			for j = 1, numTexturesTall do
 				if j < numTexturesTall then
 					texturePixelHeight = tileHeight
@@ -216,8 +234,16 @@ function MJMapCanvasMixin:refreshLayers()
 					texture:SetPoint("TOPLEFT", exploredTextureInfo.offsetX + (tileWidth * (k-1)), -(exploredTextureInfo.offsetY + (tileHeight * (j - 1))))
 					texture:SetTexture(exploredTextureInfo.fileDataIDs[((j - 1) * numTexturesWide) + k], nil, nil, "TRILINEAR")
 
-					if not exploredTextureInfo.isShownByMouseOver then
-						texture:SetDrawLayer("ARTWORK", 0)
+					if exploredTextureInfo.isShownByMouseOver then
+						texture:SetDrawLayer("ARTWORK", textureSubLevel + 1)
+						texture:Hide()
+						local highlightRect = self.highlightRectPool:Acquire()
+						highlightRect:SetSize(exploredTextureInfo.hitRect.right - exploredTextureInfo.hitRect.left, exploredTextureInfo.hitRect.bottom - exploredTextureInfo.hitRect.top)
+						highlightRect:SetPoint("TOPLEFT", exploredTextureInfo.hitRect.left, -exploredTextureInfo.hitRect.top)
+						highlightRect.index = i
+						highlightRect.texture = texture
+					else
+						texture:SetDrawLayer("ARTWORK", textureSubLevel)
 						texture:Show()
 					end
 				end
@@ -274,8 +300,8 @@ function MJMapCanvasMixin:onMouseWheel(delta)
 	local oldCurX, oldCurY = self:getCursorPosition()
 	local width, height = self.child:GetSize()
 
-	self.zoom = Clamp(self.zoom + delta, 0, 3)
-	local zoomScale = self.baseScale * (1 + .4 * self.zoom)
+	self.zoom = Clamp(self.zoom + delta, 0, 7)
+	local zoomScale = self.baseScale * (1 + .3 * self.zoom)
 	self:setCanvasScale(zoomScale)
 
 	local deltaX = (width - width * self.baseScale / zoomScale) * .5

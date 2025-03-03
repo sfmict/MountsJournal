@@ -16,7 +16,6 @@ externals:
 	libs/LibDeflate:
 		site: https://www.curseforge.com/wow/addons/libdeflate
 		url: https://github.com/SafeteeWoW/LibDeflate
-		tag: latest
 
 enable-nolib-creation: no
 

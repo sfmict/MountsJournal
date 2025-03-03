@@ -60,7 +60,7 @@ dataDialog:HookScript("OnShow", function(self)
 
 	self.editBox:HookScript("OnTextChanged", function(editBox)
 		if self.info.type ~= "import" then return end
-		local data = util.getDataFromPrint(editBox:GetText())
+		local data = util.getDataFromString(editBox:GetText(), true)
 		if type(data) == "table" and data.v == "retail" and (not self.info.valid or self.info.valid(data)) then
 			if self.info.defName then
 				self.nameEdit:SetFocus()
@@ -71,6 +71,10 @@ dataDialog:HookScript("OnShow", function(self)
 		else
 			self.btn1:Disable()
 		end
+	end)
+
+	self.editBox:HookScript("OnMouseUp", function(editBox)
+		editBox:HighlightText()
 	end)
 
 	local anchorsToFrame = {
@@ -145,11 +149,12 @@ function dataDialog:open(info)
 		self.codeBtn:SetPoint("TOPLEFT", 7, -24)
 
 		info.data.v = "retail"
-		local str = util.getPrintFromData(info.data)
+		local str = util.getStringFromData(info.data, true)
 
 		self.editBox:SetText(str)
 		self.editBox:SetFocus()
 		self.editBox:HighlightText()
+		self.editBox:SetCursorPosition(0)
 
 		self.btn1:Hide()
 		self.btn2:SetText(OKAY)

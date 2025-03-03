@@ -1,6 +1,6 @@
 local addon, ns = ...
 local L = ns.L
-local type, tremove, next, tostring = type, tremove, next, tostring
+local type, tremove, next, tostring, math = type, tremove, next, tostring, math
 local C_MountJournal, C_UnitAuras, UnitExists = C_MountJournal, C_UnitAuras, UnitExists
 local events, eventsMixin = {}, {}
 
@@ -541,16 +541,24 @@ end
 do
 	local libSerialize = LibStub("LibSerialize")
 	local libDeflate = LibStub("LibDeflate")
-	--local comm = LibStub("AceComm-3.0")
 
-	function util.getPrintFromData(data)
+	function util.getStringFromData(data, forPrint, config)
 		local serialized = libSerialize:Serialize(data)
-		local compressed = libDeflate:CompressDeflate(serialized)
-		return libDeflate:EncodeForPrint(compressed)
+		local compressed = libDeflate:CompressDeflate(serialized, config)
+		if forPrint then
+			return libDeflate:EncodeForPrint(compressed)
+		else
+			return libDeflate:EncodeForWoWAddonChannel(compressed)
+		end
 	end
 
-	function util.getDataFromPrint(str)
-		local decoded = libDeflate:DecodeForPrint(str)
+	function util.getDataFromString(str, fromPrint)
+		local decoded
+		if fromPrint then
+			decoded = libDeflate:DecodeForPrint(str)
+		else
+			decoded = libDeflate:DecodeForWoWAddonChannel(str)
+		end
 		if not decoded then return end
 		local decompressed = libDeflate:DecompressDeflate(decoded)
 		if not decompressed then return end

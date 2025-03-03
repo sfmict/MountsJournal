@@ -20,6 +20,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 		else
 			icon = self.mountID.icon
 		end
+		self.icon:SetDesaturated()
 		self.icon:SetTexture(icon)
 
 		if self:IsMouseOver() then

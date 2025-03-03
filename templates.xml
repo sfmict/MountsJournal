@@ -224,7 +224,7 @@
 				</Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
-						<Texture parentKey="icon" file="Interface/Icons/MountJournalPortrait" setAllPoints="true"/>
+						<Texture parentKey="icon" file="interface/icons/inv_horse3_chestnut" desaturated="true" setAllPoints="true"/>
 					</Layer>
 					<Layer level="OVERLAY">
 						<Texture parentKey="checkedTexture" atlas="UI-HUD-ActionBar-IconFrame-Down" alphaMode="ADD" hidden="true">
@@ -969,7 +969,7 @@
 									<Anchor point="TOPLEFT"/>
 								</Anchors>
 								<Layers>
-									<Layer level="ARTWORK">
+									<Layer level="OVERLAY">
 										<Texture parentKey="HighlightTexture" alphaMode="ADD" hidden="true">
 											<Anchors>
 												<Anchor point="TOPLEFT"/>
@@ -978,7 +978,7 @@
 									</Layer>
 								</Layers>
 								<Frames>
-									<Frame parentKey="Exploration" setAllPoints="true"/>
+									<Frame parentKey="Exploration" useParentLevel="true" setAllPoints="true"/>
 								</Frames>
 							</Frame>
 						</ScrollChild>
