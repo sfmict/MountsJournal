@@ -35,6 +35,10 @@ dataDialog:HookScript("OnShow", function(self)
 	self.nameEdit:SetAutoFocus(false)
 	self.nameEdit:SetTextInsets(0, 5, 0, 0)
 
+	-- LABEL
+	self.label = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	self.label:SetPoint("BOTTOMRIGHT", -4, 30)
+
 	-- EDIT
 	self.codeBtn = CreateFrame("BUTTON", nil, self, "BackdropTemplate")
 	self.codeBtn:SetPoint("BOTTOMRIGHT", -4, 30)
@@ -97,7 +101,7 @@ dataDialog:HookScript("OnShow", function(self)
 	self.btn1:SetScript("OnClick", function()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		local name = self.nameEdit:GetText():trim()
-		if name == "" or self.info.save and not self.info.save(self.data, name) then
+		if self.codeBtn:IsShown() and name == "" or self.info.save and not self.info.save(self.data, name) then
 			self.nameEdit:SetFocus()
 			self.nameEdit:HighlightText()
 			return
@@ -122,6 +126,8 @@ function dataDialog:open(info)
 
 	if info.type == "import" then
 		self:SetTitle(L["Import"])
+		self.label:Hide()
+		self.codeBtn:Show()
 
 		if info.defName then
 			self.nameString:Show()
@@ -142,11 +148,13 @@ function dataDialog:open(info)
 
 		self.btn2:SetText(CANCEL)
 		self.btn2:SetPoint("BOTTOMLEFT", self, "BOTTOM", 5, 5)
-	else
+	elseif info.type == "export" then
 		self:SetTitle(L["Export"])
+		self.label:Hide()
 		self.nameString:Hide()
 		self.nameEdit:Hide()
 		self.codeBtn:SetPoint("TOPLEFT", 7, -24)
+		self.codeBtn:Show()
 
 		info.data.v = "retail"
 		local str = util.getStringFromData(info.data, true)
@@ -159,5 +167,28 @@ function dataDialog:open(info)
 		self.btn1:Hide()
 		self.btn2:SetText(OKAY)
 		self.btn2:SetPoint("BOTTOM", 0, 5)
+	elseif info.type == "dataImport" then
+		self:SetTitle(L["Import"])
+		self.codeBtn:Hide()
+		self.label:Show()
+		self.label:SetText(info.text)
+		self.data = info.data
+
+		if info.defName then
+			self.nameString:Show()
+			self.nameEdit:Show()
+			self.nameEdit:SetText(info.defName)
+			self.label:SetPoint("TOPLEFT", self.nameString, "BOTTOMLEFT", -3, -4)
+		else
+			self.nameString:Hide()
+			self.nameEdit:Hide()
+			self.label:SetPoint("TOPLEFT", 7, -24)
+		end
+
+		self.btn1:Enable()
+		self.btn1:Show()
+
+		self.btn2:SetText(CANCEL)
+		self.btn2:SetPoint("BOTTOMLEFT", self, "BOTTOM", 5, 5)
 	end
 end

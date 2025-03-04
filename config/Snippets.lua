@@ -88,10 +88,14 @@ snippets:SetScript("OnShow", function(self)
 	-- SNIPEET CLICKS
 	local function click(btn, button)
 		if button == "LeftButton" then
-			codeEdit:open(btn.sName, self.snippets[btn.sName], function(...)
-				return self:edit(...)
-			end)
-			codeEdit:codeFocus()
+			if IsShiftKeyDown() then
+				util.insertChatLink("Snippet", btn.sName)
+			else
+				codeEdit:open(btn.sName, self.snippets[btn.sName], function(...)
+					return self:edit(...)
+				end)
+				codeEdit:codeFocus()
+			end
 		else
 			self.snipMenu:ddToggle(1, btn, "cursor")
 		end
@@ -243,12 +247,32 @@ function snippets:import()
 			or type(data.name) ~= "string"
 			or type(data.code) ~= "string"
 			then return end
+			util.openJournalTab(1, 3)
+			if not ns.ruleConfig.snippetToggle:GetChecked() then ns.ruleConfig.snippetToggle:Click() end
 			codeEdit:open(data.name, data.code, function(_, ...)
 				return self:add(...)
 			end)
 			codeEdit:codeFocus()
 			dataDialog:Hide()
 		end,
+	})
+end
+
+
+function snippets:dataImport(data, name, characterName)
+	dataDialog:open({
+		type = "dataImport",
+		text = ("%s: %s\n%s: %s"):format(L["Snippet"], name, L["Received from"], characterName),
+		data = data,
+		save = function(code)
+			util.openJournalTab(1, 3)
+			if not ns.ruleConfig.snippetToggle:GetChecked() then ns.ruleConfig.snippetToggle:Click() end
+			codeEdit:open(name, code, function(_, ...)
+				return self:add(...)
+			end)
+			codeEdit:nameFocus()
+			return true
+		end
 	})
 end
 

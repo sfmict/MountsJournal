@@ -167,11 +167,24 @@ ns.journal:on("MODULES_INIT", function(journal)
 	end
 
 	function dd:export()
-		local profile = self.mounts.charDB.currentProfileName and self.mounts.profiles[self.mounts.charDB.currentProfileName] or self.mounts.defProfile
+		local profile = self.charDB.currentProfileName and self.profiles[self.charDB.currentProfileName] or self.mounts.defProfile
 		ns.dataDialog:open({
 			type = "export",
 			data = {type = "profile", data = profile}
 		})
+	end
+
+	function dd:saveImportedProfile(profile, name)
+		if self.profiles[name] ~= nil then
+			self.lastProfileName = nil
+			StaticPopup_Show(util.addonName.."PROFILE_EXISTS")
+			return
+		end
+		util.openJournalTab(3)
+		self.profiles[name] = profile
+		self.mounts:checkProfile(self.profiles[name])
+		self:setProfile(name)
+		return true
 	end
 
 	function dd:import()
@@ -179,17 +192,18 @@ ns.journal:on("MODULES_INIT", function(journal)
 			type = "import",
 			defName = UnitName("player").." - "..GetRealmName(),
 			valid = function(data) return data.type == "profile" and type(data.data) == "table" end,
-			save = function(data, name)
-				if self.profiles[name] ~= nil then
-					self.lastProfileName = nil
-					StaticPopup_Show(util.addonName.."PROFILE_EXISTS")
-					return
-				end
-				self.profiles[name] = data.data
-				self.mounts:checkProfile(self.profiles[name])
-				self:setProfile(name)
-				return true
-			end
+			save = function(data, name)return self:saveImportedProfile(data.data, name) end,
+		})
+	end
+
+	function dd:dataImport(data, pName, characterName)
+		local name = pName == "" and DEFAULT or pName
+		ns.dataDialog:open({
+			type = "dataImport",
+			defName = pName == "" and UnitName("player").." - "..GetRealmName() or pName,
+			text = ("%s: %s\n%s: %s"):format(L["Profile"], name, L["Received from"], characterName),
+			data = data,
+			save = function(data, name) return self:saveImportedProfile(data, name) end,
 		})
 	end
 
@@ -216,19 +230,37 @@ ns.journal:on("MODULES_INIT", function(journal)
 			info.notCheckable = nil
 			info.isTitle = nil
 
+			local function OnTooltipShow(btn, tooltip)
+				tooltip:AddLine(L["Shift-click to create a chat link"])
+			end
+
 			info.list = {
 				{
 					text = DEFAULT,
 					checked = function() return self.charDB.currentProfileName == nil end,
-					func = function() self:setProfile() end,
+					func = function()
+						if IsShiftKeyDown() then
+							util.insertChatLink("Profile", "")
+						else
+							self:setProfile()
+						end
+					end,
+					OnTooltipShow = OnTooltipShow,
 				},
 			}
 			for _, profileName in ipairs(self.profileNames) do
 				tinsert(info.list, {
 					text = profileName,
 					checked = function(btn) return self.charDB.currentProfileName == btn.text end,
-					func = function(btn) self:setProfile(btn.text) end,
+					func = function(btn)
+						if IsShiftKeyDown() then
+							util.insertChatLink("Profile", btn.text)
+						else
+							self:setProfile(btn.text)
+						end
+					end,
 					remove = function(btn) self:deleteProfile(btn.text) end,
+					OnTooltipShow = OnTooltipShow,
 				})
 			end
 			self:ddAddButton(info, level)

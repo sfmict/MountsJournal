@@ -229,12 +229,15 @@ function journal:init()
 			tab:SetPoint(point, rFrame, rPoint, x, y)
 		end
 	]])
+	self.sFrames = {
+		self.mountCount,
+		self.bgFrame.slotButton,
+		self.bgFrame.summon1,
+		self.bgFrame.summon2,
+		self.summonButton,
+	}
+	for i = 1, #self.sFrames do sMountJournal:SetFrameRef("frame"..i, self.sFrames[i]) end
 	sMountJournal:SetFrameRef("DynamicFlightModeButton", self.bgFrame.DynamicFlightModeButton)
-	sMountJournal:SetFrameRef("frame1", self.mountCount)
-	sMountJournal:SetFrameRef("frame2", self.bgFrame.slotButton)
-	sMountJournal:SetFrameRef("frame3", self.bgFrame.summon1)
-	sMountJournal:SetFrameRef("frame4", self.bgFrame.summon2)
-	sMountJournal:SetFrameRef("frame5", self.summonButton)
 	sMountJournal:SetAttribute("tabUpdate", [[
 		local tab = self:GetAttribute("tab")
 		local i = 1
@@ -290,7 +293,7 @@ function journal:init()
 	]])
 
 	-- TABS
-	local function setTab(tab)
+	self.bgFrame.setTab = function(tab)
 		PlaySound(SOUNDKIT.UI_TOYBOX_TABS)
 		PanelTemplates_SetTab(self.bgFrame, tab)
 
@@ -338,7 +341,7 @@ function journal:init()
 			frame:SetAttribute("tab", ]]..i..[[)
 			frame:RunAttribute("tabUpdate")
 		]])
-		tab:HookScript("OnClick", function() setTab(i) end)
+		tab:HookScript("OnClick", function() self.bgFrame.setTab(i) end)
 	end
 
 	self.bgFrame.numTabs = 3

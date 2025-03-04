@@ -216,46 +216,10 @@ function test:PLAYER_ENTERING_WORLD()
 	-- end
 
 	-- JOURNAL OPEN
-	--local function setTab(tab)
-	--	PlaySound(SOUNDKIT.UI_TOYBOX_TABS)
-	--	PanelTemplates_SetTab(journal.bgFrame, tab)
-
-	--	journal.bgFrame.settingsBackground:SetShown(tab == 1)
-	--	journal.achiev:SetShown(tab ~= 1)
-	--	journal.bgFrame.OpenDynamicFlightSkillTreeButton:SetShown(tab ~= 1 and DragonridingUtil.IsDragonridingUnlocked())
-	--	journal.navBar:SetShown(tab == 2)
-	--	journal.filtersPanel:SetShown(tab ~= 1)
-	--	journal.leftInset:SetShown(tab ~= 1)
-	--	journal.bgFrame.rightInset:SetShown(tab ~= 1)
-	--	journal.mountDisplay:SetShown(tab == 3)
-	--	journal.worldMap:SetShown(tab == 2)
-	--	journal.mapSettings:SetShown(tab == 2)
-	--	journal.bgFrame.profilesMenu:SetShown(tab ~= 1)
-	--	journal.mountSpecial:SetShown(tab ~= 1)
-	--	journal.bgFrame.summonPanelSettings:SetShown(tab ~= 1 and journal.summonPanel:IsShown())
-
-	--	if tab == 2 then
-	--		journal.filtersPanel:SetPoint("TOPLEFT", journal.navBar, "BOTTOMLEFT", -1, -1)
-	--	else
-	--		journal.filtersPanel:SetPoint("TOPLEFT", 4, -60)
-	--	end
-	--end
-
-	 --if not C_AddOns.IsAddOnLoaded("Blizzard_Collections") then
-	 --	C_AddOns.LoadAddOn("Blizzard_Collections")
-	 --end
-	 --ShowUIPanel(CollectionsJournal)
-	-- journal.bgFrame.profilesMenu:Click()
-	 --CollectionsJournal_SetTab(CollectionsJournal, COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS) -- DISABLE
-	 --setTab(1) -- journal tab
-	 --journal.bgFrame.settingsBackground.Tabs[3]:Click() -- setting tab
-	 --ns.ruleConfig.snippetToggle:Click() -- snippets
-	 --ns.snippets.addSnipBtn:Click() -- codeEdit
-
-	-- journal.mountDisplay.info.petSelectionBtn:Click()
-
-	-- local sbg = journal.bgFrame.settingsBackground
-	-- sbg:Show()
+	--ns.util.openJournalTab(3, 3)
+	--ns.ruleConfig.snippetToggle:Click() -- snippets
+	--ns.snippets.addSnipBtn:Click() -- codeEdit
+	--journal.mountDisplay.info.petSelectionBtn:Click()
 
 	-- local bgWidth = journal.bgFrame:GetWidth()
 	-- for i = 1, sbg:GetNumPoints() do

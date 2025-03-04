@@ -78,11 +78,19 @@ rules:SetScript("OnShow", function(self)
 
 		if level == 1 then
 			local function selectRuleSet(btn)
-				self:selectRuleSet(btn.value)
+				if IsShiftKeyDown() then
+					util.insertChatLink("Rule Set", btn.value)
+				else
+					self:selectRuleSet(btn.value)
+				end
 			end
 
 			local function removeRuleSet(btn)
 				self:removeRuleSet(btn.value)
+			end
+
+			local function OnTooltipShow(btn, tooltip)
+				tooltip:AddLine(L["Shift-click to create a chat link"])
 			end
 
 			info.list = {}
@@ -92,6 +100,7 @@ rules:SetScript("OnShow", function(self)
 					value = ruleSet.name,
 					checked = ruleSet.name == macroFrame.currentRuleSet.name,
 					func = selectRuleSet,
+					OnTooltipShow = OnTooltipShow,
 				}
 				if #macroFrame.ruleSetConfig > 1 then
 					subInfo.remove = removeRuleSet
@@ -236,10 +245,21 @@ rules:SetScript("OnShow", function(self)
 		self:updateFilters()
 	end)
 
+	-- HINT
+	self.hint = CreateFrame("FRAME", nil, self, "MJHelpPlate")
+	self.hint:SetPoint("RIGHT", self.searchBox, "LEFT", 7, 0)
+	self.hint:SetScale(.9)
+	self.hint.tooltip = L["Rules"].." & "..L["Code Snippets"]
+	self.hint.tooltipDescription = L["Right-click for more options"].."\n"..L["Shift-click to create a chat link"]
+
 	-- RULE CLICKS
 	local function btnClick(btn, button)
 		if button == "LeftButton" then
-			self.ruleEditor:editRule(btn.id, btn.data)
+			if IsShiftKeyDown() then
+				util.insertChatLink("Rule", ("%s:%s:%s"):format(self.summonN, btn.id, macroFrame.currentRuleSet.name))
+			else
+				self.ruleEditor:editRule(btn.id, btn.data)
+			end
 		else
 			self.ruleMenu:ddToggle(1, btn, "cursor")
 		end
@@ -568,10 +588,27 @@ function rules:importRule()
 			if data.type ~= "rule" then return end
 			local rule = data.data
 			if self:checkRule(rule) then
+				util.openJournalTab(1, 3)
 				self.ruleEditor:addRule(rule)
 				ns.dataDialog:Hide()
 			end
 		end
+	})
+end
+
+
+function rules:dataImportRule(data, rName, characterName)
+	dataDialog:open({
+		type = "dataImport",
+		text = ("%s: %s\n %s: %s"):format(L["Rule"], rName, L["Received from"], characterName),
+		data = data,
+		save = function(rule)
+			if self:checkRule(rule) then
+				util.openJournalTab(1, 3)
+				self.ruleEditor:addRule(rule)
+				return true
+			end
+		end,
 	})
 end
 
@@ -584,6 +621,25 @@ function rules:exportRuleSet()
 		type = "export",
 		data = {type = "ruleSet", data = ruleSet}
 	})
+end
+
+
+function rules:saveImportedRuleSet(ruleSet, name)
+	for i, ruleSet in ipairs(macroFrame.ruleSetConfig) do
+		if ruleSet.name == name then
+			self.isCreate = nil
+			StaticPopup_Show(util.addonName.."RULE_SET_EXISTS")
+			return
+		end
+	end
+	util.openJournalTab(1, 3)
+	ruleSet.name = name
+	ruleSet.isDefault = nil
+	mounts:checkRuleSet(ruleSet)
+	tinsert(macroFrame.ruleSetConfig, ruleSet)
+	sort(macroFrame.ruleSetConfig, function(a, b) return strcmputf8i(a.name, b.name) < 0 end)
+	self:selectRuleSet(name)
+	return true
 end
 
 
@@ -604,23 +660,18 @@ function rules:importRuleSet()
 				return true
 			end
 		end,
-		save = function(data, name)
-			for i, ruleSet in ipairs(macroFrame.ruleSetConfig) do
-				if ruleSet.name == name then
-					self.isCreate = nil
-					StaticPopup_Show(util.addonName.."RULE_SET_EXISTS")
-					return
-				end
-			end
-			local ruleSet = data.data
-			ruleSet.name = name
-			ruleSet.isDefault = nil
-			mounts:checkRuleSet(ruleSet)
-			tinsert(macroFrame.ruleSetConfig, ruleSet)
-			sort(macroFrame.ruleSetConfig, function(a, b) return strcmputf8i(a.name, b.name) < 0 end)
-			self:selectRuleSet(name)
-			return true
-		end,
+		save = function(data, name) return self:saveImportedRuleSet(data.data, name) end,
+	})
+end
+
+
+function rules:dataImportRuleSet(data, rsName, characterName)
+	dataDialog:open({
+		type = "dataImport",
+		defName = rsName,
+		text = ("%s: %s\n%s: %s"):format(L["Rule Set"], rsName, L["Received from"], characterName),
+		data = data,
+		save = function(data, name) return self:saveImportedRuleSet(data, name) end,
 	})
 end
 
