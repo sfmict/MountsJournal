@@ -52,6 +52,7 @@ ns.familyDB = {
 		["Ottuk"] = 605,
 		["Quilen"] = 606,
 		["Vulpin"] = 607,
+		["Meeksi"] = 608,
 	},
 	["Cats"] = {
 		["Bipedal Cat"] = 700,
@@ -295,6 +296,7 @@ ns.familyDBIcons = {
 		["Gargon"] = 3056147,
 		["Hounds"] = 1387705,
 		["Hyenas"] = 1519597,
+		["Meeksi"] = 6310146,
 		["Ottuk"] = 4093846,
 		["Quilen"] = 644374,
 		["Vulpin"] = 2495963,
