@@ -66,19 +66,20 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT_LEADER", filterFunc)
 
 
 local function showTooltip(lines)
-	ItemRefTooltip:Show()
 	if not ItemRefTooltip:IsShown() then
 		ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE")
 	end
 	ItemRefTooltip:ClearLines()
+	ItemRefTooltip:AddLine(addon, .8,.2,1)
 	for i, line in ipairs(lines) do
 		local sides, a1, a2, a3, a4, a5, a6, a7, a8 = unpack(line)
-		if(sides == 1) then
+		if sides == 1 then
 			ItemRefTooltip:AddLine(a1, a2, a3, a4, a5)
-		elseif(sides == 2) then
+		elseif sides == 2 then
 			ItemRefTooltip:AddDoubleLine(a1, a2, a3, a4, a5, a6, a7, a8)
 		end
 	end
+	ItemRefTooltip:SetPadding(0, 0)
 	ItemRefTooltip:Show()
 end
 
@@ -107,11 +108,11 @@ do
 				else
 					characterName = characterName:gsub("%.", "")
 					local r,g,b = NIGHT_FAE_BLUE_COLOR:GetRGB()
-					local displayProfile = id == "" and DEFAULT or id
-					showTooltip{
-						{2, addon, typeLang..": "..displayProfile, .8, .2, 1, r,g,b},
-						{1, L["Requesting data from %s ..."]:format(characterName)},
-					}
+					local displayID = id == "" and DEFAULT or id
+					showTooltip({
+						{2, typeLang, displayID, 1,1,1,r,g,b},
+						{1, L["Requesting data from %s ..."]:format(characterName), 1,.8,0},
+					})
 					tooltipLoading = true
 					receivedData = false
 					requestData(characterName, dataType, id)
@@ -119,18 +120,15 @@ do
 					if timer and not timer:IsCancelled() then timer:Cancel() end
 					timer = C_Timer.NewTicker(5, function()
 						if tooltipLoading and not receivedData and ItemRefTooltip:IsShown() then
-							showTooltip{
-								{2, addon, typeLang..": "..displayProfile, .8, .2, 1, r,g,b},
-								{1, L["Error not receiving data from %s ..."]:format(characterName), 1, 0, 0},
-							}
+							showTooltip({
+								{2, typeLang, displayID, 1,1,1,r,g,b},
+								{1, L["Error not receiving data from %s ..."]:format(characterName), 1,0,0},
+							})
 						end
 					end, 1)
 				end
 			else
-				showTooltip({
-					{1, addon, .8, .2, 1},
-					{1, L["Malformed link"], 1, 0, 0}
-				})
+				showTooltip({{1, L["Malformed link"], 1,0,0}})
 			end
 		end
 	end)
@@ -175,8 +173,8 @@ local function dataImport(dataType, id, data, characterName)
 	if InCombatLockdown() then
 		local r,g,b = NIGHT_FAE_BLUE_COLOR:GetRGB()
 		showTooltip({
-			{2, addon, L[dataType]..": "..(id == "" and DEFAULT or id), .8, .2, 1, r,g,b},
-			{1, ERR_NOT_IN_COMBAT, 1, 0, 0}
+			{2, L[dataType], id == "" and DEFAULT or id, 1,1,1,r,g,b},
+			{1, ERR_NOT_IN_COMBAT, 1,0,0}
 		})
 		delayedImport:SetScript("OnEvent", function()
 			delayedImport:UnregisterEvent("PLAYER_REGEN_ENABLED")
@@ -226,10 +224,7 @@ local function handleComm(prefix, message, distribution, sender)
 			if data.d then
 				dataImport(data.t, data.id, data.d, sender)
 			else
-				showTooltip({
-					{1, addon, .8, .2, 1},
-					{1, L["Transmission error"], 1, 0, 0}
-				})
+				showTooltip({{1, L["Transmission error"], 1,0,0}})
 			end
 		elseif data.m == "dr" then
 			if util.isLinkValid(data.t, data.id) then transmitData(data, sender) end
@@ -245,18 +240,15 @@ local function handleProgressComm(prefix, message, distribution, sender)
 		local dataType, dataID = (":"):split(id, 2)
 		done = tonumber(done)
 		total = tonumber(total)
-		if done and total and dataType and dataID then
-			if done == -1 then
-			elseif total >= done then
-				local red = min(255, (1 - done / total) * 510)
-				local green = min(255, (done / total) * 510)
-				local r,g,b = NIGHT_FAE_BLUE_COLOR:GetRGB()
-				showTooltip({
-					{2, addon, L[dataType]..": "..(dataID == "" and DEFAULT or dataID), .8, .2, 1, r,g,b},
-					{1, L["Receiving data from %s"]:format(sender), 1, 1, 1},
-					{2, " ", ("|cFF%2x%2x00"):format(red, green)..done.."|cFF00FF00/"..total}
-				})
-			end
+		if done and total and dataType and dataID and total >= done then
+			local red = min(255, (1 - done / total) * 510)
+			local green = min(255, (done / total) * 510)
+			local r,g,b = NIGHT_FAE_BLUE_COLOR:GetRGB()
+			showTooltip({
+				{2, L[dataType], dataID == "" and DEFAULT or dataID, 1,1,1,r,g,b},
+				{1, L["Receiving data from %s"]:format(sender), 1,.8,0},
+				{2, " ", ("|cFF%2x%2x00"):format(red, green)..done.."|cFF00FF00/"..total}
+			})
 		end
 	end
 end

@@ -19,6 +19,7 @@ dataDialog:HookScript("OnShow", function(self)
 	self:SetScript("OnDragStart", self.StartMoving)
 	self:SetScript("OnDragStop", self.StopMovingOrSizing)
 	self:HookScript("OnHide", function(self)
+		self.info = nil
 		self.data = nil
 		self:Hide()
 	end)
@@ -59,7 +60,7 @@ dataDialog:HookScript("OnShow", function(self)
 	self.scrollBar:SetPoint("TOPRIGHT", self.codeBtn, -4, -5)
 	self.scrollBar:SetPoint("BOTTOMRIGHT", self.codeBtn, -4, 4)
 
-	self.editFrame = CreateFrame("FRAME", nil, self.codeBtn, "MJScrollingEditBoxTemplate")
+	self.editFrame = CreateFrame("FRAME", nil, self.codeBtn, "ScrollingEditBoxTemplate")
 	self.editBox = self.editFrame:GetEditBox()
 
 	self.editBox:HookScript("OnTextChanged", function(editBox)

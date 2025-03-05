@@ -365,7 +365,7 @@ return "" -- macro text (255 symbols) / nil
 	self.scrollBar:SetPoint("TOPRIGHT", self.codeBtn, -4, -5)
 	self.scrollBar:SetPoint("BOTTOMRIGHT", self.codeBtn, -4, 4)
 
-	self.editFrame = CreateFrame("FRAME", nil, self, "MJScrollingEditBoxTemplate")
+	self.editFrame = CreateFrame("FRAME", nil, self, "ScrollingEditBoxTemplate")
 	self.editBox = self.editFrame:GetEditBox()
 
 	self.editBox:HookScript("OnKeyDown", function(editBox, key)

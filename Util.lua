@@ -541,11 +541,12 @@ end
 do
 	local libSerialize = LibStub("LibSerialize")
 	local libDeflate = LibStub("LibDeflate")
-	local compressedCache = {}
+	local compressedCache
 
 	function util.getStringFromData(data, forPrint, config)
 		local serialized = libSerialize:Serialize(data)
 		local serverTime, compressed = GetServerTime()
+		compressedCache = compressedCache or {}
 
 		-- get from / add to cache
 		if compressedCache[serialized] then
@@ -656,14 +657,16 @@ function util.openJournalTab(tab1, tab2)
 	end
 	ShowUIPanel(CollectionsJournal)
 	CollectionsJournal_SetTab(CollectionsJournal, COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS)
+	if ns.mounts.config.useDefaultJournal then
+		if ns.journal.useMountsJournalButton:IsProtected() then
+			ns.journal._s:SetAttribute("useDefaultJournal", false)
+			ns.journal._s:Execute(ns.journal._s:GetAttribute("update"))
+		end
+		ns.journal.useMountsJournalButton:Click()
+	end
 	ns.journal.bgFrame.setTab(tab1)
-	ns.journal.bgFrame.DynamicFlightModeButton:SetShown(tab1 ~= 1 and DragonridingUtil.IsDragonridingUnlocked())
-	for i, f in ipairs(ns.journal.sFrames) do
-		f:SetShown(tab1 ~= 1)
-	end
-	for i, f in ipairs(ns.journal.bgFrame.Tabs) do
-		f:SetEnabled(tab1 ~= i)
-	end
+	ns.journal._s:SetAttribute("tab", tab1)
+	ns.journal._s:Execute(ns.journal._s:GetAttribute("tabUpdate"))
 	if tab1 == 1 and tab2 then
 		ns.journal.bgFrame.settingsBackground.Tabs[tab2]:Click()
 	end

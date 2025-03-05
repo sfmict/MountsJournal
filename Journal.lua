@@ -184,6 +184,7 @@ function journal:init()
 
 	-- SECURE FRAMES
 	local sMountJournal = CreateFrame("FRAME", nil, self.MountJournal, "SecureHandlerShowHideTemplate")
+	self._s = sMountJournal
 	sMountJournal:SetFrameRef("randomButton", self.MountJournal.SummonRandomFavoriteButton)
 	sMountJournal:SetFrameRef("useMountsJournalButton", self.useMountsJournalButton)
 	sMountJournal:SetFrameRef("bgFrame", self.bgFrame)
@@ -229,15 +230,12 @@ function journal:init()
 			tab:SetPoint(point, rFrame, rPoint, x, y)
 		end
 	]])
-	self.sFrames = {
-		self.mountCount,
-		self.bgFrame.slotButton,
-		self.bgFrame.summon1,
-		self.bgFrame.summon2,
-		self.summonButton,
-	}
-	for i = 1, #self.sFrames do sMountJournal:SetFrameRef("frame"..i, self.sFrames[i]) end
 	sMountJournal:SetFrameRef("DynamicFlightModeButton", self.bgFrame.DynamicFlightModeButton)
+	sMountJournal:SetFrameRef("frame1", self.mountCount)
+	sMountJournal:SetFrameRef("frame2", self.bgFrame.slotButton)
+	sMountJournal:SetFrameRef("frame3", self.bgFrame.summon1)
+	sMountJournal:SetFrameRef("frame4", self.bgFrame.summon2)
+	sMountJournal:SetFrameRef("frame5", self.summonButton)
 	sMountJournal:SetAttribute("tabUpdate", [[
 		local tab = self:GetAttribute("tab")
 		local i = 1
