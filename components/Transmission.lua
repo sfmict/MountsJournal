@@ -104,7 +104,7 @@ do
 			local _,_, dataType, characterName, typeLang, id = text:gsub("|[Cc]%x%x%x%x%x%x%x%x", ""):gsub("|[Rr]", ""):find("|HaddonMountsJournal(.-)|h%[MJ:(.-) %- (.-):(.-)%]|h")
 			if dataType and characterName and typeLang and id then
 				if IsShiftKeyDown() then
-					util.insertChatLink(dataType, id)
+					util.insertChatLink(dataType, id, characterName)
 				else
 					characterName = characterName:gsub("%.", "")
 					local r,g,b = NIGHT_FAE_BLUE_COLOR:GetRGB()

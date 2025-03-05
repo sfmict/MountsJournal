@@ -620,11 +620,14 @@ do
 	end
 
 	local linked
-	function util.getLink(dataType, id)
+	function util.getLink(dataType, id, characterName)
+		local playerName = fullName or getFullName()
 		local linkID = dataType..":"..id
-		linked = linked or {}
-		linked[linkID] = GetServerTime()
-		return ("[MountsJournal:%s:%s:MJ]"):format(fullName or getFullName(), linkID)
+		if not characterName or playerName == characterName then
+			linked = linked or {}
+			linked[linkID] = GetServerTime()
+		end
+		return ("[MountsJournal:%s:%s:MJ]"):format(characterName or playerName, linkID)
 	end
 
 	function util.isLinkValid(dataType, id)
@@ -641,10 +644,10 @@ do
 end
 
 
-function util.insertChatLink(dataType, id)
-	local editBox = ChatEdit_GetActiveWindow()
+function util.insertChatLink(...)
+	local editBox = GetCurrentKeyBoardFocus()
 	if editBox then
-		editBox:Insert(util.getLink(dataType, id))
+		editBox:Insert(util.getLink(...))
 		editBox:SetFocus()
 	end
 end
