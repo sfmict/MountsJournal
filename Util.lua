@@ -589,63 +589,79 @@ do
 end
 
 
-do
-	-- WORKAROUND
-	-- Blizzard in its infinite wisdom did:
-	-- * Force enable the profanity filter for the chinese region
-	-- * Add a realm name's part to the profanity filter
-	local function obfuscateName(name)
-		if GetCurrentRegion() == 5 then
-			local result = ""
-			for i = 1, #name do
-				local b = name:byte(i)
-				if (b >= 196 and i ~= 1) then
-					-- UTF8 Start byte
-					result = result..string.char(46, b)
-				else
-					result = result..string.char(b)
-				end
+-- WORKAROUND
+-- Blizzard in its infinite wisdom did:
+-- * Force enable the profanity filter for the chinese region
+-- * Add a realm name's part to the profanity filter
+function util.obfuscateName(name)
+	if GetCurrentRegion() == 5 then
+		local result = string.char(name:byte(1))
+		for i = 2, #name do
+			local b = name:byte(i)
+			if b >= 196 then
+				-- UTF8 Start byte
+				result = result..string.char(46, b)
+			else
+				result = result..string.char(b)
 			end
-			return result
-		else
-			return name
 		end
+		return result
+	else
+		return name
 	end
+end
 
+
+function util.deobfuscateName(name)
+	if GetCurrentRegion() == 5 then
+		local result = ""
+		local i = #name
+		while i > 1 do
+			local b = name:byte(i)
+			if b >= 196 and name:byte(i - 1) == 46 then
+				i = i - 1
+			end
+			result = string.char(b)..result
+			i = i - 1
+		end
+		return string.char(name:byte(1))..result
+	else
+		return name
+	end
+end
+
+
+do
 	local fullName
 	local function getFullName()
 		local name, realm = UnitFullName("player")
-		fullName = realm and name.."-"..obfuscateName(realm) or name
+		fullName = realm and name.."-"..util.obfuscateName(realm) or name
 		return fullName
 	end
 
 	local linked
 	function util.getLink(dataType, id, characterName)
 		local playerName = fullName or getFullName()
-		local linkID = dataType..":"..id
 		if not characterName or playerName == characterName then
 			linked = linked or {}
-			linked[linkID] = GetServerTime()
+			linked[dataType..":"..id] = GetServerTime()
 		end
-		return ("[MountsJournal:%s:%s:MJ]"):format(characterName or playerName, linkID)
+		return ("[MountsJournal:%s:%s:%s:MJ]"):format(characterName or playerName, dataType, util.obfuscateName(id))
 	end
 
 	function util.isLinkValid(dataType, id)
 		if not linked then return false end
-
 		local expiredLinkTime = GetServerTime() - 300
 		for linkID, time in next, linked do
 			if time < expiredLinkTime then linked[linkID] = nil end
 		end
-
-		local linkID = dataType..":"..id
-		return not not linked[linkID]
+		return not not linked[dataType..":"..id]
 	end
 end
 
 
 function util.insertChatLink(...)
-	local editBox = GetCurrentKeyBoardFocus()
+	local editBox = ChatEdit_GetActiveWindow() or GetCurrentKeyBoardFocus()
 	if editBox then
 		editBox:Insert(util.getLink(...))
 		editBox:SetFocus()

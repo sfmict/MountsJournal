@@ -61,7 +61,7 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT_LEADER", filterFunc)
 
 -- TEST
 --C_Timer.After(0, function()
---	SendChatMessage(util.getLink("Profile", "").." "..util.getLink("Snippet", next(mounts.globalDB.snippets)), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
+--	SendChatMessage(util.getLink("Profile", "").." "..util.getLink("Snippet", next(mounts.globalDB.snippets), nil), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
 --end)
 
 
@@ -103,10 +103,11 @@ do
 		if link:sub(1, 18) == "addonMountsJournal" then
 			local _,_, dataType, characterName, typeLang, id = text:gsub("|[Cc]%x%x%x%x%x%x%x%x", ""):gsub("|[Rr]", ""):find("|HaddonMountsJournal(.-)|h%[MJ:(.-) %- (.-):(.-)%]|h")
 			if dataType and characterName and typeLang and id then
+				id = util.deobfuscateName(id)
 				if IsShiftKeyDown() then
 					util.insertChatLink(dataType, id, characterName)
 				else
-					characterName = characterName:gsub("%.", "")
+					characterName = util.deobfuscateName(characterName)
 					local r,g,b = NIGHT_FAE_BLUE_COLOR:GetRGB()
 					local displayID = id == "" and DEFAULT or id
 					showTooltip({
