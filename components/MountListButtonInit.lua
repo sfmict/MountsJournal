@@ -2,7 +2,6 @@ local _, ns = ...
 
 
 ns.journal:on("MODULES_INIT", function(journal)
-	local function typeClick(btn) journal:mountToggle(btn) end
 	local function mouseDown(btn, mouse) journal.tags:hideDropDown(mouse) end
 	local function dragClick(btn, mouse) journal.tags:dragButtonClick(btn, mouse) end
 	local function click(btn, mouse) journal.tags:listItemClick(btn, mouse) end
@@ -81,9 +80,6 @@ ns.journal:on("MODULES_INIT", function(journal)
 					btn:SetScript("OnDragStart", drag)
 					btn:SetScript("OnEnter", onEnter)
 					btn:SetScript("OnLeave", onLeave)
-					btn.fly:SetScript("OnClick", typeClick)
-					btn.ground:SetScript("OnClick", typeClick)
-					btn.swimming:SetScript("OnClick", typeClick)
 				end
 			else
 				frame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
@@ -96,9 +92,6 @@ ns.journal:on("MODULES_INIT", function(journal)
 				frame.dragButton:SetScript("OnDragStart", drag)
 				frame.dragButton:SetScript("OnEnter", onEnter)
 				frame.dragButton:SetScript("OnLeave", onLeave)
-				frame.fly:SetScript("OnClick", typeClick)
-				frame.ground:SetScript("OnClick", typeClick)
-				frame.swimming:SetScript("OnClick", typeClick)
 			end
 		end
 	end)

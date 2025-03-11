@@ -1596,72 +1596,8 @@
 		<CheckedTexture file="Interface/Buttons/CheckButtonHilight" alphaMode="ADD" alpha=".6"/>
 	</CheckButton>
 
-	<CheckButton name="MJSetMountToggleTemplate" virtual="true">
-		<Size x="24" y="12"/>
-		<Layers>
-			<Layer level="OVERLAY">
-				<Texture parentKey="icon">
-					<Size x="24" y="12"/>
-					<Anchors>
-						<Anchor point="CENTER"/>
-					</Anchors>
-				</Texture>
-			</Layer>
-		</Layers>
-		<NormalTexture parentKey="normalTexture" file="Interface/AddOns/MountsJournal/textures/button">
-			<TexCoords left=".00390625" right=".8203125" top=".00390625" bottom=".18359375"/>
-			<Color r=".2" g=".18" b=".01"/>
-		</NormalTexture>
-		<HighlightTexture parentKey="highlight" file="Interface/AddOns/MountsJournal/textures/button">
-			<TexCoords left=".00390625" right=".8203125" top=".19140625" bottom=".37109375"/>
-		</HighlightTexture>
-		<CheckedTexture parentKey="check" file="Interface/AddOns/MountsJournal/textures/button">
-			<TexCoords left=".00390625" right=".8203125" top=".37890625" bottom=".55859375"/>
-			<Color r=".8" g=".6" b="0"/>
-		</CheckedTexture>
-		<Scripts>
-			<OnMouseDown>
-				if self:IsEnabled() then
-					self.icon:SetScale(.8)
-				end
-			</OnMouseDown>
-			<OnMouseUp>
-				if self:IsEnabled() then
-					self.icon:SetScale(1)
-				end
-			</OnMouseUp>
-		</Scripts>
-	</CheckButton>
-
-	<CheckButton name="MJSetFlyToggleTemplate" inherits="MJSetMountToggleTemplate" virtual="true">
-		<KeyValues>
-			<KeyValue key="type" value="fly" type="string"/>
-		</KeyValues>
-		<Scripts>
-			<OnLoad>self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/fly")</OnLoad>
-		</Scripts>
-	</CheckButton>
-
-	<CheckButton name="MJSetGroundToggleTemplate" inherits="MJSetMountToggleTemplate" virtual="true">
-		<KeyValues>
-			<KeyValue key="type" value="ground" type="string"/>
-		</KeyValues>
-		<Scripts>
-			<OnLoad>self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/ground")</OnLoad>
-		</Scripts>
-	</CheckButton>
-
-	<CheckButton name="MJSetSwimmingToggleTemplate" inherits="MJSetMountToggleTemplate" virtual="true">
-		<KeyValues>
-			<KeyValue key="type" value="swimming" type="string"/>
-		</KeyValues>
-		<Scripts>
-			<OnLoad>self.icon:SetTexture("Interface/AddOns/MountsJournal/textures/swimming")</OnLoad>
-		</Scripts>
-	</CheckButton>
-
 	<Button name="MJMountDefaultListButton" virtual="true">
-		<Size x="184" y="46"/>
+		<Size x="184" y="40"/>
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture atlas="PetList-ButtonBackground" parentKey="background"/>
@@ -1671,10 +1607,28 @@
 					<Anchors>
 						<Anchor point="BOTTOMRIGHT" x="-1" y="1"/>
 					</Anchors>
-					<Size x="44" y="44"/>
+					<Size x="38" y="38"/>
 				</Texture>
 			</Layer>
 			<Layer level="OVERLAY">
+				<Texture parentKey="toggle1" parentArray="toggle">
+					<Size x="20" y="10"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT" x="-2" y="-2"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="toggle2" parentArray="toggle">
+					<Size x="20" y="10"/>
+					<Anchors>
+						<Anchor point="RIGHT" relativeKey="$parent.toggle1" relativePoint="LEFT" x="2"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="toggle3" parentArray="toggle">
+					<Size x="20" y="10"/>
+					<Anchors>
+						<Anchor point="RIGHT" relativeKey="$parent.toggle2" relativePoint="LEFT" x="2"/>
+					</Anchors>
+				</Texture>
 				<FontString parentKey="name" inherits="GameFontNormal" justifyH="LEFT" maxLines="2">
 					<Size x="147" y="0"/>
 					<Anchors>
@@ -1754,9 +1708,10 @@
 						<Texture parentKey="highlight" file="Interface/Buttons/ButtonHilight-Square" setAllPoints="true" alphaMode="ADD" hidden="true"/>
 					</Layer>
 					<Layer level="OVERLAY" textureSubLevel="2">
-						<Texture parentKey="favorite" atlas="PetJournal-FavoritesIcon" useAtlasSize="true">
+						<Texture parentKey="favorite" atlas="PetJournal-FavoritesIcon">
+							<Size x="20" y="20"/>
 							<Anchors>
-								<Anchor point="TOPLEFT" relativeKey="$parent.icon" x="-8" y="8"/>
+								<Anchor point="TOPLEFT" x="-4" y="5"/>
 							</Anchors>
 						</Texture>
 					</Layer>
@@ -1765,21 +1720,6 @@
 					<KeyValue key="LibSFDropDownNoGMEvent" value="true" type="boolean"/>
 				</KeyValues>
 			</Button>
-			<CheckButton parentKey="fly" inherits="MJSetFlyToggleTemplate">
-				<Anchors>
-					<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="14"/>
-				</Anchors>
-			</CheckButton>
-			<CheckButton parentKey="ground" inherits="MJSetGroundToggleTemplate">
-				<Anchors>
-					<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="0"/>
-				</Anchors>
-			</CheckButton>
-			<CheckButton parentKey="swimming" inherits="MJSetSwimmingToggleTemplate">
-				<Anchors>
-					<Anchor point="LEFT" relativePoint="RIGHT" x="0" y="-14"/>
-				</Anchors>
-			</CheckButton>
 		</Frames>
 	</Button>
 
@@ -1808,6 +1748,24 @@
 				<Texture file="Interface/Buttons/CheckButtonHilight" parentKey="selectedTexture" alphaMode="ADD"/>
 			</Layer>
 			<Layer level="OVERLAY" textureSubLevel="1">
+				<Texture parentKey="toggle1" parentArray="toggle">
+					<Size x="20" y="10"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="-3" y="-3"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="toggle2" parentArray="toggle">
+					<Size x="20" y="10"/>
+					<Anchors>
+						<Anchor point="TOP" relativeKey="$parent.toggle1" relativePoint="BOTTOM" y="-1"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="toggle3" parentArray="toggle">
+					<Size x="20" y="10"/>
+					<Anchors>
+						<Anchor point="TOP" relativeKey="$parent.toggle2" relativePoint="BOTTOM" y="-1"/>
+					</Anchors>
+				</Texture>
 				<Texture file="Interface/BUTTONS/UI-GroupLoot-Pass-Up" parentKey="hidden" hidden="true">
 					<Size x="25" y="25"/>
 					<Anchors>
@@ -1817,51 +1775,40 @@
 				<Texture parentKey="highlight" file="Interface/Buttons/ButtonHilight-Square" setAllPoints="true=" alphaMode="ADD" hidden="true"/>
 			</Layer>
 			<Layer level="OVERLAY" textureSubLevel="2">
-				<Texture parentKey="favorite" atlas="PetJournal-FavoritesIcon" useAtlasSize="true">
+				<Texture parentKey="favorite" atlas="PetJournal-FavoritesIcon">
+					<Size x="20" y="20"/>
 					<Anchors>
-						<Anchor point="TOPLEFT" x="-8" y="8"/>
+						<Anchor point="TOPLEFT" x="-3" y="2"/>
 					</Anchors>
 				</Texture>
 			</Layer>
 		</Layers>
-		<Frames>
-			<CheckButton parentKey="fly" inherits="MJSetFlyToggleTemplate">
-				<Anchors>
-					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="0"/>
-				</Anchors>
-			</CheckButton>
-			<CheckButton parentKey="ground" inherits="MJSetGroundToggleTemplate">
-				<Anchors>
-					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="-14"/>
-				</Anchors>
-			</CheckButton>
-			<CheckButton parentKey="swimming" inherits="MJSetSwimmingToggleTemplate">
-				<Anchors>
-					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="-28"/>
-				</Anchors>
-			</CheckButton>
-		</Frames>
 		<KeyValues>
 			<KeyValue key="LibSFDropDownNoGMEvent" value="true" type="boolean"/>
 		</KeyValues>
 	</Button>
 
-	<Frame name="MJMountGrid3ListButtons" virtual="true">
-		<Size x="249" y="46"/>
+	<Frame name="MJMountGridListButtons" virtual="true">
+		<Size x="248" y="44"/>
 		<Frames>
 			<Button parentArray="mounts" inherits="MJGridMountButtonTemplate">
 				<Anchors>
-					<Anchor point="LEFT" x="14" y="0"/>
+					<Anchor point="LEFT" x="0" y="0"/>
 				</Anchors>
 			</Button>
 			<Button parentArray="mounts" inherits="MJGridMountButtonTemplate">
 				<Anchors>
-					<Anchor point="LEFT" x="93" y="0"/>
+					<Anchor point="LEFT" x="63" y="0"/>
 				</Anchors>
 			</Button>
 			<Button parentArray="mounts" inherits="MJGridMountButtonTemplate">
 				<Anchors>
-					<Anchor point="LEFT" x="172" y="0"/>
+					<Anchor point="LEFT" x="125" y="0"/>
+				</Anchors>
+			</Button>
+			<Button parentArray="mounts" inherits="MJGridMountButtonTemplate">
+				<Anchors>
+					<Anchor point="LEFT" x="187" y="0"/>
 				</Anchors>
 			</Button>
 		</Frames>

@@ -183,6 +183,11 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 		btn:ddAddButton(info, level)
 
 		if not needsFanfare then
+			info.disabled = not ((isCollected or not isMount) and journal:isCanFavorite(self.menuMountID))
+			info.text = isFavorite and BATTLE_PET_UNFAVORITE or BATTLE_PET_FAVORITE
+			info.func = function() journal:setIsFavorite(self.menuMountID, not isFavorite) end
+			btn:ddAddButton(info, level)
+
 			if isCollected then
 				info.text = nil
 				info.disabled = nil
@@ -209,15 +214,33 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 				info.OnLoad = nil
 			end
 
-			info.disabled = not ((isCollected or not isMount) and journal:isCanFavorite(self.menuMountID))
-			info.text = isFavorite and BATTLE_PET_UNFAVORITE or BATTLE_PET_FAVORITE
-			info.func = function() journal:setIsFavorite(self.menuMountID, not isFavorite) end
-			btn:ddAddButton(info, level)
-
 			info.disabled = nil
 			info.keepShownOnClick = true
-			info.hasArrow = true
+			info.notCheckable = nil
+			info.isNotRadio = true
+			info.func = function(_,_, mType)
+				journal:mountToggle(mType, self.menuSpellID, self.menuMountID)
+			end
+
+			info.text = L["SELECT_AS_TYPE_1"]
+			info.arg2 = "fly"
+			info.checked = journal.list and journal.list.fly[self.menuSpellID]
+			btn:ddAddButton(info, level)
+
+			info.text = L["SELECT_AS_TYPE_2"]
+			info.arg2 = "ground"
+			info.checked = journal.list and journal.list.ground[self.menuSpellID]
+			btn:ddAddButton(info, level)
+
+			info.text = L["SELECT_AS_TYPE_3"]
+			info.arg2 = "swimming"
+			info.checked = journal.list and journal.list.swimming[self.menuSpellID]
+			btn:ddAddButton(info, level)
+
+			info.isNotRadio = nil
 			info.func = nil
+			info.notCheckable = true
+			info.hasArrow = true
 			info.text = L["tags"]
 			info.value = 1
 			btn:ddAddButton(info, level)
@@ -229,7 +252,7 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 			info.hasArrow = true
 			info.text = L["Family"]
 			info.value = 2
-			btn:ddAddButton(info)
+			btn:ddAddButton(info, level)
 		end
 		--@end-do-not-package@
 

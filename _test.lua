@@ -1,5 +1,6 @@
 local addon, ns = ...
 local L, mounts, config, journal = ns.L, ns.mounts, ns.config, ns.journal
+mounts.newMounts = ns.newMounts
 mounts.mountsDB = ns.mountsDB
 mounts.familyDB = ns.familyDB
 mounts.additionalMounts = ns.additionalMounts
