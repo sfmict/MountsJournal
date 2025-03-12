@@ -1640,7 +1640,7 @@ function journal:setScrollGridMounts(grid)
 	if grid then
 		template = "MJMountGridListButtons"
 		self.initMountButton = self.gridInitMountButton
-		self.view:SetPadding(0,0,9,0,0)
+		self.view:SetPadding(0,0,7,0,0)
 		self.view:SetElementExtent(44)
 		index = math.ceil(index / 4)
 	else
@@ -1787,7 +1787,7 @@ end
 
 function journal:gridInitMountButton(btn, data)
 	for i = 1, #btn.mounts do
-		local g3btn = btn.mounts[i]
+		local gbtn = btn.mounts[i]
 
 		if data[i] then
 			local mountID = data[i].mountID
@@ -1801,45 +1801,45 @@ function journal:gridInitMountButton(btn, data)
 				qualityColor = HIGHLIGHT_FONT_COLOR
 			end
 
-			g3btn.spellID = spellID
-			g3btn.mountID = mountID
-			g3btn.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
-			g3btn.icon:SetVertexColor(1, 1, 1)
-			g3btn.qualityBorder:SetVertexColor(qualityColor:GetRGB())
-			g3btn:Enable()
-			g3btn.selectedTexture:SetShown(mountID == self.selectedMountID)
-			g3btn.hidden:SetShown(self:isMountHidden(spellID))
-			g3btn.favorite:SetShown(isFavorite)
+			gbtn.spellID = spellID
+			gbtn.mountID = mountID
+			gbtn.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
+			gbtn.icon:SetVertexColor(1, 1, 1)
+			gbtn.qualityBorder:SetVertexColor(qualityColor:GetRGB())
+			gbtn:Enable()
+			gbtn.selectedTexture:SetShown(mountID == self.selectedMountID)
+			gbtn.hidden:SetShown(self:isMountHidden(spellID))
+			gbtn.favorite:SetShown(isFavorite)
 
 			local mountWeight = self.mountsWeight[spellID]
 			if mountWeight then
-				g3btn.mountWeight:SetText(getColorWeight(mountWeight))
-				g3btn.mountWeight:Show()
-				g3btn.mountWeightBG:Show()
+				gbtn.mountWeight:SetText(getColorWeight(mountWeight))
+				gbtn.mountWeight:Show()
+				gbtn.mountWeightBG:Show()
 			else
-				g3btn.mountWeight:Hide()
-				g3btn.mountWeightBG:Hide()
+				gbtn.mountWeight:Hide()
+				gbtn.mountWeightBG:Hide()
 			end
 
 			if isUsable or needsFanfare then
-				g3btn.icon:SetDesaturated()
-				g3btn.icon:SetAlpha(1)
+				gbtn.icon:SetDesaturated()
+				gbtn.icon:SetAlpha(1)
 			elseif isCollected then
-				g3btn.icon:SetDesaturated(true)
+				gbtn.icon:SetDesaturated(true)
 				-- 150/255, 50/255, 50/255
-				g3btn.icon:SetVertexColor(.58823529411765, .19607843137255, .19607843137255)
-				g3btn.icon:SetAlpha(.75)
-				g3btn.qualityBorder:SetAlpha(.75)
+				gbtn.icon:SetVertexColor(.58823529411765, .19607843137255, .19607843137255)
+				gbtn.icon:SetAlpha(.75)
+				gbtn.qualityBorder:SetAlpha(.75)
 			else
-				g3btn.icon:SetDesaturated(true)
-				g3btn.icon:SetAlpha(.35)
-				g3btn.qualityBorder:SetAlpha(.25)
+				gbtn.icon:SetDesaturated(true)
+				gbtn.icon:SetAlpha(.35)
+				gbtn.qualityBorder:SetAlpha(.25)
 			end
 
-			self:updateMountToggleButton(g3btn)
-			g3btn:Show()
+			self:updateMountToggleButton(gbtn)
+			gbtn:Show()
 		else
-			g3btn:Hide()
+			gbtn:Hide()
 		end
 	end
 end

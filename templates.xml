@@ -1798,17 +1798,17 @@
 			</Button>
 			<Button parentArray="mounts" inherits="MJGridMountButtonTemplate">
 				<Anchors>
-					<Anchor point="LEFT" x="63" y="0"/>
+					<Anchor point="LEFT" x="64" y="0"/>
 				</Anchors>
 			</Button>
 			<Button parentArray="mounts" inherits="MJGridMountButtonTemplate">
 				<Anchors>
-					<Anchor point="LEFT" x="125" y="0"/>
+					<Anchor point="LEFT" x="126" y="0"/>
 				</Anchors>
 			</Button>
 			<Button parentArray="mounts" inherits="MJGridMountButtonTemplate">
 				<Anchors>
-					<Anchor point="LEFT" x="187" y="0"/>
+					<Anchor point="LEFT" x="188" y="0"/>
 				</Anchors>
 			</Button>
 		</Frames>
