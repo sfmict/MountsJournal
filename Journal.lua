@@ -1047,16 +1047,23 @@ function journal:init()
 			util.addTooltipDLine(L["Family"], getPath(familyID))
 		end
 
+		-- tags
+		local mTags = self.tags.mountTags[self.selectedSpellID]
+		if mTags then
+			util.addTooltipDLine(L["tags"], table.concat(GetKeysArray(mTags), ", "))
+		end
+
 		-- faction
 		util.addTooltipDLine(L["factions"], L["MOUNT_FACTION_"..((faction or 2) + 1)])
 
 		-- expanstion
 		util.addTooltipDLine(EXPANSION_FILTER_TEXT, _G["EXPANSION_NAME"..(expansion - 1)])
 
-		-- tags
-		local mTags = self.tags.mountTags[self.selectedSpellID]
-		if mTags then
-			util.addTooltipDLine(L["tags"], table.concat(GetKeysArray(mTags), ", "))
+		-- receipt date
+		local mountDate = mounts:getMountDate(self.selectedSpellID)
+		if mountDate then
+			local tDate = date("*t", mountDate)
+			util.addTooltipDLine(L["Receipt date"], FormatShortDate(tDate.day, tDate.month, tDate.year))
 		end
 
 		-- statistic

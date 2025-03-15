@@ -474,6 +474,12 @@ function mounts:addMountDate(spellID, time)
 end
 
 
+function mounts:getMountDate(spellID)
+	local mountStat = rawget(self.stat, spellID)
+	return mountStat and mountStat[4] and time() - GetServerTime() + mountStat[4]
+end
+
+
 function mounts:getMountSummons(spellID)
 	local mountStat = rawget(self.stat, spellID)
 	return mountStat and mountStat[1] or 0
