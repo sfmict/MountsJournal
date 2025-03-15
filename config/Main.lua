@@ -356,7 +356,7 @@ config:SetScript("OnShow", function(self)
 	-- USE MAGIC BROOM
 	self.useMagicBroom = CreateFrame("CheckButton", nil, self.magicBroomGroup, "MJCheckButtonTemplate")
 	self.useMagicBroom:SetPoint("TOPLEFT", self.magicBroomGroup, 3, -3)
-	self.useMagicBroom.Text:SetPoint("RIGHT", self.rightPanelScroll)
+	self.useMagicBroom.Text:SetPoint("RIGHT", self.magicBroomGroup, -4, 0)
 	self.useMagicBroom.Text:SetText(L["UseHallowsEndMounts"])
 	self.useMagicBroom.tooltipText = L["UseHallowsEndMounts"]
 	self.useMagicBroom.tooltipRequirement = L["UseHallowsEndMountsDescription"]
@@ -457,6 +457,7 @@ config:SetScript("OnShow", function(self)
 		self.autoUseUnderlightAngler:HookScript("OnClick", enableBtns)
 	end
 
+	-- PET GROUP
 	self.petGroup = createGropPanel(self.rightPanelScroll.child, 4)
 	self.petGroup:SetPoint("TOPLEFT", self.underlightAnglerGroup or self.magicBroomGroup, "BOTTOMLEFT", 0, -5)
 
@@ -504,41 +505,52 @@ config:SetScript("OnShow", function(self)
 	-- NO PET IN RAID
 	self.noPetInRaid = CreateFrame("CheckButton", nil, self.petGroup, "MJCheckButtonTemplate")
 	self.noPetInRaid:SetPoint("TOPLEFT", self.summonPetOnlyFavorites, "BOTTOMLEFT", -20, -3)
-	self.noPetInRaid.Text:SetPoint("RIGHT", self.rightPanelScroll)
+	self.noPetInRaid.Text:SetPoint("RIGHT", self.petGroup, -4, 0)
 	self.noPetInRaid.Text:SetText(L["NoPetInRaid"])
 	self.noPetInRaid:HookScript("OnClick", enableBtns)
 
 	-- NO PET IN GROUP
 	self.noPetInGroup = CreateFrame("CheckButton", nil, self.petGroup, "MJCheckButtonTemplate")
 	self.noPetInGroup:SetPoint("TOPLEFT", self.noPetInRaid, "BOTTOMLEFT", 0, -3)
-	self.noPetInGroup.Text:SetPoint("RIGHT", self.rightPanelScroll)
+	self.noPetInGroup.Text:SetPoint("RIGHT", self.petGroup, -4, 0)
 	self.noPetInGroup.Text:SetText(L["NoPetInGroup"])
 	self.noPetInGroup:HookScript("OnClick", enableBtns)
 
-	-- COPY MOUNT TARGET
-	self.copyMountTarget = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.copyMountTarget:SetPoint("TOPLEFT", self.noPetInGroup, "BOTTOMLEFT", 0, -15)
-	self.copyMountTarget.Text:SetPoint("RIGHT", self.rightPanelScroll)
-	self.copyMountTarget.Text:SetText(L["CopyMountTarget"])
-	self.copyMountTarget:HookScript("OnClick", enableBtns)
+	-- MOUNT LIST GROUP
+	self.mountListGroup = createGropPanel(self.rightPanelScroll.child, 3)
+	self.mountListGroup:SetPoint("TOPLEFT", self.petGroup, "BOTTOMLEFT", 0, -5)
 
 	-- COLORIZED NAMES
-	self.coloredMountNames = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.coloredMountNames:SetPoint("TOPLEFT", self.copyMountTarget, "BOTTOMLEFT", 0, -15)
-	self.coloredMountNames.Text:SetPoint("RIGHT", self.rightPanelScroll)
+	self.coloredMountNames = CreateFrame("CheckButton", nil, self.mountListGroup, "MJCheckButtonTemplate")
+	self.coloredMountNames:SetPoint("TOPLEFT", self.mountListGroup, 3, -3)
+	self.coloredMountNames.Text:SetPoint("RIGHT", self.mountListGroup, -4, 0)
 	self.coloredMountNames.Text:SetText(L["Colored mount names by rarity"])
 	self.coloredMountNames:HookScript("OnClick", enableBtns)
 
 	-- ARROW BUTTONS
-	self.arrowButtons = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.arrowButtons:SetPoint("TOPLEFT", self.coloredMountNames, "BOTTOMLEFT", 0, -15)
-	self.arrowButtons.Text:SetPoint("RIGHT", self.rightPanelScroll)
+	self.arrowButtons = CreateFrame("CheckButton", nil, self.mountListGroup, "MJCheckButtonTemplate")
+	self.arrowButtons:SetPoint("TOPLEFT", self.coloredMountNames, "BOTTOMLEFT", 0, -3)
+	self.arrowButtons.Text:SetPoint("RIGHT", self.mountListGroup, -4, 0)
 	self.arrowButtons.Text:SetText(L["Enable arrow buttons to browse mounts"])
 	self.arrowButtons:HookScript("OnClick", enableBtns)
 
+	-- TYPE SELECTION BUTTONS
+	self.showTypeSelBtn = CreateFrame("CheckButton", nil, self.mountListGroup, "MJCheckButtonTemplate")
+	self.showTypeSelBtn:SetPoint("TOPLEFT", self.arrowButtons, "BOTTOMLEFT", 0, -3)
+	self.showTypeSelBtn.Text:SetPoint("RIGHT", self.mountListGroup, -4, 0)
+	self.showTypeSelBtn.Text:SetText(L["Show mount type selection buttons"])
+	self.showTypeSelBtn:HookScript("OnClick", enableBtns)
+
+		-- COPY MOUNT TARGET
+	self.copyMountTarget = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
+	self.copyMountTarget:SetPoint("TOPLEFT", self.showTypeSelBtn, "BOTTOMLEFT", 0, -15)
+	self.copyMountTarget.Text:SetPoint("RIGHT", self.rightPanelScroll)
+	self.copyMountTarget.Text:SetText(L["CopyMountTarget"])
+	self.copyMountTarget:HookScript("OnClick", enableBtns)
+
 	-- OPEN HYPERLINKS
 	self.openLinks = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.openLinks:SetPoint("TOPLEFT", self.arrowButtons, "BOTTOMLEFT", 0, -15)
+	self.openLinks:SetPoint("TOPLEFT", self.copyMountTarget, "BOTTOMLEFT", 0, -15)
 	self.openLinks.Text:SetPoint("RIGHT", self.rightPanelScroll)
 	self.openLinks.Text:SetText(L["Open links in %s"]:format(addon))
 	self.openLinks.tooltipText = L["Open links in %s"]:format(addon)
@@ -664,9 +676,10 @@ config:SetScript("OnShow", function(self)
 		end
 		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
-		self.copyMountTarget:SetChecked(mounts.config.copyMountTarget)
 		self.coloredMountNames:SetChecked(mounts.config.coloredMountNames)
 		self.arrowButtons:SetChecked(mounts.config.arrowButtonsBrowse)
+		self.showTypeSelBtn:SetChecked(mounts.config.showTypeSelBtn)
+		self.copyMountTarget:SetChecked(mounts.config.copyMountTarget)
 		self.openLinks:SetChecked(mounts.config.openHyperlinks)
 		self.showWowheadLink:SetChecked(mounts.config.showWowheadLink)
 		self.statisticCollection:SetChecked(mounts.config.statCollection)
@@ -708,9 +721,10 @@ config:SetScript("OnShow", function(self)
 		mounts.config.summonPetOnlyFavorites = self.summonPetOnlyFavorites:GetChecked()
 		mounts.config.noPetInRaid = self.noPetInRaid:GetChecked()
 		mounts.config.noPetInGroup = self.noPetInGroup:GetChecked()
-		mounts.config.copyMountTarget = self.copyMountTarget:GetChecked()
 		mounts.config.coloredMountNames = self.coloredMountNames:GetChecked()
 		mounts.config.arrowButtonsBrowse = self.arrowButtons:GetChecked()
+		mounts.config.showTypeSelBtn = self.showTypeSelBtn:GetChecked()
+		mounts.config.copyMountTarget = self.copyMountTarget:GetChecked()
 		mounts.config.openHyperlinks = self.openLinks:GetChecked()
 		mounts.config.showWowheadLink = self.showWowheadLink:GetChecked()
 		mounts.config.statCollection = self.statisticCollection:GetChecked()
@@ -725,6 +739,7 @@ config:SetScript("OnShow", function(self)
 		mounts:setUsableRepairMounts()
 		mounts:setHerbMount()
 		ns.pets:setSummonEvery()
+		journal:setScrollGridMounts(mounts.config.gridToggle, true)
 		journal:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 	end
 end)
