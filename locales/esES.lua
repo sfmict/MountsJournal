@@ -87,6 +87,7 @@ L["ButtonsSelectedTooltipDescription"] = "Los favoritos no afectan a los montaje
 -- L["PET_4"] = ""
 -- L["expansions"] = ""
 -- L["Rarity"] = ""
+-- L["Receipt date"] = ""
 -- L["Travel time"] = ""
 -- L["Travel distance"] = ""
 -- L["Avg. speed"] = ""

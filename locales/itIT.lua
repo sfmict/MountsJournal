@@ -87,6 +87,7 @@ local L = ns.L
 -- L["PET_4"] = ""
 -- L["expansions"] = ""
 -- L["Rarity"] = ""
+-- L["Receipt date"] = ""
 -- L["Travel time"] = ""
 -- L["Travel distance"] = ""
 -- L["Avg. speed"] = ""
