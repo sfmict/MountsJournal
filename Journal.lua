@@ -1047,16 +1047,23 @@ function journal:init()
 			util.addTooltipDLine(L["Family"], getPath(familyID))
 		end
 
+		-- tags
+		local mTags = self.tags.mountTags[self.selectedSpellID]
+		if mTags then
+			util.addTooltipDLine(L["tags"], table.concat(GetKeysArray(mTags), ", "))
+		end
+
 		-- faction
 		util.addTooltipDLine(L["factions"], L["MOUNT_FACTION_"..((faction or 2) + 1)])
 
 		-- expanstion
 		util.addTooltipDLine(EXPANSION_FILTER_TEXT, _G["EXPANSION_NAME"..(expansion - 1)])
 
-		-- tags
-		local mTags = self.tags.mountTags[self.selectedSpellID]
-		if mTags then
-			util.addTooltipDLine(L["tags"], table.concat(GetKeysArray(mTags), ", "))
+		-- receipt date
+		local mountDate = mounts:getMountDate(self.selectedSpellID)
+		if mountDate then
+			local tDate = date("*t", mountDate)
+			util.addTooltipDLine(L["Receipt date"], FormatShortDate(tDate.day, tDate.month, tDate.year))
 		end
 
 		-- statistic
@@ -1633,22 +1640,46 @@ function journal:getMountAllCreatureDisplayInfo(mount)
 end
 
 
-function journal:setScrollGridMounts(grid)
+function journal:setScrollGridMounts(grid, isSwitch)
 	local index = self.view:CalculateDataIndices(self.scrollBox)
-	local template
+	local template, padding
 
 	if grid then
-		template = "MJMountGridListButtons"
+		if mounts.config.showTypeSelBtn then
+			self.gridN = 3
+			padding = 2
+			template = "MJMountGridListButtonWithTypeBtns"
+		else
+			self.gridN = 4
+			padding = 7
+			template = "MJMountGridListButtonDef"
+		end
 		self.initMountButton = self.gridInitMountButton
-		self.view:SetPadding(0,0,7,0,0)
+		self.view:SetPadding(0,0,padding,0,0)
 		self.view:SetElementExtent(44)
-		index = math.ceil(index / 4)
+		if isSwitch then
+			local n = self.gridN == 3 and 4 or 3
+			index = math.ceil((index * n - n + 1) / self.gridN)
+		else
+			index = math.ceil(index / self.gridN)
+		end
 	else
-		template = "MJMountDefaultListButton"
+		local extent
+		if mounts.config.showTypeSelBtn then
+			self.gridN = 3
+			extent = 44
+			padding = 25
+			template = "MJMountDefaultListButtonWithTypeBtns"
+		else
+			self.gridN = 4
+			extent = 40
+			padding = 0
+			template = "MJMountDefaultListButton"
+		end
 		self.initMountButton = self.defaultInitMountButton
-		self.view:SetPadding(0,0,41,0,0)
-		self.view:SetElementExtent(40)
-		index = (index - 1) * 4 + 1
+		self.view:SetPadding(0,0,41,padding,0)
+		self.view:SetElementExtent(extent)
+		if not isSwitch then index = (index - 1) * self.gridN + 1 end
 	end
 
 	self.view:SetElementInitializer(template, function(...)
@@ -1663,42 +1694,51 @@ end
 
 
 do
-	local function showNext(toggles, texture, color)
-		for i = 1, #toggles do
-			local toggle = toggles[i]
-			if not toggle:IsShown() then
-				toggle:SetTexture(texture)
-				toggle:SetVertexColor(color:GetRGB())
-				toggle:Show()
-				break
-			end
-		end
+	local function showNext(toggles, index, texture, color)
+		local toggle = toggles[index]
+		toggle:SetTexture(texture)
+		toggle:SetVertexColor(color:GetRGB())
+		toggle:Show()
+		return index + 1
+	end
+
+	local function setColor(self, btn, checked)
+		local color = checked and self.colors.gold or self.colors.gray
+		btn.icon:SetVertexColor(color:GetRGB())
+		btn:SetChecked(checked)
 	end
 
 	function journal:updateMountToggleButton(btn, reverse)
-		for i = 1, #btn.toggle do btn.toggle[i]:Hide() end
-		if self.list then
-			if reverse then
-				if self.list.swimming[btn.spellID] then
-					showNext(btn.toggle, self.tSwimming, self.colors.mount3)
-				end
-				if self.list.ground[btn.spellID] then
-					showNext(btn.toggle, self.tGround, self.colors.mount2)
-				end
-				if self.list.fly[btn.spellID] then
-					showNext(btn.toggle, self.tFly, self.colors.mount1)
-				end
-			else
-				if self.list.fly[btn.spellID] then
-					showNext(btn.toggle, self.tFly, self.colors.mount1)
-				end
-				if self.list.ground[btn.spellID] then
-					showNext(btn.toggle, self.tGround, self.colors.mount2)
-				end
-				if self.list.swimming[btn.spellID] then
-					showNext(btn.toggle, self.tSwimming, self.colors.mount3)
+		if btn.toggle then
+			for i = 1, #btn.toggle do btn.toggle[i]:Hide() end
+			if self.list then
+				local index = 1
+				if reverse then
+					if self.list.swimming[btn.spellID] then
+						index = showNext(btn.toggle, index, self.tSwimming, self.colors.mount3)
+					end
+					if self.list.ground[btn.spellID] then
+						index = showNext(btn.toggle, index, self.tGround, self.colors.mount2)
+					end
+					if self.list.fly[btn.spellID] then
+						showNext(btn.toggle, index, self.tFly, self.colors.mount1)
+					end
+				else
+					if self.list.fly[btn.spellID] then
+						index = showNext(btn.toggle, index, self.tFly, self.colors.mount1)
+					end
+					if self.list.ground[btn.spellID] then
+						index = showNext(btn.toggle, index, self.tGround, self.colors.mount2)
+					end
+					if self.list.swimming[btn.spellID] then
+						showNext(btn.toggle, index, self.tSwimming, self.colors.mount3)
+					end
 				end
 			end
+		else
+			setColor(self, btn.fly, self.list and self.list.fly[btn.spellID])
+			setColor(self, btn.ground, self.list and self.list.ground[btn.spellID])
+			setColor(self, btn.swimming, self.list and self.list.swimming[btn.spellID])
 		end
 	end
 end
@@ -1876,7 +1916,7 @@ function journal:setArrowSelectMount(enabled)
 
 				delta = (key == "UP" or key == "LEFT") and -1 or 1
 				if mounts.config.gridToggle and (key == "UP" or key == "DOWN") then
-					delta = delta * 4
+					delta = delta * self.gridN
 				end
 
 				index = nil
@@ -3121,7 +3161,7 @@ function journal:updateMountsList()
 			local mountData = {index = numMounts, mountID = mountID}
 
 			if mounts.config.gridToggle then
-				if data and #data < 4 then
+				if data and #data < self.gridN then
 					data[#data + 1] = mountData
 				else
 					data = {mountData}

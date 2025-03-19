@@ -100,7 +100,7 @@ do
 	end
 
 	function MJExistingListsMixin:refresh()
-		if not self:IsShown() then return end
+		if not self:IsVisible() then return end
 		self.lastWidth = 0
 		local text = self.util.cleanText(self.searchBox:GetText())
 		local list, relation, flags = {}, {}, {}

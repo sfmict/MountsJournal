@@ -7,6 +7,11 @@ ns.journal:on("MODULES_INIT", function(journal)
 	local function click(btn, mouse) journal.tags:listItemClick(btn, mouse) end
 	local function drag(btn) journal.tags:dragMount(btn.spellID or btn:GetParent().spellID) end
 
+	local function typeClick(btn)
+		local parent = btn:GetParent()
+		journal:mountToggle(btn.type, parent.spellID, parent.mountID)
+	end
+
 	local function onEnter(self)
 		self.highlight:Show()
 		local f = self.mountID and self or self:GetParent()
@@ -80,6 +85,11 @@ ns.journal:on("MODULES_INIT", function(journal)
 					btn:SetScript("OnDragStart", drag)
 					btn:SetScript("OnEnter", onEnter)
 					btn:SetScript("OnLeave", onLeave)
+					if btn.fly then
+						btn.fly:SetScript("OnClick", typeClick)
+						btn.ground:SetScript("OnClick", typeClick)
+						btn.swimming:SetScript("OnClick", typeClick)
+					end
 				end
 			else
 				frame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
@@ -92,6 +102,11 @@ ns.journal:on("MODULES_INIT", function(journal)
 				frame.dragButton:SetScript("OnDragStart", drag)
 				frame.dragButton:SetScript("OnEnter", onEnter)
 				frame.dragButton:SetScript("OnLeave", onLeave)
+				if frame.fly then
+					frame.fly:SetScript("OnClick", typeClick)
+					frame.ground:SetScript("OnClick", typeClick)
+					frame.swimming:SetScript("OnClick", typeClick)
+				end
 			end
 		end
 	end)
