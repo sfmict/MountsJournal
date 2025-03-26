@@ -251,7 +251,7 @@ local function handleProgressComm(prefix, message, distribution, sender)
 			showTooltip({
 				{2, L[dataType], dataID == "" and DEFAULT or dataID, 1,1,1,r,g,b},
 				{1, L["Receiving data from %s"]:format(sender), 1,.8,0},
-				{2, " ", ("|cFF%2x%2x00"):format(red, green)..done.."|cFF00FF00/"..total}
+				{2, " ", ("|cFF%2x%2x00%d|cFF00FF00/%d"):format(red, green, done, total)}
 			})
 		end
 	end

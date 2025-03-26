@@ -2941,7 +2941,7 @@
 				<FontString inherits="GameFontNormalSmall" parentKey="level" justifyH="CENTER" hidden="true">
 					<Size x="0" y="0"/>
 					<Anchors>
-						<Anchor point="CENTER" relativeKey="$parent.levelBG" x="1"/>
+						<Anchor point="CENTER" relativeKey="$parent.levelBG" x="1" y="-1"/>
 					</Anchors>
 				</FontString>
 				<Texture atlas="PetJournal-FavoritesIcon" parentKey="favorite" hidden="true">
@@ -3006,9 +3006,9 @@
 		</HighlightTexture>
 		<Frames>
 			<Frame parentKey="infoFrame" inherits="MJPetInfo">
-				<Size x="33" y="33"/>
+				<Size x="35" y="35"/>
 				<Anchors>
-					<Anchor point="LEFT" x="3"/>
+					<Anchor point="LEFT" x="1"/>
 				</Anchors>
 			</Frame>
 		</Frames>

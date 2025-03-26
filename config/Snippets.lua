@@ -262,7 +262,9 @@ end
 function snippets:dataImport(data, name, characterName)
 	dataDialog:open({
 		type = "dataImport",
-		text = ("%s: %s\n%s: %s"):format(L["Snippet"], name, L["Received from"], characterName),
+		typeLang = L["Snippet"],
+		id = name,
+		fromName = characterName,
 		data = data,
 		save = function(code)
 			util.openJournalTab(1, 3)

@@ -600,7 +600,9 @@ end
 function rules:dataImportRule(data, rName, characterName)
 	dataDialog:open({
 		type = "dataImport",
-		text = ("%s: %s\n %s: %s"):format(L["Rule"], rName, L["Received from"], characterName),
+		typeLang = L["Rule"],
+		id = rName,
+		fromName = characterName,
 		data = data,
 		save = function(rule)
 			if self:checkRule(rule) then
@@ -669,7 +671,9 @@ function rules:dataImportRuleSet(data, rsName, characterName)
 	dataDialog:open({
 		type = "dataImport",
 		defName = rsName,
-		text = ("%s: %s\n%s: %s"):format(L["Rule Set"], rsName, L["Received from"], characterName),
+		typeLang = L["Rule Set"],
+		id = rsName,
+		fromName = characterName,
 		data = data,
 		save = function(data, name) return self:saveImportedRuleSet(data, name) end,
 	})

@@ -169,16 +169,20 @@ function dataDialog:open(info)
 		self.btn2:SetText(OKAY)
 		self.btn2:SetPoint("BOTTOM", 0, 5)
 	elseif info.type == "dataImport" then
+		local color = NIGHT_FAE_BLUE_COLOR:GenerateHexColorMarkup()
 		self:SetTitle(L["Import"])
 		self.codeBtn:Hide()
 		self.label:Show()
-		self.label:SetText(info.text)
+		self.label:SetFormattedText("%s: %s%s|r\n%s: %s%s|r", info.typeLang, color, info.id, L["Received from"], color, info.fromName)
 		self.data = info.data
 
 		if info.defName then
 			self.nameString:Show()
 			self.nameEdit:Show()
 			self.nameEdit:SetText(info.defName)
+			self.nameEdit:SetFocus()
+			self.nameEdit:HighlightText()
+			self.nameEdit:SetCursorPosition(0)
 			self.label:SetPoint("TOPLEFT", self.nameString, "BOTTOMLEFT", -3, -4)
 		else
 			self.nameString:Hide()

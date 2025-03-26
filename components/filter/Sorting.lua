@@ -99,7 +99,7 @@ function journal.filters.sorting(btn, level, value)
 		fSort.collectedFirst = value
 		journal:sortMounts()
 	end
-	info.checked = fSort.favoritesFirst
+	info.checked = fSort.collectedFirst
 	btn:ddAddButton(info, level)
 
 	info.text = L["Favorites First"]

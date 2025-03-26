@@ -197,11 +197,12 @@ ns.journal:on("MODULES_INIT", function(journal)
 	end
 
 	function dd:dataImport(data, pName, characterName)
-		local name = pName == "" and DEFAULT or pName
 		ns.dataDialog:open({
 			type = "dataImport",
 			defName = pName == "" and UnitName("player").." - "..GetRealmName() or pName,
-			text = ("%s: %s\n%s: %s"):format(L["Profile"], name, L["Received from"], characterName),
+			typeLang = L["Profile"],
+			id = pName == "" and DEFAULT or pName,
+			fromName = characterName,
 			data = data,
 			save = function(data, name) return self:saveImportedProfile(data, name) end,
 		})
