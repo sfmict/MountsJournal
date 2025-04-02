@@ -2,7 +2,7 @@ local addon, ns = ...
 local L, mounts, journal = ns.L, ns.mounts, ns.journal
 
 
-function journal.filters.chance(btn, level)
+function journal.filters.chance(dd, level)
 	local filterWeight = mounts.filters.mountsWeight
 	local info = {}
 	info.keepShownOnClick = true
@@ -10,26 +10,26 @@ function journal.filters.chance(btn, level)
 	info.text = L["Any"]
 	info.func = function(button)
 		filterWeight.sign = button.value
-		btn:ddRefresh(level)
+		dd:ddRefresh(level)
 		journal:updateMountsList()
 	end
 	info.checked = function() return not filterWeight.sign end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 
 	info.text = L["> (more than)"]
 	info.value = ">"
 	info.checked = function() return filterWeight.sign == ">" end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 
 	info.text = L["< (less than)"]
 	info.value = "<"
 	info.checked = function() return filterWeight.sign == "<" end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 
 	info.text = L["= (equal to)"]
 	info.value = "="
 	info.checked = function() return filterWeight.sign == "=" end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 
 	info.text = nil
 	info.value = nil
@@ -47,5 +47,5 @@ function journal.filters.chance(btn, level)
 			end
 		end
 	end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 end

@@ -2,7 +2,7 @@ local addon, ns = ...
 local L, util, mounts, journal = ns.L, ns.util, ns.mounts, ns.journal
 
 
-function journal.filters.expansions(btn, level)
+function journal.filters.expansions(dd, level)
 	local info = {}
 	info.keepShownOnClick = true
 	info.isNotRadio = true
@@ -12,19 +12,20 @@ function journal.filters.expansions(btn, level)
 	info.func = function()
 		journal:setAllFilters("expansions", true)
 		journal:updateMountsList()
-		btn:ddRefresh(level)
+		dd:ddRefresh(level)
 	end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 
 	info.text = UNCHECK_ALL
 	info.func = function()
 		journal:setAllFilters("expansions", false)
 		journal:updateMountsList()
-		btn:ddRefresh(level)
+		dd:ddRefresh(level)
 	end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 
 	info.notCheckable = nil
+	local expansions = mounts.filters.expansions
 
 	local colors = {
 		"D6AB7D", -- classic
@@ -56,16 +57,26 @@ function journal.filters.expansions(btn, level)
 		tSizeX = 40,
 		tSizeY = 20,
 	}
+	info.widgets = {{
+		icon = "interface/worldmap/worldmappartyicon",
+		OnClick = function(btn)
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+			journal:setAllFilters("expansions", false)
+			expansions[btn.value] = true
+			journal:updateMountsList()
+			dd:ddRefresh(level)
+		end,
+	}}
+	info.func = function(btn, _,_, checked)
+		expansions[btn.value] = checked
+		journal:updateMountsList()
+	end
+	info.checked = function(btn) return expansions[btn.value] end
 
-	local expansions = mounts.filters.expansions
 	for i = util.expansion, 1, -1 do
 		info.text = ("|cff%s%s|r"):format(colors[i] or "E8E8E8", _G["EXPANSION_NAME"..(i - 1)])
 		info.icon = icons[i] or [[Interface\EncounterJournal\UI-EJ-BOSS-Default]]
-		info.func = function(_,_,_, value)
-			expansions[i] = value
-			journal:updateMountsList()
-		end
-		info.checked = function() return expansions[i] end
-		btn:ddAddButton(info, level)
+		info.value = i
+		dd:ddAddButton(info, level)
 	end
 end

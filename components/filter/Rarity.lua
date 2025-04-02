@@ -2,7 +2,7 @@ local addon, ns = ...
 local L, mounts, journal = ns.L, ns.mounts, ns.journal
 
 
-function journal.filters.rarity(btn, level)
+function journal.filters.rarity(dd, level)
 	local filterRarity = mounts.filters.mountsRarity
 	local info = {}
 	info.keepShownOnClick = true
@@ -10,26 +10,26 @@ function journal.filters.rarity(btn, level)
 	info.text = L["Any"]
 	info.func = function(button)
 		filterRarity.sign = button.value
-		btn:ddRefresh(level)
+		dd:ddRefresh(level)
 		journal:updateMountsList()
 	end
 	info.checked = function() return not filterRarity.sign end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 
 	info.text = L["> (more than)"]
 	info.value = ">"
 	info.checked = function() return filterRarity.sign == ">" end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 
 	info.text = L["< (less than)"]
 	info.value = "<"
 	info.checked = function() return filterRarity.sign == "<" end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 
 	info.text = L["= (equal to)"]
 	info.value = "="
 	info.checked = function() return filterRarity.sign == "=" end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 
 	info.text = nil
 	info.value = nil
@@ -47,5 +47,5 @@ function journal.filters.rarity(btn, level)
 			end
 		end
 	end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 end

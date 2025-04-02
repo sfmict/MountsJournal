@@ -1148,7 +1148,7 @@
 						<Texture parentKey="monthBackground" file="Interface\Calendar\CalendarBackground">
 							<Size x="142" y="36"/>
 							<Anchors>
-								<Anchor point="TOP" x="0" y="-11"/>
+								<Anchor point="TOP" relativePoint="TOPLEFT" x="100" y="-11"/>
 							</Anchors>
 							<TexCoords left="0" right=".5546875" top=".828125" bottom=".96875"/>
 						</Texture>

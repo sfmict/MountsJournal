@@ -13,7 +13,6 @@ codeEdit:SetScript("OnShow", function(self)
 	self:SetPoint("TOPLEFT", ns.journal.bgFrame, 0, -18)
 	self:SetPoint("BOTTOMRIGHT", ns.snippets)
 	self:SetBackdropColor(.1, .1, .1, .9)
-	local font = "Interface\\Addons\\MountsJournal\\Fonts\\FiraCode-Regular.ttf"
 
 	self:SetScript("OnShow", escOnShow)
 	self:HookScript("OnHide", function(self)
@@ -248,7 +247,7 @@ codeEdit:SetScript("OnShow", function(self)
 			local check = function(btn) return btn.value == mounts.globalDB.editorFontSize end
 			local func = function(btn)
 				mounts.globalDB.editorFontSize = btn.value
-				self.editBox:SetFont(font, mounts.globalDB.editorFontSize, "")
+				self.editBox:SetFont(util.codeFont, mounts.globalDB.editorFontSize, "")
 				dd:ddRefresh(level)
 			end
 
@@ -421,7 +420,7 @@ return "" -- macro text (255 symbols) / nil
 
 	setScheme()
 	IndentationLib.enable(self.editBox, colorScheme, mounts.globalDB.editorTabSpaces)
-	self.editBox:SetFont(font, mounts.globalDB.editorFontSize, "")
+	self.editBox:SetFont(util.codeFont, mounts.globalDB.editorFontSize, "")
 	local scrollBox = self.editFrame:GetScrollBox()
 	--scrollBox:GetView():SetPanExtent(self.editBox:GetFontHeight())
 

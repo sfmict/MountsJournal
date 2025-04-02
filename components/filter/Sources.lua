@@ -2,7 +2,7 @@ local _, ns = ...
 local mounts, journal = ns.mounts, ns.journal
 
 
-function journal.filters.sources(btn, level)
+function journal.filters.sources(dd, level)
 	local info = {}
 	info.keepShownOnClick = true
 	info.isNotRadio = true
@@ -13,18 +13,21 @@ function journal.filters.sources(btn, level)
 		journal:setAllFilters("sources", true)
 		journal:updateBtnFilters()
 		journal:updateMountsList()
-		btn:ddRefresh(level)
+		dd:ddRefresh(level)
 	end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 
 	info.text = UNCHECK_ALL
 	info.func = function()
 		journal:setAllFilters("sources", false)
 		journal:updateBtnFilters()
 		journal:updateMountsList()
-		btn:ddRefresh(level)
+		dd:ddRefresh(level)
 	end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
+
+	info.notCheckable = nil
+	local sources = mounts.filters.sources
 
 	local icons = {
 		"Interface/AddOns/MountsJournal/textures/sources",
@@ -103,21 +106,30 @@ function journal.filters.sources(btn, level)
 			tCoordBottom = .75,
 		},
 	}
+	info.widgets = {{
+		icon = "interface/worldmap/worldmappartyicon",
+		OnClick = function(btn)
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+			journal:setAllFilters("sources", false)
+			sources[btn.value] = true
+			journal:updateMountsList()
+			dd:ddRefresh(level)
+		end,
+	}}
+	info.func = function(btn, _,_, checked)
+		sources[btn.value] = checked
+		journal:updateBtnFilters()
+		journal:updateMountsList()
+	end
+	info.checked = function(btn) return sources[btn.value] end
 
-	info.notCheckable = nil
-	local sources = mounts.filters.sources
 	for i = 1, C_PetJournal.GetNumPetSources() do
 		if C_MountJournal.IsValidSourceFilter(i) then
 			info.text = _G["BATTLE_PET_SOURCE_"..i]
 			info.icon = icons[i]
 			info.iconInfo = iconInfos[i]
-			info.func = function(_,_,_, value)
-				sources[i] = value
-				journal:updateBtnFilters()
-				journal:updateMountsList()
-			end
-			info.checked = function() return sources[i] end
-			btn:ddAddButton(info, level)
+			info.value = i
+			dd:ddAddButton(info, level)
 		end
 	end
 end

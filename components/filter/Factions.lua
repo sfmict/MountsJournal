@@ -2,7 +2,7 @@ local addon, ns = ...
 local L, mounts, journal = ns.L, ns.mounts, ns.journal
 
 
-function journal.filters.factions(btn, level)
+function journal.filters.factions(dd, level)
 	local info = {}
 	info.keepShownOnClick = true
 	info.isNotRadio = true
@@ -12,17 +12,20 @@ function journal.filters.factions(btn, level)
 	info.func = function()
 		journal:setAllFilters("factions", true)
 		journal:updateMountsList()
-		btn:ddRefresh(level)
+		dd:ddRefresh(level)
 	end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 
 	info.text = UNCHECK_ALL
 	info.func = function()
 		journal:setAllFilters("factions", false)
 		journal:updateMountsList()
-		btn:ddRefresh(level)
+		dd:ddRefresh(level)
 	end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
+
+	info.notCheckable = nil
+	local factions = mounts.filters.factions
 
 	local icons = {
 		2565244,
@@ -35,18 +38,27 @@ function journal.filters.factions(btn, level)
 		tCoordTop = .2,
 		tCoordBottom = .8,
 	}
+	info.widgets = {{
+		icon = "interface/worldmap/worldmappartyicon",
+		OnClick = function(btn)
+			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+			journal:setAllFilters("factions", false)
+			factions[btn.value] = true
+			journal:updateMountsList()
+			dd:ddRefresh(level)
+		end,
+	}}
+	info.func = function(btn, _,_, checked)
+		factions[btn.value] = checked
+		journal:updateMountsList()
+	end
+	info.checked = function(btn) return factions[btn.value] end
 
-	info.notCheckable = nil
-	local factions = mounts.filters.factions
 	for i = 1, 3 do
 		info.text = L["MOUNT_FACTION_"..i]
 		info.icon = icons[i]
 		info.iconInfo = i == 3 and iconInfo or nil
-		info.func = function(_,_,_, value)
-			factions[i] = value
-			journal:updateMountsList()
-		end
-		info.checked = function() return factions[i] end
-		btn:ddAddButton(info, level)
+		info.value = i
+		dd:ddAddButton(info, level)
 	end
 end

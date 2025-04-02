@@ -173,7 +173,9 @@ ns.journal:on("MODULES_INIT", function(journal)
 				end
 				tinsert(info.list, {
 					keepShownOnClick = true,
-					text = ("%s|cff808080.%d%s|r"):format(v.name, animation, isKit and ".k" or ""),
+					text = v.name,
+					rightText = ("|cff808080%s%d|r"):format(isKit and "k" or "", animation),
+					rightFont = util.codeFont,
 					value = v,
 					checked = checked,
 					func = func,
@@ -183,7 +185,9 @@ ns.journal:on("MODULES_INIT", function(journal)
 		for i, v in ipairs(self.animations) do
 			tinsert(info.list, {
 				keepShownOnClick = true,
-				text = ("%s|cff808080.%d%s|r"):format(v.name, v.animation, v.isKit and ".k" or ""),
+				text = v.name,
+				rightText = ("|cff808080%s%d|r"):format(v.isKit and "k" or "", v.animation),
+				rightFont = util.codeFont,
 				value = v,
 				arg1 = i,
 				checked = checked,

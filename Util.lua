@@ -103,6 +103,7 @@ end)
 local util = {}
 MountsJournalUtil = util
 ns.util = util
+util.codeFont = "Interface\\Addons\\MountsJournal\\Fonts\\FiraCode-Regular.ttf"
 util.addonName = ("%s_ADDON_"):format(addon:upper())
 util.expansion = tonumber(GetBuildInfo():match("(.-)%."))
 util.secureButtonNameMount = addon.."_Mount"

@@ -2,78 +2,92 @@ local addon, ns = ...
 local L, journal = ns.L, ns.journal
 
 
-function journal.filters.tags(btn, level)
+function journal.filters.tags(dd, level)
 	local filterTags = journal.tags.filter
 	local info = {}
 	info.keepShownOnClick = true
 	info.isNotRadio = true
 
 	info.text = L["No tag"]
-	info.func = function(_,_,_, value)
-		filterTags.noTag = value
+	info.func = function(_,_,_, checked)
+		filterTags.noTag = checked
 		journal:updateMountsList()
 	end
 	info.checked = function() return filterTags.noTag end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 
 	info.text = L["With all tags"]
-	info.func = function(_,_,_, value)
-		filterTags.withAllTags = value
+	info.func = function(_,_,_, checked)
+		filterTags.withAllTags = checked
 		journal:updateMountsList()
 	end
 	info.checked = function() return filterTags.withAllTags end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 
-	btn:ddAddSeparator(level)
+	dd:ddAddSeparator(level)
 
 	info.notCheckable = true
 	info.text = CHECK_ALL
 	info.func = function()
 		journal.tags:setAllFilterTags(true)
 		journal:updateMountsList()
-		btn:ddRefresh(level)
+		dd:ddRefresh(level)
 	end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 
 	info.text = UNCHECK_ALL
 	info.func = function()
 		journal.tags:setAllFilterTags(false)
 		journal:updateMountsList()
-		btn:ddRefresh(level)
+		dd:ddRefresh(level)
 	end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 
 	info.func = nil
 	if #journal.tags.sortedTags == 0 then
 		info.disabled = true
 		info.text = EMPTY
-		btn:ddAddButton(info, level)
+		dd:ddAddButton(info, level)
 		info.disabled = nil
 	else
 		info.list = {}
+		local widgets = {{
+			icon = "interface/worldmap/worldmappartyicon",
+			OnClick = function(btn)
+				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+				journal.tags:setAllFilterTags(false)
+				filterTags.tags[btn._text][2] = true
+				journal:updateMountsList()
+				dd:ddRefresh(level)
+			end,
+		}}
+		local text = function(btn) return journal.tags.sortedTags[btn.value] end
+		local func = function(btn, _,_, checked)
+			filterTags.tags[btn._text][2] = checked
+			journal:updateMountsList()
+		end
+		local checked = function(btn) return filterTags.tags[btn._text][2] end
+		local remove = function(btn) journal.tags:deleteTag(btn._text) end
+		local order = function(btn, step) journal.tags:setOrderTag(btn._text, step) end
+
 		for i, tag in ipairs(journal.tags.sortedTags) do
 			info.list[i] = {
 				keepShownOnClick = true,
 				isNotRadio = true,
-				text = function() return journal.tags.sortedTags[i] end,
-				func = function(btn, _,_, value)
-					filterTags.tags[btn._text][2] = value
-					journal:updateMountsList()
-				end,
-				checked = function(btn) return filterTags.tags[btn._text][2] end,
-				remove = function(btn)
-					journal.tags:deleteTag(btn._text)
-				end,
-				order = function(btn, step)
-					journal.tags:setOrderTag(btn._text, step)
-				end,
+				widgets = widgets,
+				text = text,
+				func = func,
+				checked = checked,
+				remove = remove,
+				order = order,
+				value = i,
 			}
 		end
-		btn:ddAddButton(info, level)
+		dd:ddAddButton(info, level)
 		info.list = nil
 	end
 
-	btn:ddAddSeparator(level)
+	dd:ddAddSeparator(level)
 
 	info.keepShownOnClick = nil
 	info.notCheckable = true
@@ -83,5 +97,5 @@ function journal.filters.tags(btn, level)
 	info.func = function()
 		journal.tags:addTag()
 	end
-	btn:ddAddButton(info, level)
+	dd:ddAddButton(info, level)
 end
