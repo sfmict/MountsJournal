@@ -1645,6 +1645,7 @@ function journal:setScrollGridMounts(grid, isSwitch)
 	local template, padding
 
 	if grid then
+		local oldGridN = self.gridN
 		if mounts.config.showTypeSelBtn then
 			self.gridN = 3
 			padding = 2
@@ -1658,8 +1659,7 @@ function journal:setScrollGridMounts(grid, isSwitch)
 		self.view:SetPadding(0,0,padding,0,0)
 		self.view:SetElementExtent(44)
 		if isSwitch then
-			local n = self.gridN == 3 and 4 or 3
-			index = math.ceil((index * n - n + 1) / self.gridN)
+			index = math.ceil((index * oldGridN - oldGridN + 1) / self.gridN)
 		else
 			index = math.ceil(index / self.gridN)
 		end
