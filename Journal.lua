@@ -1731,7 +1731,14 @@ do
 						index = showNext(btn.toggle, index, self.tGround, self.colors.mount2)
 					end
 					if self.list.swimming[btn.spellID] then
-						showNext(btn.toggle, index, self.tSwimming, self.colors.mount3)
+						index = showNext(btn.toggle, index, self.tSwimming, self.colors.mount3)
+					end
+					local last = btn.toggle[index - 1]
+					if last then
+						btn.toggleBG:SetPoint("BOTTOMRIGHT", last, -1, -1)
+						btn.toggleBG:Show()
+					else
+						btn.toggleBG:Hide()
 					end
 				end
 			end

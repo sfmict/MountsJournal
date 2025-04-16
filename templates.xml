@@ -1867,7 +1867,7 @@
 				<Texture parentKey="toggle1" parentArray="toggle">
 					<Size x="20" y="10"/>
 					<Anchors>
-						<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="-3" y="-2"/>
+						<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="-1" y="-2"/>
 					</Anchors>
 				</Texture>
 				<Texture parentKey="toggle2" parentArray="toggle">
@@ -1881,6 +1881,14 @@
 					<Anchors>
 						<Anchor point="TOP" relativeKey="$parent.toggle2" relativePoint="BOTTOM" y="-1"/>
 					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="toggleBG" alpha=".4" hidden="t">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.toggle1" x="-1" y="1"/>
+					</Anchors>
+					<Color r=".23" g=".23" b=".23"/>
 				</Texture>
 			</Layer>
 		</Layers>
