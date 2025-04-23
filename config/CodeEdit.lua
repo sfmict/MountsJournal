@@ -29,7 +29,7 @@ codeEdit:SetScript("OnShow", function(self)
 		button3 = CANCEL,
 		whileDead = 1,
 		selectCallbackByIndex = true,
-		OnButton1 = function(self, cb) self:Hide() cb() end,
+		OnButton1 = function(self, cb) cb() end,
 		OnButton2 = function(self) self:Hide() codeEdit:Hide() end,
 		OnButton3 = function(self) self:Hide() end,
 	}

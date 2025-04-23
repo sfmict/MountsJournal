@@ -20,7 +20,7 @@ rules:SetScript("OnShow", function(self)
 		editBoxWidth = 350,
 		hideOnEscape = 1,
 		whileDead = 1,
-		OnAccept = function(self, cb) self:Hide() cb(self) end,
+		OnAccept = function(self, cb) cb(self) end,
 		EditBoxOnEnterPressed = function(self)
 			StaticPopup_OnClick(self:GetParent(), 1)
 		end,
@@ -51,7 +51,7 @@ rules:SetScript("OnShow", function(self)
 		button2 = CANCEL,
 		hideOnEscape = 1,
 		whileDead = 1,
-		OnAccept = function(self, cb) self:Hide() cb() end,
+		OnAccept = function(self, cb) cb() end,
 	}
 
 	-- VERSION
@@ -476,6 +476,7 @@ end
 function rules:createRuleSet(copy)
 	StaticPopup_Show(util.addonName.."NEW_RULE_SET", nil, nil, function(popup)
 		local text = popup.editBox:GetText()
+		popup:Hide()
 		if text and text ~= "" then
 			for i, ruleSet in ipairs(macroFrame.ruleSetConfig) do
 				if ruleSet.name == text then

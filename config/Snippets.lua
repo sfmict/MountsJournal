@@ -38,7 +38,7 @@ snippets:SetScript("OnShow", function(self)
 		button2 = CANCEL,
 		hideOnEscape = 1,
 		whileDead = 1,
-		OnAccept = function(self, cb) self:Hide() cb() end,
+		OnAccept = function(self, cb) cb() end,
 	}
 
 	-- ADD BUTTON

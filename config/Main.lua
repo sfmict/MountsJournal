@@ -29,15 +29,6 @@ config:SetScript("OnShow", function(self)
 	local lsfdd = LibStub("LibSFDropDown-1.5")
 	local ltl = LibStub("LibThingsLoad-1.0")
 
-	StaticPopupDialogs[util.addonName.."MACRO_EXISTS"] = {
-		text = addon..": "..L["A macro named \"%s\" already exists, overwrite it?"],
-		button1 = ACCEPT,
-		button2 = CANCEL,
-		hideOnEscape = 1,
-		whileDead = 1,
-		OnAccept = function(popup, cb) popup:Hide() cb() end,
-	}
-
 	local randomMountIcon = 413588
 
 	-- ENABLE APPLY
