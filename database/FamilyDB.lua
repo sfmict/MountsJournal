@@ -235,6 +235,8 @@ ns.familyDB = {
 		["Wilderlings"] = 3104,
 		["Wolves"] = 3105,
 	},
+	["Dogs"] = 3200,
+	["Hedgehogs"] = 3300,
 	["additional"] = {
 		["spells"] = 1,
 		["items"] = 2,
@@ -337,6 +339,7 @@ ns.familyDBIcons = {
 		["Pterrordaxes"] = 838682,
 		["Raptors"] = 132253,
 	},
+	["Dogs"] = 4741710,
 	["Dragonhawks"] = 132188,
 	["Drakes"] = {
 		[0] = 132250,
@@ -377,6 +380,7 @@ ns.familyDBIcons = {
 		["Underlights"] = 5746559,
 	},
 	["Gargoyle"] = 3852563,
+	["Hedgehogs"] = 6702279,
 	["Horses"] = {
 		[0] = 132226,
 		["Chargers"] = 136103,
