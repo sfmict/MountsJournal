@@ -360,6 +360,7 @@ L["Are you sure you want to delete tag %s?"] = "確定您想要刪除標籤%s嗎
 -- L["Gryphons"] = ""
 -- L["Gyrocopters"] = ""
 -- L["Hands"] = ""
+-- L["Hawks"] = ""
 -- L["Hawkstriders"] = ""
 -- L["Hedgehogs"] = ""
 -- L["Hippogryphs"] = ""
