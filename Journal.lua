@@ -188,7 +188,9 @@ function journal:init()
 	-- SECURE FRAMES
 	local sMountJournal = CreateFrame("FRAME", nil, self.MountJournal, "SecureHandlerShowHideTemplate")
 	self._s = sMountJournal
-	sMountJournal:SetFrameRef("randomButton", self.MountJournal.SummonRandomFavoriteButton)
+	local randomButton = self.MountJournal.SummonRandomFavoriteButton or self.MountJournal.SummonRandomFavoriteSpellFrame
+	randomButton:Hide()
+	sMountJournal:SetFrameRef("randomButton", randomButton)
 	sMountJournal:SetFrameRef("useMountsJournalButton", self.useMountsJournalButton)
 	sMountJournal:SetFrameRef("bgFrame", self.bgFrame)
 	sMountJournal:SetFrameRef("CollectionsJournalTab1", CollectionsJournalTab1)
@@ -1364,7 +1366,6 @@ function journal:init()
 	self:event("MODULES_INIT"):off("MODULES_INIT")
 
 	-- INIT
-	self.MountJournal.SummonRandomFavoriteButton:Hide()
 	self.CollectionsJournal.NineSlice:Hide()
 	self:RegisterEvent("COMPANION_UPDATE")
 	self:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
