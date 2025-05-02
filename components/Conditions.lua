@@ -1374,6 +1374,42 @@ end
 
 
 ---------------------------------------------------
+-- group GROUP TYPE
+conds.group = {}
+conds.group.text = L["Group Type"]
+
+function conds.group:getValueText(value)
+	if value == "group" then
+		return PARTY
+	elseif value == "raid" then
+		return RAID
+	end
+	return L["ANY_GROUP"]
+end
+
+function conds.group:getValueList(value, func)
+	local list = {}
+	for i, v in ipairs({"any", "group", "raid"}) do
+		list[i] = {
+			text = self:getValueText(v),
+			value = v,
+			func = func,
+			checked = v == value,
+		}
+	end
+	return list
+end
+
+function conds.group:getFuncText(value)
+	if value == "group" or value == "raid" then
+		return ("self.getGroupType() == '%s'"):format(value:gsub("['\\]", "\\%1"))
+	else
+		return "self.getGroupType()"
+	end
+end
+
+
+---------------------------------------------------
 -- METHODS
 function conds:getMenuList(value, func)
 	local list = {}

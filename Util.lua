@@ -1,7 +1,7 @@
 local addon, ns = ...
 local L = ns.L
 local type, tremove, next, tostring, math = type, tremove, next, tostring, math
-local C_MountJournal, C_UnitAuras, UnitExists = C_MountJournal, C_UnitAuras, UnitExists
+local C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup = C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup
 local events, eventsMixin = {}, {}
 
 
