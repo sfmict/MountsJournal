@@ -56,7 +56,7 @@ local createMountFromSpell do
 	local function isCollected() return true end
 
 
-	function createMountFromSpell(spellID, mountType, expansion, modelSceneID, buffID)
+	function createMountFromSpell(spellID, mountType, expansion, modelSceneID, selfMount, buffID)
 		local t = {
 			spellID = spellID,
 			buffID = buffID or spellID,
@@ -70,7 +70,7 @@ local createMountFromSpell do
 			setIsFavorite = setIsFavorite,
 			getIsFavorite = getIsFavorite,
 			isShown = true,
-			selfMount = true,
+			selfMount = selfMount,
 			familyID = 1,
 		}
 		additionalMounts[t.spellID] = t
@@ -96,7 +96,7 @@ end
 
 ----------------------------------------------------------------------
 -- SOAR
-local soar = createMountFromSpell(369536, 442, 10, 4, 430747)
+local soar = createMountFromSpell(369536, 442, 10, 4, true, 430747)
 
 if raceID == 52 or raceID == 70 then
 	soar.creatureID = "player"
@@ -118,7 +118,7 @@ end
 
 ----------------------------------------------------------------------
 -- RUNNING WILD
-local runningWild = createMountFromSpell(87840, 230, 4, 719)
+local runningWild = createMountFromSpell(87840, 230, 4, 719, true)
 
 if raceID == 22 then
 	runningWild.creatureID = "player"
@@ -132,7 +132,7 @@ end
 
 ----------------------------------------------------------------------
 -- TRAVEL FORM
-local travelForm = createMountFromSpell(783, 442, 2, 4)
+local travelForm = createMountFromSpell(783, 442, 2, 4, true)
 travelForm.isShown = classID == 11
 
 if raceID == 6 then -- Tauren
@@ -175,7 +175,7 @@ end
 
 ----------------------------------------------------------------------
 -- G-99 Breakneck
-local breakneck = createMountFromSpell(460013, 230, 11, 4)
+local breakneck = createMountFromSpell(460013, 230, 11, 4, false)
 
 breakneck.creatureID = 124253
 breakneck.allCreature = {
