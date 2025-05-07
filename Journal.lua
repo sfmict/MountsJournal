@@ -665,12 +665,14 @@ function journal:init()
 			de = "Deutsch",
 			en = "English",
 			es = "Español",
+			mx = "Español (México)",
 			fr = "Français",
 			it = "Italiano",
-			pt = "Português Brasileiro",
+			pt = "Português (Brasil)",
 			ru = "Русский",
 			ko = "한국어",
 			cn = "简体中文",
+			tw = "繁體中文",
 		}
 
 		local function langSelect(btn)
@@ -679,7 +681,7 @@ function journal:init()
 			self:updateMountDisplay(true)
 		end
 
-		for i, lang in ipairs({"de", "en", "es", "fr", "it", "pt", "ru", "ko", "cn"}) do
+		for i, lang in ipairs({"de", "en", "es", "mx", "fr", "it", "pt", "ru", "ko", "cn", "tw"}) do
 			info.value = lang
 			info.text = langs[lang]
 			info.checked = lang == mounts.config.wowheadLinkLang
