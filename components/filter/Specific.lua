@@ -56,11 +56,15 @@ function journal.filters.specific(dd, level)
 		dd:ddAddButton(info, level)
 	end
 
-	info.text = L["Ride Along"]
+	info.text = C_Spell.GetSpellName(428079)
 	info.icon = 618976
 	info.value = "rideAlong"
+	info.OnTooltipShow = function(btn, tooltip)
+		tooltip:SetSpellByID(428079)
+	end
 	dd:ddAddButton(info, level)
 
+	info.OnTooltipShow = nil
 	info.text = L["transform"]
 	info.icon = 461140
 	info.value = "transform"

@@ -71,7 +71,6 @@ L["ButtonsSelectedTooltipDescription"] = "Los favoritos no afectan a los montaje
 -- L["Specific"] = ""
 -- L["repair"] = ""
 -- L["passenger"] = ""
--- L["Ride Along"] = ""
 -- L["transform"] = ""
 -- L["Multiple Models"] = ""
 -- L["additional"] = ""
