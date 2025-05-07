@@ -76,15 +76,16 @@ ruleEditor:HookScript("OnShow", function(self)
 
 	-- PANELS
 	self.panel = CreateFrame("FRAME", nil, self, "MJDarkPanelTemplate")
-	self.panel:SetPoint("TOPLEFT", 40, -40)
-	self.panel:SetPoint("BOTTOMRIGHT", -40, 40)
+	self.panel:SetPoint("TOPLEFT", 10, -10)
+	self.panel:SetPoint("BOTTOMRIGHT", -10, 10)
 	self.panel:SetBackdropColor(.1, .1, .1, .85)
 
 	self.title = self.panel:CreateFontString(nil, "ARTWORK", "GameFontHighlightLarge")
 	self.title:SetPoint("TOP", 0, -20)
 
 	self.condText = self.panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-	self.condText:SetPoint("TOPLEFT", 40, -60)
+	self.condText:SetPoint("TOP", self.title, "BOTTOM", 0, -4)
+	self.condText:SetPoint("LEFT", 40, 0)
 	self.condText:SetText(L["Conditions"])
 
 	self.actionPanel = CreateFrame("FRAME", nil, self.panel, "MJActionPanelTemplate")
@@ -101,12 +102,12 @@ ruleEditor:HookScript("OnShow", function(self)
 	end)
 
 	self.actionText = self.panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
-	self.actionText:SetPoint("BOTTOMLEFT", self.actionPanel, "TOPLEFT", 10, 10)
+	self.actionText:SetPoint("BOTTOMLEFT", self.actionPanel, "TOPLEFT", 10, 4)
 	self.actionText:SetText(L["Action"])
 
 	self.scrollBox = CreateFrame("FRAME", nil, self.panel, "WowScrollBoxList")
-	self.scrollBox:SetPoint("TOPLEFT", self.condText, "BOTTOMLEFT", -10, -10)
-	self.scrollBox:SetPoint("BOTTOMLEFT", self.actionText, "TOPLEFT", -10, 15)
+	self.scrollBox:SetPoint("TOPLEFT", self.condText, "BOTTOMLEFT", -10, -4)
+	self.scrollBox:SetPoint("BOTTOMLEFT", self.actionText, "TOPLEFT", -10, 10)
 	self.scrollBox:SetPoint("RIGHT", -55, 0)
 
 	self.scrollBar = CreateFrame("EventFrame", nil, self.panel, "MinimalScrollBar")
