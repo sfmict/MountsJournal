@@ -105,10 +105,12 @@ test:SetScript("OnEvent", function(self, event, ...)
 	if self[event] then
 		fprint(event, ...)
 		self[event](self, ...)
-	else
-		if not ignoreEvents[event] then
-			fprint("None:", event, ...)
-		end
+	elseif event == "ADDON_LOADED" then
+		local name, containsBindings = ...
+		local _,_,_,_,_, security = C_AddOns.GetAddOnInfo(name)
+		fprint(event, name, containsBindings, security)
+	elseif not ignoreEvents[event] then
+		fprint("None:", event, ...)
 	end
 end)
 test:RegisterEvent("ADDON_LOADED")
