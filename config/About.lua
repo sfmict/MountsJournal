@@ -64,7 +64,7 @@ aboutConfig:SetScript("OnShow", function(self)
 		{"frFR", "idrael17, 6urvan, EinPallux, macumbafeh, Zazou, Braincell1980"},
 		{"koKR", "jusuya"},
 		{"ptBR", "LutzPS, Thayron147"},
-		{"zhCN", "萌丶汉丶纸, LvWind"},
+		{"zhCN", "萌丶汉丶纸, LvWind, gjfleo"},
 		{"zhTW", "BNS333, Bright009"},
 	}
 
