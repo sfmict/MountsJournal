@@ -177,6 +177,7 @@ end
 -- G-99 Breakneck
 local breakneck = createMountFromSpell(460013, 230, 11, 4, false)
 
+breakneck.animID = 484
 breakneck.creatureID = 124253
 breakneck.allCreature = {
 	124253,

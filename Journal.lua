@@ -1624,7 +1624,7 @@ function journal:getMountInfoExtra(mount)
 		local mountDB = mountsDB[mount]
 		return mountDB[1], mountDB[2], mountDB[3], C_MountJournal.GetMountInfoExtraByID(mount)
 	else
-		return mount.expansion, mount.familyID, nil, mount.creatureID, mount.description, mount.sourceText, mount.selfMount, mount.mountType, mount.modelSceneID, 0, 0
+		return mount.expansion, mount.familyID, nil, mount.creatureID, mount.description, mount.sourceText, mount.selfMount, mount.mountType, mount.modelSceneID, mount.animID or 0, 0
 	end
 end
 
