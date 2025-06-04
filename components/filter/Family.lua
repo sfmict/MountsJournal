@@ -31,19 +31,18 @@ function journal.filters.family(dd, level, subFamily)
 			dd:ddRefresh(level)
 			dd:ddRefresh(level - 1)
 		end
-		local func = function(btn, _,_, checked)
+		info.widgets = widgets
+		info.func = function(btn, _,_, checked)
 			filterFamily[btn.value] = checked
 			journal:updateMountsList()
 			dd:ddRefresh(level - 1)
 		end
+		info.checked = check
 
 		for i, name in ipairs(sortedNames) do
 			info.text = name[2]
 			info.icon = ns.familyDBIcons[subFamily][name[1]]
 			info.value = familyDB[subFamily][name[1]]
-			info.widgets = widgets
-			info.func = func
-			info.checked = check
 			dd:ddAddButton(info, level)
 		end
 	else

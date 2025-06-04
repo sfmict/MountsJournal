@@ -9,61 +9,45 @@ function journal.filters.sorting(dd, level, value)
 	local info = {}
 	info.keepShownOnClick = true
 
-	local func = function(_, by)
+	info.func = function(_, by)
 		fSort[kBy] = by
 		journal:sortMounts()
 		dd:ddRefresh(level)
 	end
-	local check = function(_, by)
+	info.checked = function(_, by)
 		return fSort[kBy] == by
 	end
 
 	info.text = NAME
 	info.arg1 = "name"
-	info.func = func
-	info.checked = check
 	dd:ddAddButton(info, level)
 
 	info.text = TYPE
 	info.arg1 = "type"
-	info.func = func
-	info.checked = check
 	dd:ddAddButton(info, level)
 
 	info.text = L["Family"]
 	info.arg1 = "family"
-	info.func = func
-	info.checked = check
 	dd:ddAddButton(info, level)
 
 	info.text = EXPANSION_FILTER_TEXT
 	info.arg1 = "expansion"
-	info.func = func
-	info.checked = check
 	dd:ddAddButton(info, level)
 
 	info.text = L["Rarity"]
 	info.arg1 = "rarity"
-	info.func = func
-	info.checked = check
 	dd:ddAddButton(info, level)
 
 	info.text = SUMMONS
 	info.arg1 = "summons"
-	info.func = func
-	info.checked = check
 	dd:ddAddButton(info, level)
 
 	info.text = L["Travel time"]
 	info.arg1 = "time"
-	info.func = func
-	info.checked = check
 	dd:ddAddButton(info, level)
 
 	info.text = L["Travel distance"]
 	info.arg1 = "distance"
-	info.func = func
-	info.checked = check
 	dd:ddAddButton(info, level)
 
 	info.arg1 = nil

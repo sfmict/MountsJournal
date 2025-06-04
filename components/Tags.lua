@@ -424,17 +424,16 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 				return b[1] == "Others" or a[1] ~= "Others" and strcmputf8i(a[2], b[2]) < 0
 			end)
 
-			local func = function(button, _,_, checked)
+			info.func = function(button, _,_, checked)
 				setFamilyID(button.value, checked)
 				btn:ddRefresh(level - 1)
 			end
+			info.checked = check
 
 			for i, name in ipairs(sortedNames) do
 				info.text = name[2]
 				info.icon = ns.familyDBIcons[value][name[1]]
 				info.value = familyDB[value][name[1]]
-				info.func = func
-				info.checked = check
 				btn:ddAddButton(info, level)
 			end
 		end
