@@ -15,16 +15,23 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: download tools
+    - name: download rarity tool
+      uses: actions/checkout@v2
+      with:
+        repository: sfmict/MountRarity
+        token: ${{ secrets.OAUTH }}
+        path: .mountRarity
+
+    - name: update rarity
+      id: rarity
+      run: node .mountRarity/getRarity.js
+
+    - name: download packager
       uses: actions/checkout@v2
       with:
         repository: sfmict/js_packager
         token: ${{ secrets.OAUTH }}
         path: my-tools
-
-    - uses: actions/setup-node@v2
-      with:
-        node-version: '16'
 
     - name: install packages
       run: cd "my-tools" && npm install
@@ -33,6 +40,7 @@ jobs:
       run: node my-tools/packager.js
       env:
         GITHUB_OAUTH: ${{ secrets.OAUTH }}
+        CHANGELOG_LINE: ${{ steps.rarity.outputs.CHANGELOG_LINE }}
         CF_API_KEY: ${{ secrets.CF_API_KEY }}
         CF_ID: 293280
         WAGO_API_KEY: ${{ secrets.WAGO_API_KEY }}
