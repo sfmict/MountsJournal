@@ -245,6 +245,16 @@ local function updateGlobal(self)
 			self.globalDB.ruleConfig = nil
 		end
 	end
+
+	-- IF < 11.1.16 GLOBAL
+	if compareVersion("11.1.16", self.globalDB.lastAddonVersion) then
+		for i, v in ipairs({"filters", "defFilters"}) do
+			if mounts[v].family then
+				mounts[v].family[1904] = nil
+				mounts[v].family[2506] = nil
+			end
+		end
+	end
 end
 
 
@@ -372,11 +382,11 @@ function mounts:setOldChanges()
 
 	local currentVersion = C_AddOns.GetAddOnMetadata(addon, "Version")
 	--@do-not-package@
-	if currentVersion == "@project-version@" then currentVersion = "v11.0.25" end
+	if currentVersion == "@project-version@" then currentVersion = "v11.1.16" end
 	--@end-do-not-package@
 
-	if not self.charDB.lastAddonVersion then self.charDB.lastAddonVersion = "v11.0.10" end
-	if not self.globalDB.lastAddonVersion then self.globalDB.lastAddonVersion = "v11.0.10" end
+	if not self.charDB.lastAddonVersion then self.charDB.lastAddonVersion = currentVersion end
+	if not self.globalDB.lastAddonVersion then self.globalDB.lastAddonVersion = currentVersion end
 
 	if compareVersion(currentVersion, self.charDB.lastAddonVersion) then
 		updateChar(self)
