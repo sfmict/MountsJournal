@@ -517,7 +517,7 @@ function journal:init()
 	end)
 
 	-- SCROLL FRAME
-	self.view = CreateScrollBoxListLinearView()
+	self.view = CreateScrollBoxListGridView()
 	self:setScrollGridMounts(mounts.config.gridToggle)
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.leftInset.scrollBar, self.view)
 
@@ -1643,48 +1643,44 @@ function journal:getMountAllCreatureDisplayInfo(mount)
 end
 
 
-function journal:setScrollGridMounts(grid, isSwitch)
+function journal:setScrollGridMounts(grid)
 	local index = self.view:CalculateDataIndices(self.scrollBox)
-	local template, padding
+	local template
 
 	if grid then
-		local oldGridN = self.gridN
+		local left, hSpacing
 		if mounts.config.showTypeSelBtn then
 			self.gridN = 3
-			padding = 2
-			template = "MJMountGridListButtonWithTypeBtns"
+			left = 16
+			hSpacing = 39
+			template = "MjGridMountButtonWithTypeBtnsTemplate"
 		else
 			self.gridN = 4
-			padding = 7
-			template = "MJMountGridListButtonDef"
+			left = 7
+			hSpacing = 22
+			template = "MjGridMountButtonDefTemplate"
 		end
 		self.initMountButton = self.gridInitMountButton
-		self.view:SetPadding(0,0,padding,0,0)
-		self.view:SetElementExtent(44)
-		if isSwitch then
-			index = math.ceil((index * oldGridN - oldGridN + 1) / self.gridN)
-		else
-			index = math.ceil(index / self.gridN)
-		end
+		self.view:SetPadding(2,2,left,0,hSpacing,2)
+		self.view:SetElementExtent(40)
 	else
-		local extent
+		local right, extent
+		self.gridN = 1
 		if mounts.config.showTypeSelBtn then
-			self.gridN = 3
 			extent = 44
-			padding = 25
+			right = 25
 			template = "MJMountDefaultListButtonWithTypeBtns"
 		else
-			self.gridN = 4
 			extent = 40
-			padding = 0
+			right = 0
 			template = "MJMountDefaultListButton"
 		end
 		self.initMountButton = self.defaultInitMountButton
-		self.view:SetPadding(0,0,41,padding,0)
+		self.view:SetPadding(0,0,41,right,0,0)
 		self.view:SetElementExtent(extent)
-		if not isSwitch then index = (index - 1) * self.gridN + 1 end
 	end
 
+	self.view:SetStride(self.gridN)
 	self.view:SetElementInitializer(template, function(...)
 		self:initMountButton(...)
 	end)
@@ -1836,62 +1832,53 @@ end
 
 
 function journal:gridInitMountButton(btn, data)
-	for i = 1, #btn.mounts do
-		local gbtn = btn.mounts[i]
+	local mountID = data.mountID
+	local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = self:getMountInfo(mountID)
 
-		if data[i] then
-			local mountID = data[i].mountID
-			local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = self:getMountInfo(mountID)
-
-			local needsFanfare, qualityColor
-			if type(mountID) == "number" then
-				needsFanfare = C_MountJournal.NeedsFanfare(mountID)
-				qualityColor = util.getRarityColor(mountID)
-			else
-				qualityColor = HIGHLIGHT_FONT_COLOR
-			end
-
-			gbtn.spellID = spellID
-			gbtn.mountID = mountID
-			gbtn.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
-			gbtn.icon:SetVertexColor(1, 1, 1)
-			gbtn.qualityBorder:SetVertexColor(qualityColor:GetRGB())
-			gbtn:Enable()
-			gbtn.selectedTexture:SetShown(mountID == self.selectedMountID)
-			gbtn.hidden:SetShown(self:isMountHidden(spellID))
-			gbtn.favorite:SetShown(isFavorite)
-
-			local mountWeight = self.mountsWeight[spellID]
-			if mountWeight then
-				gbtn.mountWeight:SetText(getColorWeight(mountWeight))
-				gbtn.mountWeight:Show()
-				gbtn.mountWeightBG:Show()
-			else
-				gbtn.mountWeight:Hide()
-				gbtn.mountWeightBG:Hide()
-			end
-
-			if isUsable or needsFanfare then
-				gbtn.icon:SetDesaturated()
-				gbtn.icon:SetAlpha(1)
-			elseif isCollected then
-				gbtn.icon:SetDesaturated(true)
-				-- 150/255, 50/255, 50/255
-				gbtn.icon:SetVertexColor(.58823529411765, .19607843137255, .19607843137255)
-				gbtn.icon:SetAlpha(.75)
-				gbtn.qualityBorder:SetAlpha(.75)
-			else
-				gbtn.icon:SetDesaturated(true)
-				gbtn.icon:SetAlpha(.35)
-				gbtn.qualityBorder:SetAlpha(.25)
-			end
-
-			self:updateMountToggleButton(gbtn)
-			gbtn:Show()
-		else
-			gbtn:Hide()
-		end
+	local needsFanfare, qualityColor
+	if type(mountID) == "number" then
+		needsFanfare = C_MountJournal.NeedsFanfare(mountID)
+		qualityColor = util.getRarityColor(mountID)
+	else
+		qualityColor = HIGHLIGHT_FONT_COLOR
 	end
+
+	btn.spellID = spellID
+	btn.mountID = mountID
+	btn.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
+	btn.icon:SetVertexColor(1, 1, 1)
+	btn.qualityBorder:SetVertexColor(qualityColor:GetRGB())
+	btn:Enable()
+	btn.selectedTexture:SetShown(mountID == self.selectedMountID)
+	btn.hidden:SetShown(self:isMountHidden(spellID))
+	btn.favorite:SetShown(isFavorite)
+
+	local mountWeight = self.mountsWeight[spellID]
+	if mountWeight then
+		btn.mountWeight:SetText(getColorWeight(mountWeight))
+		btn.mountWeight:Show()
+		btn.mountWeightBG:Show()
+	else
+		btn.mountWeight:Hide()
+		btn.mountWeightBG:Hide()
+	end
+
+	if isUsable or needsFanfare then
+		btn.icon:SetDesaturated()
+		btn.icon:SetAlpha(1)
+	elseif isCollected then
+		btn.icon:SetDesaturated(true)
+		-- 150/255, 50/255, 50/255
+		btn.icon:SetVertexColor(.58823529411765, .19607843137255, .19607843137255)
+		btn.icon:SetAlpha(.75)
+		btn.qualityBorder:SetAlpha(.75)
+	else
+		btn.icon:SetDesaturated(true)
+		btn.icon:SetAlpha(.35)
+		btn.qualityBorder:SetAlpha(.25)
+	end
+
+	self:updateMountToggleButton(btn)
 end
 
 
@@ -1925,16 +1912,14 @@ function journal:setArrowSelectMount(enabled)
 				f:SetPropagateKeyboardInput(false)
 
 				delta = (key == "UP" or key == "LEFT") and -1 or 1
-				if mounts.config.gridToggle and (key == "UP" or key == "DOWN") then
+				if key == "UP" or key == "DOWN" then
 					delta = delta * self.gridN
 				end
 
 				index = nil
 				if self.selectedMountID then
-					local data = self:getMountDataByMountID(self.selectedMountID)
-					if data then
-						index = updateIndex(data.index, delta)
-					end
+					index = self:getMountDataByMountID(self.selectedMountID)
+					if index then index = updateIndex(index, delta) end
 				end
 
 				if not index then
@@ -2562,55 +2547,26 @@ function journal:useMount(mountID)
 end
 
 
-local function getGridTogglePredicate(predicate)
-	if mounts.config.gridToggle then
-		return function(btn, data)
-			data = data or btn
-			for i = 1, #data do
-				if predicate(btn[i] or btn, data[i]) then return true end
-			end
-		end
-	else
-		return predicate
-	end
-end
-
-
 function journal:getMountDataByMountID(mountID)
-	local mountData
-	local predicate = getGridTogglePredicate(function(data)
-		if data.mountID == mountID then
-			mountData = data
-			return true
-		end
+	return self.scrollBox:FindByPredicate(function(data)
+		return data.mountID == mountID
 	end)
-	local dataIndex = self.scrollBox:FindByPredicate(predicate)
-	return mountData, dataIndex
 end
 
 
 function journal:getMountDataByMountIndex(index)
-	local mountData
-	local predicate = getGridTogglePredicate(function(data)
-		if data.index == index then
-			mountData = data
-			return true
-		end
-	end)
-	local dataIndex = self.scrollBox:FindByPredicate(predicate)
-	return mountData, dataIndex
+	return self.scrollBox:Find(index)
 end
 
 
 function journal:getMountButtonByMountID(mountID)
-	local predicate = getGridTogglePredicate(function(btn, data)
+	return self.scrollBox:FindFrameByPredicate(function(btn, data)
 		return data.mountID == mountID
 	end)
-	return self.scrollBox:FindFrameByPredicate(predicate)
 end
 
 
-function journal:setSelectedMount(mountID, spellID, dataIndex)
+function journal:setSelectedMount(mountID, spellID, index)
 	local scrollTo = not spellID
 	if not spellID then
 		local _
@@ -2634,19 +2590,18 @@ function journal:setSelectedMount(mountID, spellID, dataIndex)
 	end
 
 	if scrollTo then
-		if not dataIndex then
-			local _
-			_, dataIndex = self:getMountDataByMountID(mountID)
+		if not index then
+			index = self:getMountDataByMountID(mountID)
 		end
 
-		if dataIndex then
+		if index then
 			local scrollOffset = self.scrollBox:GetDerivedScrollOffset()
-			local indexOffset = self.scrollBox:GetExtentUntil(dataIndex)
+			local indexOffset = self.scrollBox:GetExtentUntil(index)
 
 			if indexOffset < scrollOffset then
-				self.scrollBox:ScrollToElementDataIndex(dataIndex, ScrollBoxConstants.AlignBegin)
-			elseif indexOffset + self.scrollBox:GetElementExtent(dataIndex) > scrollOffset + self.scrollBox:GetVisibleExtent() then
-				self.scrollBox:ScrollToElementDataIndex(dataIndex, ScrollBoxConstants.AlignEnd)
+				self.scrollBox:ScrollToElementDataIndex(index, ScrollBoxConstants.AlignBegin)
+			elseif indexOffset + self.scrollBox:GetElementExtent(index) > scrollOffset + self.scrollBox:GetVisibleExtent() then
+				self.scrollBox:ScrollToElementDataIndex(index, ScrollBoxConstants.AlignEnd)
 			end
 		end
 	end
@@ -2656,8 +2611,8 @@ end
 
 
 function journal:selectMountByIndex(index)
-	local data, dataIndex = self:getMountDataByMountIndex(index)
-	if data then self:setSelectedMount(data.mountID, nil, dataIndex) end
+	local data = self:getMountDataByMountIndex(index)
+	if data then self:setSelectedMount(data.mountID, nil, index) end
 end
 
 
@@ -3097,13 +3052,7 @@ function journal:setShownCountMounts(numMounts)
 		self.shownNumMouns = numMounts
 	end
 
-	if self:isDefaultFilters() then
-		self.shownPanel:Hide()
-		self.leftInset:SetPoint("TOPLEFT", self.filtersPanel, "BOTTOMLEFT", 0, -2)
-	else
-		self.shownPanel:Show()
-		self.leftInset:SetPoint("TOPLEFT", self.shownPanel, "BOTTOMLEFT", 0, -2)
-	end
+	self.shownPanel:SetShown(not self:isDefaultFilters())
 	-- self.leftInset:GetHeight()
 end
 
@@ -3117,7 +3066,7 @@ function journal:updateMountsList()
 	local filters, list, newMounts, tags = mounts.filters, self.list, newMounts, self.tags
 	local sources, factions, pet, expansions = filters.sources, filters.factions, filters.pet, filters.expansions
 	local text = util.cleanText(self.searchBox:GetText())
-	local numMounts, data = 0
+	local numMounts = 0
 	self.dataProvider = CreateDataProvider()
 
 	for i = 1, #self.mountIDs do
@@ -3168,18 +3117,7 @@ function journal:updateMountsList()
 		-- TAGS
 		and tags:getFilterMount(spellID) then
 			numMounts = numMounts + 1
-			local mountData = {index = numMounts, mountID = mountID}
-
-			if mounts.config.gridToggle then
-				if data and #data < self.gridN then
-					data[#data + 1] = mountData
-				else
-					data = {mountData}
-					self.dataProvider:Insert(data)
-				end
-			else
-				self.dataProvider:Insert(mountData)
-			end
+			self.dataProvider:Insert({mountID = mountID})
 		end
 	end
 

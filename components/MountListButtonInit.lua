@@ -75,26 +75,11 @@ ns.journal:on("MODULES_INIT", function(journal)
 
 	journal.view:RegisterCallback(journal.view.Event.OnAcquiredFrame, function(owner, frame, elementData, new)
 		if new then
-			if frame.mounts then
-				for i = 1, #frame.mounts do
-					local btn = frame.mounts[i]
-					btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-					btn:RegisterForDrag("LeftButton")
-					btn:SetScript("OnMouseDown", mouseDown)
-					btn:SetScript("OnClick", click)
-					btn:SetScript("OnDragStart", drag)
-					btn:SetScript("OnEnter", onEnter)
-					btn:SetScript("OnLeave", onLeave)
-					if btn.fly then
-						btn.fly:SetScript("OnClick", typeClick)
-						btn.ground:SetScript("OnClick", typeClick)
-						btn.swimming:SetScript("OnClick", typeClick)
-					end
-				end
-			else
-				frame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-				frame:SetScript("OnMouseDown", mouseDown)
-				frame:SetScript("OnClick", click)
+			frame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+			frame:SetScript("OnMouseDown", mouseDown)
+			frame:SetScript("OnClick", click)
+
+			if frame.dragButton then
 				frame.dragButton:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 				frame.dragButton:RegisterForDrag("LeftButton")
 				frame.dragButton:SetScript("OnMouseDown", mouseDown)
@@ -102,11 +87,17 @@ ns.journal:on("MODULES_INIT", function(journal)
 				frame.dragButton:SetScript("OnDragStart", drag)
 				frame.dragButton:SetScript("OnEnter", onEnter)
 				frame.dragButton:SetScript("OnLeave", onLeave)
-				if frame.fly then
-					frame.fly:SetScript("OnClick", typeClick)
-					frame.ground:SetScript("OnClick", typeClick)
-					frame.swimming:SetScript("OnClick", typeClick)
-				end
+			else
+				frame:RegisterForDrag("LeftButton")
+				frame:SetScript("OnDragStart", drag)
+				frame:SetScript("OnEnter", onEnter)
+				frame:SetScript("OnLeave", onLeave)
+			end
+
+			if frame.fly then
+				frame.fly:SetScript("OnClick", typeClick)
+				frame.ground:SetScript("OnClick", typeClick)
+				frame.swimming:SetScript("OnClick", typeClick)
 			end
 		end
 	end)

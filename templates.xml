@@ -416,7 +416,7 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>
-					<Frame parentKey="shownPanel" useParentLevel="false" inherits="InsetFrameTemplate" hidden="true">
+					<Frame parentKey="shownPanel" useParentLevel="false" collapsesLayout="true" inherits="InsetFrameTemplate" hidden="true">
 						<Size y="26"/>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeKey="$parent" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
@@ -468,7 +468,7 @@
 
 			<Frame parentKey="leftInset" useParentLevel="true" inherits="InsetFrameTemplate">
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeKey="$parent.filtersPanel" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
+					<Anchor point="TOPLEFT" relativeKey="$parent.filtersPanel.shownPanel" relativePoint="BOTTOMLEFT" x="0" y="-2"/>
 					<Anchor point="TOPRIGHT" relativeKey="$parent.filtersPanel" relativePoint="BOTTOMRIGHT" x="-17" y="-2"/>
 					<Anchor point="BOTTOMLEFT" y="26"/>
 				</Anchors>
@@ -1661,7 +1661,6 @@
 	</CheckButton>
 
 	<Button name="MJMountDefaultListButtonTemplate" virtual="true">
-		<Size x="184" y="40"/>
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture atlas="PetList-ButtonBackground" parentKey="background"/>
@@ -1770,6 +1769,7 @@
 	</Button>
 
 	<Button name="MJMountDefaultListButton" inherits="MJMountDefaultListButtonTemplate" virtual="true">
+		<Size x="214" y="40"/>
 		<Layers>
 			<Layer level="OVERLAY">
 				<Texture parentKey="toggle1" parentArray="toggle">
@@ -1795,6 +1795,7 @@
 	</Button>
 
 	<Button name="MJMountDefaultListButtonWithTypeBtns" inherits="MJMountDefaultListButtonTemplate" virtual="true">
+		<Size x="188" y="40"/>
 		<Frames>
 			<CheckButton parentKey="fly" inherits="MJSetFlyToggleTemplate">
 				<Anchors>
@@ -1894,32 +1895,6 @@
 		</Layers>
 	</Button>
 
-	<Frame name="MJMountGridListButtonDef" virtual="true">
-		<Size x="248" y="44"/>
-		<Frames>
-			<Button parentArray="mounts" inherits="MjGridMountButtonDefTemplate">
-				<Anchors>
-					<Anchor point="LEFT" x="0" y="0"/>
-				</Anchors>
-			</Button>
-			<Button parentArray="mounts" inherits="MjGridMountButtonDefTemplate">
-				<Anchors>
-					<Anchor point="LEFT" x="64" y="0"/>
-				</Anchors>
-			</Button>
-			<Button parentArray="mounts" inherits="MjGridMountButtonDefTemplate">
-				<Anchors>
-					<Anchor point="LEFT" x="126" y="0"/>
-				</Anchors>
-			</Button>
-			<Button parentArray="mounts" inherits="MjGridMountButtonDefTemplate">
-				<Anchors>
-					<Anchor point="LEFT" x="188" y="0"/>
-				</Anchors>
-			</Button>
-		</Frames>
-	</Frame>
-
 	<Button name="MjGridMountButtonWithTypeBtnsTemplate" inherits="MJGridMountButtonTemplate" virtual="true">
 		<Frames>
 			<CheckButton parentKey="fly" inherits="MJSetFlyToggleTemplate">
@@ -1939,27 +1914,6 @@
 			</CheckButton>
 		</Frames>
 	</Button>
-
-	<Frame name="MJMountGridListButtonWithTypeBtns" virtual="true">
-		<Size x="249" y="44"/>
-		<Frames>
-			<Button parentArray="mounts" inherits="MjGridMountButtonWithTypeBtnsTemplate">
-				<Anchors>
-					<Anchor point="LEFT" x="14" y="0"/>
-				</Anchors>
-			</Button>
-			<Button parentArray="mounts" inherits="MjGridMountButtonWithTypeBtnsTemplate">
-				<Anchors>
-					<Anchor point="LEFT" x="93" y="0"/>
-				</Anchors>
-			</Button>
-			<Button parentArray="mounts" inherits="MjGridMountButtonWithTypeBtnsTemplate">
-				<Anchors>
-					<Anchor point="LEFT" x="172" y="0"/>
-				</Anchors>
-			</Button>
-		</Frames>
-	</Frame>
 
 	<Frame name="MJOptionsPanel" inherits="BackdropTemplate" virtual="true">
 		<Scripts>
