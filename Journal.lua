@@ -168,6 +168,7 @@ function journal:init()
 	self.filtersBar = self.filtersPanel.filtersBar
 	self.shownPanel = self.filtersPanel.shownPanel
 	self.leftInset = self.bgFrame.leftInset
+	self.rightInset = self.bgFrame.rightInset
 	self.mountDisplay = self.bgFrame.mountDisplay
 	self.modelScene = self.mountDisplay.modelScene
 	self.multipleMountBtn = self.modelScene.multipleMountBtn
@@ -176,7 +177,7 @@ function journal:init()
 	self.summonButton = self.bgFrame.summonButton
 	self.percentSlider = self.bgFrame.percentSlider
 	self.mountSpecial = self.bgFrame.mountSpecial
-	self.mountSpeed = self.bgFrame.rightInset.mountSpeed
+	self.mountSpeed = self.rightInset.mountSpeed
 
 	-- USE MountsJournal BUTTON
 	self.useMountsJournalButton:SetParent(self.CollectionsJournal)
@@ -313,7 +314,7 @@ function journal:init()
 		self.navBar:SetShown(tab == 2)
 		self.filtersPanel:SetShown(tab ~= 1)
 		self.leftInset:SetShown(tab ~= 1)
-		self.bgFrame.rightInset:SetShown(tab ~= 1)
+		self.rightInset:SetShown(tab ~= 1)
 		self.mountDisplay:SetShown(tab == 3)
 		self.worldMap:SetShown(tab == 2)
 		self.mapSettings:SetShown(tab == 2)
@@ -518,7 +519,7 @@ function journal:init()
 
 	-- SCROLL FRAME
 	self.view = CreateScrollBoxListGridView()
-	self:setScrollGridMounts(mounts.config.gridToggle)
+	self:setScrollGridMounts()
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.leftInset.scrollBar, self.view)
 
 	-- FILTERS BAR
@@ -588,23 +589,23 @@ function journal:init()
 	end)
 
 	-- GRID TOGGLE BUTTON
-	self.gridToggleButton:SetChecked(mounts.config.gridToggle)
-
+	--mounts.config.gridToggle = 1
 	function self.gridToggleButton:setCoordIcon()
-		if self:GetChecked() then
+		if mounts.config.gridToggle == 1 then
 			self.icon:SetTexCoord(0, .625, 0, .25)
+		elseif mounts.config.gridToggle == 2 then
+			self.icon:SetTexCoord(0, .625, .25, .5)
 		else
-			self.icon:SetTexCoord(0, .625, .28125, .5325)
+			self.icon:SetTexCoord(0, .625, .5, .75)
 		end
 	end
 	self.gridToggleButton:setCoordIcon()
 
 	self.gridToggleButton:SetScript("OnClick", function(btn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		local checked = btn:GetChecked()
-		mounts.config.gridToggle = checked
+		mounts.config.gridToggle = Wrap(mounts.config.gridToggle + 1, 3)
 		btn:setCoordIcon()
-		self:setScrollGridMounts(checked)
+		self:setScrollGridMounts()
 	end)
 
 	-- MODELSCENE
@@ -1310,6 +1311,7 @@ function journal:init()
 		local parent = btn:GetParent()
 		parent:StopMovingOrSizing()
 		mounts.config.journalWidth, mounts.config.journalHeight = parent:GetSize()
+		self:setScrollGridMounts()
 		self:event("JOURNAL_RESIZED")
 	end)
 	resize:SetScript("OnEnter", function()
@@ -1643,11 +1645,41 @@ function journal:getMountAllCreatureDisplayInfo(mount)
 end
 
 
-function journal:setScrollGridMounts(grid)
+function journal:setScrollGridMounts()
 	local index = self.view:CalculateDataIndices(self.scrollBox)
 	local template
 
-	if grid then
+	self.leftInset:ClearAllPoints()
+	self.leftInset:SetPoint("TOPLEFT", self.shownPanel, "BOTTOMLEFT", 0, -2)
+	self.leftInset:SetPoint("BOTTOMLEFT", 0, 26)
+	if mounts.config.gridToggle ~= 3 then
+		self.mountDisplay:Show()
+		self.rightInset:Show()
+		self.leftInset:SetPoint("TOPRIGHT", self.filtersPanel, "BOTTOMRIGHT", -17, -2)
+	else
+		self.mountDisplay:Hide()
+		self.rightInset:Hide()
+		self.leftInset:SetPoint("RIGHT", -21, 0)
+	end
+
+	if mounts.config.gridToggle == 1 then
+		local right, extent
+		self.gridN = 1
+		if mounts.config.showTypeSelBtn then
+			extent = 44
+			right = 25
+			template = "MJMountDefaultListButtonWithTypeBtns"
+		else
+			extent = 40
+			right = 0
+			template = "MJMountDefaultListButton"
+		end
+		self.initMountButton = self.defaultInitMountButton
+		self.view:SetPadding(0,0,41,right,0,0)
+		self.view:SetElementExtent(extent)
+		self.view:SetPanExtent(extent)
+		self.scrollBox.wheelPanScalar = 2
+	elseif mounts.config.gridToggle == 2 then
 		local left, hSpacing
 		if mounts.config.showTypeSelBtn then
 			self.gridN = 3
@@ -1663,21 +1695,23 @@ function journal:setScrollGridMounts(grid)
 		self.initMountButton = self.gridInitMountButton
 		self.view:SetPadding(2,2,left,0,hSpacing,2)
 		self.view:SetElementExtent(40)
+		self.view:SetPanExtent(40)
+		self.scrollBox.wheelPanScalar = 2
 	else
-		local right, extent
-		self.gridN = 1
-		if mounts.config.showTypeSelBtn then
-			extent = 44
-			right = 25
-			template = "MJMountDefaultListButtonWithTypeBtns"
-		else
-			extent = 40
-			right = 0
-			template = "MJMountDefaultListButton"
-		end
-		self.initMountButton = self.defaultInitMountButton
-		self.view:SetPadding(0,0,41,right,0,0)
-		self.view:SetElementExtent(extent)
+		template = "MJGridModelSceneTemplate"
+		local stride = 6
+		local hSpacing = 2
+		local left = 0
+		local right = 0
+		local scrollWidth = self.scrollBox:GetWidth() - left - right
+		local width = math.floor((scrollWidth - (stride - 1) * hSpacing) / stride)
+		self.gmsWidth = width
+		self.gridN = stride
+		self.initMountButton = self.gridModelSceneInit
+		self.view:SetPadding(0,0,left,right,hSpacing,2)
+		self.view:SetElementExtent(self.gmsWidth)
+		self.view:SetPanExtent(self.gmsWidth)
+		self.scrollBox.wheelPanScalar = 1
 	end
 
 	self.view:SetStride(self.gridN)
@@ -1790,7 +1824,6 @@ function journal:defaultInitMountButton(btn, data)
 		btn.dragButton.mountWeightBG:Hide()
 	end
 
-	btn:Enable()
 	btn.name:SetText(creatureName)
 	btn.name:SetTextColor((mounts.config.coloredMountNames and qualityColor or NORMAL_FONT_COLOR):GetRGB())
 	btn.new:SetShown(needsFanfare)
@@ -1848,7 +1881,6 @@ function journal:gridInitMountButton(btn, data)
 	btn.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
 	btn.icon:SetVertexColor(1, 1, 1)
 	btn.qualityBorder:SetVertexColor(qualityColor:GetRGB())
-	btn:Enable()
 	btn.selectedTexture:SetShown(mountID == self.selectedMountID)
 	btn.hidden:SetShown(self:isMountHidden(spellID))
 	btn.favorite:SetShown(isFavorite)
@@ -1879,6 +1911,103 @@ function journal:gridInitMountButton(btn, data)
 	end
 
 	self:updateMountToggleButton(btn)
+end
+
+
+function journal:gridModelSceneInit(btn, data)
+	btn:SetSize(self.gmsWidth, self.gmsWidth)
+	local mountID = data.mountID
+	local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = self:getMountInfo(mountID)
+
+	local needsFanfare, qualityColor
+	if type(mountID) == "number" then
+		needsFanfare = C_MountJournal.NeedsFanfare(mountID)
+		qualityColor = util.getRarityColor(mountID)
+	else
+		qualityColor = HIGHLIGHT_FONT_COLOR
+	end
+
+	local drag = btn.dragButton
+	drag.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
+	drag.icon:SetVertexColor(1, 1, 1)
+	drag.qualityBorder:SetVertexColor(qualityColor:GetRGB())
+	drag.selectedTexture:SetShown(mountID == self.selectedMountID)
+	drag.hidden:SetShown(self:isMountHidden(spellID))
+	drag.favorite:SetShown(isFavorite)
+
+	local mountWeight = self.mountsWeight[spellID]
+	if mountWeight then
+		drag.mountWeight:SetText(getColorWeight(mountWeight))
+		drag.mountWeight:Show()
+		drag.mountWeightBG:Show()
+	else
+		drag.mountWeight:Hide()
+		drag.mountWeightBG:Hide()
+	end
+
+	if isUsable or needsFanfare then
+		drag.icon:SetDesaturated()
+		drag.icon:SetAlpha(1)
+	elseif isCollected then
+		drag.icon:SetDesaturated(true)
+		-- 150/255, 50/255, 50/255
+		drag.icon:SetVertexColor(.58823529411765, .19607843137255, .19607843137255)
+		drag.icon:SetAlpha(.75)
+		drag.qualityBorder:SetAlpha(.75)
+	else
+		drag.icon:SetDesaturated(true)
+		drag.icon:SetAlpha(.35)
+		drag.qualityBorder:SetAlpha(.25)
+	end
+
+	btn.name:SetText(creatureName)
+	btn.name:SetTextColor((mounts.config.coloredMountNames and qualityColor or NORMAL_FONT_COLOR):GetRGB())
+
+	local _,_, rarity, creatureDisplayID, descriptionText, sourceText, isSelfMount, mountType, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = self:getMountInfoExtra(mountID)
+
+	if not creatureDisplayID then
+		local allCreatureDisplays = C_MountJournal.GetMountAllCreatureDisplayInfoByID(mountID)
+		if allCreatureDisplays and #allCreatureDisplays > 0 then
+			creatureDisplayID = allCreatureDisplays[1].creatureDisplayID
+		else
+			creatureDisplayID = 0
+		end
+	end
+	local creatureID = creatureDisplayID
+
+	btn.modelScene:TransitionToModelSceneID(modelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_MAINTAIN)
+	btn.modelScene:PrepareForFanfare(needsFanfare)
+
+	local mountActor = btn.modelScene:GetActorByTag("unwrapped")
+	if mountActor then
+		if creatureID == "player" then
+			btn.modelScene:GetActorByTag("player-rider"):ClearModel()
+			local sheathWeapons = true
+			local autoDress = true
+			local hideWeapons = false
+			local usePlayerNativeForm = true
+			if mountActor:SetModelByUnit("player", sheathWeapons, autoDress, hideWeapons, usePlayerNativeForm) then
+				mountActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
+				mountActor:SetAnimation(618)
+			else
+				mountActor:ClearModel()
+			end
+		else
+			mountActor:SetModelByCreatureDisplayID(creatureID, true)
+			-- mount self idle animation
+			if isSelfMount then
+				mountActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
+				mountActor:SetAnimation(618)
+			else
+				mountActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.Anim)
+				mountActor:SetAnimation(0)
+			end
+			btn.modelScene:AttachPlayerToMount(mountActor, animID, isSelfMount, disablePlayerMountPreview or not GetCVarBool("mountJournalShowPlayer"), spellVisualKitID, PlayerUtil.ShouldUseNativeFormInModelScene())
+		end
+	end
+
+	--self.mountDisplay.lastMountID = self.selectedMountID
+	--self.mountDisplay.lastCreatureID = creatureID
 end
 
 

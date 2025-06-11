@@ -354,7 +354,7 @@
 							<Anchor point="TOPLEFT" x="3" y="-3"/>
 						</Anchors>
 					</CheckButton>
-					<CheckButton parentKey="gridToggleButton" inherits="UIMenuButtonStretchTemplate" virtual="true">
+					<Button parentKey="gridToggleButton" inherits="UIMenuButtonStretchTemplate" virtual="true">
 						<Size x="24" y="24"/>
 						<Anchors>
 							<Anchor point="LEFT" relativeKey="$parent.btnToggle" relativePoint="RIGHT" x="-2" y="0"/>
@@ -387,7 +387,7 @@
 								end
 							</OnMouseUp>
 						</Scripts>
-					</CheckButton>
+					</Button>
 					<EditBox parentKey="searchBox" inherits="SearchBoxTemplate" letters="40">
 						<Size x="131" y="20"/>
 						<Anchors>
@@ -1912,6 +1912,33 @@
 					<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" x="1" y="-28"/>
 				</Anchors>
 			</CheckButton>
+		</Frames>
+	</Button>
+
+	<Button name="MJGridModelSceneTemplate" inherits="BackdropTemplate" virtual="true">
+		<Layers>
+			<Layer level="OVERLAY">
+				<FontString parentKey="name" inherits="GameFontNormal" justifyH="LEFT" maxLines="2">
+					<Anchors>
+						<Anchor point="LEFT" relativePoint="TOPLEFT" x="44" y="-21"/>
+						<Anchor point="RIGHT" x="-6" y="0"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Button parentKey="dragButton" inherits="MJGridMountButtonTemplate">
+				<Size x="38" y="38"/>
+				<Anchors>
+					<Anchor point="TOPLEFT" x="4" y="-4"/>
+				</Anchors>
+			</Button>
+			<ModelScene parentKey="modelScene" inherits="WrappedAndUnwrappedModelScene">
+				<Anchors>
+					<Anchor point="TOPLEFT" x="2" y="-2"/>
+					<Anchor point="BOTTOMRIGHT" x="-2" y="2"/>
+				</Anchors>
+			</ModelScene>
 		</Frames>
 	</Button>
 

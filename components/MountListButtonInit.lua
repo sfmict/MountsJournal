@@ -73,31 +73,52 @@ ns.journal:on("MODULES_INIT", function(journal)
 		MJTooltipModel:Hide()
 	end
 
+	local backdrop = {
+		bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+		edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+		tile = true,
+		tileEdge = true,
+		tileSize = 8,
+		edgeSize = 8,
+		insets = {left = 2, right = 2, top = 2, bottom = 2}
+	}
+
 	journal.view:RegisterCallback(journal.view.Event.OnAcquiredFrame, function(owner, frame, elementData, new)
 		if new then
-			frame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-			frame:SetScript("OnMouseDown", mouseDown)
-			frame:SetScript("OnClick", click)
-
-			if frame.dragButton then
-				frame.dragButton:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-				frame.dragButton:RegisterForDrag("LeftButton")
-				frame.dragButton:SetScript("OnMouseDown", mouseDown)
-				frame.dragButton:SetScript("OnClick", dragClick)
-				frame.dragButton:SetScript("OnDragStart", drag)
-				frame.dragButton:SetScript("OnEnter", onEnter)
-				frame.dragButton:SetScript("OnLeave", onLeave)
+			if frame.modelScene then
+				--hooksecurefunc(frame.modelScene, "SetActiveCamera", function(modelScene)
+				--	modelScene.activeCamera:SetMouseWheelMode(nil)
+				--end)
+				--fprint(frame.modelScene.activeCamera)
+				frame:SetBackdrop(backdrop)
+				frame:SetBackdropColor(.1, .1, .1, .9)
+				frame:SetBackdropBorderColor(.3, .3, .3)
+				frame.modelScene:SetScript("OnMouseWheel", nil)
 			else
-				frame:RegisterForDrag("LeftButton")
-				frame:SetScript("OnDragStart", drag)
-				frame:SetScript("OnEnter", onEnter)
-				frame:SetScript("OnLeave", onLeave)
-			end
+				frame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+				frame:SetScript("OnMouseDown", mouseDown)
+				frame:SetScript("OnClick", click)
 
-			if frame.fly then
-				frame.fly:SetScript("OnClick", typeClick)
-				frame.ground:SetScript("OnClick", typeClick)
-				frame.swimming:SetScript("OnClick", typeClick)
+				if frame.dragButton then
+					frame.dragButton:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+					frame.dragButton:RegisterForDrag("LeftButton")
+					frame.dragButton:SetScript("OnMouseDown", mouseDown)
+					frame.dragButton:SetScript("OnClick", dragClick)
+					frame.dragButton:SetScript("OnDragStart", drag)
+					frame.dragButton:SetScript("OnEnter", onEnter)
+					frame.dragButton:SetScript("OnLeave", onLeave)
+				else
+					frame:RegisterForDrag("LeftButton")
+					frame:SetScript("OnDragStart", drag)
+					frame:SetScript("OnEnter", onEnter)
+					frame:SetScript("OnLeave", onLeave)
+				end
+
+				if frame.fly then
+					frame.fly:SetScript("OnClick", typeClick)
+					frame.ground:SetScript("OnClick", typeClick)
+					frame.swimming:SetScript("OnClick", typeClick)
+				end
 			end
 		end
 	end)
