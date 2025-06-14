@@ -3,7 +3,7 @@ local L, util, rules, conds, actions = ns.L, ns.util, ns.ruleConfig, ns.conditio
 local ruleEditor = CreateFrame("FRAME", nil, rules, "MJEscHideTemplate")
 rules.ruleEditor = ruleEditor
 ruleEditor:Hide()
-ruleEditor:SetScript("OnHide", ruleEditor.Hide)
+ruleEditor:HookScript("OnHide", ruleEditor.Hide)
 
 
 local escOnShow = ruleEditor:GetScript("OnShow")
@@ -134,7 +134,7 @@ ruleEditor:HookScript("OnShow", function(self)
 	end)
 
 	-- modal utils
-	local function saveStatus(panel, frame)
+	local function saveStatus(panel, frame, notShow)
 		local status = {}
 		for i = 1, frame:GetNumPoints() do
 			status[i] = {frame:GetPoint(i)}
@@ -145,11 +145,15 @@ ruleEditor:HookScript("OnShow", function(self)
 
 		frame:SetParent(panel)
 		frame:ClearAllPoints()
-		frame:Show()
+		if not notShow then frame:Show() end
+		frame.SetPoint = nop
+		frame.ClearAllPoints = nop
 	end
 
 	local function restoreStatus(panel)
 		for frame, status in next, panel.status do
+			frame.SetPoint = nil
+			frame.ClearAllPoints = nil
 			frame:ClearAllPoints()
 			for i = 1, #status do
 				frame:SetPoint(unpack(status[i]))
@@ -170,30 +174,30 @@ ruleEditor:HookScript("OnShow", function(self)
 
 		local navBar = ns.journal.navBar
 		saveStatus(panel, navBar)
-		navBar:SetPoint("TOPLEFT", 15, -15)
-		navBar:SetPoint("TOPRIGHT", -15, 15)
+		panel.SetPoint(navBar, "TOPLEFT", 15, -15)
+		panel.SetPoint(navBar, "TOPRIGHT", -15, 15)
 		panel.tabMapID = navBar.tabMapID
 		navBar.tabMapID = panel.condData[3] or navBar.defMapID
 
 		local worldMap = ns.journal.worldMap
 		saveStatus(panel, worldMap)
-		worldMap:SetPoint("TOPLEFT", navBar, "BOTTOMLEFT")
-		worldMap:SetPoint("BOTTOMRIGHT", -15, 78)
+		panel.SetPoint(worldMap, "TOPLEFT", navBar, "BOTTOMLEFT")
+		panel.SetPoint(worldMap, "BOTTOMRIGHT", -15, 78)
 
 		local mapControl = ns.journal.mapSettings.mapControl
 		saveStatus(panel, mapControl)
-		mapControl:SetPoint("TOPLEFT", worldMap, "BOTTOMLEFT")
-		mapControl:SetPoint("TOPRIGHT", worldMap, "BOTTOMRIGHT")
+		panel.SetPoint(mapControl, "TOPLEFT", worldMap, "BOTTOMLEFT")
+		panel.SetPoint(mapControl, "TOPRIGHT", worldMap, "BOTTOMRIGHT")
 
 		local currentMap = ns.journal.mapSettings.CurrentMap
 		saveStatus(panel, currentMap)
-		currentMap:SetPoint("LEFT", mapControl, 134, 0)
-		currentMap:SetPoint("RIGHt", mapControl, -3, 0)
+		panel.SetPoint(currentMap, "LEFT", mapControl, 134, 0)
+		panel.SetPoint(currentMap, "RIGHt", mapControl, -3, 0)
 
 		local dnr = ns.journal.mapSettings.dnr
 		saveStatus(panel, dnr)
-		dnr:SetPoint("TOPLEFT", mapControl, 3, -3)
-		dnr:SetPoint("RIGHT", currentMap, "LEFT", 2, 0)
+		panel.SetPoint(dnr, "TOPLEFT", mapControl, 3, -3)
+		panel.SetPoint(dnr, "RIGHT", currentMap, "LEFT", 2, 0)
 	end)
 	self.mapSelect:HookScript("OnHide", function(panel)
 		panel:Hide()
@@ -233,13 +237,20 @@ ruleEditor:HookScript("OnShow", function(self)
 
 		local filtersPanel = ns.journal.filtersPanel
 		saveStatus(panel, filtersPanel)
-		filtersPanel:SetPoint("TOP", 0, -6)
+		panel.SetPoint(filtersPanel, "TOP", 0, -6)
+
+		local shownPanel = ns.journal.filtersPanel.shownPanel
+		saveStatus(panel, shownPanel, true)
+		panel.SetPoint(shownPanel, "TOP", filtersPanel, "BOTTOM", 0, -2)
+		panel.SetPoint(shownPanel, "LEFT", filtersPanel)
+		panel.SetPoint(shownPanel, "RIGHT", filtersPanel)
 
 		local leftInset = ns.journal.leftInset
 		saveStatus(panel, leftInset)
-		leftInset:SetPoint("TOPRIGHT", ns.journal.filtersPanel, "BOTTOMRIGHT", -17, -2)
-		leftInset:SetPoint("BOTTOM", 0, 6)
-		ns.journal:setShownCountMounts()
+		panel.SetPoint(leftInset, "TOP", shownPanel, "BOTTOM", 0, -2)
+		panel.SetPoint(leftInset, "LEFT", filtersPanel, 0, 0)
+		panel.SetPoint(leftInset, "RIGHT", filtersPanel, -17, 0)
+		panel.SetPoint(leftInset, "BOTTOM", 0, 6)
 		ns.journal.tags.selectFunc = function(spellID)
 			self.mountSelect:Hide()
 			self.data.action[2] = spellID

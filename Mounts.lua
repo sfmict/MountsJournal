@@ -53,6 +53,9 @@ function mounts:ADDON_LOADED(addonName)
 		self.defFilters = self.globalDB.defFilters
 		self.help = self.globalDB.help
 		self.config = self.globalDB.config
+		self.config.gridToggle = self.config.gridToggle or 1
+		self.config.altGridToggle = self.config.altGridToggle or 1
+		self.config.gridModelStride = self.config.gridModelStride or 3
 		self.config.summon1Icon = self.config.summon1Icon or 413588
 		self.config.summon2Icon = self.config.summon2Icon or 631718
 		self.config.wowheadLinkLang = self.config.wowheadLinkLang or "en"
