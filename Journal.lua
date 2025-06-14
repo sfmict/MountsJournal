@@ -2745,8 +2745,14 @@ function journal:useMount(mountID)
 	if active then
 		C_MountJournal.Dismiss()
 	elseif C_MountJournal.NeedsFanfare(mountID) then
+		if self:getGridToggle() == 3 then
+			local btn = self:getMountButtonByMountID(mountID)
+			if btn then btn.modelScene:StartUnwrapAnimation() end
+		end
 		self.modelScene:StartUnwrapAnimation(function()
 			C_MountJournal.ClearFanfare(mountID)
+			local index = self:getMountDataByMountID(mountID)
+			if index then self.scrollBox:ScrollToElementDataIndex(index, ScrollBoxConstants.AlignBegin) end
 		end)
 	else
 		C_MountJournal.SummonByID(mountID)
