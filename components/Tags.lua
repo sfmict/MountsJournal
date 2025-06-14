@@ -119,9 +119,9 @@ end
 
 do
 	local lastMountClick = 0
-	function tags:listItemClick(btn, mouseBtn)
+	function tags:listItemClick(btn, anchorTo, mouseBtn)
 		if mouseBtn ~= "LeftButton" then
-			self:showMountDropdown(btn, btn, 0, 0)
+			self:showMountDropdown(btn, anchorTo, 0, 0)
 		elseif IsModifiedClick("CHATLINK") then
 			local spellID = btn.spellID
 			if MacroFrame and MacroFrame:IsShown() then

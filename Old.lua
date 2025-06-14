@@ -1,5 +1,4 @@
 local addon, ns = ...
-local mounts = ns.mounts
 
 
 local function compareVersion(v1, v2)
@@ -249,10 +248,17 @@ local function updateGlobal(self)
 	-- IF < 11.1.16 GLOBAL
 	if compareVersion("11.1.16", self.globalDB.lastAddonVersion) then
 		for i, v in ipairs({"filters", "defFilters"}) do
-			if mounts[v].family then
-				mounts[v].family[1904] = nil
-				mounts[v].family[2506] = nil
+			if self[v].family then
+				self[v].family[1904] = nil
+				self[v].family[2506] = nil
 			end
+		end
+	end
+
+	-- IF < 11.1.17 GLOBAL
+	if compareVersion("11.1.17", self.globalDB.lastAddonVersion) then
+		if type(self.config.gridToggle) == "boolean" then
+			self.config.gridToggle = self.config.gridToggle and 2 or 1
 		end
 	end
 end
@@ -377,12 +383,12 @@ local function updateChar(self)
 end
 
 
-function mounts:setOldChanges()
+function ns.mounts:setOldChanges()
 	self.setOldChanges = nil
 
 	local currentVersion = C_AddOns.GetAddOnMetadata(addon, "Version")
 	--@do-not-package@
-	if currentVersion == "@project-version@" then currentVersion = "v11.1.16" end
+	if currentVersion == "@project-version@" then currentVersion = "v11.1.17" end
 	--@end-do-not-package@
 
 	if not self.charDB.lastAddonVersion then self.charDB.lastAddonVersion = currentVersion end

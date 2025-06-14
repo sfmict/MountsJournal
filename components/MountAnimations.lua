@@ -3,7 +3,8 @@ local L, util = ns.L, ns.util
 
 
 ns.journal:on("MODULES_INIT", function(journal)
-	local dd = LibStub("LibSFDropDown-1.5"):CreateModernButtonOriginal(journal.modelScene)
+	local lsfdd = LibStub("LibSFDropDown-1.5")
+	local dd = lsfdd:CreateModernButtonOriginal(journal.modelScene)
 	dd:ddSetDisplayMode(addon)
 	dd:SetAlpha(0)
 	dd:SetPoint("LEFT", journal.modelScene.modelControl, "RIGHT", 10, 0)
@@ -114,12 +115,16 @@ ns.journal:on("MODULES_INIT", function(journal)
 	dd.customAnimationPanel = CreateFrame("FRAME", nil, journal.modelScene, "MJMountCustomAnimationPanel")
 	dd.customAnimationPanel:SetPoint("BOTTOMRIGHT", dd, "TOPRIGHT", 0, 2)
 
-	journal:on("MOUNT_MODEL_LOADED", function()
-		local selectedValue = dd:ddGetSelectedValue()
-		if selectedValue == "custom" then
-			dd.customAnimationPanel:play()
-		elseif selectedValue then
-			dd:playAnimation(selectedValue)
+	journal:on("MOUNT_MODEL_LOADED", function(journal, frame)
+		if frame then
+			dd:playAnimationForGrid(journal.gridModelAnimation:ddGetSelectedValue(), frame)
+		else
+			local selectedValue = dd:ddGetSelectedValue()
+			if selectedValue == "custom" then
+				dd.customAnimationPanel:play()
+			elseif selectedValue then
+				dd:playAnimation(selectedValue)
+			end
 		end
 	end)
 
@@ -147,12 +152,11 @@ ns.journal:on("MODULES_INIT", function(journal)
 	end)
 
 	dd:ddSetInitFunc(function(self, level)
-		local info = {}
+		local info = {list = {}}
 		local mountType = self.currentMountType or 1
 
 		local function checked(btn) return self:ddGetSelectedValue() == btn.value end
-		local function func(btn, index)
-			self.currentAnimationIndex = index
+		local function func(btn)
 			self.customAnimationPanel:Hide()
 			self:playAnimation(btn.value)
 			self:ddSetSelectedValue(btn.value, level)
@@ -160,41 +164,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 		end
 		local function remove(btn) self:deleteAnimation(btn.arg1) end
 
-		info.list = {}
-		for i, v in ipairs(self.animationList) do
-			if v.type == nil or v.type >= mountType then
-				local animation, isKit
-				if self.isPlayer then
-					animation = v.selfAnimation or v.animation
-					isKit = v.selfIsKit
-				else
-					animation = v.animation
-					isKit = v.isKit
-				end
-				tinsert(info.list, {
-					keepShownOnClick = true,
-					text = v.name,
-					rightText = ("|cff808080%s%d|r"):format(isKit and "k" or "", animation),
-					rightFont = util.codeFont,
-					value = v,
-					checked = checked,
-					func = func,
-				})
-			end
-		end
-		for i, v in ipairs(self.animations) do
-			tinsert(info.list, {
-				keepShownOnClick = true,
-				text = v.name,
-				rightText = ("|cff808080%s%d|r"):format(v.isKit and "k" or "", v.animation),
-				rightFont = util.codeFont,
-				value = v,
-				arg1 = i,
-				checked = checked,
-				func = func,
-				remove = remove,
-			})
-		end
+		self:addMountAnimationToList(info.list, mountType, checked, func, remove)
 		tinsert(info.list, {
 			text = CUSTOM,
 			value = "custom",
@@ -208,9 +178,45 @@ ns.journal:on("MODULES_INIT", function(journal)
 		self:ddAddButton(info, level)
 	end)
 
-	function dd:playAnimation(anim)
+	function dd:addMountAnimationToList(list, mountType, checked, func, remove)
+		for i, v in ipairs(self.animationList) do
+			if v.type == nil or v.type >= mountType then
+				local animation, isKit
+				if self.isPlayer then
+					animation = v.selfAnimation or v.animation
+					isKit = v.selfIsKit
+				else
+					animation = v.animation
+					isKit = v.isKit
+				end
+				tinsert(list, {
+					keepShownOnClick = true,
+					text = v.name,
+					rightText = ("|cff808080%s%d|r"):format(isKit and "k" or "", animation),
+					rightFont = util.codeFont,
+					value = v,
+					checked = checked,
+					func = func,
+				})
+			end
+		end
+		for i, v in ipairs(self.animations) do
+			tinsert(list, {
+				keepShownOnClick = true,
+				text = v.name,
+				rightText = ("|cff808080%s%d|r"):format(v.isKit and "k" or "", v.animation),
+				rightFont = util.codeFont,
+				value = v,
+				checked = checked,
+				func = func,
+				remove = remove,
+			})
+		end
+	end
+
+	function dd:playAnimationScene(anim, isPlayer, modelScene)
 		local animation, isKit
-		if self.isPlayer then
+		if isPlayer then
 			animation = anim.selfAnimation or anim.animation or anim.current
 			if anim.current then
 				isKit = anim.isKit
@@ -222,7 +228,8 @@ ns.journal:on("MODULES_INIT", function(journal)
 			isKit = anim.isKit
 		end
 
-		local actor = journal.modelScene:GetActorByTag("unwrapped")
+		local actor = modelScene:GetActorByTag("unwrapped")
+		actor:SetAnimation(0, 0)
 		actor:StopAnimationKit()
 		--max animation 2^31 - 1
 		if isKit then
@@ -232,6 +239,22 @@ ns.journal:on("MODULES_INIT", function(journal)
 			actor:StopAnimationKit()
 			actor:SetAnimation(animation, 0)
 		end
+	end
+
+	function dd:playAnimation(anim)
+		self:playAnimationScene(anim, self.isPlayer, journal.modelScene)
+	end
+
+	function dd:playAnimationForGrid(anim, f)
+		local mountType = f.mountType
+		if mountType == 231 then
+			mountType = 2
+		else
+			mountType = journal.mountTypes[mountType]
+			if type(mountType) == "table" then mountType = mountType[1] end
+		end
+		if anim.type and mountType > anim.type then anim = dd.animationList[1] end
+		self:playAnimationScene(anim, f.isSelfMount, f.modelScene)
 	end
 
 	function dd:deleteAnimation(id)
@@ -251,6 +274,30 @@ ns.journal:on("MODULES_INIT", function(journal)
 			end
 		end)
 	end
+
+	-- GRID MODEL ANIMATION
+	journal.gridModelAnimation = lsfdd:CreateModernButtonOriginal(journal.gridModelSettings, 150)
+	journal.gridModelAnimation:SetPoint("LEFT", journal.gridModelSettings, "RIGHT", -182, 0)
+	journal.gridModelAnimation:SetHeight(20)
+	journal.gridModelAnimation.Arrow:SetPoint("RIGHT", 3, -3)
+	journal.gridModelAnimation:ddSetSelectedValue(dd.animationList[1])
+	journal.gridModelAnimation:ddSetSelectedText(dd.animationList[1].name)
+
+	journal.gridModelAnimation:ddSetInitFunc(function(self, level)
+		local info = {list = {}}
+
+		local function checked(btn) return self:ddGetSelectedValue() == btn.value end
+		local function func(btn)
+			for i, f in ipairs(journal.view:GetFrames()) do
+				dd:playAnimationForGrid(btn.value, f)
+			end
+			self:ddSetSelectedValue(btn.value, level)
+			self:ddSetSelectedText(btn.value.name)
+		end
+
+		dd:addMountAnimationToList(info.list, 1, checked, func)
+		self:ddAddButton(info, level)
+	end)
 end)
 
 

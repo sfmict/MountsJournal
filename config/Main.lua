@@ -730,7 +730,7 @@ config:SetScript("OnShow", function(self)
 		mounts:setUsableRepairMounts()
 		mounts:setHerbMount()
 		ns.pets:setSummonEvery()
-		journal:setScrollGridMounts(mounts.config.gridToggle)
+		journal:setScrollGridMounts(true)
 		journal:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 	end
 end)

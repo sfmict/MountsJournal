@@ -3,82 +3,52 @@ local L, util = ns.L, ns.util
 local petRandomIcon = "Interface/Icons/INV_Pet_Achievement_CaptureAPetFromEachFamily_Battle" -- select(3, GetSpellInfo(243819))
 
 
-MJSetPetMixin = util.createFromEventsMixin()
+local setPetMixin = util.createFromEventsMixin()
 
 
-function MJSetPetMixin:onLoad()
-	self:SetPropagateMouseMotion(true)
-	self.mounts = ns.mounts
-	self.journal = ns.journal
-
-	self:SetScript("OnEnter", function(self)
-		self.highlight:Show()
-		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-		GameTooltip:SetText(L["Summonable Battle Pet"])
-		local description
-		if self.id then
-			if type(self.id) == "number" then
-				description = self.id == 1 and PET_JOURNAL_SUMMON_RANDOM_FAVORITE_PET or L["Summon Random Battle Pet"]
-			else
-				description = self.name
-			end
+function setPetMixin:onEnter()
+	self.highlight:Show()
+	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+	GameTooltip:SetText(L["Summonable Battle Pet"])
+	local description
+	if self.id then
+		if type(self.id) == "number" then
+			description = self.id == 1 and PET_JOURNAL_SUMMON_RANDOM_FAVORITE_PET or L["Summon Random Battle Pet"]
 		else
-			description = L["No Battle Pet"]
+			description = self.name
 		end
-		GameTooltip:AddLine(description, 1, 1, 1)
-		GameTooltip:Show()
-
-		if self.displayID and self.speciesID then
-			local cardModelSceneID, loadoutModelSceneID = C_PetJournal.GetPetModelSceneInfoBySpeciesID(self.speciesID)
-			MJTooltipModel.model:SetFromModelSceneID(loadoutModelSceneID)
-
-			local battlePetActor = MJTooltipModel.model:GetActorByTag("pet")
-			if battlePetActor then
-				battlePetActor:SetModelByCreatureDisplayID(self.displayID)
-				battlePetActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
-
-				MJTooltipModel:ClearAllPoints()
-				MJTooltipModel:SetPoint("TOPLEFT", GameTooltip, "BOTTOMLEFT", 0, 2)
-				MJTooltipModel:Show()
-			end
-		end
-	end)
-	self:SetScript("OnLeave", function(self)
-		self.highlight:Hide()
-		GameTooltip:Hide()
-		MJTooltipModel:Hide()
-	end)
-end
-
-
-function MJSetPetMixin:onEvent(event, ...) self[event](self, ...) end
-
-
-function MJSetPetMixin:onShow()
-	self:SetScript("OnShow", nil)
-	C_Timer.After(0, function()
-		self:SetScript("OnShow", self.refresh)
-		self:updatePetForMount()
-		self:refresh()
-		self:on("MOUNT_SELECT", self.refresh)
-		self:on("UPDATE_PROFILE", self.refresh)
-		self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
-	end)
-end
-
-
-function MJSetPetMixin:onClick()
-	if not self.petSelectionList then
-		self.petSelectionList = CreateFrame("FRAME", nil, self, "MJCompanionsPanel")
+	else
+		description = L["No Battle Pet"]
 	end
-	self.petSelectionList:SetShown(not self.petSelectionList:IsShown())
-	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	GameTooltip:AddLine(description, 1, 1, 1)
+	GameTooltip:Show()
+
+	if self.displayID and self.speciesID then
+		local cardModelSceneID, loadoutModelSceneID = C_PetJournal.GetPetModelSceneInfoBySpeciesID(self.speciesID)
+		MJTooltipModel.model:SetFromModelSceneID(loadoutModelSceneID)
+
+		local battlePetActor = MJTooltipModel.model:GetActorByTag("pet")
+		if battlePetActor then
+			battlePetActor:SetModelByCreatureDisplayID(self.displayID)
+			battlePetActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
+
+			MJTooltipModel:ClearAllPoints()
+			MJTooltipModel:SetPoint("TOPLEFT", GameTooltip, "BOTTOMLEFT", 0, 2)
+			MJTooltipModel:Show()
+		end
+	end
 end
 
 
-function MJSetPetMixin:refresh()
-	local spellID = self.journal.selectedSpellID
-	local petID = self.journal.petForMount[spellID]
+function setPetMixin:onLeave()
+	self.highlight:Hide()
+	GameTooltip:Hide()
+	MJTooltipModel:Hide()
+end
+
+
+function setPetMixin:refresh()
+	local petID = ns.journal.petForMount[self.spellID]
 	self.id = petID
 	self.displayID = nil
 	self.speciesID = nil
@@ -113,7 +83,7 @@ function MJSetPetMixin:refresh()
 			self.infoFrame.favorite:SetShown(favorite)
 			self.infoFrame:Show()
 		else
-			self.journal.petForMount[spellID] = nil
+			--ns.journal.petForMount[self.spellID] = nil
 			self.infoFrame:Hide()
 			self.id = nil
 		end
@@ -121,10 +91,44 @@ function MJSetPetMixin:refresh()
 end
 
 
+MJSetPetMixin = util.setMixin({}, setPetMixin)
+
+
+function MJSetPetMixin:onEvent(event, ...) self[event](self, ...) end
+
+
+function MJSetPetMixin:onShow()
+	self:SetScript("OnShow", nil)
+	C_Timer.After(0, function()
+		self:SetScript("OnShow", self.mountSelect)
+		self:updatePetForMount()
+		self:mountSelect()
+		self:on("MOUNT_SELECT", self.mountSelect)
+		self:on("UPDATE_PROFILE", self.mountSelect)
+		self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
+	end)
+end
+
+
+function MJSetPetMixin:onClick()
+	if not self.petSelectionList then
+		self.petSelectionList = CreateFrame("FRAME", nil, ns.journal.bgFrame, "MJCompanionsPanel")
+	end
+	self.petSelectionList:SetShown(not self.petSelectionList:IsShown())
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+end
+
+
+function MJSetPetMixin:mountSelect()
+	self.spellID = ns.journal.selectedSpellID
+	self:refresh()
+end
+
+
 function MJSetPetMixin:updatePetForMount()
 	local _, owned = C_PetJournal.GetNumPets()
 	if not self.owned or self.owned > owned then
-		local petForMount, needUpdate = self.mounts.defProfile.petForMount
+		local petForMount, needUpdate = ns.mounts.defProfile.petForMount
 
 		for spellID, petID in pairs(petForMount) do
 			if type(petID) == "string" and not C_PetJournal.GetPetInfoByPetID(petID) then
@@ -132,7 +136,7 @@ function MJSetPetMixin:updatePetForMount()
 				petForMount[spellID] = nil
 			end
 		end
-		for _, profile in pairs(self.mounts.profiles) do
+		for _, profile in pairs(ns.mounts.profiles) do
 			for spellID, petID in pairs(profile.petForMount) do
 				if type(petID) == "string" and not C_PetJournal.GetPetInfoByPetID(petID) then
 					needUpdate = true
@@ -142,12 +146,30 @@ function MJSetPetMixin:updatePetForMount()
 		end
 
 		if needUpdate then
-			self.journal:updateMountsList()
+			ns.journal:updateMountsList()
 		end
 	end
 	self.owned = owned
 end
 MJSetPetMixin.PET_JOURNAL_LIST_UPDATE = MJSetPetMixin.updatePetForMount
+
+
+MJSetPetToModelMixin = util.setMixin({}, setPetMixin)
+
+
+function MJSetPetToModelMixin:onClick()
+	local parent = self:GetParent()
+	if parent.mountID ~= ns.journal.selectedMountID then
+		ns.journal:setSelectedMount(parent.mountID, parent.spellID)
+	end
+	ns.journal.mountDisplay.info.petSelectionBtn:Click()
+end
+
+
+function MJSetPetToModelMixin:mountSelect()
+	self.spellID = self:GetParent().spellID
+	self:refresh()
+end
 
 
 MJCompanionsPanelMixin = util.createFromEventsMixin()
@@ -157,12 +179,9 @@ function MJCompanionsPanelMixin:onEvent(event, ...) self[event](self, ...) end
 
 
 function MJCompanionsPanelMixin:onLoad()
-	self.util = ns.util
-	self.journal = ns.journal
-
 	self:SetWidth(250)
-	self:SetPoint("TOPLEFT", self.journal.bgFrame, "TOPRIGHT")
-	self:SetPoint("BOTTOMLEFT", self.journal.bgFrame, "BOTTOMRIGHT")
+	self:SetPoint("TOPLEFT", ns.journal.bgFrame, "TOPRIGHT")
+	self:SetPoint("BOTTOMLEFT", ns.journal.bgFrame, "BOTTOMRIGHT")
 
 	self.filtersPanel.buttons = {}
 	self.typeFilter = {}
@@ -246,6 +265,7 @@ function MJCompanionsPanelMixin:onShow()
 	self:scrollToSelectedPet()
 	self:on("UPDATE_PROFILE", self.updateScrollPetList)
 	self:on("PET_LIST_UPDATE", self.petListUpdate)
+	self:on("TAB_CHANGED", self.Hide)
 end
 
 
@@ -318,7 +338,7 @@ end
 
 
 function MJCompanionsPanelMixin:scrollToSelectedPet()
-	local selectedPetID = self.journal.petForMount[self.journal.selectedSpellID]
+	local selectedPetID = ns.journal.petForMount[ns.journal.selectedSpellID]
 	if selectedPetID and type(selectedPetID) ~= "number" then
 		self.scrollBox:ScrollToElementDataByPredicate(function(data)
 			return data.petID == selectedPetID
@@ -328,16 +348,16 @@ end
 
 
 function MJCompanionsPanelMixin:selectButtonClick(id)
-	self.journal.petForMount[self.journal.selectedSpellID] = id
-	self.journal:updateMountsList()
-	self:GetParent():refresh()
+	ns.journal.petForMount[ns.journal.selectedSpellID] = id
+	ns.journal:updateMountsList()
+	self:GetParent().mountDisplay.info.petSelectionBtn:refresh()
 	self:Hide()
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 end
 
 
 function MJCompanionsPanelMixin:initButton(btn, data)
-	local selectedPetID = self.journal.petForMount[self.journal.selectedSpellID]
+	local selectedPetID = ns.journal.petForMount[ns.journal.selectedSpellID]
 	local speciesID, customName, level, _,_, displayID, favorite, name, icon, petType, _,_,_,_, canBattle = C_PetJournal.GetPetInfoByPetID(data.petID)
 	local health, _,_,_, rarity = C_PetJournal.GetPetStats(data.petID)
 	local petQualityColor = ITEM_QUALITY_COLORS[rarity - 1].color
@@ -414,7 +434,7 @@ end
 
 
 function MJCompanionsPanelMixin:updateFilters()
-	local text = self.util.cleanText(self.searchBox:GetText())
+	local text = util.cleanText(self.searchBox:GetText())
 	local GetPetInfoByPetID = C_PetJournal.GetPetInfoByPetID
 	local numPets = 0
 	self.dataProvider = CreateDataProvider()
