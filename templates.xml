@@ -1958,7 +1958,7 @@
 						<Anchor point="RIGHT" x="-36"/>
 					</Anchors>
 				</FontString>
-				<FontString parentKey="rarity" inherits="GameFontHighlightSmall" justifyH="LEFT">
+				<FontString parentKey="rarity" propagateMouseInput="Motion" inherits="GameFontHighlightSmall" justifyH="LEFT">
 					<Anchors>
 						<Anchor point="TOPLEFT" x="44" y="-30"/>
 					</Anchors>
@@ -1966,7 +1966,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button parentKey="dragButton" inherits="MJGridMountButtonTemplate">
+			<Button parentKey="dragButton" propagateMouseInput="Motion" inherits="MJGridMountButtonTemplate">
 				<Size x="38" y="38"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="4" y="-4"/>
