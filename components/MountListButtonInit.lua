@@ -25,20 +25,15 @@ ns.journal:on("MODULES_INIT", function(journal)
 
 		if not (self:GetParent().modelScene or journal.mountDisplay:IsShown()) then
 			local _,_,_, creatureID, _,_, isSelfMount, _, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = journal:getMountInfoExtra(f.mountID)
-			MJTooltipModel.model:SetFromModelSceneID(modelSceneID, true)
-			local mountActor = MJTooltipModel.model:GetActorByTag("unwrapped")
-			if not mountActor then return end
-
 			if not creatureID then
 				creatureID = journal:getMountFirstCreatureDisplayID(f.mountID)
 			end
+			MJTooltipModel.model:SetFromModelSceneID(modelSceneID)
 			journal:setMountToModelScene(MJTooltipModel.model, creatureID, isSelfMount, animID, disablePlayerMountPreview, spellVisualKitID)
 
-			if creatureID then
-				MJTooltipModel:ClearAllPoints()
-				MJTooltipModel:SetPoint("BOTTOMLEFT", GameTooltip, "BOTTOMRIGHT", -2, 0)
-				MJTooltipModel:Show()
-			end
+			MJTooltipModel:ClearAllPoints()
+			MJTooltipModel:SetPoint("BOTTOMLEFT", GameTooltip, "BOTTOMRIGHT", -2, 0)
+			MJTooltipModel:Show()
 		end
 	end
 
@@ -145,6 +140,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 		end)
 
 		function model_OnEnter(btn)
+			btn:SetBackdropBorderColor(.6, .6, .6)
 			inspect:SetParent(btn)
 			inspect:SetPoint("BOTTOMRIGHT", -8, 4)
 			inspect:Show()
@@ -152,7 +148,12 @@ ns.journal:on("MODULES_INIT", function(journal)
 			hint:Show()
 		end
 
-		function model_OnLeave()
+		function model_OnLeave(btn)
+			if btn.selected then
+				btn:SetBackdropBorderColor(.8, .6, 0)
+			else
+				btn:SetBackdropBorderColor(.3, .3, .3)
+			end
 			hint:Hide()
 			inspect:Hide()
 		end
@@ -167,9 +168,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 	end
 
 	local function SetActiveCamera(self)
-		if self.activeCamera then
-			journal:event("SET_ACTIVE_CAMERA", self.activeCamera, true)
-		end
+		journal:event("SET_ACTIVE_CAMERA", self.activeCamera, true)
 	end
 
 	journal.view:RegisterCallback(journal.view.Event.OnAcquiredFrame, function(owner, frame, elementData, new)
@@ -177,7 +176,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 			frame:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
 			if frame.modelScene then
-				frame:SetBackdrop(backdrop)
+				frame:SetBackdrop(ns.util.modelScenebackdrop)
 				frame:SetBackdropColor(.1, .1, .1, .9)
 				frame:SetBackdropBorderColor(.3, .3, .3)
 				frame:SetScript("OnMouseDown", click)

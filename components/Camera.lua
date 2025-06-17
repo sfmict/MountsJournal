@@ -35,7 +35,8 @@ end
 
 local function ApplyFromModelSceneCameraInfo(self, modelSceneCameraInfo, transitionType, modificationType)
 	modelSceneCameraInfo.target.z = modelSceneCameraInfo.target.z - 1.2
-	modelSceneCameraInfo.maxZoomDistance = modelSceneCameraInfo.maxZoomDistance + 6
+	modelSceneCameraInfo.minZoomDistance = modelSceneCameraInfo.minZoomDistance - 2
+	modelSceneCameraInfo.maxZoomDistance = modelSceneCameraInfo.maxZoomDistance + 8
 
 	local transitionalCameraInfo = self:CalculateTransitionalValues(self.modelSceneCameraInfo, modelSceneCameraInfo, modificationType)
 	self.modelSceneCameraInfo = modelSceneCameraInfo
@@ -74,6 +75,8 @@ local function gridApplyFromModelSceneCameraInfo(self, ...)
 	ApplyFromModelSceneCameraInfo(self, ...)
 	self.yOffset = 18
 	self.panningYOffset = self.yOffset
+	self.accX = nil
+	self.accY = nil
 end
 
 local function setAcceleration(self, deltaX, deltaY, elapsed)
@@ -226,7 +229,7 @@ local deltaModifierForCameraMode = setmetatable({
 	[ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION] = OrbitCameraMixin:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION),
 	[ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION] = OrbitCameraMixin:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION),
 	[ORBIT_CAMERA_MOUSE_MODE_ROLL_ROTATION] = OrbitCameraMixin:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_ROLL_ROTATION),
-	[ORBIT_CAMERA_MOUSE_MODE_ZOOM] = OrbitCameraMixin:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_ZOOM),
+	[ORBIT_CAMERA_MOUSE_MODE_ZOOM] = .075,
 	[ORBIT_CAMERA_MOUSE_MODE_TARGET_HORIZONTAL] = OrbitCameraMixin:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_TARGET_HORIZONTAL),
 	[ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL] = OrbitCameraMixin:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL),
 	[ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL] = OrbitCameraMixin:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL),

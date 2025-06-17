@@ -162,6 +162,17 @@ util.optionsPanelBackdrop = {
 }
 
 
+util.modelScenebackdrop = {
+	bgFile = "Interface/Tooltips/UI-Tooltip-Background",
+	edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
+	tile = true,
+	tileEdge = true,
+	tileSize = 14,
+	edgeSize = 14,
+	insets = {left = 3, right = 3, top = 3, bottom = 3}
+}
+
+
 util.editBoxBackdrop = {
 	bgFile = "Interface/ChatFrame/ChatFrameBackground",
 	edgeFile = "Interface/ChatFrame/ChatFrameBackground",

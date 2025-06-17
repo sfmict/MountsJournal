@@ -54,8 +54,10 @@ function setPetMixin:refresh()
 	self.speciesID = nil
 
 	if not petID then
+		self:SetAlpha(.7)
 		self.infoFrame:Hide()
 	elseif type(petID) == "number" then
+		self:SetAlpha(1)
 		self.infoFrame.icon:SetTexture(petRandomIcon)
 		self.infoFrame.qualityBorder:Hide()
 		self.infoFrame.isDead:Hide()
@@ -70,6 +72,7 @@ function setPetMixin:refresh()
 		if icon then
 			local health, _,_,_, rarity = C_PetJournal.GetPetStats(petID)
 
+			self:SetAlpha(1)
 			self.name = name
 			self.displayID = displayID
 			self.speciesID = speciesID
@@ -84,6 +87,7 @@ function setPetMixin:refresh()
 			self.infoFrame:Show()
 		else
 			--ns.journal.petForMount[self.spellID] = nil
+			self:SetAlpha(.7)
 			self.infoFrame:Hide()
 			self.id = nil
 		end
@@ -226,15 +230,29 @@ function MJCompanionsPanelMixin:onLoad()
 
 	self.petList = ns.pets.list
 
+	self.viewToggle.setCoordIcon = function(btn)
+		if ns.mounts.config.petViewToggle == 1 then
+			btn.icon:SetTexCoord(0, .625, 0, .25)
+		else
+			btn.icon:SetTexCoord(0, .625, .5, .75)
+		end
+	end
+	self.viewToggle:setCoordIcon()
+
+	self.viewToggle:SetScript("OnClick", function(btn)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		ns.mounts.config.petViewToggle = Wrap(ns.mounts.config.petViewToggle + 1, 2)
+		btn:setCoordIcon()
+		self:setScrollView()
+	end)
+
 	self.searchBox:SetScript("OnTextChanged", function(searchBox)
 		SearchBoxTemplate_OnTextChanged(searchBox)
 		self:updateFilters()
 	end)
 
-	self.view = CreateScrollBoxListLinearView()
-	self.view:SetElementInitializer("MJPetListButton", function(...)
-		self:initButton(...)
-	end)
+	self.view = CreateScrollBoxListGridView()
+	self:setScrollView()
 	self.scrollBox = self.petListFrame.scrollBox
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.petListFrame.scrollBar, self.view)
 
@@ -275,11 +293,11 @@ function MJCompanionsPanelMixin:onHide()
 end
 
 
-function MJCompanionsPanelMixin:showCompanionOptionsMenu(btn)
+function MJCompanionsPanelMixin:showCompanionOptionsMenu(btn, anchor, xPos)
 	if not btn.id or type(btn.id) == "number" then
 		self.companionOptionsMenu:ddCloseMenus()
 	else
-		self.companionOptionsMenu:ddToggle(1, btn.id, btn, 37, 0)
+		self.companionOptionsMenu:ddToggle(1, btn.id, anchor, xPos, 0)
 	end
 end
 
@@ -356,15 +374,45 @@ function MJCompanionsPanelMixin:selectButtonClick(id)
 end
 
 
+function MJCompanionsPanelMixin:setScrollView()
+	local index = self.view:CalculateDataIndices(self.scrollBox)
+	local extent, stride, template, func
+
+	if ns.mounts.config.petViewToggle == 1 then
+		extent = 41
+		stride = 1
+		template = "MJPetListButton"
+		func = function(...) self:initButton(...) end
+	else
+		extent = 108
+		stride = 2
+		template = "MJPetListModelButton"
+		func = function(...) self:initModelButton(...) end
+	end
+
+	self.view:SetElementExtent(extent)
+	self.view:SetPanExtent(extent)
+	self.view:SetStride(stride)
+	self.view:SetElementInitializer(template, func)
+
+	if self.dataProvider then
+		self:updateScrollPetList()
+		self.scrollBox:ScrollToElementDataIndex(index, ScrollBoxConstants.AlignBegin)
+	end
+end
+
+
 function MJCompanionsPanelMixin:initButton(btn, data)
 	local selectedPetID = ns.journal.petForMount[ns.journal.selectedSpellID]
-	local speciesID, customName, level, _,_, displayID, favorite, name, icon, petType, _,_,_,_, canBattle = C_PetJournal.GetPetInfoByPetID(data.petID)
+	local speciesID, customName, level, _,_, displayID, favorite, name, icon, petType, _, sourceText, description, _, canBattle = C_PetJournal.GetPetInfoByPetID(data.petID)
 	local health, _,_,_, rarity = C_PetJournal.GetPetStats(data.petID)
 	local petQualityColor = ITEM_QUALITY_COLORS[rarity - 1].color
 
 	btn.id = data.petID
 	btn.displayID = displayID
 	btn.speciesID = speciesID
+	btn.sourceText = sourceText
+	btn.description = description
 	btn.petTypeIcon:SetTexture(GetPetTypeTexture(petType))
 	btn.name:SetTextColor(petQualityColor:GetRGB())
 	btn.selectedTexture:SetShown(data.petID == selectedPetID)
@@ -387,6 +435,52 @@ function MJCompanionsPanelMixin:initButton(btn, data)
 	btn.infoFrame.level:SetShown(canBattle)
 	btn.infoFrame.level:SetText(level)
 	btn.infoFrame.favorite:SetShown(favorite)
+end
+
+
+function MJCompanionsPanelMixin:initModelButton(btn, data)
+	local selectedPetID = ns.journal.petForMount[ns.journal.selectedSpellID]
+	local speciesID, customName, level, _,_, displayID, favorite, name, icon, petType, _, sourceText, description, _, canBattle = C_PetJournal.GetPetInfoByPetID(data.petID)
+	local health, _,_,_, rarity = C_PetJournal.GetPetStats(data.petID)
+	local petQualityColor = ITEM_QUALITY_COLORS[rarity - 1].color
+
+	btn.id = data.petID
+	btn.displayID = displayID
+	btn.sourceText = sourceText
+	btn.description = description
+	btn.selected = data.petID == selectedPetID
+	btn.petTypeIcon:SetTexture(GetPetTypeTexture(petType))
+	btn.name:SetTextColor(petQualityColor:GetRGB())
+	btn.favorite:SetShown(favorite)
+	btn.isDead:SetShown(health <= 0)
+	btn.levelBG:SetShown(canBattle)
+	btn.level:SetShown(canBattle)
+	btn.level:SetText(level)
+
+	if customName then
+		btn.name:SetText(customName)
+		btn.subName:Show()
+		btn.subName:SetText(name)
+	else
+		btn.name:SetText(name)
+		btn.subName:Hide()
+	end
+
+	if btn.selected then
+		btn:SetBackdropBorderColor(.8, .6, 0)
+	else
+		btn:SetBackdropBorderColor(.3, .3, .3)
+	end
+
+	local cardModelSceneID, loadoutModelSceneID = C_PetJournal.GetPetModelSceneInfoBySpeciesID(speciesID)
+	btn.sceneID = loadoutModelSceneID
+	btn.modelScene:SetFromModelSceneID(loadoutModelSceneID)
+
+	local battlePetActor = btn.modelScene:GetActorByTag("pet")
+	if battlePetActor then
+		battlePetActor:SetModelByCreatureDisplayID(displayID)
+		battlePetActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
+	end
 end
 
 

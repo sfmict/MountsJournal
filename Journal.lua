@@ -1718,13 +1718,13 @@ function journal:setScrollGridMounts(force)
 
 	if self.inspectFrame then self.inspectFrame:Hide() end
 	self.filtersPanel:ClearAllPoints()
+	if self.navBar:IsShown() then
+		self.filtersPanel:SetPoint("TOPLEFT", self.navBar, "BOTTOMLEFT", -1, -1)
+	else
+		self.filtersPanel:SetPoint("TOPLEFT", 4, -60)
+	end
 	playerToggle:ClearAllPoints()
 	if grid ~= 3 then
-		if self.navBar:IsShown() then
-			self.filtersPanel:SetPoint("TOPLEFT", self.navBar, "BOTTOMLEFT", -1, -1)
-		else
-			self.filtersPanel:SetPoint("TOPLEFT", 4, -60)
-		end
 		self.filtersToggle:Show()
 		self.filtersToggle.setFiltersToggleCheck(mounts.config.filterToggle)
 		self.searchBox:SetWidth(131)
@@ -1738,7 +1738,7 @@ function journal:setScrollGridMounts(force)
 			self.rightInset:Show()
 		end
 	else
-		self.filtersPanel:SetPoint("TOPRIGHT", -4, -60)
+		self.filtersPanel:SetPoint("Right", -4, 0)
 		self.filtersToggle:Hide()
 		self.filtersToggle.setFiltersToggleCheck(false)
 		self.searchBox:SetWidth(131 + 22)
@@ -1797,17 +1797,16 @@ function journal:setScrollGridMounts(force)
 		self.initMountButton = self.gridModelSceneInit
 	end
 
+	self.scrollBox.wheelPanScalar = panScalar or 2
 	self.view:SetPadding(top,bottom,left,right,hSpacing,vSpacing)
 	self.view:SetElementExtent(extent)
 	self.view:SetPanExtent(extent)
-	self.scrollBox.wheelPanScalar = panScalar or 2
 	self.view:SetStride(self.gridN)
 	self.view:SetElementInitializer(template, function(...)
 		self:initMountButton(...)
 	end)
 
 	if self.dataProvider then
-		--self:updateMountsList()
 		self:updateScrollMountList()
 		self.view:Layout()
 		self.scrollBox:ScrollToElementDataIndex(index, ScrollBoxConstants.AlignBegin)
@@ -2039,6 +2038,13 @@ function journal:gridModelSceneInit(btn, data, force)
 		drag.mountWeightBG:Hide()
 	end
 
+	if isFactionSpecific then
+		btn.factionIcon:SetAtlas(faction == 0 and "MountJournalIcons-Horde" or "MountJournalIcons-Alliance")
+		btn.factionIcon:Show()
+	else
+		btn.factionIcon:Hide()
+	end
+
 	if isUsable or needsFanfare then
 		drag.icon:SetDesaturated()
 		drag.icon:SetAlpha(1)
@@ -2057,7 +2063,8 @@ function journal:gridModelSceneInit(btn, data, force)
 	btn.name:SetText(creatureName)
 	btn.name:SetTextColor((mounts.config.coloredMountNames and qualityColor or NORMAL_FONT_COLOR):GetRGB())
 
-	if mountID == self.selectedMountID then
+	btn.selected = mountID == self.selectedMountID
+	if btn.selected then
 		btn:SetBackdropBorderColor(.8, .6, 0)
 	else
 		btn:SetBackdropBorderColor(.3, .3, .3)
@@ -2084,7 +2091,7 @@ function journal:gridModelSceneInit(btn, data, force)
 	btn.mountType = mountType
 	btn.isSelfMount = isSelfMount
 
-	btn.modelScene:SetFromModelSceneID(modelSceneID, true)
+	btn.modelScene:TransitionToModelSceneID(modelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD, true)
 	btn.modelScene:PrepareForFanfare(needsFanfare)
 	self:setMountToModelScene(btn.modelScene, creatureID, isSelfMount, animID, disablePlayerMountPreview, spellVisualKitID)
 end
@@ -3264,7 +3271,6 @@ function journal:setShownCountMounts(numMounts)
 		self.shownPanel.count:SetText(numMounts)
 		self.shownNumMouns = numMounts
 	end
-
 	self.shownPanel:SetShown(not self:isDefaultFilters())
 	-- self.leftInset:GetHeight()
 end
