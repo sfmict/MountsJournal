@@ -190,7 +190,7 @@ function journal:init()
 	-- SECURE FRAMES
 	local sMountJournal = CreateFrame("FRAME", nil, self.MountJournal, "SecureHandlerShowHideTemplate")
 	self._s = sMountJournal
-	local randomButton = self.MountJournal.SummonRandomFavoriteButton or self.MountJournal.SummonRandomFavoriteSpellFrame
+	local randomButton = self.MountJournal.SummonRandomFavoriteSpellFrame
 	randomButton:Hide()
 	sMountJournal:SetFrameRef("randomButton", randomButton)
 	sMountJournal:SetFrameRef("useMountsJournalButton", self.useMountsJournalButton)
