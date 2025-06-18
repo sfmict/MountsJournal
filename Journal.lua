@@ -1339,6 +1339,7 @@ function journal:init()
 	self:RegisterUnitEvent("UNIT_PORTRAIT_UPDATE", "player")
 	self:on("MOUNT_SPEED_UPDATE", self.updateSpeed)
 	self:on("MOUNTED_UPDATE", self.updateMounted)
+	self:on("PET_STATUS_UPDATE", self.updateMountsList)
 
 	self:updateCollectionTabs(true)
 	self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)

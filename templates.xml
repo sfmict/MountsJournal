@@ -3175,8 +3175,8 @@
 				</Texture>
 				<FontString parentKey="name" justifyH="LEFT" justifyV="TOP" maxLines="1" inherits="GameFontNormal">
 					<Anchors>
-						<Anchor point="TOPLEFT" x="21" y="-7"/>
-						<Anchor point="TOPRIGHT" x="-4" y="-7"/>
+						<Anchor point="TOPLEFT" x="21" y="-6"/>
+						<Anchor point="TOPRIGHT" x="-4" y="-6"/>
 					</Anchors>
 				</FontString>
 				<FontString parentKey="subName" justifyH="LEFT" justifyV="TOP" maxLines="1" inherits="GameFontNormalSmall">

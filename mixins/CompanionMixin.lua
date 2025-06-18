@@ -109,6 +109,7 @@ function MJSetPetMixin:onShow()
 		self:mountSelect()
 		self:on("MOUNT_SELECT", self.mountSelect)
 		self:on("UPDATE_PROFILE", self.mountSelect)
+		self:on("PET_STATUS_UPDATE", self.refresh)
 		self:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 	end)
 end
@@ -337,13 +338,13 @@ function MJCompanionsPanelMixin:companionOptionsMenu_Init(btn, level, petID)
 			info.text = BATTLE_PET_UNFAVORITE
 			info.func = function()
 				C_PetJournal.SetFavorite(petID, 0)
-				self:GetParent():refresh()
+				self:event("PET_STATUS_UPDATE")
 			end
 		else
 			info.text = BATTLE_PET_FAVORITE
 			info.func = function()
 				C_PetJournal.SetFavorite(petID, 1)
-				self:GetParent():refresh()
+				self:event("PET_STATUS_UPDATE")
 			end
 		end
 		btn:ddAddButton(info, level)
@@ -367,8 +368,7 @@ end
 
 function MJCompanionsPanelMixin:selectButtonClick(id)
 	ns.journal.petForMount[ns.journal.selectedSpellID] = id
-	ns.journal:updateMountsList()
-	self:GetParent().mountDisplay.info.petSelectionBtn:refresh()
+	self:event("PET_STATUS_UPDATE")
 	self:Hide()
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 end
