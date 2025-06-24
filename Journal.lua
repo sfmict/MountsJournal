@@ -118,7 +118,9 @@ function journal:init()
 		self:on("MOUNT_SPEED_UPDATE", self.updateSpeed)
 		self:on("MOUNTED_UPDATE", self.updateMounted)
 		self:updateCollectionTabs()
-		self.leftInset:EnableKeyboard(not InCombatLockdown())
+		local notCombat = not InCombatLockdown()
+		self.leftInset:EnableKeyboard(notCombat)
+		self.bgFrame.resize:SetEnabled(notCombat)
 		local by = mounts.filters.sorting.by
 		if by == "summons" or by == "time" or by == "distance" then
 			self:sortMounts()
@@ -1261,16 +1263,20 @@ function journal:init()
 	local resize = self.bgFrame.resize
 	resize:RegisterForDrag("LeftButton")
 	resize:SetScript("OnDragStart", function(btn)
+		if InCombatLockdown() then return end
 		local parent = btn:GetParent()
 		local minWidth, minHeight = self.CollectionsJournal:GetSize()
 		local maxWidth = UIParent:GetWidth() - parent:GetLeft() * 2
 		local maxHeight = parent:GetTop() - CollectionsJournalTab1:GetHeight()
 		parent:SetResizeBounds(max(minWidth, self.minTabWidth), minHeight, maxWidth, maxHeight)
+		parent.isSizing = true
 		parent:StartSizing("BOTTOMRIGHT", true)
 	end)
 	resize:SetScript("OnDragStop", function(btn)
+		if InCombatLockdown() then return end
 		local parent = btn:GetParent()
 		parent:StopMovingOrSizing()
+		parent.isSizing = nil
 		mounts.config.journalWidth, mounts.config.journalHeight = parent:GetSize()
 		self:setScrollGridMounts(true)
 		self:event("JOURNAL_RESIZED")
@@ -1516,6 +1522,10 @@ function journal:PLAYER_REGEN_DISABLED()
 		self.useMountsJournalButton:Disable()
 	else
 		self.leftInset:EnableKeyboard(false)
+		self.bgFrame.resize:Disable()
+		if self.bgFrame.isSizing then
+			self.bgFrame.resize:GetScript("OnDragStop")(self.bgFrame.resize)
+		end
 		self:updateMountsList()
 	end
 end
@@ -1529,6 +1539,7 @@ function journal:PLAYER_REGEN_ENABLED()
 		end
 	else
 		self.leftInset:EnableKeyboard(true)
+		self.bgFrame.resize:Enable()
 		self:updateMountsList()
 		self:updateMountDisplay()
 	end
