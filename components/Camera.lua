@@ -28,7 +28,6 @@ local function TryCreateZoomSpline(x, y, z, existingSpline)
 		spline:ClearPoints()
 		spline:AddPoint(0, 0, 0)
 		spline:AddPoint(x, y, z)
-
 		return spline
 	end
 end
@@ -47,7 +46,6 @@ local function ApplyFromModelSceneCameraInfo(self, modelSceneCameraInfo, transit
 
 	self:SetMinZoomDistance(transitionalCameraInfo.minZoomDistance)
 	self:SetMaxZoomDistance(transitionalCameraInfo.maxZoomDistance)
-
 	self:SetZoomDistance(transitionalCameraInfo.zoomDistance)
 
 	self:SetYaw(transitionalCameraInfo.yaw)
@@ -234,7 +232,7 @@ local deltaModifierForCameraMode = setmetatable({
 	[ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL] = OrbitCameraMixin:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_MODE_TARGET_VERTICAL),
 	[ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL] = OrbitCameraMixin:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL),
 	[ORBIT_CAMERA_MOUSE_PAN_VERTICAL] = OrbitCameraMixin:GetDeltaModifierForCameraMode(ORBIT_CAMERA_MOUSE_PAN_VERTICAL),
-}, {__index = function() return 0 end})
+}, {__index = function() return 1 end})
 
 local function GetDeltaModifierForCameraMode(self, mode)
 	return deltaModifierForCameraMode[mode]

@@ -280,6 +280,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 	journal.gridModelAnimation:SetPoint("LEFT", journal.gridModelSettings, "RIGHT", -182, 0)
 	journal.gridModelAnimation:SetHeight(20)
 	journal.gridModelAnimation.Arrow:SetPoint("RIGHT", 3, -3)
+	journal.gridModelAnimation:ddSetDisplayMode(addon)
 	journal.gridModelAnimation:ddSetSelectedValue(dd.animationList[1])
 	journal.gridModelAnimation:ddSetSelectedText(dd.animationList[1].name)
 

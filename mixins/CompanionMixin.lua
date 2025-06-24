@@ -419,12 +419,14 @@ function MJCompanionsPanelMixin:initButton(btn, data)
 
 	if customName then
 		btn.name:SetText(customName)
-		btn.name:SetHeight(12)
+		btn.name:SetMaxLines(1)
+		btn.name:SetPoint("LEFT", btn.background, 5, 6)
 		btn.subName:Show()
 		btn.subName:SetText(name)
 	else
 		btn.name:SetText(name)
-		btn.name:SetHeight(25)
+		btn.name:SetMaxLines(2)
+		btn.name:SetPoint("LEFT", btn.background, 5, 0)
 		btn.subName:Hide()
 	end
 

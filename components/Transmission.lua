@@ -3,6 +3,17 @@ local L, util, mounts = ns.L, ns.util, ns.mounts
 local type, select, Ambiguate, UnitInRaid, UnitInParty, IsGuildMember, BNGetNumFriends, C_BattleNet = type, select, Ambiguate, UnitInRaid, UnitInParty, IsGuildMember, BNGetNumFriends, C_BattleNet
 
 
+local function checkApps(i, guid)
+	for j = 1, C_BattleNet.GetFriendNumGameAccounts(i) do
+		local gameAccountInfo = C_BattleNet.GetFriendGameAccountInfo(i, j)
+		if gameAccountInfo.clientProgram == "WoW" and gameAccountInfo.playerGuid == guid then
+			return true
+		end
+	end
+	return false
+end
+
+
 local function filterFunc(_, event, msg, player, l, cs, t, flag, channelId, ...)
 	if flag == "GM" or flag == "DEV"
 	or event == "CHAT_MSG_CHANNEL" and type(channelId) == "number" and channelId > 0
@@ -24,14 +35,17 @@ local function filterFunc(_, event, msg, player, l, cs, t, flag, channelId, ...)
 	if anyLinkFound then
 		newMsg = newMsg..msg:sub(newStart)
 		local trimmedPlayer = Ambiguate(player, "none")
-		if event == "CHAT_MSG_WHISPER" and not (UnitInRaid(trimmedPlayer) or UnitInParty(trimmedPlayer) or IsGuildMember(select(5, ...))) then
-			local _, num = BNGetNumFriends()
-			for i = 1, num do
-				for j = 1, C_BattleNet.GetFriendNumGameAccounts(i) do
-					local gameAccountInfo = C_BattleNet.GetFriendGameAccountInfo(i, j)
-					if gameAccountInfo.characterName == trimmedPlayer and gameAccountInfo.clientProgram == "WoW" then
-						return false, newMsg, player, l, cs, t, flag, channelId, ...
-					end
+		local guid = select(5, ...)
+		if event == "CHAT_MSG_WHISPER" and not (UnitInRaid(trimmedPlayer) or UnitInParty(trimmedPlayer) or IsGuildMember(guid)) then
+			local _, numOline, fNum, fNumOline = BNGetNumFriends()
+			for i = 1, fNumOline do
+				if checkApps(i, guid) then
+					return false, newMsg, player, l, cs, t, flag, channelId, ...
+				end
+			end
+			for i = fNum + 1, fNum + numOline - fNumOline do
+				if checkApps(i, guid) then
+					return false, newMsg, player, l, cs, t, flag, channelId, ...
 				end
 			end
 			return true

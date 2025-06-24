@@ -3053,16 +3053,16 @@
 				</Texture>
 			</Layer>
 			<Layer level="ARTWORK">
-				<FontString inherits="GameFontNormal" justifyH="LEFT" parentKey="name">
-					<Size x="147" y="25"/>
+				<FontString parentKey="name" justifyH="LEFT" inherits="GameFontNormal">
 					<Anchors>
-						<Anchor point="TOPLEFT" relativeKey="$parent.background" x="5" y="-8"/>
+						<Anchor point="LEFT" relativeKey="$parent.background" x="5"/>
+						<Anchor point="RIGHT" relativeKey="$parent.background" x="-20"/>
 					</Anchors>
 				</FontString>
-				<FontString inherits="GameFontNormalSmall" justifyH="LEFT" parentKey="subName">
-					<Size x="147" y="12"/>
+				<FontString inherits="GameFontNormalSmall" justifyH="LEFT" maxLines="1" parentKey="subName">
 					<Anchors>
-						<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeKey="$parent.name" x="0" y="0"/>
+						<Anchor point="TOPLEFT" relativeKey="$parent.name" relativePoint="BOTTOMLEFT"/>
+						<Anchor point="TOPRIGHT" relativeKey="$parent.name" relativePoint="BOTTOMRIGHT"/>
 					</Anchors>
 					<Color r="1" g="1" b="1" a="1"/>
 				</FontString>
@@ -3306,27 +3306,27 @@
 				</Anchors>
 			</Frame>
 			<Button parentKey="randomFavoritePet" inherits="MJPetListButton">
-				<Size x="239" y="41"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.controlButtons" x="3" y="-3"/>
+					<Anchor point="RIGHT" relativeKey="$parent.controlButtons" x="-3"/>
 				</Anchors>
 				<KeyValues>
 					<KeyValue key="id" value="1" type="number"/>
 				</KeyValues>
 			</Button>
 			<Button parentKey="randomPet" inherits="MJPetListButton">
-				<Size x="239" y="41"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.randomFavoritePet" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="RIGHT" relativeKey="$parent.controlButtons" x="-3"/>
 				</Anchors>
 				<KeyValues>
 					<KeyValue key="id" value="2" type="number"/>
 				</KeyValues>
 			</Button>
 			<Button parentKey="noPet" inherits="MJPetListButton">
-				<Size x="239" y="41"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.randomPet" relativePoint="BOTTOMLEFT"/>
+					<Anchor point="RIGHT" relativeKey="$parent.controlButtons" x="-3"/>
 				</Anchors>
 			</Button>
 			<Frame parentKey="petListFrame" useParentLevel="false" inherits="InsetFrameTemplate">
