@@ -223,8 +223,7 @@ function conds.spec:getValueList(value, func)
 
 	for i = 1, GetNumClasses() do
 		for j = 1, GetNumSpecializationsForClassID(i) do
-			local id = GetSpecializationInfoForClassID(i, j)
-			local _, _, _, specIcon = GetSpecializationInfoByID(id)
+			local id, _,_, specIcon = GetSpecializationInfoForClassID(i, j)
 			list[#list + 1] = {
 				text = self:getValueText(id),
 				icon = specIcon,
