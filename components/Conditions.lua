@@ -1444,7 +1444,6 @@ conds.fgroup = {}
 conds.fgroup.text = L["Friend in Party"]
 
 local function getFriendList(value, func)
--- FRIENDS
 	local friends = {}
 	local favIcon = CreateAtlasMarkup("PetJournal-FavoritesIcon", 20, 20)
 	local noteIcon = CreateSimpleTextureMarkup("Interface/FriendsFrame/UI-FriendsFrame-Note", 12, 12)
@@ -1649,6 +1648,7 @@ function conds.fraid:getFuncText(value)
 		return ("self:isUnitInGroup('%s', true)"):format(v)
 	end
 end
+
 
 ---------------------------------------------------
 -- METHODS

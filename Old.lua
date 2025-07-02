@@ -402,9 +402,4 @@ function ns.mounts:setOldChanges()
 		updateGlobal(self)
 		self.globalDB.lastAddonVersion = currentVersion
 	end
-
-	-- need to remove
-	if type(self.config.gridToggle) == "boolean" then
-		self.config.gridToggle = self.config.gridToggle and 2 or 1
-	end
 end

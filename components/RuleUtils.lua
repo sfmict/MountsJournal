@@ -1,6 +1,6 @@
 local _, ns = ...
 local macroFrame, util = ns.macroFrame, ns.util
-local next, ipairs, C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_Transmog, C_TransmogSets, C_TransmogCollection, TransmogUtil, TRANSMOG_SLOTS, tContains, GetSpecialization, GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, GetPlayerInfoByGUID, C_ZoneAbility, FindSpellOverrideByID, GetNumGroupMembers, GetNumSubgroupMembers, UnitGUID, IsInGroup, BNGetNumFriends, C_BattleNet = next, ipairs, C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_Transmog, C_TransmogSets, C_TransmogCollection, TransmogUtil, TRANSMOG_SLOTS, tContains, GetSpecialization, GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, GetPlayerInfoByGUID, C_ZoneAbility, FindSpellOverrideByID, GetNumGroupMembers, GetNumSubgroupMembers, UnitGUID, IsInGroup, BNGetNumFriends, C_BattleNet
+local next, ipairs, C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_Transmog, C_TransmogSets, C_TransmogCollection, TransmogUtil, TRANSMOG_SLOTS, tContains, GetSpecialization, GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, GetPlayerInfoByGUID, C_ZoneAbility, FindSpellOverrideByID, GetNumGroupMembers, GetNumSubgroupMembers, UnitGUID, UnitIsConnected, IsInGroup, BNGetNumFriends, C_BattleNet = next, ipairs, C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_Transmog, C_TransmogSets, C_TransmogCollection, TransmogUtil, TRANSMOG_SLOTS, tContains, GetSpecialization, GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, GetPlayerInfoByGUID, C_ZoneAbility, FindSpellOverrideByID, GetNumGroupMembers, GetNumSubgroupMembers, UnitGUID, UnitIsConnected, IsInGroup, BNGetNumFriends, C_BattleNet
 
 
 function macroFrame:isSpellReady(spellID)
@@ -249,13 +249,16 @@ end
 
 
 function macroFrame:isUnitInGroup(guid, isRaid)
+	local unit
 	if isRaid then
 		for i = 1, GetNumGroupMembers() do
-			if guid == UnitGUID("raid"..i) then return true end
+			unit = "raid"..i
+			if guid == UnitGUID(unit) then return UnitIsConnected(unit) end
 		end
 	else
 		for i = 1, GetNumSubgroupMembers() do
-			if guid == UnitGUID("party"..i) then return true end
+			unit = "party"..i
+			if guid == UnitGUID(unit) then return UnitIsConnected(unit) end
 		end
 	end
 	return false
