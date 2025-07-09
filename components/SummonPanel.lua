@@ -88,7 +88,7 @@ function panel:setPosition()
 	if InCombatLockdown() or not self:IsShown() then return end
 	self:ClearAllPoints()
 	local scale = self:GetEffectiveScale()
-	self:SetPoint("CENTER", UIParent, "BOTTOMLEFT", self.config.x / scale,  self.config.y / scale)
+	self:SetPoint("CENTER", UIParent, "BOTTOMLEFT", self.config.x / scale, self.config.y / scale)
 end
 
 
@@ -197,7 +197,7 @@ journal:on("MODULES_INIT", function(journal)
 
 			info.isTitle = nil
 			info.text = panel:isLocked() and UNLOCK or LOCK
-			info.func =  function() panel:setLocked(not panel:isLocked()) end
+			info.func = function() panel:setLocked(not panel:isLocked()) end
 			dd:ddAddButton(info, level)
 
 			info.hasArrow = true

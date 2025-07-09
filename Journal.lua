@@ -1599,6 +1599,9 @@ function journal:setMountTooltip(mountID, spellID, showDescription)
 		typeStr = L["MOUNT_TYPE_"..mType]
 	end
 	util.addTooltipDLine(L["types"], typeStr)
+	--@do-not-package@
+	util.addTooltipDLine("Type", mountType)
+	--@end-do-not-package@
 
 	-- family
 	local function getPath(FID)

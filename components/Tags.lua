@@ -5,6 +5,9 @@ local pairs, ipairs, next, select, tinsert, wipe = pairs, ipairs, next, select, 
 local ltl = LibStub("LibThingsLoad-1.0")
 journal.tags = tags
 journal:on("MODULES_INIT", function() tags:init() end)
+--@do-not-package@
+local searchStr
+--@end-do-not-package@
 
 
 function tags:init()
@@ -409,6 +412,22 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 				list[i] = subInfo
 			end
 
+			info.search = function(str, text, _, btnInfo)
+				if #str == 0 then
+					searchStr = nil
+					return true
+				end
+				searchStr = str
+				if type(btnInfo.value) == "number" then
+					return text:lower():find(str, 1, true)
+				else
+					if text:lower():find(str, 1, true) then return true end
+					for name in next, familyDB[btnInfo.value] do
+						if L[name]:lower():find(str, 1, true) then return true end
+					end
+				end
+			end
+
 			info.listMaxSize = 30
 			info.list = list
 			btn:ddAddButton(info, level)
@@ -423,6 +442,14 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 			sort(sortedNames, function(a, b)
 				return b[1] == "Others" or a[1] ~= "Others" and strcmputf8i(a[2], b[2]) < 0
 			end)
+			if searchStr then
+				for i, name in ipairs(sortedNames) do
+					local start, stop = name[2]:lower():find(searchStr, 1, true)
+					if start and stop then
+						name[2] = ("%s|cffffd200%s|r%s"):format(name[2]:sub(0, start-1), name[2]:sub(start, stop), name[2]:sub(stop+1, #name[2]))
+					end
+				end
+			end
 
 			info.func = function(button, _,_, checked)
 				setFamilyID(button.value, checked)

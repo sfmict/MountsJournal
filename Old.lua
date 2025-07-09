@@ -327,7 +327,7 @@ local function updateChar(self)
 
 		if self.charDB.profileBySpecialization then
 			if self.charDB.profileBySpecialization.enable then
-				for i = 1,  GetNumSpecializations() do
+				for i = 1, GetNumSpecializations() do
 					local profileName = self.charDB.profileBySpecialization[i] or 1
 					local specID = GetSpecializationInfo(i)
 					local rule = {
@@ -360,7 +360,7 @@ local function updateChar(self)
 
 		if self.charDB.profileBySpecializationPVP then
 			if self.charDB.profileBySpecializationPVP.enable then
-				for i = 1,  GetNumSpecializations() do
+				for i = 1, GetNumSpecializations() do
 					local profileName = self.charDB.profileBySpecializationPVP[i] or 1
 					local specID = GetSpecializationInfo(i)
 					local rule1 = {

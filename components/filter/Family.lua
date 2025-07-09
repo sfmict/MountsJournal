@@ -1,6 +1,6 @@
 local addon, ns = ...
 local L, mounts, journal = ns.L, ns.mounts, ns.journal
-local familyDB = ns.familyDB
+local familyDB, searchStr = ns.familyDB
 
 
 function journal.filters.family(dd, level, subFamily)
@@ -22,6 +22,14 @@ function journal.filters.family(dd, level, subFamily)
 		sort(sortedNames, function(a, b)
 			return b[1] == "Others" or a[1] ~= "Others" and strcmputf8i(a[2], b[2]) < 0
 		end)
+		if searchStr then
+			for i, name in ipairs(sortedNames) do
+				local start, stop = name[2]:lower():find(searchStr, 1, true)
+				if start and stop then
+					name[2] = ("%s|cffffd200%s|r%s"):format(name[2]:sub(0, start-1), name[2]:sub(start, stop), name[2]:sub(stop+1, #name[2]))
+				end
+			end
+		end
 
 		widgets[1].OnClick = function(btn)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -46,6 +54,7 @@ function journal.filters.family(dd, level, subFamily)
 			dd:ddAddButton(info, level)
 		end
 	else
+		searchStr = nil
 		info.notCheckable = true
 
 		info.text = CHECK_ALL
@@ -139,6 +148,22 @@ function journal.filters.family(dd, level, subFamily)
 			end
 
 			list[i] = subInfo
+		end
+
+		info.search = function(str, text, _, btnInfo)
+			if #str == 0 then
+				searchStr = nil
+				return true
+			end
+			searchStr = str
+			if type(btnInfo.value) == "number" then
+				return text:lower():find(str, 1, true)
+			else
+				if text:lower():find(str, 1, true) then return true end
+				for name in next, familyDB[btnInfo.value[2]] do
+					if L[name]:lower():find(str, 1, true) then return true end
+				end
+			end
 		end
 
 		info.listMaxSize = 30

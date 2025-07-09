@@ -198,7 +198,7 @@
 				</Scripts>
 			</Button>
 
-			<Button parentKey="DynamicFlightModeButton"  inherits="MJDynamicFlightFlyoutButtonTemplate,MJSecureActionButtonUpTemplate" mixin="MJDynamicFlightModeButtonMixin">
+			<Button parentKey="DynamicFlightModeButton" inherits="MJDynamicFlightFlyoutButtonTemplate,MJSecureActionButtonUpTemplate" mixin="MJDynamicFlightModeButtonMixin">
 				<Anchors>
 					<Anchor point="RIGHT" relativeKey="$parent.summon1" relativePoint="LEFT" x="-68" y="0"/>
 				</Anchors>
@@ -1955,7 +1955,7 @@
 				<FontString parentKey="name" inherits="GameFontNormal" justifyH="LEFT" justifyV="MIDDLE" maxLines="2">
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="TOPLEFT" x="44" y="-17"/>
-						<Anchor point="RIGHT" x="-36"/>
+						<Anchor point="RIGHT" x="-38"/>
 					</Anchors>
 				</FontString>
 				<FontString parentKey="rarity" propagateMouseInput="Motion" inherits="GameFontHighlightSmall" justifyH="LEFT">

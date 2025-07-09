@@ -62,6 +62,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 	local model_OnEnter, model_OnLeave do
 		local inspectFrame = CreateFrame("FRAME", nil, journal.bgFrame, "DefaultPanelTemplate,MJEscHideTemplate")
 		journal.inspectFrame = inspectFrame
+		inspectFrame:SetPoint("TOP", 0, -60)
 		inspectFrame:SetFrameLevel(journal.bgFrame:GetFrameLevel() + 1000)
 		inspectFrame:SetClampedToScreen(true)
 		inspectFrame:EnableMouse(true)
@@ -80,8 +81,6 @@ ns.journal:on("MODULES_INIT", function(journal)
 		inspectFrame:HookScript("OnShow", function(frame)
 			local height = journal.bgFrame:GetHeight() - 86
 			frame:SetSize(height * .85, height)
-			frame:ClearAllPoints()
-			frame:SetPoint("TOP", 0, -60)
 			journal.mountDisplay:SetParent(frame)
 			journal.mountDisplay:ClearAllPoints()
 			journal.mountDisplay:SetPoint("TOPLEFT", 8, -22)
@@ -159,11 +158,13 @@ ns.journal:on("MODULES_INIT", function(journal)
 		end
 	end
 
+	local function modelLoaded(actor)
+		journal:event("MOUNT_MODEL_LOADED", actor:GetParent():GetParent())
+	end
+
 	local function AcquireAndInitializeActor(self, actorInfo)
 		if actorInfo.scriptTag == "unwrapped" then
-			self:GetActorByTag("unwrapped"):SetOnSizeChangedCallback(function()
-				journal:event("MOUNT_MODEL_LOADED", self:GetParent())
-			end)
+			self:GetActorByTag("unwrapped"):SetOnSizeChangedCallback(modelLoaded)
 		end
 	end
 
