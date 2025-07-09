@@ -2,6 +2,7 @@ MJMountEquipmentMixin = {}
 
 
 function MJMountEquipmentMixin:onLoad()
+	self:SetAttribute("useOnKeyDown", false)
 	self:SetAttribute("type", "click")
 	self:SetAttribute("clickbutton", MountJournal.SlotButton)
 	hooksecurefunc("MountJournal_SetPendingApply", function(_, item)

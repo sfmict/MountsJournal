@@ -413,10 +413,12 @@ function journal:init()
 	self:RegisterEvent("ACHIEVEMENT_EARNED")
 
 	-- MACRO BUTTONS
+	local summon1Handler = _G[util.secureButtonNameMount]
 	local summon1 = self.bgFrame.summon1
 	summon1.id = 1
 	summon1.icon:SetTexture(mounts.config.summon1Icon)
-	summon1:SetAttribute("clickbutton", _G[util.secureButtonNameMount])
+	summon1:SetAttribute("clickbutton", summon1Handler)
+	SecureHandlerWrapScript(summon1, "OnClick", summon1Handler, [[owner:SetAttribute("useOnKeyDown", false);return nil, "post"]], [[owner:SetAttribute("useOnKeyDown", nil)]])
 	summon1:SetScript("OnDragStart", function()
 		self.summonPanel:startDrag()
 	-- 	if not GetMacroInfo(config.macroName) then
@@ -443,10 +445,12 @@ function journal:init()
 		GameTooltip:Show()
 	end)
 
+	local summon2Handler = _G[util.secureButtonNameSecondMount]
 	local summon2 = self.bgFrame.summon2
 	summon2.id = 2
 	summon2.icon:SetTexture(mounts.config.summon2Icon)
-	summon2:SetAttribute("clickbutton", _G[util.secureButtonNameSecondMount])
+	summon2:SetAttribute("clickbutton", summon2Handler)
+	SecureHandlerWrapScript(summon2, "OnClick", summon2Handler, [[owner:SetAttribute("useOnKeyDown", false);return nil, "post"]], [[owner:SetAttribute("useOnKeyDown", nil)]])
 	summon2:SetScript("OnDragStart", function()
 		self.summonPanel:startDrag()
 	-- 	if InCombatLockdown() then return end

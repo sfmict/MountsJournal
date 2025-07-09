@@ -25,13 +25,14 @@
 		<Size x="703" y="606"/>
 		<Frames>
 
-			<Button parentKey="closeButton" inherits="UIPanelCloseButtonNoScripts,MJSecureActionButtonUpTemplate">
+			<Button parentKey="closeButton" inherits="UIPanelCloseButtonNoScripts,SecureActionButtonTemplate">
 				<Anchors>
 					<Anchor point="TOPRIGHT" x="1" y="0"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
 						self:SetFrameLevel(self:GetParent().NineSlice:GetFrameLevel() + 1)
+						self:SetAttribute("useOnKeyDown", false)
 					</OnLoad>
 				</Scripts>
 			</Button>
@@ -67,7 +68,7 @@
 				</Layers>
 			</Frame>
 
-			<Button parentKey="slotButton" scale=".69" inherits="MountEquipmentButtonTemplate,MJSecureActionButtonUpTemplate" mixin="MJMountEquipmentMixin" hidden="true">
+			<Button parentKey="slotButton" scale=".69" inherits="MountEquipmentButtonTemplate,SecureActionButtonTemplate" mixin="MJMountEquipmentMixin" hidden="true">
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.mountCount" relativePoint="RIGHT" x="15"/>
 				</Anchors>
@@ -198,7 +199,7 @@
 				</Scripts>
 			</Button>
 
-			<Button parentKey="DynamicFlightModeButton" inherits="MJDynamicFlightFlyoutButtonTemplate,MJSecureActionButtonUpTemplate" mixin="MJDynamicFlightModeButtonMixin">
+			<Button parentKey="DynamicFlightModeButton" inherits="MJDynamicFlightFlyoutButtonTemplate,SecureActionButtonTemplate" mixin="MJDynamicFlightModeButtonMixin">
 				<Anchors>
 					<Anchor point="RIGHT" relativeKey="$parent.summon1" relativePoint="LEFT" x="-68" y="0"/>
 				</Anchors>
@@ -1044,13 +1045,14 @@
 				</Frames>
 			</Frame>
 
-			<Button parentKey="summonButton" motionScriptsWhileDisabled="true" inherits="UIPanelButtonTemplate,MJSecureActionButtonUpTemplate" text="MOUNT">
+			<Button parentKey="summonButton" motionScriptsWhileDisabled="true" inherits="UIPanelButtonTemplate,SecureActionButtonTemplate" text="MOUNT">
 				<Size x="140" y="22"/>
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" x="4" y="4"/>
 				</Anchors>
 				<Scripts>
 					<OnLoad>
+						self:SetAttribute("useOnKeyDown", false)
 						self:SetAttribute("type", "macro")
 					</OnLoad>
 					<OnLeave function="GameTooltip_Hide"/>
@@ -2615,18 +2617,6 @@
 		</Scripts>
 	</Frame>
 
-	<Button name="MJSecureActionButtonUpTemplate" inherits="SecureActionButtonTemplate" virtual="true">
-		<Scripts>
-			<PreClick>
-				self.ActionButtonUseKeyDown = GetCVar("ActionButtonUseKeyDown")
-				SetCVar("ActionButtonUseKeyDown", 0)
-			</PreClick>
-			<PostClick>
-				SetCVar("ActionButtonUseKeyDown", self.ActionButtonUseKeyDown)
-			</PostClick>
-		</Scripts>
-	</Button>
-
 	<Button name="MJIconButtonTemplate" virtual="true">
 		<Size x="33" y="33"/>
 		<Layers>
@@ -2659,9 +2649,10 @@
 		</Layers>
 	</Button>
 
-	<Button name="MJSecureMacroButtonTemplate" inherits="MJIconButtonTemplate,MJSecureActionButtonUpTemplate" virtual="true">
+	<Button name="MJSecureMacroButtonTemplate" inherits="MJIconButtonTemplate,SecureActionButtonTemplate" virtual="true">
 		<Scripts>
 			<OnLoad>
+				self:SetAttribute("useOnKeyDown", false)
 				self:SetAttribute("type", "click")
 				self:RegisterForClicks("AnyUp")
 				self:RegisterForDrag("LeftButton")
@@ -2672,7 +2663,7 @@
 		</Scripts>
 	</Button>
 
-	<Button name="MJSecureBarButtonTemplate" inherits="MJSecureActionButtonUpTemplate" virtual="true">
+	<Button name="MJSecureBarButtonTemplate" inherits="SecureActionButtonTemplate" virtual="true">
 		<Size x="45" y="45"/>
 		<Layers>
 			<Layer level="BACKGROUND">
@@ -2707,6 +2698,7 @@
 		</HighlightTexture>
 		<Scripts>
 			<OnLoad>
+				self:SetAttribute("useOnKeyDown", false)
 				self:SetAttribute("type", "click")
 				self:RegisterForClicks("AnyUp")
 				self:RegisterForDrag("LeftButton")

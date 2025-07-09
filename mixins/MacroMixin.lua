@@ -666,7 +666,9 @@ end
 function MJMacroMixin:preClick(button, down)
 	self.sFlags.forceModifier = macroFrame.currentRuleSet[self.id].altMode
 	self.sFlags.summonID = self.id
-	self.notUsable = InCombatLockdown() or down ~= GetCVarBool("ActionButtonUseKeyDown")
+	local useOnKeyDown = self:GetAttribute("useOnKeyDown")
+	if useOnKeyDown == nil then useOnKeyDown = GetCVarBool("ActionButtonUseKeyDown") end
+	self.notUsable = InCombatLockdown() or down ~= useOnKeyDown
 	if self.notUsable then return end
 	self:SetAttribute("macrotext", macroFrame.checkRules[self.id](macroFrame, button))
 end

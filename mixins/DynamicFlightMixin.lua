@@ -3,6 +3,7 @@ MJDynamicFlightModeButtonMixin = {}
 
 function MJDynamicFlightModeButtonMixin:onLoad()
 	self.spellID = C_MountJournal.GetDynamicFlightModeSpellID()
+	self:SetAttribute("useOnKeyDown", false)
 	self:SetAttribute("type", "spell")
 	self:SetAttribute("spell", self.spellID)
 	self:RegisterForDrag("LeftButton")
