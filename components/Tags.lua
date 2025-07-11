@@ -23,7 +23,8 @@ function tags:init()
 		hideOnEscape = 1,
 		whileDead = 1,
 		OnAccept = function(popup, cb)
-			local text = popup.editBox:GetText()
+			local editBox = popup.editBox or popup.EditBox
+			local text = editBox:GetText()
 			if text and text ~= "" then cb(popup, text) end
 		end,
 		EditBoxOnEnterPressed = function(self)
@@ -33,7 +34,8 @@ function tags:init()
 			self:GetParent():Hide()
 		end,
 		OnShow = function(self)
-			self.editBox:SetFocus()
+			local editBox = self.editBox or self.EditBox
+			editBox:SetFocus()
 		end,
 	}
 	StaticPopupDialogs[util.addonName.."TAG_EXISTS"] = {

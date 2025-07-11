@@ -1883,6 +1883,8 @@ do
 						end
 					end
 				end
+			elseif btn.toggleBG then
+				btn.toggleBG:Hide()
 			end
 		else
 			setColor(self, btn.fly, self.list and self.list.fly[btn.spellID])

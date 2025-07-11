@@ -650,7 +650,6 @@ MJMacroMixin = {}
 
 
 function MJMacroMixin:onLoad()
-	self.mounts = ns.mounts
 	self.sFlags = ns.mounts.sFlags
 	self:RegisterForClicks("AnyUp", "AnyDown")
 	self:SetAttribute("type", "macro")
@@ -677,8 +676,8 @@ end
 function MJMacroMixin:postClick(button, down)
 	if self.notUsable then return end
 	if macroFrame.useMount == true then
-		self.mounts:summon()
+		ns.mounts:summon()
 	elseif macroFrame.useMount then
-		self.mounts:summon(macroFrame.useMount)
+		ns.mounts:summon(macroFrame.useMount)
 	end
 end

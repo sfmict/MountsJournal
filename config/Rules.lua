@@ -28,8 +28,9 @@ rules:SetScript("OnShow", function(self)
 			self:GetParent():Hide()
 		end,
 		OnShow = function(self)
-			self.editBox:SetText(UnitName("player").." - "..GetRealmName())
-			self.editBox:HighlightText()
+			local editBox = self.editBox or self.EditBox
+			editBox:SetText(UnitName("player").." - "..GetRealmName())
+			editBox:HighlightText()
 		end,
 	}
 	local function ruleSetExistsAccept(popup, data)
@@ -475,7 +476,8 @@ end
 
 function rules:createRuleSet(copy)
 	StaticPopup_Show(util.addonName.."NEW_RULE_SET", nil, nil, function(popup)
-		local text = popup.editBox:GetText()
+		local editBox = popup.editBox or popup.EditBox
+		local text = editBox:GetText()
 		popup:Hide()
 		if text and text ~= "" then
 			for i, ruleSet in ipairs(macroFrame.ruleSetConfig) do

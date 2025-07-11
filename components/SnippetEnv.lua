@@ -46,6 +46,7 @@ local blockedTables = {
 	MailFrameTab2 = true,
 	DEFAULT_CHAT_FRAME = true,
 	ChatFrame1 = true,
+	MountsJournal = true,
 	MountsJournalDB = true,
 	MountsJournalChar = true,
 }

@@ -55,6 +55,8 @@ function journal.filters.tags(dd, level)
 			icon = "interface/worldmap/worldmappartyicon",
 			OnClick = function(btn)
 				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+				filterTags.noTag = false
+				filterTags.withAllTags = false
 				journal.tags:setAllFilterTags(false)
 				filterTags.tags[btn._text][2] = true
 				journal:updateMountsList()
