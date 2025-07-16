@@ -326,6 +326,7 @@ function MJMapCanvasMixin:onMouseDown(btn)
 	if btn == "LeftButton" then
 		self.isPaning = true
 		self.curX, self.curY = GetCursorPosition()
+		self.downTime = GetTime()
 	end
 end
 
@@ -336,7 +337,7 @@ function MJMapCanvasMixin:onMouseUp(btn)
 		local curX, curY = GetCursorPosition()
 		local deltaX = curX - self.curX
 		local deltaY = curY - self.curY
-		if deltaX * deltaX + deltaY * deltaY <= 3 then
+		if deltaX * deltaX + deltaY * deltaY <= 3 and GetTime() - self.downTime < .4 then
 			local mapInfo = C_Map.GetMapInfoAtPosition(self.mapID, self:getCursorPosition())
 			if mapInfo and mapInfo.mapID ~= self.mapID then
 				self.navBar:setMapID(mapInfo.mapID)

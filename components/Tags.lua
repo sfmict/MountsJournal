@@ -301,19 +301,24 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 			btn:ddAddButton(info, level)
 		else
 			info.list = {}
+
+			local func = function(btn, _,_, value)
+				if value then
+					self:addMountTag(self.menuSpellID, btn.value)
+				else
+					self:removeMountTag(self.menuSpellID, btn.value, true)
+				end
+			end
+			local checked = function(btn) return self:getTagInMount(self.menuSpellID, btn.value) end
+
 			for i, tag in ipairs(self.sortedTags) do
 				info.list[i] = {
 					isNotRadio = true,
 					keepShownOnClick = true,
 					text = tag,
-					func = function(_,_,_, value)
-						if value then
-							self:addMountTag(self.menuSpellID, tag)
-						else
-							self:removeMountTag(self.menuSpellID, tag, true)
-						end
-					end,
-					checked = function() return self:getTagInMount(self.menuSpellID, tag) end,
+					value = tag,
+					func = func,
+					checked = checked,
 				}
 			end
 			btn:ddAddButton(info, level)
@@ -547,12 +552,11 @@ function tags:find(spellID, text)
 	if mountTags then
 		local str = ""
 		for tag in next, mountTags do
-			str = str..tag:lower().."\n"
+			str = str..tag:lower().."\0"
 		end
 
-		text = {(" "):split(text)}
-		for i = 1, #text do
-			if not str:find(text[i], 1, true) then return end
+		for word in text:gmatch("%S+") do
+			if not str:find(word, 1, true) then return end
 		end
 		return true
 	end

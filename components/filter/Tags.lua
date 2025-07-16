@@ -26,6 +26,7 @@ function journal.filters.tags(dd, level)
 
 	dd:ddAddSeparator(level)
 
+	info.checked = nil
 	info.notCheckable = true
 	info.text = CHECK_ALL
 	info.func = function()
@@ -93,7 +94,6 @@ function journal.filters.tags(dd, level)
 
 	info.keepShownOnClick = nil
 	info.notCheckable = true
-	info.checked = nil
 
 	info.text = L["Add tag"]
 	info.func = function()

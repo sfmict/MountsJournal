@@ -190,7 +190,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 			type = "import",
 			defName = UnitName("player").." - "..GetRealmName(),
 			valid = function(data) return data.type == "profile" and type(data.data) == "table" end,
-			save = function(data, name)return self:saveImportedProfile(data.data, name) end,
+			save = function(data, name) return self:saveImportedProfile(data.data, name) end,
 		})
 	end
 
