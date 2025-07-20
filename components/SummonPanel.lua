@@ -268,13 +268,22 @@ mounts:on("CREATE_BUTTONS", function()
 	local leftIcon = "|A:newplayertutorial-icon-mouse-leftbutton:0:0|a "
 	-- local rightIcon = "|A:newplayertutorial-icon-mouse-rightbutton:0:0|a "
 
+	local dragStart = function(self, ...)
+		local parent = self:GetParent()
+		parent:GetScript("OnDragStart")(parent, ...)
+	end
+	local dragStop = function(self, ...)
+		local parent = self:GetParent()
+		parent:GetScript("OnDragStop")(parent, ...)
+	end
+
 	-- SUMMON 1
 	local summon1Handler = _G[util.secureButtonNameMount]
 	local summon1 = CreateFrame("BUTTON", nil, panel, "MJSecureBarButtonTemplate")
 	panel.summon1 = summon1
 	summon1.id = 1
-	summon1:SetPropagateMouseClicks(true)
-	summon1:SetPropagateMouseMotion(true)
+	summon1:SetScript("OnDragStart", dragStart)
+	summon1:SetScript("OnDragStop", dragStop)
 	summon1.icon:SetTexture(mounts.config.summon1Icon)
 	summon1:SetAttribute("clickbutton", summon1Handler)
 	SecureHandlerWrapScript(summon1, "OnClick", summon1Handler, [[owner:SetAttribute("useOnKeyDown", false);return nil, "post"]], [[owner:SetAttribute("useOnKeyDown", nil)]])
@@ -306,8 +315,8 @@ mounts:on("CREATE_BUTTONS", function()
 	local summon2 = CreateFrame("BUTTON", nil, panel, "MJSecureBarButtonTemplate")
 	panel.summon2 = summon2
 	summon2.id = 2
-	summon2:SetPropagateMouseClicks(true)
-	summon2:SetPropagateMouseMotion(true)
+	summon2:SetScript("OnDragStart", dragStart)
+	summon2:SetScript("OnDragStop", dragStop)
 	summon2.icon:SetTexture(mounts.config.summon2Icon)
 	summon2:SetAttribute("clickbutton", summon2Handler)
 	SecureHandlerWrapScript(summon2, "OnClick", summon2Handler, [[owner:SetAttribute("useOnKeyDown", false);return nil, "post"]], [[owner:SetAttribute("useOnKeyDown", nil)]])

@@ -9,6 +9,7 @@ util.setEventsMixin(mounts)
 mounts:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
 mounts:RegisterEvent("ADDON_LOADED")
 mounts:RegisterEvent("PLAYER_LOGIN")
+mounts:RegisterEvent("PLAYER_LOGOUT")
 mounts:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
 
 
@@ -235,6 +236,11 @@ function mounts:PLAYER_LOGIN()
 end
 
 
+function mounts:PLAYER_LOGOUT()
+	self:event("LOGOUT")
+end
+
+
 do
 	local durabilitySlots = {
 		INVSLOT_HEAD,
@@ -361,13 +367,13 @@ do
 		local petID
 		if self.fromPriority then
 			for i = 1, #self.priorityProfiles do
-				petID = self.priorityProfiles[i].petForMount[spellID]
+				petID = ns.pets:getPetForProfile(self.priorityProfiles[i].petForMount, spellID)
 				if petID then break end
 			end
 			self.fromPriority = nil
 		else
 			local profile = self.profiles[self.charDB.currentProfileName] or self.defProfile
-			petID = profile.petForMount[spellID]
+			petID = ns.pets:getPetForProfile(profile.petForMount, spellID)
 		end
 
 		if petID then

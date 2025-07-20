@@ -155,30 +155,29 @@ function calendar:saveHolidayName(eventID, name)
 end
 
 
-do
-	local function getRemove(self, eventID)
-		for _, ruleSet in ipairs(self.ruleSets) do
-			for _, rules in ipairs(ruleSet) do
-				for _, rule in ipairs(rules) do
-					for _, cond in ipairs(rule) do
-						if cond[2] == "holiday" and cond[3] == eventID then return end
+function calendar:checkHolidayNames()
+	local holidayIDs = {}
+	for _, ruleSet in ipairs(self.ruleSets) do
+		for _, rules in ipairs(ruleSet) do
+			for _, rule in ipairs(rules) do
+				for _, cond in ipairs(rule) do
+					if cond[2] == "holiday" then
+						holidayIDs[cond[3]] = true
 					end
 				end
 			end
 		end
-		return true
 	end
 
-	function calendar:checkHolidayNames()
-		for lang, holidayNames in next, mounts.globalDB.holidayNames do
-			for eventID in next, holidayNames do
-				if getRemove(self, eventID) then
-					holidayNames[eventID] = nil
-				end
+	for lang, holidayNames in next, mounts.globalDB.holidayNames do
+		for eventID in next, holidayNames do
+			if not holidayIDs[eventID] then
+				holidayNames[eventID] = nil
 			end
 		end
 	end
 end
+calendar:on("LOGOUT", calendar.checkHolidayNames)
 
 
 function calendar:updateTodayEvents()

@@ -3303,7 +3303,7 @@ end
 
 
 function journal:updateMountsList()
-	local filters, list, newMounts, tags = mounts.filters, self.list, newMounts, self.tags
+	local filters, list, newMounts, tags, pets = mounts.filters, self.list, newMounts, self.tags, ns.pets
 	local sources, factions, pet, expansions = filters.sources, filters.factions, filters.pet, filters.expansions
 	local text = util.cleanText(self.searchBox:GetText())
 	local numMounts = 0
@@ -3313,7 +3313,7 @@ function journal:updateMountsList()
 		local mountID = self.mountIDs[i]
 		local name, spellID, _,_, isUsable, sourceType, _,_, mountFaction, shouldHideOnChar, isCollected = self:getMountInfo(mountID)
 		local expansion, familyID, rarity, _,_, sourceText, isSelfMount, mountType = self:getMountInfoExtra(mountID)
-		local petID = self.petForMount[spellID]
+		local petID = pets:getPetForProfile(self.petForMount, spellID)
 		local isMountHidden = self:isMountHidden(spellID)
 
 		-- FAMILY

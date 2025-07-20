@@ -1,6 +1,7 @@
 local _, ns = ...
 local mounts, util = ns.mounts, ns.util
 local random, C_PetJournal, C_Spell, AuraUtil, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, UnitIsAFK, DoEmote = random, C_PetJournal, C_Spell, AuraUtil, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, UnitIsAFK, DoEmote
+local curRegion = GetCurrentRegion()
 local pets = CreateFrame("FRAME")
 ns.pets = pets
 util.setEventsMixin(pets)
@@ -33,6 +34,33 @@ end)
 pets:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
 pets:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 pets:RegisterEvent("UI_ERROR_MESSAGE")
+
+
+function pets:setPetForProfile(profilePetForMount, spellID, pet)
+	local petForMount = profilePetForMount[curRegion]
+	if not petForMount then
+		petForMount = {}
+		profilePetForMount[curRegion] = petForMount
+	end
+	petForMount[spellID] = pet
+end
+
+
+function pets:delPetForProfile(profilePetForMount, spellID)
+	local petForMount = profilePetForMount[curRegion]
+	if petForMount then
+		petForMount[spellID] = nil
+		if not next(petForMount) then
+			profilePetForMount[curRegion] = nil
+		end
+	end
+end
+
+
+function pets:getPetForProfile(profilePetForMount, spellID)
+	local petForMount = profilePetForMount[curRegion]
+	return petForMount and petForMount[spellID]
+end
 
 
 function pets:dismiss()

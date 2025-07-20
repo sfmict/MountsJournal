@@ -48,7 +48,7 @@ end
 
 
 function setPetMixin:refresh()
-	local petID = ns.journal.petForMount[self.spellID]
+	local petID = ns.pets:getPetForProfile(ns.journal.petForMount, self.spellID)
 	self.id = petID
 	self.displayID = nil
 	self.speciesID = nil
@@ -86,7 +86,7 @@ function setPetMixin:refresh()
 			self.infoFrame.favorite:SetShown(favorite)
 			self.infoFrame:Show()
 		else
-			--ns.journal.petForMount[self.spellID] = nil
+			ns.pets:delPetForProfile(ns.journal.petForMount, self.spellID)
 			self:SetAlpha(.7)
 			self.infoFrame:Hide()
 			self.id = nil
@@ -133,19 +133,25 @@ end
 function MJSetPetMixin:updatePetForMount()
 	local _, owned = C_PetJournal.GetNumPets()
 	if not self.owned or self.owned > owned then
-		local petForMount, needUpdate = ns.mounts.defProfile.petForMount
+		local curRegion, needUpdate = GetCurrentRegion()
+		local petForMount = ns.mounts.defProfile.petForMount
 
-		for spellID, petID in pairs(petForMount) do
-			if type(petID) == "string" and not C_PetJournal.GetPetInfoByPetID(petID) then
-				needUpdate = true
-				petForMount[spellID] = nil
+		if petForMount[curRegion] then
+			for spellID, petID in pairs(petForMount[curRegion]) do
+				if type(petID) == "string" and not C_PetJournal.GetPetInfoByPetID(petID) then
+					needUpdate = true
+					ns.pets:delPetForProfile(petForMount, spellID)
+				end
 			end
 		end
 		for _, profile in pairs(ns.mounts.profiles) do
-			for spellID, petID in pairs(profile.petForMount) do
-				if type(petID) == "string" and not C_PetJournal.GetPetInfoByPetID(petID) then
-					needUpdate = true
-					profile.petForMount[spellID] = nil
+			local petForMount = profile.petForMount
+			if petForMount[curRegion] then
+				for spellID, petID in pairs(petForMount[curRegion]) do
+					if type(petID) == "string" and not C_PetJournal.GetPetInfoByPetID(petID) then
+						needUpdate = true
+						ns.pets:delPetForProfile(petForMount, spellID)
+					end
 				end
 			end
 		end
@@ -357,7 +363,7 @@ end
 
 
 function MJCompanionsPanelMixin:scrollToSelectedPet()
-	local selectedPetID = ns.journal.petForMount[ns.journal.selectedSpellID]
+	local selectedPetID = ns.pets:getPetForProfile(ns.journal.petForMount, ns.journal.selectedSpellID)
 	if selectedPetID and type(selectedPetID) ~= "number" then
 		self.scrollBox:ScrollToElementDataByPredicate(function(data)
 			return data.petID == selectedPetID
@@ -367,7 +373,7 @@ end
 
 
 function MJCompanionsPanelMixin:selectButtonClick(id)
-	ns.journal.petForMount[ns.journal.selectedSpellID] = id
+	ns.pets:setPetForProfile(ns.journal.petForMount, ns.journal.selectedSpellID, id)
 	self:event("PET_STATUS_UPDATE")
 	self:Hide()
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -403,7 +409,7 @@ end
 
 
 function MJCompanionsPanelMixin:initButton(btn, data)
-	local selectedPetID = ns.journal.petForMount[ns.journal.selectedSpellID]
+	local selectedPetID = ns.pets:getPetForProfile(ns.journal.petForMount, ns.journal.selectedSpellID)
 	local speciesID, customName, level, _,_, displayID, favorite, name, icon, petType, _, sourceText, description, _, canBattle = C_PetJournal.GetPetInfoByPetID(data.petID)
 	local health, _,_,_, rarity = C_PetJournal.GetPetStats(data.petID)
 	local petQualityColor = ITEM_QUALITY_COLORS[rarity - 1].color
@@ -441,7 +447,7 @@ end
 
 
 function MJCompanionsPanelMixin:initModelButton(btn, data)
-	local selectedPetID = ns.journal.petForMount[ns.journal.selectedSpellID]
+	local selectedPetID = ns.pets:getPetForProfile(ns.journal.petForMount, ns.journal.selectedSpellID)
 	local speciesID, customName, level, _,_, displayID, favorite, name, icon, petType, _, sourceText, description, _, canBattle = C_PetJournal.GetPetInfoByPetID(data.petID)
 	local health, _,_,_, rarity = C_PetJournal.GetPetStats(data.petID)
 	local petQualityColor = ITEM_QUALITY_COLORS[rarity - 1].color
