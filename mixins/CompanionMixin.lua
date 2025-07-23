@@ -86,7 +86,7 @@ function setPetMixin:refresh()
 			self.infoFrame.favorite:SetShown(favorite)
 			self.infoFrame:Show()
 		else
-			ns.pets:delPetForProfile(ns.journal.petForMount, self.spellID)
+			ns.pets:setPetForProfile(ns.journal.petForMount, self.spellID)
 			self:SetAlpha(.7)
 			self.infoFrame:Hide()
 			self.id = nil
@@ -133,24 +133,23 @@ end
 function MJSetPetMixin:updatePetForMount()
 	local _, owned = C_PetJournal.GetNumPets()
 	if not self.owned or self.owned > owned then
-		local curRegion, needUpdate = GetCurrentRegion()
-		local petForMount = ns.mounts.defProfile.petForMount
+		local petForMount, needUpdate = ns.pets:getPetForProfileList(ns.mounts.defProfile.petForMount)
 
-		if petForMount[curRegion] then
-			for spellID, petID in pairs(petForMount[curRegion]) do
+		if petForMount then
+			for spellID, petID in pairs(petForMount) do
 				if type(petID) == "string" and not C_PetJournal.GetPetInfoByPetID(petID) then
 					needUpdate = true
-					ns.pets:delPetForProfile(petForMount, spellID)
+					ns.pets:setPetForProfile(ns.mounts.defProfile.petForMount, spellID)
 				end
 			end
 		end
 		for _, profile in pairs(ns.mounts.profiles) do
-			local petForMount = profile.petForMount
-			if petForMount[curRegion] then
-				for spellID, petID in pairs(petForMount[curRegion]) do
+			local petForMount = ns.pets:getPetForProfileList(profile.petForMount)
+			if petForMount then
+				for spellID, petID in pairs(petForMount) do
 					if type(petID) == "string" and not C_PetJournal.GetPetInfoByPetID(petID) then
 						needUpdate = true
-						ns.pets:delPetForProfile(petForMount, spellID)
+						ns.pets:setPetForProfile(profile.petForMount, spellID)
 					end
 				end
 			end

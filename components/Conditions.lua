@@ -1592,7 +1592,7 @@ end
 
 
 ---------------------------------------------------
--- fgroup FRIEND IN RAID
+-- fraid FRIEND IN RAID
 conds.fraid = {}
 conds.fraid.text = L["Friend in Raid"]
 
@@ -1647,6 +1647,45 @@ function conds.fraid:getFuncText(value)
 	else
 		return ("self:isUnitInGroup('%s', true)"):format(v)
 	end
+end
+
+
+---------------------------------------------------
+-- title
+conds.title = {}
+conds.title.text = PAPERDOLL_SIDEBAR_TITLES
+
+function conds.title:getValueText(value)
+	local name = GetTitleName(value)
+	return name
+end
+
+function conds.title:getValueList(value, func)
+	local list = {}
+	for i = 1, GetNumTitles() do
+		local name, show = GetTitleName(i)
+		if show then
+			list[#list + 1] = {
+				text = IsTitleKnown(i) and ("%s (|cff00cc00%s|r)"):format(name, GARRISON_MISSION_ADDED_TOAST2) or name,
+				rightText = ("|cff808080%d|r"):format(i),
+				rightFont = ns.util.codeFont,
+				value = i,
+				func = func,
+				checked = i == value,
+			}
+		end
+	end
+	sort(list, function(a, b)
+		local val = strcmputf8i(a.text, b.text)
+		if val < 0 then return true
+		elseif val > 0 then return false end
+		return  a.value < b.value
+	end)
+	return list
+end
+
+function conds.title:getFuncText(value)
+	return "GetCurrentTitle() == "..value, "GetCurrentTitle"
 end
 
 

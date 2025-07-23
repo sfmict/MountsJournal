@@ -36,19 +36,20 @@ pets:RegisterEvent("PET_JOURNAL_LIST_UPDATE")
 pets:RegisterEvent("UI_ERROR_MESSAGE")
 
 
-function pets:setPetForProfile(profilePetForMount, spellID, pet)
-	local petForMount = profilePetForMount[curRegion]
-	if not petForMount then
-		petForMount = {}
-		profilePetForMount[curRegion] = petForMount
-	end
-	petForMount[spellID] = pet
+function pets:getPetForProfileList(profilePetForMount)
+	return profilePetForMount[curRegion]
 end
 
 
-function pets:delPetForProfile(profilePetForMount, spellID)
+function pets:setPetForProfile(profilePetForMount, spellID, pet)
 	local petForMount = profilePetForMount[curRegion]
-	if petForMount then
+	if pet then
+		if not petForMount then
+			petForMount = {}
+			profilePetForMount[curRegion] = petForMount
+		end
+		petForMount[spellID] = pet
+	elseif petForMount then
 		petForMount[spellID] = nil
 		if not next(petForMount) then
 			profilePetForMount[curRegion] = nil

@@ -2,22 +2,22 @@ local addon, ns = ...
 local L = ns.L
 local type, tremove, next, tostring, math = type, tremove, next, tostring, math
 local C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup = C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup
-local events, eventsMixin = {}, {}
+local events, eventsMixin, dot = {}, {}, "."
 
 
 function eventsMixin:on(event, func)
 	if type(event) ~= "string" or type(func) ~= "function" then return self end
-	local event, name = ("."):split(event, 2)
+	local event, name = dot:split(event, 2)
 
-	if not events[event] then
-		events[event] = {}
-	end
 	local handlerList = events[event]
-	local k = tostring(self)..(name or tostring(func))
-	local handler = function(...) func(self, ...) end
+	if not handlerList then
+		handlerList = {}
+		events[event] = handlerList
+	end
 
+	local k = tostring(self)..(name or tostring(func))
 	if handlerList[k] then
-		for i = 1, #handlerList do
+		for i = #handlerList, 1, -1 do
 			if handlerList[i] == handlerList[k] then
 				tremove(handlerList, i)
 				break
@@ -25,8 +25,8 @@ function eventsMixin:on(event, func)
 		end
 	end
 
-	local index = #handlerList + 1
-	handlerList[index] = handler
+	local handler = function(...) func(self, ...) end
+	handlerList[#handlerList + 1] = handler
 	handlerList[k] = handler
 	return self
 end
@@ -34,7 +34,7 @@ end
 
 function eventsMixin:off(event, func)
 	if type(event) ~= "string" then return self end
-	local event, name = ("."):split(event, 2)
+	local event, name = dot:split(event, 2)
 
 	local handlerList = events[event]
 	if handlerList then
@@ -42,7 +42,7 @@ function eventsMixin:off(event, func)
 			local k = tostring(self)..(name or tostring(func))
 			local handler = handlerList[k]
 			if handler then
-				for i = 1, #handlerList do
+				for i = #handlerList, 1, -1 do
 					if handlerList[i] == handler then
 						tremove(handlerList, i)
 						break
