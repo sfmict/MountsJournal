@@ -697,7 +697,7 @@ function rules:getCondText(cond)
 	if not cond then return end
 	local value = self:getCondValueText(cond)
 	return ("|cff%s%s%s|r"):format(
-		cond[1] and ("cc4444%s "):format(L["NOT_CONDITION"]) or "44cc44",
+		cond[1] and ("cc4444%s|r |cff44cc44"):format(L["NOT_CONDITION"]) or "44cc44",
 		conds[cond[2]].text,
 		value == "" and value or " : "..value
 	)

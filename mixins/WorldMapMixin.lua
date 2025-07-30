@@ -111,6 +111,16 @@ function MJMapCanvasMixin:onUpdate(elapsed)
 	elseif self.accX or self.accY then
 		self:updateAcceleration(elapsed)
 	end
+
+	-- DRAGGED
+	if self.isPaning and not self.isDragged then
+		local curX, curY = GetCursorPosition()
+		local deltaX = curX - self.curX
+		local deltaY = curY - self.curY
+		if deltaX * deltaX + deltaY * deltaY > 3 then
+			self.isDragged = true
+		end
+	end
 end
 
 
@@ -325,8 +335,8 @@ end
 function MJMapCanvasMixin:onMouseDown(btn)
 	if btn == "LeftButton" then
 		self.isPaning = true
+		self.isDragged = false
 		self.curX, self.curY = GetCursorPosition()
-		self.downTime = GetTime()
 	end
 end
 
@@ -334,10 +344,7 @@ end
 function MJMapCanvasMixin:onMouseUp(btn)
 	if btn == "LeftButton" then
 		self.isPaning = false
-		local curX, curY = GetCursorPosition()
-		local deltaX = curX - self.curX
-		local deltaY = curY - self.curY
-		if deltaX * deltaX + deltaY * deltaY <= 3 and GetTime() - self.downTime < .4 then
+		if not self.isDragged then
 			local mapInfo = C_Map.GetMapInfoAtPosition(self.mapID, self:getCursorPosition())
 			if mapInfo and mapInfo.mapID ~= self.mapID then
 				self.navBar:setMapID(mapInfo.mapID)

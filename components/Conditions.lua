@@ -1679,7 +1679,7 @@ function conds.title:getValueList(value, func)
 		local val = strcmputf8i(a.text, b.text)
 		if val < 0 then return true
 		elseif val > 0 then return false end
-		return  a.value < b.value
+		return a.value < b.value
 	end)
 	return list
 end

@@ -159,11 +159,11 @@ codeEdit:SetScript("OnShow", function(self)
 
 	-- LINE
 	self.lineText = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-	self.lineText:SetPoint("LEFT", self.nameEdit, "RIGHT", 40, 0)
+	self.lineText:SetPoint("LEFT", self.nameEdit, "RIGHT", 35, 0)
 	self.lineText:SetText(L["Line"])
 
 	self.line = CreateFrame("Editbox", nil, self, "InputBoxTemplate")
-	self.line:SetSize(30, 22)
+	self.line:SetSize(40, 22)
 	self.line:SetPoint("LEFT", self.lineText, "RIGHT", 8, 0)
 	self.line:SetAutoFocus(false)
 	self.line:SetJustifyH("RIGHT")

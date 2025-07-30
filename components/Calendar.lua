@@ -88,10 +88,18 @@ function calendar:getSelectedDate()
 end
 
 
+function calendar:getEventKey(e)
+	local st = e.startTime
+	return ("%d:%d%.2d%.2d"):format(e.eventID, st.year, st.month, st.monthDay)
+end
+
+
 function calendar:sortHolidays(list)
 	sort(list, function(e1, e2)
 		if e1.name ~= e2.name then return e1.name < e2.name end
-		return e1.eventID < e2.eventID
+		if e1.eventID ~= e2.eventID then return e1.eventID < e2.eventID end
+		if e1.st.month ~= e2.st.month then return e1.st.month < e2.st.month end
+		return e1.st.monthDay < e2.st.monthDay
 	end)
 end
 
@@ -116,7 +124,8 @@ function calendar:getHolidayList()
 		for i = 1, C_Calendar.GetNumDayEvents(0, day) do
 			local e = C_Calendar.GetDayEvent(0, day, i)
 			if e.calendarType == "HOLIDAY" then
-				if not addedIDs[e.eventID] then
+				local k = self:getEventKey(e)
+				if not addedIDs[k] then
 					local eInfo = C_Calendar.GetHolidayInfo(0, day, i)
 					local data = {
 						eventID = e.eventID,
@@ -127,12 +136,12 @@ function calendar:getHolidayList()
 						st = e.startTime,
 						et = e.endTime,
 						description = eInfo.description,
-						isActive = self.activeHolidays[e.eventID],
+						isActive = self.activeHolidays[k],
 					}
 					holidays[#holidays + 1] = data
-					addedIDs[e.eventID] = data
-				elseif e.sequenceType and e.sequenceType ~= "ONGOING" and (not addedIDs[e.eventID].sequenceType or addedIDs[e.eventID].sequenceType == "ONGOING") then
-					addedIDs[e.eventID].icon = C_Calendar.GetHolidayInfo(0, day, i).texture
+					addedIDs[k] = data
+				elseif e.sequenceType and e.sequenceType ~= "ONGOING" and (not addedIDs[k].sequenceType or addedIDs[k].sequenceType == "ONGOING") then
+					addedIDs[k].icon = C_Calendar.GetHolidayInfo(0, day, i).texture
 				end
 			end
 		end
@@ -151,11 +160,13 @@ end
 
 
 function calendar:saveHolidayName(eventID, name)
+	self.needToCheck = true
 	self.holidayNames[eventID] = name
 end
 
 
 function calendar:checkHolidayNames()
+	if not self.needToCheck then return end
 	local holidayIDs = {}
 	for _, ruleSet in ipairs(self.ruleSets) do
 		for _, rules in ipairs(ruleSet) do
@@ -194,6 +205,7 @@ function calendar:updateTodayEvents()
 		if e.sequenceType == "START" then
 			local secondsToEvent = ((e.startTime.hour - date.hour) * 60 + e.startTime.minute - date.minute) * 60
 			if secondsToEvent <= 0 then
+				self.activeHolidays[self:getEventKey(e)] = true
 				self.activeHolidays[e.eventID] = true
 			elseif secondsToEvent < secondsToUpdate then
 				secondsToUpdate = secondsToEvent
@@ -201,12 +213,14 @@ function calendar:updateTodayEvents()
 		elseif e.sequenceType == "END" then
 			local secondsToEvent = ((e.endTime.hour - date.hour) * 60 + e.endTime.minute - date.minute) * 60
 			if secondsToEvent > 0 then
+				self.activeHolidays[self:getEventKey(e)] = true
 				self.activeHolidays[e.eventID] = true
 				if secondsToEvent < secondsToUpdate then
 					secondsToUpdate = secondsToEvent
 				end
 			end
 		else
+			self.activeHolidays[self:getEventKey(e)] = true
 			self.activeHolidays[e.eventID] = true
 		end
 	end
