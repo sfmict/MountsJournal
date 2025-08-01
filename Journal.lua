@@ -1,6 +1,6 @@
 local addon, ns = ...
 local L, util, mounts = ns.L, ns.util, ns.mounts
-local newMounts, mountsDB, specificDB = ns.newMounts, ns.mountsDB, ns.specificDB
+local newMounts, mountsDB, specificDB, classDB = ns.newMounts, ns.mountsDB, ns.specificDB, ns.classDB
 local C_MountJournal, C_PetJournal, wipe, tinsert, next, pairs, ipairs, select, type, sort, math, InCombatLockdown = C_MountJournal, C_PetJournal, wipe, tinsert, next, pairs, ipairs, select, type, sort, math, InCombatLockdown
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
 ns.journal = journal
@@ -3215,7 +3215,10 @@ function journal:getFilterSpecific(spellID, isSelfMount, mountType, mountID)
 		if t[spellID] then if filter[k] then return true end
 		else i = i + 1 end
 	end
-	return i == 7 and filter.rest
+	local class = classDB[spellID]
+	if class then if filter[class] then return true end
+	else i = i + 1 end
+	return i == 8 and filter.rest
 end
 
 

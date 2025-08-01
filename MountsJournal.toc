@@ -27,6 +27,7 @@ templates.xml
 Mounts.lua
 Old.lua
 database\SpecificDB.lua
+database\ClassDB.lua
 database\FamilyDB.lua
 database\MountsDB.lua
 Journal.lua

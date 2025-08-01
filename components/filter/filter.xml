@@ -4,6 +4,7 @@
 	<Script file="Selected.lua"/>
 	<Script file="Sources.lua"/>
 	<Script file="Specific.lua"/>
+	<Script file="Class.lua"/>
 	<Script file="Family.lua"/>
 	<Script file="Factions.lua"/>
 	<Script file="Pet.lua"/>

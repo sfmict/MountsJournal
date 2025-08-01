@@ -92,6 +92,7 @@ ns.familyDB = {
 	},
 	["Dragonhawks"] = 1200,
 	["Drakes"] = {
+		["Cloud Serpents"] = 1300,
 		["Drakes"] = 1301,
 		["Grand Drakes"] = 1302,
 		["Nether Drakes"] = 1303,
@@ -239,10 +240,11 @@ ns.familyDB = {
 	["Dogs"] = 3200,
 	["Hedgehogs"] = 3300,
 	["Serpents"] = {
-		["Cloud Serpents"] = 1300,
 		["N'Zoth Serpents"] = 2505,
 		["Sea Serpents"] = 2507,
 		["Serpents"] = 3400,
+		["Cloud Serpents"] = 3401,
+		["Wilderlings"] = 3402,
 	},
 	["additional"] = {
 		["spells"] = 1,
@@ -354,6 +356,7 @@ ns.familyDBIcons = {
 	["Dragonhawks"] = 132188,
 	["Drakes"] = {
 		[0] = 132250,
+		["Cloud Serpents"] = 656171,
 		["Drakes"] = 236230,
 		["Grand Drakes"] = 236234,
 		["Nether Drakes"] = 132250,
@@ -469,6 +472,7 @@ ns.familyDBIcons = {
 		["N'Zoth Serpents"] = 3005317,
 		["Sea Serpents"] = 1519579,
 		["Serpents"] = 3040844,
+		["Wilderlings"] = 3811752,
 	},
 	["Ungulates"] = {
 		[0] = 132254,
@@ -505,7 +509,7 @@ ns.familyDBIcons = {
 		["Rockets"] = 134282,
 		["Seat"] = 3747572,
 		["Spider Tanks"] = 2620863,
-		["Surfboard"] = 5661094,
+		["Surfboard"] = 5661095,
 	},
 	["Vombata"] = 3747898,
 	["Wolves"] = {
@@ -514,7 +518,7 @@ ns.familyDBIcons = {
 		["Lupine"] = 3947989,
 		["Undead Wolves"] = 464162,
 		["War Wolves"] = 524154,
-		["Wilderlings"] = 3811752,
+		["Wilderlings"] = 3811756,
 		["Wolves"] = 132266,
 	},
 	["additional"] = {

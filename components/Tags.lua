@@ -383,7 +383,6 @@ function tags:mountOptionsMenu_Init(btn, level, value)
 				for k, v in next, familyDB[button.value] do
 					setFamilyID(v, checked)
 				end
-				btn:ddRefresh(level)
 				btn:ddRefresh(level + 1)
 			end
 			local subCheck = function(btn)

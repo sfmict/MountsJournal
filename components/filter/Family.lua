@@ -113,7 +113,6 @@ function journal.filters.family(dd, level, subFamily)
 				filterFamily[v] = checked
 			end
 			journal:updateMountsList()
-			dd:ddRefresh(level)
 			dd:ddRefresh(level + 1)
 		end
 		local subCheck = function(btn)
