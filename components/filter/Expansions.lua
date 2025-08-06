@@ -51,7 +51,7 @@ function journal.filters.expansions(dd, level)
 		3256381,
 		4465334,
 		5409250,
-		6377935,
+		6980554,
 	}
 	info.iconInfo = {
 		tSizeX = 40,

@@ -1,7 +1,7 @@
 local addon, ns = ...
 local L = ns.L
 local type, tremove, next, tostring, math = type, tremove, next, tostring, math
-local C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup = C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup
+local C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup, IsSpellKnown, IsSpellInSpellBook = C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup, C_SpellBook.IsSpellKnown, C_SpellBook.IsSpellInSpellBook
 local events, eventsMixin, dot = {}, {}, "."
 
 
@@ -700,5 +700,19 @@ function util.openJournalTab(tab1, tab2)
 	ns.journal._s:Execute(ns.journal._s:GetAttribute("tabUpdate"))
 	if tab1 == 1 and tab2 then
 		ns.journal.bgFrame.settingsBackground.Tabs[tab2]:Click()
+	end
+end
+
+
+do
+	local bankPlayer = Enum.SpellBookSpellBank.Player
+	local bankPet = Enum.SpellBookSpellBank.Pet
+
+	function util.isPlayerSpell(spellID)
+		return IsSpellKnown(spellID, bankPlayer)
+	end
+
+	function util.isSpellKnown(spellID, isPet)
+		return IsSpellInSpellBook(spellID, isPet and bankPet or bankPlayer, false)
 	end
 end

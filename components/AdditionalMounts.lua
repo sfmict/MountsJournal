@@ -1,6 +1,6 @@
 local _, ns = ...
-local mounts = ns.mounts
-local C_UnitAuras, C_Spell, C_ZoneAbility, IsSpellKnown, FindSpellOverrideByID = C_UnitAuras, C_Spell, C_ZoneAbility, IsSpellKnown, FindSpellOverrideByID
+local mounts, util = ns.mounts, ns.util
+local C_UnitAuras, C_Spell, C_ZoneAbility, FindSpellOverrideByID = C_UnitAuras, C_Spell, C_ZoneAbility, FindSpellOverrideByID
 local C_Item, C_Container = C_Item, C_Container
 local ltl = LibStub("LibThingsLoad-1.0")
 local _,_, raceID = UnitRace("player")
@@ -48,7 +48,7 @@ end
 -- SPELL AS A MOUNT
 local createMountFromSpell do
 	local function isUsable(self)
-		return IsSpellKnown(self.spellID)
+		return util.isSpellKnown(self.spellID)
 		   and C_Spell.IsSpellUsable(self.spellID)
 	end
 
@@ -109,7 +109,7 @@ end
 
 function soar:canUse()
 	return not mounts.sFlags.isSubmerged
-	   and IsSpellKnown(self.spellID)
+	   and util.isSpellKnown(self.spellID)
 	   and C_Spell.IsSpellUsable(self.spellID)
 	   and C_Spell.GetSpellCooldown(self.spellID).startTime == 0
 	   and C_Spell.GetSpellCooldown(61304).startTime == 0
@@ -166,7 +166,7 @@ travelForm.allCreature = {
 }
 
 function travelForm:canUse()
-	return IsSpellKnown(self.spellID)
+	return util.isSpellKnown(self.spellID)
 	   and C_Spell.IsSpellUsable(self.spellID)
 	   and C_Spell.GetSpellCooldown(self.spellID).startTime == 0
 	   and C_Spell.GetSpellCooldown(61304).startTime == 0

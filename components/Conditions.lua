@@ -222,7 +222,7 @@ function conds.spec:getValueList(value, func)
 	local list = {}
 
 	for i = 1, GetNumClasses() do
-		for j = 1, GetNumSpecializationsForClassID(i) do
+		for j = 1, C_SpecializationInfo.GetNumSpecializationsForClassID(i) do
 			local id, _,_, specIcon = GetSpecializationInfoForClassID(i, j)
 			list[#list + 1] = {
 				text = self:getValueText(id),
@@ -240,13 +240,13 @@ end
 function conds.spec:getFuncText(value)
 	local index
 	for i = 1, GetNumSpecializations() do
-		if value == GetSpecializationInfo(i) then
+		if value == C_SpecializationInfo.GetSpecializationInfo(i) then
 			index = i
 			break
 		end
 	end
 	if index then
-		return "GetSpecialization() == "..index, "GetSpecialization"
+		return "C_SpecializationInfo.GetSpecialization() == "..index, "C_SpecializationInfo"
 	end
 	return "false"
 end
@@ -519,7 +519,7 @@ end
 conds.kspell.getValueText = conds.hitem.getValueText
 
 function conds.kspell:getFuncText(value)
-	return ("IsPlayerSpell(%d)"):format(value), "IsPlayerSpell"
+	return ("self.isPlayerSpell(%d)"):format(value)
 end
 
 
@@ -1059,7 +1059,7 @@ function conds.tl:getValueList(value, func)
 	local guid = UnitGUID("player")
 
 	for i = 1, GetNumSpecializations() do
-		local specID, specName = GetSpecializationInfo(i)
+		local specID, specName = C_SpecializationInfo.GetSpecializationInfo(i)
 		local configIDs = C_ClassTalents.GetConfigIDsBySpecID(specID)
 		for j = 1, #configIDs do
 			local configID = configIDs[j]

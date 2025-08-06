@@ -1,6 +1,6 @@
 local addon, ns = ...
 local L, util = ns.L, ns.util
-local C_MountJournal, C_Map, C_Spell, C_Timer, MapUtil, next, rawget, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container = C_MountJournal, C_Map, C_Spell, C_Timer, MapUtil, next, rawget, wipe, random, IsPlayerSpell, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container
+local C_MountJournal, C_Map, C_Spell, C_Timer, MapUtil, next, rawget, wipe, random, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container = C_MountJournal, C_Map, C_Spell, C_Timer, MapUtil, next, rawget, wipe, random, GetTime, IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, GetSpellCooldown, SecureCmdOptionParse, C_Scenario, BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS, C_Container
 local mounts = CreateFrame("Frame", "MountsJournal")
 ns.mounts = mounts
 util.setEventsMixin(mounts)
@@ -756,16 +756,16 @@ end
 
 
 function mounts:getSpellKnown()
-	if IsPlayerSpell(90265) -- Мастер верховой езды
-	or IsPlayerSpell(34091) -- Верховая езда (искусник)
-	or IsPlayerSpell(34090) -- Верховая езда (умелец)
+	if util.isPlayerSpell(90265) -- Мастер верховой езды
+	or util.isPlayerSpell(34091) -- Верховая езда (искусник)
+	or util.isPlayerSpell(34090) -- Верховая езда (умелец)
 	or C_MountJournal.IsDragonridingUnlocked()
 	then
 		return true, true
 	end
 
-	if IsPlayerSpell(33391) -- Верховая езда (подмастерье)
-	or IsPlayerSpell(33388) -- Верховая езда (ученик)
+	if util.isPlayerSpell(33391) -- Верховая езда (подмастерье)
+	or util.isPlayerSpell(33388) -- Верховая езда (ученик)
 	then
 		return true, false
 	end
