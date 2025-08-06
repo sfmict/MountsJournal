@@ -14,7 +14,11 @@ ns.familyDB = {
 		["Animite"] = 2000,
 		["Skyflayer"] = 2012,
 	},
-	["Bats"] = 300,
+	["Bats"] = {
+		["Dredwings"] = 300,
+		["Fel Bats"] = 301,
+		["Gargoyle"] = 1700,
+	},
 	["Birds"] = {
 		["Albatross"] = 400,
 		["Chickens"] = 401,
@@ -36,6 +40,7 @@ ns.familyDB = {
 		["Talonbirds"] = 417,
 		["Vultures"] = 418,
 		["Hawks"] = 419,
+		["K'arrocs"] = 420
 	},
 	["Bovids"] = {
 		["Clefthooves"] = 500,
@@ -45,6 +50,7 @@ ns.familyDB = {
 		["Talbuks"] = 504,
 		["Tauralus"] = 505,
 		["Yaks"] = 506,
+		["Slatebacks"] = 507
 	},
 	["Carnivorans"] = {
 		["Bears"] = 600,
@@ -126,7 +132,6 @@ ns.familyDB = {
 		["Underlights"] = 1603,
 		["Eels"] = 1604,
 	},
-	["Gargoyle"] = 1700,
 	["Horses"] = {
 		["Chargers"] = 1800,
 		["Demonic Steeds"] = 1801,
@@ -159,6 +164,8 @@ ns.familyDB = {
 		["Skyrazor"] = 2011,
 		["Bees"] = 2013,
 		["Butterflies"] = 2014,
+		["Creepers"] = 2015,
+		["Terror Flyers"] = 2016,
 	},
 	["Jellyfish"] = 2100,
 	["Mollusc"] = {
@@ -269,7 +276,12 @@ ns.familyDBIcons = {
 		["Spiders"] = 1370997,
 		["Undercrawlers"] = 5464947,
 	},
-	["Bats"] = 804461,
+	["Bats"] = {
+		[0] = 804461,
+		["Dredwings"] = 804461,
+		["Fel Bats"] = 1307351,
+		["Gargoyle"] = 3852563,
+	},
 	["Birds"] = {
 		[0] = 132198,
 		["Albatross"] = 1929243,
@@ -280,6 +292,7 @@ ns.familyDBIcons = {
 		["Eagle"] = 4094306,
 		["Hawks"] = 840662,
 		["Hawkstriders"] = 132232,
+		["K'arrocs"] = 6841154,
 		["Mechanical Birds"] = 2490920,
 		["Owl"] = 5171363,
 		["Owlbear"] = 4695616,
@@ -299,6 +312,7 @@ ns.familyDBIcons = {
 		["Goats"] = 656321,
 		["Rams"] = 132248,
 		["Ruinstriders"] = 1602313,
+		["Slatebacks"] = 6661374,
 		["Talbuks"] = 134060,
 		["Tauralus"] = 3849323,
 		["Yaks"] = 616692,
@@ -393,7 +407,6 @@ ns.familyDBIcons = {
 		["Stingrays"] = 2127651,
 		["Underlights"] = 5746559,
 	},
-	["Gargoyle"] = 3852563,
 	["Hedgehogs"] = 6702279,
 	["Horses"] = {
 		[0] = 132226,
@@ -420,6 +433,7 @@ ns.familyDBIcons = {
 		["Bees"] = 2027853,
 		["Beetle"] = 4508509,
 		["Butterflies"] = 6382036,
+		["Creepers"] = 6841593,
 		["Fireflies"] = 5550860,
 		["Flies"] = 3896744,
 		["Gorm"] = 3084141,
@@ -427,6 +441,7 @@ ns.familyDBIcons = {
 		["Moth"] = 3255388,
 		["Silithids"] = 134399,
 		["Skyrazor"] = 5792081,
+		["Terror Flyers"] = 6320429,
 		["Wasp"] = 3741937,
 		["Water Striders"] = 648868,
 	},
