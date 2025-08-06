@@ -25,7 +25,7 @@ local function filterFunc(_, event, msg, player, l, cs, t, flag, channelId, ...)
 		start, finish, characterName, dataType, id = msg:find("%[MountsJournal:(.-):(.-):(.-):MJ%]", newStart)
 		if characterName and dataType and id then
 			newMsg = newMsg..msg:sub(newStart, start - 1)
-			newMsg = newMsg..("|HaddonMountsJournal%s|h|cFFCC33FF[MJ:%s - %s:%s]|r|h"):format(dataType, characterName, L[dataType], id)
+			newMsg = newMsg..("|HMountsJournalH:%s|h|cFFCC33FF[MJ:%s - %s:%s]|r|h"):format(dataType, characterName, L[dataType], id)
 			anyLinkFound = true
 		else
 			break
@@ -75,10 +75,10 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT_LEADER", filterFunc)
 
 -- TEST
 --C_Timer.After(0, function()
---	SendChatMessage(util.getLink("Profile", "").." "..util.getLink("Profile", next(mounts.profiles), nil), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
---	SendChatMessage(util.getLink("Snippet", next(mounts.globalDB.snippets), nil), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
---	SendChatMessage(util.getLink("Rule Set", mounts.globalDB.ruleSets[1].name), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
---	SendChatMessage(util.getLink("Rule", "1:1:"..mounts.globalDB.ruleSets[1].name), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
+--	C_ChatInfo.SendChatMessage(util.getLink("Profile", "").." "..util.getLink("Profile", next(mounts.profiles), nil), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
+--	C_ChatInfo.SendChatMessage(util.getLink("Snippet", next(mounts.globalDB.snippets), nil), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
+--	C_ChatInfo.SendChatMessage(util.getLink("Rule Set", mounts.globalDB.ruleSets[1].name), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
+--	C_ChatInfo.SendChatMessage(util.getLink("Rule", "1:1:"..mounts.globalDB.ruleSets[1].name), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
 --end)
 
 
@@ -116,38 +116,36 @@ end
 
 do
 	local timer
-	EventRegistry:RegisterCallback("SetItemRef", function(_, link, text)
-		if link:sub(1, 18) == "addonMountsJournal" then
-			local _,_, dataType, characterName, typeLang, id = text:gsub("|[Cc]%x%x%x%x%x%x%x%x", ""):gsub("|[Rr]", ""):find("|HaddonMountsJournal(.-)|h%[MJ:(.-) %- (.-):(.-)%]|h")
-			if dataType and characterName and typeLang and id then
-				id = util.deobfuscateName(id)
-				if IsShiftKeyDown() then
-					util.insertChatLink(dataType, id, characterName)
-				else
-					characterName = util.deobfuscateName(characterName)
-					local r,g,b = NIGHT_FAE_BLUE_COLOR:GetRGB()
-					local displayID = id == "" and DEFAULT or id
-					showTooltip({
-						{2, typeLang, displayID, 1,1,1,r,g,b},
-						{1, L["Requesting data from %s ..."]:format(characterName), 1,.8,0},
-					})
-					tooltipLoading = true
-					receivedData = false
-					requestData(characterName, dataType, id)
-
-					if timer and not timer:IsCancelled() then timer:Cancel() end
-					timer = C_Timer.NewTicker(5, function()
-						if tooltipLoading and not receivedData and ItemRefTooltip:IsShown() then
-							showTooltip({
-								{2, typeLang, displayID, 1,1,1,r,g,b},
-								{1, L["Error not receiving data from %s ..."]:format(characterName), 1,0,0},
-							})
-						end
-					end, 1)
-				end
+	LinkUtil.RegisterLinkHandler("MountsJournalH", function(link, text, linkData, contextData)
+		local _,_, dataType, characterName, typeLang, id = text:gsub("|[Cc]%x%x%x%x%x%x%x%x", ""):gsub("|[Rr]", ""):find("|HMountsJournalH:(.-)|h%[MJ:(.-) %- (.-):(.-)%]|h")
+		if dataType and characterName and typeLang and id then
+			id = util.deobfuscateName(id)
+			if IsShiftKeyDown() then
+				util.insertChatLink(dataType, id, characterName)
 			else
-				showTooltip({{1, L["Malformed link"], 1,0,0}})
+				characterName = util.deobfuscateName(characterName)
+				local r,g,b = NIGHT_FAE_BLUE_COLOR:GetRGB()
+				local displayID = id == "" and DEFAULT or id
+				showTooltip({
+					{2, typeLang, displayID, 1,1,1,r,g,b},
+					{1, L["Requesting data from %s ..."]:format(characterName), 1,.8,0},
+				})
+				tooltipLoading = true
+				receivedData = false
+				requestData(characterName, dataType, id)
+
+				if timer and not timer:IsCancelled() then timer:Cancel() end
+				timer = C_Timer.NewTicker(5, function()
+					if tooltipLoading and not receivedData and ItemRefTooltip:IsShown() then
+						showTooltip({
+							{2, typeLang, displayID, 1,1,1,r,g,b},
+							{1, L["Error not receiving data from %s ..."]:format(characterName), 1,0,0},
+						})
+					end
+				end, 1)
 			end
+		else
+			showTooltip({{1, L["Malformed link"], 1,0,0}})
 		end
 	end)
 end
