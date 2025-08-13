@@ -483,14 +483,25 @@ function util.addTooltipDLine(s1, s2)
 end
 
 
-function util.getTimeBreakDown(time)
-	local d,h,m,s = ChatFrame_TimeBreakDown(time)
-	if d > 0 then
-		return ("%d:%.2d:%.2d:%.2d"):format(d,h,m,s)
-	elseif h > 0 then
-		return ("%.2d:%.2d:%.2d"):format(h,m,s)
-	else
-		return ("%.2d:%.2d"):format(m,s)
+do
+	local day = DAY_ONELETTER_ABBR:gsub(" ", "")
+	local hour = HOUR_ONELETTER_ABBR:gsub(" ", "")
+	local minute = MINUTE_ONELETTER_ABBR:gsub(" ", "")
+	local second = SECOND_ONELETTER_ABBR:gsub(" ", "")
+	local mstr = minute.." "..second
+	local hstr = hour.." "..mstr
+	local dstr = day.." "..hstr
+	function util.getTimeBreakDown(time)
+		local d,h,m,s = ChatFrame_TimeBreakDown(time)
+		if d > 0 then
+			return dstr:format(d,h,m,s)
+		elseif h > 0 then
+			return hstr:format(h,m,s)
+		elseif m > 0 then
+			return mstr:format(m,s)
+		else
+			return second:format(s)
+		end
 	end
 end
 

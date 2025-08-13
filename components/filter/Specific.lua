@@ -84,8 +84,6 @@ function journal.filters.specific(dd, level)
 	local func = info.func
 	local checked = info.checked
 
-	info.widgets = nil
-	info.func = nil
 	info.hasArrow = true
 	info.text = CLASS
 	info.icon = 136455
