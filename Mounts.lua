@@ -1010,4 +1010,14 @@ function mounts:init()
 		summon(msg)
 		self.noError = nil
 	end
+
+	SLASH_MOUNTSJOURNAL_DISMOUNT1 = "/dmount"
+	SLASH_MOUNTSJOURNAL_DISMOUNT2 = "/dm"
+	SlashCmdList["MOUNTSJOURNAL_DISMOUNT"] = function(msg)
+		if UnitInVehicle("player") then
+			VehicleExit()
+		elseif IsMounted() then
+			Dismount()
+		end
+	end
 end

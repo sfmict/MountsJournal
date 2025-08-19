@@ -1772,7 +1772,7 @@ function journal:setScrollGridMounts(force)
 
 	if self.curGrid == grid and not force then return end
 	self.curGrid = grid
-	local template, top, bottom, left, right, hSpacing, vSpacing, extent, panScalar
+	local template, top, bottom, left, right, hSpacing, vSpacing, extent, panScalar, sizeCalculator
 
 	if grid == 1 then
 		left = 41
@@ -1812,6 +1812,7 @@ function journal:setScrollGridMounts(force)
 		local scrollWidth = self.scrollBox:GetWidth()
 		self.gridN = mounts.config.gridModelStride - left - right
 		extent = math.floor((scrollWidth - (self.gridN - 1) * hSpacing) / self.gridN)
+		sizeCalculator = function(dataIndex, elementData) return extent, extent end
 		self.gmsWidth = extent
 		self.initMountButton = self.gridModelSceneInit
 	end
@@ -1819,11 +1820,15 @@ function journal:setScrollGridMounts(force)
 	self.scrollBox.wheelPanScalar = panScalar or 2
 	self.view:SetPadding(top,bottom,left,right,hSpacing,vSpacing)
 	self.view:SetElementExtent(extent)
+	if self.view.SetElementSizeCalculator then -- 11.2.5 remove
+		self.view:SetElementSizeCalculator(sizeCalculator)
+	end
 	self.view:SetPanExtent(extent)
 	self.view:SetStride(self.gridN)
 	self.view:SetElementInitializer(template, function(...)
 		self:initMountButton(...)
 	end)
+
 
 	if self.dataProvider then
 		self:updateScrollMountList()
@@ -2789,19 +2794,19 @@ end
 
 
 function journal:getMountDataByMountID(mountID)
-	return self.scrollBox:FindByPredicate(function(data)
+	return self.dataProvider:FindByPredicate(function(data)
 		return data.mountID == mountID
 	end)
 end
 
 
 function journal:getMountDataByMountIndex(index)
-	return self.scrollBox:Find(index)
+	return self.dataProvider:Find(index)
 end
 
 
 function journal:getMountButtonByMountID(mountID)
-	return self.scrollBox:FindFrameByPredicate(function(btn, data)
+	return self.view:FindFrameByPredicate(function(btn, data)
 		return data.mountID == mountID
 	end)
 end

@@ -201,7 +201,7 @@ macroFrame:on("ADDON_INIT", function(self)
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
 
 	self:refresh()
-	self:getClassMacro(self.class, function() self:refresh() end)
+	self:getClassMacro(self.class, false, function() self:refresh() end)
 end)
 
 
@@ -310,7 +310,7 @@ end
 function macroFrame:setMacro()
 	self.macro = nil
 	if self.classConfig.macroEnable then
-		self.macro = self.classConfig.macro or self:getClassMacro()
+		self.macro = self.classConfig.macro or self:getClassMacro(self.class, false)
 	end
 end
 
@@ -318,7 +318,7 @@ end
 function macroFrame:setCombatMacro()
 	self.combatMacro = nil
 	if self.classConfig.combatMacroEnable then
-		self.combatMacro = self.classConfig.combatMacro or self:getClassMacro()
+		self.combatMacro = self.classConfig.combatMacro or self:getClassMacro(self.class, true)
 	end
 end
 
@@ -361,15 +361,23 @@ do
 end
 
 
-function macroFrame:getDismountMacro()
-	return self:addLine("/leavevehicle [vehicleui]", "/dismount [mounted]")
+function macroFrame:getDismountMacro(isCombat)
+	if isCombat then
+		if self.class == "DRUID" and self.classConfig.useMacroAlways then
+			return "/dmount"
+		else
+			return "/mountNoError"
+		end
+	else
+		return "/dmount"
+	end
 end
 
 
 do
 	local function getClassDefFunc(spellID)
-		return function(self, ...)
-			local spellName = self:getSpellName(spellID, ...)
+		return function(self, cb)
+			local spellName = self:getSpellName(spellID, cb)
 			if spellName then
 				return "/cast "..spellName
 			end
@@ -378,8 +386,8 @@ do
 
 
 	local classFunc = {
-		WARRIOR = function(self, ...)
-			local spellName = self:getSpellName(6544, ...) -- Heroic Leap
+		WARRIOR = function(self, cb)
+			local spellName = self:getSpellName(6544, cb) -- Heroic Leap
 			if spellName then
 				return "/cast [@cursor]"..spellName
 			end
@@ -387,8 +395,8 @@ do
 		PALADIN = getClassDefFunc(190784), -- Devine Steed
 		HUNTER = getClassDefFunc(186257), -- Aspect of the Cheetah
 		ROGUE = getClassDefFunc(2983), -- Sprint
-		PRIEST = function(self, ...)
-			local spellName = self:getSpellName(121536, ...) -- Angelic Feather
+		PRIEST = function(self, cb)
+			local spellName = self:getSpellName(121536, cb) -- Angelic Feather
 			if spellName then
 				return "/cast [@player]"..spellName
 			end
@@ -398,9 +406,9 @@ do
 		MAGE = getClassDefFunc(1953), -- Blink
 		WARLOCK = getClassDefFunc(111400), -- Burning Rush
 		MONK = getClassDefFunc(109132), -- Roll
-		DRUID = function(self, ...)
-			local catForm = self:getSpellName(768, ...)
-			local travelForm = self:getSpellName(783, ...)
+		DRUID = function(self, cb)
+			local catForm = self:getSpellName(768, cb)
+			local travelForm = self:getSpellName(783, cb)
 
 			if catForm and travelForm then
 				return "/cast [indoors,noswimming]"..catForm..";"..travelForm
@@ -411,12 +419,12 @@ do
 	}
 
 
-	function macroFrame:getClassMacro(class, ...)
-		local macro = self:getDismountMacro()
+	function macroFrame:getClassMacro(class, isCombat, cb)
+		local macro = self:getDismountMacro(isCombat)
 
 		local classFunc = classFunc[class or self.class]
 		if type(classFunc) == "function" then
-			local text = classFunc(self, ...)
+			local text = classFunc(self, cb)
 			if type(text) == "string" and #text > 0 then
 				macro = self:addLine(macro, text)
 			end

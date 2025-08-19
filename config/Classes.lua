@@ -54,12 +54,14 @@ classConfig:SetScript("OnShow", function(self)
 		end
 		lastClassFrame = classFrame
 		classFrame.key = className
-		classFrame.default = util.getClassMacro(className, function()
+		classFrame.default = util.getClassMacro(className, false, function()
 			classFrame.default = util.getClassMacro(className)
+			classFrame.defaultCombat = util.getClassMacro(className, true)
 			if self.rightPanel and self.rightPanel.currentBtn == classFrame then
 				classFrame:Click()
 			end
 		end)
+		classFrame.defaultCombat = util.getClassMacro(className, true)
 		classFrame.name:SetText(classColor:WrapTextInColorCode(localized))
 		classFrame.check:SetVertexColor(classColor:GetRGB())
 		classFrame.highlight:SetVertexColor(classColor:GetRGB())
@@ -76,12 +78,14 @@ classConfig:SetScript("OnShow", function(self)
 	local classFrame = CreateFrame("BUTTON", nil, self.leftPanel, "MJClassButtonTemplate")
 	classFrame:SetPoint("TOPLEFT", lastClassFrame, "BOTTOMLEFT", 0, -20)
 	classFrame.key = playerClassName
-	classFrame.default = util.getClassMacro(playerClassName, function()
-		classFrame.default = util.getClassMacro(playerClassName)
+	classFrame.default = util.getClassMacro(playerClassName, false, function()
+		classFrame.default = util.getClassMacro(playerClassName, false)
+		classFrame.defaultCombat = util.getClassMacro(playerClassName, true)
 		if self.rightPanel and self.rightPanel.currentBtn == classFrame then
 			classFrame:Click()
 		end
 	end)
+	classFrame.defaultCombat = util.getClassMacro(playerClassName, true)
 	classFrame.name:SetPoint("RIGHT", -30, 0)
 	classFrame.name:SetText(classColor:WrapTextInColorCode(UnitName("player")))
 	classFrame.description = L["CHARACTER_CLASS_DESCRIPTION"]
@@ -134,6 +138,15 @@ classConfig:SetScript("OnShow", function(self)
 		end
 	end)
 
+	-- MACRO HINT
+	local function hintOnEnter(hint)
+		GameTooltip:SetOwner(hint, "ANCHOR_TOP", 0, -15)
+		GameTooltip:SetText(MACRO)
+		GameTooltip:AddLine(L["CLASS_DMOUNT_HINT"]:format("|cff80b5fd/dmount|r", "|cff80b5fd/dm|r"), 1,1,1,1, true)
+		GameTooltip:AddLine(L["CLASS_MOUNT_HINT"]:format("|cff80b5fd/mountNoError|r", "|cff80b5fd/mne|r"), 1,1,1,1, true)
+		GameTooltip:Show()
+	end
+
 	-- MOVE FALL MACRO
 	local moveFallMF = CreateFrame("FRAME", nil, self.rightPanelScroll.child, "MJMacroFrame")
 	self.moveFallMF = moveFallMF
@@ -141,6 +154,7 @@ classConfig:SetScript("OnShow", function(self)
 	moveFallMF:SetPoint("LEFT", 9, 0)
 	moveFallMF:SetPoint("RIGHT", self.rightPanelScroll, -5, 0)
 	moveFallMF.label:SetText(L["HELP_MACRO_MOVE_FALL"])
+	moveFallMF.hint:HookScript("OnEnter", hintOnEnter)
 	moveFallMF.enable:HookScript("OnClick", function(btn)
 		self.currentMacrosConfig.macroEnable = btn:GetChecked()
 		util.refreshMacro()
@@ -168,19 +182,20 @@ classConfig:SetScript("OnShow", function(self)
 	combatMF:SetPoint("TOPLEFT", moveFallMF.background, "BOTTOMLEFT", 0, -50)
 	combatMF:SetPoint("RIGHT", self.rightPanelScroll, -5, 0)
 	combatMF.label:SetText(L["HELP_MACRO_COMBAT"])
+	combatMF.hint:HookScript("OnEnter", hintOnEnter)
 	combatMF.enable:HookScript("OnClick", function(btn)
 		self.currentMacrosConfig.combatMacroEnable = btn:GetChecked()
 		util.refreshMacro()
 	end)
 	combatMF.defaultBtn:HookScript("OnClick", function()
-		self.combatMacroEditBox:SetText(self.rightPanel.currentBtn.default)
+		self.combatMacroEditBox:SetText(self.rightPanel.currentBtn.defaultCombat)
 		self.combatMacroEditBox:ClearFocus()
 		local enable = not not self.currentMacrosConfig.combatMacro
 		combatMF.saveBtn:SetEnabled(enable)
 		combatMF.cancelBtn:SetEnabled(enable)
 	end)
 	combatMF.cancelBtn:HookScript("OnClick", function()
-		self.combatMacroEditBox:SetText(self.currentMacrosConfig.combatMacro or self.rightPanel.currentBtn.default)
+		self.combatMacroEditBox:SetText(self.currentMacrosConfig.combatMacro or self.rightPanel.currentBtn.defaultCombat)
 		self.combatMacroEditBox:ClearFocus()
 	end)
 	combatMF.saveBtn:HookScript("OnClick", function()
@@ -301,6 +316,11 @@ do
 		classConfig.currentMacrosConfig[btn.key] = isEnabled
 		util.refreshMacro()
 
+		-- DRUID COMBAT MACRO CHANGE
+		local currentBtn = classConfig.rightPanel.currentBtn
+		currentBtn.defaultCombat = util.getClassMacro(currentBtn.key, true)
+		classConfig.combatMacroEditBox:SetText(classConfig.currentMacrosConfig.combatMacro or currentBtn.defaultCombat)
+
 		if type(btn.childs) == "table" then
 			for _, childOption in ipairs(btn.childs) do
 				childOption:SetEnabled(isEnabled)
@@ -386,7 +406,7 @@ do
 		self.moveFallMF.saveBtn:Disable()
 		self.moveFallMF.cancelBtn:Disable()
 		self.combatMF.enable:SetChecked(self.currentMacrosConfig.combatMacroEnable)
-		self.combatMacroEditBox:SetText(self.currentMacrosConfig.combatMacro or btn.default)
+		self.combatMacroEditBox:SetText(self.currentMacrosConfig.combatMacro or btn.defaultCombat)
 		self.combatMF.saveBtn:Disable()
 		self.combatMF.cancelBtn:Disable()
 

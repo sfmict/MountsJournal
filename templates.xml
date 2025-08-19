@@ -2226,6 +2226,11 @@
 			</Layer>
 		</Layers>
 		<Frames>
+			<Frame parentKey="hint" scale=".9" inherits="MJHelpPlate">
+				<Anchors>
+					<Anchor point="RIGHT" relativeKey="$parent.label" relativePoint="LEFT" x="10"/>
+				</Anchors>
+			</Frame>
 			<Frame parentKey="background" useParentLevel="true" inherits="BackdropTemplate">
 				<Size y="130"/>
 				<Anchors>
