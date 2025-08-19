@@ -587,6 +587,40 @@ end
 
 
 ---------------------------------------------------
+-- qc QUEST COMPLETED
+conds.qc = {}
+conds.qc.text = QUEST_COMPLETE
+conds.qc.isNumeric = true
+
+function conds.qc:getValueDescription()
+	return "questID"
+end
+
+conds.qc.getValueText = conds.hitem.getValueText
+
+function conds.qc:getFuncText(value)
+	return ("C_QuestLog.IsQuestFlaggedCompleted(%d)"):format(value), "C_QuestLog"
+end
+
+
+---------------------------------------------------
+-- qca QUEST COMPLETED ON ACCOUNT
+conds.qca = {}
+conds.qca.text = L["Quest completed on account"]
+conds.qca.isNumeric = true
+
+function conds.qca:getValueDescription()
+	return "questID"
+end
+
+conds.qca.getValueText = conds.hitem.getValueText
+
+function conds.qca:getFuncText(value)
+	return ("C_QuestLog.IsQuestFlaggedCompletedOnAccount(%d)"):format(value), "C_QuestLog"
+end
+
+
+---------------------------------------------------
 -- faction
 conds.faction = {}
 conds.faction.text = FACTION
