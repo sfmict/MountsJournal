@@ -2117,6 +2117,7 @@ function journal:gridModelSceneInit(btn, data, force)
 	btn.mountType = mountType
 	btn.isSelfMount = isSelfMount
 
+	btn.loading:Show()
 	btn.modelScene:TransitionToModelSceneID(modelSceneID, CAMERA_TRANSITION_TYPE_IMMEDIATE, CAMERA_MODIFICATION_TYPE_DISCARD, true)
 	btn.modelScene:PrepareForFanfare(needsFanfare)
 	self:setMountToModelScene(btn.modelScene, creatureID, isSelfMount, animID, disablePlayerMountPreview, spellVisualKitID)

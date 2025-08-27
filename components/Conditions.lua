@@ -1,6 +1,6 @@
 local _, ns = ...
 local L = ns.L
-local strcmputf8i = strcmputf8i
+local strcmputf8i, concat = strcmputf8i, table.concat
 local conds = {}
 ns.conditions = conds
 
@@ -609,9 +609,7 @@ conds.qca = {}
 conds.qca.text = L["Quest completed on account"]
 conds.qca.isNumeric = true
 
-function conds.qca:getValueDescription()
-	return "questID"
-end
+conds.qca.getValueDescription = conds.qc.getValueDescription
 
 conds.qca.getValueText = conds.hitem.getValueText
 
@@ -1749,28 +1747,29 @@ end
 
 
 function conds:getFuncText(conds)
-	local actionType, text = conds.action[1]
+	local text = {}
+	local actionType = conds.action[1]
 	if actionType == "rmount" or actionType == "rmountr" then
-		text = "profileLoad ~= 2\nand "
+		text[1] = "profileLoad ~= 2"
 	elseif actionType == "rmountt" or actionType == "rmounttr" then
-		text = "(not profileLoad or profileLoad == true)\nand "
+		text[1] = "(not profileLoad or profileLoad == true)"
 	elseif actionType == "mount" then
-		text = "(not profileLoad or profileLoad == true) and not self.useMount\nand "
+		text[1] = "(not profileLoad or profileLoad == true) and not self.useMount"
 	else
-		text = "not (profileLoad or self.useMount)\nand "
+		text[1] = "not (profileLoad or self.useMount)"
 		if actionType == "pmacro" then
-			text = text.."not self.preUseMacro\nand "
+			text[2] = "not self.preUseMacro"
 		end
 	end
 
+	local len = #text
 	local vars = {}
 	for i = 1, #conds do
 		local cond = conds[i]
 		local condText, var = self[cond[2]]:getFuncText(cond[3])
 		if var then vars[#vars + 1] = var end
-		if i ~= 1 then text = text.."and " end
-		if cond[1] then text = text.."not " end
-		text = text..condText.."\n"
+		if cond[1] then condText = "not "..condText end
+		text[i + len] = condText
 	end
-	return text, #vars > 0 and vars
+	return concat(text, "\nand "), #vars > 0 and vars
 end

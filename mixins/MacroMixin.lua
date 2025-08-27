@@ -269,7 +269,7 @@ return function(self, button, profileLoad, noMacro)
 			local actionText, actionVars = self.actions:getFuncText(rule.action)
 			addKeys(condVars, keys)
 			addKeys(actionVars, keys)
-			func = ("%sif %sthen\n%s\nend\n"):format(func, condText, actionText)
+			func = ("%sif %s\nthen\n%s\nend\n"):format(func, condText, actionText)
 		end
 
 		if next(keys) then

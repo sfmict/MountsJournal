@@ -159,7 +159,9 @@ ns.journal:on("MODULES_INIT", function(journal)
 	end
 
 	local function modelLoaded(actor)
-		journal:event("MOUNT_MODEL_LOADED", actor:GetParent():GetParent())
+		local frame = actor:GetParent():GetParent()
+		frame.loading:Hide()
+		journal:event("MOUNT_MODEL_LOADED", frame)
 	end
 
 	local function AcquireAndInitializeActor(self, actorInfo)
