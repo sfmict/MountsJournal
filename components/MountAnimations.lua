@@ -207,6 +207,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 				rightText = ("|cff808080%s%d|r"):format(v.isKit and "k" or "", v.animation),
 				rightFont = util.codeFont,
 				value = v,
+				arg1 = i,
 				checked = checked,
 				func = func,
 				remove = remove,

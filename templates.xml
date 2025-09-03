@@ -534,6 +534,12 @@
 				</Layers>
 				<Frames>
 					<Frame parentKey="shadowOverlay" inherits="ShadowOverlayTemplate" useParentLevel="true" setAllPoints="true"/>
+					<Frame parentKey="loading" inherits="SpinnerTemplate" alpha=".1" hidden="true">
+						<Size x="120" y="120"/>
+						<Anchors>
+							<Anchor point="CENTER" x="0" y="-30"/>
+						</Anchors>
+					</Frame>
 					<Frame parentKey="info" inherits="InlineHyperlinkFrameTemplate">
 						<Size y="46"/>
 						<Anchors>
@@ -1985,7 +1991,7 @@
 					<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
 				</Anchors>
 			</ModelScene>
-			<Frame parentKey="loading" inherits="SpinnerTemplate" alpha=".3" hidden="true">
+			<Frame parentKey="loading" inherits="SpinnerTemplate" alpha=".1" hidden="true">
 				<Anchors>
 					<Anchor point="TOPLEFT" x="30" y="-50"/>
 					<Anchor point="BOTTOMRIGHT" x="-30" y="10"/>
