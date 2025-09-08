@@ -8,48 +8,6 @@ local test = CreateFrame("Frame")
 test:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 
--- mjclick button
--- local button = CreateFrame("BUTTON", nil, nil, "SecureActionButtonTemplate")
--- button:SetAttribute("type", "macro")
--- button:SetAttribute("macrotext", "/run print(2)")
-
--- local AB = OPie.ActionBook:compatible(2, 45)
--- local actionMap = {}
-
--- local function btnHint(n, ...)
--- 	local name = ("%s %d"):format(SUMMONS, n == ns.util.secureButtonNameMount and 1 or 2)
--- 	return true, 1, 123123, name, 0, 0, 0
--- end
-
-
--- local function createMJClick(name)
--- 	local function preClick()
--- 		ns.mounts:setFlags()
--- 		AB:UpdateActionSlot(actionMap[name], "macrotext", ns.macroFrame.checkRules[1](ns.macroFrame, "LeftButton"))
--- 	end
-
--- 	if not actionMap[name] then
--- 		-- actionMap[name] = AB:CreateActionSlot(btnHint, name, "attribute", "type", "click", "clickbutton", button)
--- 		actionMap[name] = AB:CreateActionSlot(btnHint, name, "macrotext", "")
--- 		fprint("123123123", name)
--- 		AB:AddObserver("internal.collection.preopen", preClick, actionMap[name])
--- 	end
-
--- 	return actionMap[name]
--- end
-
--- local function describeMJClick(name)
--- 	return "MJClick", ("%s %d"):format(SUMMONS, name == ns.util.secureButtonNameMount and 1 or 2), 123123
--- end
-
--- AB:RegisterActionType("MJClick", createMJClick, describeMJClick, 1)
-
--- AB:AugmentCategory(addon, function(_, add)
--- 	add("MJClick", ns.util.secureButtonNameMount)
--- 	add("MJClick", ns.util.secureButtonNameSecondMount)
--- end)
-
-
 local ignoreEvents = {
 	["SPELL_ACTIVATION_OVERLAY_HIDE"] = true,
 	["ARENA_SEASON_WORLD_STATE"] = true,

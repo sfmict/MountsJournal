@@ -86,7 +86,9 @@ function setPetMixin:refresh()
 			self.infoFrame.favorite:SetShown(favorite)
 			self.infoFrame:Show()
 		else
-			ns.pets:setPetForProfile(ns.journal.petForMount, self.spellID)
+			if #ns.pets.list > 0 then
+				ns.pets:setPetForProfile(ns.journal.petForMount, self.spellID)
+			end
 			self:SetAlpha(.7)
 			self.infoFrame:Hide()
 			self.id = nil
@@ -132,7 +134,7 @@ end
 
 function MJSetPetMixin:updatePetForMount()
 	local _, owned = C_PetJournal.GetNumPets()
-	if not self.owned or self.owned > owned then
+	if owned > 0 and not self.owned or self.owned > owned then
 		local petForMount, needUpdate = ns.pets:getPetForProfileList(ns.mounts.defProfile.petForMount)
 
 		if petForMount then

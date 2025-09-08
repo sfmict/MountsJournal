@@ -18,7 +18,7 @@
 ## Category-zhTW: 戰隊收藏
 ## SavedVariables: MountsJournalDB
 ## SavedVariablesPerCharacter: MountsJournalChar
-## OptionalDeps: LibStub, LibSFDropDown, LibThingsLoad, LibDeflate
+## OptionalDeps: LibStub, LibSFDropDown, LibThingsLoad, LibDeflate, OPie
 embeds.xml
 locales.xml
 Util.lua

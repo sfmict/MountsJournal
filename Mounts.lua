@@ -702,22 +702,19 @@ function mounts:getTargetMount()
 		local spellID, mountID = util.getUnitMount("target")
 		if mountID then
 			local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
-			return isUsable and C_Spell.IsSpellUsable(spellID) and spellID
+			return isUsable and C_Spell.IsSpellUsable(spellID) and spellID, false
 		elseif spellID then
-			return ns.additionalMounts[spellID]:canUse() and spellID
+			return ns.additionalMounts[spellID]:canUse() and spellID, true
 		end
 	end
 end
 
 
 function mounts:summon(spellID)
-	self.summonedSpellID = spellID or self.summonedSpellID
-	if self.summonedSpellID then
-		local mountID = C_MountJournal.GetMountFromSpell(self.summonedSpellID)
-		if mountID then
-			C_MountJournal.SummonByID(mountID)
-			return true
-		end
+	spellID = spellID or self.summonedSpellID
+	if spellID then
+		local mountID = C_MountJournal.GetMountFromSpell(spellID)
+		if mountID then C_MountJournal.SummonByID(mountID) end
 	end
 end
 
@@ -884,7 +881,7 @@ do
 		            and (not flags.modifier or flags.isSubmerged)
 		flags.waterWalk = isFloating
 		                  or not isFlyableLocation and flags.modifier
-		flags.targetMount = self:getTargetMount()
+		flags.targetMount, flags.targetMountAdditional = self:getTargetMount()
 
 		self:setMapList()
 	end
@@ -913,10 +910,10 @@ end
 
 
 function mounts:setSummonMount(withAdditional)
-	self.withAdditional = withAdditional
-	self.summonedSpellID = nil
-	self.fromPriority = true
 	local flags = self.sFlags
+	self.withAdditional = withAdditional
+	self.summonedSpellID = flags.targetMount
+	self.fromPriority = true
 	if not flags.groundSpellKnown then
 		if not (flags.swimming and self:setUsableID(self.list.swimming, self.list.swimmingWeight) or self:setUsableID(self.lowLevel, self.sp.mountsWeight)) then
 			self.fromPriority = nil
@@ -925,7 +922,7 @@ function mounts:setSummonMount(withAdditional)
 	-- repair mounts
 	elseif not (flags.useRepair and self:setUsableID(self.usableRepairMounts, self.sp.mountsWeight))
 	-- target's mount
-	and not (flags.targetMount and self:summon(flags.targetMount))
+	and (flags.targetMountAdditional or not flags.targetMount)
 	-- swimming
 	and not (flags.swimming and (
 		flags.isVashjir and self:setUsableID(self.swimmingVashjir, self.sp.mountsWeight)
@@ -946,10 +943,10 @@ end
 
 
 function mounts:setSummonMountByType(mType, withAdditional)
-	self.withAdditional = withAdditional
-	self.summonedSpellID = nil
-	self.fromPriority = true
 	local flags = self.sFlags
+	self.withAdditional = withAdditional
+	self.summonedSpellID = flags.targetMount
+	self.fromPriority = true
 	if not flags.groundSpellKnown then
 		if not (flags.swimming and self:setUsableID(self.list.swimming, self.list.swimmingWeight) or self:setUsableID(self.lowLevel, self.sp.mountsWeight)) then
 			self.fromPriority = nil
@@ -958,8 +955,12 @@ function mounts:setSummonMountByType(mType, withAdditional)
 	-- repair mounts
 	elseif not (flags.useRepair and self:setUsableID(self.usableRepairMounts, self.sp.mountsWeight))
 	-- target's mount
-	and not (flags.targetMount and self:summon(flags.targetMount))
-	and not (mType == "swimming" and flags.isVashjir and self:setUsableID(self.swimmingVashjir, self.sp.mountsWeight))
+	and (flags.targetMountAdditional or not flags.targetMount)
+	-- vashjir
+	and not (flags.isVashjir and mType == "swimming" and self:setUsableID(self.swimmingVashjir, self.sp.mountsWeight))
+	-- herbMount
+	and not (flags.herb and mType ~= "swimming" and self:setUsableID(self.herbalismMounts, self.sp.mountsWeight))
+	-- by type
 	and not self:setUsableID(self.list[mType], self.list[mType.."Weight"])
 	and not self:setUsableID(self.lowLevel, self.sp.mountsWeight) then
 		self.fromPriority = nil
@@ -985,7 +986,7 @@ function mounts:init()
 		else
 			local profileLoad = true
 			local noMacro = true
-			local action = ns.macroFrame.checkRules[flags.summonID](ns.macroFrame, "LeftButton", profileLoad, noMacro)
+			local action = ns.macroFrame.checkRules[flags.summonID or 1](ns.macroFrame, "LeftButton", profileLoad, noMacro)
 			if action == true then return end
 			if ns.macroFrame.useMount then
 				self:summon(ns.macroFrame.useMount)
@@ -1006,8 +1007,9 @@ function mounts:init()
 	SLASH_MOUNTSJOURNAL_NO_ERROR1 = "/mountNoError"
 	SLASH_MOUNTSJOURNAL_NO_ERROR2 = "/mne"
 	SlashCmdList["MOUNTSJOURNAL_NO_ERROR"] = function(msg)
+		if not SecureCmdOptionParse(msg) then return end
 		self.noError = true
-		summon(msg)
+		summon("notNilModifier")
 		self.noError = nil
 	end
 
