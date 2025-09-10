@@ -354,25 +354,13 @@ function journal:init()
 	sMountJournal:SetAttribute("numTabs", self.bgFrame.numTabs)
 
 	-- SET SIZE
-	local function setSize()
-		local minWidth, minHeight = self.CollectionsJournal:GetSize()
-		local maxWidth = UIParent:GetWidth() - self.bgFrame:GetLeft() * 2
-		local maxHeight = self.bgFrame:GetTop() - CollectionsJournalTab1:GetHeight()
-		self.minTabWidth = (self.CollectionsJournal.Tabs[self.CollectionsJournal.numTabs]:GetRight() or 0) - self.CollectionsJournal:GetLeft() + self.bgFrame:GetRight() - self.bgFrame.Tabs[#self.bgFrame.Tabs]:GetLeft() + 20
-		local width = Clamp(mounts.config.journalWidth or minWidth, max(minWidth, self.minTabWidth), maxWidth)
-		local height = Clamp(mounts.config.journalHeight or minHeight, minHeight, maxHeight)
-		self.bgFrame:SetSize(width, height)
-	end
-	setSize()
-	C_Timer.After(0, function()
-		local oldWidth, oldHeight = self.bgFrame:GetSize()
-		setSize()
-		local width, height = self.bgFrame:GetSize()
-		if oldWidth ~= width or oldHeight ~= height then
-			self:setScrollGridMounts(true)
-			self:event("JOURNAL_RESIZED")
-		end
-	end)
+	local minWidth, minHeight = self.CollectionsJournal:GetSize()
+	local maxWidth = UIParent:GetWidth() - self.bgFrame:GetLeft() - 10
+	local maxHeight = self.bgFrame:GetTop() - CollectionsJournalTab1:GetHeight()
+	self.minTabWidth = (self.CollectionsJournal.Tabs[self.CollectionsJournal.numTabs]:GetRight() or 0) - self.CollectionsJournal:GetLeft() + self.bgFrame:GetRight() - self.bgFrame.Tabs[#self.bgFrame.Tabs]:GetLeft() + 20
+	local width = Clamp(mounts.config.journalWidth or minWidth, max(minWidth, self.minTabWidth), maxWidth)
+	local height = Clamp(mounts.config.journalHeight or minHeight, minHeight, maxHeight)
+	self.bgFrame:SetSize(width, height)
 
 	-- DYNAMIC FLIGHT
 	hooksecurefunc(self.MountJournal.ToggleDynamicFlightFlyoutButton, "UpdateVisibility", function()
@@ -1283,7 +1271,7 @@ function journal:init()
 		if InCombatLockdown() then return end
 		local parent = btn:GetParent()
 		local minWidth, minHeight = self.CollectionsJournal:GetSize()
-		local maxWidth = UIParent:GetWidth() - parent:GetLeft() * 2
+		local maxWidth = UIParent:GetWidth() - parent:GetLeft() - 10
 		local maxHeight = parent:GetTop() - CollectionsJournalTab1:GetHeight()
 		parent:SetResizeBounds(max(minWidth, self.minTabWidth), minHeight, maxWidth, maxHeight)
 		parent.isSizing = true
@@ -1295,6 +1283,8 @@ function journal:init()
 		parent:StopMovingOrSizing()
 		parent.isSizing = nil
 		mounts.config.journalWidth, mounts.config.journalHeight = parent:GetSize()
+		self.bgFrame:ClearAllPoints()
+		self.bgFrame:SetPoint("TOPLEFT", self.CollectionsJournal, "TOPLEFT", 0, 0)
 		self:setScrollGridMounts(true)
 		self:event("JOURNAL_RESIZED")
 	end)
