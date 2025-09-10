@@ -1,11 +1,19 @@
 if not (OPie and OPie.ActionBook and OPie.ActionBook.compatible) then return end
+local AB = OPie.ActionBook:compatible(2, 47)
+local R = OPie.CustomRings
+if not (AB and R and R.AddDefaultRing) then return end
 local addon, ns = ...
+local L, mounts = ns.L, ns.mounts
+
+
+R:AddDefaultRing(addon, {
+	{"MJClick", 1, 1, _u = "1"},
+	{"MJClick", 2, 1, _u = "2"},
+	name = addon, _u = "OPCMJC", v = 1
+})
 
 
 ns.macroFrame:on("ADDON_INIT", function(macroFrame)
-	local AB = OPie.ActionBook:compatible(2, 47)
-	if not AB then return end
-	local L, mounts = ns.L, ns.mounts
 	local actionMap = {}
 
 	local function tooltip(tooltip, info)
@@ -73,12 +81,10 @@ ns.macroFrame:on("ADDON_INIT", function(macroFrame)
 	AB:RegisterActionType("MJClick", createMJClick, describeMJClick, 2)
 	AB:AugmentCategory(addon, function(_, add)
 		local i = 1
-		local text = _G["KEY_BUTTON"..i]
-		while text do
+		while _G["KEY_BUTTON"..i] do
 			add("MJClick", 1, i)
 			add("MJClick", 2, i)
 			i = i + 1
-			text = _G["KEY_BUTTON"..i]
 		end
 	end)
 end)

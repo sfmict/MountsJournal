@@ -354,13 +354,25 @@ function journal:init()
 	sMountJournal:SetAttribute("numTabs", self.bgFrame.numTabs)
 
 	-- SET SIZE
-	local minWidth, minHeight = self.CollectionsJournal:GetSize()
-	local maxWidth = UIParent:GetWidth() - self.bgFrame:GetLeft() * 2
-	local maxHeight = self.bgFrame:GetTop() - CollectionsJournalTab1:GetHeight()
-	self.minTabWidth = (self.CollectionsJournal.Tabs[self.CollectionsJournal.numTabs]:GetRight() or 0) - self.CollectionsJournal:GetLeft() + self.bgFrame:GetRight() - self.bgFrame.Tabs[#self.bgFrame.Tabs]:GetLeft() + 20
-	local width = Clamp(mounts.config.journalWidth or minWidth, max(minWidth, self.minTabWidth), maxWidth)
-	local height = Clamp(mounts.config.journalHeight or minHeight, minHeight, maxHeight)
-	self.bgFrame:SetSize(width, height)
+	local function setSize()
+		local minWidth, minHeight = self.CollectionsJournal:GetSize()
+		local maxWidth = UIParent:GetWidth() - self.bgFrame:GetLeft() * 2
+		local maxHeight = self.bgFrame:GetTop() - CollectionsJournalTab1:GetHeight()
+		self.minTabWidth = (self.CollectionsJournal.Tabs[self.CollectionsJournal.numTabs]:GetRight() or 0) - self.CollectionsJournal:GetLeft() + self.bgFrame:GetRight() - self.bgFrame.Tabs[#self.bgFrame.Tabs]:GetLeft() + 20
+		local width = Clamp(mounts.config.journalWidth or minWidth, max(minWidth, self.minTabWidth), maxWidth)
+		local height = Clamp(mounts.config.journalHeight or minHeight, minHeight, maxHeight)
+		self.bgFrame:SetSize(width, height)
+	end
+	setSize()
+	C_Timer.After(0, function()
+		local oldWidth, oldHeight = self.bgFrame:GetSize()
+		setSize()
+		local width, height = self.bgFrame:GetSize()
+		if oldWidth ~= width or oldHeight ~= height then
+			self:setScrollGridMounts(true)
+			self:event("JOURNAL_RESIZED")
+		end
+	end)
 
 	-- DYNAMIC FLIGHT
 	hooksecurefunc(self.MountJournal.ToggleDynamicFlightFlyoutButton, "UpdateVisibility", function()
