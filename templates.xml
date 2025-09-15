@@ -395,6 +395,39 @@
 							<Anchor point="LEFT" relativeKey="$parent.$parent" x="4"/>
 							<Anchor point="RIGHT"/>
 						</Anchors>
+						<Frames>
+							<Button parentKey="clear" inherits="MJClearButtonTemplate">
+								<Anchors>
+									<Anchor point="RIGHT" x="-5" y="0"/>
+								</Anchors>
+							</Button>
+							<Button parentKey="resetFilter">
+								<Size x="16" y="16"/>
+								<Anchors>
+									<Anchor point="RIGHT" relativeKey="$parent.clear" relativePoint="LEFT"/>
+								</Anchors>
+								<Layers>
+									<Layer level="ARTWORK">
+										<Texture parentKey="icon" file="Interface/ChatFrame/ChatFrameExpandArrow">
+											<Size x="14" y="14"/>
+											<Anchors>
+												<Anchor point="CENTER"/>
+											</Anchors>
+										</Texture>
+									</Layer>
+								</Layers>
+								<HighlightTexture file="Interface/Buttons/UI-Common-MouseHilight" alpha=".75" alphaMode="ADD">
+									<Size x="20" y="20"/>
+									<Anchors>
+										<Anchor point="CENTER"/>
+									</Anchors>
+								</HighlightTexture>
+								<Scripts>
+									<OnMouseDown>self.icon:AdjustPointsOffset(-1, -1)</OnMouseDown>
+									<OnMouseUp>self.icon:AdjustPointsOffset(1, 1)</OnMouseUp>
+								</Scripts>
+							</Button>
+						</Frames>
 						<Layers>
 							<Layer level="ARTWORK">
 								<FontString parentKey="text" inherits="GameFontNormal" justifyH="LEFT">
@@ -411,7 +444,7 @@
 									<Size y="22"/>
 									<Anchors>
 										<Anchor point="LEFT" relativeKey="$parent.count" relativePoint="RIGHT" x="4" y="0"/>
-										<Anchor point="RIGHT" x="-28" y="0"/>
+										<Anchor point="RIGHT" relativeKey="$parent.resetFilter" relativePoint="LEFT" x="-2" y="0"/>
 									</Anchors>
 									<Scripts>
 										<OnEnter>
@@ -428,13 +461,6 @@
 								</FontString>
 							</Layer>
 						</Layers>
-						<Frames>
-							<Button parentKey="clear" inherits="MJClearButtonTemplate">
-								<Anchors>
-									<Anchor point="RIGHT" x="-5" y="0"/>
-								</Anchors>
-							</Button>
-						</Frames>
 					</Frame>
 				</Frames>
 			</Frame>
@@ -1600,7 +1626,7 @@
 
 	<Button name="MJFilterButtonTemplate" inherits="BackdropTemplate" virtual="true">
 		<Layers>
-			<Layer level="BACKGROUND">
+			<Layer level="ARTWORK">
 				<Texture parentKey="icon">
 					<Anchors>
 						<Anchor point="CENTER"/>

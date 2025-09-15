@@ -1,7 +1,7 @@
 local addon, ns = ...
 local L, util, mounts = ns.L, ns.util, ns.mounts
 local newMounts, mountsDB, specificDB, classDB = ns.newMounts, ns.mountsDB, ns.specificDB, ns.classDB
-local C_MountJournal, C_PetJournal, wipe, tinsert, next, pairs, ipairs, select, type, sort, math, InCombatLockdown = C_MountJournal, C_PetJournal, wipe, tinsert, next, pairs, ipairs, select, type, sort, math, InCombatLockdown
+local C_MountJournal, C_PetJournal, wipe, tinsert, next, pairs, ipairs, select, type, sort, math, concat, InCombatLockdown = C_MountJournal, C_PetJournal, wipe, tinsert, next, pairs, ipairs, select, type, sort, math, table.concat, InCombatLockdown
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
 ns.journal = journal
 journal.mountTypes = util.mountTypes
@@ -887,6 +887,44 @@ function journal:init()
 	-- SHOWN PANEL
 	self.shownPanel.text:SetText(L["Shown:"])
 	self.shownPanel.clear:SetScript("OnClick", function() self:resetToDefaultFilters() end)
+	self.shownPanel.list = {}
+
+	local resetFilter = self.shownPanel.resetFilter
+	resetFilter.icon:SetRotation(-math.pi/2)
+	lsfdd:SetMixin(self.shownPanel.resetFilter)
+	resetFilter:ddSetDisplayMode(addon)
+	resetFilter:ddHideWhenButtonHidden()
+	resetFilter:ddSetNoGlobalMouseEvent(true)
+	resetFilter:SetScript("OnClick", function(btn)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		btn:ddToggle(1, nil, btn, "TOPRIGHT", "BOTTOMRIGHT", 22, 0)
+	end)
+	resetFilter:ddSetInitFunc(function(dd)
+		local list = dd:GetParent().list
+		local info = {}
+		info.keepShownOnClick = true
+		info.notCheckable = true
+
+		info.widgets = {{
+			icon = "common-search-clearbutton",
+			OnClick = function(btn)
+				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+				self:resetFilterByInfo(btn.value)
+				dd:ddCloseMenus()
+				if #list > 0 then dd:Click() end
+			end,
+			iconInfo = {
+				tSizeX = 12,
+				tSizeY = 12,
+			}
+		}}
+
+		for i, text in ipairs(list) do
+			info.text = text
+			info.value = list[text]
+			dd:ddAddButton(info)
+		end
+	end)
 
 	-- MODEL SCENE ACTOR
 	hooksecurefunc(self.modelScene, "AcquireAndInitializeActor", function(self, actorInfo)
@@ -1476,8 +1514,9 @@ function journal:restoreMJFilters()
 		end
 	end
 	for i = 1, Enum.MountTypeMeta.NumValues do
-		if not C_MountJournal.IsValidTypeFilter(i) then break end
-		C_MountJournal.SetTypeFilter(i, backup.types[i])
+		if C_MountJournal.IsValidTypeFilter(i) then
+			C_MountJournal.SetTypeFilter(i, backup.types[i])
+		end
 	end
 	backup.isBackuped = false
 end
@@ -1634,7 +1673,7 @@ function journal:setMountTooltip(mountID, spellID, showDescription)
 	-- tags
 	local mTags = self.tags.mountTags[spellID]
 	if mTags then
-		util.addTooltipDLine(L["tags"], table.concat(GetKeysArray(mTags), ", "))
+		util.addTooltipDLine(L["tags"], concat(GetKeysArray(mTags), ", "))
 	end
 
 	-- faction
@@ -1831,7 +1870,6 @@ function journal:setScrollGridMounts(force)
 	self.view:SetElementInitializer(template, function(...)
 		self:initMountButton(...)
 	end)
-
 
 	if self.dataProvider then
 		self:updateScrollMountList()
@@ -2960,65 +2998,104 @@ function journal:restoreDefaultFilters()
 end
 
 
-function journal:isDefaultFilters()
-	local filters = mounts.filters
-	local defFilters = mounts.defFilters
-	local isDefault = true
-	local filterStr = ""
+do
+	local function add(list, text, defFilters, filters, k)
+		local info = list[text]
+		if info then
+			local info = list[text]
+			local i = 4
+			while info[i] do
+				i = i + 3
+			end
+			info[i] = defFilters
+			info[i + 1] = filters
+			info[i + 2] = k
+			return
+		end
+		list[text] = {defFilters, filters, k}
+		list[#list + 1] = text
+	end
 
-	local function add(text)
-		isDefault = false
-		if not filterStr:find(text, 3, true) then
-			filterStr = filterStr..", "..text
+
+	local function checkFilter(list, text, defFilters, filters, k)
+		if k then
+			if (defFilters[k] or false) ~= (filters[k] or false) then add(list, text, defFilters, filters, k) end
+		else
+			for k, v in next, filters do
+				if defFilters[k] ~= v then add(list, text, defFilters, filters) break end
+			end
 		end
 	end
 
-	if #self.searchBox:GetText() ~= 0 then add(SEARCH) end
-	if defFilters.collected ~= filters.collected then add(COLLECTED) end
-	if defFilters.notCollected ~= filters.notCollected then add(NOT_COLLECTED) end
-	if defFilters.unusable ~= filters.unusable then add(MOUNT_JOURNAL_FILTER_UNUSABLE) end
 
-	if not defFilters.hideOnChar ~= not filters.hideOnChar then add(L["hidden for character"]) end
-	if not defFilters.onlyHideOnChar ~= not filters.onlyHideOnChar then add(L["hidden for character"]) end
-	if not defFilters.hiddenByPlayer ~= not filters.hiddenByPlayer then add(L["Hidden by player"]) end
-	if not defFilters.onlyHiddenByPlayer ~= not filters.onlyHiddenByPlayer then add(L["Hidden by player"]) end
-	if not defFilters.onlyNew ~= not filters.onlyNew then add(L["Only new"]) end
-	for i = 1, #filters.types do
-		if defFilters.types[i] ~= filters.types[i] then add(L["types"]) break end
-	end
-	for i = 1, #filters.selected do
-		if defFilters.selected[i] ~= filters.selected[i] then add(L["selected"]) break end
-	end
-	for i = 1, #filters.sources do
-		if defFilters.sources[i] ~= filters.sources[i] then add(SOURCES) break end
-	end
-	for k, value in pairs(filters.specific) do
-		if defFilters.specific[k] ~= value then add(L["Specific"]) break end
-	end
-	for k, value in pairs(filters.family) do
-		if defFilters.family[k] ~= value then add(L["Family"]) break end
-	end
-	for i = 1, #filters.factions do
-		if defFilters.factions[i] ~= filters.factions[i] then add(L["factions"]) break end
-	end
-	for i = 1, #filters.pet do
-		if defFilters.pet[i] ~= filters.pet[i] then add(PET) break end
-	end
-	for i = 1, #filters.expansions do
-		if defFilters.expansions[i] ~= filters.expansions[i] then add(L["expansions"]) break end
-	end
-	if defFilters.mountsRarity.sign ~= filters.mountsRarity.sign then add(L["Rarity"]) end
-	if defFilters.mountsRarity.value ~= filters.mountsRarity.value then add(L["Rarity"]) end
-	if defFilters.mountsWeight.sign ~= filters.mountsWeight.sign then add(L["Chance of summoning"]) end
-	if defFilters.mountsWeight.weight ~= filters.mountsWeight.weight then add(L["Chance of summoning"]) end
-	if defFilters.tags.noTag ~= filters.tags.noTag then add(L["tags"]) end
-	if defFilters.tags.withAllTags ~= filters.tags.withAllTags then add(L["tags"]) end
-	for tag, value in pairs(filters.tags.tags) do
-		if defFilters.tags.tags[tag] ~= value[2] then add(L["tags"]) break end
-	end
+	function journal:checkFiltersDefault()
+		local filters = mounts.filters
+		local defFilters = mounts.defFilters
+		local list = wipe(self.shownPanel.list)
 
-	self.shownPanel.filters:SetText("("..filterStr:sub(3)..")")
-	return isDefault
+		if #self.searchBox:GetText() ~= 0 then list[1] = SEARCH end
+		checkFilter(list, COLLECTED, defFilters, filters, "collected")
+		checkFilter(list, NOT_COLLECTED, defFilters, filters, "notCollected")
+		checkFilter(list, MOUNT_JOURNAL_FILTER_UNUSABLE, defFilters, filters, "unusable")
+		checkFilter(list, L["hidden for character"], defFilters, filters, "hideOnChar")
+		checkFilter(list, L["hidden for character"], defFilters, filters, "onlyHideOnChar")
+		checkFilter(list, L["Hidden by player"], defFilters, filters, "hiddenByPlayer")
+		checkFilter(list, L["Hidden by player"], defFilters, filters, "onlyHiddenByPlayer")
+		checkFilter(list, L["Only new"], defFilters, filters, "onlyNew")
+		checkFilter(list, L["types"], defFilters.types, filters.types)
+		checkFilter(list, L["selected"], defFilters.selected, filters.selected)
+		checkFilter(list, SOURCES, defFilters.sources, filters.sources)
+		checkFilter(list, L["Specific"], defFilters.specific, filters.specific)
+		checkFilter(list, L["Family"], defFilters.family, filters.family)
+		checkFilter(list, L["factions"], defFilters.factions, filters.factions)
+		checkFilter(list, PET, defFilters.pet, filters.pet)
+		checkFilter(list, L["expansions"], defFilters.expansions, filters.expansions)
+		checkFilter(list, L["Rarity"], defFilters.mountsRarity, filters.mountsRarity, "sign")
+		checkFilter(list, L["Rarity"], defFilters.mountsRarity, filters.mountsRarity, "value")
+		checkFilter(list, L["Chance of summoning"], defFilters.mountsWeight, filters.mountsWeight, "sign")
+		checkFilter(list, L["Chance of summoning"], defFilters.mountsWeight, filters.mountsWeight, "weight")
+		checkFilter(list, L["tags"], defFilters.tags, filters.tags, "noTag")
+		checkFilter(list, L["tags"], defFilters.tags, filters.tags, "withAllTags")
+		for tag, value in pairs(filters.tags.tags) do
+			if defFilters.tags.tags[tag] ~= value[2] then
+				add(list, L["tags"], defFilters.tags.tags, filters.tags.tags)
+				break
+			end
+		end
+
+		self.shownPanel.filters:SetText("("..concat(list, ", ")..")")
+		return #list ~= 0
+	end
+end
+
+
+function journal:resetFilterByInfo(info)
+	if type(info) == "table" then
+		local i = 1
+		local defFilter = info[i]
+		while defFilter do
+			local filter = info[i + 1]
+			local k = info[i + 2]
+			if k then
+				filter[k] = defFilter[k]
+			else
+				for k, v in pairs(defFilter) do
+					if type(filter[k]) == "table" then
+						filter[k][2] = v
+					else
+						filter[k] = v
+					end
+				end
+			end
+			i = i + 3
+			defFilter = info[i]
+		end
+	else
+		self.searchBox:SetText("")
+	end
+	self:updateBtnFilters()
+	self:updateMountsList()
+	self:setCountMounts()
 end
 
 
@@ -3217,7 +3294,7 @@ function journal:getFilterSpecific(spellID, isSelfMount, mountType, mountID)
 	else i = i + 1 end
 	if ns.additionalMounts[spellID] then if filter.additional then return true end
 	else i = i + 1 end
-	if mountType == 402 then if filter.rideAlong then return true end
+	if mountType == 402 or mountType == 445 then if filter.rideAlong then return true end
 	else i = i + 1 end
 	if self.mountsWithMultipleModels[mountID] then if filter.multipleModels then return true end
 	else i = i + 1 end
@@ -3305,7 +3382,7 @@ function journal:setShownCountMounts(numMounts)
 		self.shownPanel.count:SetText(numMounts)
 		self.shownNumMouns = numMounts
 	end
-	self.shownPanel:SetShown(not self:isDefaultFilters())
+	self.shownPanel:SetShown(self:checkFiltersDefault())
 	-- self.leftInset:GetHeight()
 end
 
