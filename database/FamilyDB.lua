@@ -11,7 +11,7 @@ ns.familyDB = {
 		["Scorpions"] = 201,
 		["Spiders"] = 202,
 		["Undercrawlers"] = 203,
-		["Animite"] = 2000,
+		["Animite"] = 204,
 		["Skyflayer"] = 2012,
 	},
 	["Bats"] = {
@@ -151,6 +151,7 @@ ns.familyDB = {
 		--["Others"] = 1904,
 	},
 	["Insects"] = {
+		["Skitterflies"] = 2000,
 		["Aqir Flyers"] = 2001,
 		["Beetle"] = 2002,
 		["Flies"] = 2003,
@@ -269,7 +270,7 @@ ns.familyDBIcons = {
 	},
 	["Arachnids"] = {
 		[0] = 464143,
-		["Animite"] = 3155460,
+		["Animite"] = 3155459,
 		["Blood Ticks"] = 1618564,
 		["Scorpions"] = 464143,
 		["Skyflayer"] = 5715596,
@@ -353,8 +354,8 @@ ns.familyDBIcons = {
 		["Ur'zul"] = 1581747,
 	},
 	["Devourer"] = {
-		[0] = 3155459,
-		["Animite"] = 3155459,
+		[0] = 3155460,
+		["Animite"] = 3155460,
 		["Gorger"] = 3767410,
 		["Mauler"] = 3924116,
 	},
@@ -440,6 +441,7 @@ ns.familyDBIcons = {
 		["Krolusks"] = 1573602,
 		["Moth"] = 3255388,
 		["Silithids"] = 134399,
+		["Skitterflies"] = 3995640,
 		["Skyrazor"] = 5792081,
 		["Terror Flyers"] = 6320429,
 		["Wasp"] = 3741937,

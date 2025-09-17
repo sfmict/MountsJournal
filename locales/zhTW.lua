@@ -455,6 +455,7 @@ L["Are you sure you want to delete tag %s?"] = "確定您想要刪除標籤%s嗎
 -- L["Shalewings"] = ""
 -- L["Shardhides"] = ""
 -- L["Silithids"] = ""
+-- L["Skitterflies"] = ""
 -- L["Skyflayer"] = ""
 -- L["Skyrazor"] = ""
 -- L["Slatebacks"] = ""

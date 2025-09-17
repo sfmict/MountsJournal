@@ -1817,6 +1817,7 @@ function journal:setScrollGridMounts(force)
 	local template, top, bottom, left, right, hSpacing, vSpacing, extent, panScalar, sizeCalculator
 
 	if grid == 1 then
+		top = 1
 		left = 41
 		if mounts.config.showTypeSelBtn then
 			template = "MJMountDefaultListButtonWithTypeBtns"
@@ -1851,8 +1852,8 @@ function journal:setScrollGridMounts(force)
 		right = 0
 		hSpacing = 0
 		panScalar = 1
-		local scrollWidth = self.scrollBox:GetWidth()
-		self.gridN = mounts.config.gridModelStride - left - right
+		local scrollWidth = self.scrollBox:GetWidth() - left - right
+		self.gridN = mounts.config.gridModelStride
 		extent = math.floor((scrollWidth - (self.gridN - 1) * hSpacing) / self.gridN)
 		sizeCalculator = function(dataIndex, elementData) return extent, extent end
 		self.gmsWidth = extent
