@@ -46,6 +46,7 @@ classConfig:SetScript("OnShow", function(self)
 		local localized, className = GetClassInfo(i)
 		local classColor = C_ClassColor.GetClassColor(className)
 		local classFrame = CreateFrame("BUTTON", nil, self.leftPanel, "MJClassButtonTemplate")
+		local classMacrosConfig = self.macrosConfig[className]
 
 		if lastClassFrame then
 			classFrame:SetPoint("TOPLEFT", lastClassFrame, "BOTTOMLEFT", 0, 0)
@@ -56,12 +57,12 @@ classConfig:SetScript("OnShow", function(self)
 		classFrame.key = className
 		classFrame.default = util.getClassMacro(className, false, function()
 			classFrame.default = util.getClassMacro(className)
-			classFrame.defaultCombat = util.getClassMacro(className, true)
+			classFrame.defaultCombat = util.getClassMacro(className, true, nil, classMacrosConfig)
 			if self.rightPanel and self.rightPanel.currentBtn == classFrame then
 				classFrame:Click()
 			end
 		end)
-		classFrame.defaultCombat = util.getClassMacro(className, true)
+		classFrame.defaultCombat = util.getClassMacro(className, true, nil, classMacrosConfig)
 		classFrame.name:SetText(classColor:WrapTextInColorCode(localized))
 		classFrame.check:SetVertexColor(classColor:GetRGB())
 		classFrame.highlight:SetVertexColor(classColor:GetRGB())
@@ -80,12 +81,12 @@ classConfig:SetScript("OnShow", function(self)
 	classFrame.key = playerClassName
 	classFrame.default = util.getClassMacro(playerClassName, false, function()
 		classFrame.default = util.getClassMacro(playerClassName, false)
-		classFrame.defaultCombat = util.getClassMacro(playerClassName, true)
+		classFrame.defaultCombat = util.getClassMacro(playerClassName, true, nil, self.charMacrosConfig)
 		if self.rightPanel and self.rightPanel.currentBtn == classFrame then
 			classFrame:Click()
 		end
 	end)
-	classFrame.defaultCombat = util.getClassMacro(playerClassName, true)
+	classFrame.defaultCombat = util.getClassMacro(playerClassName, true, nil, self.charMacrosConfig)
 	classFrame.name:SetPoint("RIGHT", -30, 0)
 	classFrame.name:SetText(classColor:WrapTextInColorCode(UnitName("player")))
 	classFrame.description = L["CHARACTER_CLASS_DESCRIPTION"]
@@ -318,7 +319,7 @@ do
 
 		-- DRUID COMBAT MACRO CHANGE
 		local currentBtn = classConfig.rightPanel.currentBtn
-		currentBtn.defaultCombat = util.getClassMacro(currentBtn.key, true)
+		currentBtn.defaultCombat = util.getClassMacro(currentBtn.key, true, nil, classConfig.currentMacrosConfig)
 		classConfig.combatMacroEditBox:SetText(classConfig.currentMacrosConfig.combatMacro or currentBtn.defaultCombat)
 
 		if type(btn.childs) == "table" then

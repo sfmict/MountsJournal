@@ -67,6 +67,7 @@ end
 function pets:dismiss()
 	if InCombatLockdown() then return end
 	local petID = C_PetJournal.GetSummonedPetGUID()
+	--if petID then C_PetJournal.DismissSummonedPet(petID) end
 	if petID then C_PetJournal.SummonPetByGUID(petID) end
 end
 
