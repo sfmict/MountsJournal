@@ -1,6 +1,6 @@
 local _, ns = ...
 local util = ns.util
-local type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras, GetCVarBool = type, pairs, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras, GetCVarBool
+local type, pairs, next, concat, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras, GetCVarBool = type, pairs, next, table.concat, rawget, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras, GetCVarBool
 local macroFrame = CreateFrame("FRAME")
 ns.macroFrame = macroFrame
 util.setEventsMixin(macroFrame)
@@ -243,18 +243,23 @@ end
 
 
 function macroFrame:setRuleFuncs()
+	local t_if = "if "
+	local t_then = "\nthen\n"
+	local t_end = "\nend\n"
+
 	local function addKeys(vars, keys)
 		if not vars then return end
 		for i = 1, #vars do
-			keys[vars[i]] = true
+			keys[vars[i]] = 1
 		end
 	end
 
 	for i = 1, #self.currentRuleSet do
 		local rules = self.currentRuleSet[i]
-		local keys = {}
-		local func = [[
-local wipe = wipe
+		local keys = {wipe = 1}
+		local func = {}
+		func[5] = [[
+
 return function(self, button, profileLoad, noMacro)
 	self.mounts:setFlags()
 	self.mounts:resetMountsList()
@@ -270,19 +275,22 @@ return function(self, button, profileLoad, noMacro)
 			local actionText, actionVars = self.actions:getFuncText(rule.action)
 			addKeys(condVars, keys)
 			addKeys(actionVars, keys)
-			func = ("%sif %s\nthen\n%s\nend\n"):format(func, condText, actionText)
+			local offset = (j - 1) * 5 + 6
+			func[offset] = t_if
+			func[offset + 1] = condText
+			func[offset + 2] = t_then
+			func[offset + 3] = actionText
+			func[offset + 4] = t_end
 		end
 
-		if next(keys) then
-			local vars = {}
-			for k in next, keys do
-				vars[#vars + 1] = k
-			end
-			local varsText = table.concat(vars, ", ")
-			func = ("local %s = %1$s\n%s"):format(varsText, func)
-		end
+		for k in next, keys do keys[#keys + 1] = k end
+		local varsText = concat(keys, ", ")
+		func[1] = "local "
+		func[2] = varsText
+		func[3] = " = "
+		func[4] = varsText
 
-		func = func..[[
+		func[#func + 1] = [[
 	self.mounts:updateFlagsWithMap()
 
 	if self.useMount then
@@ -303,7 +311,7 @@ return function(self, button, profileLoad, noMacro)
 	return self:getMacro(noMacro)
 end
 		]]
-		self.checkRules[i] = self:loadString(func)
+		self.checkRules[i] = self:loadString(concat(func))
 	end
 end
 
@@ -640,6 +648,7 @@ function macroFrame:getCombatMacro()
 	elseif self.macro and self.isDruid and self.classConfig.useMacroAlways then
 		macro = self:addLine(macro, self.macro)
 	else
+		if self.isDruid then macro = self:addLine(macro, "/cancelform") end
 		macro = self:addLine(macro, "/mount notNilModifier")
 	end
 

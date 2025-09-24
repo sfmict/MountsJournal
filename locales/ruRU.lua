@@ -217,6 +217,7 @@ L["Random Mount of Selected Type by Rarity"] = "Случайный маунт в
 L["Selected profile"] = "Выбранный профиль"
 L["The lower the rarity, the higher the chance"] = "Ниже редкость, выше шанс"
 L["Mount"] = "Маунт"
+L["TMOUNT_DESCRIPTION"] = "Не прерывает выполнение правил в случае неудачи"
 L["Use Item"] = "Использовать предмет"
 L["Use Inventory Item"] = "Использовать предмет инвентаря"
 L["Cast Spell"] = "Прочитать заклинание"

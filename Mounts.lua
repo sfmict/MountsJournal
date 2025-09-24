@@ -698,14 +698,12 @@ end
 
 
 function mounts:getTargetMount()
-	if self.config.copyMountTarget then
-		local spellID, mountID = util.getUnitMount("target")
-		if mountID then
-			local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
-			return isUsable and C_Spell.IsSpellUsable(spellID) and spellID, false
-		elseif spellID then
-			return ns.additionalMounts[spellID]:canUse() and spellID, true
-		end
+	local spellID, mountID = util.getUnitMount("target")
+	if mountID then
+		local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
+		return isUsable and C_Spell.IsSpellUsable(spellID) and spellID, false
+	elseif spellID then
+		return ns.additionalMounts[spellID]:canUse() and spellID, true
 	end
 end
 
@@ -922,7 +920,7 @@ function mounts:setSummonMount(withAdditional)
 	-- repair mounts
 	elseif not (flags.useRepair and self:setUsableID(self.usableRepairMounts, self.sp.mountsWeight))
 	-- target's mount
-	and (flags.targetMountAdditional or not flags.targetMount)
+	and (flags.targetMountAdditional or not (self.config.copyMountTarget and flags.targetMount))
 	-- swimming
 	and not (flags.swimming and (
 		flags.isVashjir and self:setUsableID(self.swimmingVashjir, self.sp.mountsWeight)
@@ -955,7 +953,7 @@ function mounts:setSummonMountByType(mType, withAdditional)
 	-- repair mounts
 	elseif not (flags.useRepair and self:setUsableID(self.usableRepairMounts, self.sp.mountsWeight))
 	-- target's mount
-	and (flags.targetMountAdditional or not flags.targetMount)
+	and (flags.targetMountAdditional or not (self.config.copyMountTarget and flags.targetMount))
 	-- vashjir
 	and not (flags.isVashjir and mType == "swimming" and self:setUsableID(self.swimmingVashjir, self.sp.mountsWeight))
 	-- herbMount

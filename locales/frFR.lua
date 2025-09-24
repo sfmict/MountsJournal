@@ -217,6 +217,7 @@ L["Random Mount of Selected Type by Rarity"] = "Monture aléatoire de type séle
 L["The lower the rarity, the higher the chance"] = "Plus la rareté est faible, plus les chances sont élevées"
 L["Selected profile"] = "Profil sélectionné"
 L["Mount"] = "Monture"
+-- L["TMOUNT_DESCRIPTION"] = ""
 L["Use Item"] = "Utiliser l'objet"
 L["Use Inventory Item"] = "Utiliser l'élément d'inventaire"
 L["Cast Spell"] = "Nom du sort"

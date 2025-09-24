@@ -218,6 +218,7 @@ L["Random Mount of Selected Type by Rarity"] = "Random Mount of Selected Type by
 L["The lower the rarity, the higher the chance"] = "The lower the rarity, the higher the chance"
 L["Selected profile"] = "Selected profile"
 L["Mount"] = "Mount"
+L["TMOUNT_DESCRIPTION"] = "Does not interrupt the execution of rules in case of failure"
 L["Use Item"] = "Use Item"
 L["Use Inventory Item"] = "Use Inventory Item"
 L["Cast Spell"] = "Cast Spell"

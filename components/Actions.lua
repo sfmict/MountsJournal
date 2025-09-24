@@ -52,6 +52,8 @@ function actions.rmount:getValueList(value, func)
 	return list
 end
 
+actions.rmount.condText = "profileLoad ~= 2"
+
 function actions.rmount:getFuncText(value)
 	if value == 0 then
 		return [[
@@ -136,6 +138,8 @@ function actions.rmountt:getValueList(value, func)
 	return list
 end
 
+actions.rmountt.condText = "(not profileLoad or profileLoad == true)"
+
 function actions.rmountt:getFuncText(value)
 	local mType, profile = (":"):split(value, 2)
 
@@ -168,6 +172,8 @@ actions.rmountr.getValueText = actions.rmount.getValueText
 
 actions.rmountr.getValueList = actions.rmount.getValueList
 
+actions.rmountr.condText = actions.rmountr.condText
+
 function actions.rmountr:getFuncText(value)
 	if value == 0 then
 		return [[
@@ -198,6 +204,8 @@ actions.rmounttr.description = L["The lower the rarity, the higher the chance"]
 actions.rmounttr.getValueText = actions.rmountt.getValueText
 
 actions.rmounttr.getValueList = actions.rmountt.getValueList
+
+actions.rmounttr.condText = actions.rmountt.condText
 
 function actions.rmounttr:getFuncText(value)
 	local mType, profile = (":"):split(value, 2)
@@ -238,6 +246,8 @@ function actions.mount:getValueText(value)
 	end
 end
 
+actions.mount.condText = "(not profileLoad or profileLoad == true) and not self.useMount"
+
 function actions.mount:getFuncText(value)
 	return ([[
 		%s
@@ -255,6 +265,35 @@ function actions.mount:getFuncText(value)
 			self.useMount = %s
 		end
 	]]):format(macroFrame.classDismount or "", value, value),
+	{"GetTime"}
+end
+
+
+---------------------------------------------------
+-- mount TARGET MOUNT
+actions.tmount = {}
+actions.tmount.text = L["CopyMountTarget"]
+actions.tmount.description = L["TMOUNT_DESCRIPTION"]
+
+actions.tmount.condText = actions.mount.condText
+
+function actions.tmount:getFuncText()
+	return ([[
+		%s
+		-- EXIT VEHICLE
+		if self.sFlags.inVehicle then
+			return "/leavevehicle"
+		-- DISMOUNT
+		elseif self.sFlags.isMounted then
+			if not self.lastUseTime or GetTime() - self.lastUseTime > .5 then
+				return "/dismount"
+			end
+			return ""
+		-- MOUNT
+		elseif self.sFlags.targetMount and not (noMacro and self.sFlags.targetMountAdditional) then
+			self.useMount = self.sFlags.targetMount
+		end
+	]]):format(macroFrame.classDismount or ""),
 	{"GetTime"}
 end
 
@@ -390,6 +429,8 @@ actions.pmacro.maxLetters = 200
 
 actions.pmacro.getValueText = actions.macro.getValueText
 
+actions.pmacro.condText = "not (profileLoad or self.useMount or self.preUseMacro)"
+
 function actions.pmacro:getFuncText(value)
 	return ("self.preUseMacro = '%s'"):format(value:gsub("['\n\\]", "\\%1"))
 end
@@ -436,6 +477,7 @@ function actions:getMenuList(value, func)
 		"rmountr",
 		"rmounttr",
 		"mount",
+		"tmount",
 		"dmount",
 		"spell",
 		"item",

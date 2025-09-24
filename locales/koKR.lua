@@ -217,6 +217,7 @@ L["Random Mount of Selected Type by Rarity"] = "희귀도별 선택된 유형의
 L["The lower the rarity, the higher the chance"] = "희귀도가 낮을수록 확률이 높아집니다."
 L["Selected profile"] = "선택된 프로필"
 L["Mount"] = "탈것"
+-- L["TMOUNT_DESCRIPTION"] = ""
 L["Use Item"] = "아이템 사용"
 L["Use Inventory Item"] = "인벤토리 아이템 사용"
 L["Cast Spell"] = "주문 시전"
