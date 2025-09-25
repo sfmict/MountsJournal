@@ -250,13 +250,17 @@ function macroFrame:setRuleFuncs()
 	local function addKeys(vars, keys)
 		if not vars then return end
 		for i = 1, #vars do
-			keys[vars[i]] = 1
+			local k = vars[i]
+			if not keys[k] then
+				keys[k] = 1
+				keys[#keys + 1] = k
+			end
 		end
 	end
 
 	for i = 1, #self.currentRuleSet do
 		local rules = self.currentRuleSet[i]
-		local keys = {wipe = 1}
+		local keys = {"wipe", wipe = 1}
 		local func = {}
 		func[5] = [[
 
@@ -283,7 +287,6 @@ return function(self, button, profileLoad, noMacro)
 			func[offset + 4] = t_end
 		end
 
-		for k in next, keys do keys[#keys + 1] = k end
 		local varsText = concat(keys, ", ")
 		func[1] = "local "
 		func[2] = varsText
