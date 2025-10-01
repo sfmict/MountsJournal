@@ -1249,10 +1249,20 @@ function journal:init()
 	self.summonButton:HookScript("PreClick", function(btn)
 		if InCombatLockdown() then return end
 		if type(self.selectedMountID) == "number" then
-			self:useMount(self.selectedMountID)
-			btn:SetAttribute("macrotext", nil)
+			local spellID = ns.macroFrame.getFormSpellID and ns.macroFrame.getFormSpellID()
+			if spellID == 5487 or spellID == 768 or spellID == 114282 or spellID == 210053 then
+				btn:SetAttribute("macrotext", "/cancelform")
+			else
+				btn:SetAttribute("macrotext", nil)
+			end
 		elseif self.selectedMountID then
 			btn:SetAttribute("macrotext", self.selectedMountID.macro)
+		end
+	end)
+
+	self.summonButton:HookScript("PostClick", function(btn)
+		if type(self.selectedMountID) == "number" then
+			self:useMount(self.selectedMountID)
 		end
 	end)
 
