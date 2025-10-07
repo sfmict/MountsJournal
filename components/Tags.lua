@@ -1,7 +1,7 @@
 local addon, ns = ...
 local L, util, mounts, journal, tags = ns.L, ns.util, ns.mounts, ns.journal, {}
 local mountsDB, familyDB = ns.mountsDB, ns.familyDB
-local pairs, ipairs, next, select, tinsert, wipe = pairs, ipairs, next, select, tinsert, wipe
+local pairs, ipairs, next, tinsert, wipe = pairs, ipairs, next, tinsert, wipe
 local ltl = LibStub("LibThingsLoad-1.0")
 journal.tags = tags
 journal:on("MODULES_INIT", function() tags:init() end)

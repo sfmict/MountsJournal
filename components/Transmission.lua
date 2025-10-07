@@ -19,7 +19,7 @@ local function filterFunc(_, event, msg, player, l, cs, t, flag, channelId, ...)
 	or event == "CHAT_MSG_CHANNEL" and type(channelId) == "number" and channelId > 0
 	then return end
 
-	local newMsg, finish, start, newStart, type, id, anyLinkFound = "", 0
+	local newMsg, finish, start, newStart, id, characterName, dataType, anyLinkFound = "", 0
 	while true do
 		newStart = finish + 1
 		start, finish, characterName, dataType, id = msg:find("%[MountsJournal:(.-):(.-):(.-):MJ%]", newStart)

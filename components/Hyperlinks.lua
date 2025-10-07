@@ -4,7 +4,7 @@ local _, ns = ...
 hooksecurefunc("HandleModifiedItemClick", function(link)
 	local config = ns.mounts.config
 
-	if config.openHyperlinks and not config.useDefaultJournal and not InCombatLockdown() and IsModifiedClick("DRESSUP") and not IsModifiedClick("CHATLINK") then
+	if config.openHyperlinks and not InCombatLockdown() and IsModifiedClick("DRESSUP") and not IsModifiedClick("CHATLINK") then
 		local _,_,_, linkType, linkID = (":|H"):split(link)
 
 		local mountID
@@ -17,11 +17,7 @@ hooksecurefunc("HandleModifiedItemClick", function(link)
 
 		if mountID then
 			HideUIPanel(DressUpFrame)
-			if not C_AddOns.IsAddOnLoaded("Blizzard_Collections") then
-				C_AddOns.LoadAddOn("Blizzard_Collections")
-			end
-			ShowUIPanel(CollectionsJournal)
-			CollectionsJournal_SetTab(ns.journal.CollectionsJournal, 1)
+			ns.util.openJournalTab(3)
 			ns.journal:setSelectedMount(mountID)
 		end
 	end
