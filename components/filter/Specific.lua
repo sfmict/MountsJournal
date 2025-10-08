@@ -98,11 +98,12 @@ function journal.filters.specific(dd, level)
 	end
 	info.checked = function(btn)
 		local j = 0
-		local classes = ns.classFilterIDs
-		for i = 1, #classes do
-			if specific[classes[i]] then j = j + 1 end
+		local numClasses = GetNumClasses()
+		--local classes = ns.classFilterIDs
+		for i = 1, numClasses do
+			if specific[i] then j = j + 1 end
 		end
-		return #classes == j and 1 or j > 0 and 2
+		return numClasses == j and 1 or j > 0 and 2
 	end
 	info.widgets = {{
 		icon = "interface/worldmap/worldmappartyicon",

@@ -1873,9 +1873,7 @@ function journal:setScrollGridMounts(force)
 	self.scrollBox.wheelPanScalar = panScalar or 2
 	self.view:SetPadding(top,bottom,left,right,hSpacing,vSpacing)
 	self.view:SetElementExtent(extent)
-	if self.view.SetElementSizeCalculator then -- 11.2.5 remove
-		self.view:SetElementSizeCalculator(sizeCalculator)
-	end
+	self.view:SetElementSizeCalculator(sizeCalculator)
 	self.view:SetPanExtent(extent)
 	self.view:SetStride(self.gridN)
 	self.view:SetElementInitializer(template, function(...)
