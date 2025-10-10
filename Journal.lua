@@ -1505,7 +1505,7 @@ function journal:setMJFiltersBackup()
 	end
 	backup.isBackuped = true
 	self:RegisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
-	self:RegisterEvent("PLAYER_LEAVING_WORLD")
+	self:RegisterEvent("PLAYER_LOGOUT")
 	self:updateIndexByMountID(true)
 end
 
@@ -1514,7 +1514,7 @@ function journal:restoreMJFilters()
 	local backup = self.mjFiltersBackup
 	if not backup.isBackuped then return end
 	self:UnregisterEvent("MOUNT_JOURNAL_SEARCH_UPDATED")
-	self:UnregisterEvent("PLAYER_LEAVING_WORLD")
+	self:UnregisterEvent("PLAYER_LOGOUT")
 	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_COLLECTED, backup.collected)
 	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, backup.notCollected)
 	C_MountJournal.SetCollectedFilterSetting(LE_MOUNT_JOURNAL_FILTER_UNUSABLE, backup.unusable)
@@ -1530,7 +1530,7 @@ function journal:restoreMJFilters()
 	end
 	backup.isBackuped = false
 end
-journal.PLAYER_LEAVING_WORLD = journal.restoreMJFilters
+journal.PLAYER_LOGOUT = journal.restoreMJFilters
 
 
 do
@@ -2439,13 +2439,19 @@ function journal:sortMounts()
 end
 
 
-function journal:isCanFavorite(mountID)
-	if type(mountID) == "table" then return true end
+function journal:getMountIndexByMountID(mountID)
 	local index = self.indexByMountID[mountID]
-	if index and mountID ~= C_MountJournal.GetDisplayedMountID(index) then
+	if not index or mountID ~= C_MountJournal.GetDisplayedMountID(index) then
 		self:updateIndexByMountID(true)
 		index = self.indexByMountID[mountID]
 	end
+	return index
+end
+
+
+function journal:isCanFavorite(mountID)
+	if type(mountID) == "table" then return true end
+	local index = self:getMountIndexByMountID(mountID)
 	if index then
 		local isFavorite, canFavorite = C_MountJournal.GetIsFavorite(index)
 		return canFavorite
@@ -2458,11 +2464,7 @@ function journal:setIsFavorite(mountID, enabled)
 	if type(mountID) == "table" then
 		mountID:setIsFavorite(enabled)
 	else
-		local index = self.indexByMountID[mountID]
-		if index and mountID ~= C_MountJournal.GetDisplayedMountID(index) then
-			self:updateIndexByMountID(true)
-			index = self.indexByMountID[mountID]
-		end
+		local index = self:getMountIndexByMountID(mountID)
 		if index then C_MountJournal.SetIsFavorite(index, enabled) end
 	end
 end
