@@ -51,7 +51,8 @@ ns.familyDB = {
 		["Talbuks"] = 504,
 		["Tauralus"] = 505,
 		["Yaks"] = 506,
-		["Slatebacks"] = 507
+		["Slatebacks"] = 507,
+		["Windsteeds"] = 508,
 	},
 	["Carnivorans"] = {
 		["Bears"] = 600,
@@ -321,6 +322,7 @@ ns.familyDBIcons = {
 		["Slatebacks"] = 6661374,
 		["Talbuks"] = 134060,
 		["Tauralus"] = 3849323,
+		["Windsteeds"] = 773250,
 		["Yaks"] = 616692,
 	},
 	["Carnivorans"] = {
@@ -431,7 +433,7 @@ ns.familyDBIcons = {
 	},
 	["Humanoids"] = {
 		[0] = 797882,
-		["Crocolisks"] = 1044801,
+		["Crocolisks"] = 6694822,
 		["Gorger"] = 3601543,
 		["Gronnlings"] = 1044801,
 		["Murloc"] = 3160007,
