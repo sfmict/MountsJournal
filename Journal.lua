@@ -1628,6 +1628,8 @@ end
 
 
 function journal:COMPANION_UPDATE(companionType)
+	--fprint("COMPANION_UPDATE", companionType, issecretvalue(companionType))
+	--C_Timer.After(0, function() fprint(companionType, IsMounted()) end)
 	if companionType == "MOUNT" and InCombatLockdown() then
 		self:updateMounted(not not util.getUnitMount("player"))
 	end
@@ -2087,6 +2089,7 @@ function journal:gridModelSceneInit(btn, data, force)
 	local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = self:getMountInfo(mountID)
 	btn.spellID = spellID
 	btn.mountID = mountID
+	--fprint(issecretvalue(spellID), issecretvalue(active), issecretvalue(isUsable))
 
 	local needsFanfare, qualityColor
 	if type(mountID) == "number" then
@@ -2771,7 +2774,7 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 			info.link:SetShown(mounts.config.showWowheadLink)
 			info.linkLang:SetShown(mounts.config.showWowheadLink)
 			local lang = mounts.config.wowheadLinkLang
-			info.link:SetText("wowhead.com"..(lang == "en" and "" or "/"..lang).."/spell="..spellID)
+			info.link:SetText("wowhead.com"..(lang == "en" and "" or "/"..lang).."/mount/"..self.selectedMountID)
 			info.name:SetText(creatureName)
 			info.source:SetText(sourceText)
 			info.lore:SetText(descriptionText)

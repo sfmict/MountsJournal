@@ -1,4 +1,4 @@
-## Interface: 110205
+## Interface: 120000, 110205
 ## Title: MountsJournal
 ## Author: sfmict
 ## Version: @project-version@

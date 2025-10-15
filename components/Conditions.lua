@@ -1,5 +1,5 @@
 local _, ns = ...
-local L = ns.L
+local L, util = ns.L, ns.util
 local strcmputf8i, concat = strcmputf8i, table.concat
 local conds = {}
 ns.conditions = conds
@@ -342,7 +342,7 @@ function conds.holiday:getValueList(value, cb, dd, notReset)
 			iconInfo = e.iconInfo,
 			text = e.isActive and ("%s (|cff00cc00%s|r)"):format(e.name, SPEC_ACTIVE) or e.name,
 			rightText = ("|cff80b5fd%s - %s|r"):format(startDate, endDate),
-			rightFont = ns.util.codeFont,
+			rightFont = util.codeFont,
 			arg1 = e.name,
 			arg2 = e.description,
 			value = e.eventID,
@@ -523,20 +523,22 @@ function conds.kspell:getFuncText(value)
 end
 
 
+if not util.isMidnight then
 ---------------------------------------------------
--- rspell READY SPELL
-conds.rspell = {}
-conds.rspell.text = L["Spell is ready"]
-conds.rspell.isNumeric = true
+	-- rspell READY SPELL
+	conds.rspell = {}
+	conds.rspell.text = L["Spell is ready"]
+	conds.rspell.isNumeric = true
 
-function conds.rspell:getValueDescription()
-	return "SpellID (61304 for GCD)"
-end
+	function conds.rspell:getValueDescription()
+		return "SpellID (61304 for GCD)"
+	end
 
-conds.rspell.getValueText = conds.hitem.getValueText
+	conds.rspell.getValueText = conds.hitem.getValueText
 
-function conds.rspell:getFuncText(value)
-	return ("self:isSpellReady(%d)"):format(value)
+	function conds.rspell:getFuncText(value)
+		return ("self:isSpellReady(%d)"):format(value)
+	end
 end
 
 
@@ -767,7 +769,7 @@ function conds.map:getValueText(value)
 	if value == ns.mounts.defMountsListID then
 		return WORLD
 	else
-		local mapInfo = ns.util.getMapFullNameInfo(value)
+		local mapInfo = util.getMapFullNameInfo(value)
 		if mapInfo then return mapInfo.name end
 	end
 end
@@ -1100,7 +1102,7 @@ function conds.tl:getValueList(value, func)
 			list[#list + 1] = {
 				text = ("%s - %s"):format(configInfo.name, specName),
 				rightText = ("|cff808080ID:%d|r"):format(configID),
-				rightFont = ns.util.codeFont,
+				rightFont = util.codeFont,
 				value = v,
 				func = func,
 				checked = v == value,
@@ -1190,7 +1192,7 @@ function conds.mtrack:getValueList(value, func)
 				text = trackingInfo.name,
 				icon = TRACKING_SPELL_OVERRIDE_ATLAS[trackingInfo.spellID] or trackingInfo.texture,
 				rightText = ("|cff808080%s|r"):format(v),
-				rightFont = ns.util.codeFont,
+				rightFont = util.codeFont,
 				value = v,
 				func = func,
 				checked = v == value,
@@ -1301,7 +1303,7 @@ function conds.equips:getValueList(value, func)
 		list[i] = {
 			text = name,
 			rightText = ("|cff808080ID:%d|r"):format(setID),
-			rightFont = ns.util.codeFont,
+			rightFont = util.codeFont,
 			icon = iconFileID,
 			value = v,
 			func = func,
@@ -1700,7 +1702,7 @@ function conds.title:getValueList(value, func)
 			list[#list + 1] = {
 				text = IsTitleKnown(i) and ("%s (|cff00cc00%s|r)"):format(name, GARRISON_MISSION_ADDED_TOAST2) or name,
 				rightText = ("|cff808080%d|r"):format(i),
-				rightFont = ns.util.codeFont,
+				rightFont = util.codeFont,
 				value = i,
 				func = func,
 				checked = i == value,
@@ -1752,12 +1754,34 @@ function conds:getFuncText(conds)
 	text[1] = condText and condText or "not (profileLoad or self.useMount)"
 
 	local vars = {}
-	for i = 1, #conds do
-		local cond = conds[i]
-		local condText, var = self[cond[2]]:getFuncText(cond[3])
-		if var then vars[#vars + 1] = var end
-		if cond[1] then condText = "not "..condText end
-		text[i + 1] = condText
+	local i = 1
+	local cond = conds[i]
+	while cond do
+		local condType = cond[2]
+		local condt = self[condType]
+		if condt then
+			local condText = condt:getFuncText(cond[3])
+			if cond[1] then condText = "not "..condText end
+			if util.isMidnight and (condType == "hbuff" or condType == "hdebuff") then
+				condText = "notCombat and "..condText
+			end
+			i = i + 1
+			text[i] = condText
+		else
+			tremove(conds, i)
+		end
+		cond = conds[i]
 	end
+	--for i = 1, #conds do
+	--	local cond = conds[i]
+	--	local condType = cond[2]
+	--	local condText, var = self[cond[2]]:getFuncText(cond[3])
+	--	if var then vars[#vars + 1] = var end
+	--	if cond[1] then condText = "not "..condText end
+	--	if util.isMidnight and (condType == "hbuff" or condType == "hdebuff") then
+	--		condText = "notCombat and "..condText
+	--	end
+	--	text[i + 1] = condText
+	--end
 	return concat(text, "\nand "), #vars > 0 and vars
 end

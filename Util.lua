@@ -108,7 +108,7 @@ util.addonName = ("%s_ADDON_"):format(addon:upper())
 util.expansion = tonumber(GetBuildInfo():match("(.-)%."))
 util.secureButtonNameMount = addon.."_Mount"
 util.secureButtonNameSecondMount = addon.."_SecondMount"
-
+util.isMidnight = util.expansion > 11
 
 -- 1 FLY, 2 GROUND, 3 SWIMMING
 util.mountTypes = setmetatable({
@@ -331,7 +331,7 @@ end
 
 
 function util.checkAura(unit, spellID, filter)
-	if not UnitExists(unit) then return false end
+	if not UnitExists(unit) or util.isMidnight and UnitAffectingCombat("player") then return false end
 	local GetAuraSlots, GetAuraDataBySlot, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
 	repeat
 		ctok, a,b,c,d,e = GetAuraSlots(unit, filter, 5, ctok)
@@ -345,7 +345,9 @@ end
 
 
 function util.getUnitMount(unit)
-	if not UnitExists(unit) then return end
+	if not UnitExists(unit)
+	--or util.isMidnight and UnitAffectingCombat("player")
+	then return end
 	local GetAuraSlots, GetAuraDataBySlot, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
 	local filter = unit == "player" and "HELPFUL PLAYER" or "HELPFUL"
 	repeat

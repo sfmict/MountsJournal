@@ -260,7 +260,7 @@ function macroFrame:setRuleFuncs()
 
 	for i = 1, #self.currentRuleSet do
 		local rules = self.currentRuleSet[i]
-		local keys = {"wipe", wipe = 1}
+		local keys = {"wipe", "UnitAffectingCombat", wipe = 1, UnitAffectingCombat = 1}
 		local func = {}
 		func[5] = [[
 
@@ -270,6 +270,7 @@ return function(self, button, profileLoad, noMacro)
 	self.preUseMacro = nil
 	self.useMount = nil
 	self.summonMType = nil
+	local notCombat = not UnitAffectingCombat("player")
 	wipe(self.state)
 		]]
 

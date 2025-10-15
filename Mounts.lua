@@ -188,6 +188,324 @@ function mounts:checkProfile(profile)
 end
 
 
+-- ========================================================================
+if util.isMidnight then -- MIDNIGHT
+-- ========================================================================
+
+
+function mounts:PLAYER_LOGIN()
+	self.PLAYER_LOGIN = nil
+	self:setOldChanges()
+
+	-- INIT
+	self:setSelectedProfile()
+	self:setUsableRepairMounts()
+	self:setModifier(self.config.modifier)
+	self:setHandleWaterJump(self.config.waterJump)
+	self:updateProfs()
+	self:init()
+	self:event("ADDON_INIT"):off("ADDON_INIT")
+
+	-- MAP CHANGED
+	-- self:RegisterEvent("NEW_WMO_CHUNK")
+	-- self:RegisterEvent("ZONE_CHANGED")
+	-- self:RegisterEvent("ZONE_CHANGED_INDOORS")
+	-- self:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+
+	-- INSTANCE INFO UPDATE
+	self:RegisterEvent("PLAYER_ENTERING_WORLD")
+
+	-- PROFESSION CHANGED OR MOUNT ADDED
+	self:RegisterEvent("SKILL_LINES_CHANGED")
+	self:RegisterEvent("NEW_MOUNT_ADDED")
+
+	hooksecurefunc(C_MountJournal, "ClearFanfare", function(mountID)
+		local _, spellID = C_MountJournal.GetMountInfoByID(mountID)
+		self:addMountDate(spellID)
+		self:autoAddNewMount(spellID)
+	end)
+
+	-- PET USABLE
+	self:RegisterEvent("PLAYER_REGEN_ENABLED")
+	self:RegisterEvent("PLAYER_REGEN_DISABLED")
+	--self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
+
+	-- TRACKING
+	--self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
+	self:RegisterUnitEvent("UNIT_AURA", "player")
+	local spellID, mountID, auraInstanceID = util.getUnitMount("player")
+	if spellID then self:startTracking(spellID, auraInstanceID) end
+
+	-- PRFILE CHANGED
+	self:on("UPDATE_PROFILE", self.setSelectedProfile)
+end
+
+
+function mounts:PLAYER_LOGOUT()
+	self:event("LOGOUT")
+end
+
+
+do
+	local durabilitySlots = {
+		INVSLOT_HEAD,
+		INVSLOT_SHOULDER,
+		INVSLOT_CHEST,
+		INVSLOT_WRIST,
+		INVSLOT_HAND,
+		INVSLOT_WAIST,
+		INVSLOT_LEGS,
+		INVSLOT_FEET,
+		INVSLOT_MAINHAND,
+		INVSLOT_OFFHAND,
+	}
+
+	function mounts:UPDATE_INVENTORY_DURABILITY()
+		local percent = (tonumber(self.config.useRepairMountsDurability) or 0) / 100
+		local flyablePercent = (tonumber(self.config.useRepairFlyableDurability) or 0) / 100
+		self.sFlags.repair = false
+		self.sFlags.flyableRepair = false
+		if self.config.useRepairMounts then
+			for i = 1, #durabilitySlots do
+				local durCur, durMax = GetInventoryItemDurability(durabilitySlots[i])
+				if durCur and durMax then
+					local itemPercent = durCur / durMax
+					if itemPercent < percent then
+						self.sFlags.repair = true
+					end
+					if itemPercent < flyablePercent then
+						self.sFlags.flyableRepair = true
+					end
+				end
+			end
+			if not self.config.useRepairFlyable then
+				self.sFlags.flyableRepair = self.sFlags.repair
+			end
+		end
+	end
+end
+
+
+function mounts:setUsableRepairMounts()
+	wipe(self.usableRepairMounts)
+	if not self.config.repairSelectedMount then
+		for spellID in pairs(ns.specificDB.repair) do
+			local mountID = C_MountJournal.GetMountFromSpell(spellID)
+			local _,_,_,_,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+			if isCollected and not shouldHideOnChar then
+				self.usableRepairMounts[spellID] = true
+			end
+		end
+	else
+		local _,_,_,_,_,_,_,_,_, shouldHideOnChar = C_MountJournal.GetMountInfoByID(self.config.repairSelectedMount)
+		if shouldHideOnChar then
+			self.config.repairSelectedMount = self.config.repairSelectedMount == 61425 and 61447 or 61425
+		end
+		self.usableRepairMounts[self.config.repairSelectedMount] = true
+	end
+end
+
+
+function mounts:notEnoughFreeSlots()
+	if self.config.useRepairFreeSlots then
+		local totalFree, freeSlots, bagFamily = 0
+		for i = BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS do
+			freeSlots, bagFamily = C_Container.GetContainerNumFreeSlots(i)
+			if bagFamily == 0 then totalFree = totalFree + freeSlots end
+		end
+		return totalFree < self.config.useRepairFreeSlotsNum
+	end
+end
+
+
+do
+	local instanceUpdate = function()
+		local instanceName, instanceType, difficultyID, _,_,_,_, instanceID = GetInstanceInfo()
+		mounts.instanceName = instanceName
+		mounts.instanceType = instanceType
+		mounts.difficultyID = difficultyID
+		mounts.instanceID = instanceID
+
+		if difficultyID ~= 0 then
+			local groupType = util.getGroupType()
+			if groupType == "raid" and mounts.config.noPetInRaid
+			or groupType == "group" and mounts.config.noPetInGroup
+			then
+				ns.pets:dismiss()
+			end
+		end
+	end
+
+
+	function mounts:PLAYER_ENTERING_WORLD()
+		C_Timer.After(0, instanceUpdate)
+	end
+end
+
+
+function mounts:PLAYER_REGEN_DISABLED()
+	if self.trackableID and ns.additionalMounts[self.trackableID] then
+		self:stopTracking()
+	end
+	--self:UnregisterEvent("UNIT_SPELLCAST_START")
+	--self:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	self:RegisterEvent("COMPANION_UPDATE")
+	self:UnregisterEvent("UNIT_AURA")
+end
+
+
+function mounts:PLAYER_REGEN_ENABLED()
+	local spellID, mountID, auraInstanceID = util.getUnitMount("player")
+	if spellID then self:startTracking(spellID, auraInstanceID, true) end
+	--self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
+	--self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
+	self:UnregisterEvent("COMPANION_UPDATE")
+	self:RegisterUnitEvent("UNIT_AURA", "player")
+end
+
+
+--do
+--	local function summonPet(petID)
+--		if type(petID) == "number" then
+--			ns.pets:summonRandomPet(petID == 1)
+--		else
+--			ns.pets:summon(petID)
+--		end
+--	end
+
+
+--	local timer
+--	function mounts:UNIT_SPELLCAST_START(_,_, spellID)
+--		--fprint(issecretvalue(spellID))
+--		local petID
+--		if self.fromPriority then
+--			for i = 1, #self.priorityProfiles do
+--				petID = ns.pets:getPetForProfile(self.priorityProfiles[i].petForMount, spellID)
+--				if petID then break end
+--			end
+--			self.fromPriority = nil
+--		else
+--			local profile = self.profiles[self.charDB.currentProfileName] or self.defProfile
+--			petID = ns.pets:getPetForProfile(profile.petForMount, spellID)
+--		end
+
+--		if petID then
+--			local groupType = util.getGroupType()
+--			if self.config.noPetInRaid and groupType == "raid"
+--			or self.config.noPetInGroup and groupType == "group"
+--			then return end
+
+--			if timer and not timer:IsCancelled() then
+--				timer:Cancel()
+--				timer = nil
+--			end
+
+--			local cdInfo = C_Spell.GetSpellCooldown(61304)
+
+--			if cdInfo.duration == 0 then
+--				summonPet(petID)
+--			else
+--				timer = C_Timer.NewTicker(cdInfo.startTime + cdInfo.duration - GetTime(), function() summonPet(petID) end, 1)
+--			end
+--		end
+--	end
+--end
+
+
+do
+	local GetGlidingInfo, GetUnitSpeed, mountStat = C_PlayerInfo.GetGlidingInfo, GetUnitSpeed
+	local function tracking(self, elapsed)
+		local isGliding, _, speed = GetGlidingInfo()
+		if not isGliding then
+			speed = GetUnitSpeed("player")
+		end
+		if speed > 0 then
+			mountStat[2] = mountStat[2] + elapsed
+			mountStat[3] = mountStat[3] + speed * elapsed
+		end
+		self:event("MOUNT_SPEED_UPDATE", speed)
+	end
+
+
+	function mounts:startTracking(spellID, auraInstanceID, afterCombat)
+		self.trackableID = spellID
+		self.auraInstanceID = auraInstanceID
+		if self.config.statCollection then
+			mountStat = self.stat[spellID]
+			self:SetScript("OnUpdate", tracking)
+		end
+		if not afterCombat then self:addMountSummoned(spellID) end
+		self:event("MOUNTED_UPDATE", true)
+	end
+end
+
+
+function mounts:stopTracking()
+	self.trackableID = nil
+	self.auraInstanceID = nil
+	self:SetScript("OnUpdate", nil)
+	self:event("MOUNTED_UPDATE", false)
+end
+
+
+do
+	local function combatMountUpdate()
+		if not IsMounted() then mounts:stopTracking() end
+	end
+
+
+	function mounts:COMPANION_UPDATE(companionType)
+		if companionType == "MOUNT" and UnitAffectingCombat("player") then
+			if IsMounted() then C_Timer.After(0, combatMountUpdate) end
+		end
+	end
+end
+
+
+function mounts:UNIT_AURA(_, data)
+	if data.isFullUpdate then
+		self:stopTracking()
+		local spellID, mountID, auraInstanceID = util.getUnitMount("player")
+		if spellID then self:startTracking(spellID, auraInstanceID) end
+	end
+	if data.removedAuraInstanceIDs and self.auraInstanceID then
+		for i = 1, #data.removedAuraInstanceIDs do
+			if data.removedAuraInstanceIDs[i] == self.auraInstanceID then
+				self:stopTracking()
+				break
+			end
+		end
+	end
+	if data.addedAuras and not self.auraInstanceID then
+		for i = 1, #data.addedAuras do
+			local aura = data.addedAuras[i]
+			local spellID
+			if ns.additionalMountBuffs[aura.spellId] then
+				spellID = ns.additionalMountBuffs[aura.spellId].spellID
+			elseif C_MountJournal.GetMountFromSpell(aura.spellId) then
+				spellID = aura.spellId
+			end
+			if spellID then
+				self:startTracking(spellID, aura.auraInstanceID)
+				break
+			end
+		end
+	end
+end
+
+
+function mounts:addMountSummoned(spellID)
+	local mountStat = self.stat[spellID]
+	mountStat[1] = mountStat[1] + 1
+	self:event("MOUNT_SUMMONED")
+end
+
+
+-- ========================================================================
+else -- RETAIL
+-- ========================================================================
+
+
 function mounts:PLAYER_LOGIN()
 	self.PLAYER_LOGIN = nil
 	self:setOldChanges()
@@ -476,6 +794,11 @@ function mounts:UNIT_AURA(_, data)
 end
 
 
+-- ========================================================================
+end -- END MIDNIGHT CHECK
+-- ========================================================================
+
+
 function mounts:addMountDate(spellID, time)
 	local mountStat = self.stat[spellID]
 	if not mountStat[4] then
@@ -698,6 +1021,7 @@ end
 
 
 function mounts:getTargetMount()
+	if util.isMidnight and UnitAffectingCombat("player") then return end
 	local spellID, mountID = util.getUnitMount("target")
 	if mountID then
 		local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
