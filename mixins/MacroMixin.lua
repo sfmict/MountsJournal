@@ -7,6 +7,7 @@ util.setEventsMixin(macroFrame)
 
 
 -- for conditions
+macroFrame.isMidnight = util.isMidnight
 macroFrame.getGroupType = util.getGroupType
 macroFrame.isPlayerSpell = util.isPlayerSpell
 
@@ -260,17 +261,19 @@ function macroFrame:setRuleFuncs()
 
 	for i = 1, #self.currentRuleSet do
 		local rules = self.currentRuleSet[i]
-		local keys = {"wipe", "UnitAffectingCombat", wipe = 1, UnitAffectingCombat = 1}
+		local keys = {"wipe", wipe = 1}
 		local func = {}
 		func[5] = [[
-
+local GetRestrictedActionStatus, enumAuras, enumCooldowns = GetRestrictedActionStatus, Enum.RestrictedActionType and Enum.RestrictedActionType.SecretAuras, Enum.RestrictedActionType and Enum.RestrictedActionType.SecretCooldowns
 return function(self, button, profileLoad, noMacro)
 	self.mounts:setFlags()
 	self.mounts:resetMountsList()
 	self.preUseMacro = nil
 	self.useMount = nil
 	self.summonMType = nil
-	local notCombat = not UnitAffectingCombat("player")
+	local notSAuras = not (self.isMidnight and GetRestrictedActionStatus(enumAuras))
+	local notSCooldowns = not (self.isMidnight and GetRestrictedActionStatus(enumCooldowns))
+	fprint(notSAuras, notSCooldowns)
 	wipe(self.state)
 		]]
 

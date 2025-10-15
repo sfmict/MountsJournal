@@ -455,8 +455,8 @@ do
 
 
 	function mounts:COMPANION_UPDATE(companionType)
-		if companionType == "MOUNT" and UnitAffectingCombat("player") then
-			if IsMounted() then C_Timer.After(0, combatMountUpdate) end
+		if companionType == "MOUNT" and IsMounted() and not GetRestrictedActionStatus(Enum.RestrictedActionType.SecretAuras) then
+			C_Timer.After(0, combatMountUpdate)
 		end
 	end
 end
@@ -1021,7 +1021,7 @@ end
 
 
 function mounts:getTargetMount()
-	if util.isMidnight and UnitAffectingCombat("player") then return end
+	if util.isMidnight and GetRestrictedActionStatus(Enum.RestrictedActionType.SecretAuras) then return end
 	local spellID, mountID = util.getUnitMount("target")
 	if mountID then
 		local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)

@@ -1,6 +1,6 @@
 local _, ns = ...
 local mounts, util = ns.mounts, ns.util
-local C_UnitAuras, C_Spell, C_ZoneAbility, FindSpellOverrideByID, UnitAffectingCombat = C_UnitAuras, C_Spell, C_ZoneAbility, FindSpellOverrideByID, UnitAffectingCombat
+local C_UnitAuras, C_Spell, C_ZoneAbility, FindSpellOverrideByID = C_UnitAuras, C_Spell, C_ZoneAbility, FindSpellOverrideByID
 local C_Item, C_Container = C_Item, C_Container
 local ltl = LibStub("LibThingsLoad-1.0")
 local _,_, raceID = UnitRace("player")

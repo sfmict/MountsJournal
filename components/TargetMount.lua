@@ -36,13 +36,13 @@ ns.journal:on("MODULES_INIT", function(journal)
 
 	if util.isMidnight then
 		function tm:PLAYER_TARGET_CHANGED()
-			if UnitAffectingCombat("player") then return end
+			if GetRestrictedActionStatus(Enum.RestrictedActionType.SecretAuras) then return end
 			local spellID, mountID = util.getUnitMount("target")
 			if spellID then self:setMount(spellID, mountID or ns.additionalMounts[spellID]) end
 		end
 
 		function tm:UNIT_AURA(_, data)
-			if UnitAffectingCombat("player") then return end
+			if GetRestrictedActionStatus(Enum.RestrictedActionType.SecretAuras) then return end
 			if data.isFullUpdate then
 				local spellID, mountID = util.getUnitMount("target")
 				if spellID then self:setMount(spellID, mountID or ns.additionalMounts[spellID]) end

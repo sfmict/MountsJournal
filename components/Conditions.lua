@@ -523,22 +523,21 @@ function conds.kspell:getFuncText(value)
 end
 
 
-if not util.isMidnight then
 ---------------------------------------------------
-	-- rspell READY SPELL
-	conds.rspell = {}
-	conds.rspell.text = L["Spell is ready"]
-	conds.rspell.isNumeric = true
+-- rspell READY SPELL
+conds.rspell = {}
+conds.rspell.text = L["Spell is ready"]
+conds.rspell.isNumeric = true
+conds.rspell.secretCond = "notSCooldowns and "
 
-	function conds.rspell:getValueDescription()
-		return "SpellID (61304 for GCD)"
-	end
+function conds.rspell:getValueDescription()
+	return "SpellID (61304 for GCD)"
+end
 
-	conds.rspell.getValueText = conds.hitem.getValueText
+conds.rspell.getValueText = conds.hitem.getValueText
 
-	function conds.rspell:getFuncText(value)
-		return ("self:isSpellReady(%d)"):format(value)
-	end
+function conds.rspell:getFuncText(value)
+	return ("self:isSpellReady(%d)"):format(value)
 end
 
 
@@ -563,6 +562,7 @@ end
 conds.hbuff = {}
 conds.hbuff.text = L["The player has a buff"]
 conds.hbuff.isNumeric = true
+conds.hbuff.secretCond = "notSAuras and "
 
 conds.hbuff.getValueDescription = conds.kspell.getValueDescription
 
@@ -578,6 +578,7 @@ end
 conds.hdebuff = {}
 conds.hdebuff.text = L["The player has a debuff"]
 conds.hdebuff.isNumeric = true
+conds.hdebuff.secretCond = conds.hbuff.secretCond
 
 conds.hdebuff.getValueDescription = conds.kspell.getValueDescription
 
@@ -1762,8 +1763,8 @@ function conds:getFuncText(conds)
 		if condt then
 			local condText = condt:getFuncText(cond[3])
 			if cond[1] then condText = "not "..condText end
-			if util.isMidnight and (condType == "hbuff" or condType == "hdebuff") then
-				condText = "notCombat and "..condText
+			if util.isMidnight and condt.secretCond then
+				condText = condt.secretCond..condText
 			end
 			i = i + 1
 			text[i] = condText

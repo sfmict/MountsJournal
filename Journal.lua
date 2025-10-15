@@ -2771,10 +2771,19 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 				info.rarityValue:Hide()
 			end
 
+			local lang = mounts.config.wowheadLinkLang
+			local link = "wowhead.com"..(lang == "en" and "" or "/"..lang)
+			if isMount then
+				link = link.."/mount/"..self.selectedMountID
+			elseif self.selectedMountID.itemID then
+				link = link.."/item="..self.selectedMountID.itemID
+			else
+				link = link.."/spell="..self.selectedSpellID
+			end
+
 			info.link:SetShown(mounts.config.showWowheadLink)
 			info.linkLang:SetShown(mounts.config.showWowheadLink)
-			local lang = mounts.config.wowheadLinkLang
-			info.link:SetText("wowhead.com"..(lang == "en" and "" or "/"..lang).."/mount/"..self.selectedMountID)
+			info.link:SetText(link)
 			info.name:SetText(creatureName)
 			info.source:SetText(sourceText)
 			info.lore:SetText(descriptionText)
