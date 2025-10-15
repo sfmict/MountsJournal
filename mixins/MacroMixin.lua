@@ -273,7 +273,6 @@ return function(self, button, profileLoad, noMacro)
 	self.summonMType = nil
 	local notSAuras = not (self.isMidnight and GetRestrictedActionStatus(enumAuras))
 	local notSCooldowns = not (self.isMidnight and GetRestrictedActionStatus(enumCooldowns))
-	fprint(notSAuras, notSCooldowns)
 	wipe(self.state)
 		]]
 
