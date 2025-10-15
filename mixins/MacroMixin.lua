@@ -680,7 +680,7 @@ function MJMacroMixin:onLoad()
 end
 
 
-function MJMacroMixin:onEvent(event, ...)
+function MJMacroMixin:onEvent()
 	self:SetAttribute("macrotext", macroFrame:getCombatMacro())
 end
 

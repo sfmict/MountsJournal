@@ -110,9 +110,9 @@ function journal.filters.specific(dd, level)
 		OnClick = function(btn)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 			journal:setAllFilters("specific", false)
-			local classes = ns.classFilterIDs
-			for i = 1, #classes do
-				specific[classes[i]] = true
+			--local classes = ns.classFilterIDs
+			for i = 1, GetNumClasses() do
+				specific[i] = true
 			end
 			journal:updateMountsList()
 			dd:ddRefresh(level)
