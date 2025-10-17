@@ -264,6 +264,7 @@ function macroFrame:setRuleFuncs()
 		local keys = {"wipe", wipe = 1}
 		local func = {}
 		func[5] = [[
+
 local GetRestrictedActionStatus, enumAuras, enumCooldowns = GetRestrictedActionStatus, Enum.RestrictedActionType and Enum.RestrictedActionType.SecretAuras, Enum.RestrictedActionType and Enum.RestrictedActionType.SecretCooldowns
 return function(self, button, profileLoad, noMacro)
 	self.mounts:setFlags()

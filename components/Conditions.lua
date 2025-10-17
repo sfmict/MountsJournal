@@ -1757,13 +1757,13 @@ function conds:getFuncText(conds)
 	local vars = {}
 	local i = 1
 	local cond = conds[i]
-	while cond do
-		local condType = cond[2]
-		local condt = self[condType]
-		if condt then
-			local condText = condt:getFuncText(cond[3])
+	while cond ~= nil do
+		local condt = self[cond[2]]
+		if condt ~= nil then
+			local condText, var = condt:getFuncText(cond[3])
+			if var ~= nil then fprint(var, cond[2]) vars[#vars + 1] = var end
 			if cond[1] then condText = "not "..condText end
-			if util.isMidnight and condt.secretCond then
+			if util.isMidnight and condt.secretCond ~= nil then
 				condText = condt.secretCond..condText
 			end
 			i = i + 1

@@ -344,12 +344,15 @@ end
 
 
 function mounts:PLAYER_REGEN_DISABLED()
-	if self.trackableID and ns.additionalMounts[self.trackableID] then
-		self:stopTracking()
+	if self.trackableID then
+		if ns.additionalMounts[self.trackableID] then
+			self:stopTracking()
+		else
+			self:RegisterEvent("COMPANION_UPDATE")
+		end
 	end
 	--self:UnregisterEvent("UNIT_SPELLCAST_START")
 	--self:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-	self:RegisterEvent("COMPANION_UPDATE")
 	self:UnregisterEvent("UNIT_AURA")
 end
 
@@ -357,9 +360,9 @@ end
 function mounts:PLAYER_REGEN_ENABLED()
 	local spellID, mountID, auraInstanceID = util.getUnitMount("player")
 	if spellID then self:startTracking(spellID, auraInstanceID, true) end
+	self:UnregisterEvent("COMPANION_UPDATE")
 	--self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
 	--self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
-	self:UnregisterEvent("COMPANION_UPDATE")
 	self:RegisterUnitEvent("UNIT_AURA", "player")
 end
 
@@ -450,7 +453,10 @@ end
 
 do
 	local function combatMountUpdate()
-		if not IsMounted() then mounts:stopTracking() end
+		if not IsMounted() then
+			mounts:stopTracking()
+			mounts:UnregisterEvent("COMPANION_UPDATE")
+		end
 	end
 
 
