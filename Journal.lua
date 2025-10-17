@@ -1385,6 +1385,7 @@ function journal:init()
 
 	-- ON ALERT CLICK
 	hooksecurefunc("MountJournal_SelectByMountID", function(mountID)
+		util.openJournalTab(3)
 		self:setSelectedMount(mountID)
 	end)
 
