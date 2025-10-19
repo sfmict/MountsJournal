@@ -248,17 +248,6 @@ function macroFrame:setRuleFuncs()
 	local t_then = "\nthen\n"
 	local t_end = "\nend\n"
 
-	local function addKeys(vars, keys)
-		if not vars then return end
-		for i = 1, #vars do
-			local k = vars[i]
-			if not keys[k] then
-				keys[k] = 1
-				keys[#keys + 1] = k
-			end
-		end
-	end
-
 	for i = 1, #self.currentRuleSet do
 		local rules = self.currentRuleSet[i]
 		local keys = {"wipe", wipe = 1}
@@ -279,15 +268,11 @@ return function(self, button, profileLoad, noMacro)
 
 		for j = 1, #rules do
 			local rule = rules[j]
-			local condText, condVars = self.conditions:getFuncText(rule)
-			local actionText, actionVars = self.actions:getFuncText(rule.action)
-			addKeys(condVars, keys)
-			addKeys(actionVars, keys)
 			local offset = (j - 1) * 5 + 6
 			func[offset] = t_if
-			func[offset + 1] = condText
+			func[offset + 1] = self.conditions:getFuncText(rule, keys)
 			func[offset + 2] = t_then
-			func[offset + 3] = actionText
+			func[offset + 3] = self.actions:getFuncText(rule.action, keys)
 			func[offset + 4] = t_end
 		end
 

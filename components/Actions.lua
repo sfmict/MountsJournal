@@ -426,6 +426,7 @@ actions.pmacro = {}
 actions.pmacro.text = L["Use macro before mounting"]
 actions.pmacro.description = L["PMACRO_DESCRIPTION"]
 actions.pmacro.maxLetters = 200
+actions.pmacro.doesntInterrupt = true
 
 actions.pmacro.getValueText = actions.macro.getValueText
 
@@ -441,6 +442,7 @@ end
 actions.sstate = {}
 actions.sstate.text = L["Set State"]
 actions.sstate.description = L["Set a state that can be read in conditions using \"Get State\""]
+actions.sstate.doesntInterrupt = true
 
 actions.sstate.getValueText = actions.macro.getValueText
 
@@ -470,6 +472,8 @@ end
 ---------------------------------------------------
 -- METHODS
 function actions:getMenuList(value, func)
+	local dInterruptStar = " (|cff44ff44*|r)"
+	local dInterruptText = NIGHT_FAE_BLUE_COLOR:WrapTextInColorCode(dInterruptStar:sub(2).." "..L["Doesn't interrupt the rule queue"])
 	local list = {}
 	local types = {
 		"rmount",
@@ -487,26 +491,44 @@ function actions:getMenuList(value, func)
 		"sstate",
 		"snip",
 	}
+
+	local OnTooltipShow = function(btn, tooltip, v)
+		GameTooltip_SetTitle(tooltip, v.text)
+		if v.description then tooltip:AddLine(v.description, nil, nil, nil, true) end
+		if v.doesntInterrupt then
+			if v.description then tooltip:AddLine(" ") end
+			tooltip:AddLine(dInterruptText, nil, nil, nil, true)
+		end
+	end
+
 	for i = 1, #types do
 		local v = types[i]
 		local action = self[v]
 		list[i] = {
-			text = action.text,
+			text = action.doesntInterrupt and action.text..dInterruptStar or action.text,
 			value = v,
+			arg1 = action,
 			func = func,
 			checked = v == value,
 		}
-		if action.description then
-			list[i].OnTooltipShow = function(btn, tooltip)
-				GameTooltip_SetTitle(tooltip, action.text)
-				tooltip:AddLine(action.description, nil, nil, nil, true)
-			end
+		if action.description or action.doesntInterrupt then
+			list[i].OnTooltipShow = OnTooltipShow
 		end
 	end
 	return list
 end
 
 
-function actions:getFuncText(action)
-	return self[action[1]]:getFuncText(action[2])
+function actions:getFuncText(action, keys)
+	local text, vars = self[action[1]]:getFuncText(action[2])
+	if vars then
+		for i = 1, #vars do
+			local var = vars[i]
+			if keys[var] ~= 1 then
+				keys[var] = 1
+				keys[#keys + 1] = var
+			end
+		end
+	end
+	return text
 end

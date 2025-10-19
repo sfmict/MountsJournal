@@ -527,6 +527,7 @@ end
 -- rspell READY SPELL
 conds.rspell = {}
 conds.rspell.text = L["Spell is ready"]
+conds.rspell.combatLock = util.isMidnight
 conds.rspell.isNumeric = true
 conds.rspell.secretCond = "notSCooldowns and "
 
@@ -561,6 +562,7 @@ end
 -- hbuff HAS BUFF
 conds.hbuff = {}
 conds.hbuff.text = L["The player has a buff"]
+conds.hbuff.combatLock = util.isMidnight
 conds.hbuff.isNumeric = true
 conds.hbuff.secretCond = "notSAuras and "
 
@@ -577,6 +579,7 @@ end
 -- hdebuff HAS DEBUFF
 conds.hdebuff = {}
 conds.hdebuff.text = L["The player has a debuff"]
+conds.hdebuff.combatLock = util.isMidnight
 conds.hdebuff.isNumeric = true
 conds.hdebuff.secretCond = conds.hbuff.secretCond
 
@@ -1727,20 +1730,30 @@ end
 ---------------------------------------------------
 -- METHODS
 function conds:getMenuList(value, func)
+	local combatStar = " (|cffff4444*|r)"
+	local combatText = NIGHT_FAE_BLUE_COLOR:WrapTextInColorCode(combatStar:sub(2).." "..L["Doesn't work in combat"])
 	local list = {}
+
+	local OnTooltipShow = function(btn, tooltip, v)
+		GameTooltip_SetTitle(tooltip, v.text)
+		if v.description then tooltip:AddLine(v.description, nil, nil, nil, true) end
+		if v.combatLock then
+			if v.description then tooltip:AddLine(" ") end
+			tooltip:AddLine(combatText, nil, nil, nil, true)
+		end
+	end
+
 	for k, v in next, self do
 		if type(v) == "table" then
 			list[#list + 1] = {
-				text = v.text,
+				text = v.combatLock and v.text..combatStar or v.text,
 				value = k,
+				arg1 = v,
 				func = func,
 				checked = k == value,
 			}
-			if v.description then
-				list[#list].OnTooltipShow = function(btn, tooltip)
-					GameTooltip_SetTitle(tooltip, v.text)
-					tooltip:AddLine(v.description, nil, nil, nil, true)
-				end
+			if v.description or v.combatLock then
+				list[#list].OnTooltipShow = OnTooltipShow
 			end
 		end
 	end
@@ -1749,19 +1762,21 @@ function conds:getMenuList(value, func)
 end
 
 
-function conds:getFuncText(conds)
+function conds:getFuncText(conds, keys)
 	local text = {}
 	local condText = ns.actions[conds.action[1]].condText
 	text[1] = condText and condText or "not (profileLoad or self.useMount)"
 
-	local vars = {}
 	local i = 1
 	local cond = conds[i]
 	while cond ~= nil do
 		local condt = self[cond[2]]
 		if condt ~= nil then
 			local condText, var = condt:getFuncText(cond[3])
-			if var ~= nil then vars[#vars + 1] = var end
+			if var ~= nil and keys[var] ~= 1 then
+				keys[var] = 1
+				keys[#keys + 1] = var
+			end
 			if cond[1] then condText = "not "..condText end
 			if util.isMidnight and condt.secretCond ~= nil then
 				condText = condt.secretCond..condText
@@ -1773,16 +1788,5 @@ function conds:getFuncText(conds)
 		end
 		cond = conds[i]
 	end
-	--for i = 1, #conds do
-	--	local cond = conds[i]
-	--	local condType = cond[2]
-	--	local condText, var = self[cond[2]]:getFuncText(cond[3])
-	--	if var then vars[#vars + 1] = var end
-	--	if cond[1] then condText = "not "..condText end
-	--	if util.isMidnight and (condType == "hbuff" or condType == "hdebuff") then
-	--		condText = "notCombat and "..condText
-	--	end
-	--	text[i + 1] = condText
-	--end
-	return concat(text, "\nand "), #vars > 0 and vars
+	return concat(text, "\nand ")
 end

@@ -158,18 +158,35 @@ else -- Night Elf
 	travelForm.creatureID = 21243
 end
 
+-- ChrCustomizationDisplayInfo -> SpellShapeshiftFormID = 27
 travelForm.allCreature = {
 	21243, -- Night Elf
 	21244, -- Tauren
 	37729, -- Worgen
 	37730, -- Troll
+	37728,
 	81439, -- Highmountain Tauren
 	88351, -- Kul Tiran
+	--88355,
 	91215, -- Zandalari Troll
+	91256,
 	74305, -- Lunarwing Night Elf
 	74304, -- Lunarwing Tauren, Highmountain Tauren
 	74307, -- Lunarwing Worgen, Kul Tiran
 	74306, -- Lunarwing Troll, Zandalari Troll
+	137376, -- Lunarwing, legion Remix
+	-- dark bird
+	20857, --37727,
+	-- owls
+	64328, 64330, 64329, 64331,
+	-- moths
+	95198, 95199,
+	-- crows
+	20872, 80962, 32546,
+	-- bats
+	116324, 116323,
+	-- big owls
+	113164, 116202, 116203,
 }
 
 function travelForm:canUse()
