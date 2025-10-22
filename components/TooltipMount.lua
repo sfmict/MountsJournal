@@ -25,7 +25,7 @@ end)
 
 
 TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, function(tooltip, data)
-	if not InCombatLockdown() and mounts.config.tooltipMount and data.id then
+	if not InCombatLockdown() and mounts.config.tooltipItems and data.id then
 		local mountID = C_MountJournal.GetMountFromItem(data.id)
 		if mountID then
 			local rarity = util.getRarityColor(mountID):WrapTextInColorCode(ns.mountsDB[mountID][3].."%")

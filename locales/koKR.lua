@@ -157,6 +157,7 @@ L["Show wowhead link in mount preview"] = "탈것 미리보기에서 와우헤�
 L["Enable statistics collection"] = "통계 수집 활성화"
 L["STATISTICS_DESCRIPTION"] = "탈것의 시간과 거리를 수집합니다 (CPU 부하, 캐릭터가 탑승 중일 때만)"
 L["Show mount in unit tooltip"] = "유닛 툴팁에 탈것 표시"
+--L["Add information to item tooltip"] = ""
 L["Rule Set"] = "규칙 세트"
 L["Rule Sets"] = "규칙 세트"
 L["New rule set"] = "새 규칙 세트"

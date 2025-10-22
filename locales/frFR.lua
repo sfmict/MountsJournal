@@ -157,6 +157,7 @@ L["Show wowhead link in mount preview"] = "Afficher le lien Wowhead dans l'aper�
 L["Enable statistics collection"] = "Activer la collecte de statistiques"
 L["STATISTICS_DESCRIPTION"] = "Collecte le temps et la distance des montures (charge CPU, uniquement lorsque le personnage est en monture)"
 L["Show mount in unit tooltip"] = "Afficher la monture dans l'infobulle de l'unité"
+--L["Add information to item tooltip"] = ""
 L["Rule Set"] = "Ensemble de règles"
 L["Rule Sets"] = "Ensembles de règles"
 L["New rule set"] = "Nouvel ensemble de règles"

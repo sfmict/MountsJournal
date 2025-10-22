@@ -157,6 +157,7 @@ L["ButtonsSelectedTooltipDescription"] = "Los favoritos no afectan a los montaje
 --L["Enable statistics collection"] = ""
 --L["STATISTICS_DESCRIPTION"] = ""
 --L["Show mount in unit tooltip"] = ""
+--L["Add information to item tooltip"] = ""
 --L["Rule Set"] = ""
 --L["Rule Sets"] = ""
 --L["New rule set"] = ""

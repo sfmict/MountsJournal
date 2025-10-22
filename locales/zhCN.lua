@@ -157,6 +157,7 @@ L["Show wowhead link in mount preview"] = "在坐骑预览中显示wowhead链接
 L["Enable statistics collection"] = "开启数据收集"
 --L["STATISTICS_DESCRIPTION"] = ""
 L["Show mount in unit tooltip"] = "在单位鼠标提示中显示其坐骑"
+--L["Add information to item tooltip"] = ""
 L["Rule Set"] = "规则集"
 L["Rule Sets"] = "规则集"
 L["New rule set"] = "新建规则集"

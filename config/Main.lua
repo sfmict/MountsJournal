@@ -566,17 +566,28 @@ config:SetScript("OnShow", function(self)
 	self.statisticCollection.tooltipRequirement = L["STATISTICS_DESCRIPTION"]
 	self.statisticCollection:HookScript("OnClick", enableBtns)
 
+	-- TOOLTIP GROUP
+	self.tooltipGroup = createGropPanel(self.rightPanelScroll.child, 2)
+	self.tooltipGroup:SetPoint("TOPLEFT", self.statisticCollection, "BOTTOMLEFT", -3, -12)
+
 	-- TOOLTIP MOUNT
-	self.tooltipMount = CreateFrame("CheckButton", nil, self.rightPanelScroll.child, "MJCheckButtonTemplate")
-	self.tooltipMount:SetPoint("TOPLEFT", self.statisticCollection, "BOTTOMLEFT", 0, -15)
-	self.tooltipMount.Text:SetPoint("RIGHT", self.rightPanelScroll)
+	self.tooltipMount = CreateFrame("CheckButton", nil, self.tooltipGroup, "MJCheckButtonTemplate")
+	self.tooltipMount:SetPoint("TOPLEFT", self.tooltipGroup, 3, -3)
+	self.tooltipMount.Text:SetPoint("RIGHT", self.tooltipGroup, -4, 0)
 	self.tooltipMount.Text:SetText(L["Show mount in unit tooltip"])
 	self.tooltipMount:HookScript("OnClick", enableBtns)
+
+	-- TOOLTIP ITEMS
+	self.tooltipItems = CreateFrame("CheckButton", nil, self.tooltipGroup, "MJCheckButtonTemplate")
+	self.tooltipItems:SetPoint("TOPLEFT", self.tooltipMount, "BOTTOMLEFT", 0, -3)
+	self.tooltipItems.Text:SetPoint("RIGHT", self.tooltipGroup, -4, 0)
+	self.tooltipItems.Text:SetText(L["Add information to item tooltip"])
+	self.tooltipItems:HookScript("OnClick", enableBtns)
 
 	-- RESET HELP
 	self.resetHelp = CreateFrame("BUTTON", nil, self.rightPanelScroll.child, "UIPanelButtonTemplate")
 	self.resetHelp:SetSize(128, 22)
-	self.resetHelp:SetPoint("TOPLEFT", self.tooltipMount, "BOTTOMLEFT", 0, -15)
+	self.resetHelp:SetPoint("TOPLEFT", self.tooltipItems, "BOTTOMLEFT", 0, -15)
 	self.resetHelp:SetText(RESET_TUTORIALS)
 	self.resetHelp:SetScript("OnClick", function(btn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -675,6 +686,7 @@ config:SetScript("OnShow", function(self)
 		self.showWowheadLink:SetChecked(mounts.config.showWowheadLink)
 		self.statisticCollection:SetChecked(mounts.config.statCollection)
 		self.tooltipMount:SetChecked(mounts.config.tooltipMount)
+		self.tooltipItems:SetChecked(mounts.config.tooltipItems)
 		self.resetHelp:Enable()
 		self.cancelBtn:Disable()
 		self.applyBtn:Disable()
@@ -720,6 +732,7 @@ config:SetScript("OnShow", function(self)
 		mounts.config.showWowheadLink = self.showWowheadLink:GetChecked()
 		mounts.config.statCollection = self.statisticCollection:GetChecked()
 		mounts.config.tooltipMount = self.tooltipMount:GetChecked()
+		mounts.config.tooltipItems = self.tooltipItems:GetChecked()
 
 		updateBtnIcon(1)
 		updateBtnIcon(2)
