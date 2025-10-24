@@ -514,7 +514,7 @@ do
 			return isUsable and C_Spell.IsSpellUsable(spellID)
 		elseif data.itemID then
 			return C_Item.GetItemCount(data.itemID) > 0
-			       and (not macroFrame.sFlags.fly or C_Spell.GetSpellTexture(436854) == 5142726)
+			       --and (not macroFrame.sFlags.fly or C_Spell.GetSpellTexture(436854) == 5142726)
 		end
 	end
 

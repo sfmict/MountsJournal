@@ -231,7 +231,7 @@ function mounts:PLAYER_LOGIN()
 	-- PET USABLE
 	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 	self:RegisterEvent("PLAYER_REGEN_DISABLED")
-	--self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
 
 	-- TRACKING
 	--self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
@@ -354,7 +354,7 @@ function mounts:PLAYER_REGEN_DISABLED()
 			self:RegisterEvent("COMPANION_UPDATE")
 		end
 	end
-	--self:UnregisterEvent("UNIT_SPELLCAST_START")
+	self:UnregisterEvent("UNIT_SPELLCAST_START")
 	--self:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	self:UnregisterEvent("UNIT_AURA")
 end
@@ -364,57 +364,68 @@ function mounts:PLAYER_REGEN_ENABLED()
 	local spellID, mountID, auraInstanceID = util.getUnitMount("player")
 	if spellID then self:startTracking(spellID, auraInstanceID, true) end
 	self:UnregisterEvent("COMPANION_UPDATE")
-	--self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
 	--self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
 	self:RegisterUnitEvent("UNIT_AURA", "player")
 end
 
 
---do
---	local function summonPet(petID)
---		if type(petID) == "number" then
---			ns.pets:summonRandomPet(petID == 1)
---		else
---			ns.pets:summon(petID)
---		end
---	end
+do
+	local function summonPet(petID)
+		if type(petID) == "number" then
+			ns.pets:summonRandomPet(petID == 1)
+		else
+			ns.pets:summon(petID)
+		end
+	end
 
 
---	local timer
---	function mounts:UNIT_SPELLCAST_START(_,_, spellID)
---		--fprint(issecretvalue(spellID))
---		local petID
---		if self.fromPriority then
---			for i = 1, #self.priorityProfiles do
---				petID = ns.pets:getPetForProfile(self.priorityProfiles[i].petForMount, spellID)
---				if petID then break end
---			end
---			self.fromPriority = nil
---		else
---			local profile = self.profiles[self.charDB.currentProfileName] or self.defProfile
---			petID = ns.pets:getPetForProfile(profile.petForMount, spellID)
---		end
+	local timer
+	function mounts:UNIT_SPELLCAST_START(_,_, spellID)
+		if issecretvalue(spellID) then return end
 
---		if petID then
---			local groupType = util.getGroupType()
---			if self.config.noPetInRaid and groupType == "raid"
---			or self.config.noPetInGroup and groupType == "group"
---			then return end
+		local petID
+		if self.fromPriority then
+			for i = 1, #self.priorityProfiles do
+				petID = ns.pets:getPetForProfile(self.priorityProfiles[i].petForMount, spellID)
+				if petID then break end
+			end
+			self.fromPriority = nil
+		else
+			local profile = self.profiles[self.charDB.currentProfileName] or self.defProfile
+			petID = ns.pets:getPetForProfile(profile.petForMount, spellID)
+		end
 
---			if timer and not timer:IsCancelled() then
---				timer:Cancel()
---				timer = nil
---			end
+		if petID then
+			local groupType = util.getGroupType()
+			if self.config.noPetInRaid and groupType == "raid"
+			or self.config.noPetInGroup and groupType == "group"
+			then return end
 
---			local cdInfo = C_Spell.GetSpellCooldown(61304)
+			if timer and not timer:IsCancelled() then
+				timer:Cancel()
+				timer = nil
+			end
 
---			if cdInfo.duration == 0 then
---				summonPet(petID)
---			else
---				timer = C_Timer.NewTicker(cdInfo.startTime + cdInfo.duration - GetTime(), function() summonPet(petID) end, 1)
---			end
---		end
---	end
+			local cdInfo = C_Spell.GetSpellCooldown(61304)
+
+			if cdInfo.duration == 0 then
+				summonPet(petID)
+			else
+				timer = C_Timer.NewTicker(cdInfo.startTime + cdInfo.duration - GetTime(), function() summonPet(petID) end, 1)
+			end
+		end
+	end
+end
+
+
+--function mounts:UNIT_SPELLCAST_SUCCEEDED(_,_, spellID)
+	--fpde(spellID)
+	--if ns.additionalMounts[spellID] or C_MountJournal.GetMountFromSpell(spellID) then
+	--	local mountStat = self.stat[spellID]
+	--	mountStat[1] = mountStat[1] + 1
+	--	self:event("MOUNT_SUMMONED")
+	--end
 --end
 
 
