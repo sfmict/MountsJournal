@@ -27,32 +27,6 @@ function journal.filters.expansions(dd, level)
 	info.notCheckable = nil
 	local expansions = mounts.filters.expansions
 
-	local colors = {
-		"D6AB7D", -- classic
-		"E43E5A", -- burning crusade
-		"3FC7EB", -- wrath of the lich king
-		"FF7C0A", -- cataclysm
-		"00EF88", -- mists of pandaria
-		"F48CBA", -- warlords of draenor
-		"AAD372", -- legion
-		"FFF468", -- battle for azeroth
-		"9798FE", -- shadowlands
-		"53B39F", -- dragonflight
-		"90CCDD", -- the war within
-	}
-	local icons = {
-		1385726,
-		1378987,
-		607688,
-		536055,
-		901157,
-		1134497,
-		1715536,
-		3256381,
-		4465334,
-		5409250,
-		6980554,
-	}
 	info.iconInfo = {
 		tSizeX = 40,
 		tSizeY = 20,
@@ -74,8 +48,8 @@ function journal.filters.expansions(dd, level)
 	info.checked = function(btn) return expansions[btn.value] end
 
 	for i = util.expansion, 1, -1 do
-		info.text = ("|cff%s%s|r"):format(colors[i] or "E8E8E8", _G["EXPANSION_NAME"..(i - 1)])
-		info.icon = icons[i] or [[Interface\EncounterJournal\UI-EJ-BOSS-Default]]
+		info.text = ("|cff%s%s|r"):format(util.expColors[i], _G["EXPANSION_NAME"..(i - 1)])
+		info.icon = util.expIcons[i]
 		info.value = i
 		dd:ddAddButton(info, level)
 	end

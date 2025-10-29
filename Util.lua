@@ -145,6 +145,47 @@ util.mountTypes = setmetatable({
 })
 
 
+-- EXPANSIONS
+util.expColors = setmetatable({
+	"D6AB7D", -- classic
+	"E43E5A", -- burning crusade
+	"3FC7EB", -- wrath of the lich king
+	"FF7C0A", -- cataclysm
+	"00EF88", -- mists of pandaria
+	"F48CBA", -- warlords of draenor
+	"AAD372", -- legion
+	"FFF468", -- battle for azeroth
+	"9798FE", -- shadowlands
+	"53B39F", -- dragonflight
+	"90CCDD", -- the war within
+	util.isMidnight and "994AD2" or nil, -- midnight
+}, {
+	__index = function(self, key)
+		self[key] = "E8E8E8"
+		return self[key]
+	end
+})
+util.expIcons = setmetatable({
+	1385726,
+	1378987,
+	607688,
+	536055,
+	901157,
+	1134497,
+	1715536,
+	3256381,
+	4465334,
+	5409250,
+	6980554,
+	util.isMidnight and 7455547 or nil,
+}, {
+	__index = function(self, key)
+		self[key] = [[Interface\EncounterJournal\UI-EJ-BOSS-Default]]
+		return self[key]
+	end
+})
+
+
 util.filterButtonBackdrop = {
 	edgeFile = "Interface/AddOns/MountsJournal/textures/border",
 	edgeSize = 8,

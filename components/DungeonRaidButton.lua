@@ -1,5 +1,5 @@
 local addon, ns = ...
-local L = ns.L
+local L, util = ns.L, ns.util
 
 
 ns.journal:on("MODULES_INIT", function(journal)
@@ -19,17 +19,30 @@ ns.journal:on("MODULES_INIT", function(journal)
 		end)
 	end
 
+	local drIconInfo = {
+		tCoordLeft = .20,
+		tCoordRight = .80,
+		tCoordTop = .20,
+		tCoordBottom = .80,
+	}
 	local list = {
 		{
 			name = DUNGEONS,
+			icon = 1488824,
+			iconInfo = drIconInfo,
 			list = {},
 		},
 		{
 			name = RAIDS,
+			icon = 1488825,
+			iconInfo = drIconInfo,
 			list = {},
 		}
 	}
-
+	local expIconInfo = {
+		tSizeX = 40,
+		tSizeY = 20,
+	}
 	local mapExclude = {
 		[379] = true, -- Вершина Кун-Лай
 		[543] = true, -- Горгронд
@@ -37,11 +50,14 @@ ns.journal:on("MODULES_INIT", function(journal)
 	}
 
 	local currentTier = EJ_GetCurrentTier()
-	for i = 1, EJ_GetNumTiers() do
+	local numTiers = EJ_GetNumTiers()
+	for i = 1, numTiers do
 		EJ_SelectTier(i)
 		for _, v in ipairs(list) do
-			v.list[i] = {
-				name = EJ_GetTierInfo(i),
+			local tier = {
+				name = ("|cff%s%s|r"):format(util.expColors[i], EJ_GetTierInfo(i)),
+				icon = util.expIcons[i],
+				iconInfo = expIconInfo,
 				list = {},
 			}
 			local showRaid = v.name == RAIDS
@@ -49,14 +65,32 @@ ns.journal:on("MODULES_INIT", function(journal)
 			local instanceID, instanceName = EJ_GetInstanceByIndex(index, showRaid)
 			while instanceID do
 				EJ_SelectInstance(instanceID)
-				local _,_,_,_,_,_, mapID = EJ_GetInstanceInfo(instanceID)
+				local _,_,_,_,_, icon, mapID = EJ_GetInstanceInfo(instanceID)
 				if mapID and mapID > 0 and not mapExclude[mapID] then
-					tinsert(v.list[i].list, {name = instanceName, mapID = mapID})
+					tinsert(tier.list, {name = instanceName, icon = icon, mapID = mapID})
 				end
 				index = index + 1
 				instanceID, instanceName = EJ_GetInstanceByIndex(index, showRaid)
 			end
-			if #v.list[i].list == 0 then v.list[i] = nil end
+			--if not rawget(util.expIcons, i) then
+			--	local j, lastBossID = 1
+			--	while true do
+			--		local _,_, bossID = EJ_GetEncounterInfoByIndex(j)
+			--		if not bossID then
+			--			break
+			--		else
+			--			j = j + 1
+			--			lastBossID = bossID
+			--		end
+			--	end
+			--	if lastBossID then
+			--		local _,_,_,_, icon = EJ_GetCreatureInfo(1, lastBossID)
+			--		fprint(icon, showRaid)
+			--		tier.icon = icon
+			--	end
+			--end
+			--if tier.icon == nil then tier.icon = util.expIcons[i] end
+			v.list[numTiers - i + 1] = tier
 		end
 	end
 	EJ_SelectTier(currentTier)
@@ -75,6 +109,8 @@ ns.journal:on("MODULES_INIT", function(journal)
 
 		for _, v in ipairs(value) do
 			info.text = v.name
+			info.icon = v.icon
+			info.iconInfo = v.iconInfo
 			if v.list then
 				info.keepShownOnClick = true
 				info.hasArrow = true

@@ -71,7 +71,11 @@ end
 
 function MJDynamicFlightSkillTreeButtonMixin:onClick()
 	GenericTraitUI_LoadUI()
-	GenericTraitFrame:SetSystemID(Constants.MountDynamicFlightConsts.TRAIT_SYSTEM_ID)
+	if GenericTraitFrame.SetConfigIDBySystemID then -- midnight
+		GenericTraitFrame:SetConfigIDBySystemID(Constants.MountDynamicFlightConsts.TRAIT_SYSTEM_ID)
+	else
+		GenericTraitFrame:SetSystemID(Constants.MountDynamicFlightConsts.TRAIT_SYSTEM_ID)
+	end
 	GenericTraitFrame:SetTreeID(Constants.MountDynamicFlightConsts.TREE_ID)
 	ToggleFrame(GenericTraitFrame)
 end
