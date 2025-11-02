@@ -887,6 +887,7 @@ function journal:init()
 	-- SHOWN PANEL
 	self.shownPanel.text:SetText(L["Shown:"])
 	self.shownPanel.clear:SetScript("OnClick", function() self:resetToDefaultFilters() end)
+	self.shownPanel.framePool = CreateFramePool("BUTTON", self.shownPanel.resetBar, "MJFilterResetButtonTempalte")
 	self.shownPanel.list = {}
 
 	local resetFilter = self.shownPanel.resetFilter
@@ -911,7 +912,7 @@ function journal:init()
 				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 				self:resetFilterByInfo(btn.value)
 				dd:ddCloseMenus()
-				if #list > 0 then dd:Click() end
+				if self.shownPanel.startIndex ~= 0 then dd:Click() end
 			end,
 			iconInfo = {
 				tSizeX = 12,
@@ -919,9 +920,9 @@ function journal:init()
 			}
 		}}
 
-		for i, text in ipairs(list) do
-			info.text = text
-			info.value = list[text]
+		for i = self.shownPanel.startIndex, #list do
+			info.text = list[i]
+			info.value = list[info.text]
 			dd:ddAddButton(info)
 		end
 	end)
@@ -1106,10 +1107,14 @@ function journal:init()
 	self.multipleMountBtn:ddSetNoGlobalMouseEvent(true)
 
 	self.multipleMountBtn:ddSetInitFunc(function(btn, level)
-		local info = {}
+		local info = {keepShownOnClick = true}
 		local creatureIDs = self:getMountAllCreatureDisplayInfo(self.selectedMountID)
 		local func = function(_, creatureID)
 			self:updateMountDisplay(true, creatureID)
+			btn:ddRefresh(level)
+		end
+		local checked = function(_, creatureID)
+			return self.mountDisplay.lastCreatureID == creatureID
 		end
 
 		for i = 1, #creatureIDs do
@@ -1117,7 +1122,7 @@ function journal:init()
 			info.text = MODEL.." "..i
 			info.arg1 = creatureID
 			info.func = func
-			info.checked = self.mountDisplay.lastCreatureID == creatureID
+			info.checked = checked
 			btn:ddAddButton(info, level)
 		end
 	end)
@@ -1755,7 +1760,11 @@ function journal:getMountAllCreatureDisplayInfo(mount)
 		local creatureIDs = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
 		local list = {}
 		for i = 1, #creatureIDs do
-			list[i] = creatureIDs[i].creatureDisplayID
+			local creatureID = creatureIDs[i].creatureDisplayID
+			if list[creatureID] == nil then
+				list[creatureID] = 1
+				list[#list + 1] = creatureID
+			end
 		end
 		return list
 	else
@@ -1884,6 +1893,7 @@ function journal:setScrollGridMounts(force)
 	end)
 
 	if self.dataProvider then
+		self:updateFilterNavBar()
 		self:updateScrollMountList()
 		self.view:Layout()
 		self.scrollBox:ScrollToElementDataIndex(index, ScrollBoxConstants.AlignBegin)
@@ -3023,6 +3033,48 @@ end
 
 
 do
+	local function onClick(btn)
+		journal:resetFilterByInfo(btn.info)
+	end
+
+
+	function journal:updateFilterNavBar()
+		local list = self.shownPanel.list
+		local framePool = self.shownPanel.framePool
+		local maxWidth = self.shownPanel.resetFilter:GetLeft() - self.shownPanel.count:GetRight() - 4
+		local width = 0
+		local index = 0
+
+		framePool:ReleaseAll()
+		for i = 1, #list do
+			local f = framePool:Acquire()
+			local text = list[i]
+			f.info = list[text]
+			f:SetScript("OnClick", onClick)
+			--fprint(i, f, f:GetParent() == self.shownPanel.resetBar)
+			f:SetPoint("LEFT", width, 0)
+			f.text:SetText(list[i])
+			f:Show()
+			local textWidth = f.text:GetWidth()
+			f:SetWidth(textWidth + 18)
+			width = width + textWidth + 20
+			if width > maxWidth then
+				--fprint("width", width, maxWidth)
+				width = width - textWidth - 20
+				index = i
+				framePool:Release(f)
+				break
+			end
+		end
+
+		self.shownPanel.startIndex = index
+		self.shownPanel.resetFilter:SetShown(index ~= 0)
+		self.shownPanel.resetBar:SetWidth(width)
+	end
+end
+
+
+do
 	local function add(list, text, defFilters, filters, k)
 		local info = list[text]
 		if info then
@@ -3087,7 +3139,8 @@ do
 			end
 		end
 
-		self.shownPanel.filters:SetText("("..concat(list, ", ")..")")
+		--self.shownPanel.filters:SetText("("..concat(list, ", ")..")")
+		self.shownPanel.filters:Hide()
 		return #list ~= 0
 	end
 end
@@ -3407,6 +3460,7 @@ function journal:setShownCountMounts(numMounts)
 		self.shownNumMouns = numMounts
 	end
 	self.shownPanel:SetShown(self:checkFiltersDefault())
+	self:updateFilterNavBar()
 	-- self.leftInset:GetHeight()
 end
 

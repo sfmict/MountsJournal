@@ -401,7 +401,7 @@
 									<Anchor point="RIGHT" x="-5" y="0"/>
 								</Anchors>
 							</Button>
-							<Button parentKey="resetFilter">
+							<Button parentKey="resetFilter" collapsesLayout="true">
 								<Size x="16" y="16"/>
 								<Anchors>
 									<Anchor point="RIGHT" relativeKey="$parent.clear" relativePoint="LEFT"/>
@@ -427,6 +427,12 @@
 									<OnMouseUp>self.icon:AdjustPointsOffset(1, 1)</OnMouseUp>
 								</Scripts>
 							</Button>
+							<Frame parentKey="resetBar">
+								<Size y="20"/>
+								<Anchors>
+									<Anchor point="RIGHT" relativeKey="$parent.resetFilter" relativePoint="LEFT"/>
+								</Anchors>
+							</Frame>
 						</Frames>
 						<Layers>
 							<Layer level="ARTWORK">
@@ -1621,6 +1627,44 @@
 			<OnLeave>self.texture:SetAlpha(.5)</OnLeave>
 			<OnMouseDown>self.texture:SetPoint("CENTER", 1, -1)</OnMouseDown>
 			<OnMouseUp>self.texture:SetPoint("CENTER")</OnMouseUp>
+		</Scripts>
+	</Button>
+
+	<Button name="MJFilterResetButtonTempalte" inherits="BackdropTemplate" virtual="true">
+		<Size y="20"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString parentKey="text" inherits="GameFontHighlight" justifyH="LEFT" maxLines="1">
+					<Size y="20"/>
+					<Anchors>
+						<Anchor point="LEFT" x="3" y="0"/>
+					</Anchors>
+				</FontString>
+				<Texture atlas="common-search-clearbutton" useAtlasSize="false" alpha=".3" parentKey="texture">
+					<Size x="10" y="10"/>
+					<Anchors>
+						<Anchor point="RIGHT" x="-4"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnLoad>
+				self:SetBackdrop(MountsJournalUtil.filterButtonBackdrop)
+				self:SetBackdropBorderColor(.6, .6, .6)
+			</OnLoad>
+			<OnEnter>
+				self.texture:SetAlpha(1)
+				self.texture:SetVertexColor(.8, .6, 0)
+				self:SetBackdropBorderColor(.8, .6, 0)
+			</OnEnter>
+			<OnLeave>
+				self.texture:SetAlpha(.3)
+				self.texture:SetVertexColor(1, 1, 1)
+				self:SetBackdropBorderColor(.6, .6, .6)
+			</OnLeave>
+			<OnMouseDown>self.texture:SetSize(9, 9)</OnMouseDown>
+			<OnMouseUp>self.texture:SetSize(10, 10)</OnMouseUp>
 		</Scripts>
 	</Button>
 
