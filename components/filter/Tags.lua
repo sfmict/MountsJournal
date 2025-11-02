@@ -59,19 +59,19 @@ function journal.filters.tags(dd, level)
 				filterTags.noTag = false
 				filterTags.withAllTags = false
 				journal.tags:setAllFilterTags(false)
-				filterTags.tags[btn._text][2] = true
+				filterTags.tags[btn:text()][2] = true
 				journal:updateMountsList()
 				dd:ddRefresh(level)
 			end,
 		}}
 		local text = function(btn) return journal.tags.sortedTags[btn.value] end
 		local func = function(btn, _,_, checked)
-			filterTags.tags[btn._text][2] = checked
+			filterTags.tags[btn:text()][2] = checked
 			journal:updateMountsList()
 		end
-		local checked = function(btn) return filterTags.tags[btn._text][2] end
-		local remove = function(btn) journal.tags:deleteTag(btn._text) end
-		local order = function(btn, step) journal.tags:setOrderTag(btn._text, step) end
+		local checked = function(btn) return filterTags.tags[btn:text()][2] end
+		local remove = function(btn) journal.tags:deleteTag(btn:text()) end
+		local order = function(btn, step) journal.tags:setOrderTag(btn:text(), step) end
 
 		for i, tag in ipairs(journal.tags.sortedTags) do
 			info.list[i] = {
