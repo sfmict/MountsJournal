@@ -1390,6 +1390,7 @@ function journal:init()
 
 	-- ON ALERT CLICK
 	hooksecurefunc("MountJournal_SelectByMountID", function(mountID)
+		if mounts.config.useDefaultJournal then return end
 		util.openJournalTab(3)
 		self:setSelectedMount(mountID)
 	end)
@@ -3051,7 +3052,6 @@ do
 			local text = list[i]
 			f.info = list[text]
 			f:SetScript("OnClick", onClick)
-			--fprint(i, f, f:GetParent() == self.shownPanel.resetBar)
 			f:SetPoint("LEFT", width, 0)
 			f.text:SetText(list[i])
 			f:Show()
@@ -3059,7 +3059,6 @@ do
 			f:SetWidth(textWidth + 18)
 			width = width + textWidth + 20
 			if width > maxWidth then
-				--fprint("width", width, maxWidth)
 				width = width - textWidth - 20
 				index = i
 				framePool:Release(f)
@@ -3139,7 +3138,6 @@ do
 			end
 		end
 
-		--self.shownPanel.filters:SetText("("..concat(list, ", ")..")")
 		self.shownPanel.filters:Hide()
 		return #list ~= 0
 	end
