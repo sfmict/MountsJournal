@@ -3138,7 +3138,6 @@ do
 			end
 		end
 
-		self.shownPanel.filters:Hide()
 		return #list ~= 0
 	end
 end
