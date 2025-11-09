@@ -1,0 +1,14 @@
+<Ui>
+	<Script file="Hyperlinks.lua"/>
+	<Script file="Pets.lua"/>
+	<Script file="Calendar.lua"/>
+	<Script file="AdditionalMounts.lua"/>
+	<Script file="SummonPanel.lua"/>
+	<Script file="Conditions.lua"/>
+	<Script file="Actions.lua"/>
+	<Script file="RuleUtils.lua"/>
+	<Script file="SnippetEnv.lua"/>
+	<Script file="TooltipMount.lua"/>
+	<Script file="Transmission.lua"/>
+	<Script file="OPie.lua"/>
+</Ui>

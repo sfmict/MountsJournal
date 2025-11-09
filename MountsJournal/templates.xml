@@ -1,0 +1,58 @@
+<Ui>
+	<Script file="mixins/MacroMixin.lua"/>
+
+	<Button name="MJSecureActionButtonTemplate" inherits="SecureActionButtonTemplate" mixin="MJMacroMixin" virtual="true">
+		<Scripts>
+			<OnLoad method="onLoad"/>
+			<OnEvent method="onEvent"/>
+			<PreClick method="preClick"/>
+			<PostClick method="postClick"/>
+		</Scripts>
+	</Button>
+
+	<Button name="MJSecureBarButtonTemplate" inherits="SecureActionButtonTemplate" virtual="true">
+		<Size x="45" y="45"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="icon"/>
+				<MaskTexture parentKey="IconMask" atlas="UI-HUD-ActionBar-IconFrame-Mask" hWrapMode="CLAMPTOBLACKADDITIVE" vWrapMode="CLAMPTOBLACKADDITIVE">
+					<Anchors>
+						<Anchor point="CENTER" relativeKey="$parent.icon"/>
+					</Anchors>
+					<MaskedTextures>
+						<MaskedTexture childKey="icon"/>
+					</MaskedTextures>
+				</MaskTexture>
+			</Layer>
+		</Layers>
+		<NormalTexture parentKey="NormalTexture" atlas="UI-HUD-ActionBar-IconFrame">
+			<Size x="46" y="45"/>
+			<Anchors>
+				<Anchor point="TOPLEFT"/>
+			</Anchors>
+		</NormalTexture>
+		<PushedTexture atlas="UI-HUD-ActionBar-IconFrame-Down" parentKey="PushedTexture">
+			<Size x="46" y="45"/>
+			<Anchors>
+				<Anchor point="TOPLEFT"/>
+			</Anchors>
+		</PushedTexture>
+		<HighlightTexture atlas="UI-HUD-ActionBar-IconFrame-Mouseover" parentKey="HighlightTexture">
+			<Size x="46" y="45"/>
+			<Anchors>
+				<Anchor point="TOPLEFT"/>
+			</Anchors>
+		</HighlightTexture>
+		<Scripts>
+			<OnLoad>
+				self:SetAttribute("useOnKeyDown", false)
+				self:SetAttribute("type", "click")
+				self:RegisterForClicks("AnyUp")
+				self:RegisterForDrag("LeftButton")
+			</OnLoad>
+			<OnLeave>
+				GameTooltip:Hide()
+			</OnLeave>
+		</Scripts>
+	</Button>
+</Ui>

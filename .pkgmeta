@@ -1,22 +1,22 @@
 package-as: MountsJournal
 
 externals:
-	libs/LibStub: https://repos.curseforge.com/wow/libstub/trunk
-	libs/LibSFDropDown:
-		site: https://www.curseforge.com/wow/addons/libsfdropdown
-		url: https://github.com/sfmict/LibSFDropDown
-		tag: latest
-	libs/LibThingsLoad:
+	MountsJournal/libs/LibStub: https://repos.curseforge.com/wow/libstub/trunk
+	MountsJournal/libs/LibThingsLoad:
 		site: https://www.curseforge.com/wow/addons/libthingsload
 		url: https://github.com/sfmict/LibThingsLoad
 		tag: latest
-	libs/LibSerialize:
+	MountsJournal/libs/LibSerialize:
 		url: https://github.com/rossnichols/LibSerialize
 		tag: latest
-	libs/LibDeflate:
+	MountsJournal/libs/LibDeflate:
 		site: https://www.curseforge.com/wow/addons/libdeflate
 		url: https://github.com/SafeteeWoW/LibDeflate
-	libs/AceComm-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceComm-3.0
+	MountsJournal/libs/AceComm-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceComm-3.0
+	MountsJournalUI/libs/LibSFDropDown:
+		site: https://www.curseforge.com/wow/addons/libsfdropdown
+		url: https://github.com/sfmict/LibSFDropDown
+		tag: latest
 
 enable-nolib-creation: no
 
@@ -35,3 +35,7 @@ ignore:
 	- libs/LibDeflate/rockspecs
 	- libs/LibDeflate/tests
 	- libs/LibDeflate/tools
+
+move-folders:
+	MountsJournal/MountsJournal: MountsJournal
+	MountsJournal/MountsJournalUI: MountsJournalUI

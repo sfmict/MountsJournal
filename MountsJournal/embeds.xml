@@ -1,0 +1,7 @@
+<UI>
+	<Script file="libs\LibStub\LibStub.lua"/>
+	<Include file="libs\LibThingsLoad\LibThingsLoad.xml"/>
+	<Include file="libs\LibSerialize\lib.xml"/>
+	<Include file="libs\LibDeflate\lib.xml"/>
+	<Include file="libs\AceComm-3.0\AceComm-3.0.xml"/>
+</UI>
