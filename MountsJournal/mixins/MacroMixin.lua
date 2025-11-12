@@ -35,10 +35,8 @@ macroFrame:on("ADDON_INIT", function(self)
 	self.isDruid = self.class == "DRUID"
 	self.fishingRodID = 133755
 
-	local actionBtn1 = CreateFrame("Button", util.secureButtonNameMount, nil, "MJSecureActionButtonTemplate")
-	actionBtn1.id = 1
-	local actionBtn2 = CreateFrame("Button", util.secureButtonNameSecondMount, nil, "MJSecureActionButtonTemplate")
-	actionBtn2.id = 2
+	CreateFrame("Button", util.secureButtonNameMount, nil, "MJSecureActionButtonTemplate").id = 1
+	CreateFrame("Button", util.secureButtonNameSecondMount, nil, "MJSecureActionButtonTemplate").id = 2
 
 	local classOptionMacro = ""
 	local defMacro = ""

@@ -1,7 +1,7 @@
 local addon, ns = ...
 local L = ns.L
 local type, tremove, next, tostring, math = type, tremove, next, tostring, math
-local C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup, IsSpellKnown, IsSpellInSpellBook = C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup, C_SpellBook.IsSpellKnown, C_SpellBook.IsSpellInSpellBook
+local C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup, IsSpellKnown, IsSpellInSpellBook, IsMounted = C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup, C_SpellBook.IsSpellKnown, C_SpellBook.IsSpellInSpellBook, IsMounted
 local events, eventsMixin, dot = {}, {}, "."
 
 
@@ -180,7 +180,7 @@ end
 
 
 function util.checkAura(unit, spellID, filter)
-	if not UnitExists(unit) then return false end
+	if not UnitExists(unit) or util.isMidnight and GetRestrictedActionStatus(Enum.RestrictedActionType.SecretAuras) then return end
 	local GetAuraSlots, GetAuraDataBySlot, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
 	repeat
 		ctok, a,b,c,d,e = GetAuraSlots(unit, filter, 5, ctok)
@@ -194,7 +194,7 @@ end
 
 
 function util.getUnitMount(unit)
-	if not UnitExists(unit)	then return end
+	if not UnitExists(unit) or util.isMidnight and GetRestrictedActionStatus(Enum.RestrictedActionType.SecretAuras) then return end
 	local GetAuraSlots, GetAuraDataBySlot, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
 	local filter = unit == "player" and "HELPFUL PLAYER" or "HELPFUL"
 	repeat
@@ -210,6 +210,17 @@ function util.getUnitMount(unit)
 			a,b,c,d,e = b,c,d,e
 		end
 	until not ctok
+end
+
+
+if util.isMidnight then
+	function util.isMounted()
+		return ns.mounts.trackableID ~= nil or IsMounted()
+	end
+else
+	function util.isMounted()
+		return IsMounted() or util.getUnitMount("player") ~= nil
+	end
 end
 
 

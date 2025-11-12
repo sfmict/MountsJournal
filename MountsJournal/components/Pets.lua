@@ -119,6 +119,7 @@ do
 		[371133] = true, -- Potion of the Hushed Zephyr 15 sec
 		[371134] = true, -- Potion of the Hushed Zephyr 18 sec
 		[431424] = true, -- Treading Lightly
+		[1236551] = true, -- Shrouded in Void
 	}
 
 	local function checkAura(auraData)
@@ -129,6 +130,7 @@ do
 	end
 
 	local function isAuraApplied()
+		if util.isMidnight and GetRestrictedActionStatus(Enum.RestrictedActionType.SecretAuras) then return true end
 		aura = nil
 		AuraUtil.ForEachAura("player", "HELPFUL", nil, checkAura, true)
 		return aura

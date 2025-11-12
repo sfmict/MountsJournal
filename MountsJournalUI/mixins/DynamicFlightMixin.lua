@@ -48,11 +48,9 @@ function MJDynamicFlightModeButtonMixin:displayTooltip()
 	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
 	GameTooltip:SetSpellByID(self.spellID)
 	GameTooltip_AddBlankLineToTooltip(GameTooltip)
-	if not ns.util.isMidnight then
-		GameTooltip_AddColoredLine(GameTooltip, FLIGHT_MODE_TOGGLE_TOOLTIP_SUBTEXT, GREEN_FONT_COLOR)
-		if InCombatLockdown() then
-			GameTooltip_AddErrorLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT)
-		end
+	GameTooltip_AddColoredLine(GameTooltip, FLIGHT_MODE_TOGGLE_TOOLTIP_SUBTEXT, GREEN_FONT_COLOR)
+	if InCombatLockdown() then
+		GameTooltip_AddErrorLine(GameTooltip, SPELL_FAILED_AFFECTING_COMBAT)
 	end
 	GameTooltip:Show()
 end

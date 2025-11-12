@@ -87,7 +87,7 @@ config:SetScript("OnShow", function(self)
 	summon1:SetText(SUMMONS.." 1")
 
 	-- BIND MOUNT 1
-	config.bindSummon1Key1,	config.bindSummon1Key2 = binding:createBindingButtons(util.secureButtonNameMount, self.leftPanel, ("%s %s %d"):format(ns.addon, SUMMONS, 1))
+	self.bindSummon1Key1, self.bindSummon1Key2 = binding:createBindingButtons(util.secureButtonNameMount, self.leftPanel, ("%s %s %d"):format(ns.addon, SUMMONS, 1))
 	self.bindSummon1Key1:SetWidth(258)
 	self.bindSummon1Key1:SetPoint("TOPLEFT", self.summon1Icon, "BOTTOMLEFT", -3, -8)
 	self.bindSummon1Key2:SetParent(self.leftPanel)
@@ -135,7 +135,7 @@ config:SetScript("OnShow", function(self)
 	summon2:SetText(SUMMONS.." 2")
 
 	-- BIND MOUNT 2
-	config.bindSummon2Key1, config.bindSummon2Key2 = binding:createBindingButtons(util.secureButtonNameSecondMount, self.leftPanel, ("%s %s %d"):format(ns.addon, SUMMONS, 2))
+	self.bindSummon2Key1, self.bindSummon2Key2 = binding:createBindingButtons(util.secureButtonNameSecondMount, self.leftPanel, ("%s %s %d"):format(ns.addon, SUMMONS, 2))
 	self.bindSummon2Key1:SetSize(258, 22)
 	self.bindSummon2Key1:SetPoint("TOPLEFT", self.summon2Icon, "BOTTOMLEFT", -3, -8)
 	self.bindSummon2Key2:SetParent(self.leftPanel)

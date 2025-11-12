@@ -128,7 +128,7 @@ function journal:init()
 			self:updateMountsList()
 		end
 		self:updateMountDisplay(true)
-		local isMounted = not not util.getUnitMount("player")
+		local isMounted = util.isMounted()
 		self.mountSpecial:SetEnabled(isMounted)
 		self.mountSpeed:SetShown(mounts.config.statCollection and isMounted)
 	end)
@@ -1349,7 +1349,7 @@ function journal:init()
 	end)
 
 	-- MOUNT SPECIAL
-	local isMounted = not not util.getUnitMount("player")
+	local isMounted = util.isMounted()
 	self.mountSpecial:SetText("!")
 	self.mountSpecial.normal = self.mountSpecial:GetFontString()
 	self.mountSpecial.normal:ClearAllPoints()
@@ -1600,9 +1600,11 @@ end
 
 function journal:PLAYER_REGEN_ENABLED()
 	if self.init then
-		self.useMountsJournalButton:Enable()
-		if not mounts.config.useDefaultJournal then
+		if mounts.config.useDefaultJournal then
+			self.useMountsJournalButton:Enable()
+		else
 			self:init()
+			C_Timer.After(0, function() self.useMountsJournalButton:Enable() end)
 		end
 	else
 		self.leftInset:EnableKeyboard(true)
@@ -1639,10 +1641,8 @@ end
 
 
 function journal:COMPANION_UPDATE(companionType)
-	--fprint("COMPANION_UPDATE", companionType, issecretvalue(companionType))
-	--C_Timer.After(0, function() fprint(companionType, IsMounted()) end)
 	if companionType == "MOUNT" and InCombatLockdown() then
-		self:updateMounted(not not util.getUnitMount("player"))
+		self:updateMounted(util.isMounted())
 	end
 end
 

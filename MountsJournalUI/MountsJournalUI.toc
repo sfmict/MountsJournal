@@ -21,10 +21,10 @@
 ## LoadOnDemand: 1
 ## LoadWith: Blizzard_Collections
 embeds.xml
-Util.lua
-templates.xml
 database\ClassDB.lua
 database\FamilyDB.lua
+Util.lua
+templates.xml
 Journal.lua
 components\components.xml
 config\config.xml

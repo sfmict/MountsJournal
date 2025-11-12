@@ -18,15 +18,15 @@
 ## Category-zhTW: 戰隊收藏
 ## SavedVariables: MountsJournalDB
 ## SavedVariablesPerCharacter: MountsJournalChar
-## OptionalDeps: LibStub, LibSFDropDown, LibThingsLoad, LibDeflate, OPie
+## OptionalDeps: LibStub, LibThingsLoad, LibDeflate, OPie
 embeds.xml
 locales.xml
+database\SpecificDB.lua
+database\MountsDB.lua
 Util.lua
 templates.xml
 Mounts.lua
 Old.lua
-database\SpecificDB.lua
-database\MountsDB.lua
 components\components.xml
 #@do-not-package@
 _test.lua
