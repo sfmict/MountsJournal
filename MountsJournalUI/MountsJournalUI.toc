@@ -19,7 +19,6 @@
 ## OptionalDeps: LibStub, LibSFDropDown
 ## Dependencies: MountsJournal, Blizzard_Collections
 ## LoadOnDemand: 1
-## LoadWith: Blizzard_Collections
 embeds.xml
 database\ClassDB.lua
 database\FamilyDB.lua
