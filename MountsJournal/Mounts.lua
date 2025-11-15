@@ -14,6 +14,11 @@ mounts:RegisterEvent("UPDATE_INVENTORY_DURABILITY")
 
 
 local function loadUI()
+	function mounts.setMetaNS(ui)
+		ui.addon = addon
+		setmetatable(ns, {__index = ui, __metatable = false})
+		setmetatable(ui, {__index = ns, __metatable = false})
+	end
 	mounts:UnregisterEvent("ADDON_LOADED")
 	mounts.ADDON_LOADED = nil
 	local name = addon.."UI"
@@ -22,6 +27,7 @@ local function loadUI()
 		C_AddOns.EnableAddOn(name)
 		C_AddOns.LoadAddOn(name)
 	end
+	mounts.setMetaNS = nil
 end
 
 
@@ -168,13 +174,6 @@ function mounts:ADDON_LOADED(addonName)
 			t[spellID] = 100 - math.floor(rarity * .99 + .5)
 			return t[spellID]
 		end})
-
-		--ui ns
-		function self.setMetaNS(ui)
-			self.setMetaNS = nil
-			ui.addon = addon
-			setmetatable(ui, {__index = ns, __metatable = false})
-		end
 
 		if C_AddOns.IsAddOnLoaded("Blizzard_Collections") then
 			loadUI()
@@ -535,6 +534,7 @@ function mounts:UNIT_AURA(_, data)
 	if data.addedAuras and not self.auraInstanceID then
 		for i = 1, #data.addedAuras do
 			local aura, spellID = data.addedAuras[i]
+			if issecretvalue(aura.spellId) then return end
 			if ns.additionalMountBuffs[aura.spellId] then
 				spellID = ns.additionalMountBuffs[aura.spellId].spellID
 			elseif C_MountJournal.GetMountFromSpell(aura.spellId) then

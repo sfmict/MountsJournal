@@ -12,6 +12,7 @@ externals:
 	MountsJournal/libs/LibDeflate:
 		site: https://www.curseforge.com/wow/addons/libdeflate
 		url: https://github.com/SafeteeWoW/LibDeflate
+	MountsJournal/libs/CallbackHandler-1.0: https://repos.curseforge.com/wow/callbackhandler/trunk/CallbackHandler-1.0
 	MountsJournal/libs/AceComm-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceComm-3.0
 	MountsJournalUI/libs/LibSFDropDown:
 		site: https://www.curseforge.com/wow/addons/libsfdropdown
