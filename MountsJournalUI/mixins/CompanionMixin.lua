@@ -33,7 +33,7 @@ function setPetMixin:onEnter()
 			battlePetActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
 
 			MJTooltipModel:ClearAllPoints()
-			MJTooltipModel:SetPoint("TOPLEFT", GameTooltip, "BOTTOMLEFT", 0, 2)
+			MJTooltipModel:SetPoint("TOPLEFT", self, "TOPRIGHT", 0, 2)
 			MJTooltipModel:Show()
 		end
 	end

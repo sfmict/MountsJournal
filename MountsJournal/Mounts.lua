@@ -410,6 +410,8 @@ do
 
 	local timer
 	function mounts:UNIT_SPELLCAST_START(_,_, spellID)
+		if issecretvalue(spellID) then return end
+
 		local petID
 		if self.fromPriority then
 			for i = 1, #self.priorityProfiles do

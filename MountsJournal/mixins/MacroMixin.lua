@@ -464,6 +464,7 @@ end
 
 
 local function isNotFishingBuff()
+	if util.isMidnight and GetRestrictedActionStatus(Enum.RestrictedActionType.SecretAuras) then return false end
 	return not C_UnitAuras.GetPlayerAuraBySpellID(394009)
 end
 

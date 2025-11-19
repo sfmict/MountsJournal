@@ -41,6 +41,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 	end
 
 	function tm:UNIT_SPELLCAST_START(_,_, spellID)
+		if util.isMidnight and issecretvalue(spellID) then return end
 		if ns.additionalMounts[spellID] then
 			self:setMount(spellID, ns.additionalMounts[spellID])
 		else

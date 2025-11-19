@@ -16,12 +16,6 @@ ns.journal:on("MODULES_INIT", function(journal)
 	local function onEnter(self)
 		self.highlight:Show()
 		local f = self.mountID and self or self:GetParent()
-		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
-		if type(f.mountID) == "number" then
-			GameTooltip:SetMountBySpellID(f.spellID)
-		elseif f.spellID then
-			GameTooltip:SetSpellByID(f.spellID)
-		end
 
 		if not (self:GetParent().modelScene or journal.mountDisplay:IsShown()) then
 			local _,_,_, creatureID, _,_, isSelfMount, _, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = journal:getMountInfoExtra(f.mountID)
@@ -30,10 +24,19 @@ ns.journal:on("MODULES_INIT", function(journal)
 			end
 			MJTooltipModel.model:SetFromModelSceneID(modelSceneID)
 			journal:setMountToModelScene(MJTooltipModel.model, creatureID, isSelfMount, animID, disablePlayerMountPreview, spellVisualKitID)
-
 			MJTooltipModel:ClearAllPoints()
-			MJTooltipModel:SetPoint("BOTTOMLEFT", GameTooltip, "BOTTOMRIGHT", -2, 0)
+			GameTooltip:SetOwner(self, "ANCHOR_NONE")
+			MJTooltipModel:SetPoint("BOTTOMLEFT", self, "TOPLEFT")
+			GameTooltip:SetPoint("BOTTOMLEFT", MJTooltipModel, "BOTTOMRIGHT", -2, 0)
 			MJTooltipModel:Show()
+		else
+			GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+		end
+
+		if type(f.mountID) == "number" then
+			GameTooltip:SetMountBySpellID(f.spellID)
+		elseif f.spellID then
+			GameTooltip:SetSpellByID(f.spellID)
 		end
 	end
 
