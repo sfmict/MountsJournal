@@ -19,6 +19,7 @@ L["Drag to create a summon panel"] = "Arraste para criar um painel de invocaçã
 --L["Left-button to drag"] = ""
 --L["Right-button to open context menu"] = ""
 --L["Strata of panel"] = ""
+--L["Speed display"] = ""
 L["Fade out (opacity)"] = "Opacidade"
 L["Button size"] = "Tamanho do botão"
 --L["Reset size"] = ""

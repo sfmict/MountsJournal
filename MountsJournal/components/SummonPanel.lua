@@ -4,8 +4,9 @@ local L, mounts, util = ns.L, ns.mounts, ns.util
 
 -- PANEL
 local panel = CreateFrame("FRAME", nil, UIParent)
-panel.BTN_SIZE = 45
 mounts.summonPanel = panel
+panel.BTN_SIZE = 45
+panel.speed = UIParent:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
 panel:SetFrameLevel(1000)
 panel:SetMovable(true)
 panel:SetScript("OnEvent", function(self)
@@ -150,6 +151,36 @@ function panel:setFade(value)
 end
 
 
+function panel:setSpeed(pos)
+	self.config.speedPos = pos
+
+	if pos then
+		self.speed:SetShown(not not mounts.auraInstanceID)
+		mounts:on("MOUNTED_UPDATE.summonPanel", function(_, IsMounted)
+			self.speed:SetShown(IsMounted)
+		end)
+		      :on("MOUNT_SPEED_UPDATE.summonPanel", function(_, speed)
+			self.speed:SetText(util:getFormattedSpeed(speed))
+		end)
+	else
+		self.speed:Hide()
+		mounts:off("MOUNTED_UPDATE.summonPanel")
+		      :off("MOUNT_SPEED_UPDATE.summonPanel")
+	end
+
+	self.speed:ClearAllPoints()
+	if pos == 1 then
+		self.speed:SetPoint("BOTTOM", self, "TOP", 0, 2)
+	elseif pos == 2 then
+		self.speed:SetPoint("TOP", self, "BOTTOM", 0, -2)
+	elseif pos == 3 then
+		self.speed:SetPoint("RIGHT", self, "LEFT", -2, 0)
+	else
+		self.speed:SetPoint("LEFT", self, "RIGHT", 2, 0)
+	end
+end
+
+
 -- BUTTONS
 mounts:on("ADDON_INIT", function()
 	panel.config = mounts.globalDB.summonPanelConfig
@@ -221,6 +252,7 @@ mounts:on("ADDON_INIT", function()
 	panel:setStrata()
 	panel:setSize()
 	panel:setShown(panel.config.isShown)
+	panel:setSpeed(panel.config.speedPos)
 	panel:GetScript("OnLeave")(panel)
 	panel:RegisterEvent("UI_SCALE_CHANGED")
 	hooksecurefunc(UIParent, "SetScale", function() panel:GetScript("OnEvent")(panel) end)

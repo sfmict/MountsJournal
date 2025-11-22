@@ -57,6 +57,10 @@ ns.journal:on("MODULES_INIT", function(journal)
 			info.value = "strata"
 			dd:ddAddButton(info, level)
 
+			info.text = L["Speed display"]
+			info.value = "speed"
+			dd:ddAddButton(info, level)
+
 			info.customFrame = panel.fade
 			info.OnLoad = function(frame)
 				frame:setValue(panel.config.fade)
@@ -80,27 +84,55 @@ ns.journal:on("MODULES_INIT", function(journal)
 			info.text = HIDE
 			info.func = function() panel:setShown(false) end
 			dd:ddAddButton(info, level)
-		elseif value == "strata" then
-			local strata = {[0] = "MEDIUM", "HIGH", "DIALOG", "FULLSCREEN"}
 
-			local function func(btn)
+		elseif value == "strata" then
+			info.disabled = InCombatLockdown()
+			info.keepShownOnClick = true
+
+			info.func = function(btn)
 				panel:setStrata(btn.value)
 				dd:ddRefresh(level)
 			end
-
-			local function checked(btn)
+			info.checked = function(btn)
 				return btn.value == panel.config.frameStrata
 			end
 
-			info.disabled = InCombatLockdown()
-			info.keepShownOnClick = true
+			local strata = {[0] = "MEDIUM", "HIGH", "DIALOG", "FULLSCREEN"}
 			for i = 0, #strata do
 				info.text = strata[i]
 				info.value = i
-				info.func = func
-				info.checked = checked
 				dd:ddAddButton(info, level)
 			end
+
+		elseif value == "speed" then
+			info.keepShownOnClick = true
+
+			info.func = function(btn)
+				panel:setSpeed(btn.value)
+				dd:ddRefresh(level)
+			end
+			info.checked = function(btn)
+				return btn.value == panel.config.speedPos
+			end
+
+			info.text = NONE
+			dd:ddAddButton(info, level)
+
+			info.text = HUD_EDIT_MODE_SETTING_COOLDOWN_VIEWER_ICON_DIRECTION_UP
+			info.value = 1
+			dd:ddAddButton(info, level)
+
+			info.text = HUD_EDIT_MODE_SETTING_COOLDOWN_VIEWER_ICON_DIRECTION_DOWN
+			info.value = 2
+			dd:ddAddButton(info, level)
+
+			info.text = HUD_EDIT_MODE_SETTING_COOLDOWN_VIEWER_ICON_DIRECTION_LEFT
+			info.value = 3
+			dd:ddAddButton(info, level)
+
+			info.text = HUD_EDIT_MODE_SETTING_COOLDOWN_VIEWER_ICON_DIRECTION_RIGHT
+			info.value = 4
+			dd:ddAddButton(info, level)
 		end
 	end)
 

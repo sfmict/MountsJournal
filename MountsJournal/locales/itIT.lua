@@ -19,6 +19,7 @@ local L = ns.L
 --L["Left-button to drag"] = ""
 --L["Right-button to open context menu"] = ""
 --L["Strata of panel"] = ""
+--L["Speed display"] = ""
 --L["Fade out (opacity)"] = ""
 --L["Button size"] = ""
 --L["Reset size"] = ""

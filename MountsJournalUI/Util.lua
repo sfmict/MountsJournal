@@ -323,35 +323,6 @@ end
 
 
 do
-	local ABBR_YARD = " "..L["ABBR_YARD"]
-	local ABBR_MILE = " "..L["ABBR_MILE"]
-	function util.getImperialFormat(distance)
-		if distance < 1760 then
-			return math.floor(distance)..ABBR_YARD
-		elseif distance < 176e4 then
-			return (math.floor(distance / 176) / 10)..ABBR_MILE
-		end
-		return math.floor(distance / 1760)..ABBR_MILE
-	end
-end
-
-
-do
-	local ABBR_METER = " "..L["ABBR_METER"]
-	local ABBR_KILOMETER = " "..L["ABBR_KILOMETER"]
-	function util.getMetricFormat(distance)
-		distance = distance * .9144
-		if distance < 1e3 then
-			return math.floor(distance)..ABBR_METER
-		elseif distance < 1e6 then
-			return (math.floor(distance / 100) / 10)..ABBR_KILOMETER
-		end
-		return math.floor(distance / 1e3)..ABBR_KILOMETER
-	end
-end
-
-
-do
 	local text = "%s = %s"
 	function util:getFormattedDistance(distance)
 		return text:format(self.getImperialFormat(distance), self.getMetricFormat(distance))
@@ -364,14 +335,5 @@ do
 	function util:getFormattedAvgSpeed(distance, time)
 		local avgSpeed = time > 0 and distance / time * 3600 or 0
 		return text:format(self.getImperialFormat(avgSpeed), self.getMetricFormat(avgSpeed))
-	end
-end
-
-
-do
-	local text = "%s/"..L["ABBR_HOUR"]
-	local speedFormat = GetLocale() ~= "enUS" and util.getMetricFormat or util.getImperialFormat
-	function util:getFormattedSpeed(speed)
-		return text:format(speedFormat(speed * 3600))
 	end
 end
