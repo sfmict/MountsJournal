@@ -73,6 +73,8 @@ test:SetScript("OnEvent", function(self, event, ...)
 end)
 --test:RegisterEvent("ADDON_LOADED")
 -- test:RegisterAllEvents()
+--test:RegisterEvent("VIEWED_TRANSMOG_OUTFIT_CHANGED")
+--test:RegisterEvent("VIEWED_TRANSMOG_OUTFIT_SLOT_WEAPON_OPTION_CHANGED")
 
 test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 -- test:RegisterEvent("PET_BATTLE_OPENING_START")

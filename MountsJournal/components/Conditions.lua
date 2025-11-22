@@ -934,106 +934,235 @@ end
 conds.tmog = {}
 conds.tmog.text = PERKS_VENDOR_CATEGORY_TRANSMOG
 
-function conds.tmog:getValueText(value)
-	if type(value) == "number" then
-		local setInfo = C_TransmogSets.GetSetInfo(value)
-		if setInfo then
-			if setInfo.description then
-				return ("%s - %s (%s)"):format(WARDROBE_SETS, setInfo.name, setInfo.description)
-			else
-				return ("%s - %s"):format(WARDROBE_SETS, setInfo.name)
+-------------------------------
+if util.isMidnight then -- beta
+	function conds.tmog:getValueText(value)
+		local outfitID, guid = (":"):split(value, 2)
+		if guid == UnitGUID("player") then
+			local outfitInfo = C_TransmogOutfitInfo.GetOutfitInfo(tonumber(outfitID))
+			if outfitInfo then return outfitInfo.name end
+		elseif guid then
+			return ("ID:%s - %s"):format(outfitID, ns.macroFrame:getNameByGUID(guid))
+		end
+	end
+
+	function conds.tmog:getValueList(value, func)
+		local list = {}
+		local guid = UnitGUID("player")
+		local outfitsInfo = C_TransmogOutfitInfo.GetOutfitsInfo()
+
+		local function getSlotTransmogID(location, weaponOption)
+			if not location then return Constants.Transmog.NoTransmogID end
+			local transmogInfo = C_TransmogOutfitInfo.GetViewedOutfitSlotInfo(location:GetSlot(), location:GetType(), weaponOption)
+			return transmogInfo and transmogInfo.transmogID or Constants.Transmog.NoTransmogID
+		end
+
+		local function onEnter(btn, outfitID)
+			MJTooltipModel.model:SetFromModelSceneID(290)
+			local actor = MJTooltipModel.model:GetPlayerActor()
+			actor:SetModelByUnit("player", false, false, false, PlayerUtil.ShouldUseNativeFormInModelScene())
+
+			local hideIgnored = GetCVar("transmogHideIgnoredSlots")
+			SetCVar("transmogHideIgnoredSlots", "1")
+			local curOutfitID = C_TransmogOutfitInfo.GetCurrentlyViewedOutfitID()
+			C_TransmogOutfitInfo.ChangeViewedOutfit(outfitID)
+
+			local tLocations = {}
+			local iLocations = {}
+			local slotGroupData = C_TransmogOutfitInfo.GetSlotGroupInfo()
+			for i, groupData in ipairs(slotGroupData) do
+				for j, appearanceInfo in ipairs(groupData.appearanceSlotInfo) do
+					tLocations[#tLocations + 1] = TransmogUtil.GetTransmogLocation(appearanceInfo.slotName, appearanceInfo.type, appearanceInfo.isSecondary)
+				end
+				for j, illusionInfo in ipairs(groupData.illusionSlotInfo) do
+					iLocations[illusionInfo.slot] = TransmogUtil.GetTransmogLocation(illusionInfo.slotName, illusionInfo.type, illusionInfo.isSecondary)
+				end
 			end
+			for i = #tLocations, 1, -1 do
+				local location = tLocations[i]
+				local slot = location:GetSlot()
+				local linkedSlotInfo = C_TransmogOutfitInfo.GetLinkedSlotInfo(slot)
+
+				if not linkedSlotInfo or linkedSlotInfo.primarySlotInfo.slot == slot then
+					local slotID = location:GetSlotID()
+					local weaponOption = C_TransmogOutfitInfo.GetEquippedSlotOptionFromTransmogSlot(slot) or Enum.TransmogOutfitSlotOption.None
+					local appearanceID = getSlotTransmogID(location, weaponOption)
+
+					if appearanceID == Constants.Transmog.NoTransmogID then
+						actor:UndressSlot(slotID)
+					else
+						local secondaryAppearanceID = Constants.Transmog.NoTransmogID
+						if linkedSlotInfo then
+							local outfitSlotInfo = C_TransmogOutfitInfo.GetViewedOutfitSlotInfo(linkedSlotInfo.secondarySlotInfo.slot, linkedSlotInfo.secondarySlotInfo.type, weaponOption)
+							if outfitSlotInfo then
+								secondaryAppearanceID = outfitSlotInfo.transmogID
+							end
+						end
+						local illusionID = getSlotTransmogID(iLocations[slot], weaponOption)
+						local itemTransmogInfo = ItemUtil.CreateItemTransmogInfo(appearanceID, secondaryAppearanceID, illusionID)
+
+						local mainHandCategoryID
+						if location:IsMainHand() then
+							mainHandCategoryID = C_Transmog.GetSlotEffectiveCategory(location:GetData())
+							itemTransmogInfo:ConfigureSecondaryForMainHand(TransmogUtil.IsCategoryLegionArtifact(mainHandCategoryID))
+						end
+						-- Don't specify a slot for ranged weapons.
+						if mainHandCategoryID and TransmogUtil.IsCategoryRangedWeapon(mainHandCategoryID) then
+							slotID = nil
+						end
+						actor:SetItemTransmogInfo(itemTransmogInfo, slotID)
+					end
+				end
+			end
+
+			SetCVar("transmogHideIgnoredSlots", hideIgnored)
+			C_TransmogOutfitInfo.ChangeViewedOutfit(curOutfitID)
+
+			MJTooltipModel:ClearAllPoints()
+			MJTooltipModel:SetPoint("LEFT", btn, "RIGHT", 5, 0)
+			MJTooltipModel:Show()
 		end
-	else
-		return ("%s - %s"):format(TRANSMOG_OUTFIT_HYPERLINK_TEXT:match("|t(.*)"), value)
-	end
-end
 
-function conds.tmog:getValueList(value, func)
-	local outfitList = {}
-	for i, id in ipairs(C_TransmogCollection.GetOutfits()) do
-		local name, icon = C_TransmogCollection.GetOutfitInfo(id)
-		outfitList[i] = {
-			text = name,
-			value = name,
-			icon = icon,
-			func = func,
-			checked = name == value,
-		}
-	end
-
-	if #outfitList == 0 then
-		outfitList[1] = {
-			notCheckable = true,
-			disabled = true,
-			text = EMPTY,
-		}
-	end
-
-	local function set_OnEnter(btn)
-		MJTooltipModel.model:SetFromModelSceneID(290)
-		local actor = MJTooltipModel.model:GetPlayerActor()
-		actor:SetModelByUnit("player", false, false, false, true)
-
-		local primaryAppearances = C_TransmogSets.GetSetPrimaryAppearances(btn.value)
-		for i = 1, #primaryAppearances do
-			actor:TryOn(primaryAppearances[i].appearanceID)
+		local function onLeave()
+			MJTooltipModel:Hide()
 		end
 
-		MJTooltipModel:ClearAllPoints()
-		MJTooltipModel:SetPoint("LEFT", btn, "RIGHT", 5, 0)
-		MJTooltipModel:Show()
+		if outfitsInfo and #outfitsInfo > 0 then
+			for i, outfitInfo in ipairs(outfitsInfo) do
+				local v = ("%s:%s"):format(outfitInfo.outfitID, guid)
+				list[i] = {
+					text = outfitInfo.name,
+					value = v,
+					arg1 = outfitInfo.outfitID,
+					icon = outfitInfo.icon,
+					func = func,
+					checked = v == value,
+					OnEnter = onEnter,
+					OnLeave = onLeave,
+				}
+			end
+		else
+			list[1] = {
+				notCheckable = true,
+				disabled = true,
+				text = EMPTY,
+			}
+		end
+
+		return list
 	end
 
-	local function set_OnLeave(btn)
-		MJTooltipModel:Hide()
+	function conds.tmog:getFuncText(value)
+		local outfitID, guid = (":"):split(value, 2)
+		if guid == UnitGUID("player") then
+			return "C_TransmogOutfitInfo.GetActiveOutfitID() == "..outfitID
+		end
+		return "false"
 	end
 
-	local setList = {}
-	for i, set in ipairs(C_TransmogSets.GetUsableSets()) do
-		local setInfo = C_TransmogSets.GetSetInfo(set.setID)
-		setList[i] = {
-			text = setInfo.description and ("%s (%s)"):format(setInfo.name, setInfo.description) or setInfo.name,
-			value = set.setID,
-			func = func,
-			checked = set.setID == value,
-			OnEnter = set_OnEnter,
-			OnLeave = set_OnLeave,
+-------------------------------
+else -- retail
+	function conds.tmog:getValueText(value)
+		if type(value) == "number" then
+			local setInfo = C_TransmogSets.GetSetInfo(value)
+			if setInfo then
+				if setInfo.description then
+					return ("%s - %s (%s)"):format(WARDROBE_SETS, setInfo.name, setInfo.description)
+				else
+					return ("%s - %s"):format(WARDROBE_SETS, setInfo.name)
+				end
+			end
+		else
+			return ("%s - %s"):format(TRANSMOG_OUTFIT_HYPERLINK_TEXT:match("|t(.*)"), value)
+		end
+	end
+
+	function conds.tmog:getValueList(value, func)
+		local outfitList = {}
+		for i, id in ipairs(C_TransmogCollection.GetOutfits()) do
+			local name, icon = C_TransmogCollection.GetOutfitInfo(id)
+			outfitList[i] = {
+				text = name,
+				value = name,
+				icon = icon,
+				func = func,
+				checked = name == value,
+			}
+		end
+
+		if #outfitList == 0 then
+			outfitList[1] = {
+				notCheckable = true,
+				disabled = true,
+				text = EMPTY,
+			}
+		end
+
+		local function set_OnEnter(btn)
+			MJTooltipModel.model:SetFromModelSceneID(290)
+			local actor = MJTooltipModel.model:GetPlayerActor()
+			actor:SetModelByUnit("player", false, false, false, true)
+
+			local primaryAppearances = C_TransmogSets.GetSetPrimaryAppearances(btn.value)
+			for i = 1, #primaryAppearances do
+				actor:TryOn(primaryAppearances[i].appearanceID)
+			end
+
+			MJTooltipModel:ClearAllPoints()
+			MJTooltipModel:SetPoint("LEFT", btn, "RIGHT", 5, 0)
+			MJTooltipModel:Show()
+		end
+
+		local function set_OnLeave(btn)
+			MJTooltipModel:Hide()
+		end
+
+		local setList = {}
+		for i, set in ipairs(C_TransmogSets.GetUsableSets()) do
+			local setInfo = C_TransmogSets.GetSetInfo(set.setID)
+			setList[i] = {
+				text = setInfo.description and ("%s (%s)"):format(setInfo.name, setInfo.description) or setInfo.name,
+				value = set.setID,
+				func = func,
+				checked = set.setID == value,
+				OnEnter = set_OnEnter,
+				OnLeave = set_OnLeave,
+			}
+		end
+		sort(setList, function(a, b) return strcmputf8i(a.text, b.text) < 0 end)
+
+		if #setList == 0 then
+			setList[1] = {
+				notCheckable = true,
+				disabled = true,
+				text = EMPTY,
+			}
+		end
+
+		return {
+			{
+				keepShownOnClick = true,
+				notCheckable = true,
+				hasArrow = true,
+				text = TRANSMOG_OUTFIT_HYPERLINK_TEXT:match("|t(.*)"),
+				value = outfitList,
+			},
+			{
+				keepShownOnClick = true,
+				notCheckable = true,
+				hasArrow = true,
+				text = WARDROBE_SETS,
+				value = setList,
+			},
 		}
 	end
-	sort(setList, function(a, b) return strcmputf8i(a.text, b.text) < 0 end)
 
-	if #setList == 0 then
-		setList[1] = {
-			notCheckable = true,
-			disabled = true,
-			text = EMPTY,
-		}
-	end
-
-	return {
-		{
-			keepShownOnClick = true,
-			notCheckable = true,
-			hasArrow = true,
-			text = TRANSMOG_OUTFIT_HYPERLINK_TEXT:match("|t(.*)"),
-			value = outfitList,
-		},
-		{
-			keepShownOnClick = true,
-			notCheckable = true,
-			hasArrow = true,
-			text = WARDROBE_SETS,
-			value = setList,
-		},
-	}
-end
-
-function conds.tmog:getFuncText(value)
-	if type(value) == "number" then
-		return ("self:isTransmogSetActive(%d)"):format(value)
-	else
-		return ("self:isTtransmogOutfitActive('%s')"):format(value:gsub("['\\]", "\\%1"))
+	function conds.tmog:getFuncText(value)
+		if type(value) == "number" then
+			return ("self:isTransmogSetActive(%d)"):format(value)
+		else
+			return ("self:isTtransmogOutfitActive('%s')"):format(value:gsub("['\\]", "\\%1"))
+		end
 	end
 end
 
