@@ -958,8 +958,15 @@ if util.isMidnight then -- beta
 		end
 
 		local function onEnter(btn, outfitID)
+			if MJTooltipModel.previousActor then
+				MJTooltipModel.previousActor:ClearModel()
+				MJTooltipModel.previousActor = nil
+			end
+
 			MJTooltipModel.model:SetFromModelSceneID(290)
 			local actor = MJTooltipModel.model:GetPlayerActor()
+			if not actor then return end
+			MJTooltipModel.previousActor = actor
 			actor:SetModelByUnit("player", false, false, false, PlayerUtil.ShouldUseNativeFormInModelScene())
 
 			local hideIgnored = GetCVar("transmogHideIgnoredSlots")
@@ -987,15 +994,23 @@ if util.isMidnight then -- beta
 					local slotID = location:GetSlotID()
 					local weaponOption = C_TransmogOutfitInfo.GetEquippedSlotOptionFromTransmogSlot(slot) or Enum.TransmogOutfitSlotOption.None
 					local appearanceID = getSlotTransmogID(location, weaponOption)
+					local secondaryAppearanceID = Constants.Transmog.NoTransmogID
+					if linkedSlotInfo then
+						local outfitSlotInfo = C_TransmogOutfitInfo.GetViewedOutfitSlotInfo(linkedSlotInfo.secondarySlotInfo.slot, linkedSlotInfo.secondarySlotInfo.type, weaponOption)
+						if outfitSlotInfo then
+							secondaryAppearanceID = outfitSlotInfo.transmogID
+						end
+					end
 
-					if appearanceID == Constants.Transmog.NoTransmogID then
+					if appearanceID == Constants.Transmog.NoTransmogID and secondaryAppearanceID == Constants.Transmog.NoTransmogID then
 						actor:UndressSlot(slotID)
 					else
-						local secondaryAppearanceID = Constants.Transmog.NoTransmogID
-						if linkedSlotInfo then
-							local outfitSlotInfo = C_TransmogOutfitInfo.GetViewedOutfitSlotInfo(linkedSlotInfo.secondarySlotInfo.slot, linkedSlotInfo.secondarySlotInfo.type, weaponOption)
-							if outfitSlotInfo then
-								secondaryAppearanceID = outfitSlotInfo.transmogID
+						-- doesn't show secondary if there is no main shoulder
+						if appearanceID == Constants.Transmog.NoTransmogID then
+							local itemLocation = TransmogUtil.GetItemLocationFromTransmogLocation(location)
+							if C_Item.DoesItemExist(itemLocation) then
+								local itemTransmogInfo = C_Item.GetBaseItemTransmogInfo(itemLocation)
+								appearanceID = TransmogUtil.GetRelevantTransmogID(itemTransmogInfo, location)
 							end
 						end
 						local illusionID = getSlotTransmogID(iLocations[slot], weaponOption)
@@ -1032,6 +1047,8 @@ if util.isMidnight then -- beta
 				local v = ("%s:%s"):format(outfitInfo.outfitID, guid)
 				list[i] = {
 					text = outfitInfo.name,
+					rightText = ("|cff808080ID:%d|r"):format(outfitInfo.outfitID),
+					rightFont = util.codeFont,
 					value = v,
 					arg1 = outfitInfo.outfitID,
 					icon = outfitInfo.icon,
@@ -1055,7 +1072,7 @@ if util.isMidnight then -- beta
 	function conds.tmog:getFuncText(value)
 		local outfitID, guid = (":"):split(value, 2)
 		if guid == UnitGUID("player") then
-			return "C_TransmogOutfitInfo.GetActiveOutfitID() == "..outfitID
+			return "C_TransmogOutfitInfo.GetActiveOutfitID() == "..outfitID, "C_TransmogOutfitInfo"
 		end
 		return "false"
 	end
@@ -1099,9 +1116,22 @@ else -- retail
 		end
 
 		local function set_OnEnter(btn)
+			if MJTooltipModel.previousActor then
+				MJTooltipModel.previousActor:ClearModel()
+				MJTooltipModel.previousActor = nil
+			end
+
 			MJTooltipModel.model:SetFromModelSceneID(290)
 			local actor = MJTooltipModel.model:GetPlayerActor()
-			actor:SetModelByUnit("player", false, false, false, true)
+			if not actor then return end
+			MJTooltipModel.previousActor = actor
+			local useNativeForm = true
+			local _, raceFilename = UnitRace("Player")
+			if raceFilename == "Dracthyr" or raceFilename == "Worgen" then
+				local hasAlternateForm, inAlternateForm = C_PlayerInfo.GetAlternateFormInfo()
+				useNativeForm = not inAlternateForm
+			end
+			actor:SetModelByUnit("player", false, false, false, useNativeForm)
 
 			local primaryAppearances = C_TransmogSets.GetSetPrimaryAppearances(btn.value)
 			for i = 1, #primaryAppearances do
