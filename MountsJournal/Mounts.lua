@@ -370,7 +370,7 @@ end
 function mounts:PLAYER_REGEN_DISABLED()
 	self:UnregisterEvent("UNIT_SPELLCAST_START")
 	--self:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-	if self.auraInstanceID == nil then self:UnregisterEvent("UNIT_AURA") end
+	if self.mountAuraInstanceID == nil then self:UnregisterEvent("UNIT_AURA") end
 end
 
 
@@ -468,13 +468,13 @@ do
 			mountStat[2] = mountStat[2] + elapsed
 			mountStat[3] = mountStat[3] + speed * elapsed
 		end
-		self:event("MOUNT_SPEED_UPDATE", speed)
+		self:event("MOUNT_SPEED_UPDATE", speed, isGliding and not self.thrillAuraInstanceID)
 	end
 
 
 	function mounts:startTracking(spellID, auraInstanceID, afterCombat)
 		self.trackableID = spellID -- for additional active
-		self.auraInstanceID = auraInstanceID
+		self.mountAuraInstanceID = auraInstanceID
 		if self.config.statCollection then
 			mountStat = self.stat[spellID]
 			self:SetScript("OnUpdate", tracking)
@@ -487,7 +487,8 @@ end
 
 function mounts:stopTracking()
 	self.trackableID = nil
-	self.auraInstanceID = nil
+	self.mountAuraInstanceID = nil
+	self.thrillAuraInstanceID = nil
 	if InCombatLockdown() then
 		self:UnregisterEvent("UNIT_AURA")
 	end
@@ -515,7 +516,7 @@ end
 
 function mounts:UNIT_AURA(_, data)
 	if GetRestrictedActionStatus(Enum.RestrictedActionType.SecretAuras) then
-		if self.auraInstanceID and C_UnitAuras.GetAuraDataByAuraInstanceID("player", self.auraInstanceID) == nil then
+		if self.mountAuraInstanceID and C_UnitAuras.GetAuraDataByAuraInstanceID("player", self.mountAuraInstanceID) == nil then
 			self:stopTracking()
 		end
 		return
@@ -523,28 +524,38 @@ function mounts:UNIT_AURA(_, data)
 	if data.isFullUpdate then
 		self:stopTracking()
 		local spellID, mountID, auraInstanceID = util.getUnitMount("player")
-		if spellID then self:startTracking(spellID, auraInstanceID) end
+		if spellID then
+			self:startTracking(spellID, auraInstanceID)
+			local thrillInfo = C_UnitAuras.GetPlayerAuraBySpellID(377234)
+			self.thrillAuraInstanceID = thrillInfo and thrillInfo.auraInstanceID
+		end
 	end
-	if data.removedAuraInstanceIDs and self.auraInstanceID then -- secrets ?
+	if data.removedAuraInstanceIDs and self.mountAuraInstanceID then
 		for i = 1, #data.removedAuraInstanceIDs do
-			if data.removedAuraInstanceIDs[i] == self.auraInstanceID then
+			local removedAuraInstanceID = data.removedAuraInstanceIDs[i]
+			if removedAuraInstanceID == self.mountAuraInstanceID then
 				self:stopTracking()
 				break
+			elseif removedAuraInstanceID == self.thrillAuraInstanceID then
+				self.thrillAuraInstanceID = nil
 			end
 		end
 	end
-	if data.addedAuras and not self.auraInstanceID then
+	if data.addedAuras then
 		for i = 1, #data.addedAuras do
 			local aura, spellID = data.addedAuras[i]
 			if issecretvalue(aura.spellId) then return end
-			if ns.additionalMountBuffs[aura.spellId] then
-				spellID = ns.additionalMountBuffs[aura.spellId].spellID
-			elseif C_MountJournal.GetMountFromSpell(aura.spellId) then
-				spellID = aura.spellId
-			end
-			if spellID then
-				self:startTracking(spellID, aura.auraInstanceID)
-				break
+			if aura.spellId == 377234 then
+				self.thrillAuraInstanceID = aura.auraInstanceID
+			elseif self.mountAuraInstanceID == nil then
+				if ns.additionalMountBuffs[aura.spellId] then
+					spellID = ns.additionalMountBuffs[aura.spellId].spellID
+				elseif C_MountJournal.GetMountFromSpell(aura.spellId) then
+					spellID = aura.spellId
+				end
+				if spellID then
+					self:startTracking(spellID, aura.auraInstanceID)
+				end
 			end
 		end
 	end
@@ -716,7 +727,7 @@ end
 function mounts:PLAYER_REGEN_DISABLED()
 	self:UnregisterEvent("UNIT_SPELLCAST_START")
 	self:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-	if not self.auraInstanceID then self:UnregisterEvent("UNIT_AURA") end
+	if not self.mountAuraInstanceID then self:UnregisterEvent("UNIT_AURA") end
 end
 
 
@@ -794,12 +805,12 @@ do
 			mountStat[2] = mountStat[2] + elapsed
 			mountStat[3] = mountStat[3] + speed * elapsed
 		end
-		self:event("MOUNT_SPEED_UPDATE", speed)
+		self:event("MOUNT_SPEED_UPDATE", speed, isGliding and not self.thrillAuraInstanceID)
 	end
 
 
 	function mounts:startTracking(spellID, auraInstanceID)
-		self.auraInstanceID = auraInstanceID
+		self.mountAuraInstanceID = auraInstanceID
 		if self.config.statCollection then
 			mountStat = self.stat[spellID]
 			self:SetScript("OnUpdate", tracking)
@@ -811,7 +822,8 @@ end
 
 function mounts:stopTracking()
 	self:SetScript("OnUpdate", nil)
-	self.auraInstanceID = nil
+	self.mountAuraInstanceID = nil
+	self.thrillAuraInstanceID = nil
 	if InCombatLockdown() then
 		self:UnregisterEvent("UNIT_AURA")
 	end
@@ -823,27 +835,37 @@ function mounts:UNIT_AURA(_, data)
 	if data.isFullUpdate then
 		self:stopTracking()
 		local spellID, mountID, auraInstanceID = util.getUnitMount("player")
-		if spellID then self:startTracking(spellID, auraInstanceID) end
+		if spellID then
+			self:startTracking(spellID, auraInstanceID)
+			local thrillInfo = C_UnitAuras.GetPlayerAuraBySpellID(377234)
+			self.thrillAuraInstanceID = thrillInfo and thrillInfo.auraInstanceID
+		end
 	end
-	if data.removedAuraInstanceIDs and self.auraInstanceID then
+	if data.removedAuraInstanceIDs and self.mountAuraInstanceID then
 		for i = 1, #data.removedAuraInstanceIDs do
-			if data.removedAuraInstanceIDs[i] == self.auraInstanceID then
+			local removedAuraInstanceID = data.removedAuraInstanceIDs[i]
+			if removedAuraInstanceID == self.mountAuraInstanceID then
 				self:stopTracking()
 				break
+			elseif removedAuraInstanceID == self.thrillAuraInstanceID then
+				self.thrillAuraInstanceID = nil
 			end
 		end
 	end
-	if data.addedAuras and not self.auraInstanceID then
+	if data.addedAuras then
 		for i = 1, #data.addedAuras do
 			local aura, spellID = data.addedAuras[i]
-			if ns.additionalMountBuffs[aura.spellId] then
-				spellID = ns.additionalMountBuffs[aura.spellId].spellID
-			elseif C_MountJournal.GetMountFromSpell(aura.spellId) then
-				spellID = aura.spellId
-			end
-			if spellID then
-				self:startTracking(spellID, aura.auraInstanceID)
-				break
+			if aura.spellId == 377234 then
+				self.thrillAuraInstanceID = aura.auraInstanceID
+			elseif self.mountAuraInstanceID == nil then
+				if ns.additionalMountBuffs[aura.spellId] then
+					spellID = ns.additionalMountBuffs[aura.spellId].spellID
+				elseif C_MountJournal.GetMountFromSpell(aura.spellId) then
+					spellID = aura.spellId
+				end
+				if spellID then
+					self:startTracking(spellID, aura.auraInstanceID)
+				end
 			end
 		end
 	end

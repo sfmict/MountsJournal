@@ -439,8 +439,9 @@ end
 
 do
 	local text = "%s/"..L["ABBR_HOUR"]
+	local redText = "|cffee2222"..text
 	local speedFormat = GetLocale() ~= "enUS" and util.getMetricFormat or util.getImperialFormat
-	function util:getFormattedSpeed(speed)
-		return text:format(speedFormat(speed * 3600))
+	function util.getFormattedSpeed(speed, noThrill)
+		return (noThrill and redText or text):format(speedFormat(speed * 3600))
 	end
 end

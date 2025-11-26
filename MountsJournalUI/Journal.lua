@@ -1637,8 +1637,8 @@ function journal:COMPANION_UPDATE(companionType)
 end
 
 
-function journal:updateSpeed(speed)
-	self.mountSpeed:SetText(util:getFormattedSpeed(speed))
+function journal:updateSpeed(...)
+	self.mountSpeed:SetText(util.getFormattedSpeed(...))
 end
 
 
