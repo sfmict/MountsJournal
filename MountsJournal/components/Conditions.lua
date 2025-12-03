@@ -683,6 +683,7 @@ local RACE_KEYS = {
 	37, -- Mechagnome
 	52, -- Dracthyr
 	84, -- EarthenDwarf
+	86, -- Haranir
 }
 local RACE_LABELS = {}
 local RACE_ICON_TOKEN = { -- ChrRacesCreateScreenIcon
@@ -711,6 +712,7 @@ local RACE_ICON_TOKEN = { -- ChrRacesCreateScreenIcon
 	[37] = "mechagnome",
 	[52] = "dracthyr",
 	[84] = "earthen",
+	[86] = "haranir",
 }
 for i = 1, #RACE_KEYS do
 	local id = RACE_KEYS[i]

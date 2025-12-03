@@ -155,7 +155,7 @@ function panel:setSpeed(pos)
 	self.config.speedPos = pos
 
 	if pos then
-		self.speed:SetShown(not not mounts.trackableID)
+		self.speed:SetShown(mounts.mountAuraInstanceID ~= nil)
 		mounts:on("MOUNTED_UPDATE.summonPanel", function(_, isMounted)
 			self.speed:SetShown(isMounted)
 		end)
