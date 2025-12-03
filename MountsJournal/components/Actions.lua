@@ -230,6 +230,73 @@ end
 
 
 ---------------------------------------------------
+-- rmountc RANDOM MOUNT BY SUMMON COUNTER
+actions.rmountc = {}
+actions.rmountc.text = L["Random Mount by Summon Counter"]
+actions.rmountc.description = L["The lower the counter, the higher the chance"]
+
+actions.rmountc.getValueText = actions.rmount.getValueText
+
+actions.rmountc.getValueList = actions.rmount.getValueList
+
+actions.rmountc.condText = actions.rmountc.condText
+
+function actions.rmountc:getFuncText(value)
+	if value == 0 then
+		return [[
+			self.mounts:setMountsList(self.mounts.sp, self.mounts.counterWeight)
+			profileLoad = 1
+		]]
+	elseif value == 1 then
+		return [[
+			self.mounts:setMountsList(self.mounts.defProfile, self.mounts.counterWeight)
+			profileLoad = 1
+		]]
+	else
+		return ([[
+			local profile = self.mounts.profiles['%s']
+			self.mounts:setMountsList(profile, self.mounts.counterWeight)
+			profileLoad = 1
+		]]):format(value:gsub("[\\']", "\\%1"))
+	end
+end
+
+
+---------------------------------------------------
+-- rmounttc RANDOM MOUNT OF SELECTED TYPE BY SUMMON COUNTER
+actions.rmounttc = {}
+actions.rmounttc.text = L["Random Mount of Selected Type by Summon Counter"]
+actions.rmounttc.description = L["The lower the counter, the higher the chance"]
+
+actions.rmounttc.getValueText = actions.rmountt.getValueText
+
+actions.rmounttc.getValueList = actions.rmountt.getValueList
+
+actions.rmounttc.condText = actions.rmountt.condText
+
+function actions.rmounttc:getFuncText(value)
+	local mType, profile = (":"):split(value, 2)
+
+	if mType == "1" then
+		mType = "fly"
+	elseif mType == "2" then
+		mType = "ground"
+	else
+		mType = "swimming"
+	end
+
+	local str = ("profileLoad = 2\nself.summonMType = '%s'\n"):format(mType)
+	if profile == "0" then
+		return str.."self.mounts:setMountsList(self.mounts.sp, self.mounts.counterWeight)"
+	elseif profile == "1" then
+		return str.."self.mounts:setMountsList(self.mounts.defProfile, self.mounts.counterWeight)"
+	else
+		return ("%sself.mounts:setMountsList(self.mounts.profiles['%s'], self.mounts.counterWeight)"):format(str, profile:gsub("[\\']", "\\%1"))
+	end
+end
+
+
+---------------------------------------------------
 -- mount
 actions.mount = {}
 actions.mount.text = L["Mount"]
@@ -480,6 +547,8 @@ function actions:getMenuList(value, func)
 		"rmountt",
 		"rmountr",
 		"rmounttr",
+		"rmountc",
+		"rmounttc",
 		"mount",
 		"tmount",
 		"dmount",

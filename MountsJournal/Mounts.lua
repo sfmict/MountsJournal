@@ -129,6 +129,10 @@ function mounts:ADDON_LOADED(addonName)
 			t[k] = {0, 0, 0}
 			return t[k]
 		end})
+		self.summonCount = 1 -- to avoid div by 0
+		for k, v in next, self.stat do
+			self.summonCount = self.summonCount + v[1]
+		end
 
 		MountsJournalChar = MountsJournalChar or {}
 		self.charDB = MountsJournalChar
@@ -167,12 +171,16 @@ function mounts:ADDON_LOADED(addonName)
 			{mountID = 1799},
 		}
 
-		-- rarity weight
+		-- mount weight
 		self.rarityWeight = setmetatable({}, {__index = function(t, spellID)
 			local mountID = C_MountJournal.GetMountFromSpell(spellID)
 			local rarity = mountID and ns.mountsDB[mountID][3] or 100
 			t[spellID] = 100 - math.floor(rarity * .99 + .5)
 			return t[spellID]
+		end})
+		self.counterWeight = setmetatable({}, {__index = function(t, spellID)
+			local chance = 1 - math.pow(self:getMountSummons(spellID) / self.summonCount, .1)
+			return math.floor(chance * 100 + .5)
 		end})
 
 		if C_AddOns.IsAddOnLoaded("Blizzard_Collections") then
@@ -565,6 +573,7 @@ end
 function mounts:addMountSummoned(spellID)
 	local mountStat = self.stat[spellID]
 	mountStat[1] = mountStat[1] + 1
+	self.summonCount = self.summonCount + 1
 	self:event("MOUNT_SUMMONED")
 end
 
@@ -789,6 +798,7 @@ function mounts:UNIT_SPELLCAST_SUCCEEDED(_,_, spellID)
 	if ns.additionalMounts[spellID] or C_MountJournal.GetMountFromSpell(spellID) then
 		local mountStat = self.stat[spellID]
 		mountStat[1] = mountStat[1] + 1
+		self.summonCount = self.summonCount + 1
 		self:event("MOUNT_SUMMONED")
 	end
 end
