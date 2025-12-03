@@ -221,6 +221,7 @@ ns.familyDB = {
 		["Rhinos"] = 2808,
 		["Riverbeasts"] = 2809,
 		["Stag"] = 2810,
+		["Bloodtusks"] = 2811,
 	},
 	["Vehicles"] = {
 		["Airplanes"] = 2900,
@@ -512,6 +513,7 @@ ns.familyDBIcons = {
 	["Ungulates"] = {
 		[0] = 132254,
 		["Alpacas"] = 2916284,
+		["Bloodtusks"] = 3456125,
 		["Boars"] = 1044799,
 		["Camels"] = 454771,
 		["Cervid"] = 3747641,

@@ -516,6 +516,10 @@ end
 
 
 function codeEdit:updateHistoryBtns()
-	self.backBtn:SetEnabled(#self.history > self.historyPos)
-	self.nextBtn:SetEnabled(self.historyPos > 1)
+	local enable = #self.history > self.historyPos
+	if not enable then self.backBtn:SetButtonState("NORMAL") end
+	self.backBtn:SetEnabled(enable)
+	enable = self.historyPos > 1
+	if not enable then self.nextBtn:SetButtonState("NORMAL") end
+	self.nextBtn:SetEnabled(enable)
 end
