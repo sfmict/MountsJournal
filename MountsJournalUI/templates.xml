@@ -2990,7 +2990,7 @@
 		</Scripts>
 	</Frame>
 
-	<Frame name="MJTooltipModel" inherits="TooltipBackdropTemplate" parent="UIParent" frameStrata="TOOLTIP" hidden="true">
+	<Frame name="MJTooltipModel" clampedToScreen="true" inherits="TooltipBackdropTemplate" parent="UIParent" frameStrata="TOOLTIP" hidden="true">
 		<Size x="200" y="200"/>
 		<Frames>
 			<ModelScene parentKey="model" inherits="NonInteractableModelSceneMixinTemplate">
@@ -3114,15 +3114,6 @@
 			</OnClick>
 			<OnEnter>
 				if self.displayID and self.speciesID then
-					GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-					GameTooltip:SetText(self.subName:IsShown() and self.subName:GetText() or self.name:GetText(), 1, 1, 1)
-					GameTooltip:AddLine(self.sourceText, 1, 1, 1, true)
-					if self.description and self.description ~= "" then
-						GameTooltip:AddLine(" ")
-						GameTooltip:AddLine(self.description, nil, nil, nil, true)
-					end
-					GameTooltip:Show()
-
 					local cardModelSceneID, loadoutModelSceneID = C_PetJournal.GetPetModelSceneInfoBySpeciesID(self.speciesID)
 					MJTooltipModel.model:SetFromModelSceneID(loadoutModelSceneID)
 
@@ -3132,8 +3123,18 @@
 						battlePetActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
 
 						MJTooltipModel:ClearAllPoints()
-						MJTooltipModel:SetPoint("TOPLEFT", self, "TOPRIGHT", 0, 2)
+						MJTooltipModel:SetPoint("BOTTOMLEFT", self, "TOPRIGHT", 0, 0)
 						MJTooltipModel:Show()
+
+						GameTooltip:SetOwner(MJTooltipModel, "ANCHOR_NONE")
+						GameTooltip:SetPoint("TOPLEFT", MJTooltipModel, "BOTTOMLEFT", 0, 2)
+						GameTooltip:SetText(self.subName:IsShown() and self.subName:GetText() or self.name:GetText(), 1, 1, 1)
+						GameTooltip:AddLine(self.sourceText, 1, 1, 1, true)
+						if self.description and self.description ~= "" then
+							GameTooltip:AddLine(" ")
+							GameTooltip:AddLine(self.description, nil, nil, nil, true)
+						end
+						GameTooltip:Show()
 					end
 				end
 			</OnEnter>
@@ -3223,16 +3224,6 @@
 			<OnEnter>
 				self:SetBackdropBorderColor(.6, .6, .6)
 				local parent = self:GetParent()
-				GameTooltip:SetOwner(self, "ANCHOR_NONE")
-				GameTooltip:SetPoint("BOTTOM", self, "TOP")
-				GameTooltip:SetPoint("LEFT", parent, "RIGHT")
-				GameTooltip:SetText(self.subName:IsShown() and self.subName:GetText() or self.name:GetText(), 1, 1, 1)
-				GameTooltip:AddLine(self.sourceText, 1, 1, 1, true)
-				if self.description and self.description ~= "" then
-					GameTooltip:AddLine(" ")
-					GameTooltip:AddLine(self.description, nil, nil, nil, true)
-				end
-				GameTooltip:Show()
 
 				MJTooltipModel.model:SetFromModelSceneID(self.sceneID)
 				local battlePetActor = MJTooltipModel.model:GetActorByTag("pet")
@@ -3241,9 +3232,19 @@
 					battlePetActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
 
 					MJTooltipModel:ClearAllPoints()
-					MJTooltipModel:SetPoint("TOP", self, 0, 2)
+					MJTooltipModel:SetPoint("BOTTOM", self, "TOP")
 					MJTooltipModel:SetPoint("LEFT", parent, "RIGHT")
 					MJTooltipModel:Show()
+
+					GameTooltip:SetOwner(self, "ANCHOR_NONE")
+					GameTooltip:SetPoint("TOPLEFT", MJTooltipModel, "BOTTOMLEFT", 0, 2)
+					GameTooltip:SetText(self.subName:IsShown() and self.subName:GetText() or self.name:GetText(), 1, 1, 1)
+					GameTooltip:AddLine(self.sourceText, 1, 1, 1, true)
+					if self.description and self.description ~= "" then
+						GameTooltip:AddLine(" ")
+						GameTooltip:AddLine(self.description, nil, nil, nil, true)
+					end
+					GameTooltip:Show()
 				end
 			</OnEnter>
 			<OnLeave>
