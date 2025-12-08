@@ -1,6 +1,7 @@
 local _, ns = ...
 local L, util = ns.L, ns.util
 local strcmputf8i, concat = strcmputf8i, table.concat
+local playerGuid = UnitGUID("player")
 local conds = {}
 ns.conditions = conds
 
@@ -441,6 +442,26 @@ end
 
 
 ---------------------------------------------------
+-- rest
+conds.rest = {}
+conds.rest.text = L["The player is resting"]
+
+function conds.rest:getFuncText()
+	return "IsResting()", "IsResting"
+end
+
+
+---------------------------------------------------
+-- combat
+conds.combat = {}
+conds.combat.text = L["The player is in combat"]
+
+function conds.combat:getFuncText()
+	return "InCombatLockdown()", "InCombatLockdown"
+end
+
+
+---------------------------------------------------
 -- fs FLIGHT STYLE
 conds.fs = {}
 conds.fs.text = L["Flight style"]
@@ -539,6 +560,22 @@ conds.rspell.getValueText = conds.hitem.getValueText
 
 function conds.rspell:getFuncText(value)
 	return ("self:isSpellReady(%d)"):format(value)
+end
+
+
+---------------------------------------------------
+-- uspell USABLE SPELL
+conds.uspell = {}
+conds.uspell.text = L["Spell is usable"]
+conds.uspell.combatLock = util.isMidnight
+conds.uspell.isNumeric = true
+
+conds.uspell.getValueDescription = conds.kspell.getValueDescription
+
+conds.uspell.getValueText = conds.hitem.getValueText
+
+function conds.uspell:getFuncText(value)
+	return ("C_Spell.IsSpellUsable(%d)"):format(value), "C_Spell"
 end
 
 
@@ -940,7 +977,7 @@ conds.tmog.text = PERKS_VENDOR_CATEGORY_TRANSMOG
 if util.isMidnight then -- beta
 	function conds.tmog:getValueText(value)
 		local outfitID, guid = (":"):split(value, 2)
-		if guid == UnitGUID("player") then
+		if guid == playerGuid then
 			local outfitInfo = C_TransmogOutfitInfo.GetOutfitInfo(tonumber(outfitID))
 			if outfitInfo then return outfitInfo.name end
 		elseif guid then
@@ -950,13 +987,27 @@ if util.isMidnight then -- beta
 
 	function conds.tmog:getValueList(value, func)
 		local list = {}
-		local guid = UnitGUID("player")
 		local outfitsInfo = C_TransmogOutfitInfo.GetOutfitsInfo()
 
 		local function getSlotTransmogID(location, weaponOption)
 			if not location then return Constants.Transmog.NoTransmogID end
 			local transmogInfo = C_TransmogOutfitInfo.GetViewedOutfitSlotInfo(location:GetSlot(), location:GetType(), weaponOption)
 			return transmogInfo and transmogInfo.transmogID or Constants.Transmog.NoTransmogID
+		end
+
+		local function getRelevantTransmogID(transmogLocation)
+			local itemLocation = TransmogUtil.GetItemLocationFromTransmogLocation(transmogLocation)
+			if C_Item.DoesItemExist(itemLocation) then
+				local itemTransmogInfo = C_Item.GetBaseItemTransmogInfo(itemLocation)
+				if transmogLocation:IsIllusion() and itemTransmogInfo.illusionID then
+					return itemTransmogInfo.illusionID
+				end
+				if transmogLocation:IsSecondary() and itemTransmogInfo.secondaryAppearanceID then
+					return itemTransmogInfo.secondaryAppearanceID
+				end
+				return itemTransmogInfo.appearanceID
+			end
+			return Constants.Transmog.NoTransmogID
 		end
 
 		local function onEnter(btn, outfitID)
@@ -978,8 +1029,7 @@ if util.isMidnight then -- beta
 
 			local tLocations = {}
 			local iLocations = {}
-			local slotGroupData = C_TransmogOutfitInfo.GetSlotGroupInfo()
-			for i, groupData in ipairs(slotGroupData) do
+			for i, groupData in ipairs(C_TransmogOutfitInfo.GetSlotGroupInfo()) do
 				for j, appearanceInfo in ipairs(groupData.appearanceSlotInfo) do
 					tLocations[#tLocations + 1] = TransmogUtil.GetTransmogLocation(appearanceInfo.slotName, appearanceInfo.type, appearanceInfo.isSecondary)
 				end
@@ -993,7 +1043,6 @@ if util.isMidnight then -- beta
 				local linkedSlotInfo = C_TransmogOutfitInfo.GetLinkedSlotInfo(slot)
 
 				if not linkedSlotInfo or linkedSlotInfo.primarySlotInfo.slot == slot then
-					local slotID = location:GetSlotID()
 					local weaponOption = C_TransmogOutfitInfo.GetEquippedSlotOptionFromTransmogSlot(slot) or Enum.TransmogOutfitSlotOption.None
 					local appearanceID = getSlotTransmogID(location, weaponOption)
 					local secondaryAppearanceID = Constants.Transmog.NoTransmogID
@@ -1004,19 +1053,14 @@ if util.isMidnight then -- beta
 						end
 					end
 
-					if appearanceID == Constants.Transmog.NoTransmogID and secondaryAppearanceID == Constants.Transmog.NoTransmogID then
-						actor:UndressSlot(slotID)
-					else
+					if appearanceID ~= Constants.Transmog.NoTransmogID or secondaryAppearanceID ~= Constants.Transmog.NoTransmogID then
 						-- doesn't show secondary if there is no main shoulder
 						if appearanceID == Constants.Transmog.NoTransmogID then
-							local itemLocation = TransmogUtil.GetItemLocationFromTransmogLocation(location)
-							if C_Item.DoesItemExist(itemLocation) then
-								local itemTransmogInfo = C_Item.GetBaseItemTransmogInfo(itemLocation)
-								appearanceID = TransmogUtil.GetRelevantTransmogID(itemTransmogInfo, location)
-							end
+							appearanceID = getRelevantTransmogID(location)
 						end
 						local illusionID = getSlotTransmogID(iLocations[slot], weaponOption)
 						local itemTransmogInfo = ItemUtil.CreateItemTransmogInfo(appearanceID, secondaryAppearanceID, illusionID)
+						local slotID = location:GetSlotID()
 
 						local mainHandCategoryID
 						if location:IsMainHand() then
@@ -1046,7 +1090,7 @@ if util.isMidnight then -- beta
 
 		if outfitsInfo and #outfitsInfo > 0 then
 			for i, outfitInfo in ipairs(outfitsInfo) do
-				local v = ("%s:%s"):format(outfitInfo.outfitID, guid)
+				local v = ("%s:%s"):format(outfitInfo.outfitID, playerGuid)
 				list[i] = {
 					text = outfitInfo.name,
 					rightText = ("|cff808080ID:%d|r"):format(outfitInfo.outfitID),
@@ -1073,7 +1117,7 @@ if util.isMidnight then -- beta
 
 	function conds.tmog:getFuncText(value)
 		local outfitID, guid = (":"):split(value, 2)
-		if guid == UnitGUID("player") then
+		if guid == playerGuid then
 			return "C_TransmogOutfitInfo.GetActiveOutfitID() == "..outfitID, "C_TransmogOutfitInfo"
 		end
 		return "false"
@@ -1255,7 +1299,6 @@ end
 
 function conds.tl:getValueList(value, func)
 	local list = {}
-	local guid = UnitGUID("player")
 
 	for i = 1, GetNumSpecializations() do
 		local specID, specName = C_SpecializationInfo.GetSpecializationInfo(i)
@@ -1263,7 +1306,7 @@ function conds.tl:getValueList(value, func)
 		for j = 1, #configIDs do
 			local configID = configIDs[j]
 			local configInfo = C_Traits.GetConfigInfo(configID)
-			local v = ("%d:%s"):format(configID, guid)
+			local v = ("%d:%s"):format(configID, playerGuid)
 			list[#list + 1] = {
 				text = ("%s - %s"):format(configInfo.name, specName),
 				rightText = ("|cff808080ID:%d|r"):format(configID),
@@ -1447,7 +1490,7 @@ conds.equips.text = PAPERDOLL_EQUIPMENTMANAGER
 
 function conds.equips:getValueText(value)
 	local setID, guid = (":"):split(value, 2)
-	if guid == UnitGUID("player") then
+	if guid == playerGuid then
 		local name = C_EquipmentSet.GetEquipmentSetInfo(tonumber(setID))
 		if name then
 			return name
@@ -1460,11 +1503,10 @@ end
 
 function conds.equips:getValueList(value, func)
 	local list = {}
-	local guid = UnitGUID("player")
 
 	for i, setID in ipairs(C_EquipmentSet.GetEquipmentSetIDs()) do
 		local name, iconFileID = C_EquipmentSet.GetEquipmentSetInfo(setID)
-		local v = ("%d:%s"):format(setID, guid)
+		local v = ("%d:%s"):format(setID, playerGuid)
 		list[i] = {
 			text = name,
 			rightText = ("|cff808080ID:%d|r"):format(setID),
@@ -1489,7 +1531,7 @@ end
 
 function conds.equips:getFuncText(value)
 	local setID, guid = (":"):split(value, 2)
-	if guid == UnitGUID("player") then
+	if guid == playerGuid then
 		return ("self:checkEquipmentSet(%s)"):format(setID)
 	end
 	return "false"
@@ -1641,6 +1683,7 @@ end
 -- fgroup FRIEND IN PARTY
 conds.fgroup = {}
 conds.fgroup.text = L["Friend in Party"]
+conds.fgroup.combatLock = util.isMidnight
 
 local function getFriendList(value, func)
 	local friends = {}
@@ -1739,12 +1782,17 @@ function conds.fgroup:getValueText(value)
 end
 
 function conds.fgroup:getValueList(value, func)
-	local group = {}
+	local group, isSecret = {}
 
 	for i = 1, GetNumSubgroupMembers() do
 		local unit = "party"..i
 		if UnitIsPlayer(unit) then
-			local v = "guid:"..UnitGUID(unit)
+			local guid = UnitGUID(unit)
+			if util.isMidnight and issecretvalue(guid) then
+				isSecret = true
+				break
+			end
+			local v = "guid:"..guid
 			group[#group + 1] = {
 				text = GetUnitName(unit, true),
 				value = v,
@@ -1758,7 +1806,7 @@ function conds.fgroup:getValueList(value, func)
 		group[1] = {
 			notCheckable = true,
 			disabled = true,
-			text = EMPTY,
+			text = isSecret and "<secret>" or EMPTY,
 		}
 	end
 
@@ -1794,22 +1842,30 @@ end
 -- fraid FRIEND IN RAID
 conds.fraid = {}
 conds.fraid.text = L["Friend in Raid"]
+conds.fraid.combatLock = util.isMidnight
 
 conds.fraid.getValueText = conds.fgroup.getValueText
 
 function conds.fraid:getValueList(value, func)
-	local group = {}
+	local group, isSecret = {}
 
 	for i = 1, GetNumGroupMembers() do
 		local unit = "raid"..i
-		if UnitIsPlayer(unit) and not UnitIsUnit(unit, "player") then
-			local v = "guid:"..UnitGUID(unit)
-			group[#group + 1] = {
-				text = GetUnitName(unit, true),
-				value = v,
-				func = func,
-				checked = v == value,
-			}
+		if UnitIsPlayer(unit) then
+			local isPlayer = UnitIsUnit(unit, "player")
+			if util.isMidnight and issecretvalue(isPlayer) then
+				isSecret = true
+				break
+			end
+			if not isPlayer then
+				local v = "guid:"..UnitGUID(unit)
+				group[#group + 1] = {
+					text = GetUnitName(unit, true),
+					value = v,
+					func = func,
+					checked = v == value,
+				}
+			end
 		end
 	end
 
@@ -1817,7 +1873,7 @@ function conds.fraid:getValueList(value, func)
 		group[1] = {
 			notCheckable = true,
 			disabled = true,
-			text = EMPTY,
+			text = isSecret and "<secret>" or EMPTY,
 		}
 	end
 

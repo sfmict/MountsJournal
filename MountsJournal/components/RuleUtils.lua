@@ -249,16 +249,22 @@ end
 
 
 function macroFrame:isUnitInGroup(guid, isRaid)
-	local unit
+	local unit, uGuid
 	if isRaid then
 		for i = 1, GetNumGroupMembers() do
 			unit = "raid"..i
-			if guid == UnitGUID(unit) then return UnitIsConnected(unit) end
+			uGuid = UnitGUID(unit)
+			if not (util.isMidnight and issecretvalue(uGuid)) and guid == UnitGUID(unit) then
+				return UnitIsConnected(unit)
+			end
 		end
 	else
 		for i = 1, GetNumSubgroupMembers() do
 			unit = "party"..i
-			if guid == UnitGUID(unit) then return UnitIsConnected(unit) end
+			uGuid = UnitGUID(unit)
+			if not (util.isMidnight and issecretvalue(uGuid)) and guid == UnitGUID(unit) then
+				return UnitIsConnected(unit)
+			end
 		end
 	end
 	return false

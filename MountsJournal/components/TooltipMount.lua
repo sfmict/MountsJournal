@@ -7,6 +7,7 @@ TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, function(tool
 		for i = 1, #data.lines do
 			local unit = data.lines[i].unitToken
 			if unit then
+				if util.isMidnight and issecretvalue(unit) then return end
 				local spellID, mountID = util.getUnitMount(unit)
 				if spellID then
 					local name, _, icon = util.getMountInfo(mountID or ns.additionalMounts[spellID])
