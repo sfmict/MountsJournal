@@ -995,17 +995,16 @@ if util.isMidnight then -- beta
 			return transmogInfo and transmogInfo.transmogID or Constants.Transmog.NoTransmogID
 		end
 
-		local function getRelevantTransmogID(transmogLocation)
-			local itemLocation = TransmogUtil.GetItemLocationFromTransmogLocation(transmogLocation)
-			if C_Item.DoesItemExist(itemLocation) then
-				local itemTransmogInfo = C_Item.GetBaseItemTransmogInfo(itemLocation)
-				if transmogLocation:IsIllusion() and itemTransmogInfo.illusionID then
-					return itemTransmogInfo.illusionID
+		local function getRelevantTransmogID(location)
+			local locationData = location:GetData()
+			local categoryID = C_Transmog.GetSlotEffectiveCategory(locationData)
+			local entries = C_TransmogCollection.GetCategoryAppearances(categoryID, locationData)
+			for i, itemEntry in ipairs(entries) do
+				if itemEntry.isHideVisual then
+					local sources = CollectionWardrobeUtil.GetSortedAppearanceSources(itemEntry.visualID, categoryID, location)
+					if sources[1] then return sources[1].sourceID end
+					break
 				end
-				if transmogLocation:IsSecondary() and itemTransmogInfo.secondaryAppearanceID then
-					return itemTransmogInfo.secondaryAppearanceID
-				end
-				return itemTransmogInfo.appearanceID
 			end
 			return Constants.Transmog.NoTransmogID
 		end
@@ -1037,8 +1036,7 @@ if util.isMidnight then -- beta
 					iLocations[illusionInfo.slot] = TransmogUtil.GetTransmogLocation(illusionInfo.slotName, illusionInfo.type, illusionInfo.isSecondary)
 				end
 			end
-			for i = #tLocations, 1, -1 do
-				local location = tLocations[i]
+			for i, location in ipairs(tLocations) do
 				local slot = location:GetSlot()
 				local linkedSlotInfo = C_TransmogOutfitInfo.GetLinkedSlotInfo(slot)
 
@@ -1062,14 +1060,13 @@ if util.isMidnight then -- beta
 						local itemTransmogInfo = ItemUtil.CreateItemTransmogInfo(appearanceID, secondaryAppearanceID, illusionID)
 						local slotID = location:GetSlotID()
 
-						local mainHandCategoryID
 						if location:IsMainHand() then
-							mainHandCategoryID = C_Transmog.GetSlotEffectiveCategory(location:GetData())
+							local mainHandCategoryID = C_Transmog.GetSlotEffectiveCategory(location:GetData())
 							itemTransmogInfo:ConfigureSecondaryForMainHand(TransmogUtil.IsCategoryLegionArtifact(mainHandCategoryID))
-						end
-						-- Don't specify a slot for ranged weapons.
-						if mainHandCategoryID and TransmogUtil.IsCategoryRangedWeapon(mainHandCategoryID) then
-							slotID = nil
+							-- Don't specify a slot for ranged weapons.
+							if TransmogUtil.IsCategoryRangedWeapon(mainHandCategoryID) then
+								slotID = nil
+							end
 						end
 						actor:SetItemTransmogInfo(itemTransmogInfo, slotID)
 					end

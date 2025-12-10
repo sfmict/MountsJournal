@@ -1078,6 +1078,7 @@ function journal:init()
 	local msMountHint = self.mountDisplay.info.mountHint
 	msMountHint:SetPropagateMouseMotion(true)
 	msMountHint:SetScript("OnEnter", function(btn)
+		btn.isHover = true
 		btn.highlight:Show()
 		btn:SetAlpha(1)
 		GameTooltip:SetOwner(btn, "ANCHOR_NONE")
@@ -1087,13 +1088,14 @@ function journal:init()
 	end)
 
 	msMountHint:SetScript("OnLeave", function(btn)
+		btn.isHover = nil
 		btn.highlight:Hide()
 		btn:SetAlpha(.5)
 		GameTooltip:Hide()
 	end)
 
 	local function updateMountHint()
-		if msMountHint:IsMouseOver() then
+		if msMountHint.isHover then
 			msMountHint:GetScript("OnEnter")(msMountHint)
 		end
 	end
