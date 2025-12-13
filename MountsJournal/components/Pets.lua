@@ -130,7 +130,7 @@ do
 	end
 
 	local function isAuraApplied()
-		if util.isMidnight and GetRestrictedActionStatus(Enum.RestrictedActionType.SecretAuras) then return true end
+		if util.isMidnight and C_Secrets.ShouldAurasBeSecret() then return true end
 		aura = nil
 		AuraUtil.ForEachAura("player", "HELPFUL", nil, checkAura, true)
 		return aura

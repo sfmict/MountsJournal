@@ -180,7 +180,7 @@ end
 
 
 function util.checkAura(unit, spellID, filter)
-	if not UnitExists(unit) or util.isMidnight and GetRestrictedActionStatus(Enum.RestrictedActionType.SecretAuras) then return end
+	if not UnitExists(unit) or util.isMidnight and C_Secrets.ShouldAurasBeSecret() then return end
 	local GetAuraSlots, GetAuraDataBySlot, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
 	repeat
 		ctok, a,b,c,d,e = GetAuraSlots(unit, filter, 5, ctok)
@@ -194,7 +194,7 @@ end
 
 
 function util.getUnitMount(unit)
-	if not UnitExists(unit) or util.isMidnight and GetRestrictedActionStatus(Enum.RestrictedActionType.SecretAuras) then return end
+	if not UnitExists(unit) or util.isMidnight and C_Secrets.ShouldAurasBeSecret() then return end
 	local GetAuraSlots, GetAuraDataBySlot, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
 	local filter = unit == "player" and "HELPFUL PLAYER" or "HELPFUL"
 	repeat

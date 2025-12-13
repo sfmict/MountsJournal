@@ -525,7 +525,7 @@ end
 
 
 function mounts:UNIT_AURA(_, data)
-	if GetRestrictedActionStatus(Enum.RestrictedActionType.SecretAuras) then
+	if C_Secrets.ShouldAurasBeSecret() then
 		if self.mountAuraInstanceID and C_UnitAuras.GetAuraDataByAuraInstanceID("player", self.mountAuraInstanceID) == nil then
 			self:stopTracking()
 		end
@@ -1118,7 +1118,7 @@ end
 
 
 function mounts:getTargetMount()
-	if util.isMidnight and GetRestrictedActionStatus(Enum.RestrictedActionType.SecretAuras) then return end
+	if util.isMidnight and C_Secrets.ShouldAurasBeSecret() then return end
 	local spellID, mountID = util.getUnitMount("target")
 	if mountID then
 		local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
