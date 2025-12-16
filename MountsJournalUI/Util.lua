@@ -2,6 +2,7 @@ local addon, ns = ...
 MountsJournal.setMetaNS(ns)
 local util, L = ns.util, ns.L
 util.codeFont = "Interface\\Addons\\MountsJournalUI\\Fonts\\FiraCode-Regular.ttf"
+util.noIcon = 134400
 
 
 local menuBackdrop = {
@@ -173,9 +174,9 @@ end
 
 
 do
-	local function showTooltip(_,_, hyperLink)
+	local function showTooltip(_, link)
 		GameTooltip:SetOwner(UIParent, "ANCHOR_CURSOR")
-		GameTooltip:SetHyperlink(hyperLink)
+		GameTooltip:SetHyperlink(link)
 		GameTooltip:Show()
 	end
 
@@ -188,6 +189,11 @@ do
 		frame:SetScript("OnHyperlinkEnter", showTooltip)
 		frame:SetScript("OnHyperlinkLeave", hideTooltip)
 	end
+end
+
+
+function util.getIconLink(link, icon)
+	return link and link:gsub("%[.*%]", "|T"..(icon or util.noIcon)..":25|t")
 end
 
 

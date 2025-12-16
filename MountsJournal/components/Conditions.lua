@@ -3,7 +3,9 @@ local L, util = ns.L, ns.util
 local strcmputf8i, concat = strcmputf8i, table.concat
 local playerGuid = UnitGUID("player")
 local conds = {}
+local ltl = LibStub("LibThingsLoad-1.0")
 ns.conditions = conds
+ns.RULE_ICON_SIZE = 14
 
 
 ---------------------------------------------------
@@ -106,7 +108,7 @@ function conds.btn:getFuncText(value)
 	elseif value == 3 then
 		return "button == 'MiddleButton'"
 	else
-		return ("button == 'Button%d'"):format(value)
+		return ("button == 'Button%s'"):format(value)
 	end
 end
 
@@ -172,7 +174,9 @@ function conds.class:getValueText(value)
 	local localized, className = GetClassInfo(value)
 	if localized then
 		local classColor = C_ClassColor.GetClassColor(className)
-		return classColor:WrapTextInColorCode(localized)
+		local t = CLASS_ICON_TCOORDS[className]
+		local size = 1024
+		return CreateTextureMarkup("Interface/Glues/CharacterCreate/UI-CharacterCreate-Classes", size, size, ns.RULE_ICON_SIZE, ns.RULE_ICON_SIZE, t[1], t[2], t[3], t[4])..classColor:WrapTextInColorCode(localized)
 	end
 end
 
@@ -180,10 +184,11 @@ function conds.class:getValueList(value, func)
 	local list = {}
 
 	for i = 1, GetNumClasses() do
-		local _, className, id = GetClassInfo(i)
+		local localized, className, id = GetClassInfo(i)
+		local classColor = C_ClassColor.GetClassColor(className)
 		local t = CLASS_ICON_TCOORDS[className]
 		list[i] = {
-			text = self:getValueText(id),
+			text = classColor:WrapTextInColorCode(localized),
 			icon = "Interface/Glues/CharacterCreate/UI-CharacterCreate-Classes",
 			iconInfo = {
 				tCoordLeft = t[1],
@@ -212,10 +217,11 @@ conds.spec = {}
 conds.spec.text = SPECIALIZATION
 
 function conds.spec:getValueText(value)
-	local _, name, _,_,_, className, class = GetSpecializationInfoByID(value)
+	local _, name, _, specIcon, _, className, class = GetSpecializationInfoByID(value)
 	if name then
 		local classColor = C_ClassColor.GetClassColor(className)
-		return ("%s - %s"):format(classColor:WrapTextInColorCode(class), name)
+		local icon = CreateSimpleTextureMarkup(specIcon, ns.RULE_ICON_SIZE)
+		return ("%s%s - %s"):format(icon, classColor:WrapTextInColorCode(class), name)
 	end
 end
 
@@ -224,9 +230,11 @@ function conds.spec:getValueList(value, func)
 
 	for i = 1, GetNumClasses() do
 		for j = 1, C_SpecializationInfo.GetNumSpecializationsForClassID(i) do
-			local id, _,_, specIcon = GetSpecializationInfoForClassID(i, j)
+			local id = GetSpecializationInfoForClassID(i, j)
+			local _, name, _, specIcon, _, className, class = GetSpecializationInfoByID(id)
+			local classColor = C_ClassColor.GetClassColor(className)
 			list[#list + 1] = {
-				text = self:getValueText(id),
+				text = ("%s - %s"):format(classColor:WrapTextInColorCode(class), name),
 				icon = specIcon,
 				value = id,
 				func = func,
@@ -306,7 +314,7 @@ conds.holiday.text = CALENDAR_FILTER_HOLIDAYS
 
 function conds.holiday:getValueText(value)
 	local holidayName = ns.calendar:getHolidayName(value)
-	return ("%s |cff808080(ID:%d)|r"):format(holidayName or RED_FONT_COLOR:WrapTextInColorCode(L["Nameless holiday"]), value)
+	return ("%s |cff808080(ID:%s)|r"):format(holidayName or RED_FONT_COLOR:WrapTextInColorCode(L["Nameless holiday"]), value)
 end
 
 function conds.holiday:getValueList(value, cb, dd, notReset)
@@ -357,7 +365,7 @@ function conds.holiday:getValueList(value, cb, dd, notReset)
 end
 
 function conds.holiday:getFuncText(value)
-	return ("self.calendar:isHolidayActive(%d)"):format(value)
+	return ("self.calendar:isHolidayActive(%s)"):format(value)
 end
 
 
@@ -467,7 +475,7 @@ conds.fs = {}
 conds.fs.text = L["Flight style"]
 
 function conds.fs:getValueText(value)
-	return value == 1 and DYNAMIC_FLIGHT or L["Steady Flight"]
+	return value == 1 and ACCESSIBILITY_ADV_FLY_LABEL or L["Steady Flight"]
 end
 
 function conds.fs:getValueList(value, func)
@@ -486,9 +494,9 @@ end
 function conds.fs:getFuncText(value)
 	local spellID = C_MountJournal.GetDynamicFlightModeSpellID()
 	if value == 1 then
-		return ("C_Spell.GetSpellTexture(%d) ~= 5142726"):format(spellID), "C_Spell"
+		return ("C_Spell.GetSpellTexture(%s) ~= 5142726"):format(spellID), "C_Spell"
 	else
-		return ("C_Spell.GetSpellTexture(%d) == 5142726"):format(spellID), "C_Spell"
+		return ("C_Spell.GetSpellTexture(%s) == 5142726"):format(spellID), "C_Spell"
 	end
 end
 
@@ -503,12 +511,46 @@ function conds.hitem:getValueDescription()
 	return "ItemID"
 end
 
+function conds.hitem:setValueLink(fontString, value)
+	fontString:SetText()
+	if not value then return end
+	fontString.value = value
+	ltl:Items(value):Then(function()
+		if fontString.value == value then
+			local _, itemLink, _,_,_,_,_,_,_, icon = ltl:GetItemInfo(value)
+			fontString:SetText(util.getIconLink(itemLink, icon))
+		end
+	end)
+end
+
+function conds.hitem:receiveDrag(editBox)
+	local infoType, itemID = GetCursorInfo()
+	if infoType == "item" then
+		editBox:SetText(itemID)
+		editBox:SetCursorPosition(0)
+		editBox:HighlightText()
+		ClearCursor()
+	end
+end
+
+function conds.hitem:getValueDisplay(value)
+	local name = ltl:GetItemName(value)
+	if name then
+		local icon = CreateSimpleTextureMarkup(ltl:GetItemIcon(value) or util.noIcon, ns.RULE_ICON_SIZE)
+		return ("%s%s |cff808080<%s>|r"):format(icon, name, value)
+	else
+		ltl:Items(value):ThenForAll(function()
+			ns.macroFrame:event("RULE_LIST_UPDATE")
+		end)
+	end
+end
+
 function conds.hitem:getValueText(value)
 	return tostring(value or "")
 end
 
 function conds.hitem:getFuncText(value)
-	return ("C_Item.GetItemCount(%d) > 0"):format(value), "C_Item"
+	return ("C_Item.GetItemCount(%s) > 0"):format(value), "C_Item"
 end
 
 
@@ -519,11 +561,13 @@ conds.ritem.text = L["Item is ready"]
 conds.ritem.isNumeric = true
 
 conds.ritem.getValueDescription = conds.hitem.getValueDescription
-
+conds.ritem.setValueLink = conds.hitem.setValueLink
+conds.ritem.receiveDrag = conds.hitem.receiveDrag
+conds.ritem.getValueDisplay = conds.hitem.getValueDisplay
 conds.ritem.getValueText = conds.hitem.getValueText
 
 function conds.ritem:getFuncText(value)
-	return ("C_Container.GetItemCooldown(%d) == 0"):format(value), "C_Container"
+	return ("C_Container.GetItemCooldown(%s) == 0"):format(value), "C_Container"
 end
 
 
@@ -537,10 +581,45 @@ function conds.kspell:getValueDescription()
 	return "SpellID"
 end
 
+function conds.kspell:setValueLink(fontString, value)
+	if value then
+		local link = ltl:GetSpellLink(value)
+		local icon = link and ltl:GetSpellInfo(value).iconID
+		fontString:SetText(util.getIconLink(link, icon))
+	else
+		fontString:SetText()
+	end
+end
+
+function conds.kspell:receiveDrag(editBox)
+	local infoType, itemID, _, spellID = GetCursorInfo()
+	if infoType == "item" then
+		spellID = select(2, C_Item.GetItemSpell(itemID))
+	elseif infoType == "petaction" then
+		spellID = itemID
+	elseif infoType ~= "spell" then
+		return
+	end
+	if spellID then
+		editBox:SetText(spellID)
+		editBox:SetCursorPosition(0)
+		editBox:HighlightText()
+		ClearCursor()
+	end
+end
+
+function conds.kspell:getValueDisplay(value)
+	local info = ltl:GetSpellInfo(value)
+	if info then
+		local icon = CreateSimpleTextureMarkup(info.iconID or util.noIcon, ns.RULE_ICON_SIZE)
+		return ("%s%s |cff808080<%s>|r"):format(icon, info.name, value)
+	end
+end
+
 conds.kspell.getValueText = conds.hitem.getValueText
 
 function conds.kspell:getFuncText(value)
-	return ("self.isPlayerSpell(%d)"):format(value)
+	return ("self.isPlayerSpell(%s)"):format(value)
 end
 
 
@@ -556,10 +635,13 @@ function conds.rspell:getValueDescription()
 	return "SpellID (61304 for GCD)"
 end
 
+conds.rspell.setValueLink = conds.kspell.setValueLink
+conds.rspell.receiveDrag = conds.kspell.receiveDrag
+conds.rspell.getValueDisplay = conds.kspell.getValueDisplay
 conds.rspell.getValueText = conds.hitem.getValueText
 
 function conds.rspell:getFuncText(value)
-	return ("self:isSpellReady(%d)"):format(value)
+	return ("self:isSpellReady(%s)"):format(value)
 end
 
 
@@ -571,11 +653,13 @@ conds.uspell.combatLock = util.isMidnight
 conds.uspell.isNumeric = true
 
 conds.uspell.getValueDescription = conds.kspell.getValueDescription
-
+conds.uspell.setValueLink = conds.kspell.setValueLink
+conds.uspell.receiveDrag = conds.kspell.receiveDrag
+conds.uspell.getValueDisplay = conds.kspell.getValueDisplay
 conds.uspell.getValueText = conds.hitem.getValueText
 
 function conds.uspell:getFuncText(value)
-	return ("C_Spell.IsSpellUsable(%d)"):format(value), "C_Spell"
+	return ("C_Spell.IsSpellUsable(%s)"):format(value), "C_Spell"
 end
 
 
@@ -587,11 +671,13 @@ conds.hzspell.description = HUD_EDIT_MODE_EXTRA_ABILITIES_LABEL
 conds.hzspell.isNumeric = true
 
 conds.hzspell.getValueDescription = conds.kspell.getValueDescription
-
+conds.hzspell.setValueLink = conds.kspell.setValueLink
+conds.hzspell.receiveDrag = conds.kspell.receiveDrag
+conds.hzspell.getValueDisplay = conds.kspell.getValueDisplay
 conds.hzspell.getValueText = conds.hitem.getValueText
 
 function conds.hzspell:getFuncText(value)
-	return ("self:haveZoneSpell(%d)"):format(value)
+	return ("self:haveZoneSpell(%s)"):format(value)
 end
 
 
@@ -604,11 +690,13 @@ conds.hbuff.isNumeric = true
 conds.hbuff.secretCond = "notSAuras and "
 
 conds.hbuff.getValueDescription = conds.kspell.getValueDescription
-
+conds.hbuff.setValueLink = conds.kspell.setValueLink
+conds.hbuff.receiveDrag = conds.kspell.receiveDrag
+conds.hbuff.getValueDisplay = conds.kspell.getValueDisplay
 conds.hbuff.getValueText = conds.hitem.getValueText
 
 function conds.hbuff:getFuncText(value)
-	return ("self:hasPlayerBuff(%d)"):format(value)
+	return ("self:hasPlayerBuff(%s)"):format(value)
 end
 
 
@@ -621,11 +709,13 @@ conds.hdebuff.isNumeric = true
 conds.hdebuff.secretCond = conds.hbuff.secretCond
 
 conds.hdebuff.getValueDescription = conds.kspell.getValueDescription
-
+conds.hdebuff.setValueLink = conds.kspell.setValueLink
+conds.hdebuff.receiveDrag = conds.kspell.receiveDrag
+conds.hdebuff.getValueDisplay = conds.kspell.getValueDisplay
 conds.hdebuff.getValueText = conds.hitem.getValueText
 
 function conds.hdebuff:getFuncText(value)
-	return ("self:hasPlayerDebuff(%d)"):format(value)
+	return ("self:hasPlayerDebuff(%s)"):format(value)
 end
 
 
@@ -642,7 +732,7 @@ end
 conds.qc.getValueText = conds.hitem.getValueText
 
 function conds.qc:getFuncText(value)
-	return ("C_QuestLog.IsQuestFlaggedCompleted(%d)"):format(value), "C_QuestLog"
+	return ("C_QuestLog.IsQuestFlaggedCompleted(%s)"):format(value), "C_QuestLog"
 end
 
 
@@ -653,11 +743,10 @@ conds.qca.text = L["Quest completed on account"]
 conds.qca.isNumeric = true
 
 conds.qca.getValueDescription = conds.qc.getValueDescription
-
 conds.qca.getValueText = conds.hitem.getValueText
 
 function conds.qca:getFuncText(value)
-	return ("C_QuestLog.IsQuestFlaggedCompletedOnAccount(%d)"):format(value), "C_QuestLog"
+	return ("C_QuestLog.IsQuestFlaggedCompletedOnAccount(%s)"):format(value), "C_QuestLog"
 end
 
 
@@ -762,7 +851,8 @@ end
 sort(RACE_KEYS, function(a,b) return strcmputf8i(RACE_LABELS[a], RACE_LABELS[b]) < 0 end)
 
 function conds.race:getValueText(value)
-	return RACE_LABELS[value]
+	local atlasName = "raceicon128-"..RACE_ICON_TOKEN[value].."-"..(UnitSex("Player") == 2 and "male" or "female")
+	return CreateAtlasMarkup(atlasName, ns.RULE_ICON_SIZE, ns.RULE_ICON_SIZE)..RACE_LABELS[value]
 end
 
 function conds.race:getValueList(value, func)
@@ -771,7 +861,7 @@ function conds.race:getValueList(value, func)
 	for i = 1, #RACE_KEYS do
 		local v = RACE_KEYS[i]
 		list[#list + 1] = {
-			text = self:getValueText(v),
+			text = RACE_LABELS[v],
 			icon = atlasName:format(RACE_ICON_TOKEN[v] or ""),
 			value = v,
 			func = func,
@@ -818,7 +908,7 @@ function conds.map:getValueText(value)
 end
 
 function conds.map:getFuncText(value)
-	return ("self:checkMap(%d)"):format(value)
+	return ("self:checkMap(%s)"):format(value)
 end
 
 
@@ -916,7 +1006,7 @@ function conds.instance:getFuncText(value)
 	if value:trim():match("%D") then
 		return ("self.mounts.instanceName == '%s'"):format(value:gsub("['\\]", "\\%1"))
 	elseif tonumber(value) then
-		return ("self.mounts.instanceID == %d"):format(tonumber(value))
+		return ("self.mounts.instanceID == %s"):format(tonumber(value))
 	end
 	return "false"
 end
@@ -964,7 +1054,7 @@ function conds.difficulty:getValueList(value, func)
 end
 
 function conds.difficulty:getFuncText(value)
-	return ("self.mounts.difficultyID == %d"):format(value)
+	return ("self.mounts.difficultyID == %s"):format(value)
 end
 
 
@@ -1090,7 +1180,7 @@ if util.isMidnight then -- beta
 				local v = ("%s:%s"):format(outfitInfo.outfitID, playerGuid)
 				list[i] = {
 					text = outfitInfo.name,
-					rightText = ("|cff808080ID:%d|r"):format(outfitInfo.outfitID),
+					rightText = ("|cff808080ID:%s|r"):format(outfitInfo.outfitID),
 					rightFont = util.codeFont,
 					value = v,
 					arg1 = outfitInfo.outfitID,
@@ -1232,7 +1322,7 @@ else -- retail
 
 	function conds.tmog:getFuncText(value)
 		if type(value) == "number" then
-			return ("self:isTransmogSetActive(%d)"):format(value)
+			return ("self:isTransmogSetActive(%s)"):format(value)
 		else
 			return ("self:isTtransmogOutfitActive('%s')"):format(value:gsub("['\\]", "\\%1"))
 		end
@@ -1261,7 +1351,7 @@ function conds.sex:getValueList(value, func)
 	local list = {}
 	for i, unit in ipairs({"player", "target", "focus"}) do
 		for j = 3, 1, -1 do
-			local v = ("%s:%d"):format(unit, j)
+			local v = ("%s:%s"):format(unit, j)
 			list[#list + 1] = {
 				text = self:getValueText(v),
 				value = v,
@@ -1303,10 +1393,10 @@ function conds.tl:getValueList(value, func)
 		for j = 1, #configIDs do
 			local configID = configIDs[j]
 			local configInfo = C_Traits.GetConfigInfo(configID)
-			local v = ("%d:%s"):format(configID, playerGuid)
+			local v = ("%s:%s"):format(configID, playerGuid)
 			list[#list + 1] = {
 				text = ("%s - %s"):format(configInfo.name, specName),
-				rightText = ("|cff808080ID:%d|r"):format(configID),
+				rightText = ("|cff808080ID:%s|r"):format(configID),
 				rightFont = util.codeFont,
 				value = v,
 				func = func,
@@ -1476,7 +1566,7 @@ function conds.prof:getValueList(value, func)
 end
 
 function conds.prof:getFuncText(value)
-	return ("self.mounts.profs[%d]"):format(value)
+	return ("self.mounts.profs[%s]"):format(value)
 end
 
 
@@ -1503,10 +1593,10 @@ function conds.equips:getValueList(value, func)
 
 	for i, setID in ipairs(C_EquipmentSet.GetEquipmentSetIDs()) do
 		local name, iconFileID = C_EquipmentSet.GetEquipmentSetInfo(setID)
-		local v = ("%d:%s"):format(setID, playerGuid)
+		local v = ("%s:%s"):format(setID, playerGuid)
 		list[i] = {
 			text = name,
-			rightText = ("|cff808080ID:%d|r"):format(setID),
+			rightText = ("|cff808080ID:%s|r"):format(setID),
 			rightFont = util.codeFont,
 			icon = iconFileID,
 			value = v,
@@ -1539,6 +1629,36 @@ end
 -- equipi EQUIPPED ITEM
 conds.equipi = {}
 conds.equipi.text = L["Item is equipped"]
+
+local function getItemID(value)
+	local itemID = tonumber(value)
+	if not itemID and value then
+		local link = ltl:GetItemLink(value)
+		if link then
+			itemID = tonumber(link:match("item:(%d*)"))
+		end
+	end
+	return itemID
+end
+
+function conds.equipi:setValueLink(fontString, value)
+	conds.hitem.setValueLink(self, fontString, getItemID(value))
+end
+
+function conds.equipi:receiveDrag(editBox)
+	local infoType, _, link = GetCursorInfo()
+	if infoType == "item" then
+		editBox:SetText(link)
+		editBox:SetCursorPosition(0)
+		editBox:HighlightText()
+		ClearCursor()
+	end
+end
+
+function conds.equipi:getValueDisplay(value)
+	local itemID = getItemID(value)
+	return itemID and conds.hitem.getValueDisplay(self, itemID)
+end
 
 conds.equipi.getValueText = conds.mcond.getValueText
 
@@ -1919,7 +2039,7 @@ function conds.title:getValueList(value, func)
 		if show then
 			list[#list + 1] = {
 				text = IsTitleKnown(i) and ("%s (|cff00cc00%s|r)"):format(name, GARRISON_MISSION_ADDED_TOAST2) or name,
-				rightText = ("|cff808080%d|r"):format(i),
+				rightText = ("|cff808080%s|r"):format(i),
 				rightFont = util.codeFont,
 				value = i,
 				func = func,

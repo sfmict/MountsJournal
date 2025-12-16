@@ -59,20 +59,23 @@ ruleEditor:HookScript("OnShow", function(self)
 	local function btnPoolOnHide(f)
 		self.btnPool:Release(f)
 	end
-	local function initBtnPoolFunc(f)
+	local function btnPoolInitFunc(f)
 		f:Hide()
 		f:SetScript("OnHide", btnPoolOnHide)
 	end
-	self.btnPool = CreateFramePool("BUTTON", nil, "MJConditionDropDownTemplate", resetPoolFunc, false, initBtnPoolFunc)
+	self.btnPool = CreateFramePool("BUTTON", nil, "MJConditionDropDownTemplate", resetPoolFunc, false, btnPoolInitFunc)
 
 	local function editPoolOnHide(f)
+		f.link.value = nil -- abort loading item
 		self.editPool:Release(f)
 	end
-	local function initEditPoolFunc(f)
+	local function editPoolInitFunc(f)
 		f:Hide()
 		f:SetScript("OnHide", editPoolOnHide)
+		f.link = f.linkFrame.link
+		util.setHyperlinkTooltip(f.linkFrame)
 	end
-	self.editPool = CreateFramePool("EditBox", nil, "MJConditionEditBoxTemplate", resetPoolFunc, false, initEditPoolFunc)
+	self.editPool = CreateFramePool("EditBox", nil, "MJConditionEditBoxTemplate", resetPoolFunc, false, editPoolInitFunc)
 
 	-- PANELS
 	self.panel = CreateFrame("FRAME", nil, self, "MJDarkPanelTemplate")
@@ -400,8 +403,18 @@ function ruleEditor:setCondValueOption(panel, btnData)
 			else
 				btnData[3] = #text > 0 and text or nil
 			end
+			if cond.setValueLink then
+				cond:setValueLink(panel.optionValue.link, btnData[3])
+			else
+				panel.optionValue.link:SetText("")
+			end
 			self:checkRule()
 		end)
+		local receiveDrag = cond.receiveDrag and function(editBox)
+			cond:receiveDrag(editBox)
+		end
+		panel.optionValue:SetScript("OnMouseUp", receiveDrag)
+		panel.optionValue:SetScript("OnReceiveDrag", receiveDrag)
 	end
 
 	panel.optionValue:SetParent(panel)
@@ -409,6 +422,9 @@ function ruleEditor:setCondValueOption(panel, btnData)
 	panel.optionValue:SetPoint("RIGHT", panel.remove, "LEFT", -10, 0)
 	panel.optionValue:Show()
 	panel.optionValue:SetText(rules:getCondValueText(btnData))
+	if panel.optionValue.SetCursorPosition then
+		panel.optionValue:SetCursorPosition(0)
+	end
 	panel.optionValue.tooltip = self:getCondTooltip(btnData)
 end
 
@@ -490,8 +506,18 @@ function ruleEditor:setActionValueOption()
 			else
 				actionData[2] = #text > 0 and text or nil
 			end
+			if action.setValueLink then
+				action:setValueLink(panel.optionValue.link, actionData[2])
+			else
+				panel.optionValue.link:SetText("")
+			end
 			self:checkRule()
 		end)
+		local receiveDrag = action.receiveDrag and function(editBox)
+			action:receiveDrag(editBox)
+		end
+		panel.optionValue:SetScript("OnMouseUp", receiveDrag)
+		panel.optionValue:SetScript("OnReceiveDrag", receiveDrag)
 	end
 
 	panel.optionValue:SetParent(panel)
@@ -499,6 +525,9 @@ function ruleEditor:setActionValueOption()
 	panel.optionValue:SetPoint("RIGHT", -30, 0)
 	panel.optionValue:Show()
 	panel.optionValue:SetText(rules:getActionValueText(actionData))
+	if panel.optionValue.SetCursorPosition then
+		panel.optionValue:SetCursorPosition(0)
+	end
 	panel.optionValue.tooltip = self:getActionTooltip(actionData)
 end
 

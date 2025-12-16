@@ -232,7 +232,7 @@ function macroFrame:setRuleSet(ruleSetName)
 	end
 
 	self.currentRuleSet = currentRuleSet
-	self:setRuleFuncs()
+	xpcall(self.setRuleFuncs, CallErrorHandler, self)
 end
 
 

@@ -267,8 +267,13 @@ rules:SetScript("OnShow", function(self)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end
 	local function btnEnter(btn)
-		if #btn.data > 3 then
-			GameTooltip:SetOwner(btn, "ANCHOR_TOPLEFT", 20, 0)
+		if #btn.data > 3
+      or btn.cond1:IsTruncated()
+      or btn.cond2:IsTruncated()
+      or btn.cond3:IsTruncated()
+      then
+			GameTooltip:SetOwner(btn, "ANCHOR_NONE")
+			GameTooltip:SetPoint("BOTTOMLEFT", btn, "BOTTOMRIGHT")
 			GameTooltip:SetText(L["Conditions"]..":")
 			for i = 1, #btn.data do
 				GameTooltip:AddLine(self:getCondText(btn.data[i]))
@@ -687,29 +692,41 @@ function rules:getCondValueText(cond)
 end
 
 
+function rules:getCondValueDisplay(cond)
+	return conds[cond[2]].getValueDisplay and conds[cond[2]]:getValueDisplay(cond[3]) or self:getCondValueText(cond)
+end
+
+
 function rules:getActionValueText(action)
 	if action[2] == nil then return "" end
 	return actions[action[1]]:getValueText(action[2]) or RED_FONT_COLOR:WrapTextInColorCode(tostringall(action[2]))
 end
 
 
+function rules:getActionValueDisplay(action)
+	return actions[action[1]].getValueDisplay and actions[action[1]]:getValueDisplay(action[2]) or self:getActionValueText(action)
+end
+
+
 function rules:getCondText(cond)
 	if not cond then return end
-	local value = self:getCondValueText(cond)
-	return ("|cff%s%s%s|r"):format(
-		cond[1] and ("cc4444%s|r |cff44cc44"):format(L["NOT_CONDITION"]) or "44cc44",
-		conds[cond[2]].text,
-		value == "" and value or " : "..value
-	)
+	local value = self:getCondValueDisplay(cond)
+	local condText = "|cff44cc44"..conds[cond[2]].text
+	if cond[1] then condText = ("|cffcc4444%s|r %s"):format(L["NOT_CONDITION"], condText) end
+	if value == "" then
+		return condText
+	else
+		return ("%s:|r |cffeeeeee%s|r"):format(condText, value)
+	end
 end
 
 
 function rules:getActionText(action)
-	local value = self:getActionValueText(action)
+	local value = self:getActionValueDisplay(action)
 	if value == "" then
 		return actions[action[1]].text
 	else
-		return ("%s : %s"):format(actions[action[1]].text, value)
+		return ("%s:\n|cffeeeeee%s|r"):format(actions[action[1]].text, value)
 	end
 end
 
@@ -724,7 +741,7 @@ function rules:ruleButtonInit(btn, data, isDrag)
 
 	btn.cond2:ClearAllPoints()
 	if #btn.data == 2 then
-		btn.cond2:SetPoint("TOPLEFT", btn, "LEFT", 30, 0)
+		btn.cond2:SetPoint("TOPLEFT", btn, "LEFT", 30, -1)
 	else
 		btn.cond2:SetPoint("LEFT", 30, 0)
 	end

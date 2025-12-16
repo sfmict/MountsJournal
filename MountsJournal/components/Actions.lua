@@ -1,5 +1,5 @@
 local _, ns = ...
-local L, macroFrame, mounts = ns.L, ns.macroFrame, ns.mounts
+local L, util, macroFrame, mounts, conds = ns.L, ns.util, ns.macroFrame, ns.mounts, ns.conditions
 local strcmputf8i = strcmputf8i
 local actions = {}
 ns.actions = actions
@@ -109,12 +109,14 @@ function actions.rmountt:getValueList(value, func)
 
 	local list = {}
 	list[1] = {
+		keepShownOnClick = true,
 		notCheckable = true,
 		hasArrow = true,
 		text = L["Selected profile"],
 		value = getTList(0)
 	}
 	list[2] = {
+		keepShownOnClick = true,
 		notCheckable = true,
 		hasArrow = true,
 		text = DEFAULT,
@@ -128,6 +130,7 @@ function actions.rmountt:getValueList(value, func)
 	for i = 1, #profiles do
 		local profile = profiles[i]
 		list[#list + 1] = {
+			keepShownOnClick = true,
 			notCheckable = true,
 			hasArrow = true,
 			text = profile,
@@ -169,9 +172,7 @@ actions.rmountr.text = L["Random Mount by Rarity"]
 actions.rmountr.description = L["The lower the rarity, the higher the chance"]
 
 actions.rmountr.getValueText = actions.rmount.getValueText
-
 actions.rmountr.getValueList = actions.rmount.getValueList
-
 actions.rmountr.condText = actions.rmountr.condText
 
 function actions.rmountr:getFuncText(value)
@@ -202,9 +203,7 @@ actions.rmounttr.text = L["Random Mount of Selected Type by Rarity"]
 actions.rmounttr.description = L["The lower the rarity, the higher the chance"]
 
 actions.rmounttr.getValueText = actions.rmountt.getValueText
-
 actions.rmounttr.getValueList = actions.rmountt.getValueList
-
 actions.rmounttr.condText = actions.rmountt.condText
 
 function actions.rmounttr:getFuncText(value)
@@ -236,9 +235,7 @@ actions.rmountc.text = L["Random Mount by Summon Counter"]
 actions.rmountc.description = L["The lower the counter, the higher the chance"]
 
 actions.rmountc.getValueText = actions.rmount.getValueText
-
 actions.rmountc.getValueList = actions.rmount.getValueList
-
 actions.rmountc.condText = actions.rmountc.condText
 
 function actions.rmountc:getFuncText(value)
@@ -269,9 +266,7 @@ actions.rmounttc.text = L["Random Mount of Selected Type by Summon Counter"]
 actions.rmounttc.description = L["The lower the counter, the higher the chance"]
 
 actions.rmounttc.getValueText = actions.rmountt.getValueText
-
 actions.rmounttc.getValueList = actions.rmountt.getValueList
-
 actions.rmounttc.condText = actions.rmountt.condText
 
 function actions.rmounttc:getFuncText(value)
@@ -302,13 +297,14 @@ actions.mount = {}
 actions.mount.text = L["Mount"]
 
 function actions.mount:getValueText(value)
-	if ns.additionalMounts[value] then
-		return ns.additionalMounts[value].name
+	local mount = ns.additionalMounts[value]
+	if mount then
+		return CreateSimpleTextureMarkup(mount.icon, ns.RULE_ICON_SIZE)..mount.name
 	else
 		local mountID = C_MountJournal.GetMountFromSpell(value)
 		if mountID then
-			local name = C_MountJournal.GetMountInfoByID(mountID)
-			return name
+			local name, _, icon = C_MountJournal.GetMountInfoByID(mountID)
+			return icon and CreateSimpleTextureMarkup(icon, ns.RULE_ICON_SIZE)..name or name
 		end
 	end
 end
@@ -394,16 +390,14 @@ actions.item = {}
 actions.item.text = L["Use Item"]
 actions.item.isNumeric = true
 
-function actions.item:getValueDescription()
-	return "ItemID"
-end
-
-function actions.item:getValueText(value)
-	return tostring(value or "")
-end
+actions.item.getValueDescription = conds.hitem.getValueDescription
+actions.item.setValueLink = conds.hitem.setValueLink
+actions.item.receiveDrag = conds.hitem.receiveDrag
+actions.item.getValueDisplay = conds.hitem.getValueDisplay
+actions.item.getValueText = conds.hitem.getValueText
 
 function actions.item:getFuncText(value)
-	return ("return '/use item:%d'"):format(value)
+	return ("return '/use item:%s'"):format(value)
 end
 
 
@@ -413,8 +407,8 @@ actions.iitem = {}
 actions.iitem.text = L["Use Inventory Item"]
 actions.iitem.isNumeric = true
 
-function actions.iitem:getValueDescription()
-	local list = {
+local function getInventoryList()
+	return {
 		INVTYPE_HEAD,
 		INVTYPE_NECK,
 		INVTYPE_SHOULDER,
@@ -435,6 +429,10 @@ function actions.iitem:getValueDescription()
 		INVTYPE_RANGED,
 		INVTYPE_TABARD,
 	}
+end
+
+function actions.iitem:getValueDescription()
+	local list = getInventoryList()
 	local description = ""
 	for i = 1, #list do
 		local slot = list[i]
@@ -443,10 +441,23 @@ function actions.iitem:getValueDescription()
 	return description
 end
 
+function actions.iitem:setValueLink(FontString, value)
+	if value then
+		local link = GetInventoryItemLink("player", value)
+		FontString:SetText(util.getIconLink(link, GetInventoryItemTexture("player", value)))
+	else
+		FontString:SetText()
+	end
+end
+
+function actions.iitem:getValueDisplay(value)
+	return getInventoryList()[value]
+end
+
 actions.iitem.getValueText = actions.item.getValueText
 
-function actions.iitem:getFuncText(slot)
-	return ("return '/use %d'"):format(slot)
+function actions.iitem:getFuncText(value)
+	return ("return '/use %s'"):format(value)
 end
 
 
@@ -456,15 +467,15 @@ actions.spell = {}
 actions.spell.text = L["Cast Spell"]
 actions.spell.isNumeric = true
 
-function actions.spell:getValueDescription()
-	return "SpellID"
-end
-
-actions.spell.getValueText = actions.item.getValueText
+actions.spell.getValueDescription = conds.kspell.getValueDescription
+actions.spell.setValueLink = conds.kspell.setValueLink
+actions.spell.receiveDrag = conds.kspell.receiveDrag
+actions.spell.getValueDisplay = conds.kspell.getValueDisplay
+actions.spell.getValueText = conds.kspell.getValueText
 
 function actions.spell:getFuncText(value)
 	return ([[
-		local spellName = self:getSpellName(%d)
+		local spellName = self:getSpellName(%s)
 		if spellName then
 			return '/cast '..spellName
 		end
@@ -523,9 +534,8 @@ end
 actions.snip = {}
 actions.snip.text = L["Code Snippet"]
 
-actions.snip.getValueText = ns.conditions.snip.getValueText
-
-actions.snip.getValueList = ns.conditions.snip.getValueList
+actions.snip.getValueText = conds.snip.getValueText
+actions.snip.getValueList = conds.snip.getValueList
 
 function actions.snip:getFuncText(value)
 	return ([[

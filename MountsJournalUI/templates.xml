@@ -708,7 +708,7 @@
 							</Frame>
 						</Frames>
 					</Frame>
-					<ModelScene parentKey="modelScene" useParentLevel="true" inherits="WrappedAndUnwrappedModelScene">
+					<ModelScene parentKey="modelScene" useParentLevel="true" inherits="MJWrappedAndUnwrappedModelScene">
 						<Anchors>
 							<Anchor point="TOPLEFT"/>
 							<Anchor point="BOTTOMRIGHT" x="-1" y="1"/>
@@ -1276,6 +1276,15 @@
 
 		</Frames>
 	</Frame>
+
+	<ModelScene name="MJWrappedAndUnwrappedModelScene" inherits="WrappedAndUnwrappedModelScene" virtual="true">
+		<Scripts>
+			<OnHide inherit="prepend">
+				self.isLeftButtonDown = false
+				self.isRightButtonDown = false
+			</OnHide>
+		</Scripts>
+	</ModelScene>
 
 	<Button name="MJPetSelectionBtnTemplate" propagateMouseInput="Motion" virtual="true">
 		<Size x="38" y="38"/>
@@ -2035,7 +2044,7 @@
 					<Anchor point="TOPRIGHT" x="-12" y="-7"/>
 				</Anchors>
 			</Button>
-			<ModelScene parentKey="modelScene" inherits="WrappedAndUnwrappedModelScene">
+			<ModelScene parentKey="modelScene" inherits="MJWrappedAndUnwrappedModelScene">
 				<Anchors>
 					<Anchor point="TOPLEFT" x="4" y="-4"/>
 					<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
@@ -3711,7 +3720,7 @@
 		<Size y="40"/>
 		<FontString inherits="GameFontHighlight" justifyH="LEFT"/>
 		<TextInsets>
-			<AbsInset left="10" right="10"/>
+			<AbsInset left="10" right="33"/>
 		</TextInsets>
 		<Frames>
 			<Frame parentKey="border" inherits="InsetFrameTemplate">
@@ -3720,20 +3729,36 @@
 					<Anchor point="BOTTOMRIGHT" x="-3" y="6"/>
 				</Anchors>
 			</Frame>
+			<Frame parentKey="linkFrame">
+				<Size x="1" y="1"/>
+				<Anchors>
+					<Anchor point="RIGHT" x="-8"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<FontString parentKey="link" inherits="GameFontNormalSmall" wordwrap="false" justifyH="RIGHT">
+							<Anchors>
+								<Anchor point="RIGHT"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</Frame>
 		</Frames>
 		<Scripts>
 			<OnLoad inherit="prepend">
 				self:SetBackdropColor(0, 0, 0, .9)
 			</OnLoad>
 			<OnEnter>
-				if self.tooltip then
+				local tooltip = self.tooltip
+				if tooltip then
 					GameTooltip:SetOwner(self, "ANCHOR_RIGHT", 0, 0)
-					if type(self.tooltip) == "string" then
-						GameTooltip:SetText(self.tooltip, nil, nil, nil, nil, false)
+					if type(tooltip) == "string" then
+						GameTooltip:SetText(tooltip, nil, nil, nil, nil, false)
 					else
-						GameTooltip:SetText(self.tooltip[1], nil, nil, nil, nil, false)
-						for i = 2, #self.tooltip do
-							local text = self.tooltip[i]
+						GameTooltip:SetText(tooltip[1], nil, nil, nil, nil, false)
+						for i = 2, #tooltip do
+							local text = tooltip[i]
 							if type(text) == "string" then
 								GameTooltip:AddLine(text, 1, 1, 1, 1, false)
 							else
