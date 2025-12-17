@@ -1079,24 +1079,15 @@ if util.isMidnight then -- beta
 		local list = {}
 		local outfitsInfo = C_TransmogOutfitInfo.GetOutfitsInfo()
 
-		local function getSlotTransmogID(location, weaponOption)
+		local function getSlotTransmogID(location, weaponOption, appearanceID)
 			if not location then return Constants.Transmog.NoTransmogID end
-			local transmogInfo = C_TransmogOutfitInfo.GetViewedOutfitSlotInfo(location:GetSlot(), location:GetType(), weaponOption)
-			return transmogInfo and transmogInfo.transmogID or Constants.Transmog.NoTransmogID
-		end
-
-		local function getRelevantTransmogID(location)
-			local locationData = location:GetData()
-			local categoryID = C_Transmog.GetSlotEffectiveCategory(locationData)
-			local entries = C_TransmogCollection.GetCategoryAppearances(categoryID, locationData)
-			for i, itemEntry in ipairs(entries) do
-				if itemEntry.isHideVisual then
-					local sources = CollectionWardrobeUtil.GetSortedAppearanceSources(itemEntry.visualID, categoryID, location)
-					if sources[1] then return sources[1].sourceID end
-					break
+			if location:IsIllusion() then
+				if appearanceID == Constants.Transmog.NoTransmogID or not TransmogUtil.CanEnchantSource(appearanceID) then
+					return Constants.Transmog.NoTransmogID
 				end
 			end
-			return Constants.Transmog.NoTransmogID
+			local slotInfo = C_TransmogOutfitInfo.GetViewedOutfitSlotInfo(location:GetSlot(), location:GetType(), weaponOption)
+			return slotInfo and slotInfo.transmogID or Constants.Transmog.NoTransmogID
 		end
 
 		local function onEnter(btn, outfitID)
@@ -1142,11 +1133,7 @@ if util.isMidnight then -- beta
 					end
 
 					if appearanceID ~= Constants.Transmog.NoTransmogID or secondaryAppearanceID ~= Constants.Transmog.NoTransmogID then
-						-- doesn't show secondary if there is no main shoulder
-						if appearanceID == Constants.Transmog.NoTransmogID then
-							appearanceID = getRelevantTransmogID(location)
-						end
-						local illusionID = getSlotTransmogID(iLocations[slot], weaponOption)
+						local illusionID = getSlotTransmogID(iLocations[slot], weaponOption, appearanceID)
 						local itemTransmogInfo = ItemUtil.CreateItemTransmogInfo(appearanceID, secondaryAppearanceID, illusionID)
 						local slotID = location:GetSlotID()
 

@@ -3716,23 +3716,42 @@
 		</Scripts>
 	</Button>
 
-	<EditBox name="MJConditionEditBoxTemplate" inherits="InputBoxScriptTemplate,MJDarkPanelTemplate" numeric="true" multiLine="false" autoFocus="false" virtual="true">
-		<Size y="40"/>
+	<EditBox name="MJConditionEditBoxTemplate" inherits="InputBoxScriptTemplate" numeric="true" multiLine="false" autoFocus="false" virtual="true">
+		<Size y="30"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="Left" atlas="common-search-border-left" useAtlasSize="false">
+					<Size x="8"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="0" y="1"/>
+						<Anchor point="BOTTOMLEFT" x="0" y="1"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="Right" atlas="common-search-border-right">
+					<Size x="8"/>
+					<Anchors>
+						<Anchor point="TOPRIGHT" x="0" y="1"/>
+						<Anchor point="BOTTOMRIGHT" x="0" y="1"/>
+					</Anchors>
+				</Texture>
+				<Texture parentKey="Middle" atlas="common-search-border-middle">
+					<Size x="10"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.Left" relativePoint="TOPRIGHT"/>
+						<Anchor point="BOTTOMRIGHT" relativeKey="$parent.Right" relativePoint="BOTTOMLEFT"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
 		<FontString inherits="GameFontHighlight" justifyH="LEFT"/>
 		<TextInsets>
-			<AbsInset left="10" right="33"/>
+			<AbsInset left="6" right="31"/>
 		</TextInsets>
 		<Frames>
-			<Frame parentKey="border" inherits="InsetFrameTemplate">
-				<Anchors>
-					<Anchor point="TOPLEFT" x="3" y="-5"/>
-					<Anchor point="BOTTOMRIGHT" x="-3" y="6"/>
-				</Anchors>
-			</Frame>
 			<Frame parentKey="linkFrame">
 				<Size x="1" y="1"/>
 				<Anchors>
-					<Anchor point="RIGHT" x="-8"/>
+					<Anchor point="RIGHT" x="-6"/>
 				</Anchors>
 				<Layers>
 					<Layer level="ARTWORK">
@@ -3746,9 +3765,6 @@
 			</Frame>
 		</Frames>
 		<Scripts>
-			<OnLoad inherit="prepend">
-				self:SetBackdropColor(0, 0, 0, .9)
-			</OnLoad>
 			<OnEnter>
 				local tooltip = self.tooltip
 				if tooltip then

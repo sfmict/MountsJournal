@@ -371,7 +371,7 @@ function ruleEditor:openCondValueMenu(btn, btnData)
 end
 
 
-function ruleEditor:setCondValueOption(panel, btnData)
+function ruleEditor:setCondValueOption(panel, btnData, setFocus)
 	if not btnData[2] then return end
 
 	if panel.optionValue then
@@ -425,6 +425,9 @@ function ruleEditor:setCondValueOption(panel, btnData)
 	if panel.optionValue.SetCursorPosition then
 		panel.optionValue:SetCursorPosition(0)
 	end
+	if setFocus and panel.optionValue.SetFocus then
+		panel.optionValue:SetFocus()
+	end
 	panel.optionValue.tooltip = self:getCondTooltip(btnData)
 end
 
@@ -434,7 +437,7 @@ function ruleEditor:openCondTypeMenu(btn, btnData)
 		btnData[2] = f.value
 		btnData[3] = nil
 		btn:SetText(f.text)
-		self:setCondValueOption(btn:GetParent(), btnData)
+		self:setCondValueOption(btn:GetParent(), btnData, true)
 		self:checkRule()
 	end
 
@@ -463,7 +466,7 @@ function ruleEditor:openActionValueMenu(btn, actionData)
 end
 
 
-function ruleEditor:setActionValueOption()
+function ruleEditor:setActionValueOption(setFocus)
 	local actionData = self.data.action
 	local panel = self.actionPanel
 	panel:SetHeight(50)
@@ -528,6 +531,9 @@ function ruleEditor:setActionValueOption()
 	if panel.optionValue.SetCursorPosition then
 		panel.optionValue:SetCursorPosition(0)
 	end
+	if setFocus and panel.optionValue.SetFocus then
+		panel.optionValue:SetFocus()
+	end
 	panel.optionValue.tooltip = self:getActionTooltip(actionData)
 end
 
@@ -539,7 +545,7 @@ function ruleEditor:openActionTypeMenu(btn)
 		actionData[1] = f.value
 		actionData[2] = nil
 		btn.text:SetText(f.text)
-		self:setActionValueOption()
+		self:setActionValueOption(true)
 		self:checkRule()
 	end
 
