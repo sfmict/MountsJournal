@@ -268,10 +268,10 @@ rules:SetScript("OnShow", function(self)
 	end
 	local function btnEnter(btn)
 		if #btn.data > 3
-      or btn.cond1:IsTruncated()
-      or btn.cond2:IsTruncated()
-      or btn.cond3:IsTruncated()
-      then
+		or btn.cond1:IsTruncated()
+		or btn.cond2:IsTruncated()
+		or btn.cond3:IsTruncated()
+		then
 			GameTooltip:SetOwner(btn, "ANCHOR_NONE")
 			GameTooltip:SetPoint("BOTTOMLEFT", btn, "BOTTOMRIGHT")
 			GameTooltip:SetText(L["Conditions"]..":")

@@ -195,10 +195,7 @@ end
 
 
 function mounts:getDefaultRule()
-	return {
-		{false, "btn", 1},
-		action = {"rmount", 0},
-	}
+	return {action = {"rmount", 0}}
 end
 
 

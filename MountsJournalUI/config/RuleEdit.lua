@@ -584,7 +584,7 @@ function ruleEditor:conditionButtonInit(panel, data)
 
 		self:setCondValueOption(panel, btnData)
 
-		panel.remove:SetShown(data[1] ~= 1)
+		panel.remove:Show()
 		panel.remove:SetScript("OnClick", function() self:removeCondition(data[1]) end)
 	end
 end

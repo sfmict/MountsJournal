@@ -511,11 +511,28 @@ function conds.hitem:getValueDescription()
 	return "ItemID"
 end
 
+local function getItemID(value)
+	local itemID = tonumber(value)
+	if not itemID and value then
+		itemID = tonumber(value:match("item:(%d*)"))
+		if not itemID then
+			local link = ltl:GetItemLink(value)
+			if link then
+				itemID = tonumber(link:match("item:(%d*)"))
+			end
+		end
+	end
+	return itemID
+end
+
 function conds.hitem:setValueLink(fontString, value)
 	fontString:SetText()
 	if not value then return end
+	local itemID = value
+	if type(value) == "string" then itemID = getItemID(value) end
+	if not itemID then return end
 	fontString.value = value
-	ltl:Items(value):Then(function()
+	ltl:Items(itemID):Then(function()
 		if fontString.value == value then
 			local _, itemLink, _,_,_,_,_,_,_, icon = ltl:GetItemInfo(value)
 			fontString:SetText(util.getIconLink(itemLink, icon))
@@ -1617,20 +1634,7 @@ end
 conds.equipi = {}
 conds.equipi.text = L["Item is equipped"]
 
-local function getItemID(value)
-	local itemID = tonumber(value)
-	if not itemID and value then
-		local link = ltl:GetItemLink(value)
-		if link then
-			itemID = tonumber(link:match("item:(%d*)"))
-		end
-	end
-	return itemID
-end
-
-function conds.equipi:setValueLink(fontString, value)
-	conds.hitem.setValueLink(self, fontString, getItemID(value))
-end
+conds.equipi.setValueLink = conds.hitem.setValueLink
 
 function conds.equipi:receiveDrag(editBox)
 	local infoType, _, link = GetCursorInfo()
