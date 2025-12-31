@@ -182,7 +182,7 @@ end
 
 
 -- BUTTONS
-mounts:on("ADDON_INIT", function()
+mounts:on("ADDON_INIT", function(mounts)
 	panel.config = mounts.globalDB.summonPanelConfig
 	panel.config.frameStrata = panel.config.frameStrata or 2
 	panel.config.kSize = panel.config.kSize or 1
@@ -248,6 +248,10 @@ mounts:on("ADDON_INIT", function()
 
 	summon2Handler:HookScript("OnMouseDown", function() summon2:GetPushedTexture():Show() end)
 	summon2Handler:HookScript("OnMouseUp", function() summon2:GetPushedTexture():Hide() end)
+
+	mounts:on("UPDATE_SUMMON_ICON", function(_, id, icon)
+		panel["summon"..id].icon:SetTexture(icon)
+	end)
 
 	panel:setStrata()
 	panel:setSize()

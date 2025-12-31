@@ -194,6 +194,11 @@ rules:SetScript("OnShow", function(self)
 		end
 	end)
 
+	mounts:on("UPDATE_SUMMON_ICON", function(_, id, icon)
+		if self.summonN ~= id then return end
+		self.summons:ddSetSelectedText(("%s %d"):format(SUMMONS, id), icon)
+	end)
+
 	-- ALTERNATIVE MODE
 	self.altMode = CreateFrame("CheckButton", nil, self, "MJCheckButtonTemplate")
 	self.altMode:SetPoint("TOPLEFT", self.summons, "BOTTOMLEFT", 0, -5)
@@ -210,7 +215,7 @@ rules:SetScript("OnShow", function(self)
 	self.addRuleBtn:SetText(L["Add Rule"])
 	self.addRuleBtn:SetSize(self.addRuleBtn:GetFontString():GetStringWidth() + 40, 22)
 	self.addRuleBtn:SetScript("OnClick", function()
-		self.ruleEditor:addRule()
+		self.ruleEditor:add(self.rules)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
 
@@ -257,10 +262,16 @@ rules:SetScript("OnShow", function(self)
 	local function btnClick(btn, button)
 		if button == "LeftButton" then
 			if IsShiftKeyDown() then
-				util.insertChatLink("Rule", ("%s:%s:%s"):format(self.summonN, btn.id, macroFrame.currentRuleSet.name))
+				util.insertChatLink("Rule", ("%s:%s:%s"):format(
+					self.summonN,
+					self:getRulePath(btn.list, btn.id),
+					macroFrame.currentRuleSet.name
+				))
 			else
-				self.ruleEditor:editRule(btn.id, btn.data)
+				self.ruleEditor:edit(btn.list, btn.id, btn.data)
 			end
+		elseif button == "MiddleButton" then
+			btn.collapseExpand:Click()
 		else
 			self.ruleMenu:ddToggle(1, btn, "cursor")
 		end
@@ -287,6 +298,7 @@ rules:SetScript("OnShow", function(self)
 	local function btnDragStart(btn)
 		local level = btn:GetFrameLevel()
 		self.cover.id = btn.id
+		self.cover.list = btn.list
 		self.cover:SetParent(btn)
 		self.cover:SetAllPoints(btn)
 		self.cover:SetFrameLevel(level + 2)
@@ -305,19 +317,45 @@ rules:SetScript("OnShow", function(self)
 	end
 	local function btnUpClick(btn)
 		local parent = btn:GetParent()
-		self:setRuleOrder(parent.id, parent.id - 1)
+		local list = parent.list
+		local id = parent.id
+		self:setRulePos(list, id, list, id - 1)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end
 	local function btnDownClick(btn)
 		local parent = btn:GetParent()
-		self:setRuleOrder(parent.id, parent.id + 1)
+		local list = parent.list
+		local id = parent.id
+		self:setRulePos(list, id, list, id + 1)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end
-	local function btnRemoveClick(btn) self:removeRule(btn:GetParent().id) end
+	local function btnRemoveClick(btn)
+		local parent = btn:GetParent()
+		self:remove(parent.list, parent.id)
+	end
+	local function btnCollapseClick(btn)
+		local parent = btn:GetParent()
+		local node = parent:GetElementData()
+		parent.data.isCollapsed = node:ToggleCollapsed(TreeDataProviderConstants.RetainChildCollapse, TreeDataProviderConstants.DoInvalidation) or nil
+		parent:updateState()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end
+	local function updateState(btn)
+		local arrowRotation = btn:GetElementData():IsCollapsed() and math.pi or math.pi * .5
+		btn.collapseExpand.normal:SetRotation(arrowRotation)
+		btn.collapseExpand.pushed:SetRotation(arrowRotation)
+		btn.collapseExpand.highlight:SetRotation(arrowRotation)
+	end
 
 	local function onAcqure(owner, btn, data, new)
 		if new then
-			btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+			if btn.collapseExpand then
+				btn:RegisterForClicks("LeftButtonUp", "RightButtonUp", "MiddleButtonUp")
+				btn.collapseExpand:SetScript("OnClick", btnCollapseClick)
+				btn.updateState = updateState
+			else
+				btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+			end
 			btn:RegisterForDrag("LeftButton")
 			btn:SetScript("OnClick", btnClick)
 			btn:HookScript("OnEnter", btnEnter)
@@ -336,8 +374,29 @@ rules:SetScript("OnShow", function(self)
 	self.scrollBar:SetPoint("TOPLEFT", self.scrollBox, "TOPRIGHT", 8, -2)
 	self.scrollBar:SetPoint("BOTTOMLEFT", self.scrollBox, "BOTTOMRIGHT", 8, 0)
 
-	self.view = CreateScrollBoxListLinearView()
-	self.view:SetElementInitializer("MJRulePanelTemplate", function(...) self:ruleButtonInit(...) end)
+	local indent = 12
+	local top = 0
+	local bottom = 0
+	local left = 0
+	local right = 0
+	local spacing = 0
+	self.view = CreateScrollBoxListTreeListView(indent, top, bottom, left, right, spacing)
+	self.view:SetElementExtent(50)
+
+	local ruleTemp = "MJRulePanelTemplate"
+	local groupTemp = "MJRuleGroupTemplate"
+	local ruleInit = function(...) self:ruleButtonInit(...) end
+	local groupInit = function(...) self:ruleGroupInit(...) end
+
+	self.view:SetElementFactory(function(factory, node)
+		local data = node:GetData()
+		if data[2].action then
+			factory(ruleTemp, ruleInit)
+		else
+			factory(groupTemp, groupInit)
+		end
+	end)
+
 	self.view:RegisterCallback(self.view.Event.OnAcquiredFrame, onAcqure, self)
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.scrollBar, self.view)
 
@@ -364,7 +423,8 @@ rules:SetScript("OnShow", function(self)
 	self.separator:Hide()
 	self.separator:SetHeight(10)
 	self.separator.bg = self.separator:CreateTexture(nil, "BACKGROUND")
-	self.separator.bg:SetAllPoints()
+	self.separator.bg:SetPoint("TOPLEFT", 0, -2)
+	self.separator.bg:SetPoint("BOTTOMRIGHT", 0, -2)
 	self.separator.bg:SetTexture("Interface\\Buttons\\UI-Silver-Button-Highlight")
 	self.separator.bg:SetBlendMode("ADD")
 
@@ -379,6 +439,15 @@ rules:SetScript("OnShow", function(self)
 	self.dragBtn.up:Disable()
 	self.dragBtn.down:Disable()
 
+	local function isGroupList(gList, fList)
+		if gList == fList then return true end
+		for i, rule in ipairs(gList) do
+			if rule.rules and isGroupList(rule.rules, fList) then
+				return true
+			end
+		end
+	end
+
 	function self.dragBtn.onUpdate(btn, elapsed)
 		local x, y = GetCursorDelta()
 		local scale = btn:GetEffectiveScale()
@@ -387,24 +456,44 @@ rules:SetScript("OnShow", function(self)
 		self.separator.id = nil
 		for i, f in ipairs(self.view:GetFrames()) do
 			if f:IsMouseOver() then
-				if btn.id ~= f.id then
-					self.separator:ClearAllPoints()
-					local x, y = GetCursorPosition()
-					local xc, yc = f:GetCenter()
-					if yc < y / scale then
-						if btn.id + 1 ~= f.id and f:GetTop() <= self.scrollBox:GetTop() then
-							self.separator.id = f.id
-							self.separator:SetPoint("BOTTOMLEFT", f, "TOPLEFT", 5, -5)
-							self.separator:SetPoint("BOTTOMRIGHT", f, "TOPRIGHT", -5, -5)
-							self.separator:Show()
-						end
-					else
-						if btn.id ~= f.id + 1 and math.floor(f:GetBottom() + .5) >= math.floor(self.scrollBox:GetBottom() + .5) then
-							self.separator.id = f.id + 1
-							self.separator:SetPoint("TOPLEFT", f, "BOTTOMLEFT", 5, 5)
-							self.separator:SetPoint("TOPRIGHT", f, "BOTTOMRIGHT", -5, 5)
-							self.separator:Show()
-						end
+				if f.list == btn.list and f.id == btn.id
+				or btn.data.rules and isGroupList(btn.data.rules, f.list)
+				then return end
+				self.separator:ClearAllPoints()
+				local x, y = GetCursorPosition()
+				local xc, yc = f:GetCenter()
+				y = y / scale
+				if f.data.rules
+				and f.data.rules ~= btn.list
+				and math.abs(y - yc) < f:GetHeight() / 4
+				then -- group
+					self.separator.list = f.data.rules
+					self.separator.id = 1
+					self.separator:SetPoint("TOPLEFT", f, "CENTER", -150, 26)
+					self.separator:SetPoint("BOTTOMRIGHT", f, "CENTER", 150, -34)
+					self.separator:Show()
+					return
+				end
+				if yc < y then -- up
+					if (btn.list ~= f.list or btn.id + 1 ~= f.id)
+					and f:GetTop() <= self.scrollBox:GetTop()
+					then
+						self.separator.id = f.id
+						self.separator.list = f.list
+						self.separator:SetPoint("BOTTOMLEFT", f, "TOPLEFT", 5, -5)
+						self.separator:SetPoint("BOTTOMRIGHT", f, "TOPRIGHT", -5, -5)
+						self.separator:Show()
+					end
+				else -- down
+					if (btn.list ~= f.list or btn.id ~= f.id + 1)
+					and math.floor(f:GetBottom() + .5) >= math.floor(self.scrollBox:GetBottom() + .5)
+					--and (not f.data.rules or #f.data.rules == 0 or f.data.collapsed)
+					then
+						self.separator.id = f.id + 1
+						self.separator.list = f.list
+						self.separator:SetPoint("TOPLEFT", f, "BOTTOMLEFT", 5, 5)
+						self.separator:SetPoint("TOPRIGHT", f, "BOTTOMRIGHT", -5, 5)
+						self.separator:Show()
 					end
 				end
 				break
@@ -424,10 +513,15 @@ rules:SetScript("OnShow", function(self)
 		self.cover.id = nil
 		self.cover:Hide()
 		self.separator:Hide()
-		local id = self.separator.id
-		if id then
-			if id > self.dragBtn.id then id = id - 1 end
-			self:setRuleOrder(self.dragBtn.id, id)
+		local newID = self.separator.id
+		if newID then
+			local newList = self.separator.list
+			local list = self.dragBtn.list
+			local id = self.dragBtn.id
+			if newList == list and newID > id then
+				newID = newID - 1
+			end
+			self:setRulePos(list, id, newList, newID)
 		end
 	end)
 
@@ -440,12 +534,16 @@ rules:SetScript("OnShow", function(self)
 		local info = {}
 		info.notCheckable = true
 
+		info.text = L["Duplicate"]
+		info.func = function() self:save(btn.list, btn.id + 1, util:copyTable(btn.data)) end
+		dd:ddAddButton(info, level)
+
 		info.text = L["Export"]
-		info.func = function() self:exportRule(btn.id) end
+		info.func = function() self:exportRule(btn.list, btn.id) end
 		dd:ddAddButton(info, level)
 
 		info.text = DELETE
-		info.func = function() self:removeRule(btn.id) end
+		info.func = function() self:remove(btn.list, btn.id) end
 		dd:ddAddButton(info, level)
 
 		info.func = nil
@@ -542,47 +640,77 @@ function rules:resetRules()
 end
 
 
-function rules:saveRule(order, data)
-	if order then
-		tremove(self.rules, order)
+do
+	local function getPath(list, pList)
+		for i, rule in ipairs(pList) do
+			if rule.rules then
+				if rule.rules == list then return i end
+				local path = getPath(list, rule.rules)
+				if path then return i..">"..path end
+			end
+		end
 	end
-	tinsert(self.rules, order or 1, data)
+
+
+	function rules:getRulePath(list, order)
+		if list == self.rules then return order end
+		return getPath(list, self.rules)..">"..order
+	end
+end
+
+
+function rules:save(list, order, data, isEdit)
+	if isEdit then
+		tremove(list, order)
+	end
+	tinsert(list, order or 1, data)
 	self:updateFilters()
 	macroFrame:setRuleFuncs()
 end
 
 
-function rules:removeRule(order)
-	StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(L["Remove Rule %d"]:format(order)), nil, function()
-		tremove(self.rules, order)
+function rules:remove(list, order)
+	StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(L["Remove Rule %d"]:format(self:getRulePath(list, order))), nil, function()
+		tremove(list, order)
 		self:updateFilters()
 		macroFrame:setRuleFuncs()
 	end)
 end
 
 
-function rules:setRuleOrder(order, newOrder)
-	local rule = self.rules[order]
-	table.remove(self.rules, order)
-	table.insert(self.rules, newOrder, rule)
+function rules:setRulePos(list, order, newList, newOrder)
+	table.insert(newList, newOrder, table.remove(list, order))
 	self:updateFilters()
 	macroFrame:setRuleFuncs()
 end
 
 
-function rules:checkRule(rule)
-	if not (type(rule) == "table" and rule.action and actions[rule.action[1]]) then return end
-	for i = 1, #rule do
-		if not conds[rule[i][2]] then return end
+function rules:ruleCheck(rule)
+	if type(rule) ~= "table"
+	or type(rule.action) == "table" and not actions[rule.action[1]]
+	then return end
+
+	if type(rule.name) == "string" and type(rule.rules) == "table" then
+		for i, sRule in ipairs(rule.rules) do
+			if not self:ruleCheck(sRule) then return end
+		end
 	end
+
+	for i = 1, #rule do
+		local cond = rule[i]
+		if not conds[cond[2]]
+		or conds[cond[2]].getValueList and not cond[3]
+		then return end
+	end
+
 	return true
 end
 
 
-function rules:exportRule(order)
+function rules:exportRule(list, order)
 	dataDialog:open({
 		type = "export",
-		data = {type = "rule", data = self.rules[order]},
+		data = {type = "rule", data = list[order]},
 	})
 end
 
@@ -592,13 +720,16 @@ function rules:importRule()
 		type = "import",
 		valid = function(data)
 			if data.type ~= "rule" then return end
+			return self:ruleCheck(data.data)
+		end,
+		save = function(data)
 			local rule = data.data
-			if self:checkRule(rule) then
+			if self:ruleCheck(rule) then
 				util.openJournalTab(1, 3)
-				self.ruleEditor:addRule(rule)
-				ns.dataDialog:Hide()
+				self:save(self.rules, 1, rule)
+				return true
 			end
-		end
+		end,
 	})
 end
 
@@ -611,9 +742,9 @@ function rules:dataImportRule(data, rName, characterName)
 		fromName = characterName,
 		data = data,
 		save = function(rule)
-			if self:checkRule(rule) then
+			if self:ruleCheck(rule) then
 				util.openJournalTab(1, 3)
-				self.ruleEditor:addRule(rule)
+				self:save(self.rules, 1, rule)
 				return true
 			end
 		end,
@@ -662,7 +793,7 @@ function rules:importRuleSet()
 				for _, rules in ipairs(ruleSet) do
 					if type(rules) ~= "table" then return end
 					for _, rule in ipairs(rules) do
-						if not self:checkRule(rule) then return end
+						if not self:ruleCheck(rule) then return end
 					end
 				end
 				return true
@@ -721,29 +852,38 @@ function rules:getCondText(cond)
 end
 
 
-function rules:getActionText(action)
-	local value = self:getActionValueDisplay(action)
-	if value == "" then
-		return actions[action[1]].text
+function rules:getActionText(rule)
+	local action = rule.action
+	if action then
+		local value = self:getActionValueDisplay(action)
+		if value == "" then
+			return actions[action[1]].text
+		else
+			return ("%s:\n|cffeeeeee%s|r"):format(actions[action[1]].text, value)
+		end
 	else
-		return ("%s:\n|cffeeeeee%s|r"):format(actions[action[1]].text, value)
+		local name = rule.name
+		if name == "" then name = "|cff808080--|r" end
+		return LFG_LIST_BAD_NAME..":\n|cffeeeeee"..name
 	end
 end
 
 
-function rules:ruleButtonInit(btn, data, isDrag)
+function rules:ruleButtonInit(btn, node, isDrag)
+	local data = node:GetData()
 	btn.id = data[1]
 	btn.data = data[2]
+	btn.list = data[3]
 	btn.order:SetText(btn.id)
-	btn.action:SetText(self:getActionText(btn.data.action))
+	btn.action:SetText(self:getActionText(btn.data))
 	btn.up:SetShown(btn.id > 1)
 	btn.down:SetShown(#self.rules > btn.id)
 
 	btn.cond2:ClearAllPoints()
 	if #btn.data == 2 then
-		btn.cond2:SetPoint("TOPLEFT", btn, "LEFT", 30, -1)
+		btn.cond2:SetPoint("TOPLEFT", btn, "LEFT", 41, -1)
 	else
-		btn.cond2:SetPoint("LEFT", 30, 0)
+		btn.cond2:SetPoint("LEFT", 41, 0)
 	end
 	btn.cond2:SetPoint("RIGHT", btn, "CENTER", -21, 0)
 
@@ -758,11 +898,17 @@ function rules:ruleButtonInit(btn, data, isDrag)
 		btn.cond3:SetText(#btn.data > 3 and text.."…" or text)
 	end
 
-	if not isDrag and self.cover.id == btn.id then
+	if not isDrag and self.cover.list == btn.list and self.cover.id == btn.id then
 		self.cover:SetParent(btn)
 		self.cover:SetAllPoints(btn)
 		self.cover:Show()
 	end
+end
+
+
+function rules:ruleGroupInit(btn, node, isDrag)
+	self:ruleButtonInit(btn, node, isDrag)
+	btn:updateState()
 end
 
 
@@ -785,6 +931,9 @@ do
 			len = ds[2]
 			text = text:gsub(ds[1], compareFunc)
 		end
+		if text:find("Друг в группе") then
+			fprint(text:find("n"))
+		end
 		return text:lower():find(str, 1, true)
 	end
 
@@ -796,20 +945,41 @@ do
 	end
 
 
-	function rules:updateFilters()
-		local text = util.cleanText(self.searchBox:GetText())
-		self.dataProvider = CreateDataProvider()
-
-		for i = 1, #self.rules do
-			local rule = self.rules[i]
-			if #text == 0
-			or find(self:getActionText(rule.action), text)
+	function rules:addDataList(text, list, pNode)
+		local empty = true
+		for i = 1, #list do
+			local rule = list[i]
+			if rule.name
+			or self.notSearched
+			or find(self:getActionText(rule), text)
 			or self:condFind(rule, text)
 			then
-				self.dataProvider:Insert({i, rule})
+				local node = pNode:Insert({i, rule, list})
+				if rule.rules then
+					if self:addDataList(text, rule.rules, node)
+					or self.notSearched
+					or find(self:getActionText(rule), text)
+					or self:condFind(rule, text)
+					then
+						empty = false
+						node:SetCollapsed(rule.isCollapsed and self.notSearched)
+					else
+						pNode:Remove(node)
+					end
+				else
+					empty = false
+				end
 			end
 		end
-
-		self:updateRuleList()
+		return not empty
 	end
+end
+
+
+function rules:updateFilters()
+	local text = util.cleanText(self.searchBox:GetText())
+	self.dataProvider = CreateTreeDataProvider()
+	self.notSearched = #text == 0
+	self:addDataList(text, self.rules, self.dataProvider)
+	self:updateRuleList()
 end

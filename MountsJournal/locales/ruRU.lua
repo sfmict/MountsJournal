@@ -1,7 +1,3 @@
-if GetLocale() ~= "ruRU" then
-	return
-end
-
 local _, ns = ...
 local L = ns.L
 
@@ -169,9 +165,11 @@ L["Rule"] = "Правило"
 L["Rules"] = "Правила"
 L["RULES_TITLE"] = "Правила призыва маунтов. Правила проверяются по порядку, и первое правило в котором все условия совпадут выполнит действие."
 L["Add Rule"] = "Добавить правило"
+L["Add Group"] = "Добавить группу"
+L["Duplicate"] = "Дублировать"
 L["Import Rule"] = "Импортировать правило"
 L["Reset Rules"] = "Сбросить правила"
-L["Remove Rule %d"] = "Удалить правило %d"
+L["Remove Rule %s"] = "Удалить правило %s"
 L["Alternative Mode"] = "Альтернативный режимм"
 L["NOT_CONDITION"] = "Не"
 L["Conditions"] = "Условия"

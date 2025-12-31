@@ -3546,8 +3546,8 @@
 			<Layer level="BACKGROUND">
 				<Texture parentKey="highlight" alpha="0">
 					<Anchors>
-						<Anchor point="TOPLEFT" x="3" y="-3"/>
-						<Anchor point="BOTTOMRIGHT" x="-3" y="3"/>
+						<Anchor point="TOPLEFT" x="2" y="-2"/>
+						<Anchor point="BOTTOMRIGHT" x="-2" y="2"/>
 					</Anchors>
 					<Color r=".8" g=".6" b=".1" a=".1"/>
 				</Texture>
@@ -3595,13 +3595,13 @@
 				<FontString parentKey="order" inherits="GameFontNormalLarge" justifyH="CENTER">
 					<Size x="28"/>
 					<Anchors>
-						<Anchor point="LEFT" x="1"/>
+						<Anchor point="LEFT" x="12"/>
 					</Anchors>
 				</FontString>
 				<FontString parentKey="cond2" inherits="GameFontNormal" wordwrap="false" justifyH="LEFT">
 					<Anchors>
-						<Anchor point="LEFT" x="30"/>
-						<Anchor point="RIGHT" relativePoint="CENTER" x="-21"/>
+						<Anchor point="LEFT" x="41"/>
+						<Anchor point="RIGHT" relativePoint="CENTER" x="-10"/>
 					</Anchors>
 				</FontString>
 				<FontString parentKey="cond1" inherits="GameFontNormal" wordwrap="false" justifyH="LEFT">
@@ -3618,19 +3618,25 @@
 				</FontString>
 				<FontString parentKey="action" inherits="GameFontNormal" justifyH="LEFT" maxLines="3">
 					<Anchors>
-						<Anchor point="LEFT" relativePoint="CENTER" x="-11"/>
+						<Anchor point="LEFT" relativePoint="CENTER" x="0"/>
 						<Anchor point="RIGHT" x="-62"/>
 					</Anchors>
 				</FontString>
+				<Texture atlas="glues-characterSelect-TopHUD-BG-divider-dis">
+					<Size x="2" y="35"/>
+					<Anchors>
+						<Anchor point="RIGHT" relativeKey="$parent.action" relativePoint="LEFT" x="-4"/>
+					</Anchors>
+				</Texture>
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button parentKey="remove" inherits="MJRemoveButtonTemplate">
+			<Button parentKey="remove" inherits="MJRemoveButtonTemplate" propagateMouseInput="Motion">
 				<Anchors>
 					<Anchor point="RIGHT" x="-10"/>
 				</Anchors>
 			</Button>
-			<Button parentKey="up">
+			<Button parentKey="up" propagateMouseInput="Motion">
 				<Size x="17" y="11"/>
 				<Anchors>
 					<Anchor point="TOPRIGHT" x="-40" y="-12"/>
@@ -3639,7 +3645,7 @@
 				<PushedTexture atlas="minimal-scrollbar-arrow-top-down"/>
 				<HighlightTexture atlas="minimal-scrollbar-arrow-top-over" alphaMode="ADD"/>
 			</Button>
-			<Button parentKey="down">
+			<Button parentKey="down" propagateMouseInput="Motion">
 				<Size x="17" y="11"/>
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT" x="-40" y="12"/>
@@ -3649,6 +3655,43 @@
 				<HighlightTexture atlas="minimal-scrollbar-arrow-bottom-over" alphaMode="ADD"/>
 			</Button>
 		</Frames>
+	</Button>
+
+	<Button name="MJRuleGroupTemplate" inherits="MJRulePanelTemplate" virtual="true">
+		<Frames>
+			<Button parentKey="collapseExpand" propagateMouseInput="Motion">
+				<Size x="10" y="16"/>
+				<Anchors>
+					<Anchor point="LEFT" x="4"/>
+				</Anchors>
+				<NormalTexture parentKey="normal" atlas="bag-arrow"/>
+				<PushedTexture parentKey="pushed" atlas="bag-arrow"/>
+				<HighlightTexture parentKey="highlight" alpha="0.4" alphaMode="ADD" atlas="bag-arrow"/>
+			</Button>
+		</Frames>
+	</Button>
+
+	<Button name="MJRuleTypeButtonTemplate" virtual="true">
+		<Size y="20"/>
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture parentKey="bg" file="interface/glues/characterselect/uicharacterselectglues2x" alpha=".6">
+					<Size y="34"/>
+					<Anchors>
+						<Anchor point="LEFT" x="0" y="0"/>
+						<Anchor point="RIGHT" x="0" y="0"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<HighlightTexture parentKey="highlight" file="interface/glues/characterselect/uicharacterselectglues2x" alphaMode="ADD" alpha=".2">
+			<Size y="34"/>
+			<Anchors>
+				<Anchor point="LEFT" x="0" y="0"/>
+				<Anchor point="RIGHT" x="0" y="0"/>
+			</Anchors>
+		</HighlightTexture>
+		<NormalFont style="GameFontHighlight"/>
 	</Button>
 
 	<Button name="MJConditionDropDownTemplate" inherits="MJDarkPanelTemplate" virtual="true">
@@ -3716,7 +3759,7 @@
 		</Scripts>
 	</Button>
 
-	<EditBox name="MJConditionEditBoxTemplate" inherits="InputBoxScriptTemplate" numeric="true" multiLine="false" autoFocus="false" virtual="true">
+	<EditBox name="MJConditionEditBoxTemplate" inherits="InputBoxScriptTemplate" multiLine="false" autoFocus="false" virtual="true">
 		<Size y="30"/>
 		<Layers>
 			<Layer level="BACKGROUND">
@@ -3829,6 +3872,12 @@
 					<Anchor point="RIGHT" relativePoint="CENTER" x="-5"/>
 				</Anchors>
 			</Button>
+			<EditBox parentKey="groupName" inherits="MJConditionEditBoxTemplate">
+				<Anchors>
+					<Anchor point="LEFT" x="30"/>
+					<Anchor point="RIGHT" x="-30"/>
+				</Anchors>
+			</EditBox>
 			<Button parentKey="macro" useParentLevel="true" inherits="BackdropTemplate" hidden="true">
 				<Size y="85"/>
 				<Anchors>
@@ -3915,7 +3964,7 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Button parentKey="remove" inherits="MJRemoveButtonTemplate">
+			<Button parentKey="remove" inherits="MJRemoveButtonTemplate" propagateMouseInput="Motion">
 				<Anchors>
 					<Anchor point="TOPRIGHT" x="-5" y="-5"/>
 				</Anchors>

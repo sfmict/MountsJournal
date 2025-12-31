@@ -20,7 +20,8 @@
 ## SavedVariablesPerCharacter: MountsJournalChar
 ## OptionalDeps: LibStub, LibThingsLoad, LibDeflate, OPie
 embeds.xml
-locales.xml
+locales\Locale.lua
+locales\[TextLocale].lua
 database\SpecificDB.lua
 database\MountsDB.lua
 Util.lua

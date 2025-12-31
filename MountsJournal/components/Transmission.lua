@@ -165,16 +165,22 @@ local function getTransmitData(data)
 			end
 		end
 	elseif data.t == "Rule" then
-		local summonN, index, rsName = (":"):split(data.id, 3)
+		local summonN, path, rsName = (":"):split(data.id, 3)
 		summonN = tonumber(summonN)
-		index = tonumber(index)
-		if not (summonN and index and rsName) then return end
+		if not (summonN and path and rsName) then return end
 		for i, ruleSet in ipairs(mounts.globalDB.ruleSets) do
 			if ruleSet.name == rsName then
-				local rules = ruleSet[summonN]
-				if rules then
-					toTransmit = rules[index]
+				local rules, rule = ruleSet[summonN]
+				for i, order in ipairs({(">"):split(path)}) do
+					if rules then
+						rule = rules[tonumber(order)]
+						rules = rule and rule.rules
+					else
+						rule = nil
+						break
+					end
 				end
+				toTransmit = rule
 				break
 			end
 		end

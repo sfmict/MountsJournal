@@ -83,8 +83,57 @@ ruleEditor:HookScript("OnShow", function(self)
 	self.panel:SetPoint("BOTTOMRIGHT", -10, 10)
 	self.panel:SetBackdropColor(.1, .1, .1, .85)
 
+	-- type buttons
+	self.addTypeButton1 = CreateFrame("BUTTON", nil, self.panel, "MJRuleTypeButtonTemplate")
+	self.addTypeButton1:SetPoint("TOPRIGHT", self.panel, "TOP", 0, -20)
+	self.addTypeButton1:SetText(L["Add Rule"])
+	self.addTypeButton1:SetScript("OnClick", function(btn)
+		self:selectAddBtn(btn)
+		self.data.action = {}
+		self.data.rules = nil
+		self.data.name = nil
+		self:setActionOption()
+	end)
+	self.addTypeButton1.endPos = 10
+	self.addTypeButton1.bg:SetTexCoord(1197/2048,1622/2048,1063/2048,1161/2048)
+	self.addTypeButton1.highlight:SetTexCoord(1197/2048,1622/2048,1063/2048,1161/2048)
+
+	self.addTypeButton2 = CreateFrame("BUTTON", nil, self.panel, "MJRuleTypeButtonTemplate")
+	self.addTypeButton2:SetPoint("TOPLEFT", self.panel, "TOP", 0, -20)
+	self.addTypeButton2:SetText(L["Add Group"])
+	self.addTypeButton2:SetScript("OnClick", function(btn)
+		self:selectAddBtn(btn)
+		self.data.action = nil
+		self.data.rules = {}
+		self.data.name = ""
+		self:setActionOption()
+	end)
+	self.addTypeButton2.endPos = -10
+	self.addTypeButton2.bg:SetTexCoord(380/2048,805/2048,1186/2048,1285/2048)
+	self.addTypeButton2.highlight:SetTexCoord(380/2048,805/2048,1186/2048,1285/2048)
+
+	local width = math.max(self.addTypeButton1:GetFontString():GetStringWidth(), self.addTypeButton2:GetFontString():GetStringWidth()) + 30
+	self.addTypeButton1:SetWidth(width)
+	self.addTypeButton2:SetWidth(width)
+
+	local typeSlice = self.addTypeButton1:CreateTexture(nil, "BORDER")
+	self.panel.typeSlice = typeSlice
+	typeSlice:SetAtlas("glues-characterSelect-TopHUD-BG-divider-dis")
+	typeSlice:SetSize(2, 34)
+	typeSlice:SetPoint("RIGHT", 1, 3)
+	typeSlice:SetAlpha(.5)
+
+	local typeCheckTex = self.addTypeButton1:CreateTexture(nil, "ARTWORK")
+	self.panel.typeCheckTex = typeCheckTex
+	typeCheckTex:SetSize(width, 34)
+	typeCheckTex:SetPoint("CENTER", 0, 0)
+	typeCheckTex:SetAtlas("glues-gameMode-glw-bottom")
+	typeCheckTex:SetAlpha(.4)
+
+	-- title
 	self.title = self.panel:CreateFontString(nil, "ARTWORK", "GameFontHighlightLarge")
 	self.title:SetPoint("TOP", 0, -20)
+	self.title:SetText(" ")
 
 	self.condText = self.panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 	self.condText:SetPoint("TOP", self.title, "BOTTOM", 0, -4)
@@ -100,13 +149,12 @@ ruleEditor:HookScript("OnShow", function(self)
 		if userInput then
 			local text = editBox:GetText()
 			self.data.action[2] = #text > 0 and text or nil
-			self:checkRule()
+			self:ruleCheck()
 		end
 	end)
 
 	self.actionText = self.panel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 	self.actionText:SetPoint("BOTTOMLEFT", self.actionPanel, "TOPLEFT", 10, 4)
-	self.actionText:SetText(L["Action"])
 
 	self.scrollBox = CreateFrame("FRAME", nil, self.panel, "WowScrollBoxList")
 	self.scrollBox:SetPoint("TOPLEFT", self.condText, "BOTTOMLEFT", -10, -4)
@@ -131,7 +179,7 @@ ruleEditor:HookScript("OnShow", function(self)
 	end)
 
 	self.ok:SetScript("OnClick", function(btn)
-		rules:saveRule(self.order, self.data)
+		rules:save(self.list, self.order, self.data, self.order)
 		btn:GetParent():GetParent():Hide()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
@@ -223,7 +271,7 @@ ruleEditor:HookScript("OnShow", function(self)
 	self.mapSelect.ok:SetScript("OnClick", function(btn)
 		local panel = btn:GetParent()
 		panel.condData[3] = ns.journal.navBar.mapID
-		self:checkRule()
+		self:ruleCheck()
 		self:setCondValueOption(panel.panel, panel.condData)
 		panel:Hide()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -257,7 +305,7 @@ ruleEditor:HookScript("OnShow", function(self)
 		ns.journal.tags.selectFunc = function(spellID)
 			self.mountSelect:Hide()
 			self.data.action[2] = spellID
-			self:checkRule()
+			self:ruleCheck()
 			self:setActionValueOption()
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		end
@@ -286,53 +334,87 @@ ruleEditor:HookScript("OnShow", function(self)
 end)
 
 
-function ruleEditor:addRule(data)
+do
+	local function typeOnUpdate(panel, elapsed)
+		--local endPos = 0
+		local newPos = panel.tPos + (panel.tEndPos - panel.tPos) * elapsed * 10
+
+		if math.abs(panel.tEndPos - panel.tPos) < 1
+		or newPos > 0 and panel.tPos < 0
+		or newPos < 0 and panel.tPos > 0
+		then
+			newPos = panel.tEndPos
+			panel:SetScript("OnUpdate", nil)
+		end
+
+		panel.tPos = newPos
+		panel.typeCheckTex:SetPoint("CENTER", panel.tRFrame, newPos, 0)
+	end
+
+	function ruleEditor:selectAddBtn(btn, pos)
+		self.panel.tRFrame = btn
+		self.panel.tEndPos = btn.endPos
+		self.panel.tPos = pos or self.panel.typeCheckTex:GetCenter() - btn:GetCenter()
+		self.panel:SetScript("OnUpdate", typeOnUpdate)
+	end
+end
+
+
+function ruleEditor:add(list, data)
 	self:Show()
-	self.title:SetText(L["Add Rule"])
+	self.title:Hide()
+	self.addTypeButton1:Show()
+	self.addTypeButton2:Show()
 
+	self.list = list
 	self.order = nil
-	self.data = data or {
-		{false},
-		action = {},
-	}
+	self.data = data or {{false}, action = {}}
 
-	self.actionPanel.optionType:SetText(self.data.action[1] and actions[self.data.action[1]].text or "")
-	self:setActionValueOption()
-	self:checkRule()
+	self:selectAddBtn(self.data.action and self.addTypeButton1 or self.addTypeButton2, 0)
+	self:setActionOption()
+	self:ruleCheck()
 	self:updateConditionList()
 end
 
 
-function ruleEditor:editRule(order, data)
+function ruleEditor:edit(list, order, data)
 	self:Show()
-	self.title:SetText(L["Edit Rule"])
+	self.title:Show()
+	self.addTypeButton1:Hide()
+	self.addTypeButton2:Hide()
 
+	if data.action then
+		self.title:SetText(L["Edit Rule"])
+	else
+		self.title:SetText(L["Edit Group"])
+	end
+
+	self.list = list
 	self.order = order
 	self.data = util:copyTable(data)
 
-	self.actionPanel.optionType:SetText(actions[data.action[1]].text)
-	self:setActionValueOption()
-	self:checkRule()
+	self:setActionOption()
+	self:ruleCheck()
 	self:updateConditionList()
 end
 
 
 function ruleEditor:addCondition()
 	self.data[#self.data + 1] = {false}
-	self:checkRule()
+	self:ruleCheck()
 	self:updateConditionList()
 end
 
 
 function ruleEditor:removeCondition(order)
 	tremove(self.data, order)
-	self:checkRule()
+	self:ruleCheck()
 	self:updateConditionList()
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 end
 
 
-function ruleEditor:checkRule()
+function ruleEditor:ruleCheck()
 	local check = true
 
 	for i = 1, #self.data do
@@ -344,7 +426,7 @@ function ruleEditor:checkRule()
 	end
 
 	local action = self.data.action
-	if not action[1] or actions[action[1]].getValueText and not action[2] then
+	if action and (not action[1] or actions[action[1]].getValueText and not action[2]) then
 		check = false
 	end
 
@@ -362,7 +444,7 @@ function ruleEditor:openCondValueMenu(btn, btnData)
 	local function func(f)
 		btnData[3] = f.value
 		btn:SetText(rules:getCondValueText(btnData))
-		self:checkRule()
+		self:ruleCheck()
 	end
 
 	local list = conds[btnData[2]]:getValueList(btnData[3], func, self.menu)
@@ -408,7 +490,7 @@ function ruleEditor:setCondValueOption(panel, btnData, setFocus)
 			else
 				panel.optionValue.link:SetText("")
 			end
-			self:checkRule()
+			self:ruleCheck()
 		end)
 		local receiveDrag = cond.receiveDrag and function(editBox)
 			cond:receiveDrag(editBox)
@@ -438,12 +520,36 @@ function ruleEditor:openCondTypeMenu(btn, btnData)
 		btnData[3] = nil
 		btn:SetText(f.text)
 		self:setCondValueOption(btn:GetParent(), btnData, true)
-		self:checkRule()
+		self:ruleCheck()
 	end
 
 	local list = conds:getMenuList(btnData[2], func)
 	self.menu:ddToggle(1, list, btn)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+end
+
+
+function ruleEditor:setActionOption()
+	local actionData = self.data.action
+	local panel = self.actionPanel
+
+	if actionData then
+		self.actionText:SetText(L["Action"])
+		panel.groupName:Hide()
+		panel.optionType:Show()
+		panel.optionType:SetText(actionData[1] and actions[actionData[1]].text or "")
+		self:setActionValueOption()
+	else
+		self.actionText:SetText(LFG_LIST_BAD_NAME)
+		if panel.optionValue then panel.optionValue:Hide() end
+		panel.optionType:Hide()
+		panel.groupName:Show()
+		panel.groupName:SetText(self.data.name)
+		panel.groupName:SetScript("OnTextChanged", function(editBox)
+			self.data.name = editBox:GetText():trim()
+			self:ruleCheck()
+		end)
+	end
 end
 
 
@@ -457,7 +563,7 @@ function ruleEditor:openActionValueMenu(btn, actionData)
 	local function func(f)
 		actionData[2] = f.value
 		btn:SetText(rules:getActionValueText(actionData))
-		self:checkRule()
+		self:ruleCheck()
 	end
 
 	local list = actions[actionData[1]]:getValueList(actionData[2], func)
@@ -469,15 +575,16 @@ end
 function ruleEditor:setActionValueOption(setFocus)
 	local actionData = self.data.action
 	local panel = self.actionPanel
+
 	panel:SetHeight(50)
 	if not actionData[1] then return end
+
+	local action = actions[actionData[1]]
+	if not action.getValueText then return end
 
 	if panel.optionValue then
 		panel.optionValue:Hide()
 	end
-
-	local action = actions[actionData[1]]
-	if not action.getValueText then return end
 
 	if action.maxLetters then
 		panel:SetHeight(140)
@@ -514,7 +621,7 @@ function ruleEditor:setActionValueOption(setFocus)
 			else
 				panel.optionValue.link:SetText("")
 			end
-			self:checkRule()
+			self:ruleCheck()
 		end)
 		local receiveDrag = action.receiveDrag and function(editBox)
 			action:receiveDrag(editBox)
@@ -546,7 +653,7 @@ function ruleEditor:openActionTypeMenu(btn)
 		actionData[2] = nil
 		btn.text:SetText(f.text)
 		self:setActionValueOption(true)
-		self:checkRule()
+		self:ruleCheck()
 	end
 
 	local list = actions:getMenuList(actionData[1], func)

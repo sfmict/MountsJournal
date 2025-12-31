@@ -343,3 +343,21 @@ do
 		return text:format(self.getImperialFormat(avgSpeed), self.getMetricFormat(avgSpeed))
 	end
 end
+
+
+do
+	local raceOverride = { -- ChrRacesCreateScreenIcon
+		Scourge = "undead",
+		HighmountainTauren = "highmountain",
+		LightforgedDraenei = "lightforged",
+		ZandalariTroll = "zandalari",
+		EarthenDwarf = "earthen",
+		Harronir = "haranir",
+	}
+
+	function util.getRaceAtlas(race, sex)
+		race = raceOverride[race] or race
+		sex = sex == 2 and "male" or "female"
+		return "raceicon128-"..race.."-"..sex
+	end
+end

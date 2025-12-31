@@ -251,6 +251,34 @@ function macroFrame:setRuleFuncs()
 	local t_then = "\nthen\n"
 	local t_end = "\nend\n"
 
+	local function addRules(rules, offset, func, keys)
+		for i = 1, #rules do
+			local rule = rules[i]
+
+			if rule[1] or rule.action then
+				offset = offset + 1
+				func[offset] = t_if
+				offset = offset + 1
+				func[offset] = self.conditions:getFuncText(rule, keys, rule.name)
+				offset = offset + 1
+				func[offset] = t_then
+			end
+
+			if rule.action then
+				offset = offset + 1
+				func[offset] = self.actions:getFuncText(rule.action, keys)
+			else
+				offset = addRules(rule.rules, offset, func, keys)
+			end
+
+			if rule[1] or rule.action then
+				offset = offset + 1
+				func[offset] = t_end
+			end
+		end
+		return offset
+	end
+
 	for i = 1, #self.currentRuleSet do
 		local rules = self.currentRuleSet[i]
 		local keys = {"wipe", wipe = 1}
@@ -272,23 +300,14 @@ return function(self, button, profileLoad, noMacro)
 	wipe(self.state)
 		]]
 
-		for j = 1, #rules do
-			local rule = rules[j]
-			local offset = (j - 1) * 5 + 6
-			func[offset] = t_if
-			func[offset + 1] = self.conditions:getFuncText(rule, keys)
-			func[offset + 2] = t_then
-			func[offset + 3] = self.actions:getFuncText(rule.action, keys)
-			func[offset + 4] = t_end
-		end
-
+		local offset = addRules(rules, 5, func, keys)
 		local varsText = concat(keys, ", ")
 		func[1] = "local "
 		func[2] = varsText
 		func[3] = " = "
 		func[4] = varsText
 
-		func[#func + 1] = [[
+		func[offset + 1] = [[
 	self.mounts:updateFlagsWithMap()
 
 	if self.useMount then

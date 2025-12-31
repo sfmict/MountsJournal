@@ -826,60 +826,30 @@ local RACE_KEYS = {
 	37, -- Mechagnome
 	52, -- Dracthyr
 	84, -- EarthenDwarf
-	86, -- Haranir
+	86, -- Harronir
 }
 local RACE_LABELS = {}
-local RACE_ICON_TOKEN = { -- ChrRacesCreateScreenIcon
-	[1] = "human",
-	[2] = "orc",
-	[3] = "dwarf",
-	[4] = "nightelf",
-	[5] = "undead",
-	[6] = "tauren",
-	[7] = "gnome",
-	[8] = "troll",
-	[9] = "goblin",
-	[10] = "bloodelf",
-	[11] = "draenei",
-	[22] = "worgen",
-	[24] = "pandaren",
-	[27] = "nightborne",
-	[28] = "highmountain",
-	[29] = "voidelf",
-	[30] = "lightforged",
-	[31] = "zandalari",
-	[32] = "kultiran",
-	[34] = "darkirondwarf",
-	[35] = "vulpera",
-	[36] = "magharorc",
-	[37] = "mechagnome",
-	[52] = "dracthyr",
-	[84] = "earthen",
-	[86] = "haranir",
-}
 for i = 1, #RACE_KEYS do
 	local id = RACE_KEYS[i]
 	local info = C_CreatureInfo.GetRaceInfo(id)
 	RACE_KEYS[i] = info.clientFileString
 	RACE_LABELS[info.clientFileString] = info.raceName
-	RACE_ICON_TOKEN[info.clientFileString] = RACE_ICON_TOKEN[id]
-	RACE_ICON_TOKEN[id] = nil
 end
-sort(RACE_KEYS, function(a,b) return strcmputf8i(RACE_LABELS[a], RACE_LABELS[b]) < 0 end)
 
 function conds.race:getValueText(value)
-	local atlasName = "raceicon128-"..RACE_ICON_TOKEN[value].."-"..(UnitSex("Player") == 2 and "male" or "female")
+	local atlasName = util.getRaceAtlas(value, UnitSex("Player"))
 	return CreateAtlasMarkup(atlasName, ns.RULE_ICON_SIZE, ns.RULE_ICON_SIZE)..RACE_LABELS[value]
 end
 
 function conds.race:getValueList(value, func)
-	local atlasName = "raceicon128-%s-"..(UnitSex("Player") == 2 and "male" or "female")
+	local sex = UnitSex("Player")
 	local list = {}
+	sort(RACE_KEYS, function(a,b) return strcmputf8i(RACE_LABELS[a], RACE_LABELS[b]) < 0 end)
 	for i = 1, #RACE_KEYS do
 		local v = RACE_KEYS[i]
 		list[#list + 1] = {
 			text = RACE_LABELS[v],
-			icon = atlasName:format(RACE_ICON_TOKEN[v] or ""),
+			icon = util.getRaceAtlas(v, sex),
 			value = v,
 			func = func,
 			checked = v == value,
@@ -1665,44 +1635,46 @@ conds.gstate.text = L["Get State"]
 conds.gstate.description = L["Get a state that can be set in actions using \"Set State\""]
 
 function conds.gstate:getValueText(value)
-	local rules = ns.ruleConfig.rules
-	for i = 1, #rules do
-		local action = rules[i].action
-		if action[1] == "sstate" and action[2] == value then
-			return value
-		end
-	end
-	return RED_FONT_COLOR:WrapTextInColorCode(value)
+	return value
+	--local rules = ns.ruleConfig.rules
+	--for i = 1, #rules do
+	--	local action = rules[i].action
+	--	if action[1] == "sstate" and action[2] == value then
+	--		return value
+	--	end
+	--end
+	--return RED_FONT_COLOR:WrapTextInColorCode(value)
 end
 
-function conds.gstate:getValueList(value, func)
-	local list = {}
-	local rules = ns.ruleConfig.rules
+--function conds.gstate:getValueList(value, func)
+--	local list = {}
+--	local rules = ns.ruleConfig.rules
+--	local sstate = {}
 
-	for i = 1, #rules do
-		local action = rules[i].action
-		if action[1] == "sstate" then
-			list[#list + 1] = {
-				text = action[2],
-				value = action[2],
-				func = func,
-				checked = action[2] == value,
-			}
-		end
-	end
+--	for i = 1, #rules do
+--		local action = rules[i].action
+--		if action[1] == "sstate" then
+--			list[#list + 1] = {
+--				text = action[2],
+--				value = action[2],
+--				func = func,
+--				checked = action[2] == value,
+--			}
+--		end
+--	end
 
-	if #list == 0 then
-		list[1] = {
-			notCheckable = true,
-			disabled = true,
-			text = EMPTY,
-		}
-	elseif #list > 1 then
-		sort(list, function(a, b) return strcmputf8i(a.text, b.text) < 0 end)
-	end
+--	if #list == 0 then
+--		list[1] = {
+--			notCheckable = true,
+--			disabled = true,
+--			text = EMPTY,
+--		}
+--	elseif #list > 1 then
+--		sort(list, function(a, b) return strcmputf8i(a.text, b.text) < 0 end)
+--	end
 
-	return list
-end
+--	return list
+--end
 
 function conds.gstate:getFuncText(value)
 	return ("self.state['%s']"):format(value:gsub("['\\]", "\\%1"))
@@ -2087,10 +2059,13 @@ function conds:getMenuList(value, func)
 end
 
 
-function conds:getFuncText(conds, keys)
+function conds:getFuncText(conds, keys, isGroup)
 	local text = {}
-	local condText = ns.actions[conds.action[1]].condText
-	text[1] = condText and condText or "not (profileLoad or self.useMount)"
+
+	if isGroup == nil then
+		local condText = conds.action and ns.actions[conds.action[1]].condText
+		text[1] = condText and condText or "not (profileLoad or self.useMount)"
+	end
 
 	local i = 1
 	local cond = conds[i]
@@ -2107,7 +2082,7 @@ function conds:getFuncText(conds, keys)
 				condText = condt.secretCond..condText
 			end
 			i = i + 1
-			text[i] = condText
+			text[#text + 1] = condText
 		else
 			tremove(conds, i)
 		end

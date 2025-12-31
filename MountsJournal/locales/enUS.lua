@@ -1,10 +1,5 @@
 local _, ns = ...
-local L = {}
-ns.L = L
-
-L.auctioneer = MINIMAP_TRACKING_AUCTIONEER
-L.spells = SPELLS
-L.items = ITEMS
+local L = ns.L
 
 L["author"] = "Author"
 L["Main"] = "Main"
@@ -170,9 +165,11 @@ L["Rule"] = "Rule"
 L["Rules"] = "Rules"
 L["RULES_TITLE"] = "Rules for mounting. The rules are checked in order, and the first rule in which all conditions match executes the action."
 L["Add Rule"] = "Add Rule"
+L["Add Group"] = "Add Group"
+L["Duplicate"] = "Duplicate"
 L["Import Rule"] = "Import Rule"
 L["Reset Rules"] = "Reset Rules"
-L["Remove Rule %d"] = "Remove Rule %d"
+L["Remove Rule %s"] = "Remove Rule %s"
 L["Alternative Mode"] = "Alternative Mode"
 L["NOT_CONDITION"] = "Not"
 L["Conditions"] = "Conditions"
@@ -526,8 +523,3 @@ L["Wyverns"] = "Wyverns"
 L["Yaks"] = "Yaks"
 L["Yetis"] = "Yetis"
 L["Zhevras"] = "Zhevras"
-
-setmetatable(L, {__index = function(self, key)
-	self[key] = "[PH]"..(key or "")
-	return self[key]
-end})

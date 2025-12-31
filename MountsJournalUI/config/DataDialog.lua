@@ -102,9 +102,12 @@ dataDialog:HookScript("OnShow", function(self)
 	self.btn1:SetScript("OnClick", function()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		local name = self.nameEdit:GetText():trim()
-		if self.codeBtn:IsShown() and name == "" or self.info.save and not self.info.save(self.data, name) then
+		if self.nameEdit:IsShown() and name == "" then
 			self.nameEdit:SetFocus()
 			self.nameEdit:HighlightText()
+			return
+		end
+		if self.info.save and not self.info.save(self.data, name) then
 			return
 		end
 		self:Hide()

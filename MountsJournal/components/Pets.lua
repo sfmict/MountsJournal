@@ -161,7 +161,14 @@ do
 		else
 			self:UnregisterEvent("PLAYER_STARTED_MOVING")
 			self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-			if UnitIsAFK("player") then DoEmote("STAND") end
+			if UnitIsAFK("player") then
+				if util.isMidnight then
+					-- tainted
+					--C_ChatInfo.PerformEmote("STAND")
+				else
+					DoEmote("STAND")
+				end
+			end
 			self:summonRandomPet(mounts.config.summonPetOnlyFavorites)
 			if not self.ticker then self:setSummonEvery() end
 		end

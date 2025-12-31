@@ -466,6 +466,11 @@ function journal:init()
 	end)
 	summon2:SetScript("OnEnter", summon1:GetScript("OnEnter"))
 
+	-- update btn icon
+	self:on("UPDATE_SUMMON_ICON", function(self, id, icon)
+		self.bgFrame["summon"..id].icon:SetTexture(icon)
+	end)
+
 	-- NAVBAR
 	self:on("MAP_CHANGE", function(self)
 		self:setEditMountsList()
@@ -1635,7 +1640,9 @@ end
 
 
 function journal:COMPANION_UPDATE(companionType)
-	if companionType == "MOUNT" and InCombatLockdown() then
+	if companionType == "MOUNT"
+	and (InCombatLockdown() or util.isMidnight and C_Secrets.ShouldAurasBeSecret())
+	then
 		self:updateMounted(util.isMounted())
 	end
 end

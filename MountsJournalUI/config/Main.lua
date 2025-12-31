@@ -681,8 +681,7 @@ config:SetScript("OnShow", function(self)
 	local function updateBtnIcon(i)
 		local icon = self["summon"..i.."Icon"].icon:GetTexture()
 		mounts.config["summon"..i.."Icon"] = icon
-		journal.bgFrame["summon"..i].icon:SetTexture(icon)
-		mounts.summonPanel["summon"..i].icon:SetTexture(icon)
+		mounts:event("UPDATE_SUMMON_ICON", i, icon)
 	end
 
 	-- COMMIT
