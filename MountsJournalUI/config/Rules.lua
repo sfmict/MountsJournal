@@ -670,7 +670,7 @@ end
 
 
 function rules:remove(list, order)
-	StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(L["Remove Rule %d"]:format(self:getRulePath(list, order))), nil, function()
+	StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(L["Remove Rule %s"]:format(self:getRulePath(list, order))), nil, function()
 		tremove(list, order)
 		self:updateFilters()
 		macroFrame:setRuleFuncs()
