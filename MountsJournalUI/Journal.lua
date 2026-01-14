@@ -1338,9 +1338,14 @@ function journal:init()
 		parent:SetResizeBounds(max(minWidth, self.minTabWidth), minHeight, maxWidth, maxHeight)
 		parent.isSizing = true
 		parent:StartSizing("BOTTOMRIGHT", true)
+		btn:SetScript("OnUpdate", function()
+			self:setScrollGridMounts(true)
+			self:event("JOURNAL_RESIZED")
+		end)
 	end)
 	resize:SetScript("OnDragStop", function(btn)
 		if InCombatLockdown() then return end
+		btn:SetScript("OnUpdate", nil)
 		local parent = btn:GetParent()
 		parent:StopMovingOrSizing()
 		parent.isSizing = nil
@@ -1643,7 +1648,7 @@ function journal:COMPANION_UPDATE(companionType)
 	if companionType == "MOUNT"
 	and (InCombatLockdown() or util.isMidnight and C_Secrets.ShouldAurasBeSecret())
 	then
-		self:updateMounted(util.isMounted())
+		C_Timer.After(0, function() self:updateMounted(util.isMounted()) end)
 	end
 end
 
@@ -1874,7 +1879,6 @@ function journal:setScrollGridMounts(force)
 		self.gridN = mounts.config.gridModelStride
 		extent = math.floor((scrollWidth - (self.gridN - 1) * hSpacing) / self.gridN)
 		sizeCalculator = function(dataIndex, elementData) return extent, extent end
-		self.gmsWidth = extent
 		self.initMountButton = self.gridModelSceneInit
 	end
 
@@ -2090,7 +2094,6 @@ end
 
 
 function journal:gridModelSceneInit(btn, data, force)
-	btn:SetSize(self.gmsWidth, self.gmsWidth)
 	local mountID = data.mountID
 	local oldMountID = btn.mountID
 	local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = util.getMountInfo(mountID)

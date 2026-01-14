@@ -19,7 +19,7 @@ panel:SetScript("OnEvent", function(self)
 end)
 
 panel:SetClampedToScreen(true)
-panel:EnableMouse(true)
+panel:SetMouseMotionEnabled(true)
 panel:RegisterForDrag("LeftButton")
 panel:SetScript("OnDragStart", function(self)
 	if self:isLocked() then return end
@@ -106,7 +106,8 @@ end
 
 
 function panel:setLocked(lock)
-	self.config.isLocked = lock
+	if lock ~= nil then self.config.isLocked = lock end
+	self:SetMouseClickEnabled(not self.config.isLocked)
 end
 
 
@@ -120,15 +121,25 @@ function panel:setSize(kSize)
 	if kSize then self.config.kSize = kSize end
 	local kSize = self.config.kSize
 	local padding = 2
+	local num = self.config.btn1Disabled and 0 or 1
 
 	self.summon1:SetScale(kSize)
 	self.summon1:SetPoint("TOPLEFT")
 	self.summon2:SetScale(kSize)
-	self.summon2:SetPoint("TOPLEFT", self.BTN_SIZE + padding / kSize, 0)
+	self.summon2:SetPoint("TOPLEFT", num * (self.BTN_SIZE + padding / kSize), 0)
 
-	local width = (self.BTN_SIZE * kSize + padding) * 2 - padding
+	if not self.config.btn2Disabled then num = num + 1 end
+	local width = (self.BTN_SIZE * kSize + padding) * math.max(num, 1) - padding
 	local height = self.BTN_SIZE * kSize
 	self:SetSize(width, height)
+end
+
+
+function panel:setBtnsShown()
+	if InCombatLockdown() then return end
+	self.summon1:SetShown(not self.config.btn1Disabled)
+	self.summon2:SetShown(not self.config.btn2Disabled)
+	self:setSize()
 end
 
 
@@ -253,8 +264,9 @@ mounts:on("ADDON_INIT", function(mounts)
 		panel["summon"..id].icon:SetTexture(icon)
 	end)
 
+	panel:setLocked()
 	panel:setStrata()
-	panel:setSize()
+	panel:setBtnsShown()
 	panel:setShown(panel.config.isShown)
 	panel:setSpeed(panel.config.speedPos)
 	panel:GetScript("OnLeave")(panel)

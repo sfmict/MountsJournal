@@ -1299,7 +1299,7 @@
 			</Layer>
 			<Layer level="BORDER">
 				<Texture parentKey="border" file="Interface/Buttons/UI-Quickslot2">
-					<Size x="65" y="65"/>
+					<Size x="62" y="62"/>
 					<Anchors>
 						<Anchor point="CENTER"/>
 					</Anchors>
@@ -3132,7 +3132,7 @@
 						battlePetActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
 
 						MJTooltipModel:ClearAllPoints()
-						MJTooltipModel:SetPoint("BOTTOMLEFT", self, "TOPRIGHT", 0, 0)
+						MJTooltipModel:SetPoint("BOTTOMLEFT", self, "TOPRIGHT", 0, -2)
 						MJTooltipModel:Show()
 
 						GameTooltip:SetOwner(MJTooltipModel, "ANCHOR_NONE")
@@ -3241,7 +3241,7 @@
 					battlePetActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
 
 					MJTooltipModel:ClearAllPoints()
-					MJTooltipModel:SetPoint("BOTTOM", self, "TOP")
+					MJTooltipModel:SetPoint("BOTTOM", self, "TOP", 0, -2)
 					MJTooltipModel:SetPoint("LEFT", parent, "RIGHT")
 					MJTooltipModel:Show()
 

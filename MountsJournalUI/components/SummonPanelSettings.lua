@@ -52,6 +52,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 			info.func = function() panel:setLocked(not panel:isLocked()) end
 			dd:ddAddButton(info, level)
 
+			info.keepShownOnClick = true
 			info.hasArrow = true
 			info.text = L["Strata of panel"]
 			info.value = "strata"
@@ -61,6 +62,12 @@ ns.journal:on("MODULES_INIT", function(journal)
 			info.value = "speed"
 			dd:ddAddButton(info, level)
 
+			info.text = L["Buttons"]
+			info.value = "btns"
+			dd:ddAddButton(info, level)
+
+			info.keepShownOnClick = nil
+			info.hasArrow = nil
 			info.customFrame = panel.fade
 			info.OnLoad = function(frame)
 				frame:setValue(panel.config.fade)
@@ -75,7 +82,6 @@ ns.journal:on("MODULES_INIT", function(journal)
 			dd:ddAddButton(info)
 
 			info.customFrame = nil
-			info.hasArrow = nil
 			info.disabled = InCombatLockdown()
 			info.text = L["Reset size"]
 			info.func = function() panel:setSize(1) end
@@ -133,6 +139,24 @@ ns.journal:on("MODULES_INIT", function(journal)
 			info.text = HUD_EDIT_MODE_SETTING_COOLDOWN_VIEWER_ICON_DIRECTION_RIGHT
 			info.value = 4
 			dd:ddAddButton(info, level)
+		
+		elseif value == "btns" then
+			info.disabled = InCombatLockdown()
+			info.keepShownOnClick = true
+			info.isNotRadio = true
+
+			info.func = function(btn, _,_, checked)
+				panel.config["btn"..btn.value.."Disabled"] = not checked or nil
+				panel:setBtnsShown()
+			end
+
+			for i = 1, 2 do
+				info.text = SUMMONS.." "..i
+				info.value = i
+				info.icon = ns.mounts.config["summon"..i.."Icon"]
+				info.checked = not panel.config["btn"..i.."Disabled"]
+				dd:ddAddButton(info, level)
+			end
 		end
 	end)
 

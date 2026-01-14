@@ -19,11 +19,11 @@ function setPetMixin:onEnter()
 			battlePetActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
 
 			MJTooltipModel:ClearAllPoints()
-			MJTooltipModel:SetPoint("BOTTOMLEFT", self, "TOPRIGHT")
+			MJTooltipModel:SetPoint("TOPLEFT", self, "TOPRIGHT", 0, 2)
 			MJTooltipModel:Show()
 
 			GameTooltip:SetOwner(self, "ANCHOR_NONE")
-			GameTooltip:SetPoint("TOPLEFT", MJTooltipModel, "BOTTOMLEFT", 0, 2)
+			GameTooltip:SetPoint("BOTTOMLEFT", MJTooltipModel, "TOPLEFT", 0, -2)
 			GameTooltip:SetText(L["Summonable Battle Pet"])
 			local description
 			if self.id then

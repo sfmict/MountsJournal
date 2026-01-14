@@ -65,19 +65,19 @@ function MJNavBarMixin:onLoad()
 	if Kiosk.IsEnabled() then
 		self.KioskOverlay:Show();
 	end
-
-	self:on("JOURNAL_RESIZED", self.refresh)
 end
 
 
 function MJNavBarMixin:onShow()
 	self:setMapID(self.tabMapID)
+	self:on("JOURNAL_RESIZED", self.refresh)
 end
 
 
 function MJNavBarMixin:onHide()
 	self.tabMapID = self.mapID
 	self:setDefMap()
+	self:off("JOURNAL_RESIZED", self.refresh)
 end
 
 
