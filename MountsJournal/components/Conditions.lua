@@ -1125,7 +1125,7 @@ if util.isMidnight then -- beta
 						local slotID = location:GetSlotID()
 
 						if location:IsMainHand() then
-							local mainHandCategoryID = C_Transmog.GetSlotEffectiveCategory(location:GetData())
+							local mainHandCategoryID = C_TransmogOutfitInfo.GetItemModifiedAppearanceEffectiveCategory(appearanceID)
 							itemTransmogInfo:ConfigureSecondaryForMainHand(TransmogUtil.IsCategoryLegionArtifact(mainHandCategoryID))
 							-- Don't specify a slot for ranged weapons.
 							if TransmogUtil.IsCategoryRangedWeapon(mainHandCategoryID) then
