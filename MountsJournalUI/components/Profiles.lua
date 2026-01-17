@@ -10,8 +10,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 	local lsfdd = LibStub("LibSFDropDown-1.5")
 	local dd = lsfdd:CreateStretchButtonOriginal(journal.bgFrame, 130, 22)
 	dd:SetPoint("LEFT", journal.summonButton, "RIGHT", 4, -.5)
-	util.setEventsMixin(dd)
-	journal.bgFrame.profilesMenu = dd
+	journal.bgFrame.profilesMenu = util.setEventsMixin(dd)
 
 	-- POPUP
 	StaticPopupDialogs[util.addonName.."NEW_PROFILE"] = {

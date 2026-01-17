@@ -1,6 +1,7 @@
 local _, ns = ...
 local L, util, macroFrame, mounts, conds = ns.L, ns.util, ns.macroFrame, ns.mounts, ns.conditions
 local strcmputf8i = strcmputf8i
+local ltl = LibStub("LibThingsLoad-1.0")
 local actions = {}
 ns.actions = actions
 
@@ -9,6 +10,10 @@ ns.actions = actions
 -- rmount RANDOM MOUNT
 actions.rmount = {}
 actions.rmount.text = L["Random Mount"]
+
+function actions.rmount:getIcon()
+	return 413588
+end
 
 function actions.rmount:getValueText(profileName)
 	if profileName == 0 then
@@ -79,6 +84,10 @@ end
 -- rmountt RANDOM MOUNT OF SELECTED TYPE
 actions.rmountt = {}
 actions.rmountt.text = L["Random Mount of Selected Type"]
+
+function actions.rmountt:getIcon()
+	return 413588, "T"
+end
 
 function actions.rmountt:getValueText(value)
 	local mType, profile = (":"):split(value, 2)
@@ -171,9 +180,13 @@ actions.rmountr = {}
 actions.rmountr.text = L["Random Mount by Rarity"]
 actions.rmountr.description = L["The lower the rarity, the higher the chance"]
 
+function actions.rmountr:getIcon()
+	return 413588, nil, 1, .5, 1
+end
+
 actions.rmountr.getValueText = actions.rmount.getValueText
 actions.rmountr.getValueList = actions.rmount.getValueList
-actions.rmountr.condText = actions.rmountr.condText
+actions.rmountr.condText = actions.rmount.condText
 
 function actions.rmountr:getFuncText(value)
 	if value == 0 then
@@ -201,6 +214,10 @@ end
 actions.rmounttr = {}
 actions.rmounttr.text = L["Random Mount of Selected Type by Rarity"]
 actions.rmounttr.description = L["The lower the rarity, the higher the chance"]
+
+function actions.rmounttr:getIcon()
+	return 413588, "T", 1, .5, 1
+end
 
 actions.rmounttr.getValueText = actions.rmountt.getValueText
 actions.rmounttr.getValueList = actions.rmountt.getValueList
@@ -234,9 +251,13 @@ actions.rmountc = {}
 actions.rmountc.text = L["Random Mount by Summon Counter"]
 actions.rmountc.description = L["The lower the counter, the higher the chance"]
 
+function actions.rmountc:getIcon()
+	return 413588, nil, .2, .5, 1
+end
+
 actions.rmountc.getValueText = actions.rmount.getValueText
 actions.rmountc.getValueList = actions.rmount.getValueList
-actions.rmountc.condText = actions.rmountc.condText
+actions.rmountc.condText = actions.rmount.condText
 
 function actions.rmountc:getFuncText(value)
 	if value == 0 then
@@ -264,6 +285,10 @@ end
 actions.rmounttc = {}
 actions.rmounttc.text = L["Random Mount of Selected Type by Summon Counter"]
 actions.rmounttc.description = L["The lower the counter, the higher the chance"]
+
+function actions.rmounttc:getIcon()
+	return 413588, "T", .2, .5, 1
+end
 
 actions.rmounttc.getValueText = actions.rmountt.getValueText
 actions.rmounttc.getValueList = actions.rmountt.getValueList
@@ -296,15 +321,28 @@ end
 actions.mount = {}
 actions.mount.text = L["Mount"]
 
-function actions.mount:getValueText(value)
+function actions.mount:getIcon(value)
 	local mount = ns.additionalMounts[value]
 	if mount then
-		return CreateSimpleTextureMarkup(mount.icon, ns.RULE_ICON_SIZE)..mount.name
+		return mount.icon
+	else
+		local mountID = C_MountJournal.GetMountFromSpell(value)
+		if mountID then
+			local _,_, icon = C_MountJournal.GetMountInfoByID(mountID)
+			return icon
+		end
+	end
+end
+
+function actions.mount:getValueText(value, noIcon)
+	local mount = ns.additionalMounts[value]
+	if mount then
+		return noIcon and mount.name or CreateSimpleTextureMarkup(mount.icon, ns.RULE_ICON_SIZE)..mount.name
 	else
 		local mountID = C_MountJournal.GetMountFromSpell(value)
 		if mountID then
 			local name, _, icon = C_MountJournal.GetMountInfoByID(mountID)
-			return icon and CreateSimpleTextureMarkup(icon, ns.RULE_ICON_SIZE)..name or name
+			return (noIcon or not icon) and name or CreateSimpleTextureMarkup(icon, ns.RULE_ICON_SIZE)..name
 		end
 	end
 end
@@ -338,6 +376,10 @@ actions.tmount = {}
 actions.tmount.text = L["CopyMountTarget"]
 actions.tmount.description = L["TMOUNT_DESCRIPTION"]
 
+function actions.tmount:getIcon()
+	return 524052
+end
+
 actions.tmount.condText = actions.mount.condText
 
 function actions.tmount:getFuncText()
@@ -366,6 +408,10 @@ end
 actions.dmount = {}
 actions.dmount.text = BINDING_NAME_DISMOUNT
 
+function actions.dmount:getIcon()
+	return 237700
+end
+
 function actions.dmount:getFuncText()
 	return ([[
 		%s
@@ -390,6 +436,10 @@ actions.item = {}
 actions.item.text = L["Use Item"]
 actions.item.isNumeric = true
 
+function actions.item:getIcon(value)
+	return ltl:GetItemIcon(value)
+end
+
 actions.item.getValueDescription = conds.hitem.getValueDescription
 actions.item.setValueLink = conds.hitem.setValueLink
 actions.item.receiveDrag = conds.hitem.receiveDrag
@@ -406,6 +456,10 @@ end
 actions.iitem = {}
 actions.iitem.text = L["Use Inventory Item"]
 actions.iitem.isNumeric = true
+
+function actions.iitem:getIcon(value)
+	return GetInventoryItemTexture("player", value)
+end
 
 local function getInventoryList()
 	return {
@@ -467,6 +521,11 @@ actions.spell = {}
 actions.spell.text = L["Cast Spell"]
 actions.spell.isNumeric = true
 
+function actions.spell:getIcon(value)
+	local info = ltl:GetSpellInfo(value)
+	if info then return info.iconID end
+end
+
 actions.spell.getValueDescription = conds.kspell.getValueDescription
 actions.spell.setValueLink = conds.kspell.setValueLink
 actions.spell.receiveDrag = conds.kspell.receiveDrag
@@ -489,6 +548,10 @@ actions.macro = {}
 actions.macro.text = MACRO
 actions.macro.maxLetters = 255
 
+function actions.macro:getIcon()
+	return 136377
+end
+
 function actions.macro:getValueText(value)
 	return value
 end
@@ -506,6 +569,10 @@ actions.pmacro.description = L["PMACRO_DESCRIPTION"]
 actions.pmacro.maxLetters = 200
 actions.pmacro.doesntInterrupt = true
 
+function actions.pmacro:getIcon()
+	return 136377, "P"
+end
+
 actions.pmacro.getValueText = actions.macro.getValueText
 
 actions.pmacro.condText = "not (profileLoad or self.useMount or self.preUseMacro)"
@@ -522,6 +589,10 @@ actions.sstate.text = L["Set State"]
 actions.sstate.description = L["Set a state that can be read in conditions using \"Get State\""]
 actions.sstate.doesntInterrupt = true
 
+function actions.sstate:getIcon()
+	return 2147148
+end
+
 actions.sstate.getValueText = actions.macro.getValueText
 
 function actions.sstate:getFuncText(value)
@@ -533,6 +604,10 @@ end
 -- snip SNIPPET
 actions.snip = {}
 actions.snip.text = L["Code Snippet"]
+
+function actions.snip:getIcon()
+	return 1660431
+end
 
 actions.snip.getValueText = conds.snip.getValueText
 actions.snip.getValueList = conds.snip.getValueList

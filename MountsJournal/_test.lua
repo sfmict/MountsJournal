@@ -77,6 +77,8 @@ end)
 test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 if ns.util.isMidnight then
 	test:RegisterEvent("ADDON_RESTRICTION_STATE_CHANGED")
+	test:RegisterEvent("PLAYER_REGEN_ENABLED")
+	test:RegisterEvent("PLAYER_REGEN_DISABLED")
 end
 --ShouldSpellCooldownBeSecret, ShouldSpellAuraBeSecret
 -- test:RegisterEvent("PET_BATTLE_OPENING_START")

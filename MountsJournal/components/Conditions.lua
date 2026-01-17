@@ -2,8 +2,8 @@ local _, ns = ...
 local L, util = ns.L, ns.util
 local strcmputf8i, concat = strcmputf8i, table.concat
 local playerGuid = UnitGUID("player")
-local conds = {}
 local ltl = LibStub("LibThingsLoad-1.0")
+local conds = {}
 ns.conditions = conds
 ns.RULE_ICON_SIZE = 14
 
@@ -550,10 +550,10 @@ function conds.hitem:receiveDrag(editBox)
 	end
 end
 
-function conds.hitem:getValueDisplay(value)
+function conds.hitem:getValueDisplay(value, noIcon)
 	local name = ltl:GetItemName(value)
 	if name then
-		local icon = CreateSimpleTextureMarkup(ltl:GetItemIcon(value) or util.noIcon, ns.RULE_ICON_SIZE)
+		local icon = noIcon and "" or CreateSimpleTextureMarkup(ltl:GetItemIcon(value) or util.noIcon, ns.RULE_ICON_SIZE)
 		return ("%s%s |cff808080<%s>|r"):format(icon, name, value)
 	else
 		ltl:Items(value):ThenForAll(function()
@@ -625,10 +625,10 @@ function conds.kspell:receiveDrag(editBox)
 	end
 end
 
-function conds.kspell:getValueDisplay(value)
+function conds.kspell:getValueDisplay(value, noIcon)
 	local info = ltl:GetSpellInfo(value)
 	if info then
-		local icon = CreateSimpleTextureMarkup(info.iconID or util.noIcon, ns.RULE_ICON_SIZE)
+		local icon = noIcon and "" or CreateSimpleTextureMarkup(info.iconID or util.noIcon, ns.RULE_ICON_SIZE)
 		return ("%s%s |cff808080<%s>|r"):format(icon, info.name, value)
 	end
 end

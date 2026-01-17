@@ -343,7 +343,6 @@ rules:SetScript("OnShow", function(self)
 	local function updateState(btn)
 		local arrowRotation = btn:GetElementData():IsCollapsed() and math.pi or math.pi * .5
 		btn.collapseExpand.normal:SetRotation(arrowRotation)
-		btn.collapseExpand.pushed:SetRotation(arrowRotation)
 		btn.collapseExpand.highlight:SetRotation(arrowRotation)
 	end
 
@@ -828,14 +827,14 @@ function rules:getCondValueDisplay(cond)
 end
 
 
-function rules:getActionValueText(action)
+function rules:getActionValueText(action, ...)
 	if action[2] == nil then return "" end
-	return actions[action[1]]:getValueText(action[2]) or RED_FONT_COLOR:WrapTextInColorCode(tostringall(action[2]))
+	return actions[action[1]]:getValueText(action[2], ...) or RED_FONT_COLOR:WrapTextInColorCode(tostringall(action[2]))
 end
 
 
-function rules:getActionValueDisplay(action)
-	return actions[action[1]].getValueDisplay and actions[action[1]]:getValueDisplay(action[2]) or self:getActionValueText(action)
+function rules:getActionValueDisplay(action, ...)
+	return actions[action[1]].getValueDisplay and actions[action[1]]:getValueDisplay(action[2], ...) or self:getActionValueText(action, ...)
 end
 
 
@@ -852,10 +851,10 @@ function rules:getCondText(cond)
 end
 
 
-function rules:getActionText(rule)
+function rules:getActionText(rule, ...)
 	local action = rule.action
 	if action then
-		local value = self:getActionValueDisplay(action)
+		local value = self:getActionValueDisplay(action, ...)
 		if value == "" then
 			return actions[action[1]].text
 		else
@@ -869,23 +868,39 @@ function rules:getActionText(rule)
 end
 
 
+function rules:getActionIcon(rule)
+	local actionType = actions[rule.action[1]]
+	if actionType.getIcon then return actionType:getIcon(rule.action[2]) end
+end
+
+
 function rules:ruleButtonInit(btn, node, isDrag)
 	local data = node:GetData()
 	btn.id = data[1]
 	btn.data = data[2]
 	btn.list = data[3]
 	btn.order:SetText(btn.id)
-	btn.action:SetText(self:getActionText(btn.data))
+	btn.action:SetText(self:getActionText(btn.data, true))
 	btn.up:SetShown(btn.id > 1)
-	btn.down:SetShown(#self.rules > btn.id)
+	btn.down:SetShown(#btn.list > btn.id)
+
+	if btn.data.action then
+		local icon, text, r,g,b = self:getActionIcon(btn.data)
+		btn.icon:SetTexture(icon or util.noIcon)
+		btn.icon:SetVertexColor(r or 1, g or 1, b or 1)
+		btn.icon:Show()
+		btn.iconText:SetText(text)
+	elseif btn.icon then
+		btn.icon:Hide()
+	end
 
 	btn.cond2:ClearAllPoints()
 	if #btn.data == 2 then
-		btn.cond2:SetPoint("TOPLEFT", btn, "LEFT", 41, -1)
+		btn.cond2:SetPoint("TOPRIGHT", btn, "RIGHT", -62, -1)
 	else
-		btn.cond2:SetPoint("LEFT", 41, 0)
+		btn.cond2:SetPoint("RIGHT", -62, 0)
 	end
-	btn.cond2:SetPoint("RIGHT", btn, "CENTER", -21, 0)
+	btn.cond2:SetPoint("LEFT", btn, "CENTER", -10, 0)
 
 	if #btn.data == 1 then
 		btn.cond1:SetText()
@@ -930,9 +945,6 @@ do
 			local ds = deleteStr[i]
 			len = ds[2]
 			text = text:gsub(ds[1], compareFunc)
-		end
-		if text:find("Друг в группе") then
-			fprint(text:find("n"))
 		end
 		return text:lower():find(str, 1, true)
 	end

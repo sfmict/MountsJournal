@@ -576,15 +576,15 @@ function ruleEditor:setActionValueOption(setFocus)
 	local actionData = self.data.action
 	local panel = self.actionPanel
 
+	if panel.optionValue then
+		panel.optionValue:Hide()
+	end
+
 	panel:SetHeight(50)
 	if not actionData[1] then return end
 
 	local action = actions[actionData[1]]
 	if not action.getValueText then return end
-
-	if panel.optionValue then
-		panel.optionValue:Hide()
-	end
 
 	if action.maxLetters then
 		panel:SetHeight(140)

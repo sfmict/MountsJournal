@@ -291,15 +291,33 @@ end
 
 function iconData:refreshFilters()
 	local text = util.cleanText(self.searchBox:GetText())
-	self.filters.text = #text == 0
+	local noText = #text == 0
 	wipe(self.filtredIcons)
 
 	for i = 1, #self.extraIcons do
-		local iconData = self.extraIcons[i]
-		if self.filters[iconData.type]
-		and (#text == 0 or iconData.name:lower():find(text, 1, true))
+		local data = self.extraIcons[i]
+		if self.filters[data.type]
+		and (noText
+			or data.name:lower():find(text, 1, true)
+			or tostring(data.icon):find(text, 1, true))
 		then
-			self.filtredIcons[#self.filtredIcons + 1] = iconData
+			self.filtredIcons[#self.filtredIcons + 1] = data.icon
+		end
+	end
+
+	if self.filters.extra then
+		for i = 1, #self.spell do
+			local icon = self.spell[i]
+			if noText or tostring(icon):find(text, 1, true) then
+				self.filtredIcons[#self.filtredIcons + 1] = getIconTexture(icon)
+			end
+		end
+
+		for i = 1, #self.item do
+			local icon = self.item[i]
+			if noText or tostring(icon):find(text, 1, true) then
+				self.filtredIcons[#self.filtredIcons + 1] = getIconTexture(icon)
+			end
 		end
 	end
 
@@ -307,44 +325,9 @@ function iconData:refreshFilters()
 end
 
 
-function iconData:getNumIcons()
-	local num = #self.filtredIcons
-
-	if self.filters.extra and self.filters.text then
-		if self.filters.spell then
-			num = num + #self.spell
-		end
-		if self.filters.item then
-			num = num + #self.item
-		end
-	end
-
-	return num
-end
-
-
-function iconData:getIconByIndex(index)
-	local numIcons = #self.filtredIcons
-
-	if index <= numIcons then return self.filtredIcons[index].icon	end
-	index = index - numIcons
-
-	if self.filters.extra and self.filters.text then
-		if self.filters.spell then
-			numIcons = #self.spell
-			if index <= numIcons then return getIconTexture(self.spell[index]) end
-			index = index - numIcons
-		end
-		if self.filters.item then
-			return getIconTexture(self.item[index])
-		end
-	end
-end
-
-
 function iconData:getIndexOfIcon(icon)
-	for i = 1, self:getNumIcons() do
-		if self:getIconByIndex(i) == icon then return i end
+	for i = 1, #self.filtredIcons do
+		if self.filtredIcons[i] == icon then return i end
 	end
 end
 
@@ -364,7 +347,7 @@ do
 	end
 
 	function iconData:btnInit(btn, index)
-		local icon = self:getIconByIndex(index)
+		local icon = self.filtredIcons[index]
 		btn.icon:SetTexture(icon)
 		btn.selectedTexture:SetShown(icon == self.selectedIcon)
 		btn:SetScript("OnClick", click)
@@ -373,6 +356,6 @@ end
 
 
 function iconData:updateList()
-	self.dataProvider = CreateIndexRangeDataProvider(self:getNumIcons())
+	self.dataProvider = CreateIndexRangeDataProvider(#self.filtredIcons)
 	self.scrollBox:SetDataProvider(self.dataProvider, ScrollBoxConstants.RetainScrollPosition)
 end

@@ -5,8 +5,7 @@ local IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsM
 local BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS = BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS
 local next, rawget, wipe, GetTime, random, floor = next, rawget, wipe, GetTime, math.random, math.floor
 local mounts = CreateFrame("Frame", "MountsJournal")
-ns.mounts = mounts
-util.setEventsMixin(mounts)
+ns.mounts = util.setEventsMixin(mounts)
 
 
 mounts:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
@@ -222,6 +221,7 @@ end
 -- ========================================================================
 if util.isMidnight then -- MIDNIGHT
 -- ========================================================================
+mounts:RegisterEvent("ADDON_RESTRICTION_STATE_CHANGED")
 
 
 function mounts:PLAYER_LOGIN()
@@ -274,6 +274,12 @@ end
 
 function mounts:PLAYER_LOGOUT()
 	self:event("LOGOUT")
+end
+
+
+function mounts:ADDON_RESTRICTION_STATE_CHANGED(stType, stState)
+	self.stType = stType
+	self.stState = stState
 end
 
 

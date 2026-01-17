@@ -5,9 +5,8 @@ local C_MountJournal, C_PetJournal, InCombatLockdown = C_MountJournal, C_PetJour
 local next, pairs, ipairs, type, select, math = next, pairs, ipairs, type, select, math
 local wipe, tinsert, sort, concat = wipe, table.insert, table.sort, table.concat
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
-ns.journal = journal
+ns.journal = util.setEventsMixin(journal)
 journal.mountTypes = util.mountTypes
-util.setEventsMixin(journal)
 
 
 local MOUNT_ACHIEVEMENT_CATEGORY = 15248
@@ -1379,7 +1378,7 @@ function journal:init()
 	end)
 	self.mountSpecial:SetScript("OnClick", function()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		DoEmote("MountSpecial")
+		util.doEmote("MountSpecial")
 	end)
 
 	-- MOUNT SPEED

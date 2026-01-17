@@ -1,13 +1,12 @@
 local addon, ns = ...
 local util = ns.util
 local binding = CreateFrame("Frame", addon.."Binding")
-ns.binding = binding
+ns.binding = util.setEventsMixin(binding)
 binding:Hide()
 
 
 binding.unboundMessage = binding:CreateFontString(nil, "ARTWORK", "GameFontWhite")
 binding.unboundMessage:Hide()
-util.setEventsMixin(binding)
 
 
 binding:SetScript("OnEvent", function(self)
@@ -52,8 +51,7 @@ function binding:createBindingButton(parent, index, command)
 	button:SetScript("OnShow", button_OnShow)
 	button:SetScript("OnClick", button_OnClick)
 	button:SetScript("OnMouseWheel", button_OnMouseWheel)
-	util.setEventsMixin(button)
-	button:on("SET_BINDING", button_OnShow)
+	util.setEventsMixin(button):on("SET_BINDING", button_OnShow)
 	self:setButtonText(button)
 	return button
 end

@@ -3588,20 +3588,20 @@
 		</Scripts>
 	</Button>
 
-	<Button name="MJRulePanelTemplate" inherits="MJOptionPanelTemplate,MJHighlightAnimationTemplate" virtual="true">
+	<Button name="MJRulePanelBaseTemplate" inherits="MJOptionPanelTemplate,MJHighlightAnimationTemplate" virtual="true">
 		<Size y="55"/>
 		<Layers>
 			<Layer level="ARTWORK">
-				<FontString parentKey="order" inherits="GameFontNormalLarge" justifyH="CENTER">
-					<Size x="28"/>
+				<FontString parentKey="action" inherits="GameFontNormal" justifyH="LEFT" maxLines="3">
 					<Anchors>
-						<Anchor point="LEFT" x="12"/>
+						<Anchor point="LEFT" x="41"/>
+						<Anchor point="RIGHT" relativePoint="CENTER" x="-20"/>
 					</Anchors>
 				</FontString>
 				<FontString parentKey="cond2" inherits="GameFontNormal" wordwrap="false" justifyH="LEFT">
 					<Anchors>
-						<Anchor point="LEFT" x="41"/>
-						<Anchor point="RIGHT" relativePoint="CENTER" x="-10"/>
+						<Anchor point="LEFT" relativePoint="CENTER" x="-10"/>
+						<Anchor point="RIGHT" x="-62"/>
 					</Anchors>
 				</FontString>
 				<FontString parentKey="cond1" inherits="GameFontNormal" wordwrap="false" justifyH="LEFT">
@@ -3616,16 +3616,10 @@
 						<Anchor point="TOPRIGHT" relativeKey="$parent.cond2" relativePoint="BOTTOMRIGHT" y="-1"/>
 					</Anchors>
 				</FontString>
-				<FontString parentKey="action" inherits="GameFontNormal" justifyH="LEFT" maxLines="3">
-					<Anchors>
-						<Anchor point="LEFT" relativePoint="CENTER" x="0"/>
-						<Anchor point="RIGHT" x="-62"/>
-					</Anchors>
-				</FontString>
 				<Texture atlas="glues-characterSelect-TopHUD-BG-divider-dis">
 					<Size x="2" y="35"/>
 					<Anchors>
-						<Anchor point="RIGHT" relativeKey="$parent.action" relativePoint="LEFT" x="-4"/>
+						<Anchor point="LEFT" relativeKey="$parent.action" relativePoint="RIGHT" x="4"/>
 					</Anchors>
 				</Texture>
 			</Layer>
@@ -3657,16 +3651,61 @@
 		</Frames>
 	</Button>
 
-	<Button name="MJRuleGroupTemplate" inherits="MJRulePanelTemplate" virtual="true">
+	<Button name="MJRulePanelTemplate" inherits="MJRulePanelBaseTemplate" virtual="true">
+		<Size y="55"/>
+		<Layers>
+			<Layer level="ARTWORK" textureSubLevel="1">
+				<Texture parentKey="icon">
+					<Size x="34" y="34"/>
+					<Anchors>
+						<Anchor point="LEFT" x="4" y="-1"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK" textureSubLevel="2">
+				<FontString parentKey="iconText" inherits="GameFontHighlightOutline" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT" relativeKey="$parent.icon" x="2" y="2"/>
+					</Anchors>
+				</FontString>
+				<FontString parentKey="order" inherits="GameFontHighlightOutline" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeKey="$parent.icon" x="1" y="-4"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+	</Button>
+
+	<Button name="MJRuleGroupTemplate" inherits="MJRulePanelBaseTemplate" virtual="true">
+		<Layers>
+			<Layer level="ARTWORK">
+				<FontString parentKey="order" inherits="GameFontHighlightOutline" justifyH="LEFT">
+					<Anchors>
+						<Anchor point="TOPLEFT" x="1" y="-4"/>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
 		<Frames>
 			<Button parentKey="collapseExpand" propagateMouseInput="Motion">
 				<Size x="10" y="16"/>
+				<HitRectInsets left="-10" right="-10" top="-10" bottom="-10"/>
 				<Anchors>
-					<Anchor point="LEFT" x="4"/>
+					<Anchor point="LEFT" x="16"/>
 				</Anchors>
 				<NormalTexture parentKey="normal" atlas="bag-arrow"/>
-				<PushedTexture parentKey="pushed" atlas="bag-arrow"/>
 				<HighlightTexture parentKey="highlight" alpha="0.4" alphaMode="ADD" atlas="bag-arrow"/>
+				<Scripts>
+					<OnMouseDown>
+						self.normal:AdjustPointsOffset(1, -1)
+						self.highlight:AdjustPointsOffset(1, -1)
+					</OnMouseDown>
+					<OnMouseUp>
+						self.normal:AdjustPointsOffset(-1, 1)
+						self.highlight:AdjustPointsOffset(-1, 1)
+					</OnMouseUp>
+				</Scripts>
 			</Button>
 		</Frames>
 	</Button>
