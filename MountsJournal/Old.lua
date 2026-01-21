@@ -250,7 +250,6 @@ local function updateGlobal(self)
 		for i, v in ipairs({"filters", "defFilters"}) do
 			if self[v].family then
 				self[v].family[1904] = nil
-				self[v].family[2506] = nil
 			end
 		end
 	end

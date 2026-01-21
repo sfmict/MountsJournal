@@ -2,11 +2,11 @@ local addon, ns = ...
 local L, util, mounts = ns.L, ns.util, ns.mounts
 local newMounts, mountsDB, specificDB, classDB = ns.newMounts, ns.mountsDB, ns.specificDB, ns.classDB
 local C_MountJournal, C_PetJournal, InCombatLockdown = C_MountJournal, C_PetJournal, InCombatLockdown
-local next, pairs, ipairs, type, select, math = next, pairs, ipairs, type, select, math
+local next, pairs, ipairs, type, select, math, tonumber = next, pairs, ipairs, type, select, math, tonumber
 local wipe, tinsert, sort, concat = wipe, table.insert, table.sort, table.concat
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
 ns.journal = util.setEventsMixin(journal)
-journal.mountTypes = util.mountTypes
+-- journal.mountTypes = util.mountTypes
 
 
 local MOUNT_ACHIEVEMENT_CATEGORY = 15248
@@ -422,16 +422,13 @@ function journal:init()
 	SecureHandlerWrapScript(summon1, "OnClick", summon1Handler, [[owner:SetAttribute("useOnKeyDown", false);return nil, "post"]], [[owner:SetAttribute("useOnKeyDown", nil)]])
 	summon1:SetScript("OnDragStart", function()
 		mounts.summonPanel:startDrag()
-	-- 	if not GetMacroInfo(config.macroName) then
-	-- 		config:createMacro(config.macroName, config.secureButtonNameMount, 413588)
-	-- 	end
-	-- 	PickupMacro(config.macroName)
 	end)
 	summon1:SetScript("OnDragStop", function()
 		mounts.summonPanel:stopDrag()
 	end)
 	summon1:SetScript("OnEnter", function(btn)
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+		GameTooltip_SetTitle(GameTooltip, ("%s \"%s %d\""):format(ns.addon, SUMMONS, btn.id))
 		GameTooltip_SetTitle(GameTooltip, ("%s \"%s %d\""):format(ns.addon, SUMMONS, btn.id))
 		if ns.macroFrame.currentRuleSet[btn.id].altMode then
 			GameTooltip_AddNormalLine(GameTooltip, L["SecondMountTooltipDescription"]:gsub("\n\n", "\n"))
@@ -452,17 +449,8 @@ function journal:init()
 	summon2.icon:SetTexture(mounts.config.summon2Icon)
 	summon2:SetAttribute("clickbutton", summon2Handler)
 	SecureHandlerWrapScript(summon2, "OnClick", summon2Handler, [[owner:SetAttribute("useOnKeyDown", false);return nil, "post"]], [[owner:SetAttribute("useOnKeyDown", nil)]])
-	summon2:SetScript("OnDragStart", function()
-		mounts.summonPanel:startDrag()
-	-- 	if InCombatLockdown() then return end
-	-- 	if not GetMacroInfo(config.secondMacroName) then
-	-- 		config:createMacro(config.secondMacroName, config.secureButtonNameSecondMount, 631718)
-	-- 	end
-	-- 	PickupMacro(config.secondMacroName)
-	end)
-	summon2:SetScript("OnDragStop", function()
-		mounts.summonPanel:stopDrag()
-	end)
+	summon2:SetScript("OnDragStart", summon1:GetScript("OnDragStart"))
+	summon2:SetScript("OnDragStop", summon1:GetScript("OnDragStop"))
 	summon2:SetScript("OnEnter", summon1:GetScript("OnEnter"))
 
 	-- update btn icon
@@ -1663,7 +1651,7 @@ function journal:setMountTooltip(mountID, spellID, showDescription)
 	GameTooltip:SetText(name, nil, nil, nil, nil, true)
 
 	-- type
-	local mType, typeStr = self.mountTypes[mountType]
+	local mType, typeStr = util.mountTypes[mountType]
 	if type(mType) == "table" then
 		typeStr = L["MOUNT_TYPE_"..mType[1]]
 		for i = 2, #mType do
@@ -2332,7 +2320,7 @@ function journal:sortMounts()
 	local function getByMountID(by, mount, data)
 		if by == "type" then
 			local _,_,_,_, mType = C_MountJournal.GetMountInfoExtraByID(mount)
-			mType = self.mountTypes[mType]
+			mType = util.mountTypes[mType]
 			return type(mType) == "number" and mType or mType[1]
 		elseif by == "family" then
 			local family = db[mount][2]
@@ -2353,7 +2341,7 @@ function journal:sortMounts()
 
 	local function getByMount(by, mount, data)
 		if by == "type" then
-			local mType = self.mountTypes[mount.mountType]
+			local mType = util.mountTypes[mount.mountType]
 			return type(mType) == "number" and mType or mType[1]
 		elseif by == "family" then
 			local family = mount.familyID
@@ -3149,11 +3137,11 @@ function journal:resetFilterByInfo(info)
 			if k then
 				filter[k] = defFilter[k]
 			else
-				for k, v in pairs(defFilter) do
+				for k, v in next, filter do
 					if type(filter[k]) == "table" then
-						filter[k][2] = v
+						filter[k][2] = defFilter[k]
 					else
-						filter[k] = v
+						filter[k] = defFilter[k]
 					end
 				end
 			end
@@ -3424,7 +3412,7 @@ end
 
 function journal:getFilterType(mountType)
 	local types = mounts.filters.types
-	local mType = self.mountTypes[mountType]
+	local mType = util.mountTypes[mountType]
 	if type(mType) == "table" then
 		for i = 1, #mType do
 			if types[mType[i]] then return true end
