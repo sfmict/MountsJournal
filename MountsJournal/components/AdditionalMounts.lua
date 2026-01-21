@@ -28,15 +28,8 @@ mounts:RegisterEvent("TOOLTIP_DATA_UPDATE")
 
 ----------------------------------------------------------------------
 -- METHODS
-local isActive
-if util.isMidnight then
-	function isActive(self)
-		return self.spellID == mounts.trackableID
-	end
-else
-	function isActive(self)
-		return C_UnitAuras.GetPlayerAuraBySpellID(self.buffID)
-	end
+local function isActive(self)
+	return self.spellID == mounts.trackableID
 end
 
 

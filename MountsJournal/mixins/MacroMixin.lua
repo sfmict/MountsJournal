@@ -6,7 +6,6 @@ ns.macroFrame = util.setEventsMixin(macroFrame)
 
 
 -- for conditions
-macroFrame.isMidnight = util.isMidnight
 macroFrame.getGroupType = util.getGroupType
 macroFrame.isPlayerSpell = util.isPlayerSpell
 
@@ -294,8 +293,8 @@ return function(self, button, profileLoad, noMacro)
 	self.preUseMacro = nil
 	self.useMount = nil
 	self.summonMType = nil
-	local notSAuras = not (self.isMidnight and ShouldAurasBeSecret())
-	local notSCooldowns = not (self.isMidnight and ShouldCooldownsBeSecret())
+	local notSAuras = not ShouldAurasBeSecret()
+	local notSCooldowns = not ShouldCooldownsBeSecret()
 	wipe(self.state)
 		]]
 
@@ -485,7 +484,7 @@ end
 
 
 local function isNotFishingBuff()
-	if util.isMidnight and C_Secrets.ShouldAurasBeSecret() then return false end
+	if C_Secrets.ShouldAurasBeSecret() then return false end
 	return not C_UnitAuras.GetPlayerAuraBySpellID(394009)
 end
 

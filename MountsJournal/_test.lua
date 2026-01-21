@@ -75,11 +75,11 @@ end)
 --test:RegisterEvent("VIEWED_TRANSMOG_OUTFIT_SLOT_WEAPON_OPTION_CHANGED")
 
 test:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
-if ns.util.isMidnight then
-	test:RegisterEvent("ADDON_RESTRICTION_STATE_CHANGED")
-	test:RegisterEvent("PLAYER_REGEN_ENABLED")
-	test:RegisterEvent("PLAYER_REGEN_DISABLED")
-end
+
+-- test:RegisterEvent("ADDON_RESTRICTION_STATE_CHANGED")
+-- test:RegisterEvent("PLAYER_REGEN_ENABLED")
+-- test:RegisterEvent("PLAYER_REGEN_DISABLED")
+
 --ShouldSpellCooldownBeSecret, ShouldSpellAuraBeSecret
 -- test:RegisterEvent("PET_BATTLE_OPENING_START")
 -- test:RegisterEvent("PET_BATTLE_OPENING_DONE")

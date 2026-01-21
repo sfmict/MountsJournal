@@ -1633,7 +1633,7 @@ end
 
 function journal:COMPANION_UPDATE(companionType)
 	if companionType == "MOUNT"
-	and (InCombatLockdown() or util.isMidnight and C_Secrets.ShouldAurasBeSecret())
+	and (InCombatLockdown() or C_Secrets.ShouldAurasBeSecret())
 	then
 		C_Timer.After(0, function() self:updateMounted(util.isMounted()) end)
 	end

@@ -129,7 +129,7 @@ do
 	end
 
 	local function isAuraApplied()
-		if util.isMidnight and C_Secrets.ShouldAurasBeSecret() then return true end
+		if C_Secrets.ShouldAurasBeSecret() then return true end
 		aura = nil
 		AuraUtil.ForEachAura("player", "HELPFUL", nil, checkAura, true)
 		return aura

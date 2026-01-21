@@ -46,7 +46,7 @@ util.expColors = setmetatable({
 	"9798FE", -- shadowlands
 	"53B39F", -- dragonflight
 	"90CCDD", -- the war within
-	util.isMidnight and "994AD2" or nil, -- midnight
+	"994AD2", -- midnight
 }, {
 	__index = function(self, key)
 		self[key] = "E8E8E8"
@@ -65,7 +65,7 @@ util.expIcons = setmetatable({
 	4465334,
 	5409250,
 	6980554,
-	util.isMidnight and 7455547 or nil,
+	7455547,
 }, {
 	__index = function(self, key)
 		self[key] = [[Interface\EncounterJournal\UI-EJ-BOSS-Default]]

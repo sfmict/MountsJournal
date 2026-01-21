@@ -79,7 +79,6 @@ util.addonName = ("%s_ADDON_"):format(addon:upper())
 util.expansion = tonumber(GetBuildInfo():match("(.-)%."))
 util.secureButtonNameMount = addon.."_Mount"
 util.secureButtonNameSecondMount = addon.."_SecondMount"
-util.isMidnight = util.expansion > 11
 
 
 -- 1 FLY, 2 GROUND, 3 SWIMMING
@@ -180,7 +179,7 @@ end
 
 
 function util.checkAura(unit, spellID, filter)
-	if not UnitExists(unit) or util.isMidnight and C_Secrets.ShouldAurasBeSecret() then return end
+	if not UnitExists(unit) or C_Secrets.ShouldAurasBeSecret() then return end
 	local GetAuraSlots, GetAuraDataBySlot, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
 	repeat
 		ctok, a,b,c,d,e = GetAuraSlots(unit, filter, 5, ctok)
@@ -194,7 +193,7 @@ end
 
 
 function util.getUnitMount(unit)
-	if not UnitExists(unit) or util.isMidnight and C_Secrets.ShouldAurasBeSecret() then return end
+	if not UnitExists(unit) or C_Secrets.ShouldAurasBeSecret() then return end
 	local GetAuraSlots, GetAuraDataBySlot, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
 	local filter = unit == "player" and "HELPFUL PLAYER" or "HELPFUL"
 	repeat
@@ -213,14 +212,8 @@ function util.getUnitMount(unit)
 end
 
 
-if util.isMidnight then
-	function util.isMounted()
-		return ns.mounts.trackableID ~= nil or IsMounted()
-	end
-else
-	function util.isMounted()
-		return IsMounted() or util.getUnitMount("player") ~= nil
-	end
+function util.isMounted()
+	return ns.mounts.trackableID ~= nil or IsMounted()
 end
 
 
@@ -448,11 +441,7 @@ end
 
 
 function util.doEmote(...)
-	if util.isMidnight then
-		if (ns.mounts.stState == nil or ns.mounts.stState == 0) and not GetCVarBool("addonChatRestrictionsForced") then
-			C_ChatInfo.PerformEmote(...)
-		end
-	else
-		DoEmote(...)
+	if (ns.mounts.stState == nil or ns.mounts.stState == 0) and not GetCVarBool("addonChatRestrictionsForced") then
+		C_ChatInfo.PerformEmote(...)
 	end
 end

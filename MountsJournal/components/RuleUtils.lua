@@ -1,6 +1,6 @@
 local _, ns = ...
 local macroFrame, util = ns.macroFrame, ns.util
-local next, ipairs, C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_Transmog, C_TransmogSets, C_TransmogCollection, TransmogUtil, TRANSMOG_SLOTS, tContains, GetSpecialization, GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, GetPlayerInfoByGUID, C_ZoneAbility, FindSpellOverrideByID, GetNumGroupMembers, GetNumSubgroupMembers, UnitGUID, UnitIsConnected, IsInGroup, BNGetNumFriends, C_BattleNet = next, ipairs, C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_Transmog, C_TransmogSets, C_TransmogCollection, TransmogUtil, TRANSMOG_SLOTS, tContains, C_SpecializationInfo.GetSpecialization, C_SpecializationInfo.GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, GetPlayerInfoByGUID, C_ZoneAbility, FindSpellOverrideByID, GetNumGroupMembers, GetNumSubgroupMembers, UnitGUID, UnitIsConnected, IsInGroup, BNGetNumFriends, C_BattleNet
+local next, ipairs, C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, GetSpecialization, GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, GetPlayerInfoByGUID, C_ZoneAbility, FindSpellOverrideByID, GetNumGroupMembers, GetNumSubgroupMembers, UnitGUID, UnitIsConnected, IsInGroup, BNGetNumFriends, C_BattleNet = next, ipairs, C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_SpecializationInfo.GetSpecialization, C_SpecializationInfo.GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, GetPlayerInfoByGUID, C_ZoneAbility, FindSpellOverrideByID, GetNumGroupMembers, GetNumSubgroupMembers, UnitGUID, UnitIsConnected, IsInGroup, BNGetNumFriends, C_BattleNet
 
 
 function macroFrame:isSpellReady(spellID)
@@ -41,117 +41,6 @@ function macroFrame:checkMap(mapID)
 		if mapList[i] == mapID then return true end
 	end
 	return false
-end
-
-
-function macroFrame:isTransmogSetActive(setID)
-	local setInfo = C_TransmogSets.GetSetInfo(setID)
-	if not (setInfo and setInfo.validForCharacter) then return end
-
-	for k, transmogSlot in next, TRANSMOG_SLOTS do
-		if not transmogSlot.location:IsSecondary()
-		or TransmogUtil.IsSecondaryTransmoggedForItemLocation(TransmogUtil.GetItemLocationFromTransmogLocation(transmogSlot.location))
-		then
-			local sourceIDs = C_TransmogSets.GetSourceIDsForSlot(setID, transmogSlot.location:GetSlotID())
-			if #sourceIDs > 0 then
-				local baseSourceID, _, appliedSourceID = C_Transmog.GetSlotVisualInfo(transmogSlot.location)
-				if tContains(sourceIDs, appliedSourceID > 0 and appliedSourceID or baseSourceID) then return end
-			end
-		end
-	end
-	return true
-end
-
-
-do
-	local typeAappearance, typeIllusion, modMain, modSecondary, noTransmogID = Enum.TransmogType.Appearance, Enum.TransmogType.Illusion, Enum.TransmogModification.Main, Enum.TransmogModification.Secondary, Constants.Transmog.NoTransmogID
-	local mainHandID, offHandID, shoulderID = INVSLOT_MAINHAND, INVSLOT_OFFHAND, INVSLOT_SHOULDER
-	local modelScene = CreateFrame("ModelScene", nil, nil, "NonInteractableModelSceneMixinTemplate")
-	modelScene:Hide()
-	modelScene:SetSize(100, 100)
-	modelScene:SetFromModelSceneID(290)
-
-	local function getEffectiveTransmogID(transmogLocation)
-		local itemLocation = TransmogUtil.GetItemLocationFromTransmogLocation(transmogLocation)
-		if not C_Item.DoesItemExist(itemLocation) then return noTransmogID end
-
-		local function GetTransmogIDFrom(fn)
-			local itemTransmogInfo = fn(itemLocation)
-			return TransmogUtil.GetRelevantTransmogID(itemTransmogInfo, transmogLocation)
-		end
-
-		local appliedTransmogID = GetTransmogIDFrom(C_Item.GetAppliedItemTransmogInfo)
-		if appliedTransmogID == noTransmogID then
-			return GetTransmogIDFrom(C_Item.GetBaseItemTransmogInfo)
-		else
-			return appliedTransmogID
-		end
-	end
-
-	local function refreshItemModel(actor, slotID)
-		local transmogLocation = TransmogUtil.GetTransmogLocation(slotID, typeAappearance, modMain)
-		local appearanceID = getEffectiveTransmogID(transmogLocation)
-
-		if appearanceID ~= noTransmogID then
-			local secondaryAppearanceID = noTransmogID
-			local illusionID = noTransmogID
-
-			if transmogLocation:IsEitherHand() then
-				local dependendLocation = TransmogUtil.GetTransmogLocation(slotID, typeIllusion, modMain)
-				illusionID = getEffectiveTransmogID(dependendLocation)
-			else
-				local dependendLocation = TransmogUtil.GetTransmogLocation(slotID, typeAappearance, modSecondary)
-				secondaryAppearanceID = getEffectiveTransmogID(dependendLocation)
-			end
-
-			local itemTransmogInfo = actor:GetItemTransmogInfo(slotID)
-			itemTransmogInfo.appearanceID = appearanceID
-			itemTransmogInfo.secondaryAppearanceID = secondaryAppearanceID
-			itemTransmogInfo.illusionID = illusionID
-
-			if transmogLocation:IsMainHand() then
-				local mainHandCategoryID = C_Transmog.GetSlotEffectiveCategory(transmogLocation)
-				local isLegionArtifact = TransmogUtil.IsCategoryLegionArtifact(mainHandCategoryID)
-				itemTransmogInfo:ConfigureSecondaryForMainHand(isLegionArtifact)
-				-- don't specify a slot for ranged weapons
-				if mainHandCategoryID and TransmogUtil.IsCategoryRangedWeapon(mainHandCategoryID) then
-					slotID = nil
-				end
-			end
-			actor:SetItemTransmogInfo(itemTransmogInfo, slotID)
-		end
-	end
-
-	function macroFrame:isTtransmogOutfitActive(name)
-		local outfitID
-		for _, id in ipairs(C_TransmogCollection.GetOutfits()) do
-			if name == C_TransmogCollection.GetOutfitInfo(id) then
-				outfitID = id
-				break
-			end
-		end
-		if not outfitID then return end
-
-		local outfitItemTransmogInfoList = C_TransmogCollection.GetOutfitItemTransmogInfoList(outfitID)
-		if not outfitItemTransmogInfoList then return end
-
-		local actor = modelScene:GetPlayerActor()
-		actor:SetModelByUnit("player", false, true, false, true)
-		refreshItemModel(actor, shoulderID)
-		refreshItemModel(actor, offHandID)
-		refreshItemModel(actor, mainHandID)
-
-		local currentItemTransmogInfoList = actor:GetItemTransmogInfoList()
-		if not currentItemTransmogInfoList then return end
-
-		for slotID = 1, #currentItemTransmogInfoList do
-			local itemTransmogInfo = currentItemTransmogInfoList[slotID]
-			if itemTransmogInfo.appearanceID ~= noTransmogID and not itemTransmogInfo:IsEqual(outfitItemTransmogInfoList[slotID]) then
-				return
-			end
-		end
-		return true
-	end
 end
 
 
@@ -254,7 +143,7 @@ function macroFrame:isUnitInGroup(guid, isRaid)
 		for i = 1, GetNumGroupMembers() do
 			unit = "raid"..i
 			uGuid = UnitGUID(unit)
-			if not (util.isMidnight and issecretvalue(uGuid)) and guid == UnitGUID(unit) then
+			if not issecretvalue(uGuid) and guid == UnitGUID(unit) then
 				return UnitIsConnected(unit)
 			end
 		end
@@ -262,7 +151,7 @@ function macroFrame:isUnitInGroup(guid, isRaid)
 		for i = 1, GetNumSubgroupMembers() do
 			unit = "party"..i
 			uGuid = UnitGUID(unit)
-			if not (util.isMidnight and issecretvalue(uGuid)) and guid == UnitGUID(unit) then
+			if not issecretvalue(uGuid) and guid == UnitGUID(unit) then
 				return UnitIsConnected(unit)
 			end
 		end

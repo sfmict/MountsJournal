@@ -35,13 +35,13 @@ ns.journal:on("MODULES_INIT", function(journal)
 	tm:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
 
 	function tm:PLAYER_TARGET_CHANGED()
-		if util.isMidnight and C_Secrets.ShouldAurasBeSecret() then return end
+		if C_Secrets.ShouldAurasBeSecret() then return end
 		local spellID, mountID = util.getUnitMount("target")
 		if spellID then self:setMount(spellID, mountID or ns.additionalMounts[spellID]) end
 	end
 
 	function tm:UNIT_SPELLCAST_START(_,_, spellID)
-		if util.isMidnight and issecretvalue(spellID) then return end
+		if issecretvalue(spellID) then return end
 		if ns.additionalMounts[spellID] then
 			self:setMount(spellID, ns.additionalMounts[spellID])
 		else
