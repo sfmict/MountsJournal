@@ -337,6 +337,7 @@ L["Carnivorans"] = "육식동물"
 L["Carpets"] = "카페트"
 L["Carrion Birds"] = "Carrion Birds" -- missing
 L["Cats"] = "고양이과"
+L["Celestials"] = "Celestials" -- missing
 L["Cervid"] = "원시사슴"
 L["Chargers"] = "군마"
 L["Chickens"] = "닭"

@@ -238,7 +238,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 		else
 			actor:PlayAnimationKit(0)
 			actor:StopAnimationKit()
-			actor:SetAnimation(animation, 0)
+			actor:SetAnimation(animation)
 		end
 	end
 

@@ -337,6 +337,7 @@ L["Carnivorans"] = "食肉"
 L["Carpets"] = "飞毯"
 L["Carrion Birds"] = "Carrion Birds" -- missing
 L["Cats"] = "猫科"
+L["Celestials"] = "Celestials" -- missing
 L["Cervid"] = "元鹿"
 L["Chargers"] = "战马"
 L["Chickens"] = "鸡"

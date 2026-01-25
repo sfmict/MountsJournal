@@ -337,6 +337,7 @@ L["Carnivorans"] = "Raubtiere"
 L["Carpets"] = "Teppiche"
 L["Carrion Birds"] = "Carrion Birds" -- missing
 L["Cats"] = "Katzen"
+L["Celestials"] = "Celestials" -- missing
 L["Cervid"] = "Cervid"
 L["Chargers"] = "Streitrosse"
 L["Chickens"] = "Hühner"
