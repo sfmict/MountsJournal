@@ -137,31 +137,10 @@
 				</Anchors>
 			</Button>
 
-			<Button parentKey="summonPanelSettings" mixin="QuestLogSettingsButtonMixin" hidden="true">
-				<Size x="15" y="16"/>
+			<Button parentKey="summonPanelSettings" inherits="MJSettingsButtonTemplate" hidden="true">
 				<Anchors>
 					<Anchor point="RIGHT" relativeKey="$parent.summon1" relativePoint="LEFT" x="-3"/>
 				</Anchors>
-				<Layers>
-					<Layer level="ARTWORK">
-						<Texture parentKey="Icon" atlas="questlog-icon-setting" useAtlasSize="true">
-							<Anchors>
-								<Anchor point="CENTER"/>
-							</Anchors>
-						</Texture>
-					</Layer>
-					<Layer level="HIGHLIGHT">
-						<Texture atlas="questlog-icon-setting" useAtlasSize="true" inherits="QuestLogHighlightTextureTemplate">
-							<Anchors>
-								<Anchor point="CENTER" relativeKey="$parent.Icon"/>
-							</Anchors>
-						</Texture>
-					</Layer>
-				</Layers>
-				<Scripts>
-					<OnMouseDown method="OnMouseDown"/>
-					<OnMouseUp method="OnMouseUp"/>
-				</Scripts>
 			</Button>
 
 			<Button parentKey="OpenDynamicFlightSkillTreeButton" inherits="MJDynamicFlightFlyoutButtonTemplate" mixin="MJDynamicFlightSkillTreeButtonMixin">
@@ -1077,15 +1056,7 @@
 				</Scripts>
 			</Button>
 
-			<Button parentKey="resize">
-				<Size x="16" y="16"/>
-				<Anchors>
-					<Anchor point="BOTTOMRIGHT" x="0" y="0"/>
-				</Anchors>
-				<NormalTexture file="Interface\ChatFrame\UI-ChatIM-SizeGrabber-Up"/>
-				<HighlightTexture file="Interface\ChatFrame\UI-ChatIM-SizeGrabber-Highlight"/>
-				<PushedTexture file="Interface\ChatFrame\UI-ChatIM-SizeGrabber-Down"/>
-			</Button>
+			<Button parentKey="resize" inherits="MJResizeButtonTemplate"/>
 
 			<Button parentKey="mountSpecial" motionScriptsWhileDisabled="true" inherits="UIPanelButtonNoTooltipTemplate">
 				<Size x="22" y="22"/>
@@ -1276,6 +1247,45 @@
 
 		</Frames>
 	</Frame>
+
+	<Button name="MJSettingsButtonTemplate" mixin="QuestLogSettingsButtonMixin" virtual="true">
+		<Size x="15" y="16"/>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture parentKey="Icon" atlas="questlog-icon-setting" useAtlasSize="true">
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="HIGHLIGHT">
+				<Texture atlas="questlog-icon-setting" useAtlasSize="true" inherits="QuestLogHighlightTextureTemplate">
+					<Anchors>
+						<Anchor point="CENTER" relativeKey="$parent.Icon"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+		<Scripts>
+			<OnMouseDown method="OnMouseDown"/>
+			<OnMouseUp method="OnMouseUp"/>
+		</Scripts>
+	</Button>
+
+	<Button name="MJResizeButtonTemplate" virtual="true">
+		<Size x="16" y="16"/>
+		<Anchors>
+			<Anchor point="BOTTOMRIGHT"/>
+		</Anchors>
+		<NormalTexture file="Interface\ChatFrame\UI-ChatIM-SizeGrabber-Up"/>
+		<HighlightTexture file="Interface\ChatFrame\UI-ChatIM-SizeGrabber-Highlight"/>
+		<PushedTexture file="Interface\ChatFrame\UI-ChatIM-SizeGrabber-Down"/>
+		<Scripts>
+			<OnLoad>self:RegisterForDrag("LeftButton")</OnLoad>
+			<OnEnter>if SetCursor then SetCursor("UI_RESIZE_CURSOR") end</OnEnter>
+			<OnLeave>if SetCursor then SetCursor(nil) end</OnLeave>
+		</Scripts>
+	</Button>
 
 	<ModelScene name="MJWrappedAndUnwrappedModelScene" inherits="WrappedAndUnwrappedModelScene" virtual="true">
 		<Scripts>
@@ -1753,7 +1763,13 @@
 		</Scripts>
 	</CheckButton>
 
-	<Button name="MJMountDefaultListButtonTemplate" virtual="true">
+	<Button name="MJMountListButtonScripsTemplate" virtual="true">
+		<Scripts>
+			<OnLoad function="MJMountListButton_OnLoad"/>
+		</Scripts>
+	</Button>
+
+	<Button name="MJMountDefaultListButtonTemplate" inherits="MJMountListButtonScripsTemplate" virtual="true">
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture atlas="PetList-ButtonBackground" parentKey="background"/>
@@ -1955,7 +1971,7 @@
 		</KeyValues>
 	</Button>
 
-	<Button name="MjGridMountButtonDefTemplate" inherits="MJGridMountButtonTemplate" virtual="true">
+	<Button name="MjGridMountButtonDefTemplate" inherits="MJGridMountButtonTemplate,MJMountListButtonScripsTemplate" virtual="true">
 		<Layers>
 			<Layer level="OVERLAY" textureSubLevel="1">
 				<Texture parentKey="toggle1" parentArray="toggle">
@@ -1988,7 +2004,7 @@
 		</Layers>
 	</Button>
 
-	<Button name="MjGridMountButtonWithTypeBtnsTemplate" inherits="MJGridMountButtonTemplate" virtual="true">
+	<Button name="MjGridMountButtonWithTypeBtnsTemplate" inherits="MJGridMountButtonTemplate,MJMountListButtonScripsTemplate" virtual="true">
 		<Frames>
 			<CheckButton parentKey="fly" inherits="MJSetFlyToggleTemplate">
 				<Anchors>
@@ -2008,7 +2024,7 @@
 		</Frames>
 	</Button>
 
-	<Button name="MJGridModelSceneTemplate" propagateMouseInput="Clicks" inherits="BackdropTemplate" virtual="true">
+	<Button name="MJGridModelSceneTemplate" propagateMouseInput="Clicks" inherits="BackdropTemplate,MJMountListButtonScripsTemplate" virtual="true">
 		<Layers>
 			<Layer level="BACKGROUND" textureSubLevel="2">
 				<Texture parentKey="factionIcon">

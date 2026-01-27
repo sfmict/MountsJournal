@@ -616,7 +616,6 @@ function journal:init()
 
 	-- SCROLL FRAME
 	self.view = CreateScrollBoxListGridView()
-	self:setScrollGridMounts()
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.leftInset.scrollBar, self.view)
 
 	-- MODELSCENE
@@ -1315,7 +1314,6 @@ function journal:init()
 
 	-- RESIZE BUTTON
 	local resize = self.bgFrame.resize
-	resize:RegisterForDrag("LeftButton")
 	resize:SetScript("OnDragStart", function(btn)
 		if InCombatLockdown() then return end
 		local parent = btn:GetParent()
@@ -1341,12 +1339,6 @@ function journal:init()
 		self.bgFrame:SetPoint("TOPLEFT", self.CollectionsJournal, "TOPLEFT", 0, 0)
 		self:setScrollGridMounts(true)
 		self:event("JOURNAL_RESIZED")
-	end)
-	resize:SetScript("OnEnter", function()
-		if SetCursor then SetCursor("UI_RESIZE_CURSOR") end
-	end)
-	resize:SetScript("OnLeave", function()
-		if SetCursor then SetCursor(nil) end
 	end)
 
 	-- MOUNT SPECIAL
@@ -1411,6 +1403,7 @@ function journal:init()
 	self:on("PET_STATUS_UPDATE", self.updateMountsList)
 
 	self:updateCollectionTabs(true)
+	self:setScrollGridMounts()
 	self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 	self:setMJFiltersBackup()
 	self:hideFrames()
@@ -1787,7 +1780,6 @@ function journal:setScrollGridMounts(force)
 	local playerToggle = self.modelScene.playerToggle
 	local grid = self:getGridToggle()
 
-	if self.inspectFrame then self.inspectFrame:Hide() end
 	self.filtersPanel:ClearAllPoints()
 	if self.navBar:IsShown() then
 		self.filtersPanel:SetPoint("TOPLEFT", self.navBar, "BOTTOMLEFT", -1, -1)
@@ -1795,7 +1787,9 @@ function journal:setScrollGridMounts(force)
 		self.filtersPanel:SetPoint("TOPLEFT", 4, -60)
 	end
 	playerToggle:ClearAllPoints()
+
 	if grid ~= 3 then
+		self.inspectFrame:Hide()
 		self.filtersToggle:Show()
 		self.filtersToggle.setFiltersToggleCheck(mounts.config.filterToggle)
 		self.searchBox:SetWidth(131)
@@ -1818,8 +1812,10 @@ function journal:setScrollGridMounts(force)
 		playerToggle:SetScale(.36)
 		playerToggle:SetPoint("RIGHT", -5, -1)
 		playerToggle:SetAlpha(1)
-		self.mountDisplay:Hide()
-		self.rightInset:Hide()
+		if not self.inspectFrame:IsShown() then
+			self.mountDisplay:Hide()
+			self.rightInset:Hide()
+		end
 	end
 
 	if self.curGrid == grid and not force then return end
