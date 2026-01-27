@@ -1,6 +1,7 @@
 local _, ns = ...
 local L, util = ns.L, ns.util
-local strcmputf8i, concat = strcmputf8i, table.concat
+local strcmputf8i, concat, C_Secrets = strcmputf8i, table.concat, C_Secrets
+local GetSpellAuraSecrecy, GetSpellCooldownSecrecy = C_Secrets.GetSpellAuraSecrecy, C_Secrets.GetSpellCooldownSecrecy
 local playerGuid = UnitGUID("player")
 local ltl = LibStub("LibThingsLoad-1.0")
 local conds = {}
@@ -646,7 +647,6 @@ conds.rspell = {}
 conds.rspell.text = L["Spell is ready"]
 conds.rspell.combatLock = true
 conds.rspell.isNumeric = true
-conds.rspell.secretCond = "notSCooldowns and "
 
 function conds.rspell:getValueDescription()
 	return "SpellID (61304 for GCD)"
@@ -657,8 +657,15 @@ conds.rspell.receiveDrag = conds.kspell.receiveDrag
 conds.rspell.getValueDisplay = conds.kspell.getValueDisplay
 conds.rspell.getValueText = conds.hitem.getValueText
 
-function conds.rspell:getFuncText(value)
-	return ("self:isSpellReady(%s)"):format(value)
+function conds.rspell:getFuncText(value, isNot)
+	local secrecy = GetSpellCooldownSecrecy(value)
+	if secrecy == 2 then
+		local notText = isNot and "not " or ""
+		return ("notSCooldowns and %sself:isSpellReady(%s)"):format(notText, value), nil, true
+	elseif secrecy == 0 then
+		return ("self:isSpellReady(%s)"):format(value)
+	end
+	return "false", nil, true
 end
 
 
@@ -666,7 +673,6 @@ end
 -- uspell USABLE SPELL
 conds.uspell = {}
 conds.uspell.text = L["Spell is usable"]
-conds.uspell.combatLock = true
 conds.uspell.isNumeric = true
 
 conds.uspell.getValueDescription = conds.kspell.getValueDescription
@@ -704,7 +710,6 @@ conds.hbuff = {}
 conds.hbuff.text = L["The player has a buff"]
 conds.hbuff.combatLock = true
 conds.hbuff.isNumeric = true
-conds.hbuff.secretCond = "notSAuras and "
 
 conds.hbuff.getValueDescription = conds.kspell.getValueDescription
 conds.hbuff.setValueLink = conds.kspell.setValueLink
@@ -712,8 +717,15 @@ conds.hbuff.receiveDrag = conds.kspell.receiveDrag
 conds.hbuff.getValueDisplay = conds.kspell.getValueDisplay
 conds.hbuff.getValueText = conds.hitem.getValueText
 
-function conds.hbuff:getFuncText(value)
-	return ("self:hasPlayerBuff(%s)"):format(value)
+function conds.hbuff:getFuncText(value, isNot)
+	local secrecy = GetSpellAuraSecrecy(value)
+	if secrecy == 2 then
+		local notText = isNot and "not " or ""
+		return ("notSAuras and %sself:hasPlayerBuff(%s)"):format(notText, value), nil, true
+	elseif secrecy == 0 then
+		return ("self:hasPlayerBuff(%s)"):format(value)
+	end
+	return "false", nil, true
 end
 
 
@@ -723,7 +735,6 @@ conds.hdebuff = {}
 conds.hdebuff.text = L["The player has a debuff"]
 conds.hdebuff.combatLock = true
 conds.hdebuff.isNumeric = true
-conds.hdebuff.secretCond = conds.hbuff.secretCond
 
 conds.hdebuff.getValueDescription = conds.kspell.getValueDescription
 conds.hdebuff.setValueLink = conds.kspell.setValueLink
@@ -731,8 +742,15 @@ conds.hdebuff.receiveDrag = conds.kspell.receiveDrag
 conds.hdebuff.getValueDisplay = conds.kspell.getValueDisplay
 conds.hdebuff.getValueText = conds.hitem.getValueText
 
-function conds.hdebuff:getFuncText(value)
-	return ("self:hasPlayerDebuff(%s)"):format(value)
+function conds.hdebuff:getFuncText(value, isNot)
+	local secrecy = GetSpellAuraSecrecy(value)
+	if secrecy == 2 then
+		local notText = isNot and "not " or ""
+		return ("notSAuras and %sself:hasPlayerDebuff(%s)"):format(notText, value), nil, true
+	elseif secrecy == 0 then
+		return ("self:hasPlayerDebuff(%s)"):format(value)
+	end
+	return "false", nil, true
 end
 
 
@@ -1707,7 +1725,7 @@ function conds.fgroup:getValueList(value, func)
 
 	for i = 1, GetNumSubgroupMembers() do
 		local unit = "party"..i
-		if UnitIsPlayer(unit) then
+		-- if UnitIsPlayer(unit) then
 			local guid = UnitGUID(unit)
 			if issecretvalue(guid) then
 				isSecret = true
@@ -1720,7 +1738,7 @@ function conds.fgroup:getValueList(value, func)
 				func = func,
 				checked = v == value,
 			}
-		end
+		-- end
 	end
 
 	if #group == 0 then
@@ -1770,22 +1788,24 @@ conds.fraid.getValueText = conds.fgroup.getValueText
 function conds.fraid:getValueList(value, func)
 	local group, isSecret = {}
 
-	for i = 1, GetNumGroupMembers() do
-		local unit = "raid"..i
-		if UnitIsPlayer(unit) then
-			local isPlayer = UnitIsUnit(unit, "player")
-			if issecretvalue(isPlayer) then
-				isSecret = true
-				break
-			end
-			if not isPlayer then
-				local v = "guid:"..UnitGUID(unit)
-				group[#group + 1] = {
-					text = GetUnitName(unit, true),
-					value = v,
-					func = func,
-					checked = v == value,
-				}
+	if IsInRaid() then
+		for i = 1, GetNumGroupMembers() do
+			local unit = "raid"..i
+			if UnitIsPlayer(unit) then
+				local isPlayer = UnitIsUnit(unit, "player")
+				if issecretvalue(isPlayer) then
+					isSecret = true
+					break
+				end
+				if not isPlayer then
+					local v = "guid:"..UnitGUID(unit)
+					group[#group + 1] = {
+						text = GetUnitName(unit, true),
+						value = v,
+						func = func,
+						checked = v == value,
+					}
+				end
 			end
 		end
 	end
@@ -1869,7 +1889,7 @@ end
 -- METHODS
 function conds:getMenuList(value, func)
 	local combatStar = " (|cffff4444*|r)"
-	local combatText = NIGHT_FAE_BLUE_COLOR:WrapTextInColorCode(combatStar:sub(2).." "..L["Doesn't work in combat"])
+	local combatText = NIGHT_FAE_BLUE_COLOR:WrapTextInColorCode(combatStar:sub(2).." "..L["CONDITION_DATA_SECRET_INFO"])
 	local list = {}
 
 	local OnTooltipShow = function(btn, tooltip, v)
@@ -1913,14 +1933,13 @@ function conds:getFuncText(conds, keys, isGroup)
 	while cond ~= nil do
 		local condt = self[cond[2]]
 		if condt ~= nil then
-			local condText, var = condt:getFuncText(cond[3])
+			local condText, var, strict = condt:getFuncText(cond[3], cond[1])
 			if var ~= nil and keys[var] ~= 1 then
 				keys[var] = 1
 				keys[#keys + 1] = var
 			end
-			if cond[1] then condText = "not "..condText end
-			if condt.secretCond ~= nil then
-				condText = condt.secretCond..condText
+			if cond[1] and not strict then
+				condText = "not "..condText
 			end
 			i = i + 1
 			text[#text + 1] = condText

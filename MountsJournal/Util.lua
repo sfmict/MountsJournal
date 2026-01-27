@@ -179,12 +179,13 @@ end
 
 
 function util.checkAura(unit, spellID, filter)
-	if not UnitExists(unit) or C_Secrets.ShouldAurasBeSecret() then return end
+	if not UnitExists(unit) then return end
 	local GetAuraSlots, GetAuraDataBySlot, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
 	repeat
 		ctok, a,b,c,d,e = GetAuraSlots(unit, filter, 5, ctok)
 		while a do
-			if GetAuraDataBySlot(unit, a).spellId == spellID then return true end
+			local auraID = GetAuraDataBySlot(unit, a).spellId
+			if not issecretvalue(auraID) and auraID == spellID then return true end
 			a,b,c,d,e = b,c,d,e
 		end
 	until not ctok

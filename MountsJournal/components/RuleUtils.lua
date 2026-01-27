@@ -1,6 +1,6 @@
 local _, ns = ...
 local macroFrame, util = ns.macroFrame, ns.util
-local next, ipairs, C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, GetSpecialization, GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, GetPlayerInfoByGUID, C_ZoneAbility, FindSpellOverrideByID, GetNumGroupMembers, GetNumSubgroupMembers, UnitGUID, UnitIsConnected, IsInGroup, BNGetNumFriends, C_BattleNet = next, ipairs, C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_SpecializationInfo.GetSpecialization, C_SpecializationInfo.GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, GetPlayerInfoByGUID, C_ZoneAbility, FindSpellOverrideByID, GetNumGroupMembers, GetNumSubgroupMembers, UnitGUID, UnitIsConnected, IsInGroup, BNGetNumFriends, C_BattleNet
+local next, ipairs, C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, GetSpecialization, GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, GetPlayerInfoByGUID, C_ZoneAbility, FindSpellOverrideByID, GetNumGroupMembers, GetNumSubgroupMembers, UnitGUID, UnitIsConnected, IsInGroup, IsInRaid, BNGetNumFriends, C_BattleNet = next, ipairs, C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_SpecializationInfo.GetSpecialization, C_SpecializationInfo.GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, GetPlayerInfoByGUID, C_ZoneAbility, FindSpellOverrideByID, GetNumGroupMembers, GetNumSubgroupMembers, UnitGUID, UnitIsConnected, IsInGroup, IsInRaid, BNGetNumFriends, C_BattleNet
 
 
 function macroFrame:isSpellReady(spellID)
@@ -172,7 +172,7 @@ do
 	end
 
 	function macroFrame:isFriendInGroup(btag, isRaid)
-		if not IsInGroup() then return end
+		if not IsInGroup() or isRaid and not IsInRaid() then return end
 		local _, numOline, fNum, fNumOnline = BNGetNumFriends()
 		for i = 1, fNumOnline do
 			local accountInfo = C_BattleNet.GetFriendAccountInfo(i)

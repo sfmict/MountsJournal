@@ -542,6 +542,7 @@ function ruleEditor:setActionOption()
 	else
 		self.actionText:SetText(LFG_LIST_BAD_NAME)
 		if panel.optionValue then panel.optionValue:Hide() end
+		panel:SetHeight(50)
 		panel.optionType:Hide()
 		panel.groupName:Show()
 		panel.groupName:SetText(self.data.name)

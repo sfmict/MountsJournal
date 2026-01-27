@@ -172,6 +172,7 @@ L["Import Rule"] = "규칙 가져오기"
 L["Reset Rules"] = "규칙 초기화"
 L["Remove Rule %s"] = "규칙 %s 삭제"
 L["Alternative Mode"] = "대체 모드"
+L["CONDITION_DATA_SECRET_INFO"] = "Always false when data is secret.\nThe game does not allow you to check the condition in some situations." -- missing
 L["NOT_CONDITION"] = "아니요"
 L["Conditions"] = "조건들"
 L["Action"] = "동작"

@@ -281,6 +281,7 @@ function macroFrame:setRuleFuncs()
 		local rules = self.currentRuleSet[i]
 		local keys = {"wipe", wipe = 1}
 		local func = {}
+		-- C_Secrets.ShouldUnitIdentityBeSecret("party1")
 		func[5] = [[
 
 local ShouldAurasBeSecret, ShouldCooldownsBeSecret
@@ -484,7 +485,7 @@ end
 
 
 local function isNotFishingBuff()
-	if C_Secrets.ShouldAurasBeSecret() then return false end
+	if C_Secrets.ShouldSpellAuraBeSecret(394009) then return false end
 	return not C_UnitAuras.GetPlayerAuraBySpellID(394009)
 end
 

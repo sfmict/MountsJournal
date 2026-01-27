@@ -172,6 +172,7 @@ L["Import Rule"] = "Import Rule" -- missing
 L["Reset Rules"] = "Reset Rules" -- missing
 L["Remove Rule %s"] = "Remove Rule %s" -- missing
 L["Alternative Mode"] = "Alternative Mode" -- missing
+L["CONDITION_DATA_SECRET_INFO"] = "Always false when data is secret.\nThe game does not allow you to check the condition in some situations." -- missing
 L["NOT_CONDITION"] = "Not" -- missing
 L["Conditions"] = "Condições"
 L["Action"] = "Ação"
