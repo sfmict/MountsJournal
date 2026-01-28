@@ -850,6 +850,7 @@ local RACE_LABELS = {}
 for i = 1, #RACE_KEYS do
 	local id = RACE_KEYS[i]
 	local info = C_CreatureInfo.GetRaceInfo(id)
+	---@diagnostic disable-next-line: assign-type-mismatch
 	RACE_KEYS[i] = info.clientFileString
 	RACE_LABELS[info.clientFileString] = info.raceName
 end
@@ -1725,7 +1726,7 @@ function conds.fgroup:getValueList(value, func)
 
 	for i = 1, GetNumSubgroupMembers() do
 		local unit = "party"..i
-		-- if UnitIsPlayer(unit) then
+		if UnitIsPlayer(unit) then
 			local guid = UnitGUID(unit)
 			if issecretvalue(guid) then
 				isSecret = true
@@ -1738,7 +1739,7 @@ function conds.fgroup:getValueList(value, func)
 				func = func,
 				checked = v == value,
 			}
-		-- end
+		end
 	end
 
 	if #group == 0 then
