@@ -850,7 +850,6 @@ local RACE_LABELS = {}
 for i = 1, #RACE_KEYS do
 	local id = RACE_KEYS[i]
 	local info = C_CreatureInfo.GetRaceInfo(id)
-	---@diagnostic disable-next-line: assign-type-mismatch
 	RACE_KEYS[i] = info.clientFileString
 	RACE_LABELS[info.clientFileString] = info.raceName
 end
@@ -1026,29 +1025,54 @@ conds.difficulty.text = LFG_LIST_DIFFICULTY
 function conds.difficulty:getValueText(value)
 	if value == 0 then return WORLD end
 	local name, instanceType, _,_,_,_,_, isLFR, minPlayers, maxPlayers = GetDifficultyInfo(value)
+	local separator = " |cff808080|||r "
 
 	if name then
 		if instanceType == "raid" then
-			name = name.." | "..LEGENDARY_ORANGE_COLOR:WrapTextInColorCode(RAID)
+			name = name..separator..LEGENDARY_ORANGE_COLOR:WrapTextInColorCode(RAID)
 		elseif instanceType == "party" then
-			name = name.." | "..EPIC_PURPLE_COLOR:WrapTextInColorCode(LFG_TYPE_DUNGEON)
+			name = name..separator..EPIC_PURPLE_COLOR:WrapTextInColorCode(LFG_TYPE_DUNGEON)
 		end
 
-		if isLFR then name = name.." | "..HEIRLOOM_BLUE_COLOR:WrapTextInColorCode(minPlayers.." - "..maxPlayers) end
-		if IsLegacyDifficulty(value) then name = name.." | "..ARTIFACT_GOLD_COLOR:WrapTextInColorCode(LFG_LIST_LEGACY) end
+		if isLFR then name = name..separator..HEIRLOOM_BLUE_COLOR:WrapTextInColorCode(minPlayers.." - "..maxPlayers) end
+		if IsLegacyDifficulty(value) then name = name..separator..ARTIFACT_GOLD_COLOR:WrapTextInColorCode(LFG_LIST_LEGACY) end
 
 		return name
 	end
 end
 
 function conds.difficulty:getValueList(value, func)
-	local ids = {0}
-	for k, id in next, DifficultyUtil.ID do ids[#ids + 1] = id end
-	sort(ids)
+	local ids = {}
+	for k, id in next, DifficultyUtil.ID do
+		local _, instanceType, _,_,_,_,_, isLFR = GetDifficultyInfo(id)
+		ids[#ids + 1] = {
+			id = id,
+			isRaid = instanceType == "raid",
+			isParty = instanceType == "party",
+			isLFR = isLFR,
+			isLegacy = IsLegacyDifficulty(id),
+		}
+	end
+	sort(ids, function(a, b)
+		if a.isLegacy and not b.isLegacy then return false
+		elseif not a.isLegacy and b.isLegacy then return true end
+
+		if a.isLFR and not b.isLFR then return false
+		elseif not a.isLFR and b.isLFR then return true end
+
+		if a.isRaid and not b.isRaid then return false
+		elseif not a.isRaid and b.isRaid then return true end
+
+		if a.isParty and not b.isParty then return false
+		elseif not a.isParty and b.isParty then return true end
+
+		return a.id < b.id
+	end)
+	tinsert(ids, 1, {id = 0})
 
 	local list = {}
 	for i = 1, #ids do
-		local id = ids[i]
+		local id = ids[i].id
 		list[i] = {
 			text = self:getValueText(id),
 			value = id,
