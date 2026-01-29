@@ -442,7 +442,7 @@ end
 
 
 function util.doEmote(...)
-	if (ns.mounts.stState == nil or ns.mounts.stState == 0) and not GetCVarBool("addonChatRestrictionsForced") then
+	if ns.mounts.stState == 0 and not GetCVarBool("addonChatRestrictionsForced") then
 		C_ChatInfo.PerformEmote(...)
 	end
 end

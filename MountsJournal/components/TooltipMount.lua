@@ -1,5 +1,5 @@
-local addon, ns = ...
-local L, util, journal, mounts = ns.L, ns.util, ns.journal, ns.mounts
+local _, ns = ...
+local L, util, mounts = ns.L, ns.util, ns.mounts
 
 
 TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, function(tooltip, data)

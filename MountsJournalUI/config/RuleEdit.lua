@@ -93,6 +93,7 @@ ruleEditor:HookScript("OnShow", function(self)
 		self.data.rules = nil
 		self.data.name = nil
 		self:setActionOption()
+		self:ruleCheck()
 	end)
 	self.addTypeButton1.endPos = 10
 	self.addTypeButton1.bg:SetTexCoord(1197/2048,1622/2048,1063/2048,1161/2048)
@@ -107,6 +108,7 @@ ruleEditor:HookScript("OnShow", function(self)
 		self.data.rules = {}
 		self.data.name = ""
 		self:setActionOption()
+		self:ruleCheck()
 	end)
 	self.addTypeButton2.endPos = -10
 	self.addTypeButton2.bg:SetTexCoord(380/2048,805/2048,1186/2048,1285/2048)
@@ -415,21 +417,7 @@ end
 
 
 function ruleEditor:ruleCheck()
-	local check = true
-
-	for i = 1, #self.data do
-		local cond = self.data[i]
-		if not cond[2] or conds[cond[2]].getValueText and not cond[3] then
-			check = false
-			break
-		end
-	end
-
-	local action = self.data.action
-	if action and (not action[1] or actions[action[1]].getValueText and not action[2]) then
-		check = false
-	end
-
+	local check = rules:ruleCheck(self.data)
 	self.ok:SetEnabled(check)
 end
 

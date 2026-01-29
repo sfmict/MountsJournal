@@ -136,8 +136,8 @@ do
 				local spellLink = ltl:GetSpellLink(spellID)
 				ChatEdit_InsertLink(spellLink)
 			end
-		elseif tags.selectFunc then
-			tags.selectFunc(btn.spellID)
+		elseif self.selectFunc then
+			self.selectFunc(btn.spellID)
 		else
 			local time = GetTime()
 			if btn.mountID ~= journal.selectedMountID then

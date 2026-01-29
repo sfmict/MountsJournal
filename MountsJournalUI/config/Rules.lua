@@ -686,20 +686,31 @@ end
 
 function rules:ruleCheck(rule)
 	if type(rule) ~= "table"
-	or type(rule.action) == "table" and not actions[rule.action[1]]
+	or rule.action and (rule.name or rule.rules)
 	then return end
 
-	if type(rule.name) == "string" and type(rule.rules) == "table" then
-		for i, sRule in ipairs(rule.rules) do
-			if not self:ruleCheck(sRule) then return end
-		end
+	if rule.action then
+		local action = rule.action
+		if type(action) ~= "table"
+		or not actions[action[1]]
+		or actions[action[1]].getValueText and not action[2]
+		or actions[action[1]].isNumeric and type(action[2]) ~= "number"
+		then return end
 	end
 
 	for i = 1, #rule do
 		local cond = rule[i]
 		if not conds[cond[2]]
-		or conds[cond[2]].getValueList and not cond[3]
+		or conds[cond[2]].getValueText and not cond[3]
+		or conds[cond[2]].isNumeric and type(cond[3]) ~= "number"
 		then return end
+	end
+
+	if rule.name then
+		if type(rule.name) ~= "string" or type(rule.rules) ~= "table" then return end
+		for i, sRule in ipairs(rule.rules) do
+			if not self:ruleCheck(sRule) then return end
+		end
 	end
 
 	return true

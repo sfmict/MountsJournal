@@ -6,6 +6,7 @@ local BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS = BACKPACK_CONTAINER, NUM
 local next, rawget, wipe, GetTime, random, floor = next, rawget, wipe, GetTime, math.random, math.floor
 local mounts = CreateFrame("Frame", "MountsJournal")
 ns.mounts = util.setEventsMixin(mounts)
+mounts.stState = 0
 
 
 mounts:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
