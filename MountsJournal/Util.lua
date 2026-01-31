@@ -184,8 +184,11 @@ function util.checkAura(unit, spellID, filter)
 	repeat
 		ctok, a,b,c,d,e = GetAuraSlots(unit, filter, 5, ctok)
 		while a do
-			local auraID = GetAuraDataBySlot(unit, a).spellId
-			if not issecretvalue(auraID) and auraID == spellID then return true end
+			local data = GetAuraDataBySlot(unit, a)
+			if data then
+				local auraID = data.spellId
+				if not issecretvalue(auraID) and auraID == spellID then return true end
+			end
 			a,b,c,d,e = b,c,d,e
 		end
 	until not ctok
@@ -201,11 +204,14 @@ function util.getUnitMount(unit)
 		ctok, a,b,c,d,e = GetAuraSlots(unit, filter, 5, ctok)
 		while a do
 			local data = GetAuraDataBySlot(unit, a)
-			if ns.additionalMountBuffs[data.spellId] then
-				return ns.additionalMountBuffs[data.spellId].spellID, nil, data.auraInstanceID
-			else
-				local mountID = C_MountJournal.GetMountFromSpell(data.spellId)
-				if mountID then return data.spellId, mountID, data.auraInstanceID end
+			if data then
+				local auraID = data.spellId
+				if ns.additionalMountBuffs[auraID] then
+					return ns.additionalMountBuffs[auraID].spellID, nil, data.auraInstanceID
+				else
+					local mountID = C_MountJournal.GetMountFromSpell(auraID)
+					if mountID then return auraID, mountID, data.auraInstanceID end
+				end
 			end
 			a,b,c,d,e = b,c,d,e
 		end
