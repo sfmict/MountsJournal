@@ -202,6 +202,7 @@ macroFrame:on("ADDON_INIT", function(self)
 
 	self:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
+	self:RegisterEvent("PLAYER_REGEN_ENABLED")
 
 	self:refresh()
 	self:getClassMacro(self.class, false, function() self:refresh() end)
@@ -284,10 +285,7 @@ function macroFrame:setRuleFuncs()
 		-- C_Secrets.ShouldUnitIdentityBeSecret("party1")
 		func[5] = [[
 
-local ShouldAurasBeSecret, ShouldCooldownsBeSecret
-if C_Secrets then
-	ShouldAurasBeSecret, ShouldCooldownsBeSecret = C_Secrets.ShouldAurasBeSecret, C_Secrets.ShouldCooldownsBeSecret
-end
+local ShouldAurasBeSecret, ShouldCooldownsBeSecret = C_Secrets.ShouldAurasBeSecret, C_Secrets.ShouldCooldownsBeSecret
 return function(self, button, profileLoad, noMacro)
 	self.mounts:setFlags()
 	self.mounts:resetMountsList()
@@ -461,8 +459,12 @@ end
 
 
 function macroFrame:PLAYER_REGEN_ENABLED()
-	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-	EquipItemByName(self.fishingRodID)
+	if self.needEquipFishingRod then
+		self.needEquipFishingRod = nil
+		EquipItemByName(self.fishingRodID)
+	elseif IsSubmerged() then
+		self:autoEquip()
+	end
 end
 
 
@@ -472,7 +474,7 @@ function macroFrame:ITEM_UNLOCKED(bag, slot)
 	and C_Container.GetContainerItemID(bag, slot) == self.fishingRodID
 	then
 		if InCombatLockdown() then
-			self:RegisterEvent("PLAYER_REGEN_ENABLED")
+			self.needEquipFishingRod = true
 		else
 			EquipItemByName(self.fishingRodID)
 		end

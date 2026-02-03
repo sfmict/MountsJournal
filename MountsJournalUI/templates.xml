@@ -1248,6 +1248,8 @@
 		</Frames>
 	</Frame>
 
+	<Button name="MJMotionPropagateTemplate" propagateMouseInput="Motion" virtual="true"/>
+
 	<Button name="MJSettingsButtonTemplate" mixin="QuestLogSettingsButtonMixin" virtual="true">
 		<Size x="15" y="16"/>
 		<Layers>
@@ -2102,17 +2104,17 @@
 
 	<Button name="MJGridModelSceneWithTypeBtnsTemplate" inherits="MJGridModelSceneTemplate" virtual="true">
 		<Frames>
-			<CheckButton parentKey="fly" inherits="MJSetFlyToggleTemplate">
+			<CheckButton parentKey="fly" propagateMouseInput="Motion" inherits="MJSetFlyToggleTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" x="6" y="-44"/>
 				</Anchors>
 			</CheckButton>
-			<CheckButton parentKey="ground" inherits="MJSetGroundToggleTemplate">
+			<CheckButton parentKey="ground" propagateMouseInput="Motion" inherits="MJSetGroundToggleTemplate">
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent.fly" relativePoint="BOTTOM" y="-2"/>
 				</Anchors>
 			</CheckButton>
-			<CheckButton parentKey="swimming" inherits="MJSetSwimmingToggleTemplate">
+			<CheckButton parentKey="swimming" propagateMouseInput="Motion" inherits="MJSetSwimmingToggleTemplate">
 				<Anchors>
 					<Anchor point="TOP" relativeKey="$parent.ground" relativePoint="BOTTOM" y="-2"/>
 				</Anchors>

@@ -20,6 +20,7 @@ L["Buttons"] = "Buttons" -- missing
 L["Fade out (opacity)"] = "사라짐 (불투명도)"
 L["Button size"] = "버튼 크기"
 L["Reset size"] = "크기 초기화"
+L["Hide panel"] = "Hide panel" -- missing
 L["Target Mount"] = "대상 탈것"
 L["Shows the mount of current target"] = "현재 대상의 탈것을 표시합니다."
 L["Select mount"] = "탈것 선택"

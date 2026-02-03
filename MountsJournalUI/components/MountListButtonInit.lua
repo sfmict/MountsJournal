@@ -51,22 +51,11 @@ local function rarity_OnEnter(self)
 	GameTooltip:Show()
 end
 
-local backdrop = {
-	bgFile = "Interface/Tooltips/UI-Tooltip-Background",
-	edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
-	tile = true,
-	tileEdge = true,
-	tileSize = 14,
-	edgeSize = 14,
-	insets = {left = 3, right = 3, top = 3, bottom = 3}
-}
-
 local model_OnEnter, model_OnLeave do
-	local inspect = CreateFrame("BUTTON")
+	local inspect = CreateFrame("BUTTON", nil, nil, "MJMotionPropagateTemplate")
 	inspect:Hide()
 	inspect:SetSize(20, 20)
 	inspect:SetAlpha(.5)
-	inspect:SetPropagateMouseMotion(true)
 	inspect.icon = inspect:CreateTexture(nil, "BACKGROUND")
 	inspect.icon:SetTexture("interface/cursor/crosshair/inspect.blp")
 	inspect.icon:SetPoint("CENTER")
@@ -84,11 +73,10 @@ local model_OnEnter, model_OnLeave do
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
 
-	local hint = CreateFrame("Frame", nil, nil, "MJHelpPlate")
+	local hint = CreateFrame("Frame", nil, nil, "MJHelpPlate,MJMotionPropagateTemplate")
 	hint:Hide()
 	hint:SetScale(.7)
 	hint:SetAlpha(.5)
-	hint:SetPropagateMouseMotion(true)
 	hint:SetPoint("BOTTOM", inspect, "TOP", 3 / .7, -10 / .7)
 	hint:SetScript("OnEnter", function(hint)
 		hint.highlight:Show()
@@ -142,7 +130,7 @@ end
 
 function MJMountListButton_OnLoad(self)
 	self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-	
+
 	if self.modelScene then
 		self:SetBackdrop(ns.util.modelScenebackdrop)
 		self:SetBackdropColor(.1, .1, .1, .9)
@@ -160,7 +148,7 @@ function MJMountListButton_OnLoad(self)
 		self:SetScript("OnMouseDown", mouseDown)
 		self:SetScript("OnClick", click)
 	end
-	
+
 	if self.dragButton then
 		self.dragButton:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 		self.dragButton:RegisterForDrag("LeftButton")
@@ -175,7 +163,7 @@ function MJMountListButton_OnLoad(self)
 		self:SetScript("OnEnter", onEnter)
 		self:SetScript("OnLeave", onLeave)
 	end
-	
+
 	if self.fly then
 		self.fly:SetScript("OnClick", typeClick)
 		self.ground:SetScript("OnClick", typeClick)

@@ -87,9 +87,15 @@ ns.journal:on("MODULES_INIT", function(journal)
 			info.func = function() panel:setSize(1) end
 			dd:ddAddButton(info, level)
 
-			info.text = HIDE
+			info.disabled = panel:isLocked() or InCombatLockdown()
+			info.text = L["Hide panel"]
 			info.func = function() panel:setShown(false) end
 			dd:ddAddButton(info, level)
+
+			info.disabled = nil
+			info.func = nil
+			info.text = CANCEL
+			dd:ddAddButton(info)
 
 		elseif value == "strata" then
 			info.disabled = InCombatLockdown()
@@ -139,7 +145,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 			info.text = HUD_EDIT_MODE_SETTING_COOLDOWN_VIEWER_ICON_DIRECTION_RIGHT
 			info.value = 4
 			dd:ddAddButton(info, level)
-		
+
 		elseif value == "btns" then
 			info.disabled = InCombatLockdown()
 			info.keepShownOnClick = true

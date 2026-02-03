@@ -1,3 +1,4 @@
+if not DressUpFrame then return end
 local addon, ns = ...
 local mjBtn, curMountID = CreateFrame("BUTTON", nil, DressUpFrame)
 DressUpFrame.mjBtn = mjBtn

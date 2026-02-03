@@ -4,7 +4,7 @@ local _, ns = ...
 hooksecurefunc("HandleModifiedItemClick", function(link)
 	local config = ns.mounts.config
 
-	if config.openHyperlinks and not InCombatLockdown() and IsModifiedClick("DRESSUP") and not IsModifiedClick("CHATLINK") then
+	if config.openHyperlinks and not InCombatLockdown() and IsModifiedClick("DRESSUP") and not IsModifiedClick("CHATLINK") and link then
 		local _,_,_, linkType, linkID = (":|H"):split(link)
 
 		local mountID

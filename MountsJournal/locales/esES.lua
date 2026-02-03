@@ -20,6 +20,7 @@ L["Buttons"] = "Buttons" -- missing
 L["Fade out (opacity)"] = "Fade out (opacity)" -- missing
 L["Button size"] = "Button size" -- missing
 L["Reset size"] = "Reset size" -- missing
+L["Hide panel"] = "Hide panel" -- missing
 L["Target Mount"] = "Target Mount" -- missing
 L["Shows the mount of current target"] = "Shows the mount of current target" -- missing
 L["Select mount"] = "Select mount" -- missing

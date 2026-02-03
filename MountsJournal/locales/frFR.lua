@@ -20,6 +20,7 @@ L["Buttons"] = "Buttons" -- missing
 L["Fade out (opacity)"] = "Fondu (opacité)"
 L["Button size"] = "Taille du bouton"
 L["Reset size"] = "Réinitialiser la taille"
+L["Hide panel"] = "Hide panel" -- missing
 L["Target Mount"] = "Monture cible"
 L["Shows the mount of current target"] = "Affiche la monture de la cible actuelle"
 L["Select mount"] = "Sélectionnez toutes les montures"

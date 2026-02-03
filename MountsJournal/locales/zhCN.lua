@@ -20,6 +20,7 @@ L["Buttons"] = "Buttons" -- missing
 L["Fade out (opacity)"] = "淡出（不透明度变化）"
 L["Button size"] = "按钮尺寸"
 L["Reset size"] = "重置尺寸"
+L["Hide panel"] = "Hide panel" -- missing
 L["Target Mount"] = "Target Mount" -- missing
 L["Shows the mount of current target"] = "显示当前目标的坐骑"
 L["Select mount"] = "选择坐骑"

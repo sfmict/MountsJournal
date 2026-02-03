@@ -2549,7 +2549,11 @@ function journal:mountToggle(mountType, spellID, mountID)
 	self:getRemoveMountList(self.listMapID)
 
 	local btn = self:getMountButtonByMountID(mountID)
-	if btn then self:initMountButton(btn, btn:GetElementData()) end
+	if btn then
+		self:initMountButton(btn, btn:GetElementData())
+		btn:Hide()
+		btn:Show() -- motion trigger
+	end
 
 	-- mounts:setMountsList()
 	self.existingLists:refresh()
