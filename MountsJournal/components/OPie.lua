@@ -54,8 +54,9 @@ ns.macroFrame:on("ADDON_INIT", function(macroFrame)
 			end
 			macro = macroFrame.checkRules[id](macroFrame, button) or ""
 			if macroFrame.useMount then
-				local spellID = macroFrame.useMount == true and mounts.summonedSpellID or macroFrame.useMount
-				macro = ("%s\n/run MountsJournal:summon(%s)"):format(macro, spellID)
+				local spellID = macroFrame.useMount
+				if spellID == true then spellID = mounts.summonedSpellID end
+				if spellID then macro = ("%s\n/run MountsJournal:summon(%s)"):format(macro, spellID) end
 			end
 		end
 
