@@ -3774,9 +3774,29 @@
 		</ButtonText>
 		<Scripts>
 			<OnEnter>
-				if self.text:IsTruncated() then
+				local tooltip = self.tooltip
+				local isTruncated = self.text:IsTruncated()
+				if isTruncated or tooltip then
 					GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
-					GameTooltip:SetText(self.text:GetText())
+					if tooltip then
+						if type(tooltip) == "string" then
+							GameTooltip:SetText(tooltip, nil, nil, nil, nil, false)
+						else
+							GameTooltip:SetText(tooltip[1], nil, nil, nil, nil, false)
+							for i = 2, #tooltip do
+								local text = tooltip[i]
+								if type(text) == "string" then
+									GameTooltip:AddLine(text, 1, 1, 1, 1, false)
+								else
+									GameTooltip:AddDoubleLine(text[1], text[2], 1, 1, 1, 1, 1, 1)
+								end
+							end
+						end
+					end
+					if isTruncated then
+						if tooltip then GameTooltip:AddLine(" ") end
+						GameTooltip:AddLine(self.text:GetText(), 1, 1, 1)
+					end
 					GameTooltip:Show()
 				end
 				if not self:IsEnabled() then return end

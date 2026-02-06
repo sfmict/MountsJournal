@@ -999,16 +999,47 @@ conds.instance.text = INSTANCE
 
 function conds.instance:getValueDescription()
 	return {
-		INSTANCE.." or InstanceID",
-		{INSTANCE , ns.mounts.instanceName},
-		{"InstanceID", ns.mounts.instanceID},
+		TAXINODEYOUAREHERE,
+		{INSTANCE, ns.mounts.instanceName},
+		{"instanceID", ns.mounts.instanceID},
 	}
 end
 
-conds.instance.getValueText = conds.mcond.getValueText
+function conds.instance:getValueText(value)
+	if type(value) == "string" then return value end
+	return ("%s |cff808080<%s>|r"):format(GetRealZoneText(value), value)
+end
+
+function conds.instance:getValueList(value, func)
+	local list = {}
+	local instanceID = 0
+	local skipped = 0
+
+	while skipped < 200 do
+		local name = GetRealZoneText(instanceID)
+
+		if name and name ~= "" then
+			list[#list + 1] = {
+				text = name,
+				rightText = ("|cff808080%s|r"):format(instanceID),
+				rightFont = util.codeFont,
+				value = instanceID,
+				func = func,
+				checked = instanceID == value,
+			}
+			skipped = 0
+		else
+			skipped = skipped + 1
+		end
+
+		instanceID = instanceID + 1
+	end
+
+	return list
+end
 
 function conds.instance:getFuncText(value)
-	if value:trim():match("%D") then
+	if type(value) == "string" and value:trim():match("%D") then
 		return ("self.mounts.instanceName == '%s'"):format(value:gsub("['\\]", "\\%1"))
 	elseif tonumber(value) then
 		return ("self.mounts.instanceID == %s"):format(tonumber(value))
