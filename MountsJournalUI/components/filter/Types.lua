@@ -34,29 +34,6 @@ function journal.filters.types(dd, level)
 		"Interface/AddOns/MountsJournal/textures/ground",
 		"Interface/AddOns/MountsJournal/textures/swimming",
 	}
-	local iconInfos = {
-		{
-			tCoordLeft = .25,
-			tCoordRight = .75,
-			r = journal.colors.mount1.r,
-			g = journal.colors.mount1.g,
-			b = journal.colors.mount1.b,
-		},
-		{
-			tCoordLeft = .25,
-			tCoordRight = .75,
-			r = journal.colors.mount2.r,
-			g = journal.colors.mount2.g,
-			b = journal.colors.mount2.b,
-		},
-		{
-			tCoordLeft = .25,
-			tCoordRight = .75,
-			r = journal.colors.mount3.r,
-			g = journal.colors.mount3.g,
-			b = journal.colors.mount3.b,
-		},
-	}
 	info.widgets = {{
 		icon = "interface/worldmap/worldmappartyicon",
 		OnClick = function(btn)
@@ -74,10 +51,17 @@ function journal.filters.types(dd, level)
 	end
 	info.checked = function(btn) return types[btn.value] end
 
-	for i = 1, 3 do
+	for i = 1, #icons do
+		local color = journal.colors["mount"..i]
 		info.text = L["MOUNT_TYPE_"..i]
 		info.icon = icons[i]
-		info.iconInfo = iconInfos[i]
+		info.iconInfo = {
+			tCoordLeft = .25,
+			tCoordRight = .75,
+			r = color.r,
+			g = color.g,
+			b = color.b,
+		}
 		info.value = i
 		dd:ddAddButton(info, level)
 	end

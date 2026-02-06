@@ -802,7 +802,7 @@ function journal:init()
 	self.percentSlider.edit:HookScript("OnEnterPressed", mountListUpdate)
 	self.percentSlider.edit:HookScript("OnMouseWheel", mountListUpdate)
 
-	-- FILTERS BUTTONS
+	-- FILTER BUTTONS
 	local function filterClick(btn)
 		self:setBtnFilters(btn:GetParent():GetParent().id)
 	end
@@ -817,12 +817,13 @@ function journal:init()
 		GameTooltip:Hide()
 	end
 
-	local function CreateButtonFilter(i, parent, width, height, texture)
+	local function CreateButtonFilter(id, parent, width, height, texture, tWidth, tHeight, tooltip, l,r,t,b)
 		local btn = CreateFrame("CheckButton", nil, parent, width == height and "MJFilterButtonSquareTemplate" or "MJFilterButtonRectangleTemplate")
-		btn.id = texture.id
-		btn.tooltip = texture.tooltip
+		btn.id = id
+		btn.tooltip = tooltip
 		btn:SetSize(width, height)
-		if i == 1 then
+
+		if not parent.childs then
 			btn:SetPoint("LEFT", 5, 0)
 			parent.childs = {}
 		else
@@ -830,51 +831,34 @@ function journal:init()
 		end
 		parent.childs[#parent.childs + 1] = btn
 
-		btn.icon:SetTexture(texture.path)
-		btn.icon:SetSize(texture.width, texture.height)
-		if texture.texCoord then btn.icon:SetTexCoord(unpack(texture.texCoord)) end
+		btn.icon:SetTexture(texture)
+		btn.icon:SetSize(tWidth, tHeight)
+		if l then btn.icon:SetTexCoord(l,r,t,b) end
 
 		btn:SetScript("OnClick", filterClick)
 		btn:SetScript("OnEnter", filterEnter)
 		btn:SetScript("OnLeave", filterLeave)
 	end
 
-	-- FILTERS TYPES BUTTONS
-	local typesTextures = {
-		{id = 1, path = self.tFly, width = 32, height = 16, tooltip = L["MOUNT_TYPE_1"]},
-		{id = 2, path = self.tGround, width = 32, height = 16, tooltip = L["MOUNT_TYPE_2"]},
-		{id = 3, path = self.tSwimming, width = 32, height = 16, tooltip = L["MOUNT_TYPE_3"]},
-	}
+	-- FILTER TYPES BUTTONS
+	CreateButtonFilter(1, self.filtersBar.types, 88, 24, self.tFly, 32, 16, L["MOUNT_TYPE_1"])
+	CreateButtonFilter(2, self.filtersBar.types, 88, 24, self.tGround, 32, 16, L["MOUNT_TYPE_2"])
+	CreateButtonFilter(3, self.filtersBar.types, 88, 24, self.tSwimming, 32, 16, L["MOUNT_TYPE_3"])
 
-	for i = 1, #typesTextures do
-		CreateButtonFilter(i, self.filtersBar.types, 88, 24, typesTextures[i])
-	end
+	-- FILTER SELECTED BUTTONS
+	CreateButtonFilter(1, self.filtersBar.selected, 66, 24, self.tFly, 32, 16, L["MOUNT_TYPE_1"])
+	CreateButtonFilter(2, self.filtersBar.selected, 66, 24, self.tGround, 32, 16, L["MOUNT_TYPE_2"])
+	CreateButtonFilter(3, self.filtersBar.selected, 66, 24, self.tSwimming, 32, 16, L["MOUNT_TYPE_3"])
+	CreateButtonFilter(4, self.filtersBar.selected, 66, 24, "Interface/BUTTONS/UI-GROUPLOOT-PASS-DOWN", 16, 16, L["MOUNT_TYPE_4"])
 
-	-- FILTERS SELECTED BUTTONS
-	typesTextures[4] = {id = 4, path = "Interface/BUTTONS/UI-GROUPLOOT-PASS-DOWN", width = 16, height = 16, tooltip = L["MOUNT_TYPE_4"]}
-	for i = 1, #typesTextures do
-		CreateButtonFilter(i, self.filtersBar.selected, 66, 24, typesTextures[i])
-	end
-
-	-- FILTERS SOURCES BUTTONS
-	local sourcesTextures = {
-		{id = 1, path = texPath.."sources", texCoord = {0, .25, 0, .25}, width = 20, height = 20},
-		{id = 2, path = texPath.."sources", texCoord = {.25, .5, 0, .25}, width = 20, height = 20},
-		{id = 3, path = texPath.."sources", texCoord = {.5, .75, 0, .25}, width = 20, height = 20},
-		{id = 4, path = texPath.."sources", texCoord = {.75, 1, 0, .25}, width = 20, height = 20},
-		{id = 6, path = texPath.."sources", texCoord = {.25, .5, .25, .5}, width = 20, height = 20},
-		{id = 7, path = texPath.."sources", texCoord = {.5, .75, .25, .5}, width = 20, height = 20},
-		{id = 8, path = texPath.."sources", texCoord = {.75, 1, .25, .5}, width = 20, height = 20},
-		{id = 9, path = texPath.."sources", texCoord = {0, .25, .5, .75}, width = 20, height = 20},
-		{id = 10, path = texPath.."sources", texCoord = {.25, .5, .5, .75}, width = 20, height = 20},
-		{id = 11, path = texPath.."sources", texCoord = {.5, .75, .5, .75}, width = 20, height = 20},
-		{id = 12, path = 4696085, width = 20, height = 20},
-	}
-
-	for i = 1, #sourcesTextures do
-		local t = sourcesTextures[i]
-		t.tooltip = _G["BATTLE_PET_SOURCE_"..t.id]
-		CreateButtonFilter(i, self.filtersBar.sources, 24, 24, t)
+	-- FILTER SOURCES BUTTONS
+	local sourcesTex = texPath.."sources"
+	for i = 1, C_PetJournal.GetNumPetSources() do
+		if C_MountJournal.IsValidSourceFilter(i) then
+			local col = (i - 1) % 4 * .25
+			local row = math.floor((i - 1) / 4) * .25
+			CreateButtonFilter(i, self.filtersBar.sources, 24, 24, sourcesTex, 20, 20, _G["BATTLE_PET_SOURCE_"..i], col, col + .25, row, row + .25)
+		end
 	end
 
 	-- SHOWN PANEL

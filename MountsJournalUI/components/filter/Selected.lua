@@ -35,29 +35,6 @@ function journal.filters.selected(dd, level)
 		"Interface/AddOns/MountsJournal/textures/swimming",
 		"Interface/BUTTONS/UI-GROUPLOOT-PASS-DOWN",
 	}
-	local iconInfos = {
-		{
-			tCoordLeft = .25,
-			tCoordRight = .75,
-			r = journal.colors.mount1.r,
-			g = journal.colors.mount1.g,
-			b = journal.colors.mount1.b,
-		},
-		{
-			tCoordLeft = .25,
-			tCoordRight = .75,
-			r = journal.colors.mount2.r,
-			g = journal.colors.mount2.g,
-			b = journal.colors.mount2.b,
-		},
-		{
-			tCoordLeft = .25,
-			tCoordRight = .75,
-			r = journal.colors.mount3.r,
-			g = journal.colors.mount3.g,
-			b = journal.colors.mount3.b,
-		},
-	}
 	info.widgets = {{
 		icon = "interface/worldmap/worldmappartyicon",
 		OnClick = function(btn)
@@ -75,11 +52,22 @@ function journal.filters.selected(dd, level)
 	end
 	info.checked = function(btn) return selected[btn.value] end
 
-	for i = 1, 4 do
+	for i = 1, #icons do
 		info.text = L["MOUNT_TYPE_"..i]
 		info.icon = icons[i]
-		info.iconInfo = iconInfos[i]
 		info.value = i
+		if i < 4 then
+			local color = journal.colors["mount"..i]
+			info.iconInfo = {
+				tCoordLeft = .25,
+				tCoordRight = .75,
+				r = color.r,
+				g = color.g,
+				b = color.b,
+			}
+		else
+			info.iconInfo = nil
+		end
 		dd:ddAddButton(info, level)
 	end
 end

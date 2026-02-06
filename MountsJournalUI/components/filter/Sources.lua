@@ -29,83 +29,6 @@ function journal.filters.sources(dd, level)
 	info.notCheckable = nil
 	local sources = mounts.filters.sources
 
-	local icons = {
-		"Interface/AddOns/MountsJournal/textures/sources",
-		"Interface/AddOns/MountsJournal/textures/sources",
-		"Interface/AddOns/MountsJournal/textures/sources",
-		"Interface/AddOns/MountsJournal/textures/sources",
-		nil,
-		"Interface/AddOns/MountsJournal/textures/sources",
-		"Interface/AddOns/MountsJournal/textures/sources",
-		"Interface/AddOns/MountsJournal/textures/sources",
-		"Interface/AddOns/MountsJournal/textures/sources",
-		"Interface/AddOns/MountsJournal/textures/sources",
-		"Interface/AddOns/MountsJournal/textures/sources",
-		4696085,
-	}
-	local iconInfos = {
-		{
-			tCoordLeft = 0,
-			tCoordRight = .25,
-			tCoordTop = 0,
-			tCoordBottom = .25,
-		},
-		{
-			tCoordLeft = .25,
-			tCoordRight = .5,
-			tCoordTop = 0,
-			tCoordBottom = .25,
-		},
-		{
-			tCoordLeft = .5,
-			tCoordRight = .75,
-			tCoordTop = 0,
-			tCoordBottom = .25,
-		},
-		{
-			tCoordLeft = .75,
-			tCoordRight = 1,
-			tCoordTop = 0,
-			tCoordBottom = .25,
-		},
-		nil,
-		{
-			tCoordLeft = .25,
-			tCoordRight = .5,
-			tCoordTop = .25,
-			tCoordBottom = .5,
-		},
-		{
-			tCoordLeft = .5,
-			tCoordRight = .75,
-			tCoordTop = .25,
-			tCoordBottom = .5,
-		},
-		{
-			tCoordLeft = .75,
-			tCoordRight = 1,
-			tCoordTop = .25,
-			tCoordBottom = .5,
-		},
-		{
-			tCoordLeft = 0,
-			tCoordRight = .25,
-			tCoordTop = .5,
-			tCoordBottom = .75,
-		},
-		{
-			tCoordLeft = .25,
-			tCoordRight = .5,
-			tCoordTop = .5,
-			tCoordBottom = .75,
-		},
-		{
-			tCoordLeft = .5,
-			tCoordRight = .75,
-			tCoordTop = .5,
-			tCoordBottom = .75,
-		},
-	}
 	info.widgets = {{
 		icon = "interface/worldmap/worldmappartyicon",
 		OnClick = function(btn)
@@ -125,9 +48,16 @@ function journal.filters.sources(dd, level)
 
 	for i = 1, C_PetJournal.GetNumPetSources() do
 		if C_MountJournal.IsValidSourceFilter(i) then
+			local col = (i - 1) % 4 * .25
+			local row = math.floor((i - 1) / 4) * .25
 			info.text = _G["BATTLE_PET_SOURCE_"..i]
-			info.icon = icons[i]
-			info.iconInfo = iconInfos[i]
+			info.icon = "Interface/AddOns/MountsJournal/textures/sources"
+			info.iconInfo = {
+				tCoordLeft = col,
+				tCoordRight = col + .25,
+				tCoordTop = row,
+				tCoordBottom = row + .25,
+			}
 			info.value = i
 			dd:ddAddButton(info, level)
 		end
