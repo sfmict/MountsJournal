@@ -430,6 +430,7 @@ L["Mana Rays"] = "마나 가오리"
 L["Mana Wyrms"] = "Mana Wyrms" -- missing
 L["Manasabers"] = "마나호랑이"
 L["Mauler"] = "싸움꾼"
+L["Mawrats"] = "Mawrats" -- missing
 L["Mechanical Animals"] = "기계형 야수"
 L["Mechanical Birds"] = "기계형 새"
 L["Mechanical Cats"] = "기계형 고양이"

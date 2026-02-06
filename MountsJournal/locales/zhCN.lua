@@ -430,6 +430,7 @@ L["Mana Rays"] = "法力鳐"
 L["Mana Wyrms"] = "Mana Wyrms" -- missing
 L["Manasabers"] = "魔刃豹"
 L["Mauler"] = "重殴者"
+L["Mawrats"] = "Mawrats" -- missing
 L["Mechanical Animals"] = "机械动物"
 L["Mechanical Birds"] = "机械鸟"
 L["Mechanical Cats"] = "机械猫"

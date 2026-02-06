@@ -430,6 +430,7 @@ L["Mana Rays"] = "Manarochen"
 L["Mana Wyrms"] = "Mana Wyrms" -- missing
 L["Manasabers"] = "Manasäbler"
 L["Mauler"] = "Zerfleischer"
+L["Mawrats"] = "Mawrats" -- missing
 L["Mechanical Animals"] = "Mechanische Tiere"
 L["Mechanical Birds"] = "Mechanische Vögel"
 L["Mechanical Cats"] = "Mechanische Katzen"

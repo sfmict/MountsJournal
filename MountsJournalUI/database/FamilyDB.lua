@@ -224,6 +224,7 @@ ns.familyDB = {
 		["Rats"] = 2601,
 		["Mudnose"] = 2602,
 		["Mice"] = 2603,
+		["Mawrats"] = 2604,
 	},
 	["Rylaks"] = 2700,
 	["Ungulates"] = {
@@ -465,7 +466,7 @@ ns.familyDBIcons = {
 	["Hedgehogs"] = 6702279,
 	["Horses"] = {
 		[0] = 132226,
-		["Celestials"] = 7360959,
+		["Celestials"] = 7360957,
 		["Chargers"] = 136103,
 		["Darkmoon Chargers"] = 6375542,
 		["Demonic Steeds"] = 237534,
@@ -537,6 +538,7 @@ ns.familyDBIcons = {
 	},
 	["Rodent"] = {
 		[0] = 1450569,
+		["Mawrats"] = 4287554,
 		["Mice"] = 3016707,
 		["Mudnose"] = 5768106,
 		["Rabbit"] = 4381911,
