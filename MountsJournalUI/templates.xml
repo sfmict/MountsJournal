@@ -20,7 +20,7 @@
 		</Layers>
 	</CheckButton>
 
-	<Frame name="MJMountJournalFrameTemplate" protected="true" frameLevel="1000" enableMouse="true" dontSavePosition="true" resizable="true" inherits="PortraitFrameTemplateNoCloseButton" virtual="true">
+	<Frame name="MJMountJournalFrameTemplate" protected="true" frameLevel="1000" enableMouse="true" dontSavePosition="true" flattenRenderLayers="true" resizable="true" inherits="PortraitFrameTemplateNoCloseButton" virtual="true">
 		<Size x="703" y="606"/>
 		<Frames>
 

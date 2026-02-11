@@ -260,6 +260,15 @@ local function updateGlobal(self)
 			self.config.gridToggle = self.config.gridToggle and 2 or 1
 		end
 	end
+
+	-- IF < 12.0.4 GLOBAL
+	if compareVersion("12.0.4", self.globalDB.lastAddonVersion) then
+		for i, v in ipairs({"filters", "defFilters"}) do
+			if self[v].family then
+				self[v].family[1811] = nil
+			end
+		end
+	end
 end
 
 
@@ -387,7 +396,7 @@ function ns.mounts:setOldChanges()
 
 	local currentVersion = C_AddOns.GetAddOnMetadata(addon, "Version")
 	--@do-not-package@
-	if currentVersion == "@project-version@" then currentVersion = "v11.1.17" end
+	if currentVersion == "@project-version@" then currentVersion = "v12.0.4" end
 	--@end-do-not-package@
 
 	if not self.charDB.lastAddonVersion then self.charDB.lastAddonVersion = currentVersion end

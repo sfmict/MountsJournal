@@ -1,4 +1,3 @@
-local addon, ns = ...
 MJDynamicFlightModeButtonMixin = {}
 
 

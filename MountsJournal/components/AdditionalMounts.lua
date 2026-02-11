@@ -1,6 +1,6 @@
 local _, ns = ...
 local mounts, util = ns.mounts, ns.util
-local C_UnitAuras, C_Spell, C_ZoneAbility, FindSpellOverrideByID = C_UnitAuras, C_Spell, C_ZoneAbility, FindSpellOverrideByID
+local C_Spell, C_ZoneAbility, FindSpellOverrideByID = C_Spell, C_ZoneAbility, FindSpellOverrideByID
 local C_Item, C_Container = C_Item, C_Container
 local ltl = LibStub("LibThingsLoad-1.0")
 local _,_, raceID = UnitRace("player")
@@ -147,6 +147,8 @@ elseif raceID == 31 then -- Zandalari Troll
 	travelForm.creatureID = 91215
 elseif raceID == 32 then -- Kul Tiran
 	travelForm.creatureID = 88351
+elseif raceID == 86 or raceID == 91 then -- Haranir
+	travelForm.creatureID = 115606
 else -- Night Elf
 	travelForm.creatureID = 21243
 end
@@ -168,6 +170,7 @@ travelForm.allCreature = {
 	74307, -- Lunarwing Worgen, Kul Tiran
 	74306, -- Lunarwing Troll, Zandalari Troll
 	137376, -- Lunarwing, legion Remix
+	115606, -- Haranir Bat (no textures) 138668
 	-- dark bird
 	20857, --37727,
 	-- owls
