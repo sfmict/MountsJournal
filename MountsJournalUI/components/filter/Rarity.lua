@@ -44,6 +44,7 @@ function journal.filters.rarity(dd, level)
 		frame.setFunc = function(value)
 			if filterRarity.value ~= value then
 				filterRarity.value = value
+				journal:updateMountsList()
 			end
 		end
 	end

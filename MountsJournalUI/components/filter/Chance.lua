@@ -44,6 +44,7 @@ function journal.filters.chance(dd, level)
 		frame.setFunc = function(value)
 			if filterWeight.weight ~= value then
 				filterWeight.weight = value
+				journal:updateMountsList()
 			end
 		end
 	end

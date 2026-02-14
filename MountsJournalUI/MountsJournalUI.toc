@@ -1,4 +1,4 @@
-## Interface: 120001, 120000
+## Interface: 120001
 ## Title: MountsJournalUI
 ## Author: sfmict
 ## Version: @project-version@
@@ -22,6 +22,7 @@
 embeds.xml
 database\ClassDB.lua
 database\FamilyDB.lua
+database\ColorDB.lua
 Util.lua
 templates.xml
 Journal.lua

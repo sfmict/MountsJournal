@@ -1,7 +1,7 @@
 local addon, ns = ...
 local L, util, mounts = ns.L, ns.util, ns.mounts
 local newMounts, mountsDB, specificDB, classDB = ns.newMounts, ns.mountsDB, ns.specificDB, ns.classDB
-local C_MountJournal, C_PetJournal, InCombatLockdown = C_MountJournal, C_PetJournal, InCombatLockdown
+local C_MountJournal, C_PetJournal, C_Timer, InCombatLockdown = C_MountJournal, C_PetJournal, C_Timer, InCombatLockdown
 local next, pairs, ipairs, type, select, math, tonumber = next, pairs, ipairs, type, select, math, tonumber
 local wipe, tinsert, sort, concat = wipe, table.insert, table.sort, table.concat
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
@@ -68,6 +68,7 @@ function journal:init()
 			withAllTags = false,
 			tags = {},
 		}
+		filters.color = filters.color or {threshold = 20}
 	end
 
 	checkFilters(mounts.filters)
@@ -89,7 +90,7 @@ function journal:init()
 	self.mountsWithMultipleModels = {}
 	for i = 1, #self.mountIDs do
 		local mountID = self.mountIDs[i]
-		local creatureIDs = C_MountJournal.GetMountAllCreatureDisplayInfoByID(mountID)
+		local creatureIDs = self:getMountAllCreatureDisplayInfo(mountID)
 		if creatureIDs and #creatureIDs > 1 then
 			self.mountsWithMultipleModels[mountID] = true
 		end
@@ -774,33 +775,14 @@ function journal:init()
 		local parent = self:GetParent()
 		parent:GetScript("OnEnter")(parent)
 	end
-	local mountListUpdate = function()
-		self.tags.doNotHideMenu = true
-		self:updateMountsList()
-		self.tags.doNotHideMenu = nil
-	end
 	self.percentSlider:setOnChanged(function(frame, value)
 		frame.setFunc(value)
-		frame.slider.isModified = true
 	end)
 	self.percentSlider:SetScript("OnEnter", function(frame)
 		self.filtersButton:ddCloseMenus(frame.level)
 	end)
 	self.percentSlider.slider:HookScript("OnEnter", weightControl_OnEnter)
-	self.percentSlider.slider:HookScript("OnMouseUp", function(slider)
-		mountListUpdate()
-		slider.isModified = nil
-	end)
-	self.percentSlider.slider:HookScript("OnHide", function(slider)
-		if slider.isModified then
-			self:updateMountsList()
-			slider.isModified = nil
-		end
-	end)
-	self.percentSlider.slider:HookScript("OnMouseWheel", mountListUpdate)
 	self.percentSlider.edit:HookScript("OnEnter", weightControl_OnEnter)
-	self.percentSlider.edit:HookScript("OnEnterPressed", mountListUpdate)
-	self.percentSlider.edit:HookScript("OnMouseWheel", mountListUpdate)
 
 	-- FILTER BUTTONS
 	local function filterClick(btn)
@@ -1386,6 +1368,7 @@ function journal:init()
 	self:on("MOUNTED_UPDATE", self.updateMounted)
 	self:on("PET_STATUS_UPDATE", self.updateMountsList)
 
+	self.lastMountUpdate = 0
 	self:updateCollectionTabs(true)
 	self:setScrollGridMounts()
 	self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
@@ -1722,16 +1705,18 @@ end
 
 function journal:getMountAllCreatureDisplayInfo(mount)
 	if type(mount) == "number" then
-		local creatureIDs = C_MountJournal.GetMountAllCreatureDisplayInfoByID(self.selectedMountID)
-		local list = {}
-		for i = 1, #creatureIDs do
-			local creatureID = creatureIDs[i].creatureDisplayID
-			if list[creatureID] == nil then
-				list[creatureID] = 1
-				list[#list + 1] = creatureID
+		local creatureIDs = C_MountJournal.GetMountAllCreatureDisplayInfoByID(mount)
+		if creatureIDs and #creatureIDs > 0 then
+			local list = {}
+			for i = 1, #creatureIDs do
+				local creatureID = creatureIDs[i].creatureDisplayID
+				if list[creatureID] == nil then
+					list[creatureID] = 1
+					list[#list + 1] = creatureID
+				end
 			end
+			return list
 		end
-		return list
 	else
 		return mount.allCreature
 	end
@@ -2937,6 +2922,10 @@ function journal:saveDefaultFilters()
 	defFilters.mountsWeight.weight = filters.mountsWeight.weight
 	defFilters.tags.noTag = filters.tags.noTag
 	defFilters.tags.withAllTags = filters.tags.withAllTags
+	defFilters.color.r = filters.color.r
+	defFilters.color.g = filters.color.g
+	defFilters.color.b = filters.color.b
+	defFilters.color.threshold = filters.color.threshold
 
 	for i = 1, #filters.types do
 		defFilters.types[i] = filters.types[i]
@@ -2953,14 +2942,14 @@ function journal:saveDefaultFilters()
 	for k, value in pairs(filters.family) do
 		defFilters.family[k] = value
 	end
+	for i = 1, #filters.expansions do
+		defFilters.expansions[i] = filters.expansions[i]
+	end
 	for i = 1, #filters.factions do
 		defFilters.factions[i] = filters.factions[i]
 	end
 	for i = 1, #filters.pet do
 		defFilters.pet[i] = filters.pet[i]
-	end
-	for i = 1, #filters.expansions do
-		defFilters.expansions[i] = filters.expansions[i]
 	end
 	for tag, value in pairs(filters.tags.tags) do
 		defFilters.tags.tags[tag] = value[2]
@@ -2987,14 +2976,15 @@ function journal:restoreDefaultFilters()
 	defFilters.mountsWeight.weight = 100
 	defFilters.tags.noTag = true
 	defFilters.tags.withAllTags = false
+	defFilters.color = {threshold = 20}
 	wipe(defFilters.types)
 	wipe(defFilters.selected)
 	wipe(defFilters.sources)
 	wipe(defFilters.specific)
 	wipe(defFilters.family)
+	wipe(defFilters.expansions)
 	wipe(defFilters.factions)
 	wipe(defFilters.pet)
-	wipe(defFilters.expansions)
 	wipe(defFilters.tags.tags)
 
 	self:setShownCountMounts()
@@ -3090,9 +3080,13 @@ do
 		checkFilter(list, SOURCES, defFilters.sources, filters.sources)
 		checkFilter(list, L["Specific"], defFilters.specific, filters.specific)
 		checkFilter(list, L["Family"], defFilters.family, filters.family)
+		checkFilter(list, L["expansions"], defFilters.expansions, filters.expansions)
+		checkFilter(list, COLOR, defFilters.color, filters.color, "r")
+		checkFilter(list, COLOR, defFilters.color, filters.color, "g")
+		checkFilter(list, COLOR, defFilters.color, filters.color, "b")
+		checkFilter(list, COLOR, defFilters.color, filters.color, "threshold")
 		checkFilter(list, L["factions"], defFilters.factions, filters.factions)
 		checkFilter(list, PET, defFilters.pet, filters.pet)
-		checkFilter(list, L["expansions"], defFilters.expansions, filters.expansions)
 		checkFilter(list, L["Rarity"], defFilters.mountsRarity, filters.mountsRarity, "sign")
 		checkFilter(list, L["Rarity"], defFilters.mountsRarity, filters.mountsRarity, "value")
 		checkFilter(list, L["Chance of summoning"], defFilters.mountsWeight, filters.mountsWeight, "sign")
@@ -3121,7 +3115,7 @@ function journal:resetFilterByInfo(info)
 			if k then
 				filter[k] = defFilter[k]
 			else
-				for k, v in next, filter do
+				for k in next, filter do
 					if type(filter[k]) == "table" then
 						filter[k][2] = defFilter[k]
 					else
@@ -3177,6 +3171,10 @@ function journal:resetToDefaultFilters()
 	filters.mountsWeight.weight = defFilters.mountsWeight.weight
 	filters.tags.noTag = defFilters.tags.noTag
 	filters.tags.withAllTags = defFilters.tags.withAllTags
+	filters.color.r = defFilters.color.r
+	filters.color.g = defFilters.color.g
+	filters.color.b = defFilters.color.b
+	filters.color.threshold = defFilters.color.threshold
 
 	for i = 1, #filters.types do
 		filters.types[i] = defFilters.types[i]
@@ -3193,14 +3191,14 @@ function journal:resetToDefaultFilters()
 	for k in pairs(filters.family) do
 		filters.family[k] = defFilters.family[k]
 	end
+	for i = 1, #filters.expansions do
+		filters.expansions[i] = defFilters.expansions[i]
+	end
 	for i = 1, #filters.factions do
 		filters.factions[i] = defFilters.factions[i]
 	end
 	for i = 1, #filters.pet do
 		filters.pet[i] = defFilters.pet[i]
-	end
-	for i = 1, #filters.expansions do
-		filters.expansions[i] = defFilters.expansions[i]
 	end
 	for tag, value in pairs(filters.tags.tags) do
 		value[2] = defFilters.tags.tags[tag]
@@ -3436,8 +3434,26 @@ end
 
 
 function journal:updateMountsList()
-	local filters, list, newMounts, tags, pets, getMountInfo = mounts.filters, self.list, newMounts, self.tags, ns.pets, util.getMountInfo
-	local sources, factions, pet, expansions = filters.sources, filters.factions, filters.pet, filters.expansions
+	if self.mountUpdateHold then return end
+	local utime = GetTime()
+	if utime - self.lastMountUpdate < .1 then
+		self.mountUpdateHold = true
+		local doNotHideMenu = self.tags.doNotHideMenu
+		C_Timer.After(.1, function()
+			self.mountUpdateHold = false
+			self.tags.doNotHideMenu = doNotHideMenu
+			self:updateScrollMountList()
+			self.tags.doNotHideMenu = nil
+		end)
+		return
+	end
+	self.lastMountUpdate = utime
+
+	local filters, newMounts, tags, pets, getMountInfo = mounts.filters, newMounts, self.tags, ns.pets, util.getMountInfo
+	local sources, factions, pet, expansions, color = filters.sources, filters.factions, filters.pet, filters.expansions, filters.color
+	local r,g,b, threshold = color.r, color.g, color.b, color.threshold
+	local noColor = r == nil
+	local CheckMountColor = ns.CheckMountColor
 	local text = util.cleanText(self.searchBox:GetText())
 	local numMounts = 0
 	self.dataProvider = CreateDataProvider()
@@ -3481,6 +3497,8 @@ function journal:updateMountsList()
 		and self:getFilterSelected(spellID)
 		-- PET
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
+		-- COLOR
+		and (noColor or CheckMountColor(mountID, r,g,b, threshold))
 		-- SPECIFIC
 		and self:getFilterSpecific(spellID, isSelfMount, mountType, mountID)
 		-- MOUNTS RARITY

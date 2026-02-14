@@ -6,9 +6,10 @@
 	<Script file="Specific.lua"/>
 	<Script file="Class.lua"/>
 	<Script file="Family.lua"/>
+	<Script file="Expansions.lua"/>
+	<Script file="Color.lua"/>
 	<Script file="Factions.lua"/>
 	<Script file="Pet.lua"/>
-	<Script file="Expansions.lua"/>
 	<Script file="Rarity.lua"/>
 	<Script file="Chance.lua"/>
 	<Script file="Tags.lua"/>

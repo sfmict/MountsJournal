@@ -111,16 +111,20 @@ function journal.filters.main(dd, level)
 	info.value = "family"
 	dd:ddAddButton(info, level)
 
+	info.text = L["expansions"]
+	info.value = "expansions"
+	dd:ddAddButton(info, level)
+
+	info.text = COLOR
+	info.value = "color"
+	dd:ddAddButton(info, level)
+
 	info.text = L["factions"]
 	info.value = "factions"
 	dd:ddAddButton(info, level)
 
 	info.text = PET
 	info.value = "pet"
-	dd:ddAddButton(info, level)
-
-	info.text = L["expansions"]
-	info.value = "expansions"
 	dd:ddAddButton(info, level)
 
 	info.text = L["Rarity"]
