@@ -3,7 +3,7 @@ local L, util, mounts = ns.L, ns.util, ns.mounts
 local newMounts, mountsDB, specificDB, classDB = ns.newMounts, ns.mountsDB, ns.specificDB, ns.classDB
 local C_MountJournal, C_PetJournal, C_Timer, InCombatLockdown = C_MountJournal, C_PetJournal, C_Timer, InCombatLockdown
 local next, pairs, ipairs, type, select, math, tonumber = next, pairs, ipairs, type, select, math, tonumber
-local wipe, tinsert, sort, concat = wipe, table.insert, table.sort, table.concat
+local wipe, tinsert, sort, concat, select = wipe, table.insert, table.sort, table.concat, select
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
 ns.journal = util.setEventsMixin(journal)
 -- journal.mountTypes = util.mountTypes
@@ -1368,7 +1368,7 @@ function journal:init()
 	self:on("MOUNTED_UPDATE", self.updateMounted)
 	self:on("PET_STATUS_UPDATE", self.updateMountsList)
 
-	self.lastMountUpdate = 0
+	self.lastMountListUpdate = 0
 	self:updateCollectionTabs(true)
 	self:setScrollGridMounts()
 	self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
@@ -3050,9 +3050,13 @@ do
 	end
 
 
-	local function checkFilter(list, text, defFilters, filters, k)
+	local function checkFilter(list, text, defFilters, filters, k, ...)
 		if k then
 			if (defFilters[k] or false) ~= (filters[k] or false) then add(list, text, defFilters, filters, k) end
+			for i = 1, select("#", ...) do
+				local k = select(i, ...)
+				if (defFilters[k] or false) ~= (filters[k] or false) then add(list, text, defFilters, filters, k) end
+			end
 		else
 			for k, v in next, filters do
 				if defFilters[k] ~= v then add(list, text, defFilters, filters) break end
@@ -3070,10 +3074,8 @@ do
 		checkFilter(list, COLLECTED, defFilters, filters, "collected")
 		checkFilter(list, NOT_COLLECTED, defFilters, filters, "notCollected")
 		checkFilter(list, MOUNT_JOURNAL_FILTER_UNUSABLE, defFilters, filters, "unusable")
-		checkFilter(list, L["hidden for character"], defFilters, filters, "hideOnChar")
-		checkFilter(list, L["hidden for character"], defFilters, filters, "onlyHideOnChar")
-		checkFilter(list, L["Hidden by player"], defFilters, filters, "hiddenByPlayer")
-		checkFilter(list, L["Hidden by player"], defFilters, filters, "onlyHiddenByPlayer")
+		checkFilter(list, L["hidden for character"], defFilters, filters, "hideOnChar", "onlyHideOnChar")
+		checkFilter(list, L["Hidden by player"], defFilters, filters, "hiddenByPlayer", "onlyHiddenByPlayer")
 		checkFilter(list, L["Only new"], defFilters, filters, "onlyNew")
 		checkFilter(list, L["types"], defFilters.types, filters.types)
 		checkFilter(list, L["selected"], defFilters.selected, filters.selected)
@@ -3081,18 +3083,12 @@ do
 		checkFilter(list, L["Specific"], defFilters.specific, filters.specific)
 		checkFilter(list, L["Family"], defFilters.family, filters.family)
 		checkFilter(list, L["expansions"], defFilters.expansions, filters.expansions)
-		checkFilter(list, COLOR, defFilters.color, filters.color, "r")
-		checkFilter(list, COLOR, defFilters.color, filters.color, "g")
-		checkFilter(list, COLOR, defFilters.color, filters.color, "b")
-		checkFilter(list, COLOR, defFilters.color, filters.color, "threshold")
+		checkFilter(list, COLOR, defFilters.color, filters.color, "r", "g", "b", "threshold")
 		checkFilter(list, L["factions"], defFilters.factions, filters.factions)
 		checkFilter(list, PET, defFilters.pet, filters.pet)
-		checkFilter(list, L["Rarity"], defFilters.mountsRarity, filters.mountsRarity, "sign")
-		checkFilter(list, L["Rarity"], defFilters.mountsRarity, filters.mountsRarity, "value")
-		checkFilter(list, L["Chance of summoning"], defFilters.mountsWeight, filters.mountsWeight, "sign")
-		checkFilter(list, L["Chance of summoning"], defFilters.mountsWeight, filters.mountsWeight, "weight")
-		checkFilter(list, L["tags"], defFilters.tags, filters.tags, "noTag")
-		checkFilter(list, L["tags"], defFilters.tags, filters.tags, "withAllTags")
+		checkFilter(list, L["Rarity"], defFilters.mountsRarity, filters.mountsRarity, "sign", "value")
+		checkFilter(list, L["Chance of summoning"], defFilters.mountsWeight, filters.mountsWeight, "sign", "weight")
+		checkFilter(list, L["tags"], defFilters.tags, filters.tags, "noTag", "withAllTags")
 		for tag, value in pairs(filters.tags.tags) do
 			if defFilters.tags.tags[tag] ~= value[2] then
 				add(list, L["tags"], defFilters.tags.tags, filters.tags.tags)
@@ -3434,20 +3430,20 @@ end
 
 
 function journal:updateMountsList()
-	if self.mountUpdateHold then return end
+	if self.mountListUpdateHold then return end
 	local utime = GetTime()
-	if utime - self.lastMountUpdate < .1 then
-		self.mountUpdateHold = true
+	if utime - self.lastMountListUpdate < .1 then
+		self.mountListUpdateHold = true
 		local doNotHideMenu = self.tags.doNotHideMenu
 		C_Timer.After(.1, function()
-			self.mountUpdateHold = false
+			self.mountListUpdateHold = false
 			self.tags.doNotHideMenu = doNotHideMenu
 			self:updateScrollMountList()
 			self.tags.doNotHideMenu = nil
 		end)
 		return
 	end
-	self.lastMountUpdate = utime
+	self.lastMountListUpdate = utime
 
 	local filters, newMounts, tags, pets, getMountInfo = mounts.filters, newMounts, self.tags, ns.pets, util.getMountInfo
 	local sources, factions, pet, expansions, color = filters.sources, filters.factions, filters.pet, filters.expansions, filters.color
