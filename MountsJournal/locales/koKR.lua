@@ -84,6 +84,7 @@ L["PET_2"] = "무작위 애완동물과 함께"
 L["PET_3"] = "애완동물과 함께"
 L["PET_4"] = "애완동물 없이"
 L["expansions"] = "확장팩"
+L["Tolerance"] = "Tolerance" -- missing
 L["Rarity"] = "희귀도"
 L["Receipt date"] = "수령 날짜"
 L["Travel time"] = "여행 시간"

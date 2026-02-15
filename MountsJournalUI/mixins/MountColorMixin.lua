@@ -1,5 +1,6 @@
-local addon, ns = ...
+local _, ns = ...
 local L = ns.L
+local floor = math.floor
 
 
 local onColorSelect = function(colorPicker, r,g,b)
@@ -7,12 +8,11 @@ local onColorSelect = function(colorPicker, r,g,b)
 	colorPicker.valueThumb:Show()
 	local parent = colorPicker:GetParent()
 	parent.curColor:SetColorTexture(r,g,b)
-	parent.hexBox:SetText(CreateColor(r,g,b):GenerateHexColorNoAlpha())
+	parent.hexBox:SetText(("%.2x%.2x%.2x"):format(floor(r*255+.5), floor(g*255+.5), floor(b*255+.5)))
 	local color = ns.mounts.filters.color
 	color.r = r
 	color.g = g
 	color.b = b
-	ns.mounts.filters.color = color
 	ns.journal:updateMountsList()
 end
 
@@ -52,7 +52,7 @@ function MJMountColorMixin:onLoad()
 	end)
 
 	-- THRESHOLD
-	self.threshold:setText(L["Threshold"])
+	self.threshold:setText(L["Tolerance"])
 	self.threshold:setMinMax(0, 100)
 	self.threshold:setOnChanged(function(threshold, value)
 		local color = ns.mounts.filters.color

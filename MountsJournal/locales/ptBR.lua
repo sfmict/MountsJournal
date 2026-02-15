@@ -84,6 +84,7 @@ L["PET_2"] = "With Random Pet" -- missing
 L["PET_3"] = "With Pet" -- missing
 L["PET_4"] = "Without Pet" -- missing
 L["expansions"] = "Expansões"
+L["Tolerance"] = "Tolerance" -- missing
 L["Rarity"] = "Rarity" -- missing
 L["Receipt date"] = "Receipt date" -- missing
 L["Travel time"] = "Travel time" -- missing

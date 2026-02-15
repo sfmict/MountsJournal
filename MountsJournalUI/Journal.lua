@@ -3430,15 +3430,16 @@ end
 
 
 function journal:updateMountsList()
-	if self.mountListUpdateHold then return end
+	if self.mountListUpdatePending then return end
 	local utime = GetTime()
-	if utime - self.lastMountListUpdate < .1 then
-		self.mountListUpdateHold = true
+	local timeSinceLastUpdate = utime - self.lastMountListUpdate
+	if timeSinceLastUpdate < .2 then
+		self.mountListUpdatePending = true
 		local doNotHideMenu = self.tags.doNotHideMenu
-		C_Timer.After(.1, function()
-			self.mountListUpdateHold = false
+		C_Timer.After(.2 - timeSinceLastUpdate, function()
+			self.mountListUpdatePending = false
 			self.tags.doNotHideMenu = doNotHideMenu
-			self:updateScrollMountList()
+			self:updateMountsList()
 			self.tags.doNotHideMenu = nil
 		end)
 		return
