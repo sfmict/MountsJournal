@@ -23,7 +23,7 @@ jobs:
         path: .mountColors
 
     - name: color db generation
-      run: node .mountColors/genDB.js
+      run: cd ".mountColors" && node genDB.js
 
     - name: download rarity tool
       uses: actions/checkout@v4
