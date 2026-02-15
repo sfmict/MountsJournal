@@ -44,7 +44,7 @@ jobs:
         path: my-tools
 
     - name: install packages
-      run: cd "my-tools" && npm ci --omit=dev
+      run: cd "my-tools" && npm install
 
     - name: files
       run: node my-tools/packager.js
