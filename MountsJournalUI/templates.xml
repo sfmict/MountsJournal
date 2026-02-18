@@ -5,7 +5,6 @@
 	<Script file="mixins/CompanionMixin.lua"/>
 	<Script file="mixins/MountEquipmentMixin.lua"/>
 	<Script file="mixins/DynamicFlightMixin.lua"/>
-	<Script file="mixins/MountColorMixin.lua"/>
 
 	<CheckButton name="MJUseMountsJournalButtonTemplate" motionScriptsWhileDisabled="true" inherits="MJCheckButtonTemplate" virtual="true">
 		<Size x="25" y="24"/>
@@ -1139,14 +1138,14 @@
 				</Frames>
 			</Frame>
 
-			<Frame parentKey="mountColor" mixin="MJMountColorMixin" hidden="true">
-				<Size x="280" y="200"/>
+			<Frame parentKey="mountColor" hidden="true">
+				<Size x="283" y="206"/>
 				<Layers>
 					<Layer level="ARTWORK">
 						<Texture parentKey="curColor">
 							<Size x="47" y="47"/>
 							<Anchors>
-								<Anchor point="TOPRIGHT" x="-8" y="-8"/>
+								<Anchor point="TOPRIGHT" x="-7" y="-7"/>
 							</Anchors>
 							<Color r="1.0" g="1.0" b="1.0" a="1.0"/>
 						</Texture>
@@ -1156,7 +1155,7 @@
 					<ColorSelect parentKey="colorPicker">
 						<Size x="200" y="142"/>
 						<Anchors>
-							<Anchor point="TOPLEFT"/>
+							<Anchor point="TOPLEFT" x="6"/>
 						</Anchors>
 						<ColorWheelTexture parentKey="wheel">
 							<Size x="128" y="128"/>
@@ -1179,16 +1178,16 @@
 							<TexCoords left="0.25" right="1.0" top="0" bottom="0.875"/>
 						</ColorValueThumbTexture>
 					</ColorSelect>
-					<EditBox parentKey="hexBox" inherits="InputBoxInstructionsTemplate" mixin="ColorPickerHexBoxMixin" autoFocus="false" bytes="7">
-						<Size x="73" y="22"/>
+					<EditBox parentKey="hexBox" inherits="MJEditBoxTemplate" bytes="7">
+						<Size x="70" y="17"/>
 						<Anchors>
-							<Anchor point="BOTTOMLEFT" relativeKey="$parent.colorPicker" relativePoint="BOTTOMRIGHT" x="1" y="6"/>
+							<Anchor point="BOTTOMLEFT" relativeKey="$parent.colorPicker" relativePoint="BOTTOMRIGHT" y="7"/>
 						</Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
 								<FontString parentKey="hash" inherits="GameFontNormalLarge" text="#">
 									<Anchors>
-										<Anchor point="LEFT"/>
+										<Anchor point="LEFT" x="1"/>
 									</Anchors>
 									<Color r="0.6" g="0.6" b="0.6" />
 								</FontString>
@@ -1197,21 +1196,16 @@
 					</EditBox>
 					<Frame parentKey="threshold" inherits="MJSliderFrameTemplate" hidden="false">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeKey="$parent.colorPicker" relativePoint="BOTTOMLEFT"/>
-							<Anchor point="RIGHT"/>
+							<Anchor point="TOPLEFT" relativeKey="$parent.colorPicker" relativePoint="BOTTOMLEFT" x="-2"/>
+							<Anchor point="RIGHT" x="-6"/>
 						</Anchors>
 					</Frame>
 					<Button parentKey="reset" text="RESET" inherits="UIPanelButtonTemplate">
 						<Anchors>
-							<Anchor point="TOPLEFT" relativeKey="$parent.threshold" relativePoint="BOTTOMLEFT" x="4" y="-4"/>
+							<Anchor point="TOPLEFT" relativeKey="$parent.threshold" relativePoint="BOTTOMLEFT" x="4" y="-6"/>
 						</Anchors>
 					</Button>
 				</Frames>
-				<Scripts>
-					<OnLoad method="onLoad"/>
-					<OnShow method="onShow"/>
-					<OnHide method="onHide"/>
-				</Scripts>
 			</Frame>
 
 			<Frame parentKey="settingsBackground" inherits="MJOptionBackgroundTemplate" hidden="true">

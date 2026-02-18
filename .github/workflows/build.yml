@@ -11,12 +11,12 @@ jobs:
 
     steps:
     - name: checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
     - name: download color tool
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         repository: sfmict/MountColors
         token: ${{ secrets.OAUTH }}
@@ -29,7 +29,7 @@ jobs:
         git -C $GITHUB_WORKSPACE add -f MountsJournalUI/database/ColorDB.lua
 
     - name: download rarity tool
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         repository: sfmict/MountRarity
         token: ${{ secrets.OAUTH }}
@@ -40,7 +40,7 @@ jobs:
       run: node .mountRarity/getRarity.js
 
     - name: download packager
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         repository: sfmict/js_packager
         token: ${{ secrets.OAUTH }}
