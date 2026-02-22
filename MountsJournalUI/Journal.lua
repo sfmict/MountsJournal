@@ -6,7 +6,6 @@ local next, pairs, ipairs, type, select, math, tonumber = next, pairs, ipairs, t
 local wipe, tinsert, sort, concat, select = wipe, table.insert, table.sort, table.concat, select
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
 ns.journal = util.setEventsMixin(journal)
--- journal.mountTypes = util.mountTypes
 
 
 local MOUNT_ACHIEVEMENT_CATEGORY = 15248
@@ -429,7 +428,6 @@ function journal:init()
 	end)
 	summon1:SetScript("OnEnter", function(btn)
 		GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
-		GameTooltip_SetTitle(GameTooltip, ("%s \"%s %d\""):format(ns.addon, SUMMONS, btn.id))
 		GameTooltip_SetTitle(GameTooltip, ("%s \"%s %d\""):format(ns.addon, SUMMONS, btn.id))
 		if ns.macroFrame.currentRuleSet[btn.id].altMode then
 			GameTooltip_AddNormalLine(GameTooltip, L["SecondMountTooltipDescription"]:gsub("\n\n", "\n"))

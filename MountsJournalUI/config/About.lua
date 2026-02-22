@@ -60,6 +60,7 @@ aboutConfig:SetScript("OnShow", function(self)
 
 	local langs, last = {
 		{"deDE", "SlayerEGT, EinPallux , Flammenengel92, scienetic, fredundaunted"},
+		{"esES", "VirgilioEsparda"},
 		{"esMX", "Pedrorco"},
 		{"frFR", "idrael17, 6urvan, EinPallux, macumbafeh, Zazou, Braincell1980"},
 		{"koKR", "jusuya"},
