@@ -304,6 +304,8 @@ ruleEditor:HookScript("OnShow", function(self)
 		panel.SetPoint(leftInset, "LEFT", filtersPanel, 0, 0)
 		panel.SetPoint(leftInset, "RIGHT", filtersPanel, -17, 0)
 		panel.SetPoint(leftInset, "BOTTOM", 0, 6)
+
+		ns.journal:updateFilterNavBar()
 		ns.journal.tags.selectFunc = function(spellID)
 			self.mountSelect:Hide()
 			self.data.action[2] = spellID
@@ -422,20 +424,42 @@ function ruleEditor:ruleCheck()
 end
 
 
-function ruleEditor:getCondTooltip(condData)
-	local cond = conds[condData[2]]
+function ruleEditor:getCondTooltip(btnData)
+	local cond = conds[btnData[2]]
 	return cond.getValueDescription and cond:getValueDescription()
 end
 
 
 function ruleEditor:openCondValueMenu(btn, btnData)
-	local function func(f)
-		btnData[3] = f.value
-		btn:SetText(rules:getCondValueText(btnData))
-		self:ruleCheck()
+	local cond, value, func = conds[btnData[2]]
+
+	if cond.sort then
+		value = type(btnData[3]) == "table" and btnData[3] or {btnData[3]}
+		func = function(f, _,_, checked)
+			if checked then
+				value[#value + 1] = f.value
+			else
+				tDeleteItem(value, f.value)
+			end
+			if #value > 0 then
+				btnData[3] = #value > 1 and value or value[1]
+			else
+				btnData[3] = nil
+			end
+			cond.sort(value)
+			btn:SetText(rules:getCondValueText(btnData))
+			self:ruleCheck()
+		end
+	else
+		value = btnData[3]
+		func = function(f)
+			btnData[3] = f.value
+			btn:SetText(rules:getCondValueText(btnData))
+			self:ruleCheck()
+		end
 	end
 
-	local list = conds[btnData[2]]:getValueList(btnData[3], func, self.menu)
+	local list = cond:getValueList(value, func, self.menu)
 	self.menu:ddToggle(1, list, btn)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 end
@@ -499,6 +523,7 @@ function ruleEditor:setCondValueOption(panel, btnData, setFocus)
 		panel.optionValue:SetFocus()
 	end
 	panel.optionValue.tooltip = self:getCondTooltip(btnData)
+	panel.optionValue.multi = cond.sort and true
 end
 
 

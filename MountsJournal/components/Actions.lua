@@ -349,7 +349,8 @@ end
 
 actions.mount.condText = "(not profileLoad or profileLoad == true) and not self.useMount"
 
-function actions.mount:getFuncText(value)
+function actions.mount:getFuncText(value, addKey)
+	addKey("local GetTime = GetTime")
 	return ([[
 		%s
 		-- EXIT VEHICLE
@@ -365,8 +366,7 @@ function actions.mount:getFuncText(value)
 		elseif not (noMacro and self.additionalMounts[%s]) then
 			self.useMount = %s
 		end
-	]]):format(macroFrame.classDismount or "", value, value),
-	{"GetTime"}
+	]]):format(macroFrame.classDismount or "", value, value)
 end
 
 
@@ -382,7 +382,8 @@ end
 
 actions.tmount.condText = actions.mount.condText
 
-function actions.tmount:getFuncText()
+function actions.tmount:getFuncText(_, addKey)
+	addKey("local GetTime = GetTime")
 	return ([[
 		%s
 		-- EXIT VEHICLE
@@ -398,8 +399,7 @@ function actions.tmount:getFuncText()
 		elseif self.sFlags.targetMount and not (noMacro and self.sFlags.targetMountAdditional) then
 			self.useMount = self.sFlags.targetMount
 		end
-	]]):format(macroFrame.classDismount or ""),
-	{"GetTime"}
+	]]):format(macroFrame.classDismount or "")
 end
 
 
@@ -412,7 +412,8 @@ function actions.dmount:getIcon()
 	return 237700
 end
 
-function actions.dmount:getFuncText()
+function actions.dmount:getFuncText(_, addKey)
+	addKey("local GetTime = GetTime")
 	return ([[
 		%s
 		-- EXIT VEHICLE
@@ -425,8 +426,7 @@ function actions.dmount:getFuncText()
 			end
 			return ""
 		end
-	]]):format(macroFrame.classDismount or ""),
-	{"GetTime"}
+	]]):format(macroFrame.classDismount or "")
 end
 
 
@@ -612,12 +612,12 @@ end
 actions.snip.getValueText = conds.snip.getValueText
 actions.snip.getValueList = conds.snip.getValueList
 
-function actions.snip:getFuncText(value)
+function actions.snip:getFuncText(value, addKey)
+	addKey("local type = type")
 	return ([[
 		local text = self:callSnippet('%s')
 		return type(text) == "string" and text or nil
-	]]):format(value:gsub("['\\]", "\\%1")),
-	{"type"}
+	]]):format(value:gsub("['\\]", "\\%1"))
 end
 
 
@@ -673,16 +673,6 @@ function actions:getMenuList(value, func)
 end
 
 
-function actions:getFuncText(action, keys)
-	local text, vars = self[action[1]]:getFuncText(action[2])
-	if vars then
-		for i = 1, #vars do
-			local var = vars[i]
-			if keys[var] ~= 1 then
-				keys[var] = 1
-				keys[#keys + 1] = var
-			end
-		end
-	end
-	return text
+function actions:getFuncText(action, addKey)
+	return self[action[1]]:getFuncText(action[2], addKey)
 end

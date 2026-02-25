@@ -269,6 +269,39 @@ local function updateGlobal(self)
 			end
 		end
 	end
+
+	-- if < 12.0.6 GLOBAL
+	if compareVersion("12.0.6", self.globalDB.lastAddonVersion) then
+		local instances = {}
+		local skipped, instanceID = 0, 0
+		while skipped < 200 do
+			local name = GetRealZoneText(instanceID)
+			if name and name ~= "" then
+				if instances[name] == nil then
+					instances[name] = instanceID
+				end
+				skipped = 0
+			else
+				skipped = skipped + 1
+			end
+			instanceID = instanceID + 1
+		end
+
+		local function update(rules)
+			for _, rule in ipairs(rules) do
+				for _, cond in ipairs(rule) do
+					if cond[2] == "instance" then
+						cond[3] = tonumber(cond[3]) or instances[cond[3]] or 0
+					end
+				end
+				if rule.rules then update(rule.rules) end
+			end
+		end
+
+		for _, ruleSet in ipairs(self.globalDB.ruleSets) do
+			for _, rules in ipairs(ruleSet) do update(rules) end
+		end
+	end
 end
 
 
@@ -396,7 +429,7 @@ function ns.mounts:setOldChanges()
 
 	local currentVersion = C_AddOns.GetAddOnMetadata(addon, "Version")
 	--@do-not-package@
-	if currentVersion == "@project-version@" then currentVersion = "v12.0.4" end
+	if currentVersion == "@project-version@" then currentVersion = "v12.0.6" end
 	--@end-do-not-package@
 
 	if not self.charDB.lastAddonVersion then self.charDB.lastAddonVersion = currentVersion end

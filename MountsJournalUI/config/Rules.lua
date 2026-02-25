@@ -1,6 +1,7 @@
 local addon, ns = ...
 local L, util, mounts, macroFrame, conds, actions, dataDialog = ns.L, ns.util, ns.mounts, ns.macroFrame, ns.conditions, ns.actions, ns.dataDialog
 local strcmputf8i = strcmputf8i
+local multiNum = NIGHT_FAE_BLUE_COLOR:WrapTextInColorCode("[%s]").." (%s)"
 local rules = CreateFrame("FRAME", "MountsJournalConfigRules")
 ns.ruleConfig = rules
 rules:Hide()
@@ -285,10 +286,7 @@ rules:SetScript("OnShow", function(self)
 		then
 			GameTooltip:SetOwner(btn, "ANCHOR_NONE")
 			GameTooltip:SetPoint("BOTTOMLEFT", btn, "BOTTOMRIGHT")
-			GameTooltip:SetText(L["Conditions"]..":")
-			for i = 1, #btn.data do
-				GameTooltip:AddLine(self:getCondText(btn.data[i]))
-			end
+			self:setCondTooltip(btn.data)
 			GameTooltip:Show()
 		end
 	end
@@ -829,7 +827,11 @@ end
 
 function rules:getCondValueText(cond)
 	if cond[3] == nil then return "" end
-	return conds[cond[2]]:getValueText(cond[3]) or RED_FONT_COLOR:WrapTextInColorCode(tostringall(cond[3]))
+	local multi = conds[cond[2]].sort
+	local value = multi and type(cond[3]) ~= "table" and {cond[3]} or cond[3]
+	local text = conds[cond[2]]:getValueText(value) or RED_FONT_COLOR:WrapTextInColorCode(tostringall(cond[3]))
+	if multi and type(cond[3]) == "table" then text = multiNum:format(#cond[3], text) end
+	return text
 end
 
 
@@ -857,10 +859,25 @@ function rules:getCondText(cond)
 	if value == "" then
 		return condText
 	else
-		return ("%s:|r |cffeeeeee%s|r"):format(condText, value)
+		return ("%s:|r |cffeeeeee%s|r"):format(condText, value), condText, value
 	end
 end
 
+function rules:setCondTooltip(rule)
+	GameTooltip:SetText(L["Conditions"]..":")
+	for i, cond in ipairs(rule) do
+		local condText, name, value = self:getCondText(cond)
+		if name == nil then
+			GameTooltip:AddLine(condText)
+		elseif conds[cond[2]].sort and type(cond[3]) == "table" then
+			for j, v in ipairs({(";"):split(value:match("%((.*)%)"))}) do
+				GameTooltip:AddDoubleLine(j == 1 and name..":|r" or " ", ("|cffeeeeee%s|r"):format(v:trim()))
+			end
+		else
+			GameTooltip:AddDoubleLine(name..":|r", ("|cffeeeeee%s|r"):format(value))
+		end
+	end
+end
 
 function rules:getActionText(rule, ...)
 	local action = rule.action

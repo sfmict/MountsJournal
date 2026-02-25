@@ -1,12 +1,31 @@
 local _, ns = ...
-local L, util = ns.L, ns.util
-local strcmputf8i, concat, C_Secrets = strcmputf8i, table.concat, C_Secrets
+local L, util, macroFrame = ns.L, ns.util, ns.macroFrame
+local strcmputf8i, type, concat, strconcat, C_Secrets = strcmputf8i, type, table.concat, string.concat, C_Secrets
 local GetSpellAuraSecrecy, GetSpellCooldownSecrecy = C_Secrets.GetSpellAuraSecrecy, C_Secrets.GetSpellCooldownSecrecy
 local playerGuid = UnitGUID("player")
 local ltl = LibStub("LibThingsLoad-1.0")
 local conds = {}
 ns.conditions = conds
 ns.RULE_ICON_SIZE = 14
+
+
+local function getManyToOneString(values, isNumeric, curValue, addKey, ...)
+	if type(values) == "table" then
+		local var = ("_"):join("var", ...)
+		if isNumeric then
+			addKey(strconcat("local ", var, " = {[", concat(values, "]=true,["), "]=true}"))
+		else
+			addKey(strconcat("local ", var, " = {['", concat(values, "']=true,['"), "']=true}"))
+		end
+		return ("%s[%s]"):format(var, curValue)
+	else
+		if isNumeric then
+			return ("(%s == %s)"):format(curValue, values)
+		else
+			return ("(%s == '%s')"):format(curValue, values)
+		end
+	end
+end
 
 
 ---------------------------------------------------
@@ -48,27 +67,37 @@ function conds.mod:getValueList(value, func)
 	return list
 end
 
-function conds.mod:getFuncText(value)
+function conds.mod:getFuncText(value, addKey)
 	if value == "any" then
-		return "IsModifierKeyDown()", "IsModifierKeyDown"
+		addKey("local IsModifierKeyDown = IsModifierKeyDown")
+		return "IsModifierKeyDown()"
 	elseif value == "alt" then
-		return "IsAltKeyDown()", "IsAltKeyDown"
+		addKey("local IsAltKeyDown = IsAltKeyDown")
+		return "IsAltKeyDown()"
 	elseif value == "ctrl" then
-		return "IsControlKeyDown()", "IsControlKeyDown"
+		addKey("local IsControlKeyDown = IsControlKeyDown")
+		return "IsControlKeyDown()"
 	elseif value == "shift" then
-		return "IsShiftKeyDown()", "IsShiftKeyDown"
+		addKey("local IsShiftKeyDown = IsShiftKeyDown")
+		return "IsShiftKeyDown()"
 	elseif value == "lalt" then
-		return "IsLeftAltKeyDown()", "IsLeftAltKeyDown"
+		addKey("local IsLeftAltKeyDown = IsLeftAltKeyDown")
+		return "IsLeftAltKeyDown()"
 	elseif value == "ralt" then
-		return "IsRightAltKeyDown()", "IsRightAltKeyDown"
+		addKey("local IsRightAltKeyDown = IsRightAltKeyDown")
+		return "IsRightAltKeyDown()"
 	elseif value == "lctrl" then
-		return "IsLeftControlKeyDown()", "IsLeftControlKeyDown"
+		addKey("local IsLeftControlKeyDown = IsLeftControlKeyDown")
+		return "IsLeftControlKeyDown()"
 	elseif value == "rctrl" then
-		return "IsRightoControlKeyDown()", "IsRightoControlKeyDown"
+		addKey("local IsRightoControlKeyDown = IsRightoControlKeyDown")
+		return "IsRightoControlKeyDown()"
 	elseif value == "lshift" then
-		return "IsLeftShiftKeyDown()", "IsLeftShiftKeyDown"
+		addKey("local IsLeftShiftKeyDown = IsLeftShiftKeyDown")
+		return "IsLeftShiftKeyDown()"
 	elseif value == "rshift" then
-		return "IsRightShiftKeyDown()", "IsRightShiftKeyDown"
+		addKey("local IsRightShiftKeyDown = IsRightShiftKeyDown")
+		return "IsRightShiftKeyDown()"
 	else
 		return "false"
 	end
@@ -79,38 +108,61 @@ end
 -- btn MOUSE BUTTON
 conds.btn = {}
 conds.btn.text = L["Mouse button"]
+conds.btn.sort = sort
 
-function conds.btn:getValueText(value)
-	return _G["KEY_BUTTON"..value]
+function conds.btn:getValueText(values)
+	local names = {}
+	for i, value in ipairs(values) do
+		names[i] = _G["KEY_BUTTON"..value]
+	end
+	return concat(names, "; ")
 end
 
-function conds.btn:getValueList(value, func)
+function conds.btn:getValueList(values, func)
 	local list = {}
+	local checked = function(btn) return tContains(values, btn.value) end
+
 	local i = 1
-	local text = self:getValueText(i)
+	local text = _G["KEY_BUTTON"..i]
 	while text do
 		list[i] = {
+			keepShownOnClick = true,
+			isNotRadio = true,
 			text = text,
 			value = i,
 			func = func,
-			checked = i == value,
+			checked = checked,
 		}
 		i = i + 1
-		text = self:getValueText(i)
+		text = _G["KEY_BUTTON"..i]
 	end
+
 	return list
 end
 
-function conds.btn:getFuncText(value)
+local function getButtonKey(value)
 	if value == 1 then
-		return "button == 'LeftButton'"
+		return "LeftButton"
 	elseif value == 2 then
-		return "button == 'RightButton'"
+		return "RightButton"
 	elseif value == 3 then
-		return "button == 'MiddleButton'"
+		return "MiddleButton"
 	else
-		return ("button == 'Button%s'"):format(value)
+		return "Button"..value
 	end
+end
+
+function conds.btn:getFuncText(values, addKey, _, ...)
+	local buttons
+	if type(values) == "table" then
+		buttons = {}
+		for i = 1, #values do
+			buttons[i] = getButtonKey(values[i])
+		end
+	else
+		buttons = getButtonKey(values)
+	end
+	return getManyToOneString(buttons, false, "button", addKey, ...)
 end
 
 
@@ -161,8 +213,9 @@ function conds.mcond:getValueText(value)
 	return value
 end
 
-function conds.mcond:getFuncText(value)
-	return ("SecureCmdOptionParse('%s')"):format(value:gsub("['\\]", "\\%1")), "SecureCmdOptionParse"
+function conds.mcond:getFuncText(value, addKey)
+	addKey("local SecureCmdOptionParse = SecureCmdOptionParse")
+	return ("SecureCmdOptionParse('%s')"):format(value:gsub("['\\]", "\\%1"))
 end
 
 
@@ -170,25 +223,33 @@ end
 -- class
 conds.class = {}
 conds.class.text = CLASS
+conds.class.sort = sort
 
-function conds.class:getValueText(value)
-	local localized, className = GetClassInfo(value)
-	if localized then
-		local classColor = C_ClassColor.GetClassColor(className)
-		local t = CLASS_ICON_TCOORDS[className]
-		local size = 1024
-		return CreateTextureMarkup("Interface/Glues/CharacterCreate/UI-CharacterCreate-Classes", size, size, ns.RULE_ICON_SIZE, ns.RULE_ICON_SIZE, t[1], t[2], t[3], t[4])..classColor:WrapTextInColorCode(localized)
+function conds.class:getValueText(values)
+	local names = {}
+	for i, value in ipairs(values) do
+		local localized, className = GetClassInfo(value)
+		if localized then
+			local classColor = C_ClassColor.GetClassColor(className)
+			local t = CLASS_ICON_TCOORDS[className]
+			local size = 1024
+			names[#names + 1] = CreateTextureMarkup("Interface/Glues/CharacterCreate/UI-CharacterCreate-Classes", size, size, ns.RULE_ICON_SIZE, ns.RULE_ICON_SIZE, t[1], t[2], t[3], t[4])..classColor:WrapTextInColorCode(localized)
+		end
 	end
+	return concat(names, "; ")
 end
 
-function conds.class:getValueList(value, func)
+function conds.class:getValueList(values, func)
 	local list = {}
+	local checked = function(btn) return tContains(values,btn.value) end
 
 	for i = 1, GetNumClasses() do
 		local localized, className, id = GetClassInfo(i)
 		local classColor = C_ClassColor.GetClassColor(className)
 		local t = CLASS_ICON_TCOORDS[className]
 		list[i] = {
+			keepShownOnClick = true,
+			isNotRadio = true,
 			text = classColor:WrapTextInColorCode(localized),
 			icon = "Interface/Glues/CharacterCreate/UI-CharacterCreate-Classes",
 			iconInfo = {
@@ -199,16 +260,23 @@ function conds.class:getValueList(value, func)
 			},
 			value = id,
 			func = func,
-			checked = id == value,
+			checked = checked,
 		}
 	end
 
 	return list
 end
 
-function conds.class:getFuncText(value)
+function conds.class:getFuncText(values)
 	local _,_, id = UnitClass("player")
-	return id == value and "true" or "false"
+	if type(values) == "table" then
+		for i = 1, #values do
+			if id == values[i] then return "true" end
+		end
+	elseif id == values then
+		return "true"
+	end
+	return "false"
 end
 
 
@@ -217,17 +285,34 @@ end
 conds.spec = {}
 conds.spec.text = SPECIALIZATION
 
-function conds.spec:getValueText(value)
-	local _, name, _, specIcon, _, className, class = GetSpecializationInfoByID(value)
-	if name then
-		local classColor = C_ClassColor.GetClassColor(className)
-		local icon = CreateSimpleTextureMarkup(specIcon, ns.RULE_ICON_SIZE)
-		return ("%s%s - %s"):format(icon, classColor:WrapTextInColorCode(class), name)
+function conds.spec:getValueText(values)
+	local names = {}
+	for i, value in ipairs(values) do
+		local _, name, _, specIcon, _, className, class = GetSpecializationInfoByID(value)
+		if name then
+			local classColor = C_ClassColor.GetClassColor(className)
+			local icon = CreateSimpleTextureMarkup(specIcon, ns.RULE_ICON_SIZE)
+			names[#names + 1] = ("%s%s - %s"):format(icon, classColor:WrapTextInColorCode(class), name)
+		end
 	end
+	return concat(names, "; ")
 end
 
-function conds.spec:getValueList(value, func)
+function conds.spec.sort(values)
+	local list, n = {}, 1
+	for i = 1, GetNumClasses() do
+		for j = 1, C_SpecializationInfo.GetNumSpecializationsForClassID(i) do
+			local id = GetSpecializationInfoForClassID(i, j)
+			list[id] = n
+			n = n + 1
+		end
+	end
+	sort(values, function(a, b) return list[a] < list[b] end)
+end
+
+function conds.spec:getValueList(values, func)
 	local list = {}
+	local checked = function(btn) return tContains(values, btn.value) end
 
 	for i = 1, GetNumClasses() do
 		for j = 1, C_SpecializationInfo.GetNumSpecializationsForClassID(i) do
@@ -235,11 +320,13 @@ function conds.spec:getValueList(value, func)
 			local _, name, _, specIcon, _, className, class = GetSpecializationInfoByID(id)
 			local classColor = C_ClassColor.GetClassColor(className)
 			list[#list + 1] = {
+				keepShownOnClick = true,
+				isNotRadio = true,
 				text = ("%s - %s"):format(classColor:WrapTextInColorCode(class), name),
 				icon = specIcon,
 				value = id,
 				func = func,
-				checked = id == value,
+				checked = checked,
 			}
 		end
 	end
@@ -247,18 +334,31 @@ function conds.spec:getValueList(value, func)
 	return list
 end
 
-function conds.spec:getFuncText(value)
-	local index
-	for i = 1, GetNumSpecializations() do
-		if value == C_SpecializationInfo.GetSpecializationInfo(i) then
-			index = i
-			break
+function conds.spec:getFuncText(values, addKey, _, ...)
+	local indexes
+
+	if type(values) == "table" then
+		indexes, num = {}, 0
+		for i = 1, GetNumSpecializations() do
+			if tContains(values, C_SpecializationInfo.GetSpecializationInfo(i)) then
+				num = num + 1
+				indexes[num] = i
+			end
 		end
+		if num == 0 then return "false"
+		elseif num == 1 then indexes = indexes[1] end
+	else
+		for i = 1, GetNumSpecializations() do
+			if values == C_SpecializationInfo.GetSpecializationInfo(i) then
+				indexes = i
+				break
+			end
+		end
+		if indexes == nil then return "false" end
 	end
-	if index then
-		return "C_SpecializationInfo.GetSpecialization() == "..index, "C_SpecializationInfo"
-	end
-	return "false"
+
+	addKey("local GetSpecialization = C_SpecializationInfo.GetSpecialization")
+	return getManyToOneString(indexes, true, "GetSpecialization()", addKey, ...)
 end
 
 
@@ -267,7 +367,7 @@ end
 conds.zt = {}
 conds.zt.text = L["Zone type"]
 
-function conds.zt:getValueText(value)
+local function getZoneTypeName(value)
 	if value == "scenario" then
 		return TRACKER_HEADER_SCENARIO
 	elseif value == "party" then
@@ -279,9 +379,22 @@ function conds.zt:getValueText(value)
 	elseif value == "pvp" then
 		return BATTLEGROUND
 	end
+	return value
 end
 
-function conds.zt:getValueList(value, func)
+function conds.zt:getValueText(values)
+	local names = {}
+	for i, value in ipairs(values) do
+		names[i] = getZoneTypeName(value)
+	end
+	return concat(names, "; ")
+end
+
+function conds.zt.sort(values)
+	sort(values, function(a, b) return strcmputf8i(getZoneTypeName(a), getZoneTypeName(b)) < 0 end)
+end
+
+function conds.zt:getValueList(values, func)
 	local zoneTypes = {
 		"scenario",
 		"party",
@@ -289,22 +402,28 @@ function conds.zt:getValueList(value, func)
 		"arena",
 		"pvp"
 	}
+	self.sort(zoneTypes)
+
 	local list = {}
+	local checked = function(btn) return tContains(values, btn.value) end
+
 	for i = 1, #zoneTypes do
 		local v = zoneTypes[i]
 		list[i] = {
-			text = self:getValueText(v),
+			keepShownOnClick = true,
+			isNotRadio = true,
+			text = getZoneTypeName(v),
 			value = v,
 			func = func,
-			checked = v == value,
+			checked = checked,
 		}
 	end
-	sort(list, function(a, b) return strcmputf8i(a.text, b.text) < 0 end)
+
 	return list
 end
 
-function conds.zt:getFuncText(value)
-	return ("self.mounts.instanceType == '%s'"):format(value)
+function conds.zt:getFuncText(values, addKey, _, ...)
+	return getManyToOneString(values, false, "self.mounts.instanceType", addKey, ...)
 end
 
 
@@ -375,8 +494,9 @@ end
 conds.falling = {}
 conds.falling.text = L["The player is falling"]
 
-function conds.falling:getFuncText()
-	return "IsFalling()", "IsFalling"
+function conds.falling:getFuncText(_, addKey)
+	addKey("local IsFalling = IsFalling")
+	return "IsFalling()"
 end
 
 
@@ -445,8 +565,9 @@ end
 conds.dead = {}
 conds.dead.text = L["The player is dead"]
 
-function conds.dead:getFuncText()
-	return "UnitIsDead('Player')", "UnitIsDead"
+function conds.dead:getFuncText(_, addKey)
+	addKey("local UnitIsDead = UnitIsDead")
+	return "UnitIsDead('Player')"
 end
 
 
@@ -455,8 +576,9 @@ end
 conds.rest = {}
 conds.rest.text = L["The player is resting"]
 
-function conds.rest:getFuncText()
-	return "IsResting()", "IsResting"
+function conds.rest:getFuncText(_, addKey)
+	addKey("local IsResting = IsResting")
+	return "IsResting()"
 end
 
 
@@ -465,8 +587,9 @@ end
 conds.combat = {}
 conds.combat.text = L["The player is in combat"]
 
-function conds.combat:getFuncText()
-	return "InCombatLockdown()", "InCombatLockdown"
+function conds.combat:getFuncText(_, addKey)
+	addKey("local InCombatLockdown = InCombatLockdown")
+	return "InCombatLockdown()"
 end
 
 
@@ -492,12 +615,13 @@ function conds.fs:getValueList(value, func)
 	return list
 end
 
-function conds.fs:getFuncText(value)
+function conds.fs:getFuncText(value, addKey)
 	local spellID = C_MountJournal.GetDynamicFlightModeSpellID()
+	addKey("local GetSpellTexture = C_Spell.GetSpellTexture")
 	if value == 1 then
-		return ("C_Spell.GetSpellTexture(%s) ~= 5142726"):format(spellID), "C_Spell"
+		return ("(GetSpellTexture(%s) ~= 5142726)"):format(spellID)
 	else
-		return ("C_Spell.GetSpellTexture(%s) == 5142726"):format(spellID), "C_Spell"
+		return ("(GetSpellTexture(%s) == 5142726)"):format(spellID)
 	end
 end
 
@@ -558,7 +682,7 @@ function conds.hitem:getValueDisplay(value, noIcon)
 		return ("%s%s |cff808080<%s>|r"):format(icon, name, value)
 	else
 		ltl:Items(value):ThenForAll(function()
-			ns.macroFrame:event("RULE_LIST_UPDATE")
+			macroFrame:event("RULE_LIST_UPDATE")
 		end)
 	end
 end
@@ -567,8 +691,9 @@ function conds.hitem:getValueText(value)
 	return tostring(value or "")
 end
 
-function conds.hitem:getFuncText(value)
-	return ("C_Item.GetItemCount(%s) > 0"):format(value), "C_Item"
+function conds.hitem:getFuncText(value, addKey)
+	addKey("local GetItemCount = C_Item.GetItemCount")
+	return ("(GetItemCount(%s) > 0)"):format(value)
 end
 
 
@@ -584,8 +709,9 @@ conds.ritem.receiveDrag = conds.hitem.receiveDrag
 conds.ritem.getValueDisplay = conds.hitem.getValueDisplay
 conds.ritem.getValueText = conds.hitem.getValueText
 
-function conds.ritem:getFuncText(value)
-	return ("C_Container.GetItemCooldown(%s) == 0"):format(value), "C_Container"
+function conds.ritem:getFuncText(value, addKey)
+	addKey("local GetItemCooldown = C_Container.GetItemCooldown")
+	return ("(GetItemCooldown(%s) == 0)"):format(value)
 end
 
 
@@ -657,15 +783,15 @@ conds.rspell.receiveDrag = conds.kspell.receiveDrag
 conds.rspell.getValueDisplay = conds.kspell.getValueDisplay
 conds.rspell.getValueText = conds.hitem.getValueText
 
-function conds.rspell:getFuncText(value, isNot)
+function conds.rspell:getFuncText(value, _, isNot)
 	local secrecy = GetSpellCooldownSecrecy(value)
 	if secrecy == 2 then
 		local notText = isNot and "not " or ""
-		return ("notSCooldowns and %sself:isSpellReady(%s)"):format(notText, value), nil, true
+		return ("notSCooldowns and %sself:isSpellReady(%s)"):format(notText, value), true
 	elseif secrecy == 0 then
 		return ("self:isSpellReady(%s)"):format(value)
 	end
-	return "false", nil, true
+	return "false", true
 end
 
 
@@ -681,8 +807,9 @@ conds.uspell.receiveDrag = conds.kspell.receiveDrag
 conds.uspell.getValueDisplay = conds.kspell.getValueDisplay
 conds.uspell.getValueText = conds.hitem.getValueText
 
-function conds.uspell:getFuncText(value)
-	return ("C_Spell.IsSpellUsable(%s)"):format(value), "C_Spell"
+function conds.uspell:getFuncText(value, addKey)
+	addKey("local IsSpellUsable = C_Spell.IsSpellUsable")
+	return ("IsSpellUsable(%s)"):format(value)
 end
 
 
@@ -717,15 +844,15 @@ conds.hbuff.receiveDrag = conds.kspell.receiveDrag
 conds.hbuff.getValueDisplay = conds.kspell.getValueDisplay
 conds.hbuff.getValueText = conds.hitem.getValueText
 
-function conds.hbuff:getFuncText(value, isNot)
+function conds.hbuff:getFuncText(value, _, isNot)
 	local secrecy = GetSpellAuraSecrecy(value)
 	if secrecy == 2 then
 		local notText = isNot and "not " or ""
-		return ("notSAuras and %sself:hasPlayerBuff(%s)"):format(notText, value), nil, true
+		return ("notSAuras and %sself:hasPlayerBuff(%s)"):format(notText, value), true
 	elseif secrecy == 0 then
 		return ("self:hasPlayerBuff(%s)"):format(value)
 	end
-	return "false", nil, true
+	return "false", true
 end
 
 
@@ -742,15 +869,15 @@ conds.hdebuff.receiveDrag = conds.kspell.receiveDrag
 conds.hdebuff.getValueDisplay = conds.kspell.getValueDisplay
 conds.hdebuff.getValueText = conds.hitem.getValueText
 
-function conds.hdebuff:getFuncText(value, isNot)
+function conds.hdebuff:getFuncText(value, _, isNot)
 	local secrecy = GetSpellAuraSecrecy(value)
 	if secrecy == 2 then
 		local notText = isNot and "not " or ""
-		return ("notSAuras and %sself:hasPlayerDebuff(%s)"):format(notText, value), nil, true
+		return ("notSAuras and %sself:hasPlayerDebuff(%s)"):format(notText, value), true
 	elseif secrecy == 0 then
 		return ("self:hasPlayerDebuff(%s)"):format(value)
 	end
-	return "false", nil, true
+	return "false", true
 end
 
 
@@ -766,8 +893,9 @@ end
 
 conds.qc.getValueText = conds.hitem.getValueText
 
-function conds.qc:getFuncText(value)
-	return ("C_QuestLog.IsQuestFlaggedCompleted(%s)"):format(value), "C_QuestLog"
+function conds.qc:getFuncText(value, addKey)
+	addKey("local IsQuestFlaggedCompleted = C_QuestLog.IsQuestFlaggedCompleted")
+	return ("IsQuestFlaggedCompleted(%s)"):format(value)
 end
 
 
@@ -780,8 +908,9 @@ conds.qca.isNumeric = true
 conds.qca.getValueDescription = conds.qc.getValueDescription
 conds.qca.getValueText = conds.hitem.getValueText
 
-function conds.qca:getFuncText(value)
-	return ("C_QuestLog.IsQuestFlaggedCompletedOnAccount(%s)"):format(value), "C_QuestLog"
+function conds.qca:getFuncText(value, addKey)
+	addKey("local IsQuestFlaggedCompletedOnAccount = C_QuestLog.IsQuestFlaggedCompletedOnAccount")
+	return ("IsQuestFlaggedCompletedOnAccount(%s)"):format(value)
 end
 
 
@@ -807,9 +936,10 @@ function conds.faction:getValueList(value, func)
 	return list
 end
 
-function conds.faction:getFuncText(value)
+function conds.faction:getFuncText(value, addKey)
 	local faction = PLAYER_FACTION_GROUP[value]
-	return ("UnitFactionGroup('player') == '%s'"):format(faction:gsub("['\\]", "\\%1")), "UnitFactionGroup"
+	addKey("local UnitFactionGroup = UnitFactionGroup")
+	return ("(UnitFactionGroup('player') == '%s')"):format(faction:gsub("['\\]", "\\%1"))
 end
 
 
@@ -854,31 +984,52 @@ for i = 1, #RACE_KEYS do
 	RACE_LABELS[info.clientFileString] = info.raceName
 end
 
-function conds.race:getValueText(value)
-	local atlasName = util.getRaceAtlas(value, UnitSex("Player"))
-	return CreateAtlasMarkup(atlasName, ns.RULE_ICON_SIZE, ns.RULE_ICON_SIZE)..RACE_LABELS[value]
+function conds.race:getValueText(values)
+	local names = {}
+	for i, value in ipairs(values) do
+		local atlasName = util.getRaceAtlas(value, UnitSex("Player"))
+		names[i] = CreateAtlasMarkup(atlasName, ns.RULE_ICON_SIZE, ns.RULE_ICON_SIZE)..RACE_LABELS[value]
+	end
+	return concat(names, "; ")
 end
 
-function conds.race:getValueList(value, func)
+function conds.race.sort(values)
+	sort(values, function(a,b) return strcmputf8i(RACE_LABELS[a], RACE_LABELS[b]) < 0 end)
+end
+
+function conds.race:getValueList(values, func)
 	local sex = UnitSex("Player")
+	self.sort(RACE_KEYS)
+
 	local list = {}
-	sort(RACE_KEYS, function(a,b) return strcmputf8i(RACE_LABELS[a], RACE_LABELS[b]) < 0 end)
+	local checked = function(btn) return tContains(values, btn.value) end
+
 	for i = 1, #RACE_KEYS do
 		local v = RACE_KEYS[i]
 		list[#list + 1] = {
+			keepShownOnClick = true,
+			isNotRadio = true,
 			text = RACE_LABELS[v],
 			icon = util.getRaceAtlas(v, sex),
 			value = v,
 			func = func,
-			checked = v == value,
+			checked = checked,
 		}
 	end
+
 	return list
 end
 
-function conds.race:getFuncText(value)
+function conds.race:getFuncText(values)
 	local _, key = UnitRace("player")
-	return key == value and "true" or "false"
+	if type(values) == "table" then
+		for i = 1, #values do
+			if key == values[i] then return "true" end
+		end
+	elseif key == values then
+		return "true"
+	end
+	return "false"
 end
 
 
@@ -996,6 +1147,7 @@ end
 -- instance
 conds.instance = {}
 conds.instance.text = INSTANCE
+conds.instance.sort = sort
 
 function conds.instance:getValueDescription()
 	return {
@@ -1005,27 +1157,33 @@ function conds.instance:getValueDescription()
 	}
 end
 
-function conds.instance:getValueText(value)
-	if type(value) == "string" then return value end
-	return ("%s |cff808080<%s>|r"):format(GetRealZoneText(value), value)
+function conds.instance:getValueText(values)
+	local names = {}
+	for i, value in ipairs(values) do
+		names[i] = ("%s |cff808080<%s>|r"):format(GetRealZoneText(value), value)
+	end
+	return concat(names, "; ")
 end
 
-function conds.instance:getValueList(value, func)
+function conds.instance:getValueList(values, func)
 	local list = {}
+	local checked = function(btn) return tContains(values, btn.value) end
+
 	local instanceID = 0
 	local skipped = 0
-
 	while skipped < 200 do
 		local name = GetRealZoneText(instanceID)
 
 		if name and name ~= "" then
 			list[#list + 1] = {
+				keepShownOnClick = true,
+				isNotRadio = true,
 				text = name,
 				rightText = ("|cff808080%s|r"):format(instanceID),
 				rightFont = util.codeFont,
 				value = instanceID,
 				func = func,
-				checked = instanceID == value,
+				checked = checked,
 			}
 			skipped = 0
 		else
@@ -1035,16 +1193,22 @@ function conds.instance:getValueList(value, func)
 		instanceID = instanceID + 1
 	end
 
+	sort(list, function(a, b)
+		if a == b then return false end
+
+		local checkedA = a:checked()
+		local checkedB = b:checked()
+		if checkedA and not checkedB then return true
+		elseif not checkedA and checkedB then return false end
+
+		return a.value < b.value
+	end)
+
 	return list
 end
 
-function conds.instance:getFuncText(value)
-	if type(value) == "string" and value:trim():match("%D") then
-		return ("self.mounts.instanceName == '%s'"):format(value:gsub("['\\]", "\\%1"))
-	elseif tonumber(value) then
-		return ("self.mounts.instanceID == %s"):format(tonumber(value))
-	end
-	return "false"
+function conds.instance:getFuncText(values, addKey, _, ...)
+	return getManyToOneString(values, true, "self.mounts.instanceID", addKey, ...)
 end
 
 
@@ -1053,7 +1217,7 @@ end
 conds.difficulty = {}
 conds.difficulty.text = LFG_LIST_DIFFICULTY
 
-function conds.difficulty:getValueText(value)
+local function getDifficultyName(value)
 	if value == 0 then return WORLD end
 	local name, instanceType, _,_,_,_,_, isLFR, minPlayers, maxPlayers = GetDifficultyInfo(value)
 	local separator = " |cff808080|||r "
@@ -1072,50 +1236,68 @@ function conds.difficulty:getValueText(value)
 	end
 end
 
-function conds.difficulty:getValueList(value, func)
-	local ids = {}
-	for k, id in next, DifficultyUtil.ID do
-		local _, instanceType, _,_,_,_,_, isLFR = GetDifficultyInfo(id)
-		ids[#ids + 1] = {
-			id = id,
-			isRaid = instanceType == "raid",
-			isParty = instanceType == "party",
-			isLFR = isLFR,
-			isLegacy = IsLegacyDifficulty(id),
-		}
+function conds.difficulty:getValueText(values)
+	local names = {}
+	for i, value in ipairs(values) do
+		names[i] = getDifficultyName(value)
 	end
-	sort(ids, function(a, b)
-		if a.isLegacy and not b.isLegacy then return false
-		elseif not a.isLegacy and b.isLegacy then return true end
+	return concat(names, "; ")
+end
 
-		if a.isLFR and not b.isLFR then return false
-		elseif not a.isLFR and b.isLFR then return true end
+function conds.difficulty.sort(values)
+	sort(values, function(a, b)
+		if a == b then return false end
 
-		if a.isRaid and not b.isRaid then return false
-		elseif not a.isRaid and b.isRaid then return true end
+		local aIsLegacy = IsLegacyDifficulty(a)
+		local bIsLegacy = IsLegacyDifficulty(b)
+		if aIsLegacy and not bIsLegacy then return false
+		elseif not aIsLegacy and bIsLegacy then return true end
 
-		if a.isParty and not b.isParty then return false
-		elseif not a.isParty and b.isParty then return true end
+		local _, aInstanceType, _,_,_,_,_, aIsLFR = GetDifficultyInfo(a)
+		local _, bInstanceType, _,_,_,_,_, bIsLFR = GetDifficultyInfo(b)
+		if aIsLFR and not bIsLFR then return false
+		elseif not aIsLFR and bIsLFR then return true end
 
-		return a.id < b.id
+		local aIsRaid = aInstanceType == "raid"
+		local bIsRaid = bInstanceType == "raid"
+		if aIsRaid and not bIsRaid then return false
+		elseif not aIsRaid and bIsRaid then return true end
+
+		local aIsPary = aInstanceType == "party"
+		local bIsPary = bInstanceType == "party"
+		if aIsPary and not bIsPary then return false
+		elseif not aIsPary and bIsPary then return true end
+
+		return a < b
 	end)
-	tinsert(ids, 1, {id = 0})
+end
+
+function conds.difficulty:getValueList(values, func)
+	local ids = {}
+	for k, id in next, DifficultyUtil.ID do ids[#ids + 1] = id end
+	self.sort(ids)
+	tinsert(ids, 1, 0)
 
 	local list = {}
+	local checked = function(btn) return tContains(values, btn.value) end
+
 	for i = 1, #ids do
-		local id = ids[i].id
+		local id = ids[i]
 		list[i] = {
-			text = self:getValueText(id),
+			keepShownOnClick = true,
+			isNotRadio = true,
+			text = getDifficultyName(id),
 			value = id,
 			func = func,
-			checked = id == value,
+			checked = checked,
 		}
 	end
+
 	return list
 end
 
-function conds.difficulty:getFuncText(value)
-	return ("self.mounts.difficultyID == %s"):format(value)
+function conds.difficulty:getFuncText(values, addKey, _, ...)
+	return getManyToOneString(values, true, "self.mounts.difficultyID", addKey, ...)
 end
 
 
@@ -1130,7 +1312,7 @@ function conds.tmog:getValueText(value)
 		local outfitInfo = C_TransmogOutfitInfo.GetOutfitInfo(tonumber(outfitID))
 		if outfitInfo then return outfitInfo.name end
 	elseif guid then
-		return ("ID:%s - %s"):format(outfitID, ns.macroFrame:getNameByGUID(guid))
+		return ("ID:%s - %s"):format(outfitID, macroFrame:getNameByGUID(guid))
 	end
 end
 
@@ -1248,10 +1430,11 @@ function conds.tmog:getValueList(value, func)
 	return list
 end
 
-function conds.tmog:getFuncText(value)
+function conds.tmog:getFuncText(value, addKey)
 	local outfitID, guid = (":"):split(value, 2)
 	if guid == playerGuid then
-		return "C_TransmogOutfitInfo.GetActiveOutfitID() == "..outfitID, "C_TransmogOutfitInfo"
+		addKey("local GetActiveOutfitID = C_TransmogOutfitInfo.GetActiveOutfitID")
+		return ("(GetActiveOutfitID() == %s)"):format(outfitID)
 	end
 	return "false"
 end
@@ -1290,9 +1473,10 @@ function conds.sex:getValueList(value, func)
 	return list
 end
 
-function conds.sex:getFuncText(value)
+function conds.sex:getFuncText(value, addKey)
 	local unit, sex = (":"):split(value, 2)
-	return ("UnitSex('%s') == %s"):format(unit, sex), "UnitSex"
+	addKey("local UnitSex = UnitSex")
+	return ("(UnitSex('%s') == %s)"):format(unit, sex)
 end
 
 
@@ -1307,7 +1491,7 @@ function conds.tl:getValueText(value)
 	if configInfo then
 		return configInfo.name
 	else
-		return ("ID:%s - %s"):format(configID, ns.macroFrame:getNameByGUID(guid))
+		return ("ID:%s - %s"):format(configID, macroFrame:getNameByGUID(guid))
 	end
 end
 
@@ -1512,7 +1696,7 @@ function conds.equips:getValueText(value)
 			return RED_FONT_COLOR:WrapTextInColorCode(("ID:%s"):format(setID))
 		end
 	end
-	return ("ID:%s - %s"):format(setID, ns.macroFrame:getNameByGUID(guid))
+	return ("ID:%s - %s"):format(setID, macroFrame:getNameByGUID(guid))
 end
 
 function conds.equips:getValueList(value, func)
@@ -1602,7 +1786,7 @@ conds.snip = {}
 conds.snip.text = L["Code Snippet"]
 
 function conds.snip:getValueText(value)
-	if ns.macroFrame.snippets[value] then
+	if macroFrame.snippets[value] then
 		return value
 	end
 	return RED_FONT_COLOR:WrapTextInColorCode(value)
@@ -1611,7 +1795,7 @@ end
 function conds.snip:getValueList(value, func)
 	local list = {}
 
-	for name in next, ns.macroFrame.snippets do
+	for name in next, macroFrame.snippets do
 		list[#list + 1] = {
 			text = name,
 			value = name,
@@ -1667,7 +1851,7 @@ end
 
 function conds.group:getFuncText(value)
 	if value == "group" or value == "raid" then
-		return ("self.getGroupType() == '%s'"):format(value:gsub("['\\]", "\\%1"))
+		return ("(self.getGroupType() == '%s')"):format(value:gsub("['\\]", "\\%1"))
 	else
 		return "self.getGroupType()"
 	end
@@ -1770,7 +1954,7 @@ function conds.fgroup:getValueText(value)
 			end
 		end
 	elseif t == "guid" then
-		return ns.macroFrame:getNameByGUID(v)
+		return macroFrame:getNameByGUID(v)
 	end
 
 	return RED_FONT_COLOR:WrapTextInColorCode(L["Not Found"])
@@ -1907,37 +2091,67 @@ end
 conds.title = {}
 conds.title.text = PAPERDOLL_SIDEBAR_TITLES
 
-function conds.title:getValueText(value)
-	local name = GetTitleName(value)
-	return name
+function conds.title:getValueText(values)
+	local names = {}
+	for i, value in ipairs(values) do
+		names[i] = GetTitleName(value)
+	end
+	return concat(names, "; ")
 end
 
-function conds.title:getValueList(value, func)
+function conds.title.sort(values)
+	sort(values, function(a, b)
+		if a == b then return false end
+
+		local val = strcmputf8i(GetTitleName(a), GetTitleName(b))
+		if val < 0 then return true
+		elseif val > 0 then return false end
+
+		return a < b
+	end)
+end
+
+function conds.title:getValueList(values, func)
 	local list = {}
+	local checked = function(btn) return tContains(values, btn.value) end
+
 	for i = 1, GetNumTitles() do
 		local name, show = GetTitleName(i)
 		if show then
 			list[#list + 1] = {
+				keepShownOnClick = true,
+				isNotRadio = true,
 				text = IsTitleKnown(i) and ("%s (|cff00cc00%s|r)"):format(name, GARRISON_MISSION_ADDED_TOAST2) or name,
 				rightText = ("|cff808080%s|r"):format(i),
 				rightFont = util.codeFont,
 				value = i,
 				func = func,
-				checked = i == value,
+				checked = checked,
 			}
 		end
 	end
+
 	sort(list, function(a, b)
+		if a == b then return false end
+
+		local checkedA = a:checked()
+		local checkedB = b:checked()
+		if checkedA and not checkedB then return true
+		elseif not checkedA and checkedB then return false end
+
 		local val = strcmputf8i(a.text, b.text)
 		if val < 0 then return true
 		elseif val > 0 then return false end
+
 		return a.value < b.value
 	end)
+
 	return list
 end
 
-function conds.title:getFuncText(value)
-	return "GetCurrentTitle() == "..value, "GetCurrentTitle"
+function conds.title:getFuncText(values, addKey, _, ...)
+	addKey("local GetCurrentTitle = GetCurrentTitle")
+	return getManyToOneString(values, true, "GetCurrentTitle()", addKey, ...)
 end
 
 
@@ -1976,7 +2190,7 @@ function conds:getMenuList(value, func)
 end
 
 
-function conds:getFuncText(rule, keys, isGroup)
+function conds:getFuncText(rule, addKey, isGroup, ...)
 	local text = {}
 
 	if isGroup == nil then
@@ -1989,11 +2203,7 @@ function conds:getFuncText(rule, keys, isGroup)
 	while cond ~= nil do
 		local condt = self[cond[2]]
 		if condt ~= nil then
-			local condText, var, strict = condt:getFuncText(cond[3], cond[1])
-			if var ~= nil and keys[var] ~= 1 then
-				keys[var] = 1
-				keys[#keys + 1] = var
-			end
+			local condText, strict = condt:getFuncText(cond[3], addKey, cond[1], i, ...)
 			if cond[1] and not strict then
 				condText = "not "..condText
 			end
