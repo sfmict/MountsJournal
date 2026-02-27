@@ -1306,19 +1306,56 @@ end
 conds.tmog = {}
 conds.tmog.text = PERKS_VENDOR_CATEGORY_TRANSMOG
 
-function conds.tmog:getValueText(value)
-	local outfitID, guid = (":"):split(value, 2)
-	if guid == playerGuid then
-		local outfitInfo = C_TransmogOutfitInfo.GetOutfitInfo(tonumber(outfitID))
-		if outfitInfo then return outfitInfo.name end
-	elseif guid then
-		return ("ID:%s - %s"):format(outfitID, macroFrame:getNameByGUID(guid))
+function conds.tmog:getValueText(values)
+	local names = {}
+	local str = "%s |cff808080<%s>|r"
+	for i, value in ipairs(values) do
+		local outfitID, guid = (":"):split(value, 2)
+		if guid == playerGuid then
+			local outfitInfo = C_TransmogOutfitInfo.GetOutfitInfo(tonumber(outfitID))
+			if outfitInfo then names[#names + 1] = str:format(outfitInfo.name, outfitID) end
+		elseif guid then
+			 names[#names + 1] = str:format(macroFrame:getNameByGUID(guid), outfitID)
+		end
 	end
+	return concat(names, "; ")
 end
 
-function conds.tmog:getValueList(value, func)
+function conds.tmog.sort(values)
+	sort(values, function(a, b)
+		local aOutfitID, aGuid = (":"):split(a)
+		local bOutfitID, bGuid = (":"):split(b)
+
+		local val = strcmputf8i(aGuid, bGuid)
+		if val < 0 then return true
+		elseif val > 0 then return false end
+
+		return tonumber(aOutfitID) < tonumber(bOutfitID)
+	end)
+end
+
+function conds.tmog:getValueList(values, func)
 	local list = {}
 	local outfitsInfo = C_TransmogOutfitInfo.GetOutfitsInfo()
+	local rText = "|cff808080ID:%s|r"
+	local checked = function(btn) return tContains(values, btn.value) end
+
+	for i, value in ipairs(values) do
+		local outfitID, guid = (":"):split(value, 2)
+		if guid ~= playerGuid then
+			list[#list + 1] = {
+				keepShownOnClick = true,
+				isNotRadio = true,
+				text = macroFrame:getNameByGUID(guid),
+				rightText = rText:format(outfitID),
+				rightFont = util.codeFont,
+				value = value,
+				icon = util.noIcon,
+				func = func,
+				checked = checked,
+			}
+		end
+	end
 
 	local function getSlotTransmogID(location, weaponOption, appearanceID)
 		if not location then return Constants.Transmog.NoTransmogID end
@@ -1406,7 +1443,9 @@ function conds.tmog:getValueList(value, func)
 	if outfitsInfo and #outfitsInfo > 0 then
 		for i, outfitInfo in ipairs(outfitsInfo) do
 			local v = ("%s:%s"):format(outfitInfo.outfitID, playerGuid)
-			list[i] = {
+			list[#list + 1] = {
+				keepShownOnClick = true,
+				isNotRadio = true,
 				text = outfitInfo.name,
 				rightText = ("|cff808080ID:%s|r"):format(outfitInfo.outfitID),
 				rightFont = util.codeFont,
@@ -1414,12 +1453,14 @@ function conds.tmog:getValueList(value, func)
 				arg1 = outfitInfo.outfitID,
 				icon = outfitInfo.icon,
 				func = func,
-				checked = v == value,
+				checked = checked,
 				OnEnter = onEnter,
 				OnLeave = onLeave,
 			}
 		end
-	else
+	end
+
+	if #list == 0 then
 		list[1] = {
 			notCheckable = true,
 			disabled = true,
@@ -1430,13 +1471,28 @@ function conds.tmog:getValueList(value, func)
 	return list
 end
 
-function conds.tmog:getFuncText(value, addKey)
-	local outfitID, guid = (":"):split(value, 2)
-	if guid == playerGuid then
-		addKey("local GetActiveOutfitID = C_TransmogOutfitInfo.GetActiveOutfitID")
-		return ("(GetActiveOutfitID() == %s)"):format(outfitID)
+function conds.tmog:getFuncText(values, addKey, _, ...)
+	local ids
+
+	if type(values) == "table" then
+		ids, num = {}, 0
+		for i = 1, #values do
+			local outfitID, guid = (":"):split(values[i], 2)
+			if guid == playerGuid then
+				num = num + 1
+				ids[num] = outfitID
+			end
+		end
+		if num == 0 then return "false"
+		elseif num == 1 then ids = ids[1] end
+	else
+		local outfitID, guid = (":"):split(values, 2)
+		if guid ~= playerGuid then return "false" end
+		ids = outfitID
 	end
-	return "false"
+
+	addKey("local GetActiveOutfitID = C_TransmogOutfitInfo.GetActiveOutfitID")
+	return getManyToOneString(ids, true, "GetActiveOutfitID()", addKey, ...)
 end
 
 
