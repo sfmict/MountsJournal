@@ -9,7 +9,7 @@ function macroFrame:isSpellReady(spellID)
 end
 
 
-function macroFrame:haveZoneSpell(spellID)
+function macroFrame:hasZoneSpell(spellID)
 	local zoneAbilities = C_ZoneAbility.GetActiveAbilities()
 	for i = 1, #zoneAbilities do
 		local abilitySpellID = zoneAbilities[i].spellID
@@ -44,13 +44,12 @@ function macroFrame:checkMap(mapID)
 end
 
 
-function macroFrame:checkTalent(configID)
+function macroFrame:getTalentConfig()
 	local specIndex = GetSpecialization()
 	if specIndex then
 		local specID = GetSpecializationInfo(specIndex)
-		return configID == C_ClassTalents.GetLastSelectedSavedConfigID(specID)
+		return C_ClassTalents.GetLastSelectedSavedConfigID(specID)
 	end
-	return false
 end
 
 
@@ -67,6 +66,15 @@ end
 function macroFrame:checkEquipmentSet(setID)
 	local _,_,_, isEquipped = C_EquipmentSet.GetEquipmentSetInfo(setID)
 	return isEquipped
+end
+
+
+function macroFrame:checkEquipmentSets(setIDs)
+	for i = 1, #setIDs do
+		local _,_,_, isEquipped = C_EquipmentSet.GetEquipmentSetInfo(setIDs[i])
+		if isEquipped then return true end
+	end
+	return false
 end
 
 
@@ -188,4 +196,13 @@ do
 		end
 		return false
 	end
+end
+
+
+function macroFrame:hasProfession(values)
+	local profs = self.mounts.profs
+	for i = 1, #values do
+		if profs[values[i]] then return true end
+	end
+	return false
 end
