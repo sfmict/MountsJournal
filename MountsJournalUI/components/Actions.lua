@@ -1,5 +1,6 @@
 local _, ns = ...
 local L, actions, util, mounts, conds = ns.L, ns.actions, ns.util, ns.mounts, ns.conditions
+local createRadioInfo, createArrowInfo = util.createRadioInfo, util.createArrowInfo
 local strcmputf8i = strcmputf8i
 local ltl = LibStub("LibThingsLoad-1.0")
 
@@ -24,18 +25,8 @@ end
 
 function actions.rmount:getValueList(value, func)
 	local list = {}
-	list[1] = {
-		text = L["Selected profile"],
-		value = 0,
-		func = func,
-		checked = value == 0,
-	}
-	list[2] = {
-		text = DEFAULT,
-		value = 1,
-		func = func,
-		checked = value == 1,
-	}
+	list[1] = createRadioInfo(L["Selected profile"], 0, func, value == 0)
+	list[2] = createRadioInfo(DEFAULT, 1, func, value == 1)
 
 	local profiles = {}
 	for k in next, mounts.profiles do profiles[#profiles + 1] = k end
@@ -43,12 +34,7 @@ function actions.rmount:getValueList(value, func)
 
 	for i = 1, #profiles do
 		local profile = profiles[i]
-		list[#list + 1] = {
-			text = profile,
-			value = profile,
-			func = func,
-			checked = value == profile,
-		}
+		list[#list + 1] = createRadioInfo(profile, profile, func, value == profile)
 	end
 
 	return list
@@ -80,31 +66,14 @@ function actions.rmountt:getValueList(value, func)
 		local tList = {}
 		for i = 1, 3 do
 			local v = i..":"..profile
-			tList[i] = {
-				text = L["MOUNT_TYPE_"..i],
-				value = v,
-				func = func,
-				checked = v == value,
-			}
+			tList[i] = createRadioInfo(L["MOUNT_TYPE_"..i], v, func, v == value)
 		end
 		return tList
 	end
 
 	local list = {}
-	list[1] = {
-		keepShownOnClick = true,
-		notCheckable = true,
-		hasArrow = true,
-		text = L["Selected profile"],
-		value = getTList(0)
-	}
-	list[2] = {
-		keepShownOnClick = true,
-		notCheckable = true,
-		hasArrow = true,
-		text = DEFAULT,
-		value = getTList(1)
-	}
+	list[0] = createArrowInfo(L["Selected profile"], getTList(0))
+	list[1] = createArrowInfo(DEFAULT, getTList(1))
 
 	local profiles = {}
 	for k in next, mounts.profiles do profiles[#profiles + 1] = k end
@@ -112,13 +81,7 @@ function actions.rmountt:getValueList(value, func)
 
 	for i = 1, #profiles do
 		local profile = profiles[i]
-		list[#list + 1] = {
-			keepShownOnClick = true,
-			notCheckable = true,
-			hasArrow = true,
-			text = profile,
-			value = getTList(profile),
-		}
+		list[#list + 1] = createArrowInfo(profile, getTList(profile))
 	end
 
 	return list
@@ -409,16 +372,14 @@ function actions:getMenuList(value, func)
 	for i = 1, #types do
 		local v = types[i]
 		local action = self[v]
-		list[i] = {
-			text = action.doesntInterrupt and action.text..dInterruptStar or action.text,
-			value = v,
-			arg1 = action,
-			func = func,
-			checked = v == value,
-		}
+		local text = action.doesntInterrupt and action.text..dInterruptStar or action.text
+
+		local info = createRadioInfo(text, v, func, v == value)
+		info.arg1 = action
 		if action.description or action.doesntInterrupt then
-			list[i].OnTooltipShow = OnTooltipShow
+			info.OnTooltipShow = OnTooltipShow
 		end
+		list[i] = info
 	end
 	return list
 end

@@ -1,6 +1,6 @@
 local _, ns = ...
 local mounts, util = ns.mounts, ns.util
-local C_Calendar, ipairs, sort = C_Calendar, ipairs, sort
+local C_Calendar, ipairs, sort, strcmputf8i = C_Calendar, ipairs, sort, strcmputf8i
 local calendar = util.createFromEventsMixin()
 ns.calendar = calendar
 calendar.filterBackup = {}
@@ -96,7 +96,7 @@ end
 
 function calendar:sortHolidays(list)
 	sort(list, function(e1, e2)
-		if e1.name ~= e2.name then return e1.name < e2.name end
+		if e1.name ~= e2.name then return strcmputf8i(e1.name, e2.name) < 0 end
 		if e1.eventID ~= e2.eventID then return e1.eventID < e2.eventID end
 		if e1.st.month ~= e2.st.month then return e1.st.month < e2.st.month end
 		return e1.st.monthDay < e2.st.monthDay

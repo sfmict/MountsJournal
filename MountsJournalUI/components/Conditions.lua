@@ -1,13 +1,14 @@
 local _, ns = ...
 local L, conds, util, macroFrame = ns.L, ns.conditions, ns.util, ns.macroFrame
+local getNameByGUID, createRadioInfo, createCheckableInfo, createArrowInfo, createEmptyInfo = util.getNameByGUID, util.createRadioInfo, util.createCheckableInfo, util.createArrowInfo, util.createEmptyInfo
 local strcmputf8i, type, concat= strcmputf8i, type, table.concat
 local playerGuid = UnitGUID("player")
 local ltl = LibStub("LibThingsLoad-1.0")
 local sID = "|cff808080%s|r"
-local sGrayName = "|cffaaaaaa%s|r"
 local sName_ID = "%s |cff808080<%s>|r"
+local sIcon_Name_ID = "%s%s |cff808080<%s>|r"
+local sGrayName = "|cffaaaaaa%s|r"
 local sGrayName_ID = "|cffaaaaaa%s|r |cff808080<%s>|r"
-local sIcon_Name_ID = "%s"..sName_ID
 ns.RULE_ICON_SIZE = 14
 
 
@@ -39,12 +40,7 @@ function conds.mod:getValueList(value, func)
 	local list = {}
 	for i = 1, #mods do
 		local v = mods[i]
-		list[i] = {
-			text = self:getValueText(v),
-			value = v,
-			func = func,
-			checked = v == value,
-		}
+		list[i] = createRadioInfo(self:getValueText(v), v, func, v == value)
 	end
 	return list
 end
@@ -70,14 +66,7 @@ function conds.btn:getValueList(values, func)
 	local i = 1
 	local text = _G["KEY_BUTTON"..i]
 	while text do
-		list[i] = {
-			keepShownOnClick = true,
-			isNotRadio = true,
-			text = text,
-			value = i,
-			func = func,
-			checked = checked,
-		}
+		list[i] = createCheckableInfo(text, i, func, checked)
 		i = i + 1
 		text = _G["KEY_BUTTON"..i]
 	end
@@ -160,21 +149,16 @@ function conds.class:getValueList(values, func)
 		local localized, className, id = GetClassInfo(i)
 		local classColor = C_ClassColor.GetClassColor(className)
 		local t = CLASS_ICON_TCOORDS[className]
-		list[i] = {
-			keepShownOnClick = true,
-			isNotRadio = true,
-			text = classColor:WrapTextInColorCode(localized),
-			icon = "Interface/Glues/CharacterCreate/UI-CharacterCreate-Classes",
-			iconInfo = {
+		list[i] = createCheckableInfo(
+			classColor:WrapTextInColorCode(localized), id, func, checked, nil,
+			"Interface/Glues/CharacterCreate/UI-CharacterCreate-Classes",
+			{
 				tCoordLeft = t[1],
 				tCoordRight = t[2],
 				tCoordTop = t[3],
 				tCoordBottom = t[4],
-			},
-			value = id,
-			func = func,
-			checked = checked,
-		}
+			}
+		)
 	end
 
 	return list
@@ -219,15 +203,8 @@ function conds.spec:getValueList(values, func)
 			local id = GetSpecializationInfoForClassID(i, j)
 			local _, name, _, specIcon, _, className, class = GetSpecializationInfoByID(id)
 			local classColor = C_ClassColor.GetClassColor(className)
-			list[#list + 1] = {
-				keepShownOnClick = true,
-				isNotRadio = true,
-				text = ("%s - %s"):format(classColor:WrapTextInColorCode(class), name),
-				icon = specIcon,
-				value = id,
-				func = func,
-				checked = checked,
-			}
+			local text = ("%s - %s"):format(classColor:WrapTextInColorCode(class), name)
+			list[#list + 1] = createCheckableInfo(text, id, func, checked, nil, specIcon)
 		end
 	end
 
@@ -281,14 +258,7 @@ function conds.zt:getValueList(values, func)
 
 	for i = 1, #zoneTypes do
 		local v = zoneTypes[i]
-		list[i] = {
-			keepShownOnClick = true,
-			isNotRadio = true,
-			text = getZoneTypeName(v),
-			value = v,
-			func = func,
-			checked = checked,
-		}
+		list[i] = createCheckableInfo(getZoneTypeName(v), v, func, checked)
 	end
 
 	return list
@@ -299,17 +269,33 @@ end
 -- holiday
 conds.holiday.text = CALENDAR_FILTER_HOLIDAYS
 
-function conds.holiday:getValueText(value)
-	local holidayName = ns.calendar:getHolidayName(value)
-	return sName_ID:format(holidayName or RED_FONT_COLOR:WrapTextInColorCode(L["Nameless holiday"]), value)
+function conds.holiday:getValueText(values)
+	local names = {}
+	for i, value in ipairs(values) do
+		local holidayName = ns.calendar:getHolidayName(value)
+		names[i] = sName_ID:format(holidayName or RED_FONT_COLOR:WrapTextInColorCode(L["Nameless holiday"]), value)
+	end
+	return concat(names, "; ")
 end
 
-function conds.holiday:getValueList(value, cb, dd, notReset)
+function conds.holiday.sort(values)
+	sort(values, function(a, b)
+		if a == b then return false end
+
+		local aName = ns.calendar:getHolidayName(a) or L["Nameless holiday"]
+		local bName = ns.calendar:getHolidayName(b) or L["Nameless holiday"]
+		if aName ~= bName then return strcmputf8i(aName, bName) < 0 end
+
+		return a < b
+	end)
+end
+
+function conds.holiday:getValueList(values, cb, dd, notReset)
 	local list = {custom = true}
 	list[1] = {
 		customFrame = ns.journal.bgFrame.calendarFrame,
 		OnLoad = function(frame)
-			local value = function() return self:getValueList(value, cb, dd, true) end
+			local value = function() return self:getValueList(values, cb, dd, true) end
 			frame:init(1, value, dd)
 		end
 	}
@@ -317,10 +303,27 @@ function conds.holiday:getValueList(value, cb, dd, notReset)
 	list[2] = {list = subList}
 
 	if not notReset then ns.calendar:setCurrentDate() end
+	local eList = ns.calendar:getHolidayList()
+	local checked = function(btn) return tContains(values, btn.value) end
 
-	local func = function(btn, arg1)
+	local function notEContains(eventID)
+		for i = 1, #eList do
+			if eList[i].eventID == eventID then return false end
+		end
+		return true
+	end
+
+	for i, value in ipairs(values) do
+		if notEContains(value) then
+			local name = ns.calendar:getHolidayName(value)
+			local text = name and sGrayName:format(name) or RED_FONT_COLOR:WrapTextInColorCode(L["Nameless holiday"])
+			subList[#subList + 1] = createCheckableInfo(text, value, cb, checked, sID:format(value))
+		end
+	end
+
+	local func = function(btn, arg1, ...)
 		ns.calendar:saveHolidayName(btn.value, arg1)
-		cb(btn)
+		cb(btn, arg1, ...)
 	end
 
 	local OnTooltipShow = function(btn, tooltip, _, description)
@@ -328,24 +331,17 @@ function conds.holiday:getValueList(value, cb, dd, notReset)
 		tooltip:AddDoubleLine("ID", btn.value, 1,1,1,1,1,1)
 	end
 
-	local eList = ns.calendar:getHolidayList()
 	for i = 1, #eList do
 		local e = eList[i]
 		local startDate = FormatShortDate(e.st.monthDay, e.st.month)
 		local endDate = FormatShortDate(e.et.monthDay, e.et.month)
-		subList[i] = {
-			icon = e.icon,
-			iconInfo = e.iconInfo,
-			text = e.isActive and ("%s (|cff00cc00%s|r)"):format(e.name, SPEC_ACTIVE) or e.name,
-			rightText = ("|cff80b5fd%s - %s|r"):format(startDate, endDate),
-			rightFont = util.codeFont,
-			arg1 = e.name,
-			arg2 = e.description,
-			value = e.eventID,
-			func = func,
-			checked = e.eventID == value,
-			OnTooltipShow = OnTooltipShow,
-		}
+		local text = e.isActive and ("%s (|cff00cc00%s|r)"):format(e.name, SPEC_ACTIVE) or e.name
+		local rightText = ("|cff80b5fd%s - %s|r"):format(startDate, endDate)
+		local info = createCheckableInfo(text, e.eventID, func, checked, rightText, e.icon, e.iconInfo)
+		info.arg1 = e.name
+		info.arg2 = e.description
+		info.OnTooltipShow = OnTooltipShow
+		subList[#subList + 1] = info
 	end
 
 	return list
@@ -413,12 +409,7 @@ end
 function conds.fs:getValueList(value, func)
 	local list = {}
 	for i = 1, 2 do
-		list[i] = {
-			text = self:getValueText(i),
-			value = i,
-			func = func,
-			checked = i == value,
-		}
+		list[i] = createRadioInfo(self:getValueText(i), i, func, i == value)
 	end
 	return list
 end
@@ -647,12 +638,7 @@ end
 function conds.faction:getValueList(value, func)
 	local list = {}
 	for i = 0, #PLAYER_FACTION_GROUP do
-		list[#list + 1] = {
-			text = self:getValueText(i),
-			value = i,
-			func = func,
-			checked = i == value,
-		}
+		list[#list + 1] = createRadioInfo(self:getValueText(i), i, func, i == value)
 	end
 	return list
 end
@@ -720,15 +706,7 @@ function conds.race:getValueList(values, func)
 
 	for i = 1, #RACE_KEYS do
 		local v = RACE_KEYS[i]
-		list[#list + 1] = {
-			keepShownOnClick = true,
-			isNotRadio = true,
-			text = RACE_LABELS[v],
-			icon = util.getRaceAtlas(v, sex),
-			value = v,
-			func = func,
-			checked = checked,
-		}
+		list[#list + 1] = createCheckableInfo(RACE_LABELS[v], v, func, checked, nil, util.getRaceAtlas(v, sex))
 	end
 
 	return list
@@ -808,21 +786,10 @@ function conds.mapf:getValueList(value, func)
 
 		for k, name in next, flags do
 			local v = ("%s:%s"):format(k, profileName == DEFAULT and "" or profileName)
-			flagList[#flagList + 1] = {
-				text = name,
-				value = v,
-				func = func,
-				checked = v == value,
-			}
+			flagList[#flagList + 1] = createRadioInfo(name, v, func, v == value)
 		end
 
-		list[i + 1] = {
-			keepShownOnClick = true,
-			notCheckable = true,
-			hasArrow = true,
-			text = profileName,
-			value = flagList,
-		}
+		list[i + 1] = createArrowInfo(profileName, flagList)
 	end
 
 	return list
@@ -860,16 +827,7 @@ function conds.instance:getValueList(values, func)
 		local name = GetRealZoneText(instanceID)
 
 		if name and name ~= "" then
-			list[#list + 1] = {
-				keepShownOnClick = true,
-				isNotRadio = true,
-				text = name,
-				rightText = sID:format(instanceID),
-				rightFont = util.codeFont,
-				value = instanceID,
-				func = func,
-				checked = checked,
-			}
+			list[#list + 1] = createCheckableInfo(name, instanceID, func, checked, sID:format(instanceID))
 			skipped = 0
 		else
 			skipped = skipped + 1
@@ -963,14 +921,7 @@ function conds.difficulty:getValueList(values, func)
 
 	for i = 1, #ids do
 		local id = ids[i]
-		list[i] = {
-			keepShownOnClick = true,
-			isNotRadio = true,
-			text = getDifficultyName(id),
-			value = id,
-			func = func,
-			checked = checked,
-		}
+		list[i] = createCheckableInfo(getDifficultyName(id), id, func, checked)
 	end
 
 	return list
@@ -989,7 +940,7 @@ function conds.tmog:getValueText(values)
 			local outfitInfo = C_TransmogOutfitInfo.GetOutfitInfo(tonumber(outfitID))
 			if outfitInfo then names[#names + 1] = sName_ID:format(outfitInfo.name, outfitID) end
 		elseif guid then
-			 names[#names + 1] = sGrayName_ID:format(macroFrame:getNameByGUID(guid), outfitID)
+			 names[#names + 1] = sGrayName_ID:format(getNameByGUID(guid), outfitID)
 		end
 	end
 	return concat(names, "; ")
@@ -1000,10 +951,7 @@ function conds.tmog.sort(values)
 		local aOutfitID, aGuid = (":"):split(a, 2)
 		local bOutfitID, bGuid = (":"):split(b, 2)
 
-		local val = strcmputf8i(aGuid, bGuid)
-		if val < 0 then return true
-		elseif val > 0 then return false end
-
+		if aGuid ~= bGuid then return strcmputf8i(aGuid, bGuid) < 0 end
 		return tonumber(aOutfitID) < tonumber(bOutfitID)
 	end)
 end
@@ -1016,17 +964,8 @@ function conds.tmog:getValueList(values, func)
 	for i, value in ipairs(values) do
 		local outfitID, guid = (":"):split(value, 2)
 		if guid ~= playerGuid then
-			list[#list + 1] = {
-				keepShownOnClick = true,
-				isNotRadio = true,
-				text = sGrayName:format(macroFrame:getNameByGUID(guid)),
-				rightText = sID:format(outfitID),
-				rightFont = util.codeFont,
-				value = value,
-				icon = util.noIcon,
-				func = func,
-				checked = checked,
-			}
+			local text = sGrayName:format(getNameByGUID(guid))
+			list[#list + 1] = createCheckableInfo(text, value, func, checked, sID:format(outfitID), util.noIcon)
 		end
 	end
 
@@ -1116,29 +1055,16 @@ function conds.tmog:getValueList(values, func)
 	if outfitsInfo and #outfitsInfo > 0 then
 		for i, outfitInfo in ipairs(outfitsInfo) do
 			local v = ("%s:%s"):format(outfitInfo.outfitID, playerGuid)
-			list[#list + 1] = {
-				keepShownOnClick = true,
-				isNotRadio = true,
-				text = outfitInfo.name,
-				rightText = sID:format(outfitInfo.outfitID),
-				rightFont = util.codeFont,
-				value = v,
-				arg1 = outfitInfo.outfitID,
-				icon = outfitInfo.icon,
-				func = func,
-				checked = checked,
-				OnEnter = onEnter,
-				OnLeave = onLeave,
-			}
+			local info = createCheckableInfo(outfitInfo.name, v, func, checked, sID:format(outfitInfo.outfitID), outfitInfo.icon)
+			info.arg1 = outfitInfo.outfitID
+			info.OnEnter = onEnter
+			info.OnLeave = onLeave
+			list[#list + 1] = info
 		end
 	end
 
 	if #list == 0 then
-		list[1] = {
-			notCheckable = true,
-			disabled = true,
-			text = EMPTY,
-		}
+		list[1] = createEmptyInfo()
 	end
 
 	return list
@@ -1166,12 +1092,7 @@ function conds.sex:getValueList(value, func)
 	for i, unit in ipairs({"player", "target", "focus"}) do
 		for j = 3, 1, -1 do
 			local v = ("%s:%s"):format(unit, j)
-			list[#list + 1] = {
-				text = self:getValueText(v),
-				value = v,
-				func = func,
-				checked = v == value,
-			}
+			list[#list + 1] = createRadioInfo(self:getValueText(v), v, func, v == value)
 		end
 	end
 	return list
@@ -1190,7 +1111,7 @@ function conds.tl:getValueText(values)
 		if configInfo then
 			names[#names + 1] = sName_ID:format(configInfo.name, configID)
 		else
-			names[#names + 1] = sGrayName_ID:format(macroFrame:getNameByGUID(guid), configID)
+			names[#names + 1] = sGrayName_ID:format(getNameByGUID(guid), configID)
 		end
 	end
 	return concat(names, "; ")
@@ -1198,14 +1119,11 @@ end
 
 function conds.tl.sort(values)
 	sort(values, function(a, b)
-		local configIDA, guidA = (":"):split(a, 2)
-		local configIDB, guidB = (":"):split(b, 2)
+		local aConfigID, aGuid = (":"):split(a, 2)
+		local bConfigID, bGuid = (":"):split(b, 2)
 
-		local val = strcmputf8i(guidA, guidB)
-		if val < 0 then return true
-		elseif val > 0 then return false end
-
-		return tonumber(configIDA) < tonumber(configIDB)
+		if aGuid ~= bGuid then return strcmputf8i(aGuid, bGuid) < 0 end
+		return tonumber(aConfigID) < tonumber(bConfigID)
 	end)
 end
 
@@ -1216,16 +1134,8 @@ function conds.tl:getValueList(values, func)
 	for i, value in ipairs(values) do
 		local configID, guid = (":"):split(value, 2)
 		if C_Traits.GetConfigInfo(tonumber(configID)) == nil then
-			list[#list + 1] = {
-				keepShownOnClick = true,
-				isNotRadio = true,
-				text = sGrayName:format(macroFrame:getNameByGUID(guid)),
-				rightText = sID:format(configID),
-				rightFont = util.codeFont,
-				value = value,
-				func = func,
-				checked = checked,
-			}
+			local text = sGrayName:format(getNameByGUID(guid))
+			list[#list + 1] = createCheckableInfo(text, value, func, checked, sID:format(configID))
 		end
 	end
 
@@ -1236,25 +1146,13 @@ function conds.tl:getValueList(values, func)
 			local configID = configIDs[j]
 			local configInfo = C_Traits.GetConfigInfo(configID)
 			local v = ("%s:%s"):format(configID, playerGuid)
-			list[#list + 1] = {
-				keepShownOnClick = true,
-				isNotRadio = true,
-				text = ("%s - %s"):format(configInfo.name, specName),
-				rightText = sID:format(configID),
-				rightFont = util.codeFont,
-				value = v,
-				func = func,
-				checked = checked,
-			}
+			local text = ("%s - %s"):format(configInfo.name, specName)
+			list[#list + 1] =  createCheckableInfo(text, v, func, checked, sID:format(configID))
 		end
 	end
 
 	if #list == 0 then
-		list[1] = {
-			notCheckable = true,
-			disabled = true,
-			text = EMPTY,
-		}
+		list[1] = createEmptyInfo()
 	end
 
 	return list
@@ -1318,15 +1216,10 @@ function conds.mtrack:getValueList(value, func)
 			local trackingInfo = C_Minimap.GetTrackingInfo(i)
 			local v = filter.filterID and "filterID:"..filter.filterID or "spellID:"..filter.spellID
 
-			local info = {
-				text = trackingInfo.name,
-				icon = TRACKING_SPELL_OVERRIDE_ATLAS[trackingInfo.spellID] or trackingInfo.texture,
-				rightText = sID:format(v),
-				rightFont = util.codeFont,
-				value = v,
-				func = func,
-				checked = v == value,
-			}
+			local info = createRadioInfo(
+				trackingInfo.name, v, func, v == value, sID:format(v),
+				TRACKING_SPELL_OVERRIDE_ATLAS[trackingInfo.spellID] or trackingInfo.texture
+			)
 
 			if isHunterClass and trackingInfo.subType == HUNTER_TRACKING then
 				hunterList[#hunterList + 1] = info
@@ -1341,23 +1234,11 @@ function conds.mtrack:getValueList(value, func)
 	if #hunterList == 1 then
 		list[#list + 1] = hunterList[1]
 	elseif #hunterList > 1 then
-		list[#list + 1] = {
-			keepShownOnClick = true,
-			notCheckable = true,
-			text = HUNTER_TRACKING_TEXT,
-			hasArrow = true,
-			value = hunterList,
-		}
+		list[#list + 1] = createArrowInfo(HUNTER_TRACKING_TEXT, hunterList)
 	end
 
 	if #townfolkList > 0 then
-		list[#list + 1] = {
-			keepShownOnClick = true,
-			notCheckable = true,
-			text = TOWNSFOLK_TRACKING_TEXT,
-			hasArrow = true,
-			value = townfolkList,
-		}
+		list[#list + 1] = createArrowInfo(TOWNSFOLK_TRACKING_TEXT, townfolkList)
 	end
 
 	for i = 1, #regularList do
@@ -1397,15 +1278,7 @@ function conds.prof:getValueList(values, func)
 	for id in next, WORLD_QUEST_ICONS_BY_PROFESSION do
 		local icon = C_TradeSkillUI.GetTradeSkillTexture(id)
 		if icon then
-			list[#list + 1] = {
-				keepShownOnClick = true,
-				isNotRadio = true,
-				text = C_TradeSkillUI.GetTradeSkillDisplayName(id),
-				icon = icon,
-				value = id,
-				func = func,
-				checked = checked,
-			}
+			list[#list + 1] = createCheckableInfo(C_TradeSkillUI.GetTradeSkillDisplayName(id), id, func, checked, nil, icon)
 		end
 	end
 
@@ -1424,9 +1297,9 @@ function conds.equips:getValueText(values)
 		local setID, guid = (":"):split(value, 2)
 		if guid == playerGuid then
 			local name = C_EquipmentSet.GetEquipmentSetInfo(tonumber(setID))
-			names[i] = name and name or sGrayName_ID:format(macroFrame:getNameByGUID(guid), setID)
+			names[i] = name and name or sGrayName_ID:format(getNameByGUID(guid), setID)
 		else
-			names[i] = sGrayName_ID:format(macroFrame:getNameByGUID(guid), setID)
+			names[i] = sGrayName_ID:format(getNameByGUID(guid), setID)
 		end
 	end
 	return concat(names, "; ")
@@ -1437,10 +1310,7 @@ function conds.equips.sort(values)
 		local aSetID, aGuid = (":"):split(a, 2)
 		local bSetID, bGuid = (":"):split(b, 2)
 
-		local val = strcmputf8i(aGuid, bGuid)
-		if val < 0 then return true
-		elseif val > 0 then return false end
-
+		if aGuid ~= bGuid then return strcmputf8i(aGuid, bGuid) < 0 end
 		return tonumber(aSetID) < tonumber(bSetID)
 	end)
 end
@@ -1452,42 +1322,19 @@ function conds.equips:getValueList(values, func)
 	for i, value in ipairs(values) do
 		local setID, guid = (":"):split(value, 2)
 		if guid ~= playerGuid or C_EquipmentSet.GetEquipmentSetInfo(tonumber(setID)) == nil then
-			list[#list + 1] = {
-				keepShownOnClick = true,
-				isNotRadio = true,
-				text = sGrayName:format(macroFrame:getNameByGUID(guid)),
-				rightText = sID:format(setID),
-				rightFont = util.codeFont,
-				icon = util.noIcon,
-				value = value,
-				func = func,
-				checked = checked,
-			}
+			local text = sGrayName:format(getNameByGUID(guid))
+			list[#list + 1] = createCheckableInfo(text, value, func, checked, sID:format(setID), util.noIcon)
 		end
 	end
 
 	for i, setID in ipairs(C_EquipmentSet.GetEquipmentSetIDs()) do
 		local name, iconFileID = C_EquipmentSet.GetEquipmentSetInfo(setID)
 		local v = ("%s:%s"):format(setID, playerGuid)
-		list[#list + 1] = {
-			keepShownOnClick = true,
-			isNotRadio = true,
-			text = name,
-			rightText = sID:format(setID),
-			rightFont = util.codeFont,
-			icon = iconFileID,
-			value = v,
-			func = func,
-			checked = checked,
-		}
+		list[#list + 1] = createCheckableInfo(name, v, func, checked, sID:format(setID), iconFileID)
 	end
 
 	if #list == 0 then
-		list[1] = {
-			notCheckable = true,
-			disabled = true,
-			text = EMPTY,
-		}
+		list[1] = createEmptyInfo()
 	end
 
 	return list
@@ -1543,22 +1390,13 @@ function conds.snip:getValueList(value, func)
 	local list = {}
 
 	for name in next, macroFrame.snippets do
-		list[#list + 1] = {
-			text = name,
-			value = name,
-			func = func,
-			checked = name == value,
-		}
+		list[#list + 1] = createRadioInfo(name, name, func, name == value)
 	end
 
 	if #list > 1 then
 		sort(list, function(a, b) return strcmputf8i(a.text, b.text) < 0 end)
 	elseif #list == 0 then
-		list[1] = {
-			notCheckable = true,
-			disabled = true,
-			text = EMPTY,
-		}
+		list[1] = createEmptyInfo()
 	end
 
 	return list
@@ -1581,12 +1419,7 @@ end
 function conds.group:getValueList(value, func)
 	local list = {}
 	for i, v in ipairs({"any", "group", "raid"}) do
-		list[i] = {
-			text = self:getValueText(v),
-			value = v,
-			func = func,
-			checked = v == value,
-		}
+		list[i] = createRadioInfo(self:getValueText(v), v, func, v == value)
 	end
 	return list
 end
@@ -1621,43 +1454,35 @@ local function getFriendList(value, func)
 		local accountInfo = C_BattleNet.GetFriendAccountInfo(i)
 		local v = "btag:"..accountInfo.battleTag
 		local nameText, nameColor, statusTexture = FriendsFrame_GetBNetAccountNameAndStatus(accountInfo)
+		local text = accountInfo.isFavorite and nameText..favIcon or nameText
 
-		friends[#friends + 1] = {
-			text = accountInfo.isFavorite and nameText..favIcon or nameText,
-			icon = statusTexture,
-			value = v,
-			arg1 = accountInfo.note,
-			OnEnter = onEnter,
-			OnLeave = GameTooltip_Hide,
-			func = func,
-			checked = v == value,
-		}
+		local info = createRadioInfo(text, v, func, v == value, nil, statusTexture)
+		info.arg1 = accountInfo.note
+		info.OnEnter = onEnter
+		info.OnLeave = GameTooltip_Hide
+		friends[#friends + 1] = info
 	end
 
 	local function addWoW(i)
-		local info = C_FriendList.GetFriendInfoByIndex(i)
-		local v, icon = "guid:"..info.guid
+		local friendInfo = C_FriendList.GetFriendInfoByIndex(i)
+		local v, icon = "guid:"..friendInfo.guid
+		local text = friendInfo.connected and friendInfo.name..", "..FRIENDS_LEVEL_TEMPLATE:format(friendInfo.level, friendInfo.className) or friendInfo.name
 
-		if not info.connected then
+		if not friendInfo.connected then
 			icon = FRIENDS_TEXTURE_OFFLINE
-		elseif info.afk then
+		elseif friendInfo.afk then
 			icon = FRIENDS_TEXTURE_AFK
-		elseif info.dnd then
+		elseif friendInfo.dnd then
 			icon = FRIENDS_TEXTURE_DND
 		else
 			icon = FRIENDS_TEXTURE_ONLINE
 		end
 
-		friends[#friends + 1] = {
-			text = info.connected and info.name..", "..FRIENDS_LEVEL_TEMPLATE:format(info.level, info.className) or info.name,
-			icon = icon,
-			value = v,
-			arg1 = info.notes,
-			OnEnter = onEnter,
-			OnLeave = GameTooltip_Hide,
-			func = func,
-			checked = v == value,
-		}
+		local info = createRadioInfo(text, v, func, v == value, nil, icon)
+		info.arg1 = friendInfo.notes
+		info.OnEnter = onEnter
+		info.OnLeave = GameTooltip_Hide
+		friends[#friends + 1] = info
 	end
 
 	for i = 1, numBNetFavorite + numBNetOnline do addBNet(i) end
@@ -1666,11 +1491,7 @@ local function getFriendList(value, func)
 	for i = numWoWOnline + 1, numWoWTotal do addWoW(i) end
 
 	if #friends == 0 then
-		friends[1] = {
-			notCheckable = true,
-			disabled = true,
-			text = EMPTY,
-		}
+		friends[1] = createEmptyInfo()
 	end
 
 	return friends
@@ -1687,7 +1508,7 @@ function conds.fgroup:getValueText(value)
 			end
 		end
 	elseif t == "guid" then
-		return macroFrame:getNameByGUID(v)
+		return getNameByGUID(v)
 	end
 
 	return RED_FONT_COLOR:WrapTextInColorCode(L["Not Found"])
@@ -1705,38 +1526,17 @@ function conds.fgroup:getValueList(value, func)
 				break
 			end
 			local v = "guid:"..guid
-			group[#group + 1] = {
-				text = GetUnitName(unit, true),
-				value = v,
-				func = func,
-				checked = v == value,
-			}
+			group[#group + 1] = createRadioInfo(GetUnitName(unit, true), v, func, v == value)
 		end
 	end
 
 	if #group == 0 then
-		group[1] = {
-			notCheckable = true,
-			disabled = true,
-			text = isSecret and "<secret>" or EMPTY,
-		}
+		group[1] = createEmptyInfo(isSecret)
 	end
 
 	return {
-		{
-			keepShownOnClick = true,
-			notCheckable = true,
-			text = FRIENDS,
-			hasArrow = true,
-			value = getFriendList(value, func),
-		},
-		{
-			keepShownOnClick = true,
-			notCheckable = true,
-			text = PARTY,
-			hasArrow = true,
-			value = group,
-		}
+		createArrowInfo(FRIENDS, getFriendList(value, func)),
+		createArrowInfo(PARTY, group),
 	}
 end
 
@@ -1762,40 +1562,19 @@ function conds.fraid:getValueList(value, func)
 				end
 				if not isPlayer then
 					local v = "guid:"..UnitGUID(unit)
-					group[#group + 1] = {
-						text = GetUnitName(unit, true),
-						value = v,
-						func = func,
-						checked = v == value,
-					}
+					group[#group + 1] = createRadioInfo(GetUnitName(unit, true), v, func, v == value)
 				end
 			end
 		end
 	end
 
 	if #group == 0 then
-		group[1] = {
-			notCheckable = true,
-			disabled = true,
-			text = isSecret and "<secret>" or EMPTY,
-		}
+		group[1] = createEmptyInfo(isSecret)
 	end
 
 	return {
-		{
-			keepShownOnClick = true,
-			notCheckable = true,
-			text = FRIENDS,
-			hasArrow = true,
-			value = getFriendList(value, func),
-		},
-		{
-			keepShownOnClick = true,
-			notCheckable = true,
-			text = RAID,
-			hasArrow = true,
-			value = group,
-		}
+		createArrowInfo(FRIENDS, getFriendList(value, func)),
+		createArrowInfo(RAID, group),
 	}
 end
 
@@ -1831,16 +1610,8 @@ function conds.title:getValueList(values, func)
 	for i = 1, GetNumTitles() do
 		local name, show = GetTitleName(i)
 		if show then
-			list[#list + 1] = {
-				keepShownOnClick = true,
-				isNotRadio = true,
-				text = IsTitleKnown(i) and ("%s (|cff00cc00%s|r)"):format(name, GARRISON_MISSION_ADDED_TOAST2) or name,
-				rightText = sID:format(i),
-				rightFont = util.codeFont,
-				value = i,
-				func = func,
-				checked = checked,
-			}
+			local text = IsTitleKnown(i) and ("%s (|cff00cc00%s|r)"):format(name, GARRISON_MISSION_ADDED_TOAST2) or name
+			list[#list + 1] = createCheckableInfo(text, i, func, checked, sID:format(i))
 		end
 	end
 
@@ -1852,10 +1623,7 @@ function conds.title:getValueList(values, func)
 		if checkedA and not checkedB then return true
 		elseif not checkedA and checkedB then return false end
 
-		local val = strcmputf8i(a.text, b.text)
-		if val < 0 then return true
-		elseif val > 0 then return false end
-
+		if a.text ~= b.text then return strcmputf8i(a.text, b.text) < 0 end
 		return a.value < b.value
 	end)
 
@@ -1881,16 +1649,13 @@ function conds:getMenuList(value, func)
 
 	for k, v in next, self do
 		if type(v) == "table" then
-			list[#list + 1] = {
-				text = v.combatLock and v.text..combatStar or v.text,
-				value = k,
-				arg1 = v,
-				func = func,
-				checked = k == value,
-			}
+			local text = v.combatLock and v.text..combatStar or v.text
+			local info = createRadioInfo(text, k, func, k == value)
+			info.arg1 = v
 			if v.description or v.combatLock then
-				list[#list].OnTooltipShow = OnTooltipShow
+				info.OnTooltipShow = OnTooltipShow
 			end
+			list[#list + 1] = info
 		end
 	end
 	sort(list, function(a, b) return strcmputf8i(a.text, b.text) < 0 end)

@@ -345,6 +345,8 @@ do
 end
 
 
+---------------------------------------------------
+-- rule utils
 do
 	local raceOverride = { -- ChrRacesCreateScreenIcon
 		Scourge = "undead",
@@ -360,4 +362,87 @@ do
 		sex = sex == 2 and "male" or "female"
 		return "raceicon128-"..race.."-"..sex
 	end
+end
+
+
+do
+	local updateFrame = CreateFrame("FRAME")
+
+	local function update(self, elapsed)
+		self.time = self.time - elapsed
+
+		if self.time <= 0 then
+			for guid in next, self.guids do
+				if GetPlayerInfoByGUID(guid) then
+					self.guids = nil
+					self:SetScript("OnUpdate", nil)
+					macroFrame:event("RULE_LIST_UPDATE")
+					return
+				end
+			end
+
+			self.attempts = self.attempts - 1
+			if self.attempts == 0 then
+				self.guids = nil
+				self:SetScript("OnUpdate", nil)
+				return
+			end
+			self.time = .5
+		end
+	end
+
+	function util.getNameByGUID(guid)
+		local _,_,_,_,_, name, realmName = GetPlayerInfoByGUID(guid)
+
+		if name then
+			if realmName == "" then realmName = GetRealmName() end
+			return ("%s - %s"):format(name, realmName)
+		end
+
+		updateFrame.time = .5
+		updateFrame.attempts = 5
+		updateFrame.guids = updateFrame.guids or {}
+		updateFrame.guids[guid] = true
+		updateFrame:SetScript("OnUpdate", update)
+		return "?? - ??"
+	end
+end
+
+
+function util.createRadioInfo(text, value, func, checked, rightText, icon, iconInfo)
+	return {
+		text = text,
+		value = value,
+		func = func,
+		checked = checked,
+		rightText = rightText,
+		rightFont = rightText and util.codeFont,
+		icon = icon,
+		iconInfo = iconInfo,
+	}
+end
+
+function util.createCheckableInfo(...)
+	local info = util.createRadioInfo(...)
+	info.keepShownOnClick = true
+	info.isNotRadio = true
+	return info
+end
+
+function util.createArrowInfo(text, value)
+	return {
+		keepShownOnClick = true,
+		notCheckable = true,
+		hasArrow = true,
+		text = text,
+		value = value,
+	}
+end
+
+function util.createEmptyInfo(isSecret)
+	return {
+		notCheckable = true,
+		disabled = true,
+		text = isSecret and "<secret>" or EMPTY,
+	}
 end

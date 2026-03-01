@@ -25,13 +25,9 @@ local function getTableString(values, isNumeric, curValue, addKey, ...)
 end
 
 
-local function getFuncString(values, isNumeric, funcStr, addKey, ...)
+local function getFuncString(values, funcStr, addKey, ...)
 	local var = ("_"):join("var", ...)
-	if isNumeric then
-		addKey(strconcat("local ", var, " = {", concat(values, ","), "}"))
-	else
-		addKey(strconcat("local ", var, " = {'", concat(values, "','"), "'}"))
-	end
+	addKey(strconcat("local ", var, " = {", concat(values, ","), "}"))
 	return funcStr:format(var)
 end
 
@@ -180,8 +176,11 @@ end
 -- holiday
 conds.holiday = {}
 
-function conds.holiday:getFuncText(value)
-	return ("self.calendar:isHolidayActive(%s)"):format(value)
+function conds.holiday:getFuncText(values, addKey, _, ...)
+	if type(values) == "table" then
+		return getFuncString(values, "self:anyHoldayActive(%s)", addKey, ...)
+	end
+	return ("self.calendar:isHolidayActive(%s)"):format(values)
 end
 
 
@@ -570,10 +569,9 @@ conds.prof = {}
 
 function conds.prof:getFuncText(values, addKey, _, ...)
 	if type(values) == "table" then
-		return getFuncString(values, true, "self:hasProfession(%s)", addKey, ...)
-	else
-		return ("self.mounts.profs[%s]"):format(values)
+		return getFuncString(values, "self:hasProfession(%s)", addKey, ...)
 	end
+	return ("self.mounts.profs[%s]"):format(values)
 end
 
 
@@ -596,7 +594,7 @@ function conds.equips:getFuncText(values, addKey, _, ...)
 		end
 		if num == 0 then return "false"
 		elseif num == 1 then vals = vals[1]
-		else return getFuncString(vals, true, "self:checkEquipmentSets(%s)", addKey, ...) end
+		else return getFuncString(vals, "self:checkEquipmentSets(%s)", addKey, ...) end
 	else
 		local setID, guid = (":"):split(values, 2)
 		if guid ~= playerGuid then return "false" end
