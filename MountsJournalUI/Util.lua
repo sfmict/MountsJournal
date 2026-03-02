@@ -376,7 +376,7 @@ do
 				if GetPlayerInfoByGUID(guid) then
 					self.guids = nil
 					self:SetScript("OnUpdate", nil)
-					macroFrame:event("RULE_LIST_UPDATE")
+					ns.macroFrame:event("RULE_LIST_UPDATE")
 					return
 				end
 			end

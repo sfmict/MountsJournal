@@ -1,7 +1,7 @@
 local _, ns = ...
 local L, conds, util, macroFrame = ns.L, ns.conditions, ns.util, ns.macroFrame
 local getNameByGUID, createRadioInfo, createCheckableInfo, createArrowInfo, createEmptyInfo = util.getNameByGUID, util.createRadioInfo, util.createCheckableInfo, util.createArrowInfo, util.createEmptyInfo
-local strcmputf8i, type, concat= strcmputf8i, type, table.concat
+local strcmputf8i, type, concat = strcmputf8i, type, table.concat
 local playerGuid = UnitGUID("player")
 local ltl = LibStub("LibThingsLoad-1.0")
 local sID = "|cff808080%s|r"
@@ -16,7 +16,7 @@ ns.RULE_ICON_SIZE = 14
 -- mod MODIFIER
 conds.mod.text = L["Modifier"]
 
-function conds.mod:getValueText(value)
+function conds.mod:getModText(value)
 	if value == "any" then
 		return L["ANY_MODIFIER"]
 	else
@@ -24,7 +24,31 @@ function conds.mod:getValueText(value)
 	end
 end
 
-function conds.mod:getValueList(value, func)
+function conds.mod:getValueText(values)
+	local names = {}
+	for i, value in ipairs(values) do
+		names[i] = self:getModText(value)
+	end
+	return concat(names, "; ")
+end
+
+function conds.mod.sort(values)
+	local mods = {
+		any = 1,
+		alt = 2,
+		ctrl = 3,
+		shift = 4,
+		lalt = 5,
+		ralt = 6,
+		lctrl = 7,
+		rctrl = 8,
+		lshift = 9,
+		rshift = 10,
+	}
+	sort(values, function(a, b) return mods[a] < mods[b] end)
+end
+
+function conds.mod:getValueList(values, func)
 	local mods = {
 		"any",
 		"alt",
@@ -38,9 +62,10 @@ function conds.mod:getValueList(value, func)
 		"rshift",
 	}
 	local list = {}
+	local checked = function(btn) return tContains(values, btn.value) end
 	for i = 1, #mods do
 		local v = mods[i]
-		list[i] = createRadioInfo(self:getValueText(v), v, func, v == value)
+		list[i] = createCheckableInfo(self:getModText(v), v, func, checked)
 	end
 	return list
 end
@@ -1128,16 +1153,8 @@ function conds.tl.sort(values)
 end
 
 function conds.tl:getValueList(values, func)
-	local list = {}
+	local list, keys = {}, {}
 	local checked = function(btn) return tContains(values, btn.value) end
-
-	for i, value in ipairs(values) do
-		local configID, guid = (":"):split(value, 2)
-		if C_Traits.GetConfigInfo(tonumber(configID)) == nil then
-			local text = sGrayName:format(getNameByGUID(guid))
-			list[#list + 1] = createCheckableInfo(text, value, func, checked, sID:format(configID))
-		end
-	end
 
 	for i = 1, GetNumSpecializations() do
 		local specID, specName = C_SpecializationInfo.GetSpecializationInfo(i)
@@ -1147,7 +1164,17 @@ function conds.tl:getValueList(values, func)
 			local configInfo = C_Traits.GetConfigInfo(configID)
 			local v = ("%s:%s"):format(configID, playerGuid)
 			local text = ("%s - %s"):format(configInfo.name, specName)
-			list[#list + 1] =  createCheckableInfo(text, v, func, checked, sID:format(configID))
+			keys[configID] = 1
+			list[#list + 1] = createCheckableInfo(text, v, func, checked, sID:format(configID))
+		end
+	end
+
+	for i = #values, 1, -1 do
+		local configID, guid = (":"):split(values[i], 2)
+		configID = tonumber(configID)
+		if keys[configID] == nil then
+			local text = sGrayName:format(getNameByGUID(guid))
+			tinsert(list, 1, createCheckableInfo(text, values[i], func, checked, sID:format(configID)))
 		end
 	end
 
@@ -1596,8 +1623,7 @@ function conds.title.sort(values)
 		if a == b then return false end
 
 		local val = strcmputf8i(GetTitleName(a), GetTitleName(b))
-		if val < 0 then return true
-		elseif val > 0 then return false end
+		if val ~= 0 then return val < 0 end
 
 		return a < b
 	end)

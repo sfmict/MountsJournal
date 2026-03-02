@@ -1,5 +1,6 @@
 local _, ns = ...
 local type, concat, strconcat, C_Secrets = type, table.concat, string.concat, C_Secrets
+local UnitClass, UnitRace, GetNumSpecializations, GetSpecializationInfo, GetDynamicFlightModeSpellID, Traits_GetConfigInfo = UnitClass, UnitRace, GetNumSpecializations, C_SpecializationInfo.GetSpecializationInfo, C_MountJournal.GetDynamicFlightModeSpellID, C_Traits.GetConfigInfo
 local GetSpellAuraSecrecy, GetSpellCooldownSecrecy = C_Secrets.GetSpellAuraSecrecy, C_Secrets.GetSpellCooldownSecrecy
 local playerGuid = UnitGUID("player")
 local conds = {}
@@ -36,7 +37,7 @@ end
 -- mod MODIFIER
 conds.mod = {}
 
-function conds.mod:getFuncText(value, addKey)
+function conds.mod:getFuncString(value, addKey)
 	if value == "any" then
 		addKey("local IsModifierKeyDown = IsModifierKeyDown")
 		return "IsModifierKeyDown()"
@@ -59,8 +60,8 @@ function conds.mod:getFuncText(value, addKey)
 		addKey("local IsLeftControlKeyDown = IsLeftControlKeyDown")
 		return "IsLeftControlKeyDown()"
 	elseif value == "rctrl" then
-		addKey("local IsRightoControlKeyDown = IsRightoControlKeyDown")
-		return "IsRightoControlKeyDown()"
+		addKey("local IsRightControlKeyDown = IsRightControlKeyDown")
+		return "IsRightControlKeyDown()"
 	elseif value == "lshift" then
 		addKey("local IsLeftShiftKeyDown = IsLeftShiftKeyDown")
 		return "IsLeftShiftKeyDown()"
@@ -72,12 +73,23 @@ function conds.mod:getFuncText(value, addKey)
 	end
 end
 
+function conds.mod:getFuncText(values, addKey)
+	if type(values) == "table" then
+		local funcs = {}
+		for i = 1, #values do
+			funcs[i] = self:getFuncString(values[i], addKey)
+		end
+		return strconcat("(", concat(funcs, " or "), ")")
+	end
+	return self:getFuncString(values, addKey)
+end
+
 
 ---------------------------------------------------
 -- btn MOUSE BUTTON
 conds.btn = {}
 
-local function getButtonKey(value)
+function conds.btn:getButtonKey(value)
 	if value == 1 then
 		return "LeftButton"
 	elseif value == 2 then
@@ -94,10 +106,10 @@ function conds.btn:getFuncText(values, addKey, _, ...)
 	if type(values) == "table" then
 		buttons = {}
 		for i = 1, #values do
-			buttons[i] = getButtonKey(values[i])
+			buttons[i] = self:getButtonKey(values[i])
 		end
 	else
-		buttons = getButtonKey(values)
+		buttons = self:getButtonKey(values)
 	end
 	return getTableString(buttons, false, "button", addKey, ...)
 end
@@ -141,16 +153,20 @@ function conds.spec:getFuncText(values, addKey, _, ...)
 		local num = 0
 		vals = {}
 		for i = 1, GetNumSpecializations() do
-			if tContains(values, C_SpecializationInfo.GetSpecializationInfo(i)) then
-				num = num + 1
-				vals[num] = i
+			local specID = GetSpecializationInfo(i)
+			for j = 1, #values do
+				if specID == values[j] then
+					num = num + 1
+					vals[num] = i
+					break
+				end
 			end
 		end
 		if num == 0 then return "false"
 		elseif num == 1 then vals = vals[1] end
 	else
 		for i = 1, GetNumSpecializations() do
-			if values == C_SpecializationInfo.GetSpecializationInfo(i) then
+			if values == GetSpecializationInfo(i) then
 				vals = i
 				break
 			end
@@ -283,7 +299,7 @@ end
 conds.fs = {}
 
 function conds.fs:getFuncText(value, addKey)
-	local spellID = C_MountJournal.GetDynamicFlightModeSpellID()
+	local spellID = GetDynamicFlightModeSpellID()
 	addKey("local GetSpellTexture = C_Spell.GetSpellTexture")
 	if value == 1 then
 		return ("(GetSpellTexture(%s) ~= 5142726)"):format(spellID)
@@ -536,7 +552,7 @@ function conds.tl:getFuncText(values, addKey, _, ...)
 		vals = {}
 		for i = 1, #values do
 			local configID = (":"):split(values[i], 2)
-			if C_Traits.GetConfigInfo(tonumber(configID)) then
+			if Traits_GetConfigInfo(tonumber(configID)) then
 				num = num + 1
 				vals[num] = configID
 			end
@@ -545,7 +561,7 @@ function conds.tl:getFuncText(values, addKey, _, ...)
 		elseif num == 1 then vals = vals[1] end
 	else
 		local configID = (":"):split(values, 2)
-		if C_Traits.GetConfigInfo(tonumber(configID)) == nil then return "false" end
+		if Traits_GetConfigInfo(tonumber(configID)) == nil then return "false" end
 		vals = configID
 	end
 
