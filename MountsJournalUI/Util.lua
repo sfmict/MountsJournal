@@ -366,7 +366,7 @@ end
 
 
 do
-	local updateFrame = CreateFrame("FRAME")
+	local updateFrame, GetPlayerInfoByGUID = CreateFrame("FRAME"), GetPlayerInfoByGUID
 
 	local function update(self, elapsed)
 		self.time = self.time - elapsed

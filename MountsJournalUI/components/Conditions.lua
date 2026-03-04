@@ -349,6 +349,7 @@ function conds.holiday:getValueList(values, cb, dd, notReset)
 	local func = function(btn, arg1, ...)
 		ns.calendar:saveHolidayName(btn.value, arg1)
 		cb(btn, arg1, ...)
+		dd:ddRefresh()
 	end
 
 	local OnTooltipShow = function(btn, tooltip, _, description)

@@ -1,6 +1,6 @@
 local _, ns = ...
 local macroFrame, util = ns.macroFrame, ns.util
-local next, C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, GetSpecialization, GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, GetPlayerInfoByGUID, C_ZoneAbility, FindSpellOverrideByID, GetNumGroupMembers, GetNumSubgroupMembers, UnitGUID, UnitIsConnected, IsInGroup, IsInRaid, BNGetNumFriends, C_BattleNet = next, C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_SpecializationInfo.GetSpecialization, C_SpecializationInfo.GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, GetPlayerInfoByGUID, C_ZoneAbility, FindSpellOverrideByID, GetNumGroupMembers, GetNumSubgroupMembers, UnitGUID, UnitIsConnected, IsInGroup, IsInRaid, BNGetNumFriends, C_BattleNet
+local C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, GetSpecialization, GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, C_ZoneAbility, FindSpellOverrideByID, GetNumGroupMembers, GetNumSubgroupMembers, UnitGUID, UnitIsConnected, IsInGroup, IsInRaid, BNGetNumFriends, C_BattleNet = C_Spell, C_Item, GetRealZoneText, GetSubZoneText, GetZoneText, GetMinimapZoneText, C_SpecializationInfo.GetSpecialization, C_SpecializationInfo.GetSpecializationInfo, C_ClassTalents, C_Minimap, C_EquipmentSet, C_ZoneAbility, FindSpellOverrideByID, GetNumGroupMembers, GetNumSubgroupMembers, UnitGUID, UnitIsConnected, IsInGroup, IsInRaid, BNGetNumFriends, C_BattleNet
 
 
 function macroFrame:isSpellReady(spellID)
