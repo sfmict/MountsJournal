@@ -3,7 +3,10 @@ local L, util, rules, conds, actions = ns.L, ns.util, ns.ruleConfig, ns.conditio
 local ruleEditor = CreateFrame("FRAME", nil, rules, "MJEscHideTemplate")
 rules.ruleEditor = ruleEditor
 ruleEditor:Hide()
-ruleEditor:HookScript("OnHide", ruleEditor.Hide)
+ruleEditor:HookScript("OnHide", function(self)
+	self.lastMapID = nil
+	self:Hide()
+end)
 
 
 local escOnShow = ruleEditor:GetScript("OnShow")
@@ -230,7 +233,7 @@ ruleEditor:HookScript("OnShow", function(self)
 		panel.SetPoint(navBar, "TOPLEFT", 15, -15)
 		panel.SetPoint(navBar, "TOPRIGHT", -15, 15)
 		panel.tabMapID = navBar.tabMapID
-		navBar.tabMapID = panel.condData[3] or navBar.defMapID
+		navBar.tabMapID = self.lastMapID or navBar.defMapID
 
 		local worldMap = ns.journal.worldMap
 		saveStatus(panel, worldMap)
@@ -272,10 +275,57 @@ ruleEditor:HookScript("OnShow", function(self)
 
 	self.mapSelect.ok:SetScript("OnClick", function(btn)
 		local panel = btn:GetParent()
-		panel.condData[3] = ns.journal.navBar.mapID
+		local mapID = ns.journal.navBar.mapID
+		local values = type(panel.condData[3]) == "table" and panel.condData[3] or {panel.condData[3]}
+		if not tContains(values, mapID) then values[#values + 1] = mapID end
+		conds.map.sort(values)
+		panel.condData[3] = #values > 1 and values or values[1]
+		self.lastMapID = mapID
 		self:ruleCheck()
 		self:setCondValueOption(panel.panel, panel.condData)
 		panel:Hide()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	end)
+
+	-- map optionValue
+	self.mapOptionBtn = CreateFrame("BUTTON", nil, nil, "MJConditionDropDownTemplate")
+	self.mapOptionBtn:Hide()
+	self.mapOptionBtn:SetScript("OnHide", function(btn)
+		btn:Hide()
+		local parent = btn:GetParent()
+		if parent then parent.optionValue = nil end
+	end)
+	self.mapOptionBtn.text:SetPoint("LEFT", 42, 0)
+
+	local addMap = CreateFrame("BUTTON", nil, self.mapOptionBtn)
+	self.mapOptionBtn.add = addMap
+	addMap:SetSize(39, 26)
+	addMap:SetPoint("LEFT", 3, 0)
+	addMap.bg = addMap:CreateTexture(nil, "BACKGROUND")
+	addMap.bg:SetAllPoints()
+	addMap.bg:SetTexture("Interface/QuestFrame/UI-QuestMap_Button")
+	addMap.bg:SetTexCoord(.125, .875, 0, .5)
+	addMap.plus = addMap:CreateTexture(nil, "ARTWORK")
+	addMap.plus:SetSize(16, 16)
+	addMap.plus:SetPoint("RIGHT", -4, -4)
+	addMap.plus:SetAtlas("QuestLog-icon-Expand")
+	addMap.highlight = addMap:CreateTexture(nil, "HIGHLIGHT")
+	addMap.highlight:SetSize(31, 20)
+	addMap.highlight:SetPoint("RIGHT", -4, -1)
+	addMap.highlight:SetTexture("Interface/BUTTONS/ButtonHilight-Square")
+	addMap.highlight:SetBlendMode("ADD")
+	addMap:SetScript("OnMouseDown", function(btn)
+		btn.bg:SetTexCoord(.125, .875, .5, 1)
+		btn.plus:AdjustPointsOffset(1, -1)
+	end)
+	addMap:SetScript("OnMouseUp", function(btn)
+		btn.bg:SetTexCoord(.125, .875, 0, .5)
+		btn.plus:AdjustPointsOffset(-1, 1)
+	end)
+	addMap:SetScript("OnClick", function(btn)
+		self.mapSelect.panel = btn.panel
+		self.mapSelect.condData = btn.condData
+		self.mapSelect:Show()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
 
@@ -475,18 +525,14 @@ function ruleEditor:setCondValueOption(panel, btnData, setFocus)
 	local cond = conds[btnData[2]]
 	if not cond.getValueText then return end
 
-	if cond.getValueList then
+	if btnData[2] == "map" then
+		panel.optionValue = self.mapOptionBtn
+		panel.optionValue.add.panel = panel
+		panel.optionValue.add.condData = btnData
+		panel.optionValue:SetScript("OnClick", function(btn) self:openCondValueMenu(btn, btnData) end)
+	elseif cond.getValueList then
 		panel.optionValue = self.btnPool:Acquire()
 		panel.optionValue:SetScript("OnClick", function(btn) self:openCondValueMenu(btn, btnData) end)
-	elseif btnData[2] == "map" then
-		panel.optionValue = self.btnPool:Acquire()
-		panel.optionValue:SetScript("OnClick", function()
-			self.menu:ddCloseMenus()
-			self.mapSelect.panel = panel
-			self.mapSelect.condData = btnData
-			self.mapSelect:Show()
-			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		end)
 	else
 		panel.optionValue = self.editPool:Acquire()
 		panel.optionValue:SetNumeric(cond.isNumeric)
@@ -536,7 +582,7 @@ function ruleEditor:openCondTypeMenu(btn, btnData)
 		self:ruleCheck()
 	end
 
-	local list = conds:getMenuList(btnData[2], func)
+	local list = conds:getMenuList(btnData[2], func, self.data)
 	self.menu:ddToggle(1, list, btn)
 	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 end

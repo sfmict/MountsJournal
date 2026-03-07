@@ -44,6 +44,15 @@ function macroFrame:checkMap(mapID)
 end
 
 
+function macroFrame:checkMaps(mapIDs)
+	local mapList = self.mounts.mapList
+	for i = 1, #mapList do
+		if mapIDs[mapList[i]] then return true end
+	end
+	return false
+end
+
+
 function macroFrame:getTalentConfig()
 	local specIndex = GetSpecialization()
 	if specIndex then

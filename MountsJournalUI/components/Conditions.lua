@@ -74,6 +74,7 @@ end
 ---------------------------------------------------
 -- btn MOUSE BUTTON
 conds.btn.text = L["Mouse button"]
+conds.btn.onlyOne = true
 conds.btn.sort = sort
 
 function conds.btn:getValueText(values)
@@ -150,6 +151,7 @@ end
 ---------------------------------------------------
 -- class
 conds.class.text = CLASS
+conds.class.onlyOne = true
 conds.class.sort = sort
 
 function conds.class:getValueText(values)
@@ -193,6 +195,7 @@ end
 ---------------------------------------------------
 -- spec
 conds.spec.text = SPECIALIZATION
+conds.spec.onlyOne = true
 
 function conds.spec:getValueText(values)
 	local names = {}
@@ -240,6 +243,7 @@ end
 ---------------------------------------------------
 -- zt ZONE TYPE
 conds.zt.text = L["Zone type"]
+conds.zt.onlyOne = true
 
 local function getZoneTypeName(value)
 	if value == "scenario" then
@@ -377,56 +381,66 @@ end
 ---------------------------------------------------
 -- falling
 conds.falling.text = L["The player is falling"]
+conds.falling.onlyOne = true
 
 
 ---------------------------------------------------
 -- moving
 conds.moving.text = L["The player is moving"]
+conds.moving.onlyOne = true
 
 
 ---------------------------------------------------
 -- indoors
 conds.indoors.text = L["The player is indoors"]
+conds.indoors.onlyOne = true
 
 
 ---------------------------------------------------
 -- swimming
 conds.swimming.text = L["The player is swimming"]
+conds.swimming.onlyOne = true
 
 
 ---------------------------------------------------
 -- mounted
 conds.mounted.text = L["The player is mounted"]
+conds.mounted.onlyOne = true
 
 
 ---------------------------------------------------
 -- vehicle
 conds.vehicle.text = L["The player is within an vehicle"]
+conds.vehicle.onlyOne = true
 
 
 ---------------------------------------------------
 -- flyable
 conds.flyable.text = L["Flyable area"]
+conds.flyable.onlyOne = true
 
 
 ---------------------------------------------------
 -- dead
 conds.dead.text = L["The player is dead"]
-
+conds.dead.onlyOne = true
 
 ---------------------------------------------------
 -- rest
 conds.rest.text = L["The player is resting"]
+conds.rest.onlyOne = true
 
 
 ---------------------------------------------------
 -- combat
 conds.combat.text = L["The player is in combat"]
+conds.combat.onlyOne = true
 
 
 ---------------------------------------------------
 -- fs FLIGHT STYLE
 conds.fs.text = L["Flight style"]
+conds.fs.onlyOne = true
 
 function conds.fs:getValueText(value)
 	return value == 1 and ACCESSIBILITY_ADV_FLY_LABEL or L["Steady Flight"]
@@ -656,6 +670,7 @@ conds.qca.getValueText = conds.hitem.getValueText
 ---------------------------------------------------
 -- faction
 conds.faction.text = FACTION
+conds.faction.onlyOne = true
 
 function conds.faction:getValueText(value)
 	return FACTION_LABELS[value]
@@ -673,6 +688,7 @@ end
 ---------------------------------------------------
 -- race
 conds.race.text = RACE
+conds.race.onlyOne = true
 
 local RACE_KEYS = {
 	1, -- Human
@@ -753,14 +769,46 @@ conds.zone.getValueText = conds.mcond.getValueText
 ---------------------------------------------------
 -- map
 conds.map.text = L["Map"]
+conds.map.onlyOne = true
 
-function conds.map:getValueText(value)
+local function getMapName(value)
 	if value == ns.mounts.defMountsListID then
 		return WORLD
 	else
 		local mapInfo = util.getMapFullNameInfo(value)
 		if mapInfo then return mapInfo.name end
 	end
+	return RED_FONT_COLOR:WrapTextInColorCode(value)
+end
+
+function conds.map:getValueText(values)
+	local names = {}
+	for i, value in ipairs(values) do
+		names[i] = getMapName(value)
+	end
+	return concat(names, "; ")
+end
+
+function conds.map.sort(values)
+	sort(values, function(a, b)
+		if a == b then return false end
+		return strcmputf8i(getMapName(a), getMapName(b)) < 0
+	end)
+end
+
+function conds.map:getValueList(values, func)
+	local list = {}
+	local checked = function(btn) return tContains(values, btn.value) end
+
+	for i, value in ipairs(values) do
+		list[i] = createCheckableInfo(getMapName(value), value, func, checked)
+	end
+
+	if #list == 0 then
+		list[1] = createEmptyInfo()
+	end
+
+	return list
 end
 
 
@@ -825,6 +873,7 @@ end
 ---------------------------------------------------
 -- instance
 conds.instance.text = INSTANCE
+conds.instance.onlyOne = true
 conds.instance.sort = sort
 
 function conds.instance:getValueDescription()
@@ -880,6 +929,7 @@ end
 ---------------------------------------------------
 -- difficulty
 conds.difficulty.text = LFG_LIST_DIFFICULTY
+conds.difficulty.onlyOne = true
 
 local function getDifficultyName(value)
 	if value == 0 then return WORLD end
@@ -1128,6 +1178,7 @@ end
 ---------------------------------------------------
 -- tl TALENT LOADOUT
 conds.tl.text = L["Talent loadout"]
+conds.tl.onlyOne = true
 
 function conds.tl:getValueText(values)
 	local names = {}
@@ -1434,6 +1485,7 @@ end
 ---------------------------------------------------
 -- group GROUP TYPE
 conds.group.text = L["Group Type"]
+conds.group.onlyOne = true
 
 function conds.group:getValueText(value)
 	if value == "group" then
@@ -1610,6 +1662,7 @@ end
 ---------------------------------------------------
 -- title
 conds.title.text = PAPERDOLL_SIDEBAR_TITLES
+conds.title.onlyOne = true
 
 function conds.title:getValueText(values)
 	local names = {}
@@ -1660,10 +1713,14 @@ end
 
 ---------------------------------------------------
 -- METHODS
-function conds:getMenuList(value, func)
+function conds:getMenuList(value, func, rule)
 	local combatStar = " (|cffff4444*|r)"
 	local combatText = NIGHT_FAE_BLUE_COLOR:WrapTextInColorCode(combatStar:sub(2).." "..L["CONDITION_DATA_SECRET_INFO"])
-	local list = {}
+	local list, keys = {}, {}
+
+	for i, cond in ipairs(rule) do
+		if cond[2] and cond[2] ~= value then keys[cond[2]] = true end
+	end
 
 	local OnTooltipShow = function(btn, tooltip, v)
 		GameTooltip_SetTitle(tooltip, v.text)
@@ -1675,7 +1732,7 @@ function conds:getMenuList(value, func)
 	end
 
 	for k, v in next, self do
-		if type(v) == "table" then
+		if type(v) == "table" and not (v.onlyOne and keys[k]) then
 			local text = v.combatLock and v.text..combatStar or v.text
 			local info = createRadioInfo(text, k, func, k == value)
 			info.arg1 = v

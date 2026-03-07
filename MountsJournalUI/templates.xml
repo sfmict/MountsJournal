@@ -3867,7 +3867,7 @@
 						if tooltip then GameTooltip:AddLine(" ") end
 						local text = self.text:GetText()
 						if self.multi then
-							local mText = text:match("%((.*)%)")
+							local mText = text:match("]|r %((.*)%)")
 							if mText then
 								for j, v in ipairs({(";"):split(mText)}) do
 									GameTooltip:AddLine(("|cffeeeeee%s|r"):format(v:trim()))

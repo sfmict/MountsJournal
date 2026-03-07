@@ -870,7 +870,7 @@ function rules:setCondTooltip(rule)
 		if name == nil then
 			GameTooltip:AddLine(condText)
 		elseif conds[cond[2]].sort and type(cond[3]) == "table" then
-			for j, v in ipairs({(";"):split(value:match("%((.*)%)"))}) do
+			for j, v in ipairs({(";"):split(value:match("]|r %((.*)%)"))}) do
 				GameTooltip:AddDoubleLine(j == 1 and name..":|r" or " ", ("|cffeeeeee%s|r"):format(v:trim()))
 			end
 		else
