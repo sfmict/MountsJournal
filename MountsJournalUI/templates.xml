@@ -3741,28 +3741,47 @@
 
 	<Button name="MJRulePanelTemplate" inherits="MJRulePanelBaseTemplate" virtual="true">
 		<Size y="55"/>
-		<Layers>
-			<Layer level="ARTWORK" textureSubLevel="1">
-				<Texture parentKey="icon">
-					<Size x="34" y="34"/>
-					<Anchors>
-						<Anchor point="LEFT" x="4" y="-1"/>
-					</Anchors>
-				</Texture>
-			</Layer>
-			<Layer level="ARTWORK" textureSubLevel="2">
-				<FontString parentKey="iconText" inherits="GameFontHighlightOutline" justifyH="LEFT">
-					<Anchors>
-						<Anchor point="BOTTOMLEFT" relativeKey="$parent.icon" x="2" y="2"/>
-					</Anchors>
-				</FontString>
-				<FontString parentKey="order" inherits="GameFontHighlightOutline" justifyH="LEFT">
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeKey="$parent.icon" x="1" y="-4"/>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
+		<Frames>
+			<Frame parentKey="info">
+				<Size x="34" y="34"/>
+				<Anchors>
+					<Anchor point="LEFT" x="4" y="-1"/>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK" textureSubLevel="1">
+						<Texture parentKey="icon" setAllPoints="true"/>
+					</Layer>
+					<Layer level="ARTWORK" textureSubLevel="2">
+						<FontString parentKey="iconText" inherits="GameFontHighlightOutline" justifyH="LEFT">
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativeKey="$parent.icon" x="2" y="2"/>
+							</Anchors>
+						</FontString>
+						<FontString parentKey="order" inherits="GameFontHighlightOutline" justifyH="LEFT">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeKey="$parent.icon" x="1" y="-4"/>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnLoad>self:SetMouseClickEnabled(false)</OnLoad>
+					<OnEnter>
+						if not (self.spellID or self.itemLink) then return end
+						GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT")
+						if self.mountID then
+							GameTooltip:SetMountBySpellID(self.spellID)
+						elseif self.spellID then
+							GameTooltip:SetSpellByID(self.spellID)
+						else
+							GameTooltip:SetHyperlink(self.itemLink)
+						end
+						GameTooltip:Show()
+					</OnEnter>
+					<OnLeave function="GameTooltip_Hide"/>
+				</Scripts>
+			</Frame>
+		</Frames>
 	</Button>
 
 	<Button name="MJRuleGroupTemplate" inherits="MJRulePanelBaseTemplate" virtual="true">

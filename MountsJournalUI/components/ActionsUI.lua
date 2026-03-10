@@ -147,12 +147,12 @@ actions.mount.text = L["Mount"]
 function actions.mount:getIcon(value)
 	local mount = ns.additionalMounts[value]
 	if mount then
-		return mount.icon
+		return mount.icon, nil,nil,nil,nil,nil, mount.spellID
 	else
 		local mountID = C_MountJournal.GetMountFromSpell(value)
 		if mountID then
-			local _,_, icon = C_MountJournal.GetMountInfoByID(mountID)
-			return icon
+			local _, spellID, icon = C_MountJournal.GetMountInfoByID(mountID)
+			return icon, nil,nil,nil,nil, mountID, spellID
 		end
 	end
 end
@@ -196,7 +196,7 @@ actions.item.text = L["Use Item"]
 actions.item.isNumeric = true
 
 function actions.item:getIcon(value)
-	return ltl:GetItemIcon(value)
+	return ltl:GetItemIcon(value), nil,nil,nil,nil,nil,nil, ltl:GetItemLink(value)
 end
 
 actions.item.getValueDescription = conds.hitem.getValueDescription
@@ -212,7 +212,7 @@ actions.iitem.text = L["Use Inventory Item"]
 actions.iitem.isNumeric = true
 
 function actions.iitem:getIcon(value)
-	return GetInventoryItemTexture("player", value)
+	return GetInventoryItemTexture("player", value), nil,nil,nil,nil,nil,nil, GetInventoryItemLink("player", value)
 end
 
 local function getInventoryList()
@@ -272,7 +272,7 @@ actions.spell.isNumeric = true
 
 function actions.spell:getIcon(value)
 	local info = ltl:GetSpellInfo(value)
-	if info then return info.iconID end
+	if info then return info.iconID, nil,nil,nil,nil,nil, info.spellID end
 end
 
 actions.spell.getValueDescription = conds.kspell.getValueDescription

@@ -438,6 +438,32 @@ conds.combat.onlyOne = true
 
 
 ---------------------------------------------------
+-- lvlm LEVEL MORE
+conds.lvlm.text = LEVEL.." "..L["> (more than)"]
+conds.lvlm.isNumeric = true
+conds.lvlm.onlyOne = true
+
+conds.lvlm.getValueText = conds.mcond.getValueText
+
+
+---------------------------------------------------
+-- lvll LEVEL LESS
+conds.lvll.text = LEVEL.." "..L["< (less than)"]
+conds.lvll.isNumeric = true
+conds.lvll.onlyOne = true
+
+conds.lvll.getValueText = conds.mcond.getValueText
+
+
+---------------------------------------------------
+-- lvleq LEVEL EQUAL
+conds.lvleq.text = LEVEL.." "..L["= (equal to)"]
+conds.lvleq.isNumeric = true
+conds.lvleq.onlyOne = true
+
+conds.lvleq.getValueText = conds.mcond.getValueText
+
+---------------------------------------------------
 -- fs FLIGHT STYLE
 conds.fs.text = L["Flight style"]
 conds.fs.onlyOne = true

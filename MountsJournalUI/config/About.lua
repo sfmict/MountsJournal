@@ -17,6 +17,16 @@ aboutConfig:SetScript("OnShow", function(self)
 	self.model:SetRotation(.4)
 	self.model:PlayAnimKit(1371)
 
+	self.model2 = CreateFrame("PlayerModel", nil, self)
+	self.model2:SetFrameLevel(self:GetFrameLevel())
+	self.model2:SetPoint("TOPLEFT", self, "TOP")
+	self.model2:SetPoint("BOTTOMRIGHT")
+	self.model2:MakeCurrentCameraCustom()
+	self.model2:SetPosition(.65, .12, .2)
+	self.model2:SetRotation(-math.pi/2.1)
+	self.model2:SetDisplayInfo(121956)
+	self.model2:SetAnimation(1262)
+
 	-- ADDON NAME
 	local addonName = self:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
 	addonName:SetPoint("TOP", 0, -48)

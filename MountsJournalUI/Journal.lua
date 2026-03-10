@@ -1676,7 +1676,7 @@ function journal:setMountTooltip(mountID, spellID, showDescription)
 		util.addTooltipDLine(L["Avg. speed"], util:getFormattedAvgSpeed(mountDistance, mountTime))
 	end
 
-	if showDescription then
+	if showDescription or not mounts.config.mountDescriptionToggle then
 		GameTooltip:AddLine(" ")
 		GameTooltip:AddLine(sourceText, 1,1,1, true)
 		GameTooltip:AddLine(descriptionText, 1,1,1, true)

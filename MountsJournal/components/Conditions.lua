@@ -304,6 +304,36 @@ end
 
 
 ---------------------------------------------------
+-- lvlm LEVEL MORE
+conds.lvlm = {}
+
+function conds.lvlm:getFuncText(value, addKey)
+	addKey("local UnitLevel = UnitLevel")
+	return ("(UnitLevel('PLAYER') > %s)"):format(value)
+end
+
+
+---------------------------------------------------
+-- lvll LEVEL LESS
+conds.lvll = {}
+
+function conds.lvll:getFuncText(value, addKey)
+	addKey("local UnitLevel = UnitLevel")
+	return ("(UnitLevel('PLAYER') < %s)"):format(value)
+end
+
+
+---------------------------------------------------
+-- lvleq LEVEL EQUAL
+conds.lvleq = {}
+
+function conds.lvleq:getFuncText(value, addKey)
+	addKey("local UnitLevel = UnitLevel")
+	return ("(UnitLevel('PLAYER') == %s)"):format(value)
+end
+
+
+---------------------------------------------------
 -- fs FLIGHT STYLE
 conds.fs = {}
 
