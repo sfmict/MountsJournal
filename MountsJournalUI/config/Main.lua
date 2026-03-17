@@ -4,8 +4,6 @@ local specificDB = ns.specificDB
 local config = CreateFrame("FRAME", "MountsJournalConfig")
 ns.config = config
 config:Hide()
--- config.macroName = "MJMacro"
--- config.secondMacroName = "MJSecondMacro"
 
 
 -- SHOW CONFIG
@@ -21,26 +19,13 @@ config:SetScript("OnShow", function(self)
 		self.cancelBtn:Enable()
 	end
 
-	-- TOOLTIP
-	local function setTooltip(frame, anchor, title, text)
-		frame:SetScript("OnEnter", function()
-			GameTooltip:SetOwner(frame, anchor)
-			GameTooltip:SetText(title)
-			GameTooltip:AddLine(text, 1, 1, 1, 1, true)
-			GameTooltip:Show()
-		end)
-
-		frame:SetScript("OnLeave", function()
-			GameTooltip_Hide()
-		end)
-	end
-
 	-- GROUP
-	local function createGropPanel(parent, numCheck, numComboBox)
+	local grx, gry = 6, -8
+	local function createGroupPanel(parent, numCheck, numComboBox)
 		local group = CreateFrame("FRAME", nil, parent, "MJOptionsPanel")
 		group:SetPoint("RIGHT", parent:GetParent(), 0, 0)
-		-- check = 26 + 3, combobox = 25 + 8 + 2
-		group:SetHeight(29 * numCheck + 35 * (numComboBox or 0) + 3)
+		-- check = 26 + 3, combobox = 25 + 8 + 2, 5*2+3
+		group:SetHeight(29 * numCheck + 35 * (numComboBox or 0) - gry * 2 - 3)
 		return group
 	end
 
@@ -155,12 +140,12 @@ config:SetScript("OnShow", function(self)
 	self.rightPanelScroll:SetPoint("BOTTOMRIGHT", self.rightPanel, -26, 5)
 
 	-- HERB GROUP
-	self.herbGroup = createGropPanel(self.rightPanelScroll.child, 2)
+	self.herbGroup = createGroupPanel(self.rightPanelScroll.child, 2)
 	self.herbGroup:SetPoint("TOPLEFT", 3, -2)
 
 	-- USE HERBALISM MOUNTS
 	self.useHerbMounts = CreateFrame("CheckButton", nil, self.herbGroup, "MJCheckButtonTemplate")
-	self.useHerbMounts:SetPoint("TOPLEFT", self.herbGroup, 3, -3)
+	self.useHerbMounts:SetPoint("TOPLEFT", self.herbGroup, grx, gry)
 	self.useHerbMounts.Text:SetText(L["UseHerbMounts"])
 	self.useHerbMounts.tooltipText = L["UseHerbMounts"]
 	self.useHerbMounts.tooltipRequirement = L["UseHerbMountsDescription"]
@@ -174,12 +159,12 @@ config:SetScript("OnShow", function(self)
 	self.herbMountsOnZones:HookScript("OnClick", enableBtns)
 
 	-- REPAIR GROUP
-	self.repairGroup = createGropPanel(self.rightPanelScroll.child, 3, 1)
+	self.repairGroup = createGroupPanel(self.rightPanelScroll.child, 3, 1)
 	self.repairGroup:SetPoint("TOPLEFT", self.herbGroup, "BOTTOMLEFT", 0, -5)
 
 	-- USE REPAIR MOUNTS
 	self.useRepairMounts = CreateFrame("CheckButton", nil, self.repairGroup, "MJCheckButtonTemplate")
-	self.useRepairMounts:SetPoint("TOPLEFT", self.repairGroup, 3, -3)
+	self.useRepairMounts:SetPoint("TOPLEFT", self.repairGroup, grx, gry)
 	self.useRepairMounts.Text:SetText(L["If item durability is less than"])
 	self.useRepairMounts.tooltipText = L["If item durability is less than"]
 	self.useRepairMounts.tooltipRequirement = L["UseRepairMountsDescription"]
@@ -325,12 +310,12 @@ config:SetScript("OnShow", function(self)
 	end)
 
 	-- MAGIC BROOM GROUP
-	self.magicBroomGroup = createGropPanel(self.rightPanelScroll.child, 1, 1)
+	self.magicBroomGroup = createGroupPanel(self.rightPanelScroll.child, 1, 1)
 	self.magicBroomGroup:SetPoint("TOPLEFT", self.repairGroup, "BOTTOMLEFT", 0, -5)
 
 	-- USE MAGIC BROOM
 	self.useMagicBroom = CreateFrame("CheckButton", nil, self.magicBroomGroup, "MJCheckButtonTemplate")
-	self.useMagicBroom:SetPoint("TOPLEFT", self.magicBroomGroup, 3, -3)
+	self.useMagicBroom:SetPoint("TOPLEFT", self.magicBroomGroup, grx, gry)
 	self.useMagicBroom.Text:SetPoint("RIGHT", self.magicBroomGroup, -4, 0)
 	self.useMagicBroom.Text:SetText(L["UseHallowsEndMounts"])
 	self.useMagicBroom.tooltipText = L["UseHallowsEndMounts"]
@@ -413,11 +398,11 @@ config:SetScript("OnShow", function(self)
 
 	-- USE UNDERLIGHT ANGLER
 	if C_Item.DoesItemExistByID(133755) then
-		self.underlightAnglerGroup = createGropPanel(self.rightPanelScroll.child, 2)
+		self.underlightAnglerGroup = createGroupPanel(self.rightPanelScroll.child, 2)
 		self.underlightAnglerGroup:SetPoint("TOPLEFT", self.magicBroomGroup, "BOTTOMLEFT", 0, -5)
 
 		self.useUnderlightAngler = CreateFrame("CheckButton", nil, self.underlightAnglerGroup, "MJCheckButtonTemplate")
-		self.useUnderlightAngler:SetPoint("TOPLEFT", self.underlightAnglerGroup, 3, -3)
+		self.useUnderlightAngler:SetPoint("TOPLEFT", self.underlightAnglerGroup, grx, gry)
 		local underlightAngler = Item:CreateFromItemID(133755)
 		underlightAngler:ContinueOnItemLoad(function()
 			self.useUnderlightAngler.Text:SetText(L["Use %s"]:format(underlightAngler:GetItemLink()))
@@ -433,12 +418,12 @@ config:SetScript("OnShow", function(self)
 	end
 
 	-- PET GROUP
-	self.petGroup = createGropPanel(self.rightPanelScroll.child, 4)
+	self.petGroup = createGroupPanel(self.rightPanelScroll.child, 4)
 	self.petGroup:SetPoint("TOPLEFT", self.underlightAnglerGroup or self.magicBroomGroup, "BOTTOMLEFT", 0, -5)
 
 	-- SUMMON PET EVERY N MINUTES
 	self.summonPetEvery = CreateFrame("CheckButton", nil, self.petGroup, "MJCheckButtonTemplate")
-	self.summonPetEvery:SetPoint("TOPLEFT", self.petGroup, 3, -3)
+	self.summonPetEvery:SetPoint("TOPLEFT", self.petGroup, grx, gry)
 	self.summonPetEvery.Text:SetText(L["Summon a pet every"])
 	self.summonPetEvery:HookScript("OnClick",  enableBtns)
 
@@ -492,12 +477,12 @@ config:SetScript("OnShow", function(self)
 	self.noPetInGroup:HookScript("OnClick", enableBtns)
 
 	-- MOUNT LIST GROUP
-	self.mountListGroup = createGropPanel(self.rightPanelScroll.child, 3)
+	self.mountListGroup = createGroupPanel(self.rightPanelScroll.child, 3)
 	self.mountListGroup:SetPoint("TOPLEFT", self.petGroup, "BOTTOMLEFT", 0, -5)
 
 	-- COLORIZED NAMES
 	self.coloredMountNames = CreateFrame("CheckButton", nil, self.mountListGroup, "MJCheckButtonTemplate")
-	self.coloredMountNames:SetPoint("TOPLEFT", self.mountListGroup, 3, -3)
+	self.coloredMountNames:SetPoint("TOPLEFT", self.mountListGroup, grx, gry)
 	self.coloredMountNames.Text:SetPoint("RIGHT", self.mountListGroup, -4, 0)
 	self.coloredMountNames.Text:SetText(L["Colored mount names by rarity"])
 	self.coloredMountNames:HookScript("OnClick", enableBtns)
@@ -551,12 +536,12 @@ config:SetScript("OnShow", function(self)
 	self.statisticCollection:HookScript("OnClick", enableBtns)
 
 	-- TOOLTIP GROUP
-	self.tooltipGroup = createGropPanel(self.rightPanelScroll.child, 2)
-	self.tooltipGroup:SetPoint("TOPLEFT", self.statisticCollection, "BOTTOMLEFT", -3, -12)
+	self.tooltipGroup = createGroupPanel(self.rightPanelScroll.child, 2)
+	self.tooltipGroup:SetPoint("TOPLEFT", self.statisticCollection, "BOTTOMLEFT", -grx, -12)
 
 	-- TOOLTIP MOUNT
 	self.tooltipMount = CreateFrame("CheckButton", nil, self.tooltipGroup, "MJCheckButtonTemplate")
-	self.tooltipMount:SetPoint("TOPLEFT", self.tooltipGroup, 3, -3)
+	self.tooltipMount:SetPoint("TOPLEFT", self.tooltipGroup, grx, gry)
 	self.tooltipMount.Text:SetPoint("RIGHT", self.tooltipGroup, -4, 0)
 	self.tooltipMount.Text:SetText(L["Show mount in unit tooltip"])
 	self.tooltipMount:HookScript("OnClick", enableBtns)
@@ -579,6 +564,9 @@ config:SetScript("OnShow", function(self)
 		util.showHelpJournal()
 		btn:Disable()
 	end)
+
+	-- CHILD
+	self.rightPanelScroll.child:SetHeight(self.rightPanelScroll.child:GetTop() - self.resetHelp:GetBottom() + 5)
 
 	-- CANCEL
 	self.cancelBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")

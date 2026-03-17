@@ -425,6 +425,7 @@ conds.flyable.onlyOne = true
 conds.dead.text = L["The player is dead"]
 conds.dead.onlyOne = true
 
+
 ---------------------------------------------------
 -- rest
 conds.rest.text = L["The player is resting"]
@@ -468,14 +469,21 @@ conds.lvleq.getValueText = conds.mcond.getValueText
 conds.fs.text = L["Flight style"]
 conds.fs.onlyOne = true
 
+function conds.fs:getName(value)
+	if value == 1 then return ACCESSIBILITY_ADV_FLY_LABEL, 5142725 end
+	return L["Steady Flight"], 5142726
+end
+
 function conds.fs:getValueText(value)
-	return value == 1 and ACCESSIBILITY_ADV_FLY_LABEL or L["Steady Flight"]
+	local name, icon = self:getName(value)
+	return CreateSimpleTextureMarkup(icon, ns.RULE_ICON_SIZE)..name
 end
 
 function conds.fs:getValueList(value, func)
 	local list = {}
 	for i = 1, 2 do
-		list[i] = createRadioInfo(self:getValueText(i), i, func, i == value)
+		local name, icon = self:getName(i)
+		list[i] = createRadioInfo(name, i, func, i == value, nil, icon)
 	end
 	return list
 end
@@ -1267,21 +1275,37 @@ end
 ---------------------------------------------------
 -- mtrack MINIMAP TRACKING
 conds.mtrack.text = TRACKING
+conds.mtrack.TRACKING_SPELL_OVERRIDE_ATLAS = {
+	[43308] = "professions_tracking_fish", -- Find Fish
+	[2580] = "professions_tracking_ore", -- Find Minerals 1
+	[8388] = "professions_tracking_ore", -- Find Minerals 2
+	[2383] = "professions_tracking_herb", -- Find Herbs 1
+	[8387] = "professions_tracking_herb", -- Find Herbs 2
+	[122026] = "WildBattlePetCapturable", -- Track Pets
+}
 
 function conds.mtrack:getValueText(value)
-	local k, v, name = (":"):split(value, 2)
+	local k, v, name, icon = (":"):split(value, 2)
 	v = tonumber(v)
 	for i = 1, C_Minimap.GetNumTrackingTypes() do
 		if C_Minimap.GetTrackingFilter(i)[k] == v then
-			name = C_Minimap.GetTrackingInfo(i).name
+			local trackingInfo = C_Minimap.GetTrackingInfo(i)
+			name = trackingInfo.name
+			icon = self.TRACKING_SPELL_OVERRIDE_ATLAS[trackingInfo.spellID] or trackingInfo.texture
 			break
 		end
 	end
 	if not name and k == "spellID" then
 		name = C_Spell.GetSpellName(v)
+		icon = self.TRACKING_SPELL_OVERRIDE_ATLAS[v] or C_Spell.GetSpellTexture(v)
 	end
 	if name then
-		return sName_ID:format(name, value)
+		if icon and C_Texture.GetAtlasInfo(icon) then
+			icon = CreateAtlasMarkup(icon, ns.RULE_ICON_SIZE, ns.RULE_ICON_SIZE)
+		else
+			icon = CreateSimpleTextureMarkup(icon or util.noIcon, ns.RULE_ICON_SIZE)
+		end
+		return sIcon_Name_ID:format(icon, name, value)
 	end
 	return value
 end
@@ -1302,15 +1326,6 @@ function conds.mtrack:getValueList(value, func)
 		[Enum.MinimapTrackingFilter.Mailbox] = true,
 	}
 
-	local TRACKING_SPELL_OVERRIDE_ATLAS = {
-		[43308] = "professions_tracking_fish", -- Find Fish
-		[2580] = "professions_tracking_ore", -- Find Minerals 1
-		[8388] = "professions_tracking_ore", -- Find Minerals 2
-		[2383] = "professions_tracking_herb", -- Find Herbs 1
-		[8387] = "professions_tracking_herb", -- Find Herbs 2
-		[122026] = "WildBattlePetCapturable", -- Track Pets
-	}
-
 	local hunterList = {}
 	local townfolkList = {}
 	local regularList = {}
@@ -1323,7 +1338,7 @@ function conds.mtrack:getValueList(value, func)
 
 			local info = createRadioInfo(
 				trackingInfo.name, v, func, v == value, sID:format(v),
-				TRACKING_SPELL_OVERRIDE_ATLAS[trackingInfo.spellID] or trackingInfo.texture
+				self.TRACKING_SPELL_OVERRIDE_ATLAS[trackingInfo.spellID] or trackingInfo.texture
 			)
 
 			if isHunterClass and trackingInfo.subType == HUNTER_TRACKING then
@@ -1361,7 +1376,9 @@ conds.prof.text = PROFESSIONS_BUTTON
 function conds.prof:getValueText(values)
 	local names = {}
 	for i, value in ipairs(values) do
-		names[i] = C_TradeSkillUI.GetTradeSkillDisplayName(value) or RED_FONT_COLOR:WrapTextInColorCode(value)
+		local name = C_TradeSkillUI.GetTradeSkillDisplayName(value) or RED_FONT_COLOR:WrapTextInColorCode(value)
+		local icon = CreateSimpleTextureMarkup(C_TradeSkillUI.GetTradeSkillTexture(value) or util.noIcon, ns.RULE_ICON_SIZE)
+		names[i] = icon..name
 	end
 	return concat(names, "; ")
 end

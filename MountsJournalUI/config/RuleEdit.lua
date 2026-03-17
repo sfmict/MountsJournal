@@ -577,7 +577,7 @@ function ruleEditor:openCondTypeMenu(btn, btnData)
 	local function func(f)
 		btnData[2] = f.value
 		btnData[3] = nil
-		btn:SetText(f.text)
+		btn:SetText(conds[f.value].text)
 		self:setCondValueOption(btn:GetParent(), btnData, true)
 		self:ruleCheck()
 	end
@@ -711,7 +711,7 @@ function ruleEditor:openActionTypeMenu(btn)
 	local function func(f)
 		actionData[1] = f.value
 		actionData[2] = nil
-		btn.text:SetText(f.text)
+		btn.text:SetText(actions[f.value].text)
 		self:setActionValueOption(true)
 		self:ruleCheck()
 	end

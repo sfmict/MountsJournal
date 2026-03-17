@@ -305,14 +305,16 @@ function iconData:refreshFilters()
 		end
 	end
 
-	if self.filters.extra then
+	if self.filters.extra and self.filters.spell then
 		for i = 1, #self.spell do
 			local icon = self.spell[i]
 			if noText or tostring(icon):find(text, 1, true) then
 				self.filtredIcons[#self.filtredIcons + 1] = getIconTexture(icon)
 			end
 		end
+	end
 
+	if self.filters.extra and self.filters.item then
 		for i = 1, #self.item do
 			local icon = self.item[i]
 			if noText or tostring(icon):find(text, 1, true) then
