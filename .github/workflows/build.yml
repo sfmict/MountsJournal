@@ -28,16 +28,16 @@ jobs:
         node genDB.js
         git -C $GITHUB_WORKSPACE add -f MountsJournalUI/database/ColorDB.lua
 
-    - name: download rarity tool
-      uses: actions/checkout@v6
-      with:
-        repository: sfmict/MountRarity
-        token: ${{ secrets.OAUTH }}
-        path: .mountRarity
+    # - name: download rarity tool
+    #   uses: actions/checkout@v6
+    #   with:
+    #     repository: sfmict/MountRarity
+    #     token: ${{ secrets.OAUTH }}
+    #     path: .mountRarity
 
-    - name: updating rarity
-      id: rarity
-      run: node .mountRarity/getRarity.js
+    # - name: updating rarity
+    #   id: rarity
+    #   run: node .mountRarity/getRarity.js
 
     - name: download packager
       uses: actions/checkout@v6
@@ -53,7 +53,7 @@ jobs:
       run: node my-tools/packager.js
       env:
         GITHUB_OAUTH: ${{ secrets.OAUTH }}
-        CHANGELOG_LINE: ${{ steps.rarity.outputs.CHANGELOG_LINE }}
+        # CHANGELOG_LINE: ${{ steps.rarity.outputs.CHANGELOG_LINE }}
         CF_API_KEY: ${{ secrets.CF_API_KEY }}
         CF_ID: 293280
         WAGO_API_KEY: ${{ secrets.WAGO_API_KEY }}
