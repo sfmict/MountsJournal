@@ -74,12 +74,12 @@ ChatFrame_AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT_LEADER", filterFunc)
 
 
 -- TEST
---C_Timer.After(0, function()
---	C_ChatInfo.SendChatMessage(util.getLink("Profile", "").." "..util.getLink("Profile", next(mounts.profiles), nil), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
---	C_ChatInfo.SendChatMessage(util.getLink("Snippet", next(mounts.globalDB.snippets), nil), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
---	C_ChatInfo.SendChatMessage(util.getLink("Rule Set", mounts.globalDB.ruleSets[1].name), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
---	C_ChatInfo.SendChatMessage(util.getLink("Rule", "1:1:"..mounts.globalDB.ruleSets[1].name), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
---end)
+-- C_Timer.After(0, function()
+-- 	C_ChatInfo.SendChatMessage(util.getLink("Profile", "").." "..util.getLink("Profile", next(mounts.profiles), nil), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
+-- 	C_ChatInfo.SendChatMessage(util.getLink("Snippet", next(mounts.globalDB.snippets), nil), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
+-- 	C_ChatInfo.SendChatMessage(util.getLink("Rule Set", mounts.globalDB.ruleSets[1].name), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
+-- 	C_ChatInfo.SendChatMessage(util.getLink("Rule", "1:1:"..mounts.globalDB.ruleSets[1].name), "WHISPER", select(2, GetDefaultLanguage()), UnitName("player"))
+-- end)
 
 
 local function showTooltip(lines)
@@ -104,12 +104,11 @@ end
 -- RECEIVING DATA
 local comm = LibStub("AceComm-3.0")
 local delayedImport = CreateFrame("FRAME")
-local deflateConfig = {level = 9}
 local tooltipLoading, receivedData
 
 
 local function requestData(characterName, dataType, id)
-	local transmitString = util.getStringFromData({m = "dr", t = dataType, id = id}, nil, deflateConfig)
+	local transmitString = util.getStringFromData({m = "dr", t = dataType, id = id})
 	comm:SendCommMessage(addon, transmitString, "WHISPER", characterName)
 end
 
@@ -187,7 +186,7 @@ local function getTransmitData(data)
 	elseif data.t == "Snippet" then
 		toTransmit = mounts.globalDB.snippets[data.id]
 	end
-	return toTransmit and util.getStringFromData({m = "d", t = data.t, id = data.id, d = toTransmit}, nil, deflateConfig)
+	return toTransmit and util.getStringFromData({m = "d", t = data.t, id = data.id, d = toTransmit})
 end
 
 

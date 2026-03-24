@@ -2345,7 +2345,6 @@ function journal:sortMounts()
 			data.isFavorite = mount:getIsFavorite()
 			data.isCollected = mount:isCollected()
 			data.spellID = mount.spellID
-			data.needsFanfare = false
 			data.additional = true
 			data.by = getByMount(fSort.by, mount, data)
 			data.by2 = fSort.by2 == fSort.by and data.by or getByMount(fSort.by2, mount, data)
@@ -2363,26 +2362,13 @@ function journal:sortMounts()
 		local mb = mCache[b]
 
 		-- FANFARE
-		if ma.needFanfare and not mb.needFanfare then return true
-		elseif not ma.needFanfare and mb.needFanfare then return false end
-
+		if ma.needFanfare ~= mb.needFanfare then return ma.needFanfare end
 		-- COLLECTED
-		if fSort.collectedFirst then
-			if ma.isCollected and not mb.isCollected then return true
-			elseif not ma.isCollected and mb.isCollected then return false end
-		end
-
+		if fSort.collectedFirst and ma.isCollected ~= mb.isCollected then return ma.isCollected end
 		-- FAVORITES
-		if fSort.favoritesFirst then
-			if ma.isFavorite and not mb.isFavorite then return true
-			elseif not ma.isFavorite and mb.isFavorite then return false end
-		end
-
+		if fSort.favoritesFirst and ma.isFavorite ~= mb.isFavorite then return ma.isFavorite end
 		-- ADDITIONAL
-		if fSort.additionalFirst then
-			if ma.additional and not mb.additional then return true
-			elseif not ma.additional and mb.additional then return false end
-		end
+		if fSort.additionalFirst and ma.additional ~= mb.additional then return ma.additional end
 
 		-- BY
 		if ma.by < mb.by then return not fSort.reverse

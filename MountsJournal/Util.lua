@@ -241,12 +241,32 @@ end
 
 
 do
-	local libSerialize = LibStub("LibSerialize")
-	local libDeflate = LibStub("LibDeflate")
-	local compressedCache
+	local compressedCache, encodeForWoWAddonChannel, decodeForWoWAddonChannel
 
-	function util.getStringFromData(data, forPrint, config)
-		local serialized = libSerialize:Serialize(data)
+	function encodeForWoWAddonChannel(str)
+		local encode_translate = {
+			["\000"] = "\001\002",
+			["\001"] = "\001\003",
+		}
+		function encodeForWoWAddonChannel(str)
+			return str:gsub("[%z\001]", encode_translate)
+		end
+		return encodeForWoWAddonChannel(str)
+	end
+
+	function decodeForWoWAddonChannel(str)
+		local decode_translate = {
+			["\001\002"] = "\000",
+			["\001\003"] = "\001",
+		}
+		function decodeForWoWAddonChannel(str)
+			return str:gsub("\001[\002\003]", decode_translate)
+		end
+		return decodeForWoWAddonChannel(str)
+	end
+
+	function util.getStringFromData(data, forPrint)
+		local serialized = C_EncodingUtil.SerializeCBOR(data)
 		local serverTime, compressed = GetServerTime()
 		compressedCache = compressedCache or {}
 
@@ -255,7 +275,7 @@ do
 			compressed = compressedCache[serialized].compressed
 			compressedCache[serialized].lastAccess = serverTime
 		else
-			compressed = libDeflate:CompressDeflate(serialized, config)
+			compressed = C_EncodingUtil.CompressString(serialized, Enum.CompressionMethod.Deflate, Enum.CompressionLevel.OptimizeForSize)
 			compressedCache[serialized] = {
 				compressed = compressed,
 				lastAccess = serverTime,
@@ -269,23 +289,22 @@ do
 		end
 
 		if forPrint then
-			return libDeflate:EncodeForPrint(compressed)
+			return C_EncodingUtil.EncodeBase64(compressed, Enum.Base64Variant.StandardUrlSafe)
 		else
-			return libDeflate:EncodeForWoWAddonChannel(compressed)
+			return encodeForWoWAddonChannel(compressed)
 		end
 	end
 
 	function util.getDataFromString(str, fromPrint)
-		local decoded
+		local decoded, success, decompressed, data
 		if fromPrint then
-			decoded = libDeflate:DecodeForPrint(str)
+			decoded = C_EncodingUtil.DecodeBase64(str, Enum.Base64Variant.StandardUrlSafe)
 		else
-			decoded = libDeflate:DecodeForWoWAddonChannel(str)
+			decoded = decodeForWoWAddonChannel(str)
 		end
-		if not decoded then return end
-		local decompressed = libDeflate:DecompressDeflate(decoded)
-		if not decompressed then return end
-		local success, data = libSerialize:Deserialize(decompressed)
+		success, decompressed = pcall(C_EncodingUtil.DecompressString, decoded, Enum.CompressionMethod.Deflate)
+		if not success then return end
+		success, data = pcall(C_EncodingUtil.DeserializeCBOR, decompressed)
 		if success then return data end
 	end
 end

@@ -40,7 +40,7 @@ end
 
 
 local function getIsFavorite(self)
-	return mounts.additionalFavorites[self.spellID]
+	return mounts.additionalFavorites[self.spellID] or false
 end
 
 
