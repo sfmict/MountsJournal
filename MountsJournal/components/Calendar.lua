@@ -1,6 +1,6 @@
 local _, ns = ...
 local mounts, util = ns.mounts, ns.util
-local C_Calendar, ipairs, sort, strcmputf8i = C_Calendar, ipairs, sort, strcmputf8i
+local C_Calendar, ipairs, sort, strcmputf8i, issecretvalue = C_Calendar, ipairs, sort, strcmputf8i, issecretvalue
 local calendar = util.createFromEventsMixin()
 ns.calendar = calendar
 calendar.filterBackup = {}
@@ -191,6 +191,14 @@ end
 calendar:on("LOGOUT", calendar.checkHolidayNames)
 
 
+function calendar:RESTRICTION_CHANGED(_, stState)
+	if stState == 0 then
+		self:off("RESTRICTION_CHANGED")
+		self:updateTodayEvents()
+	end
+end
+
+
 function calendar:updateTodayEvents()
 	local date = C_DateAndTime.GetCurrentCalendarTime()
 	local secondsToUpdate = ((24 - date.hour) * 60 + 1 - date.minute) * 60
@@ -202,7 +210,10 @@ function calendar:updateTodayEvents()
 	for i = 1, C_Calendar.GetNumDayEvents(0, date.monthDay) do
 		local e = C_Calendar.GetDayEvent(0, date.monthDay, i)
 
-		if e.sequenceType == "START" then
+		if issecretvalue(e.sequenceType) then
+			self:on("RESTRICTION_CHANGED", self.RESTRICTION_CHANGED)
+			break
+		elseif e.sequenceType == "START" then
 			local secondsToEvent = ((e.startTime.hour - date.hour) * 60 + e.startTime.minute - date.minute) * 60
 			if secondsToEvent <= 0 then
 				self.activeHolidays[self:getEventKey(e)] = true

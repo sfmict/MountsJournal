@@ -297,6 +297,7 @@ end
 ---------------------------------------------------
 -- holiday
 conds.holiday.text = CALENDAR_FILTER_HOLIDAYS
+conds.holiday.combatLock = true
 
 function conds.holiday:getValueText(values)
 	local names = {}

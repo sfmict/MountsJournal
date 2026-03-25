@@ -276,6 +276,7 @@ end
 function mounts:ADDON_RESTRICTION_STATE_CHANGED(stType, stState)
 	self.stType = stType
 	self.stState = stState
+	self:event("RESTRICTION_CHANGED", stType, stState)
 end
 
 
