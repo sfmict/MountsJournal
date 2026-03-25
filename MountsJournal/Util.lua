@@ -1,6 +1,6 @@
 local addon, ns = ...
 local L = ns.L
-local type, tremove, next, tostring, math = type, tremove, next, tostring, math
+local type, tremove, next, tostring, math, issecretvalue = type, tremove, next, tostring, math, issecretvalue
 local C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup, IsSpellKnown, IsSpellInSpellBook, IsMounted = C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup, C_SpellBook.IsSpellKnown, C_SpellBook.IsSpellInSpellBook, IsMounted
 local events, eventsMixin, dot = {}, {}, "."
 
@@ -204,7 +204,7 @@ function util.getUnitMount(unit)
 		ctok, a,b,c,d,e = GetAuraSlots(unit, filter, 5, ctok)
 		while a do
 			local data = GetAuraDataBySlot(unit, a)
-			if data then
+			if data and not issecretvalue(data.spellId) then
 				local auraID = data.spellId
 				if ns.additionalMountBuffs[auraID] then
 					return ns.additionalMountBuffs[auraID].spellID, nil, data.auraInstanceID
