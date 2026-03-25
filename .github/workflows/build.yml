@@ -28,16 +28,16 @@ jobs:
         node genDB.js
         git -C $GITHUB_WORKSPACE add -f MountsJournalUI/database/ColorDB.lua
 
-    # - name: download rarity tool
-    #   uses: actions/checkout@v6
-    #   with:
-    #     repository: sfmict/MountRarity
-    #     token: ${{ secrets.OAUTH }}
-    #     path: .mountRarity
+    - name: download rarity tool
+      uses: actions/checkout@v6
+      with:
+        repository: sfmict/MountRarity
+        token: ${{ secrets.OAUTH }}
+        path: .mountRarity
 
-    # - name: updating rarity
-    #   id: rarity
-    #   run: node .mountRarity/getRarity.js
+    - name: updating rarity
+      id: rarity
+      run: node .mountRarity/updateRarity.js
 
     - name: download packager
       uses: actions/checkout@v6
