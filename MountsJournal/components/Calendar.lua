@@ -105,7 +105,7 @@ end
 
 
 function calendar:getHolidayList()
-	local holidays, addedIDs = {}, {}
+	local holidays, addedIDs, isSecret = {}, {}, false
 
 	self:setBackup()
 
@@ -123,7 +123,10 @@ function calendar:getHolidayList()
 	for day = 1, monthInfo.numDays do
 		for i = 1, C_Calendar.GetNumDayEvents(0, day) do
 			local e = C_Calendar.GetDayEvent(0, day, i)
-			if e.calendarType == "HOLIDAY" then
+			if issecretvalue(e.calendarType) then
+				isSecret = true
+				break
+			elseif e.calendarType == "HOLIDAY" then
 				local k = self:getEventKey(e)
 				if not addedIDs[k] then
 					local eInfo = C_Calendar.GetHolidayInfo(0, day, i)
@@ -150,7 +153,7 @@ function calendar:getHolidayList()
 	self:restoreBackup()
 
 	self:sortHolidays(holidays)
-	return holidays
+	return holidays, isSecret
 end
 
 
@@ -282,6 +285,7 @@ calendar:on("ADDON_INIT", function(self)
 		local numEvents = C_Calendar.GetNumDayEvents(0, date.monthDay)
 		for i = 1, numEvents do
 			local e = C_Calendar.GetDayEvent(0, date.monthDay, i)
+			if issecretvalue(e.eventID) then break end
 			if names[e.eventID] == false then
 				names[e.eventID] = e.title
 				numNoName = numNoName - 1

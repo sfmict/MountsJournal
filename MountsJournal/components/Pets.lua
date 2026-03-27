@@ -1,6 +1,7 @@
 local _, ns = ...
 local mounts, util = ns.mounts, ns.util
-local random, C_PetJournal, C_Spell, AuraUtil, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, UnitIsAFK, DoEmote = random, C_PetJournal, C_Spell, AuraUtil, C_Timer, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, UnitIsAFK, DoEmote
+local C_PetJournal, C_Spell, AuraUtil, C_Timer, C_Secrets = C_PetJournal, C_Spell, AuraUtil, C_Timer, C_Secrets
+local random, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, UnitIsAFK, issecretvalue = random, wipe, InCombatLockdown, IsFlying, UnitHasVehicleUI, UnitCastingInfo, UnitChannelInfo, IsStealthed, UnitIsGhost, UnitIsAFK, issecretvalue
 local curRegion = GetCurrentRegion()
 local pets = CreateFrame("FRAME")
 ns.pets = util.setEventsMixin(pets)
@@ -122,7 +123,7 @@ do
 	}
 
 	local function checkAura(auraData)
-		if aurasList[auraData.spellId] then
+		if issecretvalue(auraData.spellId) or aurasList[auraData.spellId] then
 			aura = true
 			return true
 		end

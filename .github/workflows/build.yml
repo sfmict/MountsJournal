@@ -53,7 +53,7 @@ jobs:
       run: node my-tools/packager.js
       env:
         GITHUB_OAUTH: ${{ secrets.OAUTH }}
-        # CHANGELOG_LINE: ${{ steps.rarity.outputs.CHANGELOG_LINE }}
+        CHANGELOG_LINE: ${{ steps.rarity.outputs.CHANGELOG_LINE }}
         CF_API_KEY: ${{ secrets.CF_API_KEY }}
         CF_ID: 293280
         WAGO_API_KEY: ${{ secrets.WAGO_API_KEY }}

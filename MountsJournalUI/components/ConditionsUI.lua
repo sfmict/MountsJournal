@@ -333,7 +333,7 @@ function conds.holiday:getValueList(values, cb, dd, notReset)
 	list[2] = {list = subList}
 
 	if not notReset then ns.calendar:setCurrentDate() end
-	local eList = ns.calendar:getHolidayList()
+	local eList, isSecret = ns.calendar:getHolidayList()
 	local checked = function(btn) return tContains(values, btn.value) end
 
 	local function notEContains(eventID)
@@ -373,6 +373,10 @@ function conds.holiday:getValueList(values, cb, dd, notReset)
 		info.arg2 = e.description
 		info.OnTooltipShow = OnTooltipShow
 		subList[#subList + 1] = info
+	end
+
+	if isSecret then
+		subList[#subList + 1] = util.createEmptyInfo(isSecret)
 	end
 
 	return list
