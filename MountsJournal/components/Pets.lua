@@ -123,7 +123,7 @@ do
 	}
 
 	local function checkAura(auraData)
-		if issecretvalue(auraData.spellId) or aurasList[auraData.spellId] then
+		if not issecretvalue(auraData.spellId) and aurasList[auraData.spellId] then
 			aura = true
 			return true
 		end
