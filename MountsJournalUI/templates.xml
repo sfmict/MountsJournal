@@ -431,9 +431,9 @@
 			</Frame>
 
 			<Frame parentKey="gridModelSettings">
+				<Size x="400" y="30"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="30" y="-60"/>
-					<Anchor point="RIGHT" relativeKey="$parent.filtersPanel.searchBox" relativePoint="LEFT" x="-6"/>
 				</Anchors>
 				<Frames>
 					<Frame parentKey="strideSlider" inherits="MJSliderFrameTemplate" hidden="false">

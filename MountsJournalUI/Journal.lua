@@ -20,10 +20,8 @@ journal.colors = {
 	mount3 = CreateColor(.231, .533, .588),
 	mount4 = CreateColor(.03, .48, .03),
 }
-
-
-local metaMounts = {__index = {[0] = 0}}
-journal.indexByMountID = setmetatable({}, metaMounts)
+-- local metaMounts = {__index = {[0] = 0}}
+journal.indexByMountID = {}
 
 
 function journal:init()
@@ -691,7 +689,7 @@ function journal:init()
 			tw = "繁體中文",
 		}
 
-		local function langSelect(btn)
+		info.func = function(btn)
 			mounts.config.wowheadLinkLang = btn.value
 			langButton:SetText(btn.value)
 			self:updateMountDisplay(true)
@@ -701,7 +699,6 @@ function journal:init()
 			info.value = lang
 			info.text = langs[lang]
 			info.checked = lang == mounts.config.wowheadLinkLang
-			info.func = langSelect
 			langButton:ddAddButton(info)
 		end
 	end)
@@ -1753,13 +1750,14 @@ function journal:setScrollGridMounts(force)
 	else
 		self.filtersPanel:SetPoint("TOPLEFT", 4, -60)
 	end
+	self.searchBox:ClearAllPoints()
+	self.searchBox:SetPoint("TOPRIGHT", -95, -5)
 	playerToggle:ClearAllPoints()
 
 	if grid ~= 3 then
 		self.inspectFrame:Hide()
 		self.filtersToggle:Show()
 		self.filtersToggle.setFiltersToggleCheck(mounts.config.filterToggle)
-		self.searchBox:SetWidth(131)
 		self.gridModelSettings:Hide()
 		playerToggle:SetParent(self.modelScene)
 		playerToggle:SetScale(.5)
@@ -1770,10 +1768,10 @@ function journal:setScrollGridMounts(force)
 			self.rightInset:Show()
 		end
 	else
-		self.filtersPanel:SetPoint("Right", -4, 0)
+		self.filtersPanel:SetPoint("RIGHT", -4, 0)
+		self.searchBox:SetPoint("LEFT", self.gridModelSettings, "RIGHT", 6, 0)
 		self.filtersToggle:Hide()
 		self.filtersToggle.setFiltersToggleCheck(false)
-		self.searchBox:SetWidth(131 + 22)
 		self.gridModelSettings:Show()
 		playerToggle:SetParent(self.gridModelSettings)
 		playerToggle:SetScale(.36)

@@ -184,7 +184,7 @@ ruleEditor:HookScript("OnShow", function(self)
 	end)
 
 	self.ok:SetScript("OnClick", function(btn)
-		rules:save(self.list, self.order, self.data, self.order)
+		rules:save(self.list, self.data, self.curData)
 		btn:GetParent():GetParent():Hide()
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
@@ -421,7 +421,7 @@ function ruleEditor:add(list, data)
 	self.addTypeButton2:Show()
 
 	self.list = list
-	self.order = nil
+	self.curData = nil
 	self.data = data or {{false}, action = {}}
 
 	self:selectAddBtn(self.data.action and self.addTypeButton1 or self.addTypeButton2, 0)
@@ -431,7 +431,7 @@ function ruleEditor:add(list, data)
 end
 
 
-function ruleEditor:edit(list, order, data)
+function ruleEditor:edit(list, data)
 	self:Show()
 	self.title:Show()
 	self.addTypeButton1:Hide()
@@ -444,7 +444,7 @@ function ruleEditor:edit(list, order, data)
 	end
 
 	self.list = list
-	self.order = order
+	self.curData = data
 	self.data = util:copyTable(data)
 
 	self:setActionOption()

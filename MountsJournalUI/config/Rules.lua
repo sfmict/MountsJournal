@@ -269,7 +269,7 @@ rules:SetScript("OnShow", function(self)
 					macroFrame.currentRuleSet.name
 				))
 			else
-				self.ruleEditor:edit(btn.list, btn.id, btn.data)
+				self.ruleEditor:edit(btn.list, btn.data)
 			end
 		elseif button == "MiddleButton" then
 			btn.collapseExpand:Click()
@@ -532,7 +532,7 @@ rules:SetScript("OnShow", function(self)
 		info.notCheckable = true
 
 		info.text = L["Duplicate"]
-		info.func = function() self:save(btn.list, btn.id + 1, util:copyTable(btn.data)) end
+		info.func = function() self:save(btn.list, util:copyTable(btn.data), nil, btn.id + 1) end
 		dd:ddAddButton(info, level)
 
 		info.text = L["Export"]
@@ -656,11 +656,15 @@ do
 end
 
 
-function rules:save(list, order, data, isEdit)
-	if isEdit then
-		tremove(list, order)
+function rules:save(list, newData, data, order)
+	if data then
+		wipe(data)
+		for k, v in next, newData do
+			data[k] = v
+		end
+	else
+		tinsert(list, order or 1, newData)
 	end
-	tinsert(list, order or 1, data)
 	self:updateFilters()
 	macroFrame:setRuleFuncs()
 end
@@ -685,6 +689,7 @@ end
 function rules:ruleCheck(rule)
 	if type(rule) ~= "table"
 	or rule.action and (rule.name or rule.rules)
+	or not (type(rule.action) == "table" or (type(rule.name) == "string" and  type(rule.rules) == "table"))
 	then return end
 
 	if rule.action then
