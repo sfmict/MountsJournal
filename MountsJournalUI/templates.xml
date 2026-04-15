@@ -20,7 +20,7 @@
 		</Layers>
 	</CheckButton>
 
-	<Frame name="MJMountJournalFrameTemplate" protected="true" frameLevel="1000" enableMouse="true" dontSavePosition="true" flattenRenderLayers="true" resizable="true" inherits="PortraitFrameTemplateNoCloseButton" virtual="true">
+	<Frame name="MJMountJournalFrameTemplate" protected="true" enableMouse="true" dontSavePosition="true" resizable="true" inherits="PortraitFrameTemplateNoCloseButton" virtual="true">
 		<Size x="703" y="606"/>
 		<Frames>
 
@@ -1208,7 +1208,7 @@
 				</Frames>
 			</Frame>
 
-			<Frame parentKey="settingsBackground" inherits="MJOptionBackgroundTemplate" hidden="true">
+			<Frame parentKey="settingsBackground" inherits="MJOptionBackgroundTemplate" useParentLevel="false" hidden="true">
 				<Anchors>
 					<Anchor point="TOPLEFT" relativePoint="TOPLEFT" y="-60" x="4"/>
 					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" x="-4" y="26"/>

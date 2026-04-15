@@ -7,7 +7,6 @@ function MJMapCanvasMixin:onLoad()
 	self.navBar = self:GetParent().navBar
 	self.child = self.ScrollContainer.Child
 	self.highlight = self.child.HighlightTexture
-	self.zoom = 0
 	self.detailLayerPool = CreateFramePool("FRAME", self.child, "MapCanvasDetailLayerTemplate")
 	self.explorationLayerPool = CreateTexturePool(self.child.Exploration, "ARTWORK", 1)
 	self.highlightRectPool = CreateTexturePool(self.child.Exploration, "ARTWORK", 1)
@@ -280,6 +279,7 @@ end
 function MJMapCanvasMixin:setCanvasSize(width, height)
 	local sWidth, sHeight = self.ScrollContainer:GetSize()
 	self.baseScale = min(sWidth / width, sHeight / height)
+	self.zoom = 0
 	self.child:SetSize(width, height)
 	self:setCanvasScale(self.baseScale)
 end

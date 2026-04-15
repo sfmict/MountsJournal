@@ -47,7 +47,7 @@ ruleEditor:HookScript("OnShow", function(self)
 				dd:ddAddButton(value[i], level)
 			end
 		else
-			local info = {list = value, listMaxSize = 30}
+			local info = {list = value, listMaxSize = 30, autoFocus = true}
 			dd:ddAddButton(info, level)
 		end
 	end)

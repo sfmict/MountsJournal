@@ -1,4 +1,4 @@
-local addon, ns = ...
+local _, ns = ...
 local L, util, mounts = ns.L, ns.util, ns.mounts
 local classConfig = CreateFrame("Frame", "MountsJournalConfigClasses")
 ns.classConfig = classConfig
@@ -10,13 +10,6 @@ classConfig:SetScript("OnShow", function(self)
 
 	self.macrosConfig = mounts.config.macrosConfig
 	self.charMacrosConfig = mounts.charDB.macrosConfig
-
-	-- VERSION
-	local ver = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	ver:SetPoint("TOPRIGHT", -40, 15)
-	ver:SetTextColor(.5, .5, .5, 1)
-	ver:SetJustifyH("RIGHT")
-	ver:SetText(C_AddOns.GetAddOnMetadata(addon, "Version"))
 
 	-- TITLE
 	local subtitle = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")

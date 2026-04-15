@@ -100,7 +100,7 @@ function journal:init()
 	end
 
 	-- BACKGROUND FRAME
-	self.bgFrame = CreateFrame("FRAME", "MountsJournalBackground", self.CollectionsJournal, "MJMountJournalFrameTemplate")
+	self.bgFrame = CreateFrame("FRAME", "MountsJournalBackground", self.useMountsJournalButton, "MJMountJournalFrameTemplate")
 	self.bgFrame:SetPoint("TOPLEFT", self.CollectionsJournal, "TOPLEFT", 0, 0)
 	self.bgFrame:SetTitle(MOUNTS)
 	self.bgFrame:SetPortraitToAsset("Interface/Icons/MountJournalPortrait")
@@ -183,10 +183,13 @@ function journal:init()
 
 	-- USE MountsJournal BUTTON
 	self.useMountsJournalButton:SetParent(self.CollectionsJournal)
-	self.useMountsJournalButton:SetFrameLevel(self.bgFrame:GetFrameLevel() + 10)
 	self.useMountsJournalButton:SetScript("OnShow", nil)
 	self.useMountsJournalButton:SetScript("OnHide", nil)
 	self.useMountsJournalButton:SetPoint("BOTTOMLEFT", self.bgFrame, "BOTTOMLEFT", 281, 2)
+	self.useMountsJournalButton:EnableMouse(false)
+	self.useMountsJournalButton:SetFlattensRenderLayers(true)
+	self.useMountsJournalButton:SetFrameLevel(self.CollectionsJournal:GetFrameLevel() + 1000)
+	self.bgFrame:SetFrameLevel(self.useMountsJournalButton:GetFrameLevel() - 1)
 
 	-- SECURE FRAMES
 	local sMountJournal = CreateFrame("FRAME", nil, self.MountJournal, "SecureHandlerShowHideTemplate")
@@ -353,11 +356,8 @@ function journal:init()
 	sMountJournal:SetAttribute("numTabs", self.bgFrame.numTabs)
 
 	-- SET SIZE
-	local minWidth, minHeight = self.CollectionsJournal:GetSize()
-	local maxWidth = UIParent:GetWidth() - self.bgFrame:GetLeft() - 10
-	local maxHeight = self.bgFrame:GetTop() - CollectionsJournalTab1:GetHeight()
-	self.minTabWidth = (self.CollectionsJournal.Tabs[self.CollectionsJournal.numTabs]:GetRight() or 0) - self.CollectionsJournal:GetLeft() + self.bgFrame:GetRight() - self.bgFrame.Tabs[#self.bgFrame.Tabs]:GetLeft() + 20
-	local width = Clamp(mounts.config.journalWidth or minWidth, max(minWidth, self.minTabWidth), maxWidth)
+	local minWidth, minHeight, maxWidth, maxHeight = self:getMinMaxSize()
+	local width = Clamp(mounts.config.journalWidth or minWidth, minWidth, maxWidth)
 	local height = Clamp(mounts.config.journalHeight or minHeight, minHeight, maxHeight)
 	self.bgFrame:SetSize(width, height)
 
@@ -1278,10 +1278,7 @@ function journal:init()
 	resize:SetScript("OnDragStart", function(btn)
 		if InCombatLockdown() then return end
 		local parent = btn:GetParent()
-		local minWidth, minHeight = self.CollectionsJournal:GetSize()
-		local maxWidth = UIParent:GetWidth() - parent:GetLeft() - 10
-		local maxHeight = parent:GetTop() - CollectionsJournalTab1:GetHeight()
-		parent:SetResizeBounds(max(minWidth, self.minTabWidth), minHeight, maxWidth, maxHeight)
+		parent:SetResizeBounds(self:getMinMaxSize())
 		parent.isSizing = true
 		parent:StartSizing("BOTTOMRIGHT", true)
 		btn:SetScript("OnUpdate", function()
@@ -1442,6 +1439,15 @@ journal.useMountsJournalButton:SetScript("OnHide", function()
 	journal:UnregisterEvent("PLAYER_REGEN_DISABLED")
 	journal:UnregisterEvent("PLAYER_REGEN_ENABLED")
 end)
+
+
+function journal:getMinMaxSize()
+	local minWidth, minHeight = self.CollectionsJournal:GetSize()
+	local minTabWidth = (self.CollectionsJournal.Tabs[self.CollectionsJournal.numTabs]:GetRight() or 0) - self.CollectionsJournal:GetLeft() + self.bgFrame:GetRight() - self.bgFrame.Tabs[#self.bgFrame.Tabs]:GetLeft() + 20
+	local maxWidth = UIParent:GetWidth() - self.bgFrame:GetLeft() - 10
+	local maxHeight = self.bgFrame:GetTop() - CollectionsJournalTab1:GetHeight()
+	return max(minWidth, minTabWidth), minHeight, maxWidth, maxHeight
+end
 
 
 function journal:setMJFiltersBackup()

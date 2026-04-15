@@ -330,7 +330,7 @@ function conds.holiday:getValueList(values, cb, dd, notReset)
 		end
 	}
 	local subList = {}
-	list[2] = {list = subList}
+	list[2] = {list = subList, autoFocus = true}
 
 	if not notReset then ns.calendar:setCurrentDate() end
 	local eList, isSecret = ns.calendar:getHolidayList()
@@ -932,8 +932,17 @@ function conds.instance:getValueText(values)
 end
 
 function conds.instance:getValueList(values, func)
-	local list = {}
+	local list, selected = {}, {}
 	local checked = function(btn) return tContains(values, btn.value) end
+
+	for i, instanceID in ipairs(values) do
+		local name = GetRealZoneText(instanceID)
+		if not name or name == "" then
+			name = tostring(instanceID)
+		end
+		list[i] = createCheckableInfo(name, instanceID, func, checked, sID:format(instanceID))
+		selected[instanceID] = true
+	end
 
 	local instanceID = 0
 	local skipped = 0
@@ -941,7 +950,9 @@ function conds.instance:getValueList(values, func)
 		local name = GetRealZoneText(instanceID)
 
 		if name and name ~= "" then
-			list[#list + 1] = createCheckableInfo(name, instanceID, func, checked, sID:format(instanceID))
+			if not selected[instanceID] then
+				list[#list + 1] = createCheckableInfo(name, instanceID, func, checked, sID:format(instanceID))
+			end
 			skipped = 0
 		else
 			skipped = skipped + 1
@@ -949,17 +960,6 @@ function conds.instance:getValueList(values, func)
 
 		instanceID = instanceID + 1
 	end
-
-	sort(list, function(a, b)
-		if a == b then return false end
-
-		local checkedA = a:checked()
-		local checkedB = b:checked()
-		if checkedA and not checkedB then return true
-		elseif not checkedA and checkedB then return false end
-
-		return a.value < b.value
-	end)
 
 	return list
 end

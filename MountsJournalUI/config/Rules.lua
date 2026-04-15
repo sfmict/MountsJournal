@@ -56,13 +56,6 @@ rules:SetScript("OnShow", function(self)
 		OnAccept = function(self, cb) cb() end,
 	}
 
-	-- VERSION
-	local ver = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	ver:SetPoint("TOPRIGHT", -40, 15)
-	ver:SetTextColor(.5, .5, .5, 1)
-	ver:SetJustifyH("RIGHT")
-	ver:SetText(C_AddOns.GetAddOnMetadata(addon, "Version"))
-
 	-- RULE SETS TEXT
 	local ruleSetsText = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	ruleSetsText:SetHeight(22)

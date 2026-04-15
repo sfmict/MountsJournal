@@ -99,6 +99,7 @@ end
 
 function tags:dragMount(spellID)
 	if InCombatLockdown() then return end
+	ClearCursor()
 	C_Spell.PickupSpell(spellID)
 end
 

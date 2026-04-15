@@ -51,6 +51,7 @@ aboutConfig:SetScript("OnShow", function(self)
 	local version = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	version:SetPoint("LEFT", versionText, "RIGHT", 4, 0)
 	version:SetText(C_AddOns.GetAddOnMetadata(addon, "Version"))
+	util.setCopyBox(version)
 
 	-- HELP TRANSLATION
 	local helpText = self:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -65,7 +66,7 @@ aboutConfig:SetScript("OnShow", function(self)
 
 	-- TRANSLATORS
 	local translators = self:CreateFontString(nil, "ARTWORK", "GameFontNormal")
-	translators:SetPoint("TOPLEFT", helpText, "BOTTOMLEFT", 0, -80)
+	translators:SetPoint("TOPLEFT", helpText, "BOTTOMLEFT", 0, -70)
 	translators:SetText(L["Localization Translators:"])
 
 	local langs, last = {

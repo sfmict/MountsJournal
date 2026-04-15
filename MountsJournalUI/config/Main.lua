@@ -29,13 +29,6 @@ config:SetScript("OnShow", function(self)
 		return group
 	end
 
-	-- VERSION
-	local ver = self:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	ver:SetPoint("TOPRIGHT", -40, 15)
-	ver:SetTextColor(.5, .5, .5, 1)
-	ver:SetJustifyH("RIGHT")
-	ver:SetText(C_AddOns.GetAddOnMetadata(addon, "Version"))
-
 	-- TITLE
 	local subtitle = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	subtitle:SetHeight(30)
