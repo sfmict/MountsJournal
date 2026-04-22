@@ -280,7 +280,7 @@ function macroFrame:setRuleFuncs()
 
 	for i = 1, #self.currentRuleSet do
 		local rules = self.currentRuleSet[i]
-		local keys = {"local wipe = wipe"}
+		local keys = {"local wipe, v = wipe, {}"}
 		local func = {}
 
 		local function addKey(var)

@@ -11,10 +11,10 @@ ns.journal:on("MODULES_INIT", function(journal)
 	journal.mapSettings.dnr = dd
 
 	if C_AddOns.IsAddOnLoaded("Blizzard_EncounterJournal") then
-		local oldOnEvent = EncounterJournal:GetScript("OnEvent")
+		local EncounterJournal_OnEvent = EncounterJournal_OnEvent
 		EncounterJournal:SetScript("OnEvent", function(self, event, ...)
 			if event ~= "EJ_LOOT_DATA_RECIEVED" and event ~= "EJ_DIFFICULTY_UPDATE" or self:IsShown() then
-				oldOnEvent(self, event, ...)
+				EncounterJournal_OnEvent(self, event, ...)
 			end
 		end)
 	end
