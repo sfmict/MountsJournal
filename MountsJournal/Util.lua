@@ -461,7 +461,10 @@ do
 	local redText = "|cffee2222"..text
 	local speedFormat = GetLocale() ~= "enUS" and util.getMetricFormat or util.getImperialFormat
 	function util.getFormattedSpeed(speed, noThrill)
-		return (noThrill and redText or text):format(speedFormat(speed * 3600))
+		if speed then
+			return (noThrill and redText or text):format(speedFormat(speed * 3600))
+		end
+		return "|cff808080--|r"
 	end
 end
 

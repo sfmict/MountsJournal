@@ -474,11 +474,12 @@ do
 		if not isGliding then
 			speed = GetUnitSpeed("player")
 		end
-		if speed > 0 then
+		local notSecret = not issecretvalue(speed)
+		if notSecret and speed > 0 then
 			mountStat[2] = mountStat[2] + elapsed
 			mountStat[3] = mountStat[3] + speed * elapsed
 		end
-		self:event("MOUNT_SPEED_UPDATE", speed, isGliding and not self.thrillAuraInstanceID)
+		self:event("MOUNT_SPEED_UPDATE", notSecret and speed, isGliding and not self.thrillAuraInstanceID)
 	end
 
 
