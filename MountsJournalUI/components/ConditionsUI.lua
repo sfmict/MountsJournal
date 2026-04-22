@@ -393,6 +393,7 @@ conds.falling.onlyOne = true
 -- moving
 conds.moving.text = L["The player is moving"]
 conds.moving.onlyOne = true
+conds.moving.combatLock = true
 
 
 ---------------------------------------------------

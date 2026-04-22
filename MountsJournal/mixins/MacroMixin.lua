@@ -1,6 +1,6 @@
 local _, ns = ...
 local util = ns.util
-local type, concat, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras, GetCVarBool = type, table.concat, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras, GetCVarBool
+local type, concat, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras, GetCVarBool, issecretvalue = type, table.concat, GetUnitSpeed, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras, GetCVarBool, issecretvalue
 local macroFrame = CreateFrame("FRAME")
 ns.macroFrame = util.setEventsMixin(macroFrame)
 
@@ -45,7 +45,7 @@ macroFrame:on("ADDON_INIT", function(self)
 		]]
 	elseif self.class == "MONK" then
 		classOptionMacro = classOptionMacro..[[
-			local IsFalling, GetTime, GetUnitSpeed, C_UnitAuras = IsFalling, GetTime, GetUnitSpeed, C_UnitAuras
+			local IsFalling, GetTime, C_UnitAuras = IsFalling, GetTime, C_UnitAuras
 		]]
 	elseif self.isDruid then
 		local GetShapeshiftForm, GetShapeshiftFormInfo = GetShapeshiftForm, GetShapeshiftFormInfo
@@ -135,7 +135,7 @@ macroFrame:on("ADDON_INIT", function(self)
 					self.lastUseClassSpellTime = GetTime()
 					return "/cast "..self:getSpellName(125883)
 				elseif C_UnitAuras.GetPlayerAuraBySpellID(125883) then
-					return GetTime() - (self.lastUseClassSpellTime or 0) < .5 and "" or GetUnitSpeed("player") > 0 and "/cancelaura "..self:getSpellName(125883)
+					return GetTime() - (self.lastUseClassSpellTime or 0) < .5 and "" or self:isMoving() and "/cancelaura "..self:getSpellName(125883)
 				end
 			end
 		]]
@@ -576,8 +576,14 @@ do
 end
 
 
+function macroFrame:isMoving()
+	local speed = GetUnitSpeed("player")
+	return not issecretvalue(speed) and speed > 0
+end
+
+
 function macroFrame:isMovingOrFalling()
-	return GetUnitSpeed("player") > 0 or IsFalling()
+	return self:isMoving() or IsFalling()
 end
 
 
@@ -591,7 +597,7 @@ function macroFrame:getMacro(noMacro)
 		or self.fishingSlotID == self.fishingRodID
 			and self.charMacrosConfig.itemSlot28
 			and not self.sFlags.isSubmerged
-			and GetUnitSpeed("player") > 0
+			and self:isMoving()
 		then
 			self:updateFishingRod()
 			return noMacro or ""
