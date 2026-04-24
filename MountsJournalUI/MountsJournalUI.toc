@@ -1,4 +1,4 @@
-## Interface: 120005, 120001
+## Interface: 120005
 ## Title: MountsJournalUI
 ## Author: sfmict
 ## Version: @project-version@
