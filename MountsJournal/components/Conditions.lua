@@ -9,24 +9,24 @@ ns.conditions = conds
 
 local function genNumInList(values, expr, addKey, ...)
 	if type(values) ~= "table" then
-		return strconcat(expr, ' == ', values) -- ("(%s == %s)"):format(expr, values)
+		return strconcat(expr, ' == ', values)
 	end
 
 	local var = ("_"):join("v.t", ...)
 	addKey(strconcat(var, " = {[", concat(values, "]=true,["), "]=true}"))
 
-	return strconcat(var, "[", expr, "]") -- ("%s[%s]"):format(var, expr)
+	return strconcat(var, "[", expr, "]")
 end
 
 local function genStrInList(values, expr, addKey, ...)
 	if type(values) ~= "table" then
-		return strconcat(expr, " == '", values, "'") -- ("(%s == '%s')"):format(expr, values)
+		return strconcat(expr, " == '", values, "'")
 	end
 
 	local var = ("_"):join("v.t", ...)
 	addKey(strconcat(var, " = {['", concat(values, "']=true,['"), "']=true}"))
 
-	return strconcat(var, "[", expr, "]") -- ("%s[%s]"):format(var, expr)
+	return strconcat(var, "[", expr, "]")
 end
 
 local function genTableCheck(values, funcStr, addKey, ...)

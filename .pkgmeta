@@ -21,6 +21,7 @@ ignore:
 	- _test\.lua
 	- libs/.*\.toc$
 	- libs/LibStub/tests
+	- mountMenu/Family\.lua
 
 move-folders:
 	MountsJournal/MountsJournal: MountsJournal

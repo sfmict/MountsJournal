@@ -4,9 +4,9 @@ local strcmputf8i = strcmputf8i
 
 
 ns.journal:on("MODULES_INIT", function(journal)
+	local defProfile = ns.mounts.defProfile
 	local profiles = ns.mounts.profiles
 	local charDB = ns.mounts.charDB
-	local profileNames = {}
 	local lsfdd = LibStub("LibSFDropDown-1.5")
 	local dd = lsfdd:CreateStretchButtonOriginal(journal.bgFrame, 130, 22)
 	dd:SetPoint("LEFT", journal.summonButton, "RIGHT", 4, -.5)
@@ -109,22 +109,24 @@ ns.journal:on("MODULES_INIT", function(journal)
 		end
 	end
 
-	function dd:setAllFiltredMounts(actionText, enabled)
+	function dd:setAllMountsFor(actionText, mountList, enabled, onlyFavorites)
 		StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(actionText), nil, function()
 			if not journal.list then
 				journal:createMountList(journal.listMapID)
 			end
 
-			for i, data in ipairs(journal.dataProvider:GetCollection()) do
-				local _, spellID, _,_,_,_,_,_,_,_, isCollected = util.getMountInfo(data.mountID)
-				if enabled then
-					if isCollected then
-						ns.mounts:addMountToList(journal.list, spellID)
+			for i, data in ipairs(mountList) do
+				local _, spellID, _,_,_,_, isFavorite, _,_,_, isCollected = util.getMountInfo(type(data) == "table" and data.mountID or data)
+				if not onlyFavorites or isFavorite then
+					if enabled then
+						if isCollected then
+							ns.mounts:addMountToList(journal.list, spellID)
+						end
+					else
+						journal.list.fly[spellID] = nil
+						journal.list.ground[spellID] = nil
+						journal.list.swimming[spellID] = nil
 					end
-				else
-					journal.list.fly[spellID] = nil
-					journal.list.ground[spellID] = nil
-					journal.list.swimming[spellID] = nil
 				end
 			end
 
@@ -133,38 +135,15 @@ ns.journal:on("MODULES_INIT", function(journal)
 		end)
 	end
 
-	function dd:selectAllMounts(actionText, onlyFavorites)
-		StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(actionText), nil, function()
-			if not journal.list then
-				journal:createMountList(journal.listMapID)
-			end
-
-			for _, mountID in ipairs(journal.mountIDs) do
-				local _, spellID, _,_,_,_, isFavorite, _,_,_, isCollected = util.getMountInfo(mountID)
-				if isCollected and (not onlyFavorites or isFavorite) then
-					ns.mounts:addMountToList(journal.list, spellID)
-				end
-			end
-
-			journal:getRemoveMountList(journal.listMapID)
-			self:event("UPDATE_PROFILE")
-		end)
+	function dd:setAllFiltredMounts(actionText, enabled)
+		self:setAllMountsFor(actionText, journal.dataProvider:GetCollection(), enabled)
 	end
 
-	function dd:unselectAllMounts()
-		StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(L["Unselect all mounts in selected zone"]), nil, function()
-			if journal.list then
-				wipe(journal.list.fly)
-				wipe(journal.list.ground)
-				wipe(journal.list.swimming)
-				journal:getRemoveMountList(journal.listMapID)
-				self:event("UPDATE_PROFILE")
-			end
-		end)
+	function dd:setAllMounts(actionText, enabled, onlyFavorites)
+		self:setAllMountsFor(actionText, journal.mountIDs, enabled, onlyFavorites)
 	end
 
-	function dd:export()
-		local profile = charDB.currentProfileName and profiles[charDB.currentProfileName] or ns.mounts.defProfile
+	function dd:export(profile)
 		ns.dataDialog:open({
 			type = "export",
 			data = {type = "profile", data = profile}
@@ -223,26 +202,16 @@ ns.journal:on("MODULES_INIT", function(journal)
 			info.isTitle = nil
 
 			local function OnTooltipShow(btn, tooltip)
+				tooltip:SetOwner(btn, "ANCHOR_RIGHT", 0, 12)
 				tooltip:AddLine(L["Shift-click to create a chat link"])
 			end
 
-			info.list = {
-				{
-					text = DEFAULT,
-					checked = function() return charDB.currentProfileName == nil end,
-					func = function()
-						if IsShiftKeyDown() then
-							util.insertChatLink("Profile", "")
-						else
-							self:setProfile()
-						end
-					end,
-					OnTooltipShow = OnTooltipShow,
-				},
-			}
-			for _, profileName in ipairs(profileNames) do
-				tinsert(info.list, {
-					text = profileName,
+			local list = {}
+			for name, profile in next, profiles do
+				tinsert(list, {
+					hasArrow = true,
+					text = name,
+					value = {name, profile},
 					checked = function(btn) return charDB.currentProfileName == btn.text end,
 					func = function(btn)
 						if IsShiftKeyDown() then
@@ -255,6 +224,23 @@ ns.journal:on("MODULES_INIT", function(journal)
 					OnTooltipShow = OnTooltipShow,
 				})
 			end
+			sort(list, function(a, b) return strcmputf8i(a.text, b.text) < 0 end)
+			tinsert(list, 1, {
+				hasArrow = true,
+				text = DEFAULT,
+				value = defProfile,
+				checked = function() return charDB.currentProfileName == nil end,
+				func = function()
+					if IsShiftKeyDown() then
+						util.insertChatLink("Profile", "")
+					else
+						self:setProfile()
+					end
+				end,
+				OnTooltipShow = OnTooltipShow,
+			})
+
+			info.list = list
 			self:ddAddButton(info, level)
 			info.list = nil
 
@@ -264,90 +250,63 @@ ns.journal:on("MODULES_INIT", function(journal)
 			info.notCheckable = true
 			info.hasArrow = true
 
-			info.text = L["Profile settings"]
-			info.value = "settings"
-			self:ddAddButton(info, level)
-
 			info.text = L["New profile"]
 			info.value = "new"
 			self:ddAddButton(info, level)
 
-			self:ddAddSeparator(level)
-
 			info.keepShownOnClick = nil
 			info.hasArrow = nil
-
-			info.text = L["Export"]
-			info.func = function() self:export() end
-			self:ddAddButton(info, level)
 
 			info.text = L["Import"]
 			info.func = function() self:import() end
 			self:ddAddButton(info, level)
 
-		elseif value == "settings" then -- PROFILE SETTINGS
+		elseif type(value) == "table" then -- PROFILE SETTINGS
+			local name = value[1] or DEFAULT
+			local profile = value[2] or value
+
 			info.notCheckable = true
 			info.isTitle = true
-			info.text = charDB.currentProfileName or DEFAULT
+			info.text = L["Profile settings"].." - "..name
 			self:ddAddButton(info, level)
-
-			self:ddAddSeparator(level)
 
 			info.notCheckable = nil
 			info.isTitle = nil
 			info.isNotRadio = true
 			info.keepShownOnClick = true
 
-			if charDB.currentProfileName ~= nil then
+			if name ~= DEFAULT then
 				info.text = L["Pet binding from default profile"]
-				info.checked = function() return journal.db.petListFromProfile end
+				info.checked = profile.petListFromProfile
 				info.func = function(_,_,_, checked)
-					journal.db.petListFromProfile = checked and true or nil
+					profile.petListFromProfile = checked or nil
 					self:event("UPDATE_PROFILE")
 				end
 				self:ddAddButton(info, level)
 
 				info.text = L["Zones settings from default profile"]
-				info.checked = function() return journal.db.zoneMountsFromProfile end
+				info.checked = profile.zoneMountsFromProfile
 				info.func = function(_,_,_, checked)
-					journal.db.zoneMountsFromProfile = checked and true or nil
+					profile.zoneMountsFromProfile = checked or nil
 					self:event("UPDATE_PROFILE")
 				end
 				self:ddAddButton(info, level)
 			end
 
 			info.text = L["Auto add new mounts to selected"]
-			info.checked = function() return journal.db.autoAddNewMount end
+			info.checked = profile.autoAddNewMount
 			info.func = function(_,_,_, checked)
-				journal.db.autoAddNewMount = checked and true or nil
+				profile.autoAddNewMount = checked or nil
 			end
 			self:ddAddButton(info, level)
 
-			self:ddAddSpace(level)
+			self:ddAddSeparator(level)
 
-			info.notCheckable = true
 			info.keepShownOnClick = nil
-
-			info.text = L["Select all filtered mounts by type in the selected zone"]
-			info.func = function(btn) self:setAllFiltredMounts(btn.text, true) end
-			self:ddAddButton(info, level)
-
-			info.text = L["Unselect all filtered mounts in the selected zone"]
-			info.func = function(btn) self:setAllFiltredMounts(btn.text, false) end
-			self:ddAddButton(info, level)
-
-			self:ddAddSpace(level)
-
-			info.text = L["Select all favorite mounts by type in the selected zone"]
-			info.func = function(btn) self:selectAllMounts(btn.text, true) end
-			self:ddAddButton(info, level)
-
-			info.text = L["Select all mounts by type in selected zone"]
-			info.func = function(btn) self:selectAllMounts(btn.text) end
-			self:ddAddButton(info, level)
-
-			info.text = L["Unselect all mounts in selected zone"]
-			info.func = function() self:unselectAllMounts() end
+			info.isNotRadio = nil
+			info.notCheckable = true
+			info.text = L["Export"]
+			info.func = function() self:export(profile) end
 			self:ddAddButton(info, level)
 
 		elseif value == "new" then -- NEW PROFLE
@@ -361,13 +320,5 @@ ns.journal:on("MODULES_INIT", function(journal)
 			info.func = function() self:createProfile(true) end
 			self:ddAddButton(info, level)
 		end
-	end)
-
-	dd:SetScript("OnClick", function(self)
-		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-		wipe(profileNames)
-		for k in pairs(profiles) do tinsert(profileNames, k) end
-		sort(profileNames, function(a, b) return strcmputf8i(a, b) < 0 end)
-		self:ddToggle(1, nil, self, 117, 13)
 	end)
 end)

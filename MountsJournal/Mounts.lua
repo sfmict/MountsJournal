@@ -89,9 +89,9 @@ function mounts:ADDON_LOADED(addonName)
 		if self.config.arrowButtonsBrowse == nil then
 			self.config.arrowButtonsBrowse = true
 		end
-		if self.config.openHyperlinks == nil then
-			self.config.openHyperlinks = true
-		end
+		-- if self.config.openHyperlinks == nil then
+		-- 	self.config.openHyperlinks = true
+		-- end
 		if self.config.showWowheadLink == nil then
 			self.config.showWowheadLink = true
 		end

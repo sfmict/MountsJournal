@@ -1,13 +1,9 @@
 local addon, ns = ...
 local L, util, mounts, journal, tags = ns.L, ns.util, ns.mounts, ns.journal, {}
-local mountsDB, familyDB = ns.mountsDB, ns.familyDB
 local pairs, ipairs, next, tinsert, wipe = pairs, ipairs, next, tinsert, wipe
 local ltl = LibStub("LibThingsLoad-1.0")
 journal.tags = tags
 journal:on("MODULES_INIT", function() tags:init() end)
---@do-not-package@
-local searchStr
---@end-do-not-package@
 
 
 function tags:init()
@@ -161,331 +157,27 @@ end
 
 
 function tags:mountOptionsMenu_Init(btn, level, value)
-	local info = {}
-
 	if level == 1 then
-		local _,_,_, active, isUsable, _, isFavorite, _,_,_, isCollected = util.getMountInfo(self.menuMountID)
-		local isMount = type(self.menuMountID) == "number"
-		local needsFanfare = isMount and C_MountJournal.NeedsFanfare(self.menuMountID)
-		info.notCheckable = true
-
-		if needsFanfare then
-			info.text = UNWRAP
-		elseif active then
-			info.text = BINDING_NAME_DISMOUNT
-			info.disabled = not (isUsable and isMount)
-		else
-			info.text = MOUNT
-			info.disabled = not (isUsable and isMount)
-		end
-
-		info.func = function()
-			if needsFanfare then
-				journal:setSelectedMount(self.menuMountID, self.menuSpellID)
-			end
-			journal:useMount(self.menuMountID)
-		end
-
-		btn:ddAddButton(info, level)
-
-		if not needsFanfare then
-			info.disabled = not ((isCollected or not isMount) and journal:isCanFavorite(self.menuMountID))
-			info.text = isFavorite and BATTLE_PET_UNFAVORITE or BATTLE_PET_FAVORITE
-			info.func = function() journal:setIsFavorite(self.menuMountID, not isFavorite) end
-			btn:ddAddButton(info, level)
-
-			if isCollected then
-				info.text = nil
-				info.disabled = nil
-				info.customFrame = journal.percentSlider
-				info.customFrame:setText(L["Chance of summoning"])
-				info.customFrame:setMinMax(1, 100)
-				info.OnLoad = function(frame)
-					local mountsWeight = journal.mountsWeight
-					frame.level = level + 1
-					frame:setValue(mountsWeight[self.menuSpellID] or 100)
-					frame.setFunc = function(value)
-						if value == 100 then value = nil end
-						if mountsWeight[self.menuSpellID] ~= value then
-							mountsWeight[self.menuSpellID] = value
-							local btn = journal:getMountButtonByMountID(self.menuMountID)
-							if btn then
-								journal:initMountButton(btn, btn:GetElementData())
-							end
-						end
-					end
-				end
-				btn:ddAddButton(info, level)
-				info.customFrame = nil
-				info.OnLoad = nil
-			end
-
-			info.disabled = nil
-			info.keepShownOnClick = true
-			info.notCheckable = nil
-			info.isNotRadio = true
-			info.func = function(_,_, mType)
-				journal:mountToggle(mType, self.menuSpellID, self.menuMountID)
-			end
-
-			info.text = L["SELECT_AS_TYPE_1"]
-			info.arg2 = "fly"
-			info.checked = journal.list and journal.list.fly[self.menuSpellID]
-			btn:ddAddButton(info, level)
-
-			info.text = L["SELECT_AS_TYPE_2"]
-			info.arg2 = "ground"
-			info.checked = journal.list and journal.list.ground[self.menuSpellID]
-			btn:ddAddButton(info, level)
-
-			info.text = L["SELECT_AS_TYPE_3"]
-			info.arg2 = "swimming"
-			info.checked = journal.list and journal.list.swimming[self.menuSpellID]
-			btn:ddAddButton(info, level)
-
-			info.isNotRadio = nil
-			info.func = nil
-			info.notCheckable = true
-			info.hasArrow = true
-			info.text = L["tags"]
-			info.value = 1
-			btn:ddAddButton(info, level)
-		end
-		--@do-not-package@
-		if isMount then
-			info.disabled = nil
-			info.keepShownOnClick = true
-			info.hasArrow = true
-			info.text = L["Family"]
-			info.value = 2
-			btn:ddAddButton(info, level)
-		end
-		--@end-do-not-package@
-
-		info.disabled = nil
-		info.hasArrow = nil
-		info.notCheckable = nil
-		info.value = nil
-		info.keepShownOnClick = true
-		info.isNotRadio = true
-		info.text = HIDE
-		info.func = function(_,_,_, checked)
-			if checked then
-				mounts.globalDB.hiddenMounts = mounts.globalDB.hiddenMounts or {}
-				mounts.globalDB.hiddenMounts[self.menuSpellID] = true
-			elseif mounts.globalDB.hiddenMounts then
-				mounts.globalDB.hiddenMounts[self.menuSpellID] = nil
-				if not next(mounts.globalDB.hiddenMounts) then
-					mounts.globalDB.hiddenMounts = nil
-				end
-			end
-			self.doNotHideMenu = true
-			journal:updateMountsList()
-			self.doNotHideMenu = nil
-		end
-		info.checked = journal:isMountHidden(self.menuSpellID)
-		btn:ddAddButton(info, level)
-
-		info.keepShownOnClick = nil
-		info.func = nil
-		info.isNotRadio = nil
-		info.notCheckable = true
-		info.text = CANCEL
-		btn:ddAddButton(info, level)
-	elseif value == 1 then
-		if #self.sortedTags == 0 then
-			info.isNotRadio = true
-			info.keepShownOnClick = true
-			info.notCheckable = true
-			info.disabled = true
-			info.text = EMPTY
-			btn:ddAddButton(info, level)
-		else
-			info.list = {}
-
-			local func = function(btn, _,_, value)
-				if value then
-					self:addMountTag(self.menuSpellID, btn.value)
-				else
-					self:removeMountTag(self.menuSpellID, btn.value, true)
-				end
-			end
-			local checked = function(btn) return self:getTagInMount(self.menuSpellID, btn.value) end
-
-			for i, tag in ipairs(self.sortedTags) do
-				info.list[i] = {
-					isNotRadio = true,
-					keepShownOnClick = true,
-					text = tag,
-					value = tag,
-					func = func,
-					checked = checked,
-				}
-			end
-			btn:ddAddButton(info, level)
-		end
-	--@do-not-package@
+		self.mountMenu.main(btn, level)
+	elseif self.mountMenu[value] then
+		self.mountMenu[value](btn, level)
 	else
-		local mountDB = mountsDB[self.menuMountID]
-
-		local function isChecked(familyID)
-			local ids = mountDB[2]
-			if type(ids) == "number" then
-				return ids == familyID
-			else
-				for i, id in ipairs(ids) do
-					if id == familyID then return true end
-				end
-			end
-		end
-
-		local function setFamilyID(familyID, enabled)
-			local ids = mountDB[2]
-			if enabled then
-				if type(ids) == "table" then
-					if tInsertUnique(ids, familyID) then
-						sort(ids)
-					end
-				elseif ids == 0 then
-					mountDB[2] = familyID
-				else
-					mountDB[2] = {ids, familyID}
-					sort(mountDB[2])
-				end
-			else
-				if type(ids) == "table" then
-					tDeleteItem(ids, familyID)
-					if #ids == 1 then mountDB[2] = ids[1] end
-				else
-					mountDB[2] = 0
-				end
-			end
-		end
-
-		local check = function(button)
-			return isChecked(button.value)
-		end
-
-		if value == 2 then
-			local sortedNames = {}
-			for k in next, familyDB do
-				sortedNames[#sortedNames + 1] = {k, L[k]}
-			end
-			sort(sortedNames, function(a, b)
-				return b[1] == "rest" or a[1] ~= "rest" and strcmputf8i(a[2], b[2]) < 0
-			end)
-
-			local func = function(button, _,_, checked)
-				setFamilyID(button.value, checked)
-				btn:ddRefresh(level)
-			end
-
-			local subFunc = function(button, _,_, checked)
-				for k, v in next, familyDB[button.value] do
-					setFamilyID(v, checked)
-				end
-				btn:ddRefresh(level + 1)
-			end
-			local subCheck = function(btn)
-				local i, j = 0, 0
-				for k, v in next, familyDB[btn.value] do
-					i = i + 1
-					if isChecked(v) then j = j + 1 end
-				end
-				return i == j and 1 or j > 0 and 2
-			end
-
-			local list = {}
-			for i, name in ipairs(sortedNames) do
-				local subInfo = {}
-				subInfo.keepShownOnClick = true
-				subInfo.isNotRadio = true
-				subInfo.text = name[2]
-
-				if type(familyDB[name[1]]) == "number" then
-					subInfo.disabled = name[1] == "rest"
-					subInfo.icon = ns.familyDBIcons[name[1]]
-					subInfo.value = familyDB[name[1]]
-					subInfo.func = func
-					subInfo.checked = check
-				else
-					subInfo.hasArrow = true
-					subInfo.icon = ns.familyDBIcons[name[1]][0]
-					subInfo.value = name[1]
-					subInfo.func = subFunc
-					subInfo.checked = subCheck
-				end
-
-				list[i] = subInfo
-			end
-
-			info.search = function(str, text, _, btnInfo)
-				if #str == 0 then
-					searchStr = nil
-					return true
-				end
-				searchStr = str
-				if type(btnInfo.value) == "number" then
-					return text:lower():find(str, 1, true)
-				else
-					if text:lower():find(str, 1, true) then return true end
-					for name in next, familyDB[btnInfo.value] do
-						if L[name]:lower():find(str, 1, true) then return true end
-					end
-				end
-			end
-
-			info.listMaxSize = 30
-			info.list = list
-			btn:ddAddButton(info, level)
-		else
-			info.keepShownOnClick = true
-			info.isNotRadio = true
-
-			local sortedNames = {}
-			for k in next, familyDB[value] do
-				sortedNames[#sortedNames + 1] = {k, L[k]}
-			end
-			sort(sortedNames, function(a, b)
-				return b[1] == "Others" or a[1] ~= "Others" and strcmputf8i(a[2], b[2]) < 0
-			end)
-			if searchStr then
-				for i, name in ipairs(sortedNames) do
-					local start, stop = name[2]:lower():find(searchStr, 1, true)
-					if start and stop then
-						name[2] = ("%s|cffffd200%s|r%s"):format(name[2]:sub(0, start-1), name[2]:sub(start, stop), name[2]:sub(stop+1, #name[2]))
-					end
-				end
-			end
-
-			info.func = function(button, _,_, checked)
-				setFamilyID(button.value, checked)
-				btn:ddRefresh(level - 1)
-			end
-			info.checked = check
-
-			for i, name in ipairs(sortedNames) do
-				info.text = name[2]
-				info.icon = ns.familyDBIcons[value][name[1]]
-				info.value = familyDB[value][name[1]]
-				btn:ddAddButton(info, level)
-			end
-		end
-	--@end-do-not-package@
+		self.mountMenu[value[1]](btn, level, value[2])
 	end
 end
 
 
-function tags:addTag()
-	StaticPopup_Show(util.addonName.."ADD_TAG", nil, nil, function(popup, text)
-		if self.filter.tags[text] ~= nil then
+function tags:addTag(spellID)
+	StaticPopup_Show(util.addonName.."ADD_TAG", nil, nil, function(popup, tag)
+		if self.filter.tags[tag] ~= nil then
 			popup:Hide()
 			StaticPopup_Show(util.addonName.."TAG_EXISTS")
 			return
 		end
-		self.filter.tags[text] = {#self.sortedTags + 1, true}
-		tinsert(self.sortedTags, text)
+		self.filter.tags[tag] = {#self.sortedTags + 1, true}
+		tinsert(self.sortedTags, tag)
 		journal:updateMountsList()
+		if spellID then self:addMountTag(spellID, tag) end
 	end)
 end
 

@@ -1,0 +1,9 @@
+<Ui>
+	<Script file="Main.lua"/>
+	<Script file="Extra.lua"/>
+	<Script file="Tags.lua"/>
+	<Script file="Profiles.lua"/>
+	<!-- @do-not-package@ -->
+	<Script file="Family.lua"/>
+	<!-- @end-do-not-package@ -->
+</Ui>

@@ -9,7 +9,7 @@ local function drag(btn) journal.tags:dragMount(btn.spellID or btn:GetParent().s
 
 local function typeClick(btn)
 	local parent = btn:GetParent()
-	journal:mountToggle(btn.type, parent.spellID, parent.mountID)
+	journal:mountToggle(btn.type, parent.spellID, parent.mountID, journal.list)
 end
 
 local function onEnter(self)

@@ -7,7 +7,7 @@ snippets:Hide()
 
 
 snippets:SetScript("OnShow", function(self)
-	self:SetScript("OnShow", function(self) end)
+	self:SetScript("OnShow", function(self) self:updateFilters() end)
 
 	self:SetWidth(300)
 	self:SetPoint("TOPLEFT", ns.journal.bgFrame, "TOPRIGHT", -4, 0)
