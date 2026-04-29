@@ -1009,18 +1009,15 @@ function conds.difficulty.sort(values)
 
 		local _, aInstanceType, _,_,_,_,_, aIsLFR = GetDifficultyInfo(a)
 		local _, bInstanceType, _,_,_,_,_, bIsLFR = GetDifficultyInfo(b)
-		if aIsLFR and not bIsLFR then return false
-		elseif not aIsLFR and bIsLFR then return true end
+		if aIsLFR ~= bIsLFR then return bIsLFR end
 
 		local aIsRaid = aInstanceType == "raid"
 		local bIsRaid = bInstanceType == "raid"
-		if aIsRaid and not bIsRaid then return false
-		elseif not aIsRaid and bIsRaid then return true end
+		if aIsRaid ~= bIsRaid then return bIsRaid end
 
 		local aIsPary = aInstanceType == "party"
 		local bIsPary = bInstanceType == "party"
-		if aIsPary and not bIsPary then return false
-		elseif not aIsPary and bIsPary then return true end
+		if aIsPary ~= bIsPary then return bIsPary end
 
 		return a < b
 	end)
@@ -1749,8 +1746,7 @@ function conds.title:getValueList(values, func)
 
 		local checkedA = a:checked()
 		local checkedB = b:checked()
-		if checkedA and not checkedB then return true
-		elseif not checkedA and checkedB then return false end
+		if checkedA ~= checkedB then return checkedA end
 
 		if a.text ~= b.text then return strcmputf8i(a.text, b.text) < 0 end
 		return a.value < b.value

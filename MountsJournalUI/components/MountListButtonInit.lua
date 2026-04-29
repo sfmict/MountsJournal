@@ -17,7 +17,7 @@ local function onEnter(self)
 	local f = self.mountID and self or self:GetParent()
 
 	if not (self:GetParent().modelScene or journal.mountDisplay:IsShown()) then
-		local _,_,_, creatureID, _,_, isSelfMount, _, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = journal:getMountInfoExtra(f.mountID)
+		local _,_,_, creatureID, _,_, isSelfMount, _, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = ns.util.getMountInfoExtra(f.mountID)
 		if not creatureID then
 			creatureID = journal:getMountFirstCreatureDisplayID(f.mountID)
 		end

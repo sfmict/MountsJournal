@@ -6,11 +6,19 @@ ns.journal:on("MODULES_INIT", function(journal)
 	local bg, activeContent = journal.bgFrame.settingsBackground
 
 	-- VERSION
-	local ver = bg:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	ver:SetPoint("TOPRIGHT", -40, 15)
-	ver:SetTextColor(.5, .5, .5, 1)
-	ver:SetText(C_AddOns.GetAddOnMetadata(addon, "Version"))
-	ns.util.setCopyBox(ver)
+	local aver = bg:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	aver:SetPoint("TOPRIGHT", -40, 15)
+	aver:SetTextColor(.5, .5, .5, 1)
+	aver:SetText(C_AddOns.GetAddOnMetadata(addon, "Version"))
+	ns.util.setCopyBox(aver)
+
+	-- WOW VERSION
+	local ver, build = GetBuildInfo()
+	local wver = bg:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	wver:SetPoint("BOTTOMRIGHT", aver, "TOPRIGHT", 0, 2)
+	wver:SetTextColor(.5, .5, .5, 1)
+	wver:SetText(ver.."."..build)
+	ns.util.setCopyBox(wver)
 
 	-- TABS
 	local index = 0
@@ -19,7 +27,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 		activeContent:Hide()
 		activeContent = self.content
 		activeContent:Show()
-		ver:SetShown(self.id ~= index)
+		-- aver:SetShown(self.id ~= index)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end
 

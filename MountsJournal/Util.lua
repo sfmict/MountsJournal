@@ -178,6 +178,17 @@ function util.getMountInfo(mount)
 end
 
 
+function util.getMountInfoExtra(mount)
+	-- expansion, familyID, rarity, creatureDisplayID, descriptionText, sourceText, isSelfMount, mountType, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview
+	if type(mount) == "number" then
+		local mountDB = ns.mountsDB[mount]
+		return mountDB[1], mountDB[2], mountDB[3], C_MountJournal.GetMountInfoExtraByID(mount)
+	else
+		return mount.expansion, mount.familyID, nil, mount.creatureID, mount.description, mount.sourceText, mount.selfMount, mount.mountType, mount.modelSceneID, mount.animID or 0, 0
+	end
+end
+
+
 function util.checkAura(unit, spellID, filter)
 	if not UnitExists(unit) then return end
 	local GetAuraSlots, GetAuraDataBySlot, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
