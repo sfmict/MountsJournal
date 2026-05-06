@@ -826,16 +826,21 @@ end
 
 function rules:getCondValueText(cond)
 	if cond[3] == nil then return "" end
-	local multi = conds[cond[2]].sort
-	local value = multi and type(cond[3]) ~= "table" and {cond[3]} or cond[3]
-	local text = conds[cond[2]]:getValueText(value) or RED_FONT_COLOR:WrapTextInColorCode(tostringall(cond[3]))
-	if multi and type(cond[3]) == "table" then text = self.multiNumStr:format(#cond[3], text) end
-	return text
+	if conds[cond[2]].getValueNames then -- multi
+		local values = type(cond[3]) ~= "table" and {cond[3]} or cond[3]
+		local names = conds[cond[2]]:getValueNames(values)
+		local num = #names
+		local text = num > 1 and self.multiNumStr:format(num, table.concat(names, ", ")) or names[1]
+		return text, names
+	end
+	return conds[cond[2]]:getValueText(cond[3]) or RED_FONT_COLOR:WrapTextInColorCode(tostringall(cond[3]))
 end
 
 
 function rules:getCondValueDisplay(cond)
-	return conds[cond[2]].getValueDisplay and conds[cond[2]]:getValueDisplay(cond[3]) or self:getCondValueText(cond)
+	local text = conds[cond[2]].getValueDisplay and conds[cond[2]]:getValueDisplay(cond[3])
+	if text then return text end
+	return self:getCondValueText(cond)
 end
 
 
@@ -852,13 +857,14 @@ end
 
 function rules:getCondText(cond)
 	if not cond then return end
-	local value = self:getCondValueDisplay(cond)
+	local value, values = self:getCondValueDisplay(cond)
 	local condText = "|cff44cc44"..conds[cond[2]].text
+	if value == nil then fpde(condText, value, values, "Asd") end
 	if cond[1] then condText = self.condNotStr..condText end
 	if value == "" then
 		return condText
 	else
-		return ("%s:|r |cffeeeeee%s|r"):format(condText, value), condText, value
+		return ("%s:|r |cffeeeeee%s|r"):format(condText, value), condText, values
 	end
 end
 
@@ -866,11 +872,11 @@ end
 function rules:setCondTooltip(rule)
 	GameTooltip:SetText(L["Conditions"]..":")
 	for i, cond in ipairs(rule) do
-		local condText, name, value = self:getCondText(cond)
+		local condText, name, values = self:getCondText(cond)
 		if name ~= nil and conds[cond[2]].sort and type(cond[3]) == "table" then
 			GameTooltip:AddLine(self.condNumStr:format(i, name..":"))
-			for v in value:match("]|r %((.*)%)"):gmatch("[^;]+") do
-				GameTooltip:AddLine(("      |cffeeeeee%s|r"):format(v:trim()))
+			for i, v in ipairs(values) do
+				GameTooltip:AddLine(("      |cffeeeeee%s|r"):format(v))
 			end
 		else
 			GameTooltip:AddLine(self.condNumStr:format(i, condText))

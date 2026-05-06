@@ -497,7 +497,9 @@ function ruleEditor:openCondValueMenu(btn, btnData)
 				btnData[3] = nil
 			end
 			cond.sort(value)
-			btn:SetText(rules:getCondValueText(btnData))
+			local text, names = rules:getCondValueText(btnData)
+			btn:SetText(text)
+			btn.names = names
 			self:ruleCheck()
 		end
 	else
@@ -523,7 +525,7 @@ function ruleEditor:setCondValueOption(panel, btnData, setFocus)
 	end
 
 	local cond = conds[btnData[2]]
-	if not cond.getValueText then return end
+	if not (cond.getValueText or cond.getValueNames) then return end
 
 	if btnData[2] == "map" then
 		panel.optionValue = self.mapOptionBtn
@@ -561,7 +563,11 @@ function ruleEditor:setCondValueOption(panel, btnData, setFocus)
 	panel.optionValue:SetPoint("LEFT", panel.optionType, "RIGHT", 10, 0)
 	panel.optionValue:SetPoint("RIGHT", panel.remove, "LEFT", -10, 0)
 	panel.optionValue:Show()
-	panel.optionValue:SetText(rules:getCondValueText(btnData))
+
+	local text, names = rules:getCondValueText(btnData)
+	panel.optionValue:SetText(text)
+	panel.optionValue.names = names
+
 	if panel.optionValue.SetCursorPosition then
 		panel.optionValue:SetCursorPosition(0)
 	end
@@ -569,7 +575,6 @@ function ruleEditor:setCondValueOption(panel, btnData, setFocus)
 		panel.optionValue:SetFocus()
 	end
 	panel.optionValue.tooltip = self:getCondTooltip(btnData)
-	panel.optionValue.multi = cond.sort and true
 end
 
 
