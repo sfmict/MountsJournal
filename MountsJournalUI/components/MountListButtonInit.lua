@@ -8,6 +8,7 @@ local function click(btn, mouse) journal.tags:listItemClick(btn, btn.modelScene 
 local function drag(btn) journal.tags:dragMount(btn.spellID or btn:GetParent().spellID) end
 
 local function typeClick(btn)
+	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	local parent = btn:GetParent()
 	journal:mountToggle(btn.type, parent.spellID, parent.mountID, journal.list)
 end

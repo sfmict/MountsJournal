@@ -1,6 +1,8 @@
 local addon, ns = ...
 local L, util = ns.L, ns.util
 local C_MountJournal, C_Map, C_Spell, C_Timer, C_Scenario, C_Container, MapUtil = C_MountJournal, C_Map, C_Spell, C_Timer, C_Scenario, C_Container, MapUtil
+local GetMountFromSpell, GetMountInfoByID, GetMountInfoExtraByID, SummonByID, IsDragonridingUnlocked = C_MountJournal.GetMountFromSpell, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID, C_MountJournal.SummonByID, C_MountJournal.IsDragonridingUnlocked
+local IsSpellUsable, GetSpellCooldown = C_Spell.IsSpellUsable, C_Spell.GetSpellCooldown
 local IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, SecureCmdOptionParse = IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, SecureCmdOptionParse
 local BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS = BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS
 local next, rawget, wipe, GetTime, random, floor = next, rawget, wipe, GetTime, math.random, math.floor
@@ -177,7 +179,7 @@ function mounts:ADDON_LOADED(addonName)
 
 		-- mount weight
 		self.rarityWeight = setmetatable({}, {__index = function(t, spellID)
-			local mountID = C_MountJournal.GetMountFromSpell(spellID)
+			local mountID = GetMountFromSpell(spellID)
 			local rarity = mountID and ns.mountsDB[mountID][3] or 100
 			t[spellID] = 1 - rarity * .01
 			return t[spellID]
@@ -247,7 +249,7 @@ function mounts:PLAYER_LOGIN()
 	self:RegisterEvent("NEW_MOUNT_ADDED")
 
 	hooksecurefunc(C_MountJournal, "ClearFanfare", function(mountID)
-		local _, spellID = C_MountJournal.GetMountInfoByID(mountID)
+		local _, spellID = GetMountInfoByID(mountID)
 		self:addMountDate(spellID)
 		self:autoAddNewMount(spellID)
 	end)
@@ -324,14 +326,14 @@ function mounts:setUsableRepairMounts()
 	wipe(self.usableRepairMounts)
 	if not self.config.repairSelectedMount then
 		for spellID in pairs(ns.specificDB.repair) do
-			local mountID = C_MountJournal.GetMountFromSpell(spellID)
-			local _,_,_,_,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+			local mountID = GetMountFromSpell(spellID)
+			local _,_,_,_,_,_,_,_,_, shouldHideOnChar, isCollected = GetMountInfoByID(mountID)
 			if isCollected and not shouldHideOnChar then
 				self.usableRepairMounts[spellID] = true
 			end
 		end
 	else
-		local _,_,_,_,_,_,_,_,_, shouldHideOnChar = C_MountJournal.GetMountInfoByID(self.config.repairSelectedMount)
+		local _,_,_,_,_,_,_,_,_, shouldHideOnChar = GetMountInfoByID(self.config.repairSelectedMount)
 		if shouldHideOnChar then
 			self.config.repairSelectedMount = self.config.repairSelectedMount == 61425 and 61447 or 61425
 		end
@@ -445,7 +447,7 @@ do
 				timer = nil
 			end
 
-			local cdInfo = C_Spell.GetSpellCooldown(61304)
+			local cdInfo = GetSpellCooldown(61304)
 
 			if issecretvalue(cdInfo.duration) or cdInfo.duration == 0 then
 				summonPet(petID)
@@ -459,7 +461,7 @@ end
 
 --function mounts:UNIT_SPELLCAST_SUCCEEDED(_,_, spellID)
 	--fpde(spellID)
-	--if ns.additionalMounts[spellID] or C_MountJournal.GetMountFromSpell(spellID) then
+	--if ns.additionalMounts[spellID] or GetMountFromSpell(spellID) then
 	--	local mountStat = self.stat[spellID]
 	--	mountStat[1] = mountStat[1] + 1
 	--	self:event("MOUNT_SUMMONED")
@@ -561,7 +563,7 @@ function mounts:UNIT_AURA(_, data)
 			elseif self.mountAuraInstanceID == nil then
 				if ns.additionalMountBuffs[aura.spellId] then
 					spellID = ns.additionalMountBuffs[aura.spellId].spellID
-				elseif C_MountJournal.GetMountFromSpell(aura.spellId) then
+				elseif GetMountFromSpell(aura.spellId) then
 					spellID = aura.spellId
 				end
 				if spellID then
@@ -616,7 +618,7 @@ end
 
 
 function mounts:NEW_MOUNT_ADDED(mountID)
-	local _, spellID = C_MountJournal.GetMountInfoByID(mountID)
+	local _, spellID = GetMountInfoByID(mountID)
 	self:addMountDate(spellID)
 	self:autoAddNewMount(spellID)
 	if self.herbalismMounts[spellID] then self:setHerbMount() end
@@ -642,8 +644,8 @@ do
 		if ns.additionalMounts[spellID] then
 			mountType = util.mountTypes[ns.additionalMounts[spellID].mountType]
 		else
-			local mountID = C_MountJournal.GetMountFromSpell(spellID)
-			local _,_,_,_, mountTypeExtra = C_MountJournal.GetMountInfoExtraByID(mountID)
+			local mountID = GetMountFromSpell(spellID)
+			local _,_,_,_, mountTypeExtra = GetMountInfoExtraByID(mountID)
 			mountType = util.mountTypes[mountTypeExtra]
 		end
 
@@ -811,8 +813,8 @@ function mounts:getTargetMount()
 	if C_Secrets.ShouldAurasBeSecret() then return end
 	local spellID, mountID = util.getUnitMount("target")
 	if mountID then
-		local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
-		return isUsable and C_Spell.IsSpellUsable(spellID) and spellID, false
+		local _,_,_,_, isUsable = GetMountInfoByID(mountID)
+		return isUsable and IsSpellUsable(spellID) and spellID, false
 	elseif spellID then
 		return ns.additionalMounts[spellID]:canUse() and spellID, true
 	end
@@ -822,8 +824,19 @@ end
 function mounts:summon(spellID)
 	spellID = spellID or self.summonedSpellID
 	if spellID then
-		local mountID = C_MountJournal.GetMountFromSpell(spellID)
-		if mountID then C_MountJournal.SummonByID(mountID) end
+		local mountID = GetMountFromSpell(spellID)
+		if mountID then SummonByID(mountID) end
+	end
+end
+
+
+function mounts:isMountUsable(spellID)
+	local mountID = GetMountFromSpell(spellID)
+	if mountID then
+		local _,_,_,_, isUsable = GetMountInfoByID(mountID)
+		return isUsable and IsSpellUsable(spellID)
+	elseif ns.additionalMounts[spellID] then
+		return self.withAdditional and ns.additionalMounts[spellID]:canUse()
 	end
 end
 
@@ -834,36 +847,15 @@ function mounts:setUsableID(ids, mWeight, mPWeight)
 
 	if mPWeight == nil or mWeight == mPWeight then
 		for spellID in next, ids do
-			local usable
-			if ns.additionalMounts[spellID] then
-				usable = self.withAdditional and ns.additionalMounts[spellID]:canUse()
-			else
-				local mountID = C_MountJournal.GetMountFromSpell(spellID)
-				if mountID then
-					local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
-					usable = isUsable and C_Spell.IsSpellUsable(spellID)
-				end
-			end
-
-			if usable then
+			if self:isMountUsable(spellID) then
 				weight = weight + (mWeight[spellID] or 100)
 				self.usableIDs[weight] = spellID
 			end
 		end
 	else
 		for spellID in next, ids do
-			local usable
-			if ns.additionalMounts[spellID] then
-				usable = self.withAdditional and ns.additionalMounts[spellID]:canUse()
-			else
-				local mountID = C_MountJournal.GetMountFromSpell(spellID)
-				if mountID then
-					local _,_,_,_, isUsable = C_MountJournal.GetMountInfoByID(mountID)
-					usable = isUsable and C_Spell.IsSpellUsable(spellID)
-				end
-			end
-
-			if usable then
+			if self:isMountUsable(spellID) then
+				-- mWeight is 0..1 factor; .99 + 1.5 clamps result to 1..100
 				weight = weight + floor((mPWeight[spellID] or 100) * mWeight[spellID] * .99 + 1.5)
 				self.usableIDs[weight] = spellID
 			end
@@ -885,7 +877,7 @@ function mounts:getSpellKnown()
 	if util.isPlayerSpell(90265) -- Мастер верховой езды
 	or util.isPlayerSpell(34091) -- Верховая езда (искусник)
 	or util.isPlayerSpell(34090) -- Верховая езда (умелец)
-	or C_MountJournal.IsDragonridingUnlocked()
+	or IsDragonridingUnlocked()
 	then
 		return true, true
 	end
@@ -914,8 +906,8 @@ mounts.SKILL_LINES_CHANGED = mounts.updateProfs
 function mounts:setHerbMount()
 	if self.config.useHerbMounts and self.profs[182] then
 		for spellID in next, self.herbalismMounts do
-			local mountID = C_MountJournal.GetMountFromSpell(spellID)
-			local _,_,_,_,_,_,_,_,_,_, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+			local mountID = GetMountFromSpell(spellID)
+			local _,_,_,_,_,_,_,_,_,_, isCollected = GetMountInfoByID(mountID)
 			if isCollected then
 				self.herbMount = true
 				return

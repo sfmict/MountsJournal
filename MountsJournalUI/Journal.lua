@@ -513,7 +513,10 @@ function journal:init()
 	end)
 
 	-- FILTERS BAR
-	self.filtersBar.clear:SetScript("OnClick", function() self:clearBtnFilters() end)
+	self.filtersBar.clear:SetScript("OnClick", function()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		self:clearBtnFilters()
+	end)
 
 	local function tabClick(self)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -780,6 +783,7 @@ function journal:init()
 
 	-- FILTER BUTTONS
 	local function filterClick(btn)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		self:setBtnFilters(btn:GetParent():GetParent().id)
 	end
 
@@ -839,7 +843,10 @@ function journal:init()
 
 	-- SHOWN PANEL
 	self.shownPanel.text:SetText(L["Shown:"])
-	self.shownPanel.clear:SetScript("OnClick", function() self:resetToDefaultFilters() end)
+	self.shownPanel.clear:SetScript("OnClick", function()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		self:resetToDefaultFilters()
+	end)
 	self.shownPanel.framePool = CreateFramePool("BUTTON", self.shownPanel.resetBar, "MJFilterResetButtonTempalte")
 	self.shownPanel.list = {}
 
@@ -2333,7 +2340,6 @@ function journal:mountToggle(mountType, spellID, mountID, list, zoneMounts)
 
 	-- mounts:setMountsList()
 	self.existingLists:refresh()
-	PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 end
 
 

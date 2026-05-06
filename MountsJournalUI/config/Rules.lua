@@ -1,7 +1,6 @@
 local addon, ns = ...
 local L, util, mounts, macroFrame, conds, actions, dataDialog = ns.L, ns.util, ns.mounts, ns.macroFrame, ns.conditions, ns.actions, ns.dataDialog
 local strcmputf8i = strcmputf8i
-local multiNum = NIGHT_FAE_BLUE_COLOR:WrapTextInColorCode("[%s]").." (%s)"
 local rules = CreateFrame("FRAME", "MountsJournalConfigRules")
 ns.ruleConfig = rules
 rules:Hide()
@@ -9,7 +8,9 @@ rules:Hide()
 
 rules:SetScript("OnShow", function(self)
 	self:SetScript("OnShow", function(self) self:updateFilters() end)
-
+	self.multiNumStr = NIGHT_FAE_BLUE_COLOR:WrapTextInColorCode("[%s]").." (%s)"
+	self.condNumStr = "|cff707070%s.|r %s"
+	self.condNotStr = "|cffcc4444"..L["NOT_CONDITION"].."|r "
 	local lsfdd = LibStub("LibSFDropDown-1.5")
 
 	StaticPopupDialogs[util.addonName.."NEW_RULE_SET"] = {
@@ -828,7 +829,7 @@ function rules:getCondValueText(cond)
 	local multi = conds[cond[2]].sort
 	local value = multi and type(cond[3]) ~= "table" and {cond[3]} or cond[3]
 	local text = conds[cond[2]]:getValueText(value) or RED_FONT_COLOR:WrapTextInColorCode(tostringall(cond[3]))
-	if multi and type(cond[3]) == "table" then text = multiNum:format(#cond[3], text) end
+	if multi and type(cond[3]) == "table" then text = self.multiNumStr:format(#cond[3], text) end
 	return text
 end
 
@@ -853,7 +854,7 @@ function rules:getCondText(cond)
 	if not cond then return end
 	local value = self:getCondValueDisplay(cond)
 	local condText = "|cff44cc44"..conds[cond[2]].text
-	if cond[1] then condText = ("|cffcc4444%s|r %s"):format(L["NOT_CONDITION"], condText) end
+	if cond[1] then condText = self.condNotStr..condText end
 	if value == "" then
 		return condText
 	else
@@ -861,21 +862,22 @@ function rules:getCondText(cond)
 	end
 end
 
+
 function rules:setCondTooltip(rule)
 	GameTooltip:SetText(L["Conditions"]..":")
 	for i, cond in ipairs(rule) do
 		local condText, name, value = self:getCondText(cond)
-		if name == nil then
-			GameTooltip:AddLine(condText)
-		elseif conds[cond[2]].sort and type(cond[3]) == "table" then
-			for j, v in ipairs({(";"):split(value:match("]|r %((.*)%)"))}) do
-				GameTooltip:AddDoubleLine(j == 1 and name..":|r" or " ", ("|cffeeeeee%s|r"):format(v:trim()))
+		if name ~= nil and conds[cond[2]].sort and type(cond[3]) == "table" then
+			GameTooltip:AddLine(self.condNumStr:format(i, name..":"))
+			for v in value:match("]|r %((.*)%)"):gmatch("[^;]+") do
+				GameTooltip:AddLine(("      |cffeeeeee%s|r"):format(v:trim()))
 			end
 		else
-			GameTooltip:AddDoubleLine(name..":|r", ("|cffeeeeee%s|r"):format(value))
+			GameTooltip:AddLine(self.condNumStr:format(i, condText))
 		end
 	end
 end
+
 
 function rules:getActionText(rule, ...)
 	local action = rule.action

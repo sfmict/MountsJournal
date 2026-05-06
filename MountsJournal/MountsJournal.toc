@@ -1,4 +1,4 @@
-## Interface: 120005
+## Interface: 120007, 120005
 ## Title: MountsJournal
 ## Author: sfmict
 ## Version: @project-version@
@@ -18,7 +18,7 @@
 ## Category-zhTW: 戰隊收藏
 ## SavedVariables: MountsJournalDB
 ## SavedVariablesPerCharacter: MountsJournalChar
-## OptionalDeps: LibStub, LibThingsLoad, LibDeflate, OPie
+## OptionalDeps: LibStub, LibThingsLoad, OPie
 embeds.xml
 locales\Locale.lua
 locales\[TextLocale].lua
