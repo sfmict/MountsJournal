@@ -578,7 +578,7 @@ end
 
 function macroFrame:isMoving()
 	local speed = GetUnitSpeed("player")
-	return not issecretvalue(speed) and speed > 0
+	return issecretvalue(speed) and IsPlayerMoving() or speed > 0
 end
 
 
