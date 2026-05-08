@@ -925,11 +925,26 @@
 										</Texture>
 									</Layer>
 								</Layers>
-								<Frames>
-									<Frame parentKey="Exploration" useParentLevel="true" setAllPoints="true"/>
-								</Frames>
 							</Frame>
 						</ScrollChild>
+						<Frames>
+							<Frame parentKey="label" setAllPoints="true">
+								<Layers>
+									<Layer level="OVERLAY">
+										<FontString parentKey="name" inherits="WorldMapTextFont">
+											<Anchors>
+												<Anchor point="TOP" x="0" y="-20"/>
+											</Anchors>
+										</FontString>
+										<FontString parentKey="description" inherits="SubZoneTextFont">
+											<Anchors>
+												<Anchor point="TOP" relativeKey="$parent.name" relativePoint="BOTTOM" x="0" y="-10"/>
+											</Anchors>
+										</FontString>
+									</Layer>
+								</Layers>
+							</Frame>
+						</Frames>
 					</ScrollFrame>
 				</Frames>
 				<Scripts>

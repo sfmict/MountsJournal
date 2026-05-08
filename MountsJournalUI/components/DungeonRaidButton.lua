@@ -19,6 +19,8 @@ ns.journal:on("MODULES_INIT", function(journal)
 		end)
 	end
 
+	ns.mapIDByJInstanceID = {}
+
 	local drIconInfo = {
 		tCoordLeft = .2,
 		tCoordRight = .8,
@@ -39,10 +41,6 @@ ns.journal:on("MODULES_INIT", function(journal)
 			list = {},
 		}
 	}
-	local expIconInfo = {
-		tSizeX = 40,
-		tSizeY = 20,
-	}
 	local mapExclude = {
 		[379] = true, -- Вершина Кун-Лай
 		[543] = true, -- Горгронд
@@ -57,7 +55,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 			local tier = {
 				name = ("|cff%s%s|r"):format(util.expColors[i], EJ_GetTierInfo(i)),
 				icon = util.expIcons[i],
-				iconInfo = expIconInfo,
+				iconInfo = util.expIconInfo,
 				list = {},
 			}
 			local showRaid = v.name == RAIDS
@@ -66,8 +64,11 @@ ns.journal:on("MODULES_INIT", function(journal)
 			while instanceID do
 				EJ_SelectInstance(instanceID)
 				local _,_,_,_,_, icon, mapID = EJ_GetInstanceInfo(instanceID)
-				if mapID and mapID > 0 and not mapExclude[mapID] then
-					tinsert(tier.list, {name = instanceName, icon = icon, mapID = mapID})
+				if mapID and mapID > 0 then
+					if not mapExclude[mapID] then
+						tinsert(tier.list, {name = instanceName, icon = icon, mapID = mapID})
+					end
+					ns.mapIDByJInstanceID[instanceID] = mapID
 				end
 				index = index + 1
 				instanceID, instanceName = EJ_GetInstanceByIndex(index, showRaid)

@@ -27,10 +27,7 @@ function journal.filters.expansions(dd, level)
 	info.notCheckable = nil
 	local expansions = mounts.filters.expansions
 
-	info.iconInfo = {
-		tSizeX = 40,
-		tSizeY = 20,
-	}
+	info.iconInfo = util.expIconInfo
 	info.widgets = {{
 		icon = "interface/worldmap/worldmappartyicon",
 		OnClick = function(btn)

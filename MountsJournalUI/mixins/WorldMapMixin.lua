@@ -7,14 +7,33 @@ function MJMapCanvasMixin:onLoad()
 	self.navBar = self:GetParent().navBar
 	self.child = self.ScrollContainer.Child
 	self.highlight = self.child.HighlightTexture
+	self.name = self.ScrollContainer.label.name
+	self.name:SetFontHeight(22)
+	self.description = self.ScrollContainer.label.description
+	self.description:SetFontHeight(16)
 	self.detailLayerPool = CreateFramePool("FRAME", self.child, "MapCanvasDetailLayerTemplate")
-	self.explorationLayerPool = CreateTexturePool(self.child.Exploration, "ARTWORK", 1)
-	self.highlightRectPool = CreateTexturePool(self.child.Exploration, "ARTWORK", 1)
+	self.explorationLayerPool = CreateTexturePool(self.child, "ARTWORK", 1)
+	self.highlightRectPool = CreateTexturePool(self.child, "ARTWORK", 1)
+	self.pinPool = CreateFramePool("FRAME", self.child, "DungeonEntrancePinTemplate")
 	self.navigation = LibStub("LibSFDropDown-1.5"):CreateModernButtonOriginal(self)
 	self.navigation:SetFrameLevel(self:GetFrameLevel() + 10)
 	self.navigation:SetPoint("TOPLEFT", 4, -4)
 	self.navigation:ddSetDisplayMode(addon)
 	self.navigation:ddSetInitFunc(function(...) self:dropDownInit(...) end)
+end
+
+
+function MJMapCanvasMixin:setLabel(name, description, dirty)
+	if self.isLabelDirty then return end
+	self.name:SetText(name)
+	self.description:SetText(description)
+	self.isLabelDirty = dirty
+end
+
+
+function MJMapCanvasMixin:clearLabel(force)
+	if force then self.isLabelDirty = nil end
+	self:setLabel()
 end
 
 
@@ -56,7 +75,8 @@ end
 
 function MJMapCanvasMixin:onUpdate(elapsed)
 	-- MAP HIGHLIGHT
-	local fileDataID, atlasID, texPercentageX, texPercentageY, textureX, textureY, scrollChildX, scrollChildY = C_Map.GetMapHighlightInfoAtPosition(self.mapID, self:getCursorPosition())
+	local cursorX, cursorY = self:getCursorPosition()
+	local fileDataID, atlasID, texPercentageX, texPercentageY, textureX, textureY, scrollChildX, scrollChildY = C_Map.GetMapHighlightInfoAtPosition(self.mapID, cursorX, cursorY)
 
 	if fileDataID and fileDataID > 0 or atlasID then
 		self.highlight:SetTexCoord(0, texPercentageX, 0, texPercentageY)
@@ -97,6 +117,13 @@ function MJMapCanvasMixin:onUpdate(elapsed)
 	-- now show all who match the same index
 	for highlightRect in self.highlightRectPool:EnumerateActive() do
 		highlightRect.texture:SetShown(highlightRect.index == highlightIndex)
+	end
+
+	-- LABEL
+	self:clearLabel()
+	local positionMapInfo = C_Map.GetMapInfoAtPosition(self.mapID, cursorX, cursorY)
+	if positionMapInfo and positionMapInfo.mapID ~= self.mapID then
+		self:setLabel(positionMapInfo.name)
 	end
 
 	-- ACCSELERATION
@@ -178,7 +205,7 @@ function MJMapCanvasMixin:onHide()
 end
 
 
--- Need for MapCanvasDetailLayerTemplate (MapCanvasDetailLayerMixin)
+-- Needs for MapCanvasDetailLayerTemplate (MapCanvasDetailLayerMixin)
 function MJMapCanvasMixin:AddMaskableTexture() end
 
 
@@ -262,6 +289,72 @@ function MJMapCanvasMixin:refreshLayers()
 end
 
 
+-- Needs for pins (MapCanvasPinMixin)
+function MJMapCanvasMixin:GetMapID()
+	return self.mapID
+end
+
+
+function MJMapCanvasMixin:SetPinPosition(pin, x, y)
+	pin:ClearAllPoints()
+	if x and y then
+		local scale = .8 / self.curScale
+		local canvas = pin:GetParent()
+		x = canvas:GetWidth() * x / scale
+		y = canvas:GetHeight() * y / scale
+		pin:SetScale(scale)
+		pin:SetPoint("CENTER", canvas, "TOPLEFT", x, -y)
+	end
+end
+
+
+do
+	local function onPinMouseDown(pin)
+		pin:AdjustPointsOffset(1, -1)
+	end
+
+	local function onPinMouseUp(pin, button, upInside)
+		pin:AdjustPointsOffset(-1, 1)
+		if button == "LeftButton" and upInside then
+			local mapID = ns.mapIDByJInstanceID[pin:GetPoiInfo().journalInstanceID]
+			if mapID then
+				pin:GetOwningMap().navBar:setMapID(mapID)
+			end
+		end
+	end
+
+	local function onPinMouseEnter(pin)
+		local info = pin:GetPoiInfo()
+		pin:GetOwningMap():setLabel(info.name, info.description, true)
+	end
+
+	local function onPinMouseLeave(pin)
+		pin:GetOwningMap():clearLabel(true)
+	end
+
+	function MJMapCanvasMixin:refreshPins()
+		self.pinPool:ReleaseAll()
+		local dungeonEntrances = C_EncounterJournal.GetDungeonEntrancesForMap(self.mapID)
+
+		for i, dungeonEntranceInfo in ipairs(dungeonEntrances) do
+			local pin, newPin = self.pinPool:Acquire()
+
+			if newPin then
+				pin:SetOwningMap(self)
+				pin:OnLoad()
+				pin:SetScript("OnMouseDown", onPinMouseDown)
+				pin:SetScript("OnMouseUp", onPinMouseUp)
+				pin:SetScript("OnEnter", onPinMouseEnter)
+				pin:SetScript("OnLeave", onPinMouseLeave)
+			end
+
+			pin:Show()
+			pin:OnAcquired(dungeonEntranceInfo)
+		end
+	end
+end
+
+
 function MJMapCanvasMixin:setCanvasScale(scale)
 	local width, height = self.child:GetSize()
 	local sWidth, sHeight = self.ScrollContainer:GetSize()
@@ -273,6 +366,7 @@ function MJMapCanvasMixin:setCanvasScale(scale)
 	self.child:SetScale(scale)
 	self.accX = nil
 	self.accY = nil
+	self:refreshPins()
 end
 
 

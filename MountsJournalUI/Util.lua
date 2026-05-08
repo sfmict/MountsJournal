@@ -72,6 +72,10 @@ util.expIcons = setmetatable({
 		return self[key]
 	end
 })
+util.expIconInfo = {
+	tSizeX = 40,
+	tSizeY = 20,
+}
 
 
 util.filterButtonBackdrop = {
