@@ -567,6 +567,17 @@ function journal:getFilterFamily(familyID)
 end
 
 
+function journal:getFamilySearch(text, familyID)
+	if type(familyID) == "table" then
+		for i = 1, #familyID do
+			if self:getFamilyPath(familyID[i]):lower():find(text, 1, true) then return true end
+		end
+	else
+		return self:getFamilyPath(familyID):lower():find(text, 1, true)
+	end
+end
+
+
 function journal:getFilterRarity(rarity)
 	local filter = mounts.filters.mountsRarity
 	if not filter.sign then
@@ -611,15 +622,21 @@ function journal:getFilterType(mountType)
 end
 
 
-function journal:getCustomSearchFilter(text, mountID, spellID, mountType)
-	local id = text:match("^id:(%d+)")
-	if id then return tonumber(id) == mountID end
+do
+	local id, spell, mType, family
+	function journal:setCustomSearchMatches(text)
+		id = tonumber(text:match("^id[: ] *(%d+)"))
+		spell = tonumber(text:match("^spell[: ] *(%d+)"))
+		mType = tonumber(text:match("^type[: ] *(%d+)"))
+		family = text:match("-f[: ] *(.-) *$")
+	end
 
-	id = text:match("^spell:(%d+)")
-	if id then return tonumber(id) == spellID end
-
-	id = text:match("^type:(%d+)")
-	if id then return tonumber(id) == mountType end
+	function journal:getCustomSearchFilter(mountID, spellID, mountType, familyID)
+		return id == mountID
+		    or spell == spellID
+		    or mType == mountType
+		    or family and self:getFamilySearch(family, familyID)
+	end
 end
 
 
@@ -664,6 +681,7 @@ function journal:updateMountsList()
 	local text = util.cleanText(self.searchBox:GetText())
 	local numMounts = 0
 	self.dataProvider = CreateDataProvider()
+	self:setCustomSearchMatches(text)
 
 	for i = 1, #self.mountIDs do
 		local mountID = self.mountIDs[i]
@@ -695,7 +713,7 @@ function journal:updateMountsList()
 			or name:lower():find(text, 1, true)
 			or sourceText:lower():find(text, 1, true)
 			or tags:find(spellID, text)
-			or self:getCustomSearchFilter(text, mountID, spellID, mountType))
+			or self:getCustomSearchFilter(mountID, spellID, mountType, familyID))
 		-- TYPE
 		and self:getFilterType(mountType)
 		-- FACTION

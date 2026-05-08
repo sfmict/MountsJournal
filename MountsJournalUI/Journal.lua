@@ -1612,6 +1612,19 @@ function journal:updateSpeed(...)
 end
 
 
+function journal:getFamilyPath(familyID)
+	for name, k in next, ns.familyDB do
+		if type(k) == "number" then
+			if familyID == k then return L[name] end
+		else
+			for subName, id in next, k do
+				if familyID == id then return ("%s / %s"):format(L[name], L[subName]) end
+			end
+		end
+	end
+end
+
+
 function journal:setMountTooltip(mountID, spellID, showDescription)
 	local name, _,_,_,_,_,_,_, faction = util.getMountInfo(mountID)
 	local expansion, familyID, _,_, descriptionText, sourceText, _, mountType = util.getMountInfoExtra(mountID)
@@ -1633,24 +1646,12 @@ function journal:setMountTooltip(mountID, spellID, showDescription)
 	--@end-do-not-package@
 
 	-- family
-	local function getPath(FID)
-		for name, k in next, ns.familyDB do
-			if type(k) == "number" then
-				if FID == k then return L[name] end
-			else
-				for subName, id in next, k do
-					if FID == id then return ("%s / %s"):format(L[name], L[subName]) end
-				end
-			end
-		end
-	end
-
 	if type(familyID) == "table" then
 		for i = 1, #familyID do
-			util.addTooltipDLine(i == 1 and L["Family"] or " ", getPath(familyID[i]))
+			util.addTooltipDLine(i == 1 and L["Family"] or " ", self:getFamilyPath(familyID[i]))
 		end
 	else
-		util.addTooltipDLine(L["Family"], getPath(familyID))
+		util.addTooltipDLine(L["Family"], self:getFamilyPath(familyID))
 	end
 
 	-- tags
