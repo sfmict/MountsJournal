@@ -219,10 +219,9 @@ do
 
 		framePool:ReleaseAll()
 		for i = 1, #list do
-			local f = framePool:Acquire()
-			local text = list[i]
-			f.info = list[text]
-			f:SetScript("OnClick", onClick)
+			local f, new = framePool:Acquire()
+			if new then f:SetScript("OnClick", onClick) end
+			f.info = list[list[i]]
 			f:SetPoint("LEFT", width, 0)
 			f.text:SetText(list[i])
 			f:Show()
@@ -623,19 +622,21 @@ end
 
 
 do
-	local id, spell, mType, family
-	function journal:setCustomSearchMatches(text)
-		id = tonumber(text:match("^id[: ] *(%d+)"))
-		spell = tonumber(text:match("^spell[: ] *(%d+)"))
-		mType = tonumber(text:match("^type[: ] *(%d+)"))
-		family = text:match("-f[: ] *(.-) *$")
+	local f, t, tp, id, sid
+	function journal:setFlagSearchMatches(text)
+		f = text:match("^%-f:?%s*(.-)%s*$")
+		t = text:match("^%-t:?%s*(.-)%s*$")
+		tp = tonumber(text:match("^%-tp:?%s*(%d+)"))
+		id = tonumber(text:match("^%-id:?%s*(%d+)"))
+		sid = tonumber(text:match("^%-sid:?%s*(%d+)"))
 	end
 
-	function journal:getCustomSearchFilter(mountID, spellID, mountType, familyID)
-		return id == mountID
-		    or spell == spellID
-		    or mType == mountType
-		    or family and self:getFamilySearch(family, familyID)
+	function journal:getFlagSearchFilter(mountID, spellID, mountType, familyID)
+		return f and self:getFamilySearch(f, familyID)
+		    or t and self.tags:find(spellID, t)
+		    or tp == mountType
+		    or id == mountID
+		    or sid == spellID
 	end
 end
 
@@ -681,7 +682,7 @@ function journal:updateMountsList()
 	local text = util.cleanText(self.searchBox:GetText())
 	local numMounts = 0
 	self.dataProvider = CreateDataProvider()
-	self:setCustomSearchMatches(text)
+	self:setFlagSearchMatches(text)
 
 	for i = 1, #self.mountIDs do
 		local mountID = self.mountIDs[i]
@@ -713,7 +714,7 @@ function journal:updateMountsList()
 			or name:lower():find(text, 1, true)
 			or sourceText:lower():find(text, 1, true)
 			or tags:find(spellID, text)
-			or self:getCustomSearchFilter(mountID, spellID, mountType, familyID))
+			or self:getFlagSearchFilter(mountID, spellID, mountType, familyID))
 		-- TYPE
 		and self:getFilterType(mountType)
 		-- FACTION

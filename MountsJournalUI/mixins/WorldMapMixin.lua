@@ -150,24 +150,23 @@ function MJMapCanvasMixin:onUpdate(elapsed)
 end
 
 
-function MJMapCanvasMixin:dropDownInit(btn, level)
+function MJMapCanvasMixin:dropDownInit(dd, level)
 	local mapGroupID = C_Map.GetMapGroupID(self.mapID)
 	if not mapGroupID then return end
 
 	local mapGroupMembersInfo = C_Map.GetMapGroupMembersInfo(mapGroupID)
 	if not mapGroupMembersInfo then return end
 
-	local function goToMap(button)
-		self.navBar:setMapID(button.value)
+	local info = {}
+	info.func = function(btn)
+		self.navBar:setMapID(btn.value)
 	end
 
-	local info = {}
 	for _, mapInfo in ipairs(mapGroupMembersInfo) do
 		info.text = mapInfo.name
 		info.value = mapInfo.mapID
 		info.checked = self.mapID == mapInfo.mapID
-		info.func = goToMap
-		btn:ddAddButton(info, level)
+		dd:ddAddButton(info, level)
 	end
 end
 

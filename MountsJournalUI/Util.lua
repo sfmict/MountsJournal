@@ -13,11 +13,12 @@ local menuBackdrop = {
 local lsfdd = LibStub("LibSFDropDown-1.5")
 
 local menuOnUpdate = function(self, elapsed)
-	local r,g,b,a = self:GetBackdropBorderColor()
+	local r = self.r
 	if r > .4 then self.delta = -.2
 	elseif r < .1 then self.delta = .2 end
 	r = r + elapsed * self.delta
-	self:SetBackdropBorderColor(r, r, r, a)
+	self.r = r
+	self:SetBackdropBorderColor(r, r, r, .8)
 end
 
 lsfdd:CreateMenuStyle(addon, function(parent)
@@ -28,6 +29,7 @@ lsfdd:CreateMenuStyle(addon, function(parent)
 	f:SetBackdropColor(.06, .06, .09, .85)
 	f:SetBackdropBorderColor(.3, .3, .3, .8)
 	f:SetScript("OnUpdate", menuOnUpdate)
+	f.r = .3
 	f.delta = .2
 	return f
 end)

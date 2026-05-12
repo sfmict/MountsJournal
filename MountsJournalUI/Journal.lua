@@ -758,6 +758,18 @@ function journal:init()
 	self.searchBox.clearButton:HookScript("OnClick", function()
 		self:updateMountsList()
 	end)
+	self.searchBox.searchIcon:SetScript("OnEnter", function(icon)
+		local str = NIGHT_FAE_BLUE_COLOR:WrapTextInColorCode("%s: |Cffffffff%s|r")
+		GameTooltip:SetOwner(icon, "ANCHOR_RIGHT")
+		GameTooltip:SetText(SEARCH)
+		GameTooltip:AddLine(str:format("-f", L["Family"]))
+		GameTooltip:AddLine(str:format("-t", L["tags"]))
+		GameTooltip:AddLine(str:format("-tp", "TypeID"))
+		GameTooltip:AddLine(str:format("-id", "MountID"))
+		GameTooltip:AddLine(str:format("-sid", "SpellID"))
+		GameTooltip:Show()
+	end)
+	self.searchBox.searchIcon:SetScript("OnLeave", GameTooltip_Hide)
 
 	-- FILTERS BUTTON
 	self.filtersButton = lsfdd:CreateStretchButtonOriginal(self.filtersPanel, nil, 22)
@@ -1612,13 +1624,24 @@ function journal:updateSpeed(...)
 end
 
 
-function journal:getFamilyPath(familyID)
-	for name, k in next, ns.familyDB do
-		if type(k) == "number" then
-			if familyID == k then return L[name] end
-		else
-			for subName, id in next, k do
-				if familyID == id then return ("%s / %s"):format(L[name], L[subName]) end
+do
+	local pathCache
+	function journal:getFamilyPath(familyID)
+		pathCache = pathCache or {}
+		if pathCache[familyID] then return pathCache[familyID] end
+		for name, v in next, ns.familyDB do
+			if type(v) == "table" then
+				for subName, id in next, v do
+					if familyID == id then
+						local path = ("%s / %s"):format(L[name], L[subName])
+						pathCache[familyID] = path
+						return path
+					end
+				end
+			elseif familyID == v then
+				local path = L[name]
+				pathCache[familyID] = path
+				return path
 			end
 		end
 	end
@@ -1642,7 +1665,7 @@ function journal:setMountTooltip(mountID, spellID, showDescription)
 	end
 	util.addTooltipDLine(L["types"], typeStr)
 	--@do-not-package@
-	util.addTooltipDLine("Type", mountType)
+	util.addTooltipDLine("TypeID", mountType)
 	--@end-do-not-package@
 
 	-- family
