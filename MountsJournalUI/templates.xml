@@ -933,12 +933,12 @@
 									<Layer level="OVERLAY">
 										<FontString parentKey="name" inherits="WorldMapTextFont">
 											<Anchors>
-												<Anchor point="TOP" x="0" y="-20"/>
+												<Anchor point="TOP" x="0" y="-28"/>
 											</Anchors>
 										</FontString>
 										<FontString parentKey="description" inherits="SubZoneTextFont">
 											<Anchors>
-												<Anchor point="TOP" relativeKey="$parent.name" relativePoint="BOTTOM" x="0" y="-10"/>
+												<Anchor point="TOP" relativeKey="$parent.name" relativePoint="BOTTOM" x="0" y="-8"/>
 											</Anchors>
 										</FontString>
 									</Layer>

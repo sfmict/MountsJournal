@@ -14,7 +14,7 @@ function MJMapCanvasMixin:onLoad()
 	self.detailLayerPool = CreateFramePool("FRAME", self.child, "MapCanvasDetailLayerTemplate")
 	self.explorationLayerPool = CreateTexturePool(self.child, "ARTWORK", 1)
 	self.highlightRectPool = CreateTexturePool(self.child, "ARTWORK", 1)
-	self.pinPool = CreateFramePool("FRAME", self.child, "DungeonEntrancePinTemplate")
+	self.pinPools = {}
 	self.navigation = LibStub("LibSFDropDown-1.5"):CreateModernButtonOriginal(self)
 	self.navigation:SetFrameLevel(self:GetFrameLevel() + 10)
 	self.navigation:SetPoint("TOPLEFT", 4, -4)
@@ -315,7 +315,8 @@ do
 	local function onPinMouseUp(pin, button, upInside)
 		pin:AdjustPointsOffset(-1, 1)
 		if button == "LeftButton" and upInside then
-			local mapID = ns.mapIDByJInstanceID[pin:GetPoiInfo().journalInstanceID]
+			local info = pin:GetPoiInfo()
+			local mapID = info.linkedUiMapID or ns.mapIDByJInstanceID[info.journalInstanceID]
 			if mapID then
 				pin:GetOwningMap().navBar:setMapID(mapID)
 			end
@@ -331,25 +332,40 @@ do
 		pin:GetOwningMap():clearLabel(true)
 	end
 
-	function MJMapCanvasMixin:refreshPins()
-		self.pinPool:ReleaseAll()
-		local dungeonEntrances = C_EncounterJournal.GetDungeonEntrancesForMap(self.mapID)
-
-		for i, dungeonEntranceInfo in ipairs(dungeonEntrances) do
-			local pin, newPin = self.pinPool:Acquire()
-
-			if newPin then
-				pin:SetOwningMap(self)
-				pin:OnLoad()
-				pin:SetScript("OnMouseDown", onPinMouseDown)
-				pin:SetScript("OnMouseUp", onPinMouseUp)
-				pin:SetScript("OnEnter", onPinMouseEnter)
-				pin:SetScript("OnLeave", onPinMouseLeave)
-			end
-
-			pin:Show()
-			pin:OnAcquired(dungeonEntranceInfo)
+	function MJMapCanvasMixin:acquirePin(pinTemplate, info)
+		if not self.pinPools[pinTemplate] then
+			self.pinPools[pinTemplate] = CreateFramePool("FRAME", self.child, pinTemplate)
 		end
+		local pin, newPin = self.pinPools[pinTemplate]:Acquire()
+
+		if newPin then
+			pin:SetOwningMap(self)
+			pin:OnLoad()
+			pin:SetScript("OnMouseDown", onPinMouseDown)
+			pin:SetScript("OnMouseUp", onPinMouseUp)
+			pin:SetScript("OnEnter", onPinMouseEnter)
+			pin:SetScript("OnLeave", onPinMouseLeave)
+		end
+
+		pin:Show()
+		pin:OnAcquired(info)
+	end
+end
+
+
+function MJMapCanvasMixin:refreshPins()
+	for _, pool in next, self.pinPools do
+		pool:ReleaseAll()
+	end
+
+	local dungeonEntrances = C_EncounterJournal.GetDungeonEntrancesForMap(self.mapID)
+	for i, dungeonEntranceInfo in ipairs(dungeonEntrances) do
+		self:acquirePin("DungeonEntrancePinTemplate", dungeonEntranceInfo)
+	end
+
+	local mapLinks = C_Map.GetMapLinksForMap(self.mapID)
+	for i, mapLink in ipairs(mapLinks) do
+		self:acquirePin("MapLinkPinTemplate", mapLink)
 	end
 end
 
