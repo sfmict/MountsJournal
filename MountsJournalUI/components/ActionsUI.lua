@@ -145,6 +145,7 @@ actions.rmounttc.getValueList = actions.rmountt.getValueList
 actions.mount.text = L["Mount"]
 
 function actions.mount:getIcon(value)
+	if not value then return 631718 end
 	local mount = ns.additionalMounts[value]
 	if mount then
 		return mount.icon, nil,nil,nil,nil,nil, mount.spellID
@@ -196,6 +197,7 @@ actions.item.text = L["Use Item"]
 actions.item.isNumeric = true
 
 function actions.item:getIcon(value)
+	if not value then return 133633 end
 	return ltl:GetItemIcon(value), nil,nil,nil,nil,nil,nil, ltl:GetItemLink(value)
 end
 
@@ -212,6 +214,7 @@ actions.iitem.text = L["Use Inventory Item"]
 actions.iitem.isNumeric = true
 
 function actions.iitem:getIcon(value)
+	if not value then return 133069 end
 	return GetInventoryItemTexture("player", value), nil,nil,nil,nil,nil,nil, GetInventoryItemLink("player", value)
 end
 
@@ -271,6 +274,7 @@ actions.spell.text = L["Cast Spell"]
 actions.spell.isNumeric = true
 
 function actions.spell:getIcon(value)
+	if not value then return 135810 end
 	local info = ltl:GetSpellInfo(value)
 	if info then return info.iconID, nil,nil,nil,nil,nil, info.spellID end
 end
@@ -373,8 +377,9 @@ function actions:getMenuList(value, func)
 		local v = types[i]
 		local action = self[v]
 		local text = action.doesntInterrupt and action.text..dInterruptStar or action.text
+		local icon, _, r,g,b = action:getIcon()
 
-		local info = createRadioInfo(text, v, func, v == value)
+		local info = createRadioInfo(text, v, func, v == value, nil, icon, r and {r=r, g=g, b=b})
 		info.arg1 = action
 		if action.description or action.doesntInterrupt then
 			info.OnTooltipShow = OnTooltipShow
