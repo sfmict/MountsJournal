@@ -314,11 +314,14 @@ do
 
 	local function onPinMouseUp(pin, button, upInside)
 		pin:AdjustPointsOffset(-1, 1)
-		if button == "LeftButton" and upInside then
+		local owner = pin:GetOwningMap()
+		if button ~= "LeftButton" then
+			owner:onMouseUp(button)
+		elseif upInside then
 			local info = pin:GetPoiInfo()
 			local mapID = info.linkedUiMapID or ns.mapIDByJInstanceID[info.journalInstanceID]
 			if mapID then
-				pin:GetOwningMap().navBar:setMapID(mapID)
+				owner.navBar:setMapID(mapID)
 			end
 		end
 	end

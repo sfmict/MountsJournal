@@ -615,6 +615,7 @@ function journal:init()
 
 	-- SCROLL FRAME
 	self.view = CreateScrollBoxListGridView()
+	self.elementInitializerFunc = function(...) self:initMountButton(...) end
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.leftInset.scrollBar, self.view)
 
 	-- MODELSCENE
@@ -1857,13 +1858,19 @@ function journal:setScrollGridMounts(force)
 
 	self.scrollBox.wheelPanScalar = panScalar or 2
 	self.view:SetPadding(top,bottom,left,right,hSpacing,vSpacing)
-	self.view:SetElementExtent(extent)
-	self.view:SetElementSizeCalculator(sizeCalculator)
+	if self.view.SetElementSize then
+		if self.gridN > 1 then
+			self.view:SetElementSize(extent, extent)
+		else
+			self.view:ClearElementSizeData()
+		end
+	else
+		self.view:SetElementExtent(extent)
+		self.view:SetElementSizeCalculator(sizeCalculator)
+	end
 	self.view:SetPanExtent(extent)
 	self.view:SetStride(self.gridN)
-	self.view:SetElementInitializer(template, function(...)
-		self:initMountButton(...)
-	end)
+	self.view:SetElementInitializer(template, self.elementInitializerFunc)
 
 	if self.dataProvider then
 		self:updateFilterNavBar()

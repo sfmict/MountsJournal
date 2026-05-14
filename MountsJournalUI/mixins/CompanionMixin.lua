@@ -399,7 +399,15 @@ function MJCompanionsPanelMixin:setScrollView()
 		func = function(...) self:initModelButton(...) end
 	end
 
-	self.view:SetElementExtent(extent)
+	if self.view.SetElementSize then
+		if stride > 1 then
+			self.view:SetElementSize(extent, extent)
+		else
+			self.view:ClearElementSizeData()
+		end
+	else
+		self.view:SetElementExtent(extent)
+	end
 	self.view:SetPanExtent(extent)
 	self.view:SetStride(stride)
 	self.view:SetElementInitializer(template, func)
