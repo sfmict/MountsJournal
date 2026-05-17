@@ -642,7 +642,6 @@ do
 		end
 	end
 
-
 	function rules:getRulePath(list, order)
 		if list == self.rules then return order end
 		return getPath(list, self.rules)..">"..order
@@ -733,7 +732,7 @@ function rules:importRule()
 			local rule = data.data
 			if self:ruleCheck(rule) then
 				util.openJournalTab(1, 3)
-				self:save(self.rules, 1, rule)
+				self:save(self.rules, rule)
 				return true
 			end
 		end,
@@ -751,7 +750,7 @@ function rules:dataImportRule(data, rName, characterName)
 		save = function(rule)
 			if self:ruleCheck(rule) then
 				util.openJournalTab(1, 3)
-				self:save(self.rules, 1, rule)
+				self:save(self.rules, rule)
 				return true
 			end
 		end,
@@ -986,31 +985,22 @@ do
 		end
 		return text:lower():find(str, 1, true)
 	end
-
-
-	function rules:condFind(rule, text)
+	local function ruleFind(self, rule, text)
+		if find(self:getActionText(rule), text) then return true end
 		for i = 1, #rule do
 			if find(self:getCondText(rule[i]), text) then return true end
 		end
 	end
 
-
 	function rules:addDataList(text, list, pNode)
 		local empty = true
 		for i = 1, #list do
 			local rule = list[i]
-			if rule.name
-			or self.notSearched
-			or find(self:getActionText(rule), text)
-			or self:condFind(rule, text)
-			then
+			local ruleMatch = self.notSearched or ruleFind(self, rule, text)
+			if ruleMatch or rule.rules then
 				local node = pNode:Insert({i, rule, list})
 				if rule.rules then
-					if self:addDataList(text, rule.rules, node)
-					or self.notSearched
-					or find(self:getActionText(rule), text)
-					or self:condFind(rule, text)
-					then
+					if self:addDataList(text, rule.rules, node) or ruleMatch then
 						empty = false
 						node:SetCollapsed(rule.isCollapsed and self.notSearched)
 					else

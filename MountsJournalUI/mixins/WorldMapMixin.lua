@@ -46,14 +46,11 @@ end
 
 local function getDeltaAcceleration(curAcc, elapsed)
 	local kAcc = -5
-	local delta = curAcc * elapsed
-	delta = delta + elapsed * delta * kAcc
-	local newAcc = delta / elapsed
+	local decay = math.exp(kAcc * elapsed)
+	local delta = curAcc * (decay - 1) / kAcc
+	local newAcc = curAcc * decay
 
-	if curAcc >= 0 and newAcc < 0 or curAcc < 0 and newAcc >= 0
-	or newAcc < 5 and newAcc > -5
-	then return end
-
+	if newAcc < 5 and newAcc > -5 then return end
 	return delta, newAcc
 end
 
@@ -205,7 +202,7 @@ end
 
 
 -- Needs for MapCanvasDetailLayerTemplate (MapCanvasDetailLayerMixin)
-function MJMapCanvasMixin:AddMaskableTexture() end
+MJMapCanvasMixin.AddMaskableTexture = nop
 
 
 function MJMapCanvasMixin:refreshLayers()
@@ -288,6 +285,10 @@ function MJMapCanvasMixin:refreshLayers()
 end
 
 
+-- Needs for DelveEntrancePinTemplate (AreaPOIPinMixin)
+MJMapCanvasMixin.GetBountyInfo = nop
+
+
 -- Needs for pins (MapCanvasPinMixin)
 function MJMapCanvasMixin:GetMapID()
 	return self.mapID
@@ -318,11 +319,7 @@ do
 		if button ~= "LeftButton" then
 			owner:onMouseUp(button)
 		elseif upInside then
-			local info = pin:GetPoiInfo()
-			local mapID = info.linkedUiMapID or ns.mapIDByJInstanceID[info.journalInstanceID]
-			if mapID then
-				owner.navBar:setMapID(mapID)
-			end
+			owner.navBar:setMapID(pin:GetPoiInfo().linkedUiMapID)
 		end
 	end
 
@@ -363,12 +360,26 @@ function MJMapCanvasMixin:refreshPins()
 
 	local dungeonEntrances = C_EncounterJournal.GetDungeonEntrancesForMap(self.mapID)
 	for i, dungeonEntranceInfo in ipairs(dungeonEntrances) do
-		self:acquirePin("DungeonEntrancePinTemplate", dungeonEntranceInfo)
+		dungeonEntranceInfo.linkedUiMapID = ns.mapIDByJInstanceID[dungeonEntranceInfo.journalInstanceID]
+		if dungeonEntranceInfo.linkedUiMapID then
+			self:acquirePin("DungeonEntrancePinTemplate", dungeonEntranceInfo)
+		end
 	end
 
 	local mapLinks = C_Map.GetMapLinksForMap(self.mapID)
 	for i, mapLink in ipairs(mapLinks) do
-		self:acquirePin("MapLinkPinTemplate", mapLink)
+		if mapLink.linkedUiMapID then
+			self:acquirePin("MapLinkPinTemplate", mapLink)
+		end
+	end
+
+	local areaPOIs = C_AreaPoiInfo.GetDelvesForMap(self.mapID)
+	for i, arePoiID in ipairs(areaPOIs) do
+		local poiInfo = C_AreaPoiInfo.GetAreaPOIInfo(self.mapID, arePoiID)
+		if poiInfo and poiInfo.linkedUiMapID then
+			poiInfo.dataProvider = self
+			self:acquirePin("DelveEntrancePinTemplate", poiInfo)
+		end
 	end
 end
 

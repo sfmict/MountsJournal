@@ -88,14 +88,10 @@ local function setAcceleration(self, deltaX, deltaY, elapsed)
 end
 
 local function getDeltaAcceleration(curAcc, elapsed, kAcc, kSpeed)
-	local delta = curAcc * elapsed
-	delta = delta + elapsed * delta * kAcc
-	local newAcc = delta / elapsed
+	local decay = math.exp(kAcc * elapsed)
+	local delta = curAcc * (decay - 1) / kAcc
+	local newAcc = curAcc * decay
 	local minSpeed = 50 * kSpeed
-
-	if curAcc >= 0 and newAcc < 0 or curAcc < 0 and newAcc >= 0 then
-		newAcc = 0
-	end
 
 	if math.abs(newAcc) < minSpeed then
 		newAcc = minSpeed * (curAcc < 0 and -1 or 1)
