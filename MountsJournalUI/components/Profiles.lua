@@ -10,6 +10,12 @@ ns.journal:on("MODULES_INIT", function(journal)
 	local lsfdd = LibStub("LibSFDropDown-1.5")
 	local dd = lsfdd:CreateStretchButtonOriginal(journal.bgFrame, 130, 22)
 	dd:SetPoint("LEFT", journal.summonButton, "RIGHT", 4, -.5)
+	dd:SetScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_TOPLEFT", 0, 0)
+		GameTooltip:SetText(L["Profile"]..": "..self.Text:GetText())
+		GameTooltip:AddLine(L["ProfilesTooltipDescription"], 1, 1, 1, true)
+		GameTooltip:Show()
+	end)
 	journal.bgFrame.profilesMenu = util.setEventsMixin(dd)
 
 	-- POPUP

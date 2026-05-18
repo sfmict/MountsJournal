@@ -858,7 +858,6 @@ function rules:getCondText(cond)
 	if not cond then return end
 	local value, values = self:getCondValueDisplay(cond)
 	local condText = "|cff44cc44"..conds[cond[2]].text
-	if value == nil then fpde(condText, value, values, "Asd") end
 	if cond[1] then condText = self.condNotStr..condText end
 	if value == "" then
 		return condText
