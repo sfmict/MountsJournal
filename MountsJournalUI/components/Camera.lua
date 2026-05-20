@@ -1,17 +1,17 @@
 local _, ns = ...
 local mounts, journal, math = ns.mounts, ns.journal, math
 local ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, ORBIT_CAMERA_MOUSE_PAN_VERTICAL = ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, ORBIT_CAMERA_MOUSE_PAN_VERTICAL
-local GetScaledCursorDelta, GetScaledCursorPosition, IsShiftKeyDown = GetScaledCursorDelta, GetScaledCursorPosition, IsShiftKeyDown
-local DeltaLerp, Vector3D_CalculateNormalFromYawPitch = DeltaLerp, Vector3D_CalculateNormalFromYawPitch
+local GetScaledCursorDelta, IsShiftKeyDown = GetScaledCursorDelta, IsShiftKeyDown
+local DeltaLerp, Clamp, Vector3D_CalculateNormalFromYawPitch = DeltaLerp, Clamp, Vector3D_CalculateNormalFromYawPitch
 local pi2 = math.pi * 2
 
 
 -- QUATERNION
 local function quaternion_Multiply(aw, ax, ay, az, bw, bx, by, bz)
 	return aw*bw - ax*bx - ay*by - az*bz,
-          aw*bx + ax*bw + ay*bz - az*by,
-          aw*by - ax*bz + ay*bw + az*bx,
-          aw*bz + ax*by - ay*bx + az*bw
+	       aw*bx + ax*bw + ay*bz - az*by,
+	       aw*by - ax*bz + ay*bw + az*bx,
+	       aw*bz + ax*by - ay*bx + az*bw
 end
 
 local function quaternion_FromYawPitchRoll(yaw, pitch, roll)
@@ -27,16 +27,16 @@ local function quaternion_FromYawPitchRoll(yaw, pitch, roll)
 end
 
 local function quaternion_ToYawPitchRoll(w, x, y, z)
-	local sinp, pitch = 2 * (w*y - x*z)
+	local fx = 1 - 2*(y*y + z*z)
+	local fy = 2*(x*y + w*z)
+	local fz = 2*(x*z - w*y)
+	local rz = 2*(y*z + w*x)
+	local uz = 1 - 2*(x*x + y*y)
 
-	if math.abs(sinp) >= 1 then
-		pitch = math.pi / 2 * (sinp > 0 and 1 or -1)
-	else
-		pitch = math.asin(sinp)
-	end
-
-	local yaw = math.atan2(2 * (w*z + x*y), 1 - 2 * (y*y + z*z))
-	local roll = math.atan2(2 * (w*x - y*z), 1 - 2 * (x*x + y*y))
+	local sinp = -fz
+	local pitch = math.abs(sinp) >= 1 and math.pi / 2*(sinp > 0 and 1 or -1) or math.asin(sinp)
+	local yaw = math.atan2(fy, fx)
+	local roll = math.atan2(rz, uz)
 
 	return yaw, pitch, roll
 end
@@ -55,19 +55,25 @@ local function quaternion_ToAxisVectors(w, x, y, z)
 	local xy, xz, yz = x*y, x*z, y*z
 	local wx, wy, wz = w*x, w*y, w*z
 
-	local fx = 1 - 2 * (yy + zz)
+	local fx = 1 - 2*(yy + zz)
 	local fy = 2 * (xy + wz)
 	local fz = 2 * (xz - wy)
 
-	local rx = 2 * (xy - wz)
-	local ry = 1 - 2 * (xx + zz)
-	local rz = 2 * (yz + wx)
+	local rx = 2*(xy - wz)
+	local ry = 1 - 2*(xx + zz)
+	local rz = 2*(yz + wx)
 
 	local ux = fy*rz - fz*ry
 	local uy = fz*rx - fx*rz
 	local uz = fx*ry - fy*rx
 
 	return fx, fy, fz, rx, ry, rz, ux, uy, uz
+end
+
+local function quaternion_GetUpVector(w, x, y, z)
+	return 2*(x*z + w*y), -- ux
+	       2*(y*z - w*x), -- uy
+	       1 - 2*(x*x + y*y) -- uz
 end
 
 local function quaternion_Trackball(hy, hp, qw, qx, qy, qz)
@@ -79,6 +85,38 @@ local function quaternion_Trackball(hy, hp, qw, qx, qy, qz)
 	return quaternion_Normalize(nw, nx, ny, nz)
 end
 
+local function quaternion_Slerp(aw, ax, ay, az, bw, bx, by, bz, amount)
+	local dot = aw*bw + ax*bx + ay*by + az*bz
+	if dot < 0 then
+		bw, bx, by, bz = -bw, -bx, -by, -bz
+		dot = -dot
+	end
+
+	if dot > .9995 then
+		return quaternion_Normalize(
+			aw + (bw - aw) * amount,
+			ax + (bx - ax) * amount,
+			ay + (by - ay) * amount,
+			az + (bz - az) * amount
+		)
+	end
+
+	dot = Clamp(dot, -1, 1)
+	local theta0 = math.acos(dot)
+	local theta = theta0 * amount
+	local sinTheta = math.sin(theta)
+	local sinTheta0 = math.sin(theta0)
+	local s0 = math.cos(theta) - dot * sinTheta / sinTheta0
+	local s1 = sinTheta / sinTheta0
+
+	return quaternion_Normalize(
+		aw*s0 + bw*s1,
+		ax*s0 + bx*s1,
+		ay*s0 + by*s1,
+		az*s0 + bz*s1
+	)
+end
+
 
 -- ORBIT CAMERA
 local function setMaxOffsets(self)
@@ -87,8 +125,8 @@ local function setMaxOffsets(self)
 	local extra = 50
 	self.xMaxOffset = hw + extra
 	self.yMaxOffset = hh + extra
-	self.xMaxCursor = self.xMaxOffset / self:GetDeltaModifierForCameraMode(self.buttonModes.rightX) - hw
-	self.yMaxCursor = self.yMaxOffset / self:GetDeltaModifierForCameraMode(self.buttonModes.rightY) - hh
+	self.xOffset = Clamp(self.xOffset, -self.xMaxOffset, self.xMaxOffset)
+	self.yOffset = Clamp(self.yOffset, -self.yMaxOffset, self.yMaxOffset)
 end
 
 local function SaveInitialTransform(self)
@@ -127,7 +165,7 @@ local function ApplyFromModelSceneCameraInfo(self, modelSceneCameraInfo, transit
 	self:SetPitch(transitionalCameraInfo.pitch)
 	self:SetRoll(transitionalCameraInfo.roll)
 
-	self.qw, self.qx, self.qy, self.qz = quaternion_FromYawPitchRoll(transitionalCameraInfo.yaw, transitionalCameraInfo.pitch, 0)
+	self.qw, self.qx, self.qy, self.qz = quaternion_FromYawPitchRoll(transitionalCameraInfo.yaw, transitionalCameraInfo.pitch, transitionalCameraInfo.roll)
 
 	if self.xOffset == nil then
 		self.defYOfsset = 20
@@ -211,15 +249,11 @@ local function HandleMouseMovement(self, mode, delta, snapToValue)
 		if snapToValue then self:SnapToTargetInterpolationPitch() end
 
 	elseif mode == ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL then
-		self.xOffset = self.xOffset + delta
-		if self.xOffset > self.xMaxOffset then self.xOffset = self.xMaxOffset
-		elseif self.xOffset < -self.xMaxOffset then self.xOffset = -self.xMaxOffset end
+		self.xOffset = Clamp(self.xOffset + delta, -self.xMaxOffset, self.xMaxOffset)
 		if snapToValue then self.panningXOffset = nil end
 
 	elseif mode == ORBIT_CAMERA_MOUSE_PAN_VERTICAL then
-		self.yOffset = self.yOffset + delta
-		if self.yOffset > self.yMaxOffset then self.yOffset = self.yMaxOffset
-		elseif self.yOffset < -self.yMaxOffset then self.yOffset = -self.yMaxOffset end
+		self.yOffset = Clamp(self.yOffset + delta, -self.yMaxOffset, self.yMaxOffset)
 		if snapToValue then self.panningYOffset = nil end
 	else
 		oldHandleMouseMovement(self, mode, delta, snapToValue)
@@ -238,22 +272,14 @@ local function OnUpdate(self, elapsed)
 
 	if self:IsRightMouseButtonDown() then
 		local deltaX, deltaY = GetScaledCursorDelta()
-		local x, y = GetScaledCursorPosition()
-		local modelScene = self:GetOwningScene()
-		if deltaX > 0 and x > modelScene:GetLeft() - self.xMaxCursor
-		or deltaX < 0 and x < modelScene:GetRight() + self.xMaxCursor then
-			self:HandleMouseMovement(self.buttonModes.rightX, deltaX * self:GetDeltaModifierForCameraMode(self.buttonModes.rightX), not self.buttonModes.rightXinterpolate)
-		end
-		if deltaY > 0 and y > modelScene:GetBottom() - self.yMaxCursor
-		or deltaY < 0 and y < modelScene:GetTop() + self.yMaxCursor then
-			self:HandleMouseMovement(self.buttonModes.rightY, -deltaY * self:GetDeltaModifierForCameraMode(self.buttonModes.rightY), not self.buttonModes.rightYinterpolate)
-		end
+		self:HandleMouseMovement(self.buttonModes.rightX, deltaX * self:GetDeltaModifierForCameraMode(self.buttonModes.rightX), not self.buttonModes.rightXinterpolate)
+		self:HandleMouseMovement(self.buttonModes.rightY, -deltaY * self:GetDeltaModifierForCameraMode(self.buttonModes.rightY), not self.buttonModes.rightYinterpolate)
 	end
 
 	local shiftDown = IsShiftKeyDown()
 	-- interpolation starts when shift is released
 	if not shiftDown and self.wasShiftDown then
-		self.interpolatedQ = {self.qw, self.qx, self.qy, self.qz}
+		self.interpolatedQ = true
 	end
 	self.wasShiftDown = shiftDown
 
@@ -265,7 +291,8 @@ local function OnUpdate(self, elapsed)
 		if dx ~= 0 or dy ~= 0 then
 			if shiftDown then
 				self.interpolatedQ = nil
-				self.qw, self.qx, self.qy, self.qz = quaternion_Trackball(-dx, -dy, self.qw, self.qx, self.qy, self.qz)
+				local k = .7
+				self.qw, self.qx, self.qy, self.qz = quaternion_Trackball(-dx*k, -dy*k, self.qw, self.qx, self.qy, self.qz)
 				local yaw, pitch = quaternion_ToYawPitchRoll(self.qw, self.qx, self.qy, self.qz)
 				self:SetYaw(yaw)
 				self:SetPitch(pitch)
@@ -274,7 +301,7 @@ local function OnUpdate(self, elapsed)
 				self:SetPitch(self:GetPitch() - dy)
 
 				if not self.interpolatedQ then
-					self.qw, self.qx, self.qy, self.qz = quaternion_FromYawPitchRoll(self:GetYaw(), self:GetPitch(), 0)
+					self.qw, self.qx, self.qy, self.qz = quaternion_FromYawPitchRoll(self:GetYaw(), self:GetPitch(), self:GetRoll())
 				end
 			end
 		end
@@ -293,28 +320,17 @@ local function UpdateInterpolationTargets(self, elapsed)
 	oldUpdateInterpolationTargets(self, elapsed)
 
 	if self.interpolatedQ then
-		local iw, ix, iy, iz = self.interpolatedQ[1], self.interpolatedQ[2], self.interpolatedQ[3], self.interpolatedQ[4]
-		local tw, tx, ty, tz = quaternion_FromYawPitchRoll(self:GetYaw(), self:GetPitch(), 0)
+		local tw, tx, ty, tz = quaternion_FromYawPitchRoll(self:GetYaw(), self:GetPitch(), self:GetRoll())
+		local amount = Clamp(9 * elapsed, 0, 1) -- .15*60=9
+		self.qw, self.qx, self.qy, self.qz = quaternion_Slerp(self.qw, self.qx, self.qy, self.qz, tw, tx, ty, tz, amount)
 
-		-- short path
-		local dot = iw*tw + ix*tx + iy*ty + iz*tz
-		if dot < 0 then
-			tw, tx, ty, tz = -tw, -tx, -ty, -tz
-		end
+		local ux, uy, uz = quaternion_GetUpVector(self.qw, self.qx, self.qy, self.qz)
+		local tux, tuy, tuz = quaternion_GetUpVector(tw, tx, ty, tz)
 
-		local amount = .15
-		self.interpolatedQ[1] = DeltaLerp(iw, tw, amount, elapsed)
-		self.interpolatedQ[2] = DeltaLerp(ix, tx, amount, elapsed)
-		self.interpolatedQ[3] = DeltaLerp(iy, ty, amount, elapsed)
-		self.interpolatedQ[4] = DeltaLerp(iz, tz, amount, elapsed)
+		local dotUp = ux*tux + uy*tuy + uz*tuz
+		local angle = math.acos(Clamp(dotUp, -1, 1))
 
-		self.qw, self.qx, self.qy, self.qz = quaternion_Normalize(
-			self.interpolatedQ[1], self.interpolatedQ[2],
-			self.interpolatedQ[3], self.interpolatedQ[4]
-		)
-
-		local diff = math.abs(self.qw - tw) + math.abs(self.qx - tx) + math.abs(self.qy - ty) + math.abs(self.qz - tz)
-		if diff < .006 then
+		if angle < .0087 then -- .5°
 			self.qw, self.qx, self.qy, self.qz = tw, tx, ty, tz
 			self.interpolatedQ = nil
 		end
@@ -390,25 +406,25 @@ local function SetRoll(self, roll)
 	self.roll = roll % pi2
 end
 
-local function normalizeRad(angle, defAngle)
-	angle = math.fmod((angle or 0) - defAngle, pi2)
-	if angle > math.pi then angle = angle - pi2
-	elseif angle < -math.pi then angle = angle + pi2 end
-	return angle + defAngle
-end
+-- local function normalizeRad(angle, defAngle)
+-- 	angle = math.fmod((angle or 0) - defAngle, pi2)
+-- 	if angle > math.pi then angle = angle - pi2
+-- 	elseif angle < -math.pi then angle = angle + pi2 end
+-- 	return angle + defAngle
+-- end
 
 local function resetPosition(self)
 	self.accX = nil
 	self.accY = nil
 	self.pendingYawDelta = nil
 	self.pendingPitchDelta = nil
-	self.interpolatedYaw = normalizeRad(self.interpolatedYaw, self.modelSceneCameraInfo.yaw)
-	self.interpolatedPitch = normalizeRad(self.interpolatedPitch, self.modelSceneCameraInfo.pitch)
-	self.interpolatedRoll = normalizeRad(self.interpolatedRoll, self.modelSceneCameraInfo.roll)
+	-- self.interpolatedYaw = normalizeRad(self.interpolatedYaw, self.modelSceneCameraInfo.yaw)
+	-- self.interpolatedPitch = normalizeRad(self.interpolatedPitch, self.modelSceneCameraInfo.pitch)
+	-- self.interpolatedRoll = normalizeRad(self.interpolatedRoll, self.modelSceneCameraInfo.roll)
 	self:SetYaw(self.modelSceneCameraInfo.yaw)
 	self:SetPitch(self.modelSceneCameraInfo.pitch)
 	self:SetRoll(self.modelSceneCameraInfo.roll)
-	self.interpolatedQ = {self.qw, self.qx, self.qy, self.qz}
+	self.interpolatedQ = true
 	self:SetZoomDistance(self.modelSceneCameraInfo.zoomDistance)
 	self.xOffset = 0
 	self.yOffset = self.defYOfsset + (mounts.config.mountDescriptionToggle and self.yOffsetDelta or 0)
