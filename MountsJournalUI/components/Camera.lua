@@ -279,7 +279,7 @@ local function OnUpdate(self, elapsed)
 	local shiftDown = IsShiftKeyDown()
 	-- interpolation starts when shift is released
 	if not shiftDown and self.wasShiftDown then
-		self.interpolatedQ = true
+		self.interpolatedQ = .3
 	end
 	self.wasShiftDown = shiftDown
 
@@ -297,10 +297,11 @@ local function OnUpdate(self, elapsed)
 				self:SetYaw(yaw)
 				self:SetPitch(pitch)
 			else
+				if self.interpolatedQ ~= .3 then self.interpolatedQ = nil end
 				self:SetYaw(self:GetYaw() - dx)
 				self:SetPitch(self:GetPitch() - dy)
 
-				if not self.interpolatedQ then
+				if self.interpolatedQ == nil then
 					self.qw, self.qx, self.qy, self.qz = quaternion_FromYawPitchRoll(self:GetYaw(), self:GetPitch(), self:GetRoll())
 				end
 			end
@@ -321,14 +322,11 @@ local function UpdateInterpolationTargets(self, elapsed)
 
 	if self.interpolatedQ then
 		local tw, tx, ty, tz = quaternion_FromYawPitchRoll(self:GetYaw(), self:GetPitch(), self:GetRoll())
-		local amount = Clamp(9 * elapsed, 0, 1) -- .15*60=9
+		local amount = Clamp(elapsed * self.interpolatedQ * 60, 0, 1)
 		self.qw, self.qx, self.qy, self.qz = quaternion_Slerp(self.qw, self.qx, self.qy, self.qz, tw, tx, ty, tz, amount)
 
-		local ux, uy, uz = quaternion_GetUpVector(self.qw, self.qx, self.qy, self.qz)
-		local tux, tuy, tuz = quaternion_GetUpVector(tw, tx, ty, tz)
-
-		local dotUp = ux*tux + uy*tuy + uz*tuz
-		local angle = math.acos(Clamp(dotUp, -1, 1))
+		local dot = self.qw*tw + self.qx*tx + self.qy*ty + self.qz*tz
+		local angle = 2 * math.acos(Clamp(math.abs(dot), -1, 1))
 
 		if angle < .0087 then -- .5°
 			self.qw, self.qx, self.qy, self.qz = tw, tx, ty, tz
@@ -424,7 +422,7 @@ local function resetPosition(self)
 	self:SetYaw(self.modelSceneCameraInfo.yaw)
 	self:SetPitch(self.modelSceneCameraInfo.pitch)
 	self:SetRoll(self.modelSceneCameraInfo.roll)
-	self.interpolatedQ = true
+	if self.interpolatedQ == nil then self.interpolatedQ = .15 end
 	self:SetZoomDistance(self.modelSceneCameraInfo.zoomDistance)
 	self.xOffset = 0
 	self.yOffset = self.defYOfsset + (mounts.config.mountDescriptionToggle and self.yOffsetDelta or 0)
