@@ -1,8 +1,8 @@
 local _, ns = ...
 local mounts, journal, math = ns.mounts, ns.journal, math
-local ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, ORBIT_CAMERA_MOUSE_PAN_VERTICAL = ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, ORBIT_CAMERA_MOUSE_PAN_VERTICAL
+local ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, ORBIT_CAMERA_MOUSE_PAN_VERTICAL, ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION, ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION, ORBIT_CAMERA_MOUSE_MODE_ZOOM = ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, ORBIT_CAMERA_MOUSE_PAN_VERTICAL, ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION, ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION, ORBIT_CAMERA_MOUSE_MODE_ZOOM
 local GetScaledCursorDelta, IsShiftKeyDown = GetScaledCursorDelta, IsShiftKeyDown
-local DeltaLerp, Clamp, Vector3D_CalculateNormalFromYawPitch = DeltaLerp, Clamp, Vector3D_CalculateNormalFromYawPitch
+local DeltaLerp, Clamp = DeltaLerp, Clamp
 local pi2 = math.pi * 2
 
 
@@ -70,12 +70,6 @@ local function quaternion_ToAxisVectors(w, x, y, z)
 	return fx, fy, fz, rx, ry, rz, ux, uy, uz
 end
 
-local function quaternion_GetUpVector(w, x, y, z)
-	return 2*(x*z + w*y), -- ux
-	       2*(y*z - w*x), -- uy
-	       1 - 2*(x*x + y*y) -- uz
-end
-
 local function quaternion_Trackball(hy, hp, qw, qx, qy, qz)
 	local _, _, _, rx, ry, rz, ux, uy, uz = quaternion_ToAxisVectors(qw, qx, qy, qz)
 	local sy, cy = math.sin(hy), math.cos(hy)
@@ -85,7 +79,7 @@ local function quaternion_Trackball(hy, hp, qw, qx, qy, qz)
 	return quaternion_Normalize(nw, nx, ny, nz)
 end
 
-local function quaternion_Slerp(aw, ax, ay, az, bw, bx, by, bz, amount)
+local function quaternion_Slerp(aw, ax, ay, az, bw, bx, by, bz, t)
 	local dot = aw*bw + ax*bx + ay*by + az*bz
 	if dot < 0 then
 		bw, bx, by, bz = -bw, -bx, -by, -bz
@@ -94,16 +88,15 @@ local function quaternion_Slerp(aw, ax, ay, az, bw, bx, by, bz, amount)
 
 	if dot > .9995 then
 		return quaternion_Normalize(
-			aw + (bw - aw) * amount,
-			ax + (bx - ax) * amount,
-			ay + (by - ay) * amount,
-			az + (bz - az) * amount
+			aw + (bw - aw) * t,
+			ax + (bx - ax) * t,
+			ay + (by - ay) * t,
+			az + (bz - az) * t
 		)
 	end
 
-	dot = Clamp(dot, -1, 1)
 	local theta0 = math.acos(dot)
-	local theta = theta0 * amount
+	local theta = theta0 * t
 	local sinTheta = math.sin(theta)
 	local sinTheta0 = math.sin(theta0)
 	local s0 = math.cos(theta) - dot * sinTheta / sinTheta0
@@ -127,12 +120,6 @@ local function setMaxOffsets(self)
 	self.yMaxOffset = hh + extra
 	self.xOffset = Clamp(self.xOffset, -self.xMaxOffset, self.xMaxOffset)
 	self.yOffset = Clamp(self.yOffset, -self.yMaxOffset, self.yMaxOffset)
-end
-
-local function SaveInitialTransform(self)
-	local initialLightYaw, initialLightPitch = Vector3D_CalculateYawPitchFromNormal(Vector3D_Normalize(self:GetOwningScene():GetLightDirection()))
-	self.lightDeltaYaw = initialLightYaw - self:GetYaw()
-	self.lightDeltaPitch = initialLightPitch - self:GetPitch()
 end
 
 local function TryCreateZoomSpline(x, y, z, existingSpline)
@@ -174,8 +161,9 @@ local function ApplyFromModelSceneCameraInfo(self, modelSceneCameraInfo, transit
 		self.yOffset = self.defYOfsset + (mounts.config.mountDescriptionToggle and self.yOffsetDelta or 0)
 		self.panningXOffset = 0
 		self.panningYOffset = self.yOffset
+		self.pendingYawDelta = 0
+		self.pendingPitchDelta = 0
 		self:setMaxOffsets()
-		self:SaveInitialTransform()
 	end
 
 	if transitionType == CAMERA_TRANSITION_TYPE_IMMEDIATE then
@@ -225,7 +213,7 @@ local function updateAcceleration(self, elapsed)
 		local deltaX, accX = getDeltaAcceleration(self.accX, elapsed, mounts.cameraConfig.xAcceleration, mounts.cameraConfig.xMinSpeed)
 		self.accX = accX
 		if deltaX then
-			self:HandleMouseMovement(self.buttonModes.leftX, deltaX * self:GetDeltaModifierForCameraMode(self.buttonModes.leftX), not self.buttonModes.leftXinterpolate)
+			self:HandleMouseMovement(self.buttonModes.leftX, deltaX)
 		end
 	end
 
@@ -233,20 +221,19 @@ local function updateAcceleration(self, elapsed)
 		local deltaY, accY = getDeltaAcceleration(self.accY, elapsed, mounts.cameraConfig.yAcceleration, mounts.cameraConfig.yMinSpeed)
 		self.accY = accY
 		if deltaY then
-			self:HandleMouseMovement(self.buttonModes.leftY, deltaY * self:GetDeltaModifierForCameraMode(self.buttonModes.leftY), not self.buttonModes.leftYinterpolate)
+			self:HandleMouseMovement(self.buttonModes.leftY, deltaY)
 		end
 	end
 end
 
-local oldHandleMouseMovement = OrbitCameraMixin.HandleMouseMovement
 local function HandleMouseMovement(self, mode, delta, snapToValue)
+	delta = delta * self:GetDeltaModifierForCameraMode(mode)
+
 	if mode == ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION then
-		self.pendingYawDelta = (self.pendingYawDelta or 0) + delta
-		if snapToValue then self:SnapToTargetInterpolationYaw() end
+		self.pendingYawDelta = delta
 
 	elseif mode == ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION then
-		self.pendingPitchDelta = (self.pendingPitchDelta or 0) + delta
-		if snapToValue then self:SnapToTargetInterpolationPitch() end
+		self.pendingPitchDelta = delta
 
 	elseif mode == ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL then
 		self.xOffset = Clamp(self.xOffset + delta, -self.xMaxOffset, self.xMaxOffset)
@@ -255,92 +242,120 @@ local function HandleMouseMovement(self, mode, delta, snapToValue)
 	elseif mode == ORBIT_CAMERA_MOUSE_PAN_VERTICAL then
 		self.yOffset = Clamp(self.yOffset + delta, -self.yMaxOffset, self.yMaxOffset)
 		if snapToValue then self.panningYOffset = nil end
-	else
-		oldHandleMouseMovement(self, mode, delta, snapToValue)
+
+	elseif mode == ORBIT_CAMERA_MOUSE_MODE_ZOOM then
+		self:ZoomByPercent(delta)
+		if snapToValue then self:SnapToTargetInterpolationZoom() end
 	end
+end
+
+local function OnMouseWheel(self, delta)
+	self:HandleMouseMovement(self.buttonModes.wheel, delta , not self.buttonModes.wheelInterpolate)
 end
 
 local function OnUpdate(self, elapsed)
 	if self:IsLeftMouseButtonDown() then
 		local deltaX, deltaY = GetScaledCursorDelta()
 		self:setAcceleration(deltaX, deltaY, elapsed)
-		self:HandleMouseMovement(self.buttonModes.leftX, deltaX * self:GetDeltaModifierForCameraMode(self.buttonModes.leftX), not self.buttonModes.leftXinterpolate)
-		self:HandleMouseMovement(self.buttonModes.leftY, deltaY * self:GetDeltaModifierForCameraMode(self.buttonModes.leftY), not self.buttonModes.leftYinterpolate)
+		self:HandleMouseMovement(self.buttonModes.leftX, deltaX)
+		self:HandleMouseMovement(self.buttonModes.leftY, deltaY)
 	elseif self.accX or self.accY then
 		self:updateAcceleration(elapsed)
 	end
 
 	if self:IsRightMouseButtonDown() then
 		local deltaX, deltaY = GetScaledCursorDelta()
-		self:HandleMouseMovement(self.buttonModes.rightX, deltaX * self:GetDeltaModifierForCameraMode(self.buttonModes.rightX), not self.buttonModes.rightXinterpolate)
-		self:HandleMouseMovement(self.buttonModes.rightY, -deltaY * self:GetDeltaModifierForCameraMode(self.buttonModes.rightY), not self.buttonModes.rightYinterpolate)
+		self:HandleMouseMovement(self.buttonModes.rightX, deltaX, not self.buttonModes.rightXinterpolate)
+		self:HandleMouseMovement(self.buttonModes.rightY, -deltaY, not self.buttonModes.rightYinterpolate)
 	end
 
 	local shiftDown = IsShiftKeyDown()
 	-- interpolation starts when shift is released
 	if not shiftDown and self.wasShiftDown then
-		self.interpolatedQ = .3
+		local yaw, pitch = quaternion_ToYawPitchRoll(self.qw, self.qx, self.qy, self.qz)
+		self:SetYaw(yaw)
+		self:SetPitch(pitch)
+
+		local speed = 0
+		if self.pendingYawDelta ~= 0 or self.pendingPitchDelta ~= 0 then
+			speed = math.sqrt(self.pendingYawDelta^2 + self.pendingPitchDelta^2) / elapsed
+		end
+
+		self:startInterpolatedQ(speed)
 	end
 	self.wasShiftDown = shiftDown
 
-	if self.pendingYawDelta or self.pendingPitchDelta then
-		local dx = self.pendingYawDelta or 0
-		local dy = self.pendingPitchDelta or 0
-		self.pendingYawDelta, self.pendingPitchDelta = nil, nil
+	-- quaternion rotation
+	if self.pendingYawDelta ~= 0 or self.pendingPitchDelta ~= 0 then
+		if shiftDown then
+			self.interpolatedQ = nil
+			local k = -.7
+			self.qw, self.qx, self.qy, self.qz = quaternion_Trackball(
+				self.pendingYawDelta * k,
+				self.pendingPitchDelta * k,
+				self.qw, self.qx, self.qy, self.qz
+			)
+		else
+			if self.interpolatedQ ~= 2 then self.interpolatedQ = nil end
+			self:SetYaw(self:GetYaw() - self.pendingYawDelta)
+			self:SetPitch(self:GetPitch() - self.pendingPitchDelta)
 
-		if dx ~= 0 or dy ~= 0 then
-			if shiftDown then
-				self.interpolatedQ = nil
-				local k = .7
-				self.qw, self.qx, self.qy, self.qz = quaternion_Trackball(-dx*k, -dy*k, self.qw, self.qx, self.qy, self.qz)
-				local yaw, pitch = quaternion_ToYawPitchRoll(self.qw, self.qx, self.qy, self.qz)
-				self:SetYaw(yaw)
-				self:SetPitch(pitch)
-			else
-				if self.interpolatedQ ~= .3 then self.interpolatedQ = nil end
-				self:SetYaw(self:GetYaw() - dx)
-				self:SetPitch(self:GetPitch() - dy)
-
-				if self.interpolatedQ == nil then
-					self.qw, self.qx, self.qy, self.qz = quaternion_FromYawPitchRoll(self:GetYaw(), self:GetPitch(), self:GetRoll())
-				end
+			if self.interpolatedQ == nil then
+				self.qw, self.qx, self.qy, self.qz = quaternion_FromYawPitchRoll(self:GetYaw(), self:GetPitch(), self:GetRoll())
 			end
 		end
+		self.pendingYawDelta, self.pendingPitchDelta = 0, 0
 	end
 
 	self:UpdateInterpolationTargets(elapsed)
 	self:SynchronizeCamera()
 end
 
+local function startInterpolatedQ(self, angularSpeed)
+	self.interpCounter = 50 + (angularSpeed or 0) * 10
+	if self.interpolatedQ ~= 2 then
+		self.interpolatedQ = angularSpeed and 2 or 1
+	end
+end
+
 local function InterpolateDimension(lastValue, targetValue, amount, elapsed)
 	return lastValue and DeltaLerp(lastValue, targetValue, amount, elapsed) or targetValue
 end
 
-local oldUpdateInterpolationTargets = OrbitCameraMixin.UpdateInterpolationTargets
 local function UpdateInterpolationTargets(self, elapsed)
-	oldUpdateInterpolationTargets(self, elapsed)
+	local targetX, targetY, targetZ = self:GetDerivedTarget()
+	local zoomDistance = self:GetDerivedZoomDistance()
+	local amount = .15
+
+	self.interpolatedZoomDistance = InterpolateDimension(self.interpolatedZoomDistance, zoomDistance, amount, elapsed)
+
+	self.interpolatedTargetX = InterpolateDimension(self.interpolatedTargetX, targetX, amount, elapsed)
+	self.interpolatedTargetY = InterpolateDimension(self.interpolatedTargetY, targetY, amount, elapsed)
+	self.interpolatedTargetZ = InterpolateDimension(self.interpolatedTargetZ, targetZ, amount, elapsed)
+
+	self.panningXOffset = InterpolateDimension(self.panningXOffset, self.xOffset, amount, elapsed)
+	self.panningYOffset = InterpolateDimension(self.panningYOffset, self.yOffset, amount, elapsed)
 
 	if self.interpolatedQ then
 		local tw, tx, ty, tz = quaternion_FromYawPitchRoll(self:GetYaw(), self:GetPitch(), self:GetRoll())
-		local amount = Clamp(elapsed * self.interpolatedQ * 60, 0, 1)
-		self.qw, self.qx, self.qy, self.qz = quaternion_Slerp(self.qw, self.qx, self.qy, self.qz, tw, tx, ty, tz, amount)
 
-		local dot = self.qw*tw + self.qx*tx + self.qy*ty + self.qz*tz
-		local angle = 2 * math.acos(Clamp(math.abs(dot), -1, 1))
+		self.interpCounter = self.interpCounter + 120 * elapsed
+		local t = Clamp(elapsed * amount * self.interpCounter, 0, 1)
+		self.qw, self.qx, self.qy, self.qz = quaternion_Slerp(self.qw, self.qx, self.qy, self.qz, tw, tx, ty, tz, t)
 
-		if angle < .0087 then -- .5°
+		local dot = math.abs(self.qw*tw + self.qx*tx + self.qy*ty + self.qz*tz)
+		local angle = 2 * math.acos(dot > 1 and 1 or dot)
+
+		-- .00087 = .5°
+		if self.interpolatedQ == 2 and angle < .0087 or angle == 0 then
 			self.qw, self.qx, self.qy, self.qz = tw, tx, ty, tz
 			self.interpolatedQ = nil
 		end
 	end
-
-	self.panningXOffset = InterpolateDimension(self.panningXOffset, self.xOffset, .15, elapsed)
-	self.panningYOffset = InterpolateDimension(self.panningYOffset, self.yOffset, .15, elapsed)
 end
 
 local function UpdateCameraOrientationAndPosition(self)
 	local modelScene = self:GetOwningScene()
-
 	local fx, fy, fz, rx, ry, rz, ux, uy, uz = quaternion_ToAxisVectors(self.qw, self.qx, self.qy, self.qz)
 	modelScene:SetCameraOrientationByAxisVectors(fx, fy, fz, rx, ry, rz, ux, uy, uz)
 
@@ -358,22 +373,15 @@ local function UpdateCameraOrientationAndPosition(self)
 	local xOffset = self.panningXOffset * zoomFactor
 	local yOffset = self.panningYOffset * zoomFactor
 
-	targetX = targetX + xOffset * rx + yOffset * ux
-	targetY = targetY + xOffset * ry + yOffset * uy
-	targetZ = targetZ + xOffset * rz + yOffset * uz
-
-	local camPosX = targetX - fx * zoomDistance
-	local camPosY = targetY - fy * zoomDistance
-	local camPosZ = targetZ - fz * zoomDistance
-
+	local camPosX = targetX + xOffset * rx + yOffset * ux - fx * zoomDistance
+	local camPosY = targetY + xOffset * ry + yOffset * uy - fy * zoomDistance
+	local camPosZ = targetZ + xOffset * rz + yOffset * uz - fz * zoomDistance
 	modelScene:SetCameraPosition(camPosX, camPosY, camPosZ)
 end
 
 local function UpdateLight(self)
 	if self:ShouldAlignLightToOrbitDelta() then
-		local lightYaw = self.lightDeltaYaw + self.interpolatedYaw
-		local lightPitch = self.lightDeltaPitch + self.interpolatedPitch
-		self:GetOwningScene():SetLightDirection(Vector3D_CalculateNormalFromYawPitch(lightYaw, lightPitch))
+		self:GetOwningScene():SetLightDirection(self:GetForwardVector())
 	end
 end
 
@@ -414,16 +422,16 @@ end
 local function resetPosition(self)
 	self.accX = nil
 	self.accY = nil
-	self.pendingYawDelta = nil
-	self.pendingPitchDelta = nil
+	self.pendingYawDelta = 0
+	self.pendingPitchDelta = 0
 	-- self.interpolatedYaw = normalizeRad(self.interpolatedYaw, self.modelSceneCameraInfo.yaw)
 	-- self.interpolatedPitch = normalizeRad(self.interpolatedPitch, self.modelSceneCameraInfo.pitch)
 	-- self.interpolatedRoll = normalizeRad(self.interpolatedRoll, self.modelSceneCameraInfo.roll)
 	self:SetYaw(self.modelSceneCameraInfo.yaw)
 	self:SetPitch(self.modelSceneCameraInfo.pitch)
 	self:SetRoll(self.modelSceneCameraInfo.roll)
-	if self.interpolatedQ == nil then self.interpolatedQ = .15 end
 	self:SetZoomDistance(self.modelSceneCameraInfo.zoomDistance)
+	self:startInterpolatedQ()
 	self.xOffset = 0
 	self.yOffset = self.defYOfsset + (mounts.config.mountDescriptionToggle and self.yOffsetDelta or 0)
 end
@@ -435,11 +443,11 @@ end
 
 journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera, isGrid)
 	activeCamera.setMaxOffsets = setMaxOffsets
-	activeCamera.SaveInitialTransform = SaveInitialTransform
 	activeCamera.setAcceleration = setAcceleration
 	activeCamera.updateAcceleration = updateAcceleration
 	activeCamera.HandleMouseMovement = HandleMouseMovement
 	activeCamera.OnUpdate = OnUpdate
+	activeCamera.startInterpolatedQ = startInterpolatedQ
 	activeCamera.UpdateInterpolationTargets = UpdateInterpolationTargets
 	activeCamera.UpdateCameraOrientationAndPosition = UpdateCameraOrientationAndPosition
 	activeCamera.UpdateLight = UpdateLight
@@ -456,6 +464,7 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera, isGrid)
 	end
 
 	activeCamera.ApplyFromModelSceneCameraInfo = ApplyFromModelSceneCameraInfo
+	activeCamera.OnMouseWheel = OnMouseWheel
 	activeCamera.resetPosition = resetPosition
 	activeCamera.updateYOffset = updateYOffset
 
