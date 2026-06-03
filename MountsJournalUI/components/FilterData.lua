@@ -639,7 +639,7 @@ end
 
 
 do
-	local f, t, rs, rn, rm, tp, id, sid
+	local f, t, rn, rs, rm, tp, id, sid, notAny
 	function journal:setFlagSearchMatches(text)
 		text = text.." -l"
 		f = text:match("%-f[:%s]%s*(.-)%s+%-%a")
@@ -651,9 +651,11 @@ do
 		tp = tonumber(text:match("%-tp[:%s]%s*(%d+)"))
 		id = tonumber(text:match("%-id[:%s]%s*(%d+)"))
 		sid = tonumber(text:match("%-sid[:%s]%s*(%d+)"))
+		notAny = not (f or t or rm or tp or id or sid)
 	end
 
 	function journal:getFlagSearchFilter(mountID, spellID, mountType, familyID, rarity)
+		if notAny then return false end
 		if f and not self:getFamilySearch(f, familyID) then return false end
 		if t and not self.tags:find(spellID, t) then return false end
 		if tp and tp ~= mountType then return false end
