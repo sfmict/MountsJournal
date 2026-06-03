@@ -518,39 +518,56 @@ function journal:getFilterSelected(spellID)
 	local filter = mounts.filters.selected
 	local list = self.list
 	if list then
-		local i = 0
-		if list.fly[spellID] then if filter[1] then return true end
-		else i = i + 1 end
-		if list.ground[spellID] then if filter[2] then return true end
-		else i = i + 1 end
-		if list.swimming[spellID] then if filter[3] then return true end
-		else i = i + 1 end
-		return i == 3 and filter[4]
-	else
-		return filter[4]
+		local inAny
+		if list.fly[spellID] then
+			if filter[1] then return true end
+			inAny = true
+		end
+		if list.ground[spellID] then
+			if filter[2] then return true end
+			inAny = true
+		end
+		if list.swimming[spellID] then
+			if filter[3] then return true end
+			inAny = true
+		end
+		if inAny then return false end
 	end
+	return filter[4]
 end
 
 
 function journal:getFilterSpecific(spellID, isSelfMount, mountType, mountID)
-	local filter = mounts.filters.specific
-	local i = 0
-	if isSelfMount then if filter.transform then return true end
-	else i = i + 1 end
-	if ns.additionalMounts[spellID] then if filter.additional then return true end
-	else i = i + 1 end
-	if mountType == 402 or mountType == 445 then if filter.rideAlong then return true end
-	else i = i + 1 end
-	if self.mountsWithMultipleModels[mountID] then if filter.multipleModels then return true end
-	else i = i + 1 end
-	for k, t in pairs(specificDB) do
-		if t[spellID] then if filter[k] then return true end
-		else i = i + 1 end
+	local filter, inAny = mounts.filters.specific
+	if isSelfMount then
+		if filter.transform then return true end
+		inAny = true
+	end
+	if ns.additionalMounts[spellID] then
+		if filter.additional then return true end
+		inAny = true
+	end
+	if mountType == 402 or mountType == 445 then
+		if filter.rideAlong then return true end
+		inAny = true
+	end
+	if self.mountsWithMultipleModels[mountID] then
+		if filter.multipleModels then return true end
+		inAny = true
+	end
+	for k, t in next, specificDB do
+		if t[spellID] then
+			if filter[k] then return true end
+			inAny = true
+		end
 	end
 	local class = classDB[spellID]
-	if class then if filter[class] then return true end
-	else i = i + 1 end
-	return i == 8 and filter.rest
+	if class then
+		if filter[class] then return true end
+		inAny = true
+	end
+	if inAny then return false end
+	return filter.rest
 end
 
 
@@ -622,21 +639,33 @@ end
 
 
 do
-	local f, t, tp, id, sid
+	local f, t, rs, rn, rm, tp, id, sid
 	function journal:setFlagSearchMatches(text)
-		f = text:match("^%-f:?%s*(.-)%s*$")
-		t = text:match("^%-t:?%s*(.-)%s*$")
-		tp = tonumber(text:match("^%-tp:?%s*(%d+)"))
-		id = tonumber(text:match("^%-id:?%s*(%d+)"))
-		sid = tonumber(text:match("^%-sid:?%s*(%d+)"))
+		text = text.." -l"
+		f = text:match("%-f[:%s]%s*(.-)%s+%-%a")
+		if f == "" then f = nil end
+		t = text:match("%-t[:%s]%s*(.-)%s+%-%a")
+		if t == "" then t = nil end
+		rn, rs, rm = text:match("%-r[:%s]%s*(%d*)([%s-<>=])%s-(%d+)")
+		rn, rm = tonumber(rn), tonumber(rm)
+		tp = tonumber(text:match("%-tp[:%s]%s*(%d+)"))
+		id = tonumber(text:match("%-id[:%s]%s*(%d+)"))
+		sid = tonumber(text:match("%-sid[:%s]%s*(%d+)"))
 	end
 
-	function journal:getFlagSearchFilter(mountID, spellID, mountType, familyID)
-		return f and self:getFamilySearch(f, familyID)
-		    or t and self.tags:find(spellID, t)
-		    or tp == mountType
-		    or id == mountID
-		    or sid == spellID
+	function journal:getFlagSearchFilter(mountID, spellID, mountType, familyID, rarity)
+		if f and not self:getFamilySearch(f, familyID) then return false end
+		if t and not self.tags:find(spellID, t) then return false end
+		if tp and tp ~= mountType then return false end
+		if id and id ~= mountID then return false end
+		if sid and sid ~= spellID then return false end
+		if rm and (
+			rs == "<" and rarity >= rm
+			or rs == ">" and rarity <= rm
+			or rs == "=" and math.floor(rarity + .5) ~= rm
+			or rs == "-" and rn and (rarity < rn or rarity > rm)
+		) then return false end
+		return true
 	end
 end
 
@@ -644,7 +673,7 @@ end
 function journal:setShownCountMounts(numMounts)
 	if numMounts then
 		self.shownPanel.count:SetText(numMounts)
-		self.shownNumMouns = numMounts
+		self.shownNumMounts = numMounts
 	end
 	self.shownPanel:SetShown(self:checkFiltersDefault())
 	self:updateFilterNavBar()
@@ -714,7 +743,7 @@ function journal:updateMountsList()
 			or name:lower():find(text, 1, true)
 			or sourceText:lower():find(text, 1, true)
 			or tags:find(spellID, text)
-			or self:getFlagSearchFilter(mountID, spellID, mountType, familyID))
+			or self:getFlagSearchFilter(mountID, spellID, mountType, familyID, rarity or 100))
 		-- TYPE
 		and self:getFilterType(mountType)
 		-- FACTION

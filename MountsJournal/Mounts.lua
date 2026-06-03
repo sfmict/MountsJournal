@@ -1,6 +1,6 @@
 local addon, ns = ...
 local L, util = ns.L, ns.util
-local C_MountJournal, C_Map, C_Spell, C_Timer, C_Scenario, C_Container, MapUtil = C_MountJournal, C_Map, C_Spell, C_Timer, C_Scenario, C_Container, MapUtil
+local C_Map, C_Timer, C_Scenario, C_Container, MapUtil = C_Map, C_Timer, C_Scenario, C_Container, MapUtil
 local GetMountFromSpell, GetMountInfoByID, GetMountInfoExtraByID, SummonByID, IsDragonridingUnlocked = C_MountJournal.GetMountFromSpell, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID, C_MountJournal.SummonByID, C_MountJournal.IsDragonridingUnlocked
 local IsSpellUsable, GetSpellCooldown = C_Spell.IsSpellUsable, C_Spell.GetSpellCooldown
 local IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, SecureCmdOptionParse = IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, SecureCmdOptionParse
@@ -476,12 +476,11 @@ do
 		if not isGliding then
 			speed = GetUnitSpeed("player")
 		end
-		local notSecret = not issecretvalue(speed)
-		if notSecret and speed > 0 then
+		if not issecretvalue(speed) and speed > 0 then
 			mountStat[2] = mountStat[2] + elapsed
 			mountStat[3] = mountStat[3] + speed * elapsed
 		end
-		self:event("MOUNT_SPEED_UPDATE", notSecret and speed, isGliding and not self.thrillAuraInstanceID)
+		self:event("MOUNT_SPEED_UPDATE", speed, isGliding and not self.thrillAuraInstanceID)
 	end
 
 

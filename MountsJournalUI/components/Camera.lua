@@ -71,7 +71,7 @@ local function quaternion_ToAxisVectors(w, x, y, z)
 end
 
 local function quaternion_Trackball(hy, hp, qw, qx, qy, qz)
-	local _, _, _, rx, ry, rz, ux, uy, uz = quaternion_ToAxisVectors(qw, qx, qy, qz)
+	local _,_,_, rx, ry, rz, ux, uy, uz = quaternion_ToAxisVectors(qw, qx, qy, qz)
 	local sy, cy = math.sin(hy), math.cos(hy)
 	local sp, cp = math.sin(hp), math.cos(hp)
 	local dw, dx, dy, dz = quaternion_Multiply(cy, ux*sy, uy*sy, uz*sy, cp, rx*sp, ry*sp, rz*sp)
@@ -155,10 +155,10 @@ local function ApplyFromModelSceneCameraInfo(self, modelSceneCameraInfo, transit
 	self.qw, self.qx, self.qy, self.qz = quaternion_FromYawPitchRoll(transitionalCameraInfo.yaw, transitionalCameraInfo.pitch, transitionalCameraInfo.roll)
 
 	if self.xOffset == nil then
-		self.defYOfsset = 20
+		self.defYOffset = 20
 		self.yOffsetDelta = 40
 		self.xOffset = 0
-		self.yOffset = self.defYOfsset + (mounts.config.mountDescriptionToggle and self.yOffsetDelta or 0)
+		self.yOffset = self.defYOffset + (mounts.config.mountDescriptionToggle and self.yOffsetDelta or 0)
 		self.panningXOffset = 0
 		self.panningYOffset = self.yOffset
 		self.pendingYawDelta = 0
@@ -190,18 +190,19 @@ local function setAcceleration(self, deltaX, deltaY, elapsed)
 	if self.accY > -yMinInit and self.accY < yMinInit then self.accY = nil end
 end
 
-local function getDeltaAcceleration(curAcc, elapsed, kAcc, kSpeed)
+local function getDeltaAcceleration(curAcc, elapsed, kAcc, kMinSpeed)
 	local decay = math.exp(kAcc * elapsed)
 	local delta = curAcc * (decay - 1) / kAcc
 	local newAcc = curAcc * decay
-	local minSpeed = 50 * kSpeed
+	local absAcc = math.abs(newAcc)
+	local minSpeed = 50 * kMinSpeed
 
-	if math.abs(newAcc) < minSpeed then
+	if absAcc < minSpeed then
 		newAcc = minSpeed * (curAcc < 0 and -1 or 1)
 		return newAcc * elapsed, newAcc
 	end
 
-	if newAcc < 5 and newAcc > -5 then return end
+	if absAcc < 5 then return end
 	return delta, newAcc
 end
 
@@ -250,7 +251,7 @@ local function HandleMouseMovement(self, mode, delta, snapToValue)
 end
 
 local function OnMouseWheel(self, delta)
-	self:HandleMouseMovement(self.buttonModes.wheel, delta , not self.buttonModes.wheelInterpolate)
+	self:HandleMouseMovement(self.buttonModes.wheel, delta, not self.buttonModes.wheelInterpolate)
 end
 
 local function OnUpdate(self, elapsed)
@@ -433,7 +434,7 @@ local function resetPosition(self)
 	self:SetZoomDistance(self.modelSceneCameraInfo.zoomDistance)
 	self:startInterpolatedQ()
 	self.xOffset = 0
-	self.yOffset = self.defYOfsset + (mounts.config.mountDescriptionToggle and self.yOffsetDelta or 0)
+	self.yOffset = self.defYOffset + (mounts.config.mountDescriptionToggle and self.yOffsetDelta or 0)
 end
 
 local function updateYOffset(self)

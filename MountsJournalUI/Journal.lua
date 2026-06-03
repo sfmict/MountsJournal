@@ -765,6 +765,7 @@ function journal:init()
 		GameTooltip:SetText(SEARCH)
 		GameTooltip:AddLine(str:format("-f", L["Family"]))
 		GameTooltip:AddLine(str:format("-t", L["tags"]))
+		GameTooltip:AddLine(str:format("-r", L["Rarity"].." (>5, 3-7, =2)"))
 		GameTooltip:AddLine(str:format("-tp", "TypeID"))
 		GameTooltip:AddLine(str:format("-id", "MountID"))
 		GameTooltip:AddLine(str:format("-sid", "SpellID"))
@@ -1665,9 +1666,6 @@ function journal:setMountTooltip(mountID, spellID, showDescription)
 		typeStr = L["MOUNT_TYPE_"..mType]
 	end
 	util.addTooltipDLine(L["types"], typeStr)
-	--@do-not-package@
-	util.addTooltipDLine("TypeID", mountType)
-	--@end-do-not-package@
 
 	-- family
 	if type(familyID) == "table" then
@@ -1715,6 +1713,12 @@ function journal:setMountTooltip(mountID, spellID, showDescription)
 		GameTooltip:AddLine(sourceText, 1,1,1, true)
 		GameTooltip:AddLine(descriptionText, 1,1,1, true)
 	end
+	--@do-not-package@
+	GameTooltip:AddLine(" ")
+	util.addTooltipDLine("TypeID", mountType)
+	util.addTooltipDLine("MountID", mountID)
+	util.addTooltipDLine("SpellID", spellID)
+	--@end-do-not-package@
 end
 
 
@@ -2172,10 +2176,10 @@ function journal:setArrowSelectMount(enabled)
 		local function updateIndex(index, delta)
 			index = index + delta
 			if index < 1 then
-				index = self.shownNumMouns + index - math.fmod(self.shownNumMouns, delta)
-				if self.shownNumMouns - index > -delta - 1 then index = index - delta end
-			elseif index > self.shownNumMouns then
-				index = index - self.shownNumMouns + math.fmod(self.shownNumMouns, delta)
+				index = self.shownNumMounts + index - math.fmod(self.shownNumMounts, delta)
+				if self.shownNumMounts - index > -delta - 1 then index = index - delta end
+			elseif index > self.shownNumMounts then
+				index = index - self.shownNumMounts + math.fmod(self.shownNumMounts, delta)
 				if index > delta then index = index - delta end
 			end
 			return index
@@ -2207,7 +2211,7 @@ function journal:setArrowSelectMount(enabled)
 				end
 
 				if not index then
-					index = delta > 0 and 1 or self.shownNumMouns
+					index = delta > 0 and 1 or self.shownNumMounts
 				end
 				self:selectMountByIndex(index)
 

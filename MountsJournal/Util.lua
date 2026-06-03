@@ -1,6 +1,6 @@
 local addon, ns = ...
 local L = ns.L
-local type, tremove, next, tostring, math, issecretvalue = type, tremove, next, tostring, math, issecretvalue
+local type, tremove, next, tostring, math, strconcat, AbbreviateNumbers, issecretvalue = type, tremove, next, tostring, math, string.concat, AbbreviateNumbers, issecretvalue
 local C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup, IsSpellKnown, IsSpellInSpellBook, IsMounted = C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup, C_SpellBook.IsSpellKnown, C_SpellBook.IsSpellInSpellBook, IsMounted
 local events, eventsMixin, dot = {}, {}, "."
 
@@ -439,43 +439,28 @@ end
 
 
 do
-	local ABBR_YARD = " "..L["ABBR_YARD"]
-	local ABBR_MILE = " "..L["ABBR_MILE"]
-	function util.getImperialFormat(distance)
-		if distance < 1760 then
-			return math.floor(distance)..ABBR_YARD
-		elseif distance < 176e4 then
-			return (math.floor(distance / 176) / 10)..ABBR_MILE
-		end
-		return math.floor(distance / 1760)..ABBR_MILE
+	local red = "|cffee2222"
+	local options = {
+		breakpointData = {
+			{
+				breakpoint = -1e9,
+				fractionDivisor = 10,
+				abbreviationIsGlobal = false,
+			}
+		}
+	}
+
+	if GetLocale() == "enUS" then
+		options.breakpointData[1].significandDivisor = 176 / 3600
+		options.breakpointData[1].abbreviation = " "..L["ABBR_MILE"].."/"..L["ABBR_HOUR"]
+	else
+		options.breakpointData[1].significandDivisor = 100 / (3600 * .9144)
+		options.breakpointData[1].abbreviation = " "..L["ABBR_KILOMETER"].."/"..L["ABBR_HOUR"]
 	end
-end
 
-
-do
-	local ABBR_METER = " "..L["ABBR_METER"]
-	local ABBR_KILOMETER = " "..L["ABBR_KILOMETER"]
-	function util.getMetricFormat(distance)
-		distance = distance * .9144
-		if distance < 1e3 then
-			return math.floor(distance)..ABBR_METER
-		elseif distance < 1e6 then
-			return (math.floor(distance / 100) / 10)..ABBR_KILOMETER
-		end
-		return math.floor(distance / 1e3)..ABBR_KILOMETER
-	end
-end
-
-
-do
-	local text = "%s/"..L["ABBR_HOUR"]
-	local redText = "|cffee2222"..text
-	local speedFormat = GetLocale() ~= "enUS" and util.getMetricFormat or util.getImperialFormat
 	function util.getFormattedSpeed(speed, noThrill)
-		if speed then
-			return (noThrill and redText or text):format(speedFormat(speed * 3600))
-		end
-		return "|cff808080--|r"
+		local text = AbbreviateNumbers(speed, options)
+		return noThrill and strconcat(red, text) or text
 	end
 end
 
