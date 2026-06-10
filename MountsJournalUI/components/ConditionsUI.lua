@@ -1619,7 +1619,7 @@ local function getFriendList(value, func)
 		friends[1] = createEmptyInfo()
 	end
 
-	return friends
+	return {custom = true, {list = friends, hideSearch = true, listMaxSize = 30}}
 end
 
 function conds.fgroup:getValueText(value)

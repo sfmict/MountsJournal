@@ -656,18 +656,19 @@ do
 
 	function journal:getFlagSearchFilter(mountID, spellID, mountType, familyID, rarity)
 		if notAny then return false end
-		if f and not self:getFamilySearch(f, familyID) then return false end
-		if t and not self.tags:find(spellID, t) then return false end
-		if tp and tp ~= mountType then return false end
-		if id and id ~= mountID then return false end
-		if sid and sid ~= spellID then return false end
-		if rm and (
-			rs == "<" and rarity >= rm
-			or rs == ">" and rarity <= rm
-			or rs == "=" and math.floor(rarity + .5) ~= rm
-			or rs == "-" and rn and (rarity < rn or rarity > rm)
-		) then return false end
-		return true
+		return not (
+			f and not self:getFamilySearch(f, familyID)
+			or t and not self.tags:find(spellID, t)
+			or tp and tp ~= mountType
+			or id and id ~= mountID
+			or sid and sid ~= spellID
+			or rm and (
+				rs == "<" and rarity >= rm
+				or rs == ">" and rarity <= rm
+				or rs == "=" and math.floor(rarity + .5) ~= rm
+				or rs == "-" and rn and (rarity < rn or rarity > rm)
+			)
+		)
 	end
 end
 
