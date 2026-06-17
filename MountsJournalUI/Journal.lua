@@ -1815,7 +1815,7 @@ function journal:setScrollGridMounts(force)
 
 	if self.curGrid == grid and not force then return end
 	self.curGrid = grid
-	local template, top, bottom, left, right, hSpacing, vSpacing, extent, panScalar, sizeCalculator
+	local template, top, bottom, left, right, hSpacing, vSpacing, extent, panScalar
 
 	if grid == 1 then
 		top = 1
@@ -1856,21 +1856,15 @@ function journal:setScrollGridMounts(force)
 		local scrollWidth = self.scrollBox:GetWidth() - left - right
 		self.gridN = mounts.config.gridModelStride
 		extent = math.floor((scrollWidth - (self.gridN - 1) * hSpacing) / self.gridN)
-		sizeCalculator = function(dataIndex, elementData) return extent, extent end
 		self.initMountButton = self.gridModelSceneInit
 	end
 
 	self.scrollBox.wheelPanScalar = panScalar or 2
-	self.view:SetPadding(top,bottom,left,right,hSpacing,vSpacing)
-	if self.view.SetElementSize then
-		if self.gridN > 1 then
-			self.view:SetElementSize(extent, extent)
-		else
-			self.view:ClearElementSizeData()
-		end
+	self.view:SetPadding(top, bottom, left, right, hSpacing, vSpacing)
+	if self.gridN > 1 then
+		self.view:SetElementSize(extent, extent)
 	else
-		self.view:SetElementExtent(extent)
-		self.view:SetElementSizeCalculator(sizeCalculator)
+		self.view:ClearElementSizeData()
 	end
 	self.view:SetPanExtent(extent)
 	self.view:SetStride(self.gridN)
