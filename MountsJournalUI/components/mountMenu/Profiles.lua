@@ -39,6 +39,7 @@ function tags.mountMenu.profiles(dd, level, profile)
 			list[#list + 1] = {
 				notCheckable = true,
 				hasArrow = true,
+				keepShownOnClick = true,
 				text = name,
 				value = {"profiles", profile}
 			}
@@ -48,6 +49,7 @@ function tags.mountMenu.profiles(dd, level, profile)
 		tinsert(list, 1, {
 			notCheckable = true,
 			hasArrow = true,
+			keepShownOnClick = true,
 			text = DEFAULT,
 			value = {"profiles", mounts.defProfile},
 		})
