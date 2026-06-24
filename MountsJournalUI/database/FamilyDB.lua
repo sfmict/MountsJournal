@@ -116,7 +116,11 @@ ns.familyDB = {
 		["Pterrordaxes"] = 1103,
 		["Raptors"] = 1104,
 	},
-	["Dragonhawks"] = 1200,
+	["Dragonhawks"] = {
+		["Dragonhawks"] = 1200,
+		["Hexawing Dragonhawks"] = 1201,
+		["Sporegliders"] = 1202,
+	},
 	["Drakes"] = {
 		["Cloud Serpents"] = 1300,
 		["Drakes"] = 1301,
@@ -387,7 +391,7 @@ ns.familyDBIcons = {
 		["Bipedal Cat"] = 5370987,
 		["Dreamsaber"] = 5100593,
 		["Furlines"] = 3232104,
-		["Grimlynxes"] = 7386625,
+		["Grimlynxes"] = 7386623,
 		["Lions"] = 464140,
 		["Lynx"] = 5689904,
 		["Manasabers"] = 1096090,
@@ -423,7 +427,12 @@ ns.familyDBIcons = {
 		["Raptors"] = 132253,
 	},
 	["Dogs"] = 1795322,
-	["Dragonhawks"] = 132188,
+	["Dragonhawks"] = {
+		[0] = 132188,
+		["Hexawing Dragonhawks"] = 6841376,
+		["Dragonhawks"] = 132188,
+		["Sporegliders"] = 6254091,
+	},
 	["Drakes"] = {
 		[0] = 132250,
 		["Cloud Serpents"] = 656171,
@@ -512,7 +521,7 @@ ns.familyDBIcons = {
 	["Jellyfish"] = 970851,
 	["Mollusc"] = {
 		[0] = 3764235,
-		["Slug"] = 3996722,
+		["Slug"] = 3996721,
 		["Snail"] = 3764235,
 	},
 	["Pangolins"] = 7414435,
@@ -552,7 +561,7 @@ ns.familyDBIcons = {
 	["Serpents"] = {
 		[0] = 656172,
 		["Cloud Serpents"] = 656172,
-		["Mana Wyrms"] = 7266832,
+		["Mana Wyrms"] = 4323958,
 		["N'Zoth Serpents"] = 3005317,
 		["Sea Serpents"] = 1519579,
 		["Serpents"] = 3040844,
