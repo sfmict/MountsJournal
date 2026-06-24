@@ -254,9 +254,15 @@ local function OnMouseWheel(self, delta)
 	self:HandleMouseMovement(self.buttonModes.wheel, delta, not self.buttonModes.wheelInterpolate)
 end
 
+local function getScaledCursorDelta(self)
+	local x, y = GetCursorDelta()
+	local scale = self:GetOwningScene():GetEffectiveScale()
+	return x / scale, y / scale
+end
+
 local function OnUpdate(self, elapsed)
 	if self:IsLeftMouseButtonDown() then
-		local deltaX, deltaY = GetScaledCursorDelta()
+		local deltaX, deltaY = getScaledCursorDelta(self)
 		self:setAcceleration(deltaX, deltaY, elapsed)
 		self:HandleMouseMovement(self.buttonModes.leftX, deltaX)
 		self:HandleMouseMovement(self.buttonModes.leftY, deltaY)
@@ -265,7 +271,7 @@ local function OnUpdate(self, elapsed)
 	end
 
 	if self:IsRightMouseButtonDown() then
-		local deltaX, deltaY = GetScaledCursorDelta()
+		local deltaX, deltaY = getScaledCursorDelta(self)
 		self:HandleMouseMovement(self.buttonModes.rightX, deltaX, not self.buttonModes.rightXinterpolate)
 		self:HandleMouseMovement(self.buttonModes.rightY, -deltaY, not self.buttonModes.rightYinterpolate)
 	end

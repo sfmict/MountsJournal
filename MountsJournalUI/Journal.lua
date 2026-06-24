@@ -1261,10 +1261,8 @@ function journal:init()
 	end
 
 	function calendarFrame:reloadMenu()
-		self.dd:ddCloseMenus(self.level)
-		local menu = lsfdd:GetMenu(self.level)
 		local value = type(self.value) == "function" and self.value() or self.value
-		self.dd:ddToggle(self.level, value, menu.anchorFrame)
+		self.dd:ddReopenMenu(self.level, value)
 	end
 
 	calendarFrame.prevMonthButton:SetScript("OnClick", function(btn)
