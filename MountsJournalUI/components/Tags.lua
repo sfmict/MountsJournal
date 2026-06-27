@@ -190,7 +190,7 @@ function tags:deleteTag(tag)
 		self.filter.tags[tag] = nil
 		self.defFilter.tags[tag] = nil
 		self:setSortedTags()
-		journal:updateMountsList()
+		self:updateOrSortMountList()
 	end)
 end
 
@@ -205,6 +205,9 @@ function tags:setOrderTag(tag, step)
 		self.sortedTags[pos] = secondTag
 		self.sortedTags[nextPos] = tag
 	end
+	if journal:hasSortingByAny("tags") then
+		journal:sortMounts()
+	end
 end
 
 
@@ -214,14 +217,19 @@ function tags:getTagInMount(spellID, tag)
 end
 
 
+function tags:updateOrSortMountList()
+	self.doNotHideMenu = true
+	journal:updateMountsListWithSortCheck("tags")
+	self.doNotHideMenu = nil
+end
+
+
 function tags:addMountTag(spellID, tag)
 	if not self.mountTags[spellID] then
 		self.mountTags[spellID] = {}
 	end
 	self.mountTags[spellID][tag] = true
-	self.doNotHideMenu = true
-	journal:updateMountsList()
-	self.doNotHideMenu = nil
+	self:updateOrSortMountList()
 end
 
 
@@ -232,10 +240,20 @@ function tags:removeMountTag(spellID, tag, needUpdate)
 		if next(mountTags) == nil then self.mountTags[spellID] = nil end
 	end
 	if needUpdate then
-		self.doNotHideMenu = true
-		journal:updateMountsList()
-		self.doNotHideMenu = nil
+		self:updateOrSortMountList()
 	end
+end
+
+
+function tags:getMountTagOrder(spellID)
+	local mountTags = self.mountTags[spellID]
+	if mountTags then
+		local sortedTags = self.sortedTags
+		for i = 1, #sortedTags do
+			if mountTags[sortedTags[i]] then return i end
+		end
+	end
+	return math.huge
 end
 
 

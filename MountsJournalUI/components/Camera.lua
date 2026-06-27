@@ -1,7 +1,7 @@
 local _, ns = ...
 local mounts, journal, math = ns.mounts, ns.journal, math
 local ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, ORBIT_CAMERA_MOUSE_PAN_VERTICAL, ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION, ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION, ORBIT_CAMERA_MOUSE_MODE_ZOOM = ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, ORBIT_CAMERA_MOUSE_PAN_VERTICAL, ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION, ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION, ORBIT_CAMERA_MOUSE_MODE_ZOOM
-local GetScaledCursorDelta, IsShiftKeyDown = GetScaledCursorDelta, IsShiftKeyDown
+local IsShiftKeyDown = IsShiftKeyDown
 local DeltaLerp, Clamp = DeltaLerp, Clamp
 local pi2 = math.pi * 2
 
@@ -388,7 +388,8 @@ end
 
 local function UpdateLight(self)
 	if self:ShouldAlignLightToOrbitDelta() then
-		self:GetOwningScene():SetLightDirection(self:GetForwardVector())
+		local modelScene = self:GetOwningScene()
+		modelScene:SetLightDirection(modelScene:GetCameraForward())
 	end
 end
 

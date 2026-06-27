@@ -50,6 +50,10 @@ function journal.filters.sorting(dd, level, value)
 	info.arg1 = "distance"
 	dd:ddAddButton(info, level)
 
+	info.text = L["tags"]
+	info.arg1 = "tags"
+	dd:ddAddButton(info, level)
+
 	info.arg1 = nil
 	info.func = nil
 	info.checked = nil

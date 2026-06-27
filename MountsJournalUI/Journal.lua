@@ -119,12 +119,7 @@ function journal:init()
 		local notCombat = not InCombatLockdown()
 		self.leftInset:EnableKeyboard(notCombat)
 		self.bgFrame.resize:SetEnabled(notCombat)
-		local by = mounts.filters.sorting.by
-		if by == "summons" or by == "time" or by == "distance" then
-			self:sortMounts()
-		else
-			self:updateMountsList()
-		end
+		self:updateMountsListWithSortCheck("summons", "time", "distance")
 		self:updateMountDisplay(true)
 		local isMounted = util.isMounted()
 		self.mountSpecial:SetEnabled(isMounted)
