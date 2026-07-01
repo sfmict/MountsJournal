@@ -1,6 +1,6 @@
 local addon, ns = ...
 local L, util, mounts, journal, tags = ns.L, ns.util, ns.mounts, ns.journal, {}
-local pairs, ipairs, next, tinsert, wipe = pairs, ipairs, next, tinsert, wipe
+local pairs, ipairs, next, tinsert, wipe, math = pairs, ipairs, next, tinsert, wipe, math
 local ltl = LibStub("LibThingsLoad-1.0")
 journal.tags = tags
 journal:on("MODULES_INIT", function() tags:init() end)
@@ -247,13 +247,17 @@ end
 
 function tags:getMountTagOrder(spellID)
 	local mountTags = self.mountTags[spellID]
-	if mountTags then
-		local sortedTags = self.sortedTags
-		for i = 1, #sortedTags do
-			if mountTags[sortedTags[i]] then return i end
+	if not mountTags then return math.huge end
+
+	local filterTags = self.filter.tags
+	local minOrder = math.huge
+	for tag in next, mountTags do
+		local order = filterTags[tag][1]
+		if order < minOrder then
+			minOrder = order
 		end
 	end
-	return math.huge
+	return minOrder
 end
 
 
