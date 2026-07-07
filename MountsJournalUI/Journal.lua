@@ -410,8 +410,6 @@ function journal:init()
 	local summon1 = self.bgFrame.summon1
 	summon1.id = 1
 	summon1.icon:SetTexture(mounts.config.summon1Icon)
-	summon1:SetAttribute("clickbutton", summon1Handler)
-	SecureHandlerWrapScript(summon1, "OnClick", summon1Handler, [[owner:SetAttribute("useOnKeyDown", false);return nil, "post"]], [[owner:SetAttribute("useOnKeyDown", nil)]])
 	summon1:SetScript("OnDragStart", function()
 		mounts.summonPanel:startDrag()
 	end)
@@ -433,16 +431,16 @@ function journal:init()
 		end
 		GameTooltip:Show()
 	end)
+	util.setClickButtonUp(summon1, summon1Handler)
 
 	local summon2Handler = _G[util.secureButtonNameSecondMount]
 	local summon2 = self.bgFrame.summon2
 	summon2.id = 2
 	summon2.icon:SetTexture(mounts.config.summon2Icon)
-	summon2:SetAttribute("clickbutton", summon2Handler)
-	SecureHandlerWrapScript(summon2, "OnClick", summon2Handler, [[owner:SetAttribute("useOnKeyDown", false);return nil, "post"]], [[owner:SetAttribute("useOnKeyDown", nil)]])
 	summon2:SetScript("OnDragStart", summon1:GetScript("OnDragStart"))
 	summon2:SetScript("OnDragStop", summon1:GetScript("OnDragStop"))
 	summon2:SetScript("OnEnter", summon1:GetScript("OnEnter"))
+	util.setClickButtonUp(summon2, summon2Handler)
 
 	-- update btn icon
 	self:on("UPDATE_SUMMON_ICON", function(self, id, icon)

@@ -210,7 +210,12 @@ function MJMapCanvasMixin:refreshLayers()
 	self.detailLayerPool:ReleaseAll()
 
 	local layers = C_Map.GetMapArtLayers(self.mapID)
+	if not layers then
+		self:setCanvasSize(1, 1)
+		return
+	end
 	self:setCanvasSize(layers[1].layerWidth, layers[1].layerHeight)
+
 	for index, layerInfo in ipairs(layers) do
 		local detailLayer = self.detailLayerPool:Acquire()
 		detailLayer:SetAllPoints()

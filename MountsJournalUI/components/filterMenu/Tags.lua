@@ -52,18 +52,30 @@ function journal.filters.tags(dd, level)
 		info.disabled = nil
 	else
 		info.list = {}
-		local widgets = {{
-			icon = "interface/worldmap/worldmappartyicon",
-			OnClick = function(btn)
-				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-				filterTags.noTag = false
-				filterTags.withAllTags = false
-				journal.tags:setAllFilterTags(false)
-				filterTags.tags[btn:text()][2] = true
-				journal:updateMountsList()
-				dd:ddRefresh(level)
-			end,
-		}}
+		local widgets = {
+			{
+				icon = "Interface/WorldMap/GEAR_64GREY",
+				OnClick = function(btn)
+					journal.tags:editTag(btn._text)
+					dd:ddCloseMenus()
+				end,
+				OnTooltipShow = function(_, tooltip)
+					tooltip:SetText(EDIT)
+				end,
+			},
+			{
+				icon = "interface/worldmap/worldmappartyicon",
+				OnClick = function(btn)
+					PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+					filterTags.noTag = false
+					filterTags.withAllTags = false
+					journal.tags:setAllFilterTags(false)
+					filterTags.tags[btn:text()][2] = true
+					journal:updateMountsList()
+					dd:ddRefresh(level)
+				end,
+			},
+		}
 		local text = function(btn) return journal.tags.sortedTags[btn.value] end
 		local func = function(btn, _,_, checked)
 			filterTags.tags[btn:text()][2] = checked

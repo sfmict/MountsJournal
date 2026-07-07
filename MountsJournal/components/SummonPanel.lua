@@ -215,12 +215,9 @@ mounts:on("ADDON_INIT", function(mounts)
 	local summon1 = CreateFrame("BUTTON", nil, panel, "MJSecureBarButtonTemplate")
 	panel.summon1 = summon1
 	summon1.id = 1
+	summon1:SetPropagateMouseMotion(true)
 	summon1:SetScript("OnDragStart", dragStart)
 	summon1:SetScript("OnDragStop", dragStop)
-	summon1.icon:SetTexture(mounts.config.summon1Icon)
-	summon1:SetAttribute("clickbutton", summon1Handler)
-	SecureHandlerWrapScript(summon1, "OnClick", summon1Handler, [[owner:SetAttribute("useOnKeyDown", false);return nil, "post"]], [[owner:SetAttribute("useOnKeyDown", nil)]])
-	summon1:SetPropagateMouseMotion(true)
 	summon1:SetScript("OnEnter", function(btn)
 		if panel.isDrag then return end
 		GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
@@ -240,6 +237,8 @@ mounts:on("ADDON_INIT", function(mounts)
 		end
 		GameTooltip:Show()
 	end)
+	summon1.icon:SetTexture(mounts.config.summon1Icon)
+	util.setClickButtonUp(summon1, summon1Handler)
 
 	summon1Handler:HookScript("OnMouseDown", function() summon1:GetPushedTexture():Show() end)
 	summon1Handler:HookScript("OnMouseUp", function() summon1:GetPushedTexture():Hide() end)
@@ -249,13 +248,12 @@ mounts:on("ADDON_INIT", function(mounts)
 	local summon2 = CreateFrame("BUTTON", nil, panel, "MJSecureBarButtonTemplate")
 	panel.summon2 = summon2
 	summon2.id = 2
+	summon2:SetPropagateMouseMotion(true)
 	summon2:SetScript("OnDragStart", dragStart)
 	summon2:SetScript("OnDragStop", dragStop)
-	summon2.icon:SetTexture(mounts.config.summon2Icon)
-	summon2:SetAttribute("clickbutton", summon2Handler)
-	SecureHandlerWrapScript(summon2, "OnClick", summon2Handler, [[owner:SetAttribute("useOnKeyDown", false);return nil, "post"]], [[owner:SetAttribute("useOnKeyDown", nil)]])
-	summon2:SetPropagateMouseMotion(true)
 	summon2:SetScript("OnEnter", summon1:GetScript("OnEnter"))
+	summon2.icon:SetTexture(mounts.config.summon2Icon)
+	util.setClickButtonUp(summon2, summon2Handler)
 
 	summon2Handler:HookScript("OnMouseDown", function() summon2:GetPushedTexture():Show() end)
 	summon2Handler:HookScript("OnMouseUp", function() summon2:GetPushedTexture():Hide() end)

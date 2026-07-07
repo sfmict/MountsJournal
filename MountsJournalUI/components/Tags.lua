@@ -1,6 +1,6 @@
 local addon, ns = ...
 local L, util, mounts, journal, tags = ns.L, ns.util, ns.mounts, ns.journal, {}
-local pairs, ipairs, next, tinsert, wipe, math = pairs, ipairs, next, tinsert, wipe, math
+local ipairs, next, tinsert, wipe, math = ipairs, next, tinsert, wipe, math
 local ltl = LibStub("LibThingsLoad-1.0")
 journal.tags = tags
 journal:on("MODULES_INIT", function() tags:init() end)
@@ -9,8 +9,8 @@ journal:on("MODULES_INIT", function() tags:init() end)
 function tags:init()
 	self.init = nil
 
-	StaticPopupDialogs[util.addonName.."ADD_TAG"] = {
-		text = ns.addon..": "..L["Add tag"],
+	StaticPopupDialogs[util.addonName.."ADD_EDIT_TAG"] = {
+		text = ns.addon..": %s",
 		button1 = ACCEPT,
 		button2 = CANCEL,
 		hasEditBox = 1,
@@ -19,7 +19,7 @@ function tags:init()
 		hideOnEscape = 1,
 		whileDead = 1,
 		OnAccept = function(popup, cb)
-			local editBox = popup.editBox or popup.EditBox
+			local editBox = popup:GetEditBox()
 			local text = editBox:GetText()
 			if text and text ~= "" then cb(popup, text) end
 		end,
@@ -29,8 +29,8 @@ function tags:init()
 		EditBoxOnEscapePressed = function(self)
 			self:GetParent():Hide()
 		end,
-		OnShow = function(self)
-			local editBox = self.editBox or self.EditBox
+		OnShow = function(popup)
+			local editBox = popup:GetEditBox()
 			editBox:SetFocus()
 		end,
 	}
@@ -69,7 +69,7 @@ end
 function tags:setSortedTags()
 	local filterTags = self.filter.tags
 	wipe(self.sortedTags)
-	for tag in pairs(filterTags) do
+	for tag in next, filterTags do
 		tinsert(self.sortedTags, tag)
 	end
 	sort(self.sortedTags, function(tag1, tag2) return filterTags[tag1][1] < filterTags[tag2][1] end)
@@ -80,7 +80,7 @@ end
 
 
 function tags:setAllFilterTags(enabled)
-	for _, value in pairs(self.filter.tags) do
+	for _, value in next, self.filter.tags do
 		value[2] = enabled
 	end
 end
@@ -168,7 +168,7 @@ end
 
 
 function tags:addTag(spellID)
-	StaticPopup_Show(util.addonName.."ADD_TAG", nil, nil, function(popup, tag)
+	StaticPopup_Show(util.addonName.."ADD_EDIT_TAG", L["Add tag"], nil, function(popup, tag)
 		if self.filter.tags[tag] ~= nil then
 			popup:Hide()
 			StaticPopup_Show(util.addonName.."TAG_EXISTS")
@@ -182,9 +182,37 @@ function tags:addTag(spellID)
 end
 
 
+function tags:editTag(tag)
+	local dialog = StaticPopup_Show(util.addonName.."ADD_EDIT_TAG", CALENDAR_EDIT_EVENT, nil, function(popup, newTag)
+		if newTag == tag or self.filter.tags[tag] == nil then return end
+		if self.filter.tags[newTag] ~= nil then
+			popup:Hide()
+			StaticPopup_Show(util.addonName.."TAG_EXISTS")
+			return
+		end
+		for _, mountTags in next, self.mountTags do
+			if mountTags[tag] then
+				mountTags[newTag] = true
+				mountTags[tag] = nil
+			end
+		end
+		self.filter.tags[newTag] = self.filter.tags[tag]
+		self.filter.tags[tag] = nil
+		self.defFilter.tags[newTag] = self.defFilter.tags[tag]
+		self.defFilter.tags[tag] = nil
+		self:setSortedTags()
+	end)
+	if dialog then
+		local editBox = dialog:GetEditBox()
+		editBox:SetText(tag)
+		editBox:HighlightText()
+	end
+end
+
+
 function tags:deleteTag(tag)
 	StaticPopup_Show(util.addonName.."DELETE_TAG", NORMAL_FONT_COLOR_CODE..tag..FONT_COLOR_CODE_CLOSE, nil, function()
-		for spellID in pairs(self.mountTags) do
+		for spellID in next, self.mountTags do
 			self:removeMountTag(spellID, tag)
 		end
 		self.filter.tags[tag] = nil
@@ -283,14 +311,10 @@ function tags:getFilterMount(spellID)
 	local filterTags = self.filter.tags
 
 	if self.filter.withAllTags then
-		local i = 0
 		for tag, value in next, filterTags do
-			if value[2] then
-				if not mountTags[tag] then return false end
-				i = i + 1
-			end
+			if value[2] and not mountTags[tag] then return false end
 		end
-		return i > 0
+		return true
 	else
 		for tag in next, mountTags do
 			if filterTags[tag][2] then return true end

@@ -7,12 +7,14 @@ function tags.mountMenu.tags(dd, level)
 	local info = {}
 
 	if #tags.sortedTags == 0 then
-		info.isNotRadio = true
 		info.keepShownOnClick = true
 		info.notCheckable = true
 		info.disabled = true
 		info.text = EMPTY
 		dd:ddAddButton(info, level)
+
+		info.keepShownOnClick = nil
+		info.disabled = nil
 	else
 		info.list = {}
 
@@ -37,12 +39,13 @@ function tags.mountMenu.tags(dd, level)
 		end
 		dd:ddAddButton(info, level)
 
-		dd:ddAddSeparator(level)
-
 		info.list = nil
 		info.notCheckable = true
-		info.text = L["Add tag"]
-		info.func = function() tags:addTag(tags.menuSpellID) end
-		dd:ddAddButton(info, level)
 	end
+
+	dd:ddAddSeparator(level)
+
+	info.text = L["Add tag"]
+	info.func = function() tags:addTag(tags.menuSpellID) end
+	dd:ddAddButton(info, level)
 end

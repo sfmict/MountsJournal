@@ -1,16 +1,5 @@
 local addon, ns = ...
 local util = ns.util
-local mapValidTypes = {
-	[Enum.UIMapType.World] = true,
-	[Enum.UIMapType.Continent] = true,
-	[Enum.UIMapType.Zone] = true,
-}
-local function isMapValidForNavBarDropDown(mapInfo)
-	if mapValidTypes[mapInfo.mapType] then
-		local children = C_Map.GetMapChildrenInfo(mapInfo.parentMapID)
-		return type(children) == "table" and #children > 1
-	end
-end
 
 
 MJNavBarMixin = util.createFromEventsMixin()
@@ -52,11 +41,10 @@ function MJNavBarMixin:onLoad()
 		local list = {}
 		for _, button in ipairs(navBar.navList) do
 			if button:IsShown() then break end
-			local data = {
+			list[#list + 1] = {
 				text = button:GetText(),
 				id = button.id,
 			}
-			tinsert(list, data)
 		end
 		return list
 	end
@@ -90,7 +78,7 @@ function MJNavBarMixin:refresh()
 			id = mapInfo.mapID,
 			OnClick = function(self) self:GetParent():setMapID(self.data.id) end,
 		}
-		if isMapValidForNavBarDropDown(mapInfo) then
+		if C_Map.IsMapValidForNavBarDropdown(mapInfo.mapID) then
 			btnData.listFunc = self.getDropDownList
 		end
 		tinsert(hierarchy, 1, btnData)
@@ -111,12 +99,11 @@ function MJNavBarMixin:getDropDownList()
 		local children = C_Map.GetMapChildrenInfo(mapInfo.parentMapID)
 		if children then
 			for i, childInfo in ipairs(children) do
-				if isMapValidForNavBarDropDown(childInfo) then
-					local data = {
+				if C_Map.IsMapValidForNavBarDropdown(childInfo.mapID) then
+					list[#list + 1] = {
 						text = childInfo.name,
 						id = childInfo.mapID,
 					}
-					tinsert(list, data)
 				end
 			end
 			sort(list, function(a, b) return a.text < b.text end)

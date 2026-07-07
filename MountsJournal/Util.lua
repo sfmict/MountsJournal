@@ -134,6 +134,12 @@ function util.setEventsMixin(frame)
 end
 
 
+function util.setClickButtonUp(frame, owner)
+	frame:SetAttribute("clickbutton", owner)
+	SecureHandlerWrapScript(frame, "OnClick", owner, [[owner:SetAttribute("useOnKeyDown", false);return nil, "post"]], [[owner:SetAttribute("useOnKeyDown", nil)]])
+end
+
+
 function util.getMapFullNameInfo(mapID)
 	local mapInfo = C_Map.GetMapInfo(mapID)
 
