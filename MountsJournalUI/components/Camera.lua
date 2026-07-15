@@ -1,7 +1,7 @@
 local _, ns = ...
 local mounts, journal, math = ns.mounts, ns.journal, math
 local ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, ORBIT_CAMERA_MOUSE_PAN_VERTICAL, ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION, ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION, ORBIT_CAMERA_MOUSE_MODE_ZOOM = ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL, ORBIT_CAMERA_MOUSE_PAN_VERTICAL, ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION, ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION, ORBIT_CAMERA_MOUSE_MODE_ZOOM
-local IsShiftKeyDown = IsShiftKeyDown
+local IsControlKeyDown, IsShiftKeyDown = IsControlKeyDown, IsShiftKeyDown
 local DeltaLerp, Clamp = DeltaLerp, Clamp
 local pi2 = math.pi * 2
 
@@ -448,6 +448,18 @@ local function updateYOffset(self)
 	self.yOffset = self.yOffset + (mounts.config.mountDescriptionToggle and 1 or -1) * self.yOffsetDelta
 end
 
+local function onGridMouseDown(self, button)
+	if button == "LeftButton" and not IsControlKeyDown() then
+		self.isLeftButtonDown = true
+	elseif button == "RightButton" then
+		self.isRightButtonDown = true
+	end
+
+	if self.activeCamera then
+		self.activeCamera:OnMouseDown(button)
+	end
+end
+
 
 journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera, isGrid)
 	activeCamera.setMaxOffsets = setMaxOffsets
@@ -467,6 +479,7 @@ journal:on("SET_ACTIVE_CAMERA", function(self, activeCamera, isGrid)
 	activeCamera:SetLeftMouseButtonYMode(ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION, true)
 
 	if isGrid then
+		activeCamera:GetOwningScene():SetScript("OnMouseDown", onGridMouseDown)
 		activeCamera.ApplyFromModelSceneCameraInfo = gridApplyFromModelSceneCameraInfo
 		return
 	end

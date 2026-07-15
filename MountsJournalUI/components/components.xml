@@ -1,6 +1,7 @@
 <Ui>
 	<Script file="Binding.lua"/>
 	<Script file="ForAllIndentsAndPurposes.lua"/>
+	<Script file="ScrollBoxSorting.lua"/>
 
 	<Script file="MountLists.lua"/>
 	<Script file="FilterData.lua"/>

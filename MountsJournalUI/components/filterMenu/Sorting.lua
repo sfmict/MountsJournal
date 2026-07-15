@@ -54,6 +54,33 @@ function journal.filters.sorting(dd, level, value)
 	info.arg1 = "tags"
 	dd:ddAddButton(info, level)
 
+	if not value then
+		info.text = CUSTOM
+		info.arg1 = "custom"
+		info.func = function(_, by)
+			fSort[kBy] = by
+			journal:setCustomSorting()
+			journal:sortMounts()
+			dd:ddRefresh(level)
+		end
+		info.OnTooltipShow = function(_, tooltip)
+			tooltip:SetText(L["CTRL + drag to sort mounts"])
+		end
+		info.widgets = {{
+			icon = "Interface/BUTTONS/UI-GroupLoot-Pass-Up",
+			OnClick = function()
+				journal:resetCustomSorting()
+				dd:ddCloseMenus()
+			end,
+			OnTooltipShow = function(_, tooltip)
+				tooltip:SetText(RESET)
+			end,
+		}}
+		dd:ddAddButton(info, level)
+		info.OnTooltipShow = nil
+		info.widgets = nil
+	end
+
 	info.arg1 = nil
 	info.func = nil
 	info.checked = nil
@@ -72,6 +99,7 @@ function journal.filters.sorting(dd, level, value)
 	dd:ddAddSeparator(level)
 
 	info.isNotRadio = true
+	info.disabled = function() return fSort[kBy] == "custom" end
 	info.text = L["Reverse Sort"]
 	info.func = function(_,_,_, checked)
 		fSort[kReverse] = checked

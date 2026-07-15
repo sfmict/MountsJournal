@@ -120,7 +120,7 @@ end
 
 
 do
-	local lastMountClick = 0
+	local lastMountClick, cx, cy = 0,0,0
 	function tags:listItemClick(btn, anchorTo, mouseBtn)
 		if mouseBtn ~= "LeftButton" then
 			self:showMountDropdown(btn, anchorTo, 0, 0)
@@ -137,12 +137,17 @@ do
 			self.selectFunc(btn.spellID)
 		else
 			local time = GetTime()
+			local x, y = GetCursorPosition()
 			if btn.mountID ~= journal.selectedMountID then
 				journal:setSelectedMount(btn.mountID, btn.spellID)
-			elseif time - lastMountClick < .4 and type(btn.mountID) == "number" then
+			elseif time - lastMountClick < .4
+			and math.abs(cx - x) + math.abs(cy - y) < 1
+			and type(btn.mountID) == "number"
+			then
 				journal:useMount(btn.mountID)
 			end
 			lastMountClick = time
+			cx, cy = x, y
 		end
 	end
 end

@@ -611,6 +611,33 @@ function journal:init()
 	self.elementInitializerFunc = function(...) self:initMountButton(...) end
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.leftInset.scrollBar, self.view)
 
+	-- SCROLL DRAG SORTING
+	local dropIndicator = CreateFrame("FRAME", nil, self.bgFrame)
+	dropIndicator:SetFrameStrata("DIALOG")
+	dropIndicator:Hide()
+	dropIndicator.bg = dropIndicator:CreateTexture(nil, "BACKGROUND")
+	dropIndicator.bg:SetAllPoints()
+	dropIndicator.bg:SetColorTexture(.5, .5, 1, .5)
+
+	local function onDropEnter(isShown, frame)
+		if isShown then
+			dropIndicator:SetAllPoints(frame)
+			dropIndicator:Show()
+		else
+			dropIndicator:ClearAllPoints()
+			dropIndicator:Hide()
+		end
+	end
+	local function onSetPosition(dragData, dropData)
+		local dragMountID = self:getCustomOrder(dragData.mountID)
+		local dropMountID = self:getCustomOrder(dropData.mountID)
+		self:setCustomOrder(dragMountID, dropMountID)
+	end
+	local function isDragable()
+		return mounts.filters.sorting.by == "custom" and IsControlKeyDown()
+	end
+	util.setupDragSorting(self.scrollBox, onDropEnter, onSetPosition, isDragable)
+
 	-- MODELSCENE
 	self.modelScene:HookScript("OnEnter", function(modelScene)
 		modelScene:GetParent():SetScript("OnUpdate", nil)

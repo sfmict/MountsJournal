@@ -287,26 +287,6 @@ rules:SetScript("OnShow", function(self)
 	local function btnDown(btn)
 		btn.x, btn.y = GetCursorPosition()
 	end
-	local function btnDragStart(btn)
-		local level = btn:GetFrameLevel()
-		self.cover.id = btn.id
-		self.cover.list = btn.list
-		self.cover:SetParent(btn)
-		self.cover:SetAllPoints(btn)
-		self.cover:SetFrameLevel(level + 2)
-		self.cover:Show()
-		self.dragBtn:SetSize(btn:GetSize())
-		self.dragBtn:SetFrameLevel(level + 500)
-		self:ruleButtonInit(self.dragBtn, btn:GetElementData(), true)
-		local x, y = GetCursorPosition()
-		local xd, yd = GetCursorDelta()
-		local scale = btn:GetEffectiveScale()
-		x = btn:GetLeft() + (x - btn.x - xd) / scale
-		y = btn:GetBottom() + (y - btn.y - yd) / scale
-		self.dragBtn:SetPoint("BOTTOMLEFT", UIParent, x, y)
-		self.dragBtn:SetScript("OnUpdate", self.dragBtn.onUpdate)
-		self.dragBtn:Show()
-	end
 	local function btnUpClick(btn)
 		local parent = btn:GetParent()
 		local list = parent.list
@@ -329,11 +309,11 @@ rules:SetScript("OnShow", function(self)
 		local parent = btn:GetParent()
 		local node = parent:GetElementData()
 		parent.data.isCollapsed = node:ToggleCollapsed(TreeDataProviderConstants.RetainChildCollapse, TreeDataProviderConstants.DoInvalidation) or nil
-		parent:updateState()
+		parent:updateState(node)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end
-	local function updateState(btn)
-		local arrowRotation = btn:GetElementData():IsCollapsed() and math.pi or math.pi * .5
+	local function updateState(btn, node)
+		local arrowRotation = node:IsCollapsed() and math.pi or math.pi * .5
 		btn.collapseExpand.normal:SetRotation(arrowRotation)
 		btn.collapseExpand.highlight:SetRotation(arrowRotation)
 	end
@@ -347,11 +327,9 @@ rules:SetScript("OnShow", function(self)
 			else
 				btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 			end
-			btn:RegisterForDrag("LeftButton")
 			btn:SetScript("OnClick", btnClick)
 			btn:HookScript("OnEnter", btnEnter)
-			btn:SetScript("OnMouseDown", btnDown)
-			btn:SetScript("OnDragStart", btnDragStart)
+			btn:HookScript("OnMouseDown", btnDown)
 			btn.up:SetScript("OnClick", btnUpClick)
 			btn.down:SetScript("OnClick", btnDownClick)
 			btn.remove:SetScript("OnClick", btnRemoveClick)
@@ -388,7 +366,7 @@ rules:SetScript("OnShow", function(self)
 		end
 	end)
 
-	self.view:RegisterCallback(self.view.Event.OnAcquiredFrame, onAcqure, self)
+	self.scrollBox:RegisterCallback(self.view.Event.OnAcquiredFrame, onAcqure, self)
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.scrollBar, self.view)
 
 	local scrollBoxAnchorsWithBar = {
@@ -401,14 +379,6 @@ rules:SetScript("OnShow", function(self)
 	}
 	ScrollUtil.AddManagedScrollBarVisibilityBehavior(self.scrollBox, self.scrollBar, scrollBoxAnchorsWithBar, scrollBoxAnchorsWithoutBar)
 
-	-- COVER
-	self.cover = CreateFrame("FRAME")
-	self.cover:Hide()
-	self.cover.bg = self.cover:CreateTexture(nil, "BACKGROUND")
-	self.cover.bg:SetAllPoints()
-	self.cover.bg:SetColorTexture(.2, .2, .2, .6)
-	self.cover:SetScript("OnHide", self.Hide)
-
 	-- SEPARATOR
 	self.separator = CreateFrame("FRAME", nil, self)
 	self.separator:Hide()
@@ -419,17 +389,7 @@ rules:SetScript("OnShow", function(self)
 	self.separator.bg:SetTexture("Interface\\Buttons\\UI-Silver-Button-Highlight")
 	self.separator.bg:SetBlendMode("ADD")
 
-	-- DRAG BUTTON
-	self.dragBtn = CreateFrame("FRAME", nil, self, "MJRulePanelTemplate")
-	self.dragBtn:Hide()
-	self.dragBtn:SetAlpha(.5)
-	self.dragBtn:SetMovable(true)
-	self.dragBtn:SetMouseClickEnabled(false)
-	self.dragBtn:SetMouseMotionEnabled(true)
-	self.dragBtn.remove:Disable()
-	self.dragBtn.up:Disable()
-	self.dragBtn.down:Disable()
-
+	-- SCROLL DRAG SORTING
 	local function isGroupList(gList, fList)
 		if gList == fList then return true end
 		for i, rule in ipairs(gList) do
@@ -439,82 +399,69 @@ rules:SetScript("OnShow", function(self)
 		end
 	end
 
-	function self.dragBtn.onUpdate(btn, elapsed)
-		local x, y = GetCursorDelta()
-		local scale = btn:GetEffectiveScale()
-		btn:AdjustPointsOffset(x / scale, y / scale)
+	local function onDropEnter(isShown, f, dragNode, x, y)
+		self.separator:ClearAllPoints()
 		self.separator:Hide()
 		self.separator.id = nil
-		for i, f in ipairs(self.view:GetFrames()) do
-			if f:IsMouseOver() then
-				if f.list == btn.list and f.id == btn.id
-				or btn.data.rules and isGroupList(btn.data.rules, f.list)
-				then return end
-				self.separator:ClearAllPoints()
-				local x, y = GetCursorPosition()
-				local xc, yc = f:GetCenter()
-				y = y / scale
-				if f.data.rules
-				and f.data.rules ~= btn.list
-				and math.abs(y - yc) < f:GetHeight() / 4
-				then -- group
-					self.separator.list = f.data.rules
-					self.separator.id = 1
-					self.separator:SetPoint("TOPLEFT", f, "CENTER", -150, 26)
-					self.separator:SetPoint("BOTTOMRIGHT", f, "CENTER", 150, -34)
+
+		if isShown then
+			local curData = f:GetData()
+			local cID, cData, cList = curData[1], curData[2], curData[3]
+			local dragData = dragNode:GetData()
+			local dID, dData, dList = dragData[1], dragData[2], dragData[3]
+
+			if cID == dID and cList == dList
+			or dData.rules and isGroupList(dData.rules, cList)
+			then return end
+
+			if cData.rules
+			and cData.rules ~= dList
+			and y > .25 and y < .75
+			then -- group
+				self.separator.id = 1
+				self.separator.list = cData.rules
+				self.separator:SetPoint("TOPLEFT", f, "CENTER", -150, 26)
+				self.separator:SetPoint("BOTTOMRIGHT", f, "CENTER", 150, -34)
+				self.separator:Show()
+			elseif y >= .5 then -- up
+				if (dList ~= curData[3] or dID + 1 ~= cID)
+				and f:GetTop() <= self.scrollBox:GetTop()
+				then
+					self.separator.id = cID
+					self.separator.list = cList
+					self.separator:SetPoint("BOTTOMLEFT", f, "TOPLEFT", 5, -5)
+					self.separator:SetPoint("BOTTOMRIGHT", f, "TOPRIGHT", -5, -5)
 					self.separator:Show()
-					return
 				end
-				if yc < y then -- up
-					if (btn.list ~= f.list or btn.id + 1 ~= f.id)
-					and f:GetTop() <= self.scrollBox:GetTop()
-					then
-						self.separator.id = f.id
-						self.separator.list = f.list
-						self.separator:SetPoint("BOTTOMLEFT", f, "TOPLEFT", 5, -5)
-						self.separator:SetPoint("BOTTOMRIGHT", f, "TOPRIGHT", -5, -5)
-						self.separator:Show()
-					end
-				else -- down
-					if (btn.list ~= f.list or btn.id ~= f.id + 1)
-					and math.floor(f:GetBottom() + .5) >= math.floor(self.scrollBox:GetBottom() + .5)
-					--and (not f.data.rules or #f.data.rules == 0 or f.data.collapsed)
-					then
-						self.separator.id = f.id + 1
-						self.separator.list = f.list
-						self.separator:SetPoint("TOPLEFT", f, "BOTTOMLEFT", 5, 5)
-						self.separator:SetPoint("TOPRIGHT", f, "BOTTOMRIGHT", -5, 5)
-						self.separator:Show()
-					end
+			else -- down
+				if (dList ~= cList or dID ~= cID + 1)
+				and math.floor(f:GetBottom() + .5) >= math.floor(self.scrollBox:GetBottom() + .5)
+				then
+					self.separator.id = cID + 1
+					self.separator.list = cList
+					self.separator:SetPoint("TOPLEFT", f, "BOTTOMLEFT", 5, 5)
+					self.separator:SetPoint("TOPRIGHT", f, "BOTTOMRIGHT", -5, 5)
+					self.separator:Show()
 				end
-				break
 			end
 		end
 	end
 
-	self.dragBtn:SetScript("OnShow", function(btn)
-		btn:RegisterEvent("GLOBAL_MOUSE_UP")
-	end)
-	self.dragBtn:SetScript("OnHide", function(btn)
-		btn:UnregisterEvent("GLOBAL_MOUSE_UP")
-	end)
-	self.dragBtn:SetScript("OnEvent", function(btn)
-		btn:SetScript("OnUpdate", nil)
-		btn:Hide()
-		self.cover.id = nil
-		self.cover:Hide()
-		self.separator:Hide()
+	local function onSetPosition(dragNode)
 		local newID = self.separator.id
 		if newID then
 			local newList = self.separator.list
-			local list = self.dragBtn.list
-			local id = self.dragBtn.id
+			local dragData = dragNode:GetData()
+			local id = dragData[1]
+			local list = dragData[3]
 			if newList == list and newID > id then
 				newID = newID - 1
 			end
 			self:setRulePos(list, id, newList, newID)
 		end
-	end)
+	end
+
+	util.setupDragSorting(self.scrollBox, onDropEnter, onSetPosition)
 
 	-- RULE MENU
 	self.ruleMenu = lsfdd:SetMixin({})
@@ -947,19 +894,13 @@ function rules:ruleButtonInit(btn, node, isDrag)
 		local text = self:getCondText(btn.data[3])
 		btn.cond3:SetText(#btn.data > 3 and text.."…" or text)
 	end
-
-	if not isDrag and self.cover.list == btn.list and self.cover.id == btn.id then
-		self.cover:SetParent(btn)
-		self.cover:SetAllPoints(btn)
-		self.cover:Show()
-	end
 end
 
 
 function rules:ruleGroupInit(btn, node, isDrag)
 	self:ruleButtonInit(btn, node, isDrag)
 	btn.order:SetText(btn.id)
-	btn:updateState()
+	btn:updateState(node)
 end
 
 

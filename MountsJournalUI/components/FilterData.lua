@@ -27,11 +27,68 @@ function journal:updateMountsListWithSortCheck(...)
 end
 
 
+function journal:setCustomSorting()
+	if mounts.filters.sorting.custom then return end
+	local custom, _, spellID = {}
+	mounts.filters.sorting.custom = custom
+
+	for i, mount in ipairs(self.mountIDs) do
+		_, spellID = util.getMountInfo(mount)
+		custom[spellID] = i
+	end
+end
+
+
+function journal:resetCustomSorting()
+	StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(L["Reset custom sorting"]), nil, function()
+		local sorting = mounts.filters.sorting
+		if sorting.by == "custom" then
+			sorting.by = "name"
+		end
+		sorting.custom = nil
+		self:sortMounts()
+	end)
+end
+
+
+function journal:getMountIndex(mountID)
+	for i = #self.mountIDs, i do
+		if self.mountIDs[i] == mountID then return i end
+	end
+end
+
+
+function journal:getCustomOrder(mountID)
+	local _, spellID = util.getMountInfo(mountID)
+	return mounts.filters.sorting.custom[spellID] or self:getMountIndex(mountID)
+end
+
+
+function journal:setCustomOrder(curPos, newPos)
+	local custom = mounts.filters.sorting.custom
+	local _, spellID = util.getMountInfo(self.mountIDs[curPos])
+	local step = curPos < newPos and 1 or -1
+	custom[spellID] = newPos
+
+	for i = curPos + step, newPos, step do
+		_, spellID = util.getMountInfo(self.mountIDs[i])
+		custom[spellID] = i - step
+	end
+
+	self:sortMounts()
+end
+
+
 function journal:sortMounts()
 	local fSort, db = mounts.filters.sorting, mountsDB
-	local by1, rev1 = fSort.by, fSort.reverse
+	local notCustom = fSort.by ~= "custom"
+	local by1, rev1 = fSort.by, notCustom and fSort.reverse
 	local by2, rev2 = fSort.by2, fSort.reverse2
 	local by3, rev3 = fSort.by3, fSort.reverse3
+	local collectedFirst = notCustom and fSort.collectedFirst
+	local favoritesFirst = notCustom and fSort.favoritesFirst
+	local additionalFirst = notCustom and fSort.additionalFirst
+	local custom = fSort.custom
 	local numNeedingFanfare = C_MountJournal.GetNumMountsNeedingFanfare()
 
 	local extractors = {
@@ -69,6 +126,9 @@ function journal:sortMounts()
 		tags = function(data)
 			return self.tags:getMountTagOrder(data.spellID)
 		end,
+		custom = function(data)
+			return custom[data.spellID] or math.huge
+		end,
 	}
 
 	local mCache = setmetatable({}, {__index = function(t, mount)
@@ -105,13 +165,13 @@ function journal:sortMounts()
 		local mb = mCache[b]
 
 		-- FANFARE
-		if ma.needFanfare ~= mb.needFanfare then return ma.needFanfare end
+		if notCustom and ma.needFanfare ~= mb.needFanfare then return ma.needFanfare end
 		-- COLLECTED
-		if fSort.collectedFirst and ma.isCollected ~= mb.isCollected then return ma.isCollected end
+		if collectedFirst and ma.isCollected ~= mb.isCollected then return ma.isCollected end
 		-- FAVORITES
-		if fSort.favoritesFirst and ma.isFavorite ~= mb.isFavorite then return ma.isFavorite end
+		if favoritesFirst and ma.isFavorite ~= mb.isFavorite then return ma.isFavorite end
 		-- ADDITIONAL
-		if fSort.additionalFirst and ma.additional ~= mb.additional then return ma.additional end
+		if additionalFirst and ma.additional ~= mb.additional then return ma.additional end
 
 		-- BY
 		if ma.by1 < mb.by1 then return not rev1

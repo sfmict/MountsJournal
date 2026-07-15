@@ -103,6 +103,12 @@ function tags.mountMenu.main(dd, level)
 		info.text = L["tags"]
 		info.value = "tags"
 		dd:ddAddButton(info, level)
+
+		if mounts.filters.sorting.by == "custom" then
+			info.text = L["Move to"]
+			info.value = "customOrder"
+			dd:ddAddButton(info, level)
+		end
 	end
 	--@do-not-package@
 	if isMount then
