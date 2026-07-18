@@ -359,7 +359,7 @@ rules:SetScript("OnShow", function(self)
 
 	self.view:SetElementFactory(function(factory, node)
 		local data = node:GetData()
-		if data[2].action then
+		if data.rule.action then
 			factory(ruleTemp, ruleInit)
 		else
 			factory(groupTemp, groupInit)
@@ -406,25 +406,24 @@ rules:SetScript("OnShow", function(self)
 
 		if isShown then
 			local curData = f:GetData()
-			local cID, cData, cList = curData[1], curData[2], curData[3]
+			local cID, cRule, cList = curData.id, curData.rule, curData.list
 			local dragData = dragNode:GetData()
-			local dID, dData, dList = dragData[1], dragData[2], dragData[3]
+			local dID, dRule, dList = dragData.id, dragData.rule, dragData.list
 
 			if cID == dID and cList == dList
-			or dData.rules and isGroupList(dData.rules, cList)
+			or dRule.rules and isGroupList(dRule.rules, cList)
 			then return end
 
-			if cData.rules
-			and cData.rules ~= dList
+			if cRule.rules and cRule.rules ~= dList
 			and y > .25 and y < .75
 			then -- group
 				self.separator.id = 1
-				self.separator.list = cData.rules
+				self.separator.list = cRule.rules
 				self.separator:SetPoint("TOPLEFT", f, "CENTER", -150, 26)
 				self.separator:SetPoint("BOTTOMRIGHT", f, "CENTER", 150, -34)
 				self.separator:Show()
 			elseif y >= .5 then -- up
-				if (dList ~= curData[3] or dID + 1 ~= cID)
+				if (dList ~= cList or dID + 1 ~= cID)
 				and f:GetTop() <= self.scrollBox:GetTop()
 				then
 					self.separator.id = cID
@@ -452,8 +451,8 @@ rules:SetScript("OnShow", function(self)
 		if newID then
 			local newList = self.separator.list
 			local dragData = dragNode:GetData()
-			local id = dragData[1]
-			local list = dragData[3]
+			local id = dragData.id
+			local list = dragData.list
 			if newList == list and newID > id then
 				newID = newID - 1
 			end
@@ -853,20 +852,20 @@ function rules:getActionIcon(rule)
 end
 
 
-function rules:ruleButtonInit(btn, node, isDrag)
+function rules:ruleButtonInit(btn, node)
 	local data = node:GetData()
-	btn.id = data[1]
-	btn.data = data[2]
-	btn.list = data[3]
+	btn.id = data.id
+	btn.data = data.rule
+	btn.list = data.list
 	btn.action:SetText(self:getActionText(btn.data, true))
 	btn.up:SetShown(btn.id > 1)
 	btn.down:SetShown(#btn.list > btn.id)
 
 	if btn.data.action then
 		local icon, text, r,g,b, mountID, spellID, itemLink = self:getActionIcon(btn.data)
-		btn.info.mountID = not isDrag and mountID
-		btn.info.spellID = not isDrag and spellID
-		btn.info.itemLink = not isDrag and itemLink
+		btn.info.mountID = mountID
+		btn.info.spellID = spellID
+		btn.info.itemLink = itemLink
 		btn.info:Show()
 		btn.info.icon:SetTexture(icon or util.noIcon)
 		btn.info.icon:SetVertexColor(r or 1, g or 1, b or 1)
@@ -938,7 +937,7 @@ do
 			local rule = list[i]
 			local ruleMatch = self.notSearched or ruleFind(self, rule, text)
 			if ruleMatch or rule.rules then
-				local node = pNode:Insert({i, rule, list})
+				local node = pNode:Insert({id = i, rule = rule, list = list})
 				if rule.rules then
 					if self:addDataList(text, rule.rules, node) or ruleMatch then
 						empty = false

@@ -612,8 +612,7 @@ function journal:init()
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.leftInset.scrollBar, self.view)
 
 	-- SCROLL DRAG SORTING
-	local dropIndicator = CreateFrame("FRAME", nil, self.bgFrame)
-	dropIndicator:SetFrameStrata("DIALOG")
+	local dropIndicator = CreateFrame("FRAME")
 	dropIndicator:Hide()
 	dropIndicator.bg = dropIndicator:CreateTexture(nil, "BACKGROUND")
 	dropIndicator.bg:SetAllPoints()
@@ -621,6 +620,8 @@ function journal:init()
 
 	local function onDropEnter(isShown, frame)
 		if isShown then
+			dropIndicator:SetParent(frame)
+			dropIndicator:SetFrameStrata("DIALOG")
 			dropIndicator:SetAllPoints(frame)
 			dropIndicator:Show()
 		else

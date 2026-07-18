@@ -39,7 +39,7 @@ local getCursorFrame do
 			new = true
 		end
 
-		delegate:GetParent():OnViewAcquiredFrame(frame, elementData, new)
+		delegate.view:TriggerEvent(delegate.view.Event.OnAcquiredFrame, frame, elementData, new)
 		if initializer then initializer(frame, sourceFrame, elementData) end
 
 		cursorCover:SetAllPoints(frame)
@@ -52,22 +52,47 @@ local getCursorFrame do
 end
 
 
-local function onUpdate(delegate)
-	local cursorFrame = delegate.cursorFrame
-	local cx, cy = InputUtil.GetCursorPosition(delegate:GetParent())
-	cursorFrame:SetPoint("BOTTOMLEFT", cx - delegate.dx, cy - delegate.dy)
+local function getPanFactor(elapsed, delta)
+	local v = delta / (UIParent:GetHeight() * .046)
+	return elapsed * math.max(.1, v*v)
+end
 
-	delegate.dropElementData = nil
-	for i, frame in ipairs(delegate.view:GetFrames()) do
-		local data = frame:GetElementData()
-		if delegate.sourceElementData ~= data and frame:IsMouseOver() then
-			delegate.dropElementData = data
-			local x = (cx - frame:GetLeft()) / frame:GetWidth()
-			local y = (cy - frame:GetBottom()) / frame:GetHeight()
-			delegate.onDropEnter(true, frame, delegate.sourceElementData, x, y)
-			return
+
+local function tryVerticalEdgeScroll(delegate, elapsed, cy)
+	local scrollBox = delegate:GetParent()
+	local topDelta = cy - scrollBox:GetTop()
+	if topDelta > 0 then
+		scrollBox:ScrollDecrease(getPanFactor(elapsed, topDelta))
+	else
+		local bottomDelta = cy - scrollBox:GetBottom()
+		if bottomDelta < 0 then
+			scrollBox:ScrollIncrease(getPanFactor(elapsed, bottomDelta))
 		end
 	end
+end
+
+
+local function onUpdate(delegate, elapsed)
+	local scrollBox = delegate:GetParent()
+	local cx, cy = InputUtil.GetCursorPosition(scrollBox)
+	delegate.cursorFrame:SetPoint("BOTTOMLEFT", cx - delegate.dx, cy - delegate.dy)
+	delegate.dropElementData = nil
+
+	if scrollBox:IsMouseOver() then
+		for i, frame in ipairs(delegate.view:GetFrames()) do
+			local data = frame:GetElementData()
+			if delegate.sourceElementData ~= data and frame:IsMouseOver() then
+				delegate.dropElementData = data
+				local x = (cx - frame:GetLeft()) / frame:GetWidth()
+				local y = (cy - frame:GetBottom()) / frame:GetHeight()
+				delegate.onDropEnter(true, frame, delegate.sourceElementData, x, y)
+				return
+			end
+		end
+	else
+		tryVerticalEdgeScroll(delegate, elapsed, cy)
+	end
+
 	delegate.onDropEnter(false)
 end
 
@@ -76,7 +101,9 @@ local function onMouseDown(self)
 	local delegate = self.__delegate
 	delegate.canDrag = not delegate.isCanDrag or delegate.isCanDrag()
 	if delegate.canDrag then
-		delegate.dx, delegate.dy = InputUtil.GetCursorPosition(delegate:GetParent())
+		local cx, cy = InputUtil.GetCursorPosition(delegate:GetParent())
+		delegate.dx = cx - self:GetLeft()
+		delegate.dy = cy - self:GetBottom()
 	end
 end
 
@@ -90,12 +117,9 @@ local function onDragStart(self, ...)
 
 	if not self:InterceptStartDrag(delegate) then return end
 
+	cover:setCover(self)
 	delegate.sourceElementData = self:GetElementData()
 	delegate.cursorFrame = getCursorFrame(delegate, self)
-	delegate.dx = delegate.dx - self:GetLeft()
-	delegate.dy = delegate.dy - self:GetBottom()
-
-	cover:setCover(self)
 	delegate:Show()
 end
 
