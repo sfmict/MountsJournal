@@ -221,6 +221,38 @@ local function updateGlobal(self)
 			for _, rules in ipairs(ruleSet) do update(rules) end
 		end
 	end
+
+	-- if < 12.0.31 GLOBAL
+	if compareVersion("12.0.31", self.globalDB.lastAddonVersion) then
+		local curRegion = GetCurrentRegion()
+		local function updatePetProfile(profile)
+			if profile.oldPetForMount then
+				local petForMount = profile.petForMount[curRegion]
+				if not petForMount then
+					petForMount = {}
+					for k, v in next, profile.oldPetForMount do
+						petForMount[k] = v
+					end
+					profile.petForMount[curRegion] = petForMount
+				end
+				profile.oldPetForMount = nil
+			else
+				local k, v = next(profile.petForMount)
+				if v ~= nil and type(v) ~= "table" then
+					local petForMount = {}
+					for k, v in next, profile.petForMount do
+						petForMount[k] = v
+					end
+					profile.petForMount = {[curRegion] = petForMount}
+				end
+			end
+		end
+
+		updatePetProfile(self.defProfile)
+		for name, profile in next, self.profiles do
+			updatePetProfile(profile)
+		end
+	end
 end
 
 
@@ -317,35 +349,5 @@ function ns.mounts:setOldChanges()
 	if compareVersion(currentVersion, self.globalDB.lastAddonVersion) then
 		updateGlobal(self)
 		self.globalDB.lastAddonVersion = currentVersion
-	end
-
-	-- UPDATE PET FOR PROFILE
-	local curRegion = GetCurrentRegion()
-	local function updatePetProfile(profile)
-		if profile.oldPetForMount then
-			local petForMount = profile.petForMount[curRegion]
-			if not petForMount then
-				petForMount = {}
-				for k, v in next, profile.oldPetForMount do
-					petForMount[k] = v
-				end
-				profile.petForMount[curRegion] = petForMount
-			end
-		else
-			local k, v = next(profile.petForMount)
-			if v ~= nil and type(v) ~= "table" then
-				profile.oldPetForMount = profile.petForMount
-				local petForMount = {}
-				for k, v in next, profile.oldPetForMount do
-					petForMount[k] = v
-				end
-				profile.petForMount = {[curRegion] = petForMount}
-			end
-		end
-	end
-
-	updatePetProfile(self.defProfile)
-	for name, profile in next, self.profiles do
-		updatePetProfile(profile)
 	end
 end

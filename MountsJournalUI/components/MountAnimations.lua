@@ -93,7 +93,6 @@ ns.journal:on("MODULES_INIT", function(journal)
 		{
 			name = SUMMON,
 			animation = 1496,
-			type = 1,
 		},
 		{
 			name = C_Spell.GetSpellName(372610), -- Skyward Ascent

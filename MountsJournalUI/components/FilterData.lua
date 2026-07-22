@@ -52,7 +52,7 @@ end
 
 
 function journal:getMountIndex(mountID)
-	for i = #self.mountIDs, i do
+	for i = #self.mountIDs, 1, -1 do
 		if self.mountIDs[i] == mountID then return i end
 	end
 end

@@ -27,8 +27,8 @@ cursorCover:SetFrameStrata("TOOLTIP")
 local getCursorFrame do
 	local list = {}
 	function getCursorFrame(delegate, sourceFrame)
-		local elementData = delegate.sourceElementData
-		local template, initializer = delegate.cursorFactory(elementData)
+		local view, elementData = delegate.view, delegate.sourceElementData
+		local template, initializer = view:GetFactoryDataFromElementData(elementData)
 		local frame, new = list[template], false
 
 		if not frame then
@@ -39,8 +39,9 @@ local getCursorFrame do
 			new = true
 		end
 
-		delegate.view:TriggerEvent(delegate.view.Event.OnAcquiredFrame, frame, elementData, new)
-		if initializer then initializer(frame, sourceFrame, elementData) end
+		frame:SetSize(sourceFrame:GetSize())
+		view:TriggerEvent(view.Event.OnAcquiredFrame, frame, elementData, new)
+		if initializer then initializer(frame, elementData) end
 
 		cursorCover:SetAllPoints(frame)
 		cursorCover:Show()
@@ -58,8 +59,7 @@ local function getPanFactor(elapsed, delta)
 end
 
 
-local function tryVerticalEdgeScroll(delegate, elapsed, cy)
-	local scrollBox = delegate:GetParent()
+local function tryVerticalEdgeScroll(scrollBox, elapsed, cy)
 	local topDelta = cy - scrollBox:GetTop()
 	if topDelta > 0 then
 		scrollBox:ScrollDecrease(getPanFactor(elapsed, topDelta))
@@ -90,7 +90,7 @@ local function onUpdate(delegate, elapsed)
 			end
 		end
 	else
-		tryVerticalEdgeScroll(delegate, elapsed, cy)
+		tryVerticalEdgeScroll(scrollBox, elapsed, cy)
 	end
 
 	delegate.onDropEnter(false)
@@ -168,7 +168,6 @@ function util.setupDragSorting(scrollBox, onDropEnter, onSetPosition, isCanDrag)
 	delegate.onDropEnter = onDropEnter
 	delegate.onSetPosition = onSetPosition
 	delegate.isCanDrag = isCanDrag
-	delegate.cursorFactory = ScrollUtil.GenerateCursorFactory(scrollBox)
 	delegate.view = scrollBox:GetView()
 	scrollBox:RegisterCallback(scrollBox.Event.OnAcquiredFrame, onAcquiredFrame, delegate)
 	scrollBox:RegisterCallback(scrollBox.Event.OnInitializedFrame, onInitializedFrame, delegate)
