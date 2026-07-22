@@ -222,6 +222,22 @@ function mounts:checkProfile(profile)
 end
 
 
+function mounts:getProfileZoneMounts(profile)
+	if profile.zoneMountsFromProfile == true then
+		return self.defProfile.zoneMounts
+	end
+	return (self.profiles[profile.zoneMountsFromProfile] or profile).zoneMounts
+end
+
+
+function mounts:getProfilePetForMount(profile)
+	if profile.petListFromProfile == true then
+		return self.defProfile.petForMount
+	end
+	return (self.profiles[profile.petListFromProfile] or profile).petForMount
+end
+
+
 function mounts:PLAYER_LOGIN()
 	self.PLAYER_LOGIN = nil
 	self:setOldChanges()
@@ -427,13 +443,13 @@ do
 		local petID
 		if self.fromPriority then
 			for i = 1, #self.priorityProfiles do
-				petID = ns.pets:getPetForProfile(self.priorityProfiles[i].petForMount, spellID)
+				petID = ns.pets:getPetForProfile(self:getProfilePetForMount(self.priorityProfiles[i]), spellID)
 				if petID then break end
 			end
 			self.fromPriority = nil
 		else
 			local profile = self.profiles[self.charDB.currentProfileName] or self.defProfile
-			petID = ns.pets:getPetForProfile(profile.petForMount, spellID)
+			petID = ns.pets:getPetForProfile(self:getProfilePetForMount(profile), spellID)
 		end
 
 		if petID then
@@ -720,7 +736,7 @@ function mounts:setMountsList(profile, mountsWeight)
 
 	for i = 1, #self.mapList do
 		local mapID = self.mapList[i]
-		local zoneMounts, list = profile.zoneMountsFromProfile and self.defProfile.zoneMounts or profile.zoneMounts
+		local zoneMounts, list = self:getProfileZoneMounts(profile)
 
 		if mapID == self.defMountsListID then
 			list = profile

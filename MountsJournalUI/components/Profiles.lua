@@ -91,6 +91,14 @@ ns.journal:on("MODULES_INIT", function(journal)
 		whileDead = 1,
 		OnAccept = function(_, cb) cb() end,
 	}
+	StaticPopupDialogs[util.addonName.."PROFILE_FROM"] = {
+		text = ns.addon..": "..L["Other profiles that link to \"%s\" will also be updated to \"%s\". Proceed?"],
+		button1 = OKAY,
+		button2 = CANCEL,
+		hideOnEscape = 1,
+		whileDead = 1,
+		OnAccept = function(_, cb) cb() end,
+	}
 
 	-- METHODS
 	function dd:createProfile(copy)
@@ -100,6 +108,20 @@ ns.journal:on("MODULES_INIT", function(journal)
 
 	function dd:deleteProfile(profileName)
 		StaticPopup_Show(util.addonName.."DELETE_PROFILE", NORMAL_FONT_COLOR:WrapTextInColorCode(profileName), nil, function()
+			if defProfile.petListFromProfile == profileName then
+				defProfile.petListFromProfile = nil
+			end
+			if defProfile.zoneMountsFromProfile == profileName then
+				defProfile.zoneMountsFromProfile = nil
+			end
+			for _, profile in next, profiles do
+				if profile.petListFromProfile == profileName then
+					profile.petListFromProfile = nil
+				end
+				if profile.zoneMountsFromProfile == profileName then
+					profile.zoneMountsFromProfile = nil
+				end
+			end
 			profiles[profileName] = nil
 			if charDB.currentProfileName == profileName then
 				self:setProfile()
@@ -149,6 +171,44 @@ ns.journal:on("MODULES_INIT", function(journal)
 		self:setAllMountsFor(actionText, journal.mountIDs, enabled, onlyFavorites)
 	end
 
+	function dd:setProfileKeyFrom(profile, name, key, value)
+		if value then
+			local hasLink = false
+			local profileValue = profile == defProfile and true or name
+
+			if defProfile[key] == profileValue then
+				hasLink = true
+			end
+			if not hasLink then
+				for _, p in next, profiles do
+					if p[key] == profileValue then
+						hasLink = true
+						break
+					end
+				end
+			end
+
+			if hasLink then
+				self:ddCloseMenus()
+				local fromName = value == true and DEFAULT or value
+				StaticPopup_Show(util.addonName.."PROFILE_FROM", NORMAL_FONT_COLOR:WrapTextInColorCode(name), NORMAL_FONT_COLOR:WrapTextInColorCode(fromName), function()
+					if defProfile[key] == profileValue then
+						defProfile[key] = value
+					end
+					for _, p in next, profiles do
+						if p[key] == profileValue then
+							p[key] = value
+						end
+					end
+					profile[key] = value
+				end)
+				return
+			end
+		end
+
+		profile[key] = value
+	end
+
 	function dd:export(profile)
 		ns.dataDialog:open({
 			type = "export",
@@ -193,16 +253,16 @@ ns.journal:on("MODULES_INIT", function(journal)
 	-- DROPDOWN
 	dd:SetText(charDB.currentProfileName or DEFAULT)
 	dd:ddSetDisplayMode(addon)
-	dd:ddSetInitFunc(function(self, level, value)
+	dd:ddSetInitFunc(function(dd, level, value)
 		local info = {}
 
 		if level == 1 then -- MENU
 			info.notCheckable = true
 			info.isTitle = true
 			info.text = L["Profiles"]
-			self:ddAddButton(info, level)
+			dd:ddAddButton(info, level)
 
-			self:ddAddSeparator(level)
+			dd:ddAddSeparator(level)
 
 			info.notCheckable = nil
 			info.isTitle = nil
@@ -217,16 +277,16 @@ ns.journal:on("MODULES_INIT", function(journal)
 				tinsert(list, {
 					hasArrow = true,
 					text = name,
-					value = {name, profile},
+					value = {"settings", name, profile},
 					checked = function(btn) return charDB.currentProfileName == btn.text end,
 					func = function(btn)
 						if IsShiftKeyDown() then
 							util.insertChatLink("Profile", btn.text)
 						else
-							self:setProfile(btn.text)
+							dd:setProfile(btn.text)
 						end
 					end,
-					remove = function(btn) self:deleteProfile(btn.text) end,
+					remove = function(btn) dd:deleteProfile(btn.text) end,
 					OnTooltipShow = OnTooltipShow,
 				})
 			end
@@ -234,23 +294,23 @@ ns.journal:on("MODULES_INIT", function(journal)
 			tinsert(list, 1, {
 				hasArrow = true,
 				text = DEFAULT,
-				value = defProfile,
+				value = {"settings", DEFAULT, defProfile},
 				checked = function() return charDB.currentProfileName == nil end,
 				func = function()
 					if IsShiftKeyDown() then
 						util.insertChatLink("Profile", "")
 					else
-						self:setProfile()
+						dd:setProfile()
 					end
 				end,
 				OnTooltipShow = OnTooltipShow,
 			})
 
 			info.list = list
-			self:ddAddButton(info, level)
+			dd:ddAddButton(info, level)
 			info.list = nil
 
-			self:ddAddSeparator(level)
+			dd:ddAddSeparator(level)
 
 			info.keepShownOnClick = true
 			info.notCheckable = true
@@ -258,73 +318,120 @@ ns.journal:on("MODULES_INIT", function(journal)
 
 			info.text = L["New profile"]
 			info.value = "new"
-			self:ddAddButton(info, level)
+			dd:ddAddButton(info, level)
 
 			info.keepShownOnClick = nil
 			info.hasArrow = nil
 
 			info.text = L["Import"]
-			info.func = function() self:import() end
-			self:ddAddButton(info, level)
+			info.func = function() dd:import() end
+			dd:ddAddButton(info, level)
 
-		elseif type(value) == "table" then -- PROFILE SETTINGS
-			local name = value[1] or DEFAULT
-			local profile = value[2] or value
+		elseif value == "new" then -- NEW PROFILE
+			info.notCheckable = true
+
+			info.text = L["Create"]
+			info.func = function() dd:createProfile() end
+			dd:ddAddButton(info, level)
+
+			info.text = L["Copy current"]
+			info.func = function() dd:createProfile(true) end
+			dd:ddAddButton(info, level)
+
+		elseif value[1] == "settings" then -- PROFILE SETTINGS
+			local name = value[2]
+			local profile = value[3]
 
 			info.notCheckable = true
 			info.isTitle = true
 			info.text = L["Profile settings"].." - "..name
-			self:ddAddButton(info, level)
+			dd:ddAddButton(info, level)
 
-			info.notCheckable = nil
 			info.isTitle = nil
-			info.isNotRadio = true
+			info.hasArrow = true
 			info.keepShownOnClick = true
 
-			if name ~= DEFAULT then
-				info.text = L["Pet binding from default profile"]
-				info.checked = profile.petListFromProfile
-				info.func = function(_,_,_, checked)
-					profile.petListFromProfile = checked or nil
-					self:event("UPDATE_PROFILE")
-				end
-				self:ddAddButton(info, level)
+			info.text = L["Pet binding from profile"]
+			info.value = {"petBinding", name, profile}
+			dd:ddAddButton(info, level)
 
-				info.text = L["Zones settings from default profile"]
-				info.checked = profile.zoneMountsFromProfile
-				info.func = function(_,_,_, checked)
-					profile.zoneMountsFromProfile = checked or nil
-					self:event("UPDATE_PROFILE")
-				end
-				self:ddAddButton(info, level)
-			end
+			info.text = L["Zone settings from profile"]
+			info.value = {"zoneSettings", name, profile}
+			dd:ddAddButton(info, level)
+
+			info.notCheckable = nil
+			info.hasArrow = nil
+			info.value = nil
+			info.isNotRadio = true
 
 			info.text = L["Auto add new mounts to selected"]
 			info.checked = profile.autoAddNewMount
 			info.func = function(_,_,_, checked)
 				profile.autoAddNewMount = checked or nil
 			end
-			self:ddAddButton(info, level)
+			dd:ddAddButton(info, level)
 
-			self:ddAddSeparator(level)
+			dd:ddAddSeparator(level)
 
 			info.keepShownOnClick = nil
 			info.isNotRadio = nil
 			info.notCheckable = true
 			info.text = L["Export"]
-			info.func = function() self:export(profile) end
-			self:ddAddButton(info, level)
+			info.func = function() dd:export(profile) end
+			dd:ddAddButton(info, level)
 
-		elseif value == "new" then -- NEW PROFLE
-			info.notCheckable = true
+		else -- PET BINDING FROM OR ZONE SETTINGS FROM
+			local key = value[1] == "petBinding" and "petListFromProfile" or "zoneMountsFromProfile"
+			local curName = value[2]
+			local curProfile = value[3]
+			local list = {}
 
-			info.text = L["Create"]
-			info.func = function() self:createProfile() end
-			self:ddAddButton(info, level)
+			local check = function(btn) return curProfile[key] == btn.value end
+			local func = function(btn)
+				dd:setProfileKeyFrom(curProfile, curName, key, btn.value)
+				dd:ddRefresh(level)
+				dd:event("UPDATE_PROFILE")
+			end
 
-			info.text = L["Copy current"]
-			info.func = function() self:createProfile(true) end
-			self:ddAddButton(info, level)
+			for name, profile in next, profiles do
+				if profile ~= curProfile and profile[key] == nil then
+					tinsert(list, {
+						isRadio = true,
+						keepShownOnClick = true,
+						text = name,
+						value = name,
+						checked = check,
+						func = func,
+					})
+				end
+			end
+			sort(list, function(a, b) return strcmputf8i(a.text, b.text) < 0 end)
+
+			if defProfile ~= curProfile and defProfile[key] == nil then
+				tinsert(list, 1, {
+					isRadio = true,
+					keepShownOnClick = true,
+					text = DEFAULT,
+					value = true,
+					checked = check,
+					func = func,
+				})
+			end
+
+			if #list > 0 then
+				tinsert(list, 1, {
+					isRadio = true,
+					keepShownOnClick = true,
+					text = NO,
+					checked = check,
+					func = func,
+				})
+			else
+				list[1] = util.createEmptyInfo()
+			end
+
+			info.list = list
+			dd:ddAddButton(info, level)
 		end
 	end)
 end)

@@ -5,7 +5,7 @@ local next = next
 
 function journal:getTFromProfile(profile)
 	local mapID = self.navBar.mapID ~= self.navBar.defMapID and self.navBar.mapID or nil
-	local zoneMounts, list, currentList = profile.zoneMountsFromProfile and mounts.defProfile.zoneMounts or profile.zoneMounts
+	local zoneMounts, list, currentList = mounts:getProfileZoneMounts(profile)
 
 	if mapID == nil then
 		currentList = profile
@@ -32,7 +32,7 @@ end
 function journal:setEditMountsList()
 	self.db = mounts.charDB.currentProfileName and mounts.profiles[mounts.charDB.currentProfileName] or mounts.defProfile
 	self.list, self.zoneMounts, self.currentList, self.listMapID = self:getTFromProfile(self.db)
-	self.petForMount = self.db.petListFromProfile and mounts.defProfile.petForMount or self.db.petForMount
+	self.petForMount = mounts:getProfilePetForMount(self.db)
 	self.mountsWeight = self.db.mountsWeight
 end
 
