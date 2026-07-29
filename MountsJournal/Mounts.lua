@@ -279,7 +279,7 @@ function mounts:PLAYER_LOGIN()
 	--self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
 	self:RegisterUnitEvent("UNIT_AURA", "player")
 	local spellID, mountID, auraInstanceID = util.getUnitMount("player")
-	if spellID then self:startTracking(spellID, auraInstanceID) end
+	if spellID then self:startTracking(spellID, auraInstanceID, true) end
 
 	-- PRFILE CHANGED
 	self:on("UPDATE_PROFILE", self.setSelectedProfile)
@@ -500,14 +500,14 @@ do
 	end
 
 
-	function mounts:startTracking(spellID, auraInstanceID, afterCombat)
+	function mounts:startTracking(spellID, auraInstanceID, noCounter)
 		self.trackableID = spellID -- for additional active
 		self.mountAuraInstanceID = auraInstanceID
 		if self.config.statCollection then
 			mountStat = self.stat[spellID]
 			self:SetScript("OnUpdate", tracking)
 		end
-		if not afterCombat then self:addMountSummoned(spellID) end
+		if not noCounter then self:addMountSummoned(spellID) end
 		self:event("MOUNTED_UPDATE", true)
 	end
 end

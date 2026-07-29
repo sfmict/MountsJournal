@@ -785,6 +785,7 @@ function journal:updateMountsList()
 	local noColor = r == nil
 	local CheckMountColor = ns.CheckMountColor
 	local text = util.cleanText(self.searchBox:GetText())
+	local noText = #text == 0
 	local numMounts = 0
 	self.dataProvider = CreateDataProvider()
 	self:setFlagSearchMatches(text)
@@ -815,7 +816,7 @@ function journal:updateMountsList()
 		-- SOURCES
 		and sources[sourceType]
 		-- SEARCH
-		and (#text == 0
+		and (noText
 			or name:lower():find(text, 1, true)
 			or sourceText:lower():find(text, 1, true)
 			or tags:find(spellID, text)

@@ -127,7 +127,7 @@ end
 local function onDragStop(delegate)
 	if not delegate:IsShown() then return end
 
-	if delegate.dropElementData then
+	if delegate.dropElementData and not IsMouseButtonDown("LeftButton") then
 		xpcall(delegate.onSetPosition, CallErrorHandler, delegate.sourceElementData, delegate.dropElementData)
 	end
 

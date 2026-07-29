@@ -116,7 +116,7 @@ function macroFrame:isUnitInGroup(guid, isRaid)
 		for i = 1, GetNumGroupMembers() do
 			unit = "raid"..i
 			uGuid = UnitGUID(unit)
-			if not issecretvalue(uGuid) and guid == UnitGUID(unit) then
+			if not issecretvalue(uGuid) and guid == uGuid then
 				return UnitIsConnected(unit)
 			end
 		end
@@ -124,7 +124,7 @@ function macroFrame:isUnitInGroup(guid, isRaid)
 		for i = 1, GetNumSubgroupMembers() do
 			unit = "party"..i
 			uGuid = UnitGUID(unit)
-			if not issecretvalue(uGuid) and guid == UnitGUID(unit) then
+			if not issecretvalue(uGuid) and guid == uGuid then
 				return UnitIsConnected(unit)
 			end
 		end

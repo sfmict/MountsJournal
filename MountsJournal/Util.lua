@@ -1,6 +1,6 @@
 local addon, ns = ...
 local L = ns.L
-local type, tremove, next, tostring, math, strconcat, AbbreviateNumbers, issecretvalue = type, tremove, next, tostring, math, string.concat, AbbreviateNumbers, issecretvalue
+local type, tremove, next, tostring, strconcat, AbbreviateNumbers, issecretvalue = type, tremove, next, tostring, string.concat, AbbreviateNumbers, issecretvalue
 local C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup, IsSpellKnown, IsSpellInSpellBook, IsMounted = C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup, C_SpellBook.IsSpellKnown, C_SpellBook.IsSpellInSpellBook, IsMounted
 local events, eventsMixin, dot = {}, {}, "."
 
