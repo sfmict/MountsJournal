@@ -35,6 +35,7 @@ function journal:init()
 
 	-- FILTERS INIT
 	local filtersMeta = {__index = function(self, key)
+		if key == "ToDebugString" then return end
 		self[key] = true
 		return self[key]
 	end}

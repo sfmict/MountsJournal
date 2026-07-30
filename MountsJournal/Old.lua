@@ -253,6 +253,18 @@ local function updateGlobal(self)
 			updatePetProfile(profile)
 		end
 	end
+
+	if compareVersion("12.0.33", self.globalDB.lastAddonVersion) then
+		local function noDebug(tbl)
+			tbl["ToDebugString"] = nil
+			for _, v in next, tbl do
+				if type(v) == "table" then noDebug(v) end
+			end
+		end
+		noDebug(self.filters)
+		noDebug(self.defFilters)
+		noDebug(self.stat)
+	end
 end
 
 
@@ -336,7 +348,7 @@ function ns.mounts:setOldChanges()
 
 	local currentVersion = C_AddOns.GetAddOnMetadata(addon, "Version")
 	--@do-not-package@
-	if currentVersion == "@project-version@" then currentVersion = "v12.0.6" end
+	if currentVersion == "@project-version@" then currentVersion = "v12.0.33" end
 	--@end-do-not-package@
 
 	if not self.charDB.lastAddonVersion then self.charDB.lastAddonVersion = currentVersion end

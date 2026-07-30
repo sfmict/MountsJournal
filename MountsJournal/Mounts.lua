@@ -132,6 +132,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.cameraConfig.yMinAcceleration = nil
 		self.cameraConfig.yMinSpeed = self.cameraConfig.yMinSpeed or 0
 		self.stat = setmetatable(self.globalDB.stat, {__index = function(t, k)
+			if k == "ToDebugString" then return end
 			t[k] = {0, 0, 0}
 			return t[k]
 		end})
