@@ -175,11 +175,11 @@ end
 
 
 function util.getMountInfo(mount)
-	-- name, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, shouldHideOnChar, isCollected, _, isForDragonriding
+	-- isMount, name, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, shouldHideOnChar, isCollected, _, isForDragonriding
 	if type(mount) == "number" then
-		return C_MountJournal.GetMountInfoByID(mount)
+		return true, C_MountJournal.GetMountInfoByID(mount)
 	else
-		return mount.name, mount.spellID, mount.icon, mount:isActive(), mount:isUsable(), 0, mount:getIsFavorite(), false, nil, not mount.isShown, mount:isCollected()
+		return false, mount.name, mount.spellID, mount.icon, mount:isActive(), mount:isUsable(), 0, mount:getIsFavorite(), false, nil, not mount.isShown, mount:isCollected()
 	end
 end
 

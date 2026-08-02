@@ -231,10 +231,10 @@ local function HandleMouseMovement(self, mode, delta, snapToValue)
 	delta = delta * self:GetDeltaModifierForCameraMode(mode)
 
 	if mode == ORBIT_CAMERA_MOUSE_MODE_YAW_ROTATION then
-		self.pendingYawDelta = delta
+		self.pendingYawDelta = self.pendingYawDelta + delta
 
 	elseif mode == ORBIT_CAMERA_MOUSE_MODE_PITCH_ROTATION then
-		self.pendingPitchDelta = delta
+		self.pendingPitchDelta = self.pendingPitchDelta + delta
 
 	elseif mode == ORBIT_CAMERA_MOUSE_PAN_HORIZONTAL then
 		self.xOffset = Clamp(self.xOffset + delta, -self.xMaxOffset, self.xMaxOffset)

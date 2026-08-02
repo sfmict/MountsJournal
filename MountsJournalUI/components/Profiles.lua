@@ -144,7 +144,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 			end
 
 			for i, data in ipairs(mountList) do
-				local _, spellID, _,_,_,_, isFavorite, _,_,_, isCollected = util.getMountInfo(type(data) == "table" and data.mountID or data)
+				local _,_, spellID, _,_,_,_, isFavorite, _,_,_, isCollected = util.getMountInfo(type(data) == "table" and data.mountID or data)
 				if not onlyFavorites or isFavorite then
 					if enabled then
 						if isCollected then

@@ -10,7 +10,7 @@ TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Unit, function(tool
 				if issecretvalue(unit) then return end
 				local spellID, mountID = util.getUnitMount(unit)
 				if spellID then
-					local name, _, icon = util.getMountInfo(mountID or ns.additionalMounts[spellID])
+					local _, name, _, icon = util.getMountInfo(mountID or ns.additionalMounts[spellID])
 					tooltip:AddLine(" ")
 					if mountID then
 						tooltip:AddDoubleLine(("|T%s:18:18|t %s"):format(icon, name), ns.mountsDB[mountID][3].."%", util.getRarityColor(mountID):GetRGB())

@@ -906,7 +906,7 @@ function journal:init()
 			icon = "common-search-clearbutton",
 			OnClick = function(btn)
 				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-				self:resetFilterByInfo(btn.value)
+				self:resetFilterByInfo(btn.value, true)
 				dd:ddCloseMenus()
 				if self.shownPanel.startIndex ~= 0 then dd:Click() end
 			end,
@@ -1671,7 +1671,7 @@ end
 
 
 function journal:setMountTooltip(mountID, spellID, showDescription)
-	local name, _,_,_,_,_,_,_, faction = util.getMountInfo(mountID)
+	local _, name, _,_,_,_,_,_,_, faction = util.getMountInfo(mountID)
 	local expansion, familyID, _,_, descriptionText, sourceText, _, mountType = util.getMountInfoExtra(mountID)
 	GameTooltip:SetText(name, nil, nil, nil, nil, true)
 
@@ -1971,10 +1971,10 @@ end
 
 
 function journal:defaultInitMountButton(btn, data)
-	local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = util.getMountInfo(data.mountID)
+	local isMount, creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = util.getMountInfo(data.mountID)
 
 	local needsFanfare, qualityColor
-	if type(data.mountID) == "number" then
+	if isMount then
 		needsFanfare = C_MountJournal.NeedsFanfare(data.mountID)
 		qualityColor = util.getRarityColor(data.mountID)
 	else
@@ -2043,10 +2043,10 @@ end
 
 function journal:gridInitMountButton(btn, data)
 	local mountID = data.mountID
-	local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = util.getMountInfo(mountID)
+	local isMount, creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = util.getMountInfo(mountID)
 
 	local needsFanfare, qualityColor
-	if type(mountID) == "number" then
+	if isMount then
 		needsFanfare = C_MountJournal.NeedsFanfare(mountID)
 		qualityColor = util.getRarityColor(mountID)
 	else
@@ -2094,12 +2094,12 @@ end
 function journal:gridModelSceneInit(btn, data, force)
 	local mountID = data.mountID
 	local oldMountID = btn.mountID
-	local creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = util.getMountInfo(mountID)
+	local isMount, creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = util.getMountInfo(mountID)
 	btn.spellID = spellID
 	btn.mountID = mountID
 
 	local needsFanfare, qualityColor
-	if type(mountID) == "number" then
+	if isMount then
 		needsFanfare = C_MountJournal.NeedsFanfare(mountID)
 		qualityColor = util.getRarityColor(mountID)
 	else
@@ -2555,8 +2555,7 @@ end
 function journal:updateMountDisplay(forceSceneChange, creatureID)
 	local info = self.mountDisplay.info
 	if self.selectedMountID then
-		local creatureName, spellID, icon, active, isUsable = util.getMountInfo(self.selectedMountID)
-		local isMount = type(self.selectedMountID) == "number"
+		local isMount, creatureName, spellID, icon, active, isUsable = util.getMountInfo(self.selectedMountID)
 		local needsFanfare = isMount and C_MountJournal.NeedsFanfare(self.selectedMountID)
 
 		if self.mountDisplay.lastMountID ~= self.selectedMountID or forceSceneChange or MountJournal_GetPendingMountChanges() then
@@ -2692,7 +2691,7 @@ function journal:setSelectedMount(mountID, spellID, index)
 	local scrollTo = not spellID
 	if not spellID then
 		local _
-		_, spellID = util.getMountInfo(mountID)
+		_,_, spellID = util.getMountInfo(mountID)
 	end
 	local oldSelectedID = self.selectedMountID
 	self.selectedMountID = mountID

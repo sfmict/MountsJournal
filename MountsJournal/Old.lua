@@ -254,6 +254,7 @@ local function updateGlobal(self)
 		end
 	end
 
+	-- if < 12.0.33 GLOBAL
 	if compareVersion("12.0.33", self.globalDB.lastAddonVersion) then
 		local function noDebug(tbl)
 			tbl["ToDebugString"] = nil

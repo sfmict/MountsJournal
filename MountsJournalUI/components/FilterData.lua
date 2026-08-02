@@ -33,7 +33,7 @@ function journal:setCustomSorting()
 	mounts.filters.sorting.custom = custom
 
 	for i, mount in ipairs(self.mountIDs) do
-		_, spellID = util.getMountInfo(mount)
+		_,_, spellID = util.getMountInfo(mount)
 		custom[spellID] = i
 	end
 end
@@ -59,19 +59,19 @@ end
 
 
 function journal:getCustomOrder(mountID)
-	local _, spellID = util.getMountInfo(mountID)
+	local _,_, spellID = util.getMountInfo(mountID)
 	return mounts.filters.sorting.custom[spellID] or self:getMountIndex(mountID)
 end
 
 
 function journal:setCustomOrder(curPos, newPos)
 	local custom = mounts.filters.sorting.custom
-	local _, spellID = util.getMountInfo(self.mountIDs[curPos])
+	local _,_, spellID = util.getMountInfo(self.mountIDs[curPos])
 	local step = curPos < newPos and 1 or -1
 	custom[spellID] = newPos
 
 	for i = curPos + step, newPos, step do
-		_, spellID = util.getMountInfo(self.mountIDs[i])
+		_,_, spellID = util.getMountInfo(self.mountIDs[i])
 		custom[spellID] = i - step
 	end
 
@@ -95,24 +95,24 @@ function journal:sortMounts()
 		name = function(data)
 			return data.name
 		end,
-		type = function(data, mount, isNumber)
+		type = function(data, mount, isMount)
 			local _, mType
-			if isNumber then
+			if isMount then
 				_,_,_,_, mType = C_MountJournal.GetMountInfoExtraByID(mount)
 			else
 				mType = util.mountTypes[mount.mountType]
 			end
 			return type(mType) == "number" and mType or mType[1]
 		end,
-		family = function(data, mount, isNumber)
-			local family = isNumber and db[mount][2] or mount.familyID
+		family = function(data, mount, isMount)
+			local family = isMount and db[mount][2] or mount.familyID
 			return type(family) == "number" and family or family[1]
 		end,
-		expansion = function(data, mount, isNumber)
-			return isNumber and db[mount][1] or mount.expansion
+		expansion = function(data, mount, isMount)
+			return isMount and db[mount][1] or mount.expansion
 		end,
-		rarity = function(data, mount, isNumber)
-			return isNumber and db[mount][3] or 100
+		rarity = function(data, mount, isMount)
+			return isMount and db[mount][3] or 100
 		end,
 		summons = function(data)
 			return mounts:getMountSummons(data.spellID)
@@ -132,29 +132,22 @@ function journal:sortMounts()
 	}
 
 	local mCache = setmetatable({}, {__index = function(t, mount)
-		local data = {}
-		local isNumber = type(mount) == "number"
-		if isNumber then
-			local name, spellID, _,_,_,_, isFavorite, _,_,_, isCollected = C_MountJournal.GetMountInfoByID(mount)
-			data.name = name
-			data.isFavorite = isFavorite
-			data.isCollected = isCollected
-			data.spellID = spellID
-			if numNeedingFanfare > 0 and C_MountJournal.NeedsFanfare(mount) then
-				data.needFanfare = true
-				numNeedingFanfare = numNeedingFanfare - 1
-			end
-		else
-			data.name = mount.name
-			data.isFavorite = mount:getIsFavorite()
-			data.isCollected = mount:isCollected()
-			data.spellID = mount.spellID
+		local isMount, name, spellID, _,_,_,_, isFavorite, _,_,_, isCollected = util.getMountInfo(mount)
+		local data = {
+			name = name,
+			isFavorite = isFavorite,
+			isCollected = isCollected,
+			spellID = spellID,
+		}
+		if isMount and numNeedingFanfare > 0 and C_MountJournal.NeedsFanfare(mount) then
+			data.needFanfare = true
+			numNeedingFanfare = numNeedingFanfare - 1
 		end
-		data.by1 = extractors[by1](data, mount, isNumber)
-		data.by2 = by2 == by1 and data.by1 or extractors[by2](data, mount, isNumber)
+		data.by1 = extractors[by1](data, mount, isMount)
+		data.by2 = by2 == by1 and data.by1 or extractors[by2](data, mount, isMount)
 		if by3 == by1 then data.by3 = data.by1
 		elseif by3 == by2 then data.by3 = data.by2
-		else data.by3 = extractors[by3](data, mount, isNumber) end
+		else data.by3 = extractors[by3](data, mount, isMount) end
 		t[mount] = data
 		return data
 	end})
@@ -279,7 +272,7 @@ end
 
 do
 	local function onClick(btn)
-		journal:resetFilterByInfo(btn.info)
+		journal:resetFilterByInfo(btn.info, true)
 	end
 
 
@@ -320,7 +313,6 @@ do
 	local function add(list, text, defFilters, filters, k)
 		local info = list[text]
 		if info then
-			local info = list[text]
 			local i = 4
 			while info[i] do
 				i = i + 3
@@ -386,7 +378,7 @@ do
 end
 
 
-function journal:resetFilterByInfo(info)
+function journal:resetFilterByInfo(info, needUpdate)
 	if type(info) == "table" then
 		local i = 1
 		local defFilter = info[i]
@@ -410,9 +402,12 @@ function journal:resetFilterByInfo(info)
 	else
 		self.searchBox:SetText("")
 	end
-	self:updateBtnFilters()
-	self:updateMountsList()
-	self:setCountMounts()
+
+	if needUpdate then
+		self:updateBtnFilters()
+		self:updateMountsList()
+		self:setCountMounts()
+	end
 end
 
 
@@ -434,57 +429,11 @@ end
 
 
 function journal:resetToDefaultFilters()
-	local filters = mounts.filters
-	local defFilters = mounts.defFilters
-
-	filters.collected = defFilters.collected
-	filters.notCollected = defFilters.notCollected
-	filters.unusable = defFilters.unusable
-	filters.hideOnChar = defFilters.hideOnChar
-	filters.onlyHideOnChar = defFilters.onlyHideOnChar
-	filters.hiddenByPlayer = defFilters.hiddenByPlayer
-	filters.onlyHiddenByPlayer = defFilters.onlyHiddenByPlayer
-	filters.onlyNew = defFilters.onlyNew
-	filters.mountsRarity.sign = defFilters.mountsRarity.sign
-	filters.mountsRarity.value = defFilters.mountsRarity.value
-	filters.mountsWeight.sign = defFilters.mountsWeight.sign
-	filters.mountsWeight.weight = defFilters.mountsWeight.weight
-	filters.tags.noTag = defFilters.tags.noTag
-	filters.tags.withAllTags = defFilters.tags.withAllTags
-	filters.color.r = defFilters.color.r
-	filters.color.g = defFilters.color.g
-	filters.color.b = defFilters.color.b
-	filters.color.threshold = defFilters.color.threshold
-
-	for i = 1, #filters.types do
-		filters.types[i] = defFilters.types[i]
-	end
-	for i = 1, #filters.selected do
-		filters.selected[i] = defFilters.selected[i]
-	end
-	for i = 1, #filters.sources do
-		filters.sources[i] = defFilters.sources[i]
-	end
-	for k in pairs(filters.specific) do
-		filters.specific[k] = defFilters.specific[k]
-	end
-	for k in pairs(filters.family) do
-		filters.family[k] = defFilters.family[k]
-	end
-	for i = 1, #filters.expansions do
-		filters.expansions[i] = defFilters.expansions[i]
-	end
-	for i = 1, #filters.factions do
-		filters.factions[i] = defFilters.factions[i]
-	end
-	for i = 1, #filters.pet do
-		filters.pet[i] = defFilters.pet[i]
-	end
-	for tag, value in pairs(filters.tags.tags) do
-		value[2] = defFilters.tags.tags[tag]
+	local list = self.shownPanel.list
+	for i = 1, #list do
+		self:resetFilterByInfo(list[list[i]])
 	end
 
-	self.searchBox:SetText("")
 	self:updateBtnFilters()
 	self:updateMountsList()
 	self:setCountMounts()
@@ -792,7 +741,7 @@ function journal:updateMountsList()
 
 	for i = 1, #self.mountIDs do
 		local mountID = self.mountIDs[i]
-		local name, spellID, _,_, isUsable, sourceType, _,_, mountFaction, shouldHideOnChar, isCollected = getMountInfo(mountID)
+		local isMount, name, spellID, _,_, isUsable, sourceType, _,_, mountFaction, shouldHideOnChar, isCollected = getMountInfo(mountID)
 		local expansion, familyID, rarity, _,_, sourceText, isSelfMount, mountType = getMountInfoExtra(mountID)
 		local petID = pets:getPetForProfile(self.petForMount, spellID)
 		local isMountHidden = self:isMountHidden(spellID)
@@ -830,7 +779,7 @@ function journal:updateMountsList()
 		-- PET
 		and pet[petID and (type(petID) == "number" and petID or 3) or 4]
 		-- COLOR
-		and (noColor or CheckMountColor(mountID, r,g,b, threshold))
+		and (noColor or isMount and CheckMountColor(mountID, r,g,b, threshold))
 		-- SPECIFIC
 		and self:getFilterSpecific(spellID, isSelfMount, mountType, mountID)
 		-- MOUNTS RARITY

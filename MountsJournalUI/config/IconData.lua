@@ -7,7 +7,7 @@ iconData:Hide()
 
 local function fillOutExtraIconsWithMounts(extraIcons, icons)
 	for i = 1, #journal.mountIDs do
-		local name, spellID, icon = util.getMountInfo(journal.mountIDs[i])
+		local _, name, _, icon = util.getMountInfo(journal.mountIDs[i])
 		if icon and not icons[icon] then
 			extraIcons[#extraIcons + 1] = {type = "mount", name = name, icon = icon}
 			icons[icon] = true

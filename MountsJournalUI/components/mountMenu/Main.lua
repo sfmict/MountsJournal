@@ -7,8 +7,7 @@ tags.mountMenu = {}
 function tags.mountMenu.main(dd, level)
 	local info = {}
 
-	local _,_,_, active, isUsable, _, isFavorite, _,_,_, isCollected = util.getMountInfo(tags.menuMountID)
-	local isMount = type(tags.menuMountID) == "number"
+	local isMount, _,_,_, active, isUsable, _, isFavorite, _,_,_, isCollected = util.getMountInfo(tags.menuMountID)
 	local needsFanfare = isMount and C_MountJournal.NeedsFanfare(tags.menuMountID)
 	info.notCheckable = true
 

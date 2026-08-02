@@ -11,7 +11,7 @@ function tags.mountMenu.customOrder(dd, level)
 	end
 
 	for i, mountID in ipairs(journal.mountIDs) do
-		local name, _, icon = util.getMountInfo(mountID)
+		local _, name, _, icon = util.getMountInfo(mountID)
 		list[i] = {
 			notCheckable = true,
 			text = name,
