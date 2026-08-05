@@ -110,6 +110,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.config.useRepairFlyableDurability = self.config.useRepairFlyableDurability or 31
 		self.config.useRepairFreeSlotsNum = self.config.useRepairFreeSlotsNum or 1
 		self.config.summonPetEveryN = self.config.summonPetEveryN or 5
+		self.config.randomMountEvery = self.config.randomMountEvery or 0
 		self.config.macrosConfig = self.config.macrosConfig or {}
 		for i = 1, GetNumClasses() do
 			local _, className = GetClassInfo(i)
@@ -851,38 +852,57 @@ function mounts:isMountUsable(spellID)
 	if mountID then
 		local _,_,_,_, isUsable = GetMountInfoByID(mountID)
 		return isUsable and IsSpellUsable(spellID)
-	elseif ns.additionalMounts[spellID] then
-		return self.withAdditional and ns.additionalMounts[spellID]:canUse()
+	elseif self.withAdditional and ns.additionalMounts[spellID] then
+		return ns.additionalMounts[spellID]:canUse()
 	end
+	return false
 end
 
 
-function mounts:setUsableID(ids, mWeight, mPWeight)
-	local weight = 0
-	wipe(self.usableIDs)
+do
+	local list = setmetatable({}, {__mode = "k", __index = function(t, k)
+		t[k] = {0}
+		return t[k]
+	end})
 
-	if mPWeight == nil or mWeight == mPWeight then
-		for spellID in next, ids do
-			if self:isMountUsable(spellID) then
-				weight = weight + (mWeight[spellID] or 100)
-				self.usableIDs[weight] = spellID
-			end
-		end
-	else
-		for spellID in next, ids do
-			if self:isMountUsable(spellID) then
-				-- mWeight is 0..1 factor; .99 + 1.5 clamps result to 1..100
-				weight = weight + floor((mPWeight[spellID] or 100) * mWeight[spellID] * .99 + 1.5)
-				self.usableIDs[weight] = spellID
-			end
-		end
-	end
-
-	if weight > 0 then
-		for i = random(weight), weight do
-			if self.usableIDs[i] then
-				self.summonedSpellID = self.usableIDs[i]
+	function mounts:setUsableID(ids, mWeight, mPWeight)
+		local stime = GetTime()
+		if stime - list[ids][1] < self.config.randomMountEvery then
+			local spellID = list[ids][2]
+			if ids[spellID] and self:isMountUsable(spellID) then
+				self.summonedSpellID = spellID
 				return true
+			end
+		end
+
+		local weight = 0
+		local usableIDs = wipe(self.usableIDs)
+
+		if mPWeight == nil or mWeight == mPWeight then
+			for spellID in next, ids do
+				if self:isMountUsable(spellID) then
+					weight = weight + (mWeight[spellID] or 100)
+					usableIDs[weight] = spellID
+				end
+			end
+		else
+			for spellID in next, ids do
+				if self:isMountUsable(spellID) then
+					-- mWeight is 0..1 factor; .99 + 1.5 clamps result to 1..100
+					weight = weight + floor((mPWeight[spellID] or 100) * mWeight[spellID] * .99 + 1.5)
+					usableIDs[weight] = spellID
+				end
+			end
+		end
+
+		if weight > 0 then
+			for i = random(weight), weight do
+				if usableIDs[i] then
+					self.summonedSpellID = usableIDs[i]
+					list[ids][1] = stime
+					list[ids][2] = usableIDs[i]
+					return true
+				end
 			end
 		end
 	end
