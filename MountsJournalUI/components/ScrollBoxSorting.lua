@@ -34,7 +34,6 @@ local getCursorFrame do
 		if not frame then
 			local templateInfo = C_XMLUtil.GetTemplateInfo(template)
 			frame = CreateFrame(templateInfo.type, nil, UIParent, template)
-			frame:SetAlpha(.5)
 			list[template] = frame
 			new = true
 		end
@@ -42,6 +41,7 @@ local getCursorFrame do
 		frame:SetSize(sourceFrame:GetSize())
 		view:TriggerEvent(view.Event.OnAcquiredFrame, frame, elementData, new)
 		if initializer then initializer(frame, elementData) end
+		frame:SetAlpha(.5)
 
 		cursorCover:SetAllPoints(frame)
 		cursorCover:Show()

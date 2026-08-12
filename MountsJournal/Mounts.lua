@@ -278,10 +278,10 @@ function mounts:PLAYER_LOGIN()
 	self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
 
 	-- TRACKING
-	--self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
 	self:RegisterUnitEvent("UNIT_AURA", "player")
 	local spellID, mountID, auraInstanceID = util.getUnitMount("player")
-	if spellID then self:startTracking(spellID, auraInstanceID, true) end
+	if spellID then self:startTracking(spellID, auraInstanceID) end
 
 	-- PRFILE CHANGED
 	self:on("UPDATE_PROFILE", self.setSelectedProfile)
@@ -399,7 +399,7 @@ end
 
 function mounts:PLAYER_REGEN_DISABLED()
 	self:UnregisterEvent("UNIT_SPELLCAST_START")
-	--self:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	self:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
 	if self.mountAuraInstanceID == nil then self:UnregisterEvent("UNIT_AURA") end
 end
 
@@ -420,10 +420,10 @@ end
 
 function mounts:PLAYER_REGEN_ENABLED()
 	local spellID, mountID, auraInstanceID = util.getUnitMount("player")
-	if spellID then self:startTracking(spellID, auraInstanceID, true) end
+	if spellID then self:startTracking(spellID, auraInstanceID) end
 	--self:UnregisterEvent("COMPANION_UPDATE")
 	self:RegisterUnitEvent("UNIT_SPELLCAST_START", "player")
-	--self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
+	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
 	self:RegisterUnitEvent("UNIT_AURA", "player")
 end
 
@@ -477,14 +477,11 @@ do
 end
 
 
---function mounts:UNIT_SPELLCAST_SUCCEEDED(_,_, spellID)
-	--fpde(spellID)
-	--if ns.additionalMounts[spellID] or GetMountFromSpell(spellID) then
-	--	local mountStat = self.stat[spellID]
-	--	mountStat[1] = mountStat[1] + 1
-	--	self:event("MOUNT_SUMMONED")
-	--end
---end
+function mounts:UNIT_SPELLCAST_SUCCEEDED(_,_, spellID)
+	if not issecretvalue(spellID) and (ns.additionalMounts[spellID] or GetMountFromSpell(spellID)) then
+		self:addMountSummoned(spellID)
+	end
+end
 
 
 do
@@ -502,14 +499,13 @@ do
 	end
 
 
-	function mounts:startTracking(spellID, auraInstanceID, noCounter)
+	function mounts:startTracking(spellID, auraInstanceID)
 		self.trackableID = spellID -- for additional active
 		self.mountAuraInstanceID = auraInstanceID
 		if self.config.statCollection then
 			mountStat = self.stat[spellID]
 			self:SetScript("OnUpdate", tracking)
 		end
-		if not noCounter then self:addMountSummoned(spellID) end
 		self:event("MOUNTED_UPDATE", true)
 	end
 end
@@ -573,18 +569,20 @@ function mounts:UNIT_AURA(_, data)
 	end
 	if data.addedAuras then
 		for i = 1, #data.addedAuras do
-			local aura, spellID = data.addedAuras[i]
-			if issecretvalue(aura.spellId) then return end
-			if aura.spellId == 377234 then
-				self.thrillAuraInstanceID = aura.auraInstanceID
-			elseif self.mountAuraInstanceID == nil then
-				if ns.additionalMountBuffs[aura.spellId] then
-					spellID = ns.additionalMountBuffs[aura.spellId].spellID
-				elseif GetMountFromSpell(aura.spellId) then
-					spellID = aura.spellId
-				end
-				if spellID then
-					self:startTracking(spellID, aura.auraInstanceID)
+			local aura = data.addedAuras[i]
+			if not issecretvalue(aura.spellId) then
+				if aura.spellId == 377234 then
+					self.thrillAuraInstanceID = aura.auraInstanceID
+				elseif self.mountAuraInstanceID == nil then
+					local spellID
+					if ns.additionalMountBuffs[aura.spellId] then
+						spellID = ns.additionalMountBuffs[aura.spellId].spellID
+					elseif GetMountFromSpell(aura.spellId) then
+						spellID = aura.spellId
+					end
+					if spellID then
+						self:startTracking(spellID, aura.auraInstanceID)
+					end
 				end
 			end
 		end
@@ -860,15 +858,14 @@ end
 
 
 do
-	local list = setmetatable({}, {__mode = "k", __index = function(t, k)
-		t[k] = {0}
-		return t[k]
-	end})
+	local meta = {__mode = "k"}
+	local timers = setmetatable({}, meta)
+	local sIDs = setmetatable({}, meta)
 
 	function mounts:setUsableID(ids, mWeight, mPWeight)
 		local stime = GetTime()
-		if stime - list[ids][1] < self.config.randomMountEvery then
-			local spellID = list[ids][2]
+		if stime - (timers[ids] or 0) < self.config.randomMountEvery then
+			local spellID = sIDs[ids]
 			if ids[spellID] and self:isMountUsable(spellID) then
 				self.summonedSpellID = spellID
 				return true
@@ -899,8 +896,8 @@ do
 			for i = random(weight), weight do
 				if usableIDs[i] then
 					self.summonedSpellID = usableIDs[i]
-					list[ids][1] = stime
-					list[ids][2] = usableIDs[i]
+					timers[ids] = stime
+					sIDs[ids] = usableIDs[i]
 					return true
 				end
 			end

@@ -13,7 +13,7 @@ function actions.rmount:getIcon()
 	return 413588
 end
 
-function actions.rmount:getValueText(profileName)
+function actions.rmount:getValue(profileName)
 	if profileName == 0 then
 		return L["Selected profile"]
 	elseif profileName == 1 then
@@ -49,7 +49,7 @@ function actions.rmountt:getIcon()
 	return 413588, "T"
 end
 
-function actions.rmountt:getValueText(value)
+function actions.rmountt:getValue(value)
 	local mType, profile = (":"):split(value, 2)
 	if profile == "0" then
 		profile = L["Selected profile"]
@@ -97,7 +97,7 @@ function actions.rmountr:getIcon()
 	return 413588, nil, 1, .5, 1
 end
 
-actions.rmountr.getValueText = actions.rmount.getValueText
+actions.rmountr.getValue = actions.rmount.getValue
 actions.rmountr.getValueList = actions.rmount.getValueList
 
 
@@ -110,7 +110,7 @@ function actions.rmounttr:getIcon()
 	return 413588, "T", 1, .5, 1
 end
 
-actions.rmounttr.getValueText = actions.rmountt.getValueText
+actions.rmounttr.getValue = actions.rmountt.getValue
 actions.rmounttr.getValueList = actions.rmountt.getValueList
 
 
@@ -123,7 +123,7 @@ function actions.rmountc:getIcon()
 	return 413588, nil, .2, .5, 1
 end
 
-actions.rmountc.getValueText = actions.rmount.getValueText
+actions.rmountc.getValue = actions.rmount.getValue
 actions.rmountc.getValueList = actions.rmount.getValueList
 
 
@@ -136,7 +136,7 @@ function actions.rmounttc:getIcon()
 	return 413588, "T", .2, .5, 1
 end
 
-actions.rmounttc.getValueText = actions.rmountt.getValueText
+actions.rmounttc.getValue = actions.rmountt.getValue
 actions.rmounttc.getValueList = actions.rmountt.getValueList
 
 
@@ -158,7 +158,7 @@ function actions.mount:getIcon(value)
 	end
 end
 
-function actions.mount:getValueText(value, noIcon)
+function actions.mount:getValue(value, noIcon)
 	local mount = ns.additionalMounts[value]
 	if mount then
 		return noIcon and mount.name or CreateSimpleTextureMarkup(mount.icon, ns.RULE_ICON_SIZE)..mount.name
@@ -205,7 +205,7 @@ actions.item.getValueDescription = conds.hitem.getValueDescription
 actions.item.setValueLink = conds.hitem.setValueLink
 actions.item.receiveDrag = conds.hitem.receiveDrag
 actions.item.getValueDisplay = conds.hitem.getValueDisplay
-actions.item.getValueText = conds.hitem.getValueText
+actions.item.getValue = conds.hitem.getValue
 
 
 ---------------------------------------------------
@@ -246,7 +246,6 @@ function actions.iitem:getValueDescription()
 	local list = getInventoryList()
 	local description = ""
 	for i = 1, #list do
-		local slot = list[i]
 		description = ("%s%s = %s\n"):format(description, i, list[i])
 	end
 	return description
@@ -255,7 +254,8 @@ end
 function actions.iitem:setValueLink(FontString, value)
 	if value then
 		local link = GetInventoryItemLink("player", value)
-		FontString:SetText(util.getIconLink(link, GetInventoryItemTexture("player", value)))
+		local icon = GetInventoryItemTexture("player", value)
+		FontString:SetText(util.getIconLink(link, icon))
 	else
 		FontString:SetText()
 	end
@@ -265,7 +265,7 @@ function actions.iitem:getValueDisplay(value)
 	return getInventoryList()[value]
 end
 
-actions.iitem.getValueText = actions.item.getValueText
+actions.iitem.getValue = actions.item.getValue
 
 
 ---------------------------------------------------
@@ -283,7 +283,7 @@ actions.spell.getValueDescription = conds.kspell.getValueDescription
 actions.spell.setValueLink = conds.kspell.setValueLink
 actions.spell.receiveDrag = conds.kspell.receiveDrag
 actions.spell.getValueDisplay = conds.kspell.getValueDisplay
-actions.spell.getValueText = conds.kspell.getValueText
+actions.spell.getValue = conds.kspell.getValue
 
 
 ---------------------------------------------------
@@ -295,7 +295,7 @@ function actions.macro:getIcon()
 	return 136377
 end
 
-function actions.macro:getValueText(value)
+function actions.macro:getValue(value)
 	return value
 end
 
@@ -311,7 +311,7 @@ function actions.pmacro:getIcon()
 	return 136377, "P"
 end
 
-actions.pmacro.getValueText = actions.macro.getValueText
+actions.pmacro.getValue = actions.macro.getValue
 
 
 ---------------------------------------------------
@@ -324,7 +324,7 @@ function actions.sstate:getIcon()
 	return 2147148
 end
 
-actions.sstate.getValueText = actions.macro.getValueText
+actions.sstate.getValue = actions.macro.getValue
 
 
 ---------------------------------------------------
@@ -335,7 +335,7 @@ function actions.snip:getIcon()
 	return 1660431
 end
 
-actions.snip.getValueText = conds.snip.getValueText
+actions.snip.getValue = conds.snip.getValue
 actions.snip.getValueList = conds.snip.getValueList
 
 

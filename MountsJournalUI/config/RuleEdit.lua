@@ -525,7 +525,7 @@ function ruleEditor:setCondValueOption(panel, btnData, setFocus)
 	end
 
 	local cond = conds[btnData[2]]
-	if not (cond.getValueText or cond.getValueNames) then return end
+	if not cond.getValue then return end
 
 	if btnData[2] == "map" then
 		panel.optionValue = self.mapOptionBtn
@@ -649,7 +649,7 @@ function ruleEditor:setActionValueOption(setFocus)
 	if not actionData[1] then return end
 
 	local action = actions[actionData[1]]
-	if not action.getValueText then return end
+	if not action.getValue then return end
 
 	if action.maxLetters then
 		panel:SetHeight(140)

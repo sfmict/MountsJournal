@@ -36,6 +36,7 @@ config:SetScript("OnShow", function(self)
 		group:SetHeight(group:GetTop() - lastFrame:GetBottom() + (lastFrame:IsObjectType("CheckButton") and 8 or 11))
 	end
 
+	-- CHECKBOX
 	local function createCheckbox(parent, text, tooltipText, tooltipRequirement)
 		local f = CreateFrame("CheckButton", nil, parent, "MJCheckButtonTemplate")
 		f.Text:SetText(text)
@@ -45,6 +46,7 @@ config:SetScript("OnShow", function(self)
 		return f
 	end
 
+	-- CHECKBOX CHILD
 	local function createCheckboxChild(parent, text, tooltipText, tooltipRequirement, checkFunc)
 		local f = util.createCheckboxChild(text, parent)
 		f.tooltipText = tooltipText
@@ -54,6 +56,7 @@ config:SetScript("OnShow", function(self)
 		return f
 	end
 
+	-- NUMBERBOX
 	local createNumberBox do
 		local onTextChanged = function(editBox, userInput)
 			local value = tonumber(editBox:GetText())

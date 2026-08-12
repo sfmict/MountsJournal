@@ -471,6 +471,12 @@ rules:SetScript("OnShow", function(self)
 		local info = {}
 		info.notCheckable = true
 
+		info.arg1 = btn.data.isDisabled
+		info.text = info.arg1 and ENABLE or DISABLE
+		info.func = function(_, value) self:setEnabled(btn.data, value) end
+		dd:ddAddButton(info, level)
+
+		info.arg1 = nil
 		info.text = L["Duplicate"]
 		info.func = function() self:save(btn.list, util:copyTable(btn.data), nil, btn.id + 1) end
 		dd:ddAddButton(info, level)
@@ -618,6 +624,13 @@ function rules:remove(list, order)
 end
 
 
+function rules:setEnabled(data, enabled)
+	data.isDisabled = not enabled and true or nil
+	self:updateFilters()
+	macroFrame:setRuleFuncs()
+end
+
+
 function rules:setRulePos(list, order, newList, newOrder)
 	table.insert(newList, newOrder, table.remove(list, order))
 	self:updateFilters()
@@ -635,15 +648,16 @@ function rules:ruleCheck(rule)
 		local action = rule.action
 		if type(action) ~= "table"
 		or not actions[action[1]]
-		or actions[action[1]].getValueText and not action[2]
+		or actions[action[1]].getValue and not action[2]
 		or actions[action[1]].isNumeric and type(action[2]) ~= "number"
 		then return end
 	end
 
 	for i = 1, #rule do
 		local cond = rule[i]
-		if not conds[cond[2]]
-		or conds[cond[2]].getValueText and not cond[3]
+		if type(cond) ~= "table"
+		or not conds[cond[2]]
+		or not cond[3] and conds[cond[2]].getValue
 		or conds[cond[2]].isNumeric and type(cond[3]) ~= "number"
 		then return end
 	end
@@ -771,19 +785,21 @@ end
 
 function rules:getCondValueText(cond)
 	if cond[3] == nil then return "" end
-	if conds[cond[2]].getValueNames then -- multi
+	local condType = conds[cond[2]]
+	if condType.sort then -- multi
 		local values = type(cond[3]) ~= "table" and {cond[3]} or cond[3]
-		local names = conds[cond[2]]:getValueNames(values)
-		local num = #names
-		local text = num > 1 and self.multiNumStr:format(num, table.concat(names, ", ")) or names[1]
-		return text, names
+		local list = condType:getValue(values)
+		local num = #list
+		local text = num > 1 and self.multiNumStr:format(num, table.concat(list, ", ")) or list[1]
+		return text, list
 	end
-	return conds[cond[2]]:getValueText(cond[3]) or RED_FONT_COLOR:WrapTextInColorCode(tostringall(cond[3]))
+	return condType:getValue(cond[3]) or RED_FONT_COLOR:WrapTextInColorCode(tostringall(cond[3]))
 end
 
 
 function rules:getCondValueDisplay(cond)
-	local text = conds[cond[2]].getValueDisplay and conds[cond[2]]:getValueDisplay(cond[3])
+	local condType = conds[cond[2]]
+	local text = condType.getValueDisplay and condType:getValueDisplay(cond[3])
 	if text then return text end
 	return self:getCondValueText(cond)
 end
@@ -791,12 +807,13 @@ end
 
 function rules:getActionValueText(action, ...)
 	if action[2] == nil then return "" end
-	return actions[action[1]]:getValueText(action[2], ...) or RED_FONT_COLOR:WrapTextInColorCode(tostringall(action[2]))
+	return actions[action[1]]:getValue(action[2], ...) or RED_FONT_COLOR:WrapTextInColorCode(tostringall(action[2]))
 end
 
 
 function rules:getActionValueDisplay(action, ...)
-	return actions[action[1]].getValueDisplay and actions[action[1]]:getValueDisplay(action[2], ...) or self:getActionValueText(action, ...)
+	local actionType = actions[action[1]]
+	return actionType.getValueDisplay and actionType:getValueDisplay(action[2], ...) or self:getActionValueText(action, ...)
 end
 
 
@@ -833,10 +850,11 @@ function rules:getActionText(rule, ...)
 	local action = rule.action
 	if action then
 		local value = self:getActionValueDisplay(action, ...)
+		local actionType = actions[action[1]]
 		if value == "" then
-			return actions[action[1]].text
+			return actionType.text
 		else
-			return ("%s:\n|cffeeeeee%s|r"):format(actions[action[1]].text, value)
+			return ("%s:\n|cffeeeeee%s|r"):format(actionType.text, value)
 		end
 	else
 		local name = rule.name
@@ -857,6 +875,7 @@ function rules:ruleButtonInit(btn, node)
 	btn.id = data.id
 	btn.data = data.rule
 	btn.list = data.list
+	btn:SetAlpha(data.isDisabled and .3 or 1)
 	btn.action:SetText(self:getActionText(btn.data, true))
 	btn.up:SetShown(btn.id > 1)
 	btn.down:SetShown(#btn.list > btn.id)
@@ -931,15 +950,16 @@ do
 		end
 	end
 
-	function rules:addDataList(text, list, pNode)
+	function rules:addDataList(text, list, pNode, disabled)
 		local empty = true
 		for i = 1, #list do
 			local rule = list[i]
 			local ruleMatch = self.notSearched or ruleFind(self, rule, text)
 			if ruleMatch or rule.rules then
-				local node = pNode:Insert({id = i, rule = rule, list = list})
+				local isDisabled = rule.isDisabled or disabled
+				local node = pNode:Insert({id = i, rule = rule, list = list, isDisabled = isDisabled})
 				if rule.rules then
-					if self:addDataList(text, rule.rules, node) or ruleMatch then
+					if self:addDataList(text, rule.rules, node, isDisabled) or ruleMatch then
 						empty = false
 						node:SetCollapsed(rule.isCollapsed and self.notSearched)
 					else

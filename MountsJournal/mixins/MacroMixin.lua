@@ -254,25 +254,27 @@ function macroFrame:setRuleFuncs()
 		for i = 1, #rules do
 			local rule = rules[i]
 
-			if rule[1] or rule.action then
-				offset = offset + 1
-				func[offset] = t_if
-				offset = offset + 1
-				func[offset] = self.conditions:getFuncText(rule, addKey, rule.name, i, ...)
-				offset = offset + 1
-				func[offset] = t_then
-			end
+			if not rule.isDisabled then
+				if rule[1] or rule.action then
+					offset = offset + 1
+					func[offset] = t_if
+					offset = offset + 1
+					func[offset] = self.conditions:getFuncText(rule, addKey, rule.name, i, ...)
+					offset = offset + 1
+					func[offset] = t_then
+				end
 
-			if rule.action then
-				offset = offset + 1
-				func[offset] = self.actions:getFuncText(rule.action, addKey)
-			else
-				offset = addRules(rule.rules, offset, func, addKey, i, ...)
-			end
+				if rule.action then
+					offset = offset + 1
+					func[offset] = self.actions:getFuncText(rule.action, addKey)
+				else
+					offset = addRules(rule.rules, offset, func, addKey, i, ...)
+				end
 
-			if rule[1] or rule.action then
-				offset = offset + 1
-				func[offset] = t_end
+				if rule[1] or rule.action then
+					offset = offset + 1
+					func[offset] = t_end
+				end
 			end
 		end
 		return offset

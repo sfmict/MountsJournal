@@ -24,7 +24,7 @@ function conds.mod:getModText(value)
 	end
 end
 
-function conds.mod:getValueNames(values)
+function conds.mod:getValue(values)
 	local names = {}
 	for i, value in ipairs(values) do
 		names[i] = self:getModText(value)
@@ -77,7 +77,7 @@ conds.btn.text = L["Mouse button"]
 conds.btn.onlyOne = true
 conds.btn.sort = sort
 
-function conds.btn:getValueNames(values)
+function conds.btn:getValue(values)
 	local names = {}
 	for i, value in ipairs(values) do
 		names[i] = _G["KEY_BUTTON"..value]
@@ -143,7 +143,7 @@ vehicleui|r
 ]]
 end
 
-function conds.mcond:getValueText(value)
+function conds.mcond:getValue(value)
 	return value
 end
 
@@ -154,7 +154,7 @@ conds.class.text = CLASS
 conds.class.onlyOne = true
 conds.class.sort = sort
 
-function conds.class:getValueNames(values)
+function conds.class:getValue(values)
 	local names = {}
 	for i, value in ipairs(values) do
 		local localized, className = GetClassInfo(value)
@@ -197,7 +197,7 @@ end
 conds.spec.text = SPECIALIZATION
 conds.spec.onlyOne = true
 
-function conds.spec:getValueNames(values)
+function conds.spec:getValue(values)
 	local names = {}
 	for i, value in ipairs(values) do
 		local _, name, _, specIcon, _, className, class = GetSpecializationInfoByID(value)
@@ -260,7 +260,7 @@ local function getZoneTypeName(value)
 	return value
 end
 
-function conds.zt:getValueNames(values)
+function conds.zt:getValue(values)
 	local names = {}
 	for i, value in ipairs(values) do
 		names[i] = getZoneTypeName(value)
@@ -299,7 +299,7 @@ end
 conds.holiday.text = CALENDAR_FILTER_HOLIDAYS
 conds.holiday.combatLock = true
 
-function conds.holiday:getValueNames(values)
+function conds.holiday:getValue(values)
 	local names = {}
 	for i, value in ipairs(values) do
 		local holidayName = ns.calendar:getHolidayName(value)
@@ -449,7 +449,7 @@ conds.lvlm.text = LEVEL.." "..L["> (more than)"]
 conds.lvlm.isNumeric = true
 conds.lvlm.onlyOne = true
 
-conds.lvlm.getValueText = conds.mcond.getValueText
+conds.lvlm.getValue = conds.mcond.getValue
 
 
 ---------------------------------------------------
@@ -458,7 +458,7 @@ conds.lvll.text = LEVEL.." "..L["< (less than)"]
 conds.lvll.isNumeric = true
 conds.lvll.onlyOne = true
 
-conds.lvll.getValueText = conds.mcond.getValueText
+conds.lvll.getValue = conds.mcond.getValue
 
 
 ---------------------------------------------------
@@ -467,7 +467,7 @@ conds.lvleq.text = LEVEL.." "..L["= (equal to)"]
 conds.lvleq.isNumeric = true
 conds.lvleq.onlyOne = true
 
-conds.lvleq.getValueText = conds.mcond.getValueText
+conds.lvleq.getValue = conds.mcond.getValue
 
 ---------------------------------------------------
 -- fs FLIGHT STYLE
@@ -479,7 +479,7 @@ function conds.fs:getName(value)
 	return L["Steady Flight"], 5142726
 end
 
-function conds.fs:getValueText(value)
+function conds.fs:getValue(value)
 	local name, icon = self:getName(value)
 	return CreateSimpleTextureMarkup(icon, ns.RULE_ICON_SIZE)..name
 end
@@ -554,7 +554,7 @@ function conds.hitem:getValueDisplay(value, noIcon)
 	end
 end
 
-function conds.hitem:getValueText(value)
+function conds.hitem:getValue(value)
 	return tostring(value or "")
 end
 
@@ -568,7 +568,7 @@ conds.ritem.getValueDescription = conds.hitem.getValueDescription
 conds.ritem.setValueLink = conds.hitem.setValueLink
 conds.ritem.receiveDrag = conds.hitem.receiveDrag
 conds.ritem.getValueDisplay = conds.hitem.getValueDisplay
-conds.ritem.getValueText = conds.hitem.getValueText
+conds.ritem.getValue = conds.hitem.getValue
 
 
 ---------------------------------------------------
@@ -615,7 +615,7 @@ function conds.kspell:getValueDisplay(value, noIcon)
 	end
 end
 
-conds.kspell.getValueText = conds.hitem.getValueText
+conds.kspell.getValue = conds.hitem.getValue
 
 
 ---------------------------------------------------
@@ -631,7 +631,7 @@ end
 conds.rspell.setValueLink = conds.kspell.setValueLink
 conds.rspell.receiveDrag = conds.kspell.receiveDrag
 conds.rspell.getValueDisplay = conds.kspell.getValueDisplay
-conds.rspell.getValueText = conds.hitem.getValueText
+conds.rspell.getValue = conds.hitem.getValue
 
 
 ---------------------------------------------------
@@ -643,7 +643,7 @@ conds.uspell.getValueDescription = conds.kspell.getValueDescription
 conds.uspell.setValueLink = conds.kspell.setValueLink
 conds.uspell.receiveDrag = conds.kspell.receiveDrag
 conds.uspell.getValueDisplay = conds.kspell.getValueDisplay
-conds.uspell.getValueText = conds.hitem.getValueText
+conds.uspell.getValue = conds.hitem.getValue
 
 
 ---------------------------------------------------
@@ -656,7 +656,7 @@ conds.hzspell.getValueDescription = conds.kspell.getValueDescription
 conds.hzspell.setValueLink = conds.kspell.setValueLink
 conds.hzspell.receiveDrag = conds.kspell.receiveDrag
 conds.hzspell.getValueDisplay = conds.kspell.getValueDisplay
-conds.hzspell.getValueText = conds.hitem.getValueText
+conds.hzspell.getValue = conds.hitem.getValue
 
 
 ---------------------------------------------------
@@ -669,7 +669,7 @@ conds.hbuff.getValueDescription = conds.kspell.getValueDescription
 conds.hbuff.setValueLink = conds.kspell.setValueLink
 conds.hbuff.receiveDrag = conds.kspell.receiveDrag
 conds.hbuff.getValueDisplay = conds.kspell.getValueDisplay
-conds.hbuff.getValueText = conds.hitem.getValueText
+conds.hbuff.getValue = conds.hitem.getValue
 
 
 ---------------------------------------------------
@@ -682,7 +682,7 @@ conds.hdebuff.getValueDescription = conds.kspell.getValueDescription
 conds.hdebuff.setValueLink = conds.kspell.setValueLink
 conds.hdebuff.receiveDrag = conds.kspell.receiveDrag
 conds.hdebuff.getValueDisplay = conds.kspell.getValueDisplay
-conds.hdebuff.getValueText = conds.hitem.getValueText
+conds.hdebuff.getValue = conds.hitem.getValue
 
 
 ---------------------------------------------------
@@ -694,7 +694,7 @@ function conds.qc:getValueDescription()
 	return "questID"
 end
 
-conds.qc.getValueText = conds.hitem.getValueText
+conds.qc.getValue = conds.hitem.getValue
 
 
 ---------------------------------------------------
@@ -703,7 +703,7 @@ conds.qca.text = L["Quest completed on account"]
 conds.qca.isNumeric = true
 
 conds.qca.getValueDescription = conds.qc.getValueDescription
-conds.qca.getValueText = conds.hitem.getValueText
+conds.qca.getValue = conds.hitem.getValue
 
 
 ---------------------------------------------------
@@ -711,14 +711,14 @@ conds.qca.getValueText = conds.hitem.getValueText
 conds.faction.text = FACTION
 conds.faction.onlyOne = true
 
-function conds.faction:getValueText(value)
+function conds.faction:getValue(value)
 	return FACTION_LABELS[value]
 end
 
 function conds.faction:getValueList(value, func)
 	local list = {}
 	for i = 0, #PLAYER_FACTION_GROUP do
-		list[#list + 1] = createRadioInfo(self:getValueText(i), i, func, i == value)
+		list[#list + 1] = createRadioInfo(self:getValue(i), i, func, i == value)
 	end
 	return list
 end
@@ -765,7 +765,7 @@ for i = 1, #RACE_KEYS do
 	RACE_LABELS[info.clientFileString] = info.raceName
 end
 
-function conds.race:getValueNames(values)
+function conds.race:getValue(values)
 	local names = {}
 	for i, value in ipairs(values) do
 		local atlasName = util.getRaceAtlas(value, UnitSex("Player"))
@@ -802,7 +802,7 @@ function conds.zone:getValueDescription()
 	return L["Zone Name/Subzone Name"]
 end
 
-conds.zone.getValueText = conds.mcond.getValueText
+conds.zone.getValue = conds.mcond.getValue
 
 
 ---------------------------------------------------
@@ -820,7 +820,7 @@ local function getMapName(value)
 	return RED_FONT_COLOR:WrapTextInColorCode(value)
 end
 
-function conds.map:getValueNames(values)
+function conds.map:getValue(values)
 	local names = {}
 	for i, value in ipairs(values) do
 		names[i] = getMapName(value)
@@ -855,7 +855,7 @@ end
 -- mapf MAP FLAGS
 conds.mapf.text = L["Map flags"]
 
-function conds.mapf:getValueText(value)
+function conds.mapf:getValue(value)
 	local flag, profile = (":"):split(value, 2)
 
 	local flags = {
@@ -923,7 +923,7 @@ function conds.instance:getValueDescription()
 	}
 end
 
-function conds.instance:getValueNames(values)
+function conds.instance:getValue(values)
 	local names = {}
 	for i, value in ipairs(values) do
 		names[i] = sName_ID:format(GetRealZoneText(value), value)
@@ -989,7 +989,7 @@ local function getDifficultyName(value)
 	end
 end
 
-function conds.difficulty:getValueNames(values)
+function conds.difficulty:getValue(values)
 	local names = {}
 	for i, value in ipairs(values) do
 		names[i] = getDifficultyName(value)
@@ -1044,7 +1044,7 @@ end
 -- tmog TRANSMOG
 conds.tmog.text = PERKS_VENDOR_CATEGORY_TRANSMOG
 
-function conds.tmog:getValueNames(values)
+function conds.tmog:getValue(values)
 	local names = {}
 	for i, value in ipairs(values) do
 		local outfitID, guid = (":"):split(value, 2)
@@ -1187,7 +1187,7 @@ end
 -- sex
 conds.sex.text = L["Sex"]
 
-function conds.sex:getValueText(value)
+function conds.sex:getValue(value)
 	local unit, sex = (":"):split(value, 2)
 	if sex == "2" then
 		sex = MALE
@@ -1204,7 +1204,7 @@ function conds.sex:getValueList(value, func)
 	for i, unit in ipairs({"player", "target", "focus"}) do
 		for j = 3, 1, -1 do
 			local v = ("%s:%s"):format(unit, j)
-			list[#list + 1] = createRadioInfo(self:getValueText(v), v, func, v == value)
+			list[#list + 1] = createRadioInfo(self:getValue(v), v, func, v == value)
 		end
 	end
 	return list
@@ -1216,7 +1216,7 @@ end
 conds.tl.text = L["Talent loadout"]
 conds.tl.onlyOne = true
 
-function conds.tl:getValueNames(values)
+function conds.tl:getValue(values)
 	local names = {}
 	for i, value in ipairs(values) do
 		local configID, guid = (":"):split(value, 2)
@@ -1286,7 +1286,7 @@ conds.mtrack.TRACKING_SPELL_OVERRIDE_ATLAS = {
 	[122026] = "WildBattlePetCapturable", -- Track Pets
 }
 
-function conds.mtrack:getValueText(value)
+function conds.mtrack:getValue(value)
 	local k, v, name, icon = (":"):split(value, 2)
 	v = tonumber(v)
 	for i = 1, C_Minimap.GetNumTrackingTypes() do
@@ -1375,7 +1375,7 @@ end
 -- prof PROFESSION
 conds.prof.text = PROFESSIONS_BUTTON
 
-function conds.prof:getValueNames(values)
+function conds.prof:getValue(values)
 	local names = {}
 	for i, value in ipairs(values) do
 		local name = C_TradeSkillUI.GetTradeSkillDisplayName(value) or RED_FONT_COLOR:WrapTextInColorCode(value)
@@ -1415,7 +1415,7 @@ end
 -- equips EQUIPMENT SET
 conds.equips.text = PAPERDOLL_EQUIPMENTMANAGER
 
-function conds.equips:getValueNames(values)
+function conds.equips:getValue(values)
 	local names = {}
 	for i, value in ipairs(values) do
 		local setID, guid = (":"):split(value, 2)
@@ -1486,7 +1486,7 @@ function conds.equipi:getValueDisplay(value)
 	return itemID and conds.hitem.getValueDisplay(self, itemID)
 end
 
-conds.equipi.getValueText = conds.mcond.getValueText
+conds.equipi.getValue = conds.mcond.getValue
 
 
 ---------------------------------------------------
@@ -1494,7 +1494,7 @@ conds.equipi.getValueText = conds.mcond.getValueText
 conds.gstate.text = L["Get State"]
 conds.gstate.description = L["Get a state that can be set in actions using \"Set State\""]
 
-function conds.gstate:getValueText(value)
+function conds.gstate:getValue(value)
 	return value
 end
 
@@ -1503,7 +1503,7 @@ end
 -- snip SNIPPET
 conds.snip.text = L["Code Snippet"]
 
-function conds.snip:getValueText(value)
+function conds.snip:getValue(value)
 	if macroFrame.snippets[value] then
 		return value
 	end
@@ -1532,7 +1532,7 @@ end
 conds.group.text = L["Group Type"]
 conds.group.onlyOne = true
 
-function conds.group:getValueText(value)
+function conds.group:getValue(value)
 	if value == "group" then
 		return PARTY
 	elseif value == "raid" then
@@ -1544,7 +1544,7 @@ end
 function conds.group:getValueList(value, func)
 	local list = {}
 	for i, v in ipairs({"any", "group", "raid"}) do
-		list[i] = createRadioInfo(self:getValueText(v), v, func, v == value)
+		list[i] = createRadioInfo(self:getValue(v), v, func, v == value)
 	end
 	return list
 end
@@ -1622,7 +1622,7 @@ local function getFriendList(value, func)
 	return {custom = true, {list = friends, hideSearch = true, listMaxSize = 30}}
 end
 
-function conds.fgroup:getValueText(value)
+function conds.fgroup:getValue(value)
 	local t, v = (":"):split(value, 2)
 
 	if t == "btag" then
@@ -1671,7 +1671,7 @@ end
 conds.fraid.text = L["Friend in Raid"]
 conds.fraid.combatLock = true
 
-conds.fraid.getValueText = conds.fgroup.getValueText
+conds.fraid.getValue = conds.fgroup.getValue
 
 function conds.fraid:getValueList(value, func)
 	local group, isSecret = {}
@@ -1709,7 +1709,7 @@ end
 conds.title.text = PAPERDOLL_SIDEBAR_TITLES
 conds.title.onlyOne = true
 
-function conds.title:getValueNames(values)
+function conds.title:getValue(values)
 	local names = {}
 	for i, value in ipairs(values) do
 		names[i] = GetTitleName(value)
