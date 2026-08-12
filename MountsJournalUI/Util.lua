@@ -67,7 +67,7 @@ util.expIcons = setmetatable({
 	4465334,
 	5409250,
 	6980554,
-	7852832,
+	7966634,
 }, {
 	__index = function(self, key)
 		self[key] = [[Interface\EncounterJournal\UI-EJ-BOSS-Default]]
