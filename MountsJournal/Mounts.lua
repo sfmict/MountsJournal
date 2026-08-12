@@ -1,7 +1,7 @@
 local addon, ns = ...
 local L, util = ns.L, ns.util
 local C_Map, C_Timer, C_Scenario, C_Container, MapUtil = C_Map, C_Timer, C_Scenario, C_Container, MapUtil
-local GetMountFromSpell, GetMountInfoByID, GetMountInfoExtraByID, SummonByID, IsDragonridingUnlocked = C_MountJournal.GetMountFromSpell, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID, C_MountJournal.SummonByID, C_MountJournal.IsDragonridingUnlocked
+local GetMountFromSpell, GetMountInfoByID, GetMountInfoExtraByID, SummonByID, IsDragonridingUnlocked, ShouldAurasBeSecret = C_MountJournal.GetMountFromSpell, C_MountJournal.GetMountInfoByID, C_MountJournal.GetMountInfoExtraByID, C_MountJournal.SummonByID, C_MountJournal.IsDragonridingUnlocked, C_Secrets.ShouldAurasBeSecret
 local IsSpellUsable, GetSpellCooldown = C_Spell.IsSpellUsable, C_Spell.GetSpellCooldown
 local IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, SecureCmdOptionParse = IsFlyableArea, IsSubmerged, GetInstanceInfo, IsIndoors, UnitInVehicle, IsMounted, InCombatLockdown, SecureCmdOptionParse
 local BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS = BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS
@@ -400,7 +400,7 @@ end
 function mounts:PLAYER_REGEN_DISABLED()
 	self:UnregisterEvent("UNIT_SPELLCAST_START")
 	self:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-	if self.mountAuraInstanceID == nil then self:UnregisterEvent("UNIT_AURA") end
+	self:UnregisterEvent("UNIT_AURA")
 end
 
 
@@ -485,17 +485,24 @@ end
 
 
 do
-	local GetGlidingInfo, GetUnitSpeed, mountStat = C_PlayerInfo.GetGlidingInfo, GetUnitSpeed
+	local GetGlidingInfo, GetSpellCharges, GetUnitSpeed, mountStat = C_PlayerInfo.GetGlidingInfo, C_Spell.GetSpellCharges, GetUnitSpeed
 	local function tracking(self, elapsed)
 		local isGliding, _, speed = GetGlidingInfo()
-		if not isGliding then
+		local isThrill
+		if isGliding then
+			local data = GetSpellCharges(372608)
+			isThrill = data and data.cooldownDuration <= 6.003
+		else
 			speed = GetUnitSpeed("player")
+		end
+		if ShouldAurasBeSecret() and not IsMounted() then
+			self:stopTracking()
 		end
 		if not issecretvalue(speed) and speed > 0 then
 			mountStat[2] = mountStat[2] + elapsed
 			mountStat[3] = mountStat[3] + speed * elapsed
 		end
-		self:event("MOUNT_SPEED_UPDATE", speed, isGliding and not self.thrillAuraInstanceID)
+		self:event("MOUNT_SPEED_UPDATE", speed, isGliding and not isThrill)
 	end
 
 
@@ -514,10 +521,6 @@ end
 function mounts:stopTracking()
 	self.trackableID = nil
 	self.mountAuraInstanceID = nil
-	self.thrillAuraInstanceID = nil
-	if InCombatLockdown() then
-		self:UnregisterEvent("UNIT_AURA")
-	end
 	self:SetScript("OnUpdate", nil)
 	self:event("MOUNTED_UPDATE", false)
 end
@@ -541,48 +544,34 @@ end
 
 
 function mounts:UNIT_AURA(_, data)
-	if C_Secrets.ShouldAurasBeSecret() then
-		if self.mountAuraInstanceID and C_UnitAuras.GetAuraDataByAuraInstanceID("player", self.mountAuraInstanceID) == nil then
-			self:stopTracking()
-		end
-		return
-	end
+	if ShouldAurasBeSecret() then return end
 	if data.isFullUpdate then
 		self:stopTracking()
 		local spellID, mountID, auraInstanceID = util.getUnitMount("player")
 		if spellID then
 			self:startTracking(spellID, auraInstanceID)
-			local thrillInfo = C_UnitAuras.GetPlayerAuraBySpellID(377234)
-			self.thrillAuraInstanceID = thrillInfo and thrillInfo.auraInstanceID
 		end
 	end
-	if data.removedAuraInstanceIDs and self.mountAuraInstanceID then
+	if data.removedAuraInstanceIDs and self.mountAuraInstanceID ~= nil then
 		for i = 1, #data.removedAuraInstanceIDs do
-			local removedAuraInstanceID = data.removedAuraInstanceIDs[i]
-			if removedAuraInstanceID == self.mountAuraInstanceID then
+			if data.removedAuraInstanceIDs[i] == self.mountAuraInstanceID then
 				self:stopTracking()
 				break
-			elseif removedAuraInstanceID == self.thrillAuraInstanceID then
-				self.thrillAuraInstanceID = nil
 			end
 		end
 	end
-	if data.addedAuras then
+	if data.addedAuras and self.mountAuraInstanceID == nil then
 		for i = 1, #data.addedAuras do
 			local aura = data.addedAuras[i]
 			if not issecretvalue(aura.spellId) then
-				if aura.spellId == 377234 then
-					self.thrillAuraInstanceID = aura.auraInstanceID
-				elseif self.mountAuraInstanceID == nil then
-					local spellID
-					if ns.additionalMountBuffs[aura.spellId] then
-						spellID = ns.additionalMountBuffs[aura.spellId].spellID
-					elseif GetMountFromSpell(aura.spellId) then
-						spellID = aura.spellId
-					end
-					if spellID then
-						self:startTracking(spellID, aura.auraInstanceID)
-					end
+				local spellID
+				if ns.additionalMountBuffs[aura.spellId] then
+					spellID = ns.additionalMountBuffs[aura.spellId].spellID
+				elseif GetMountFromSpell(aura.spellId) then
+					spellID = aura.spellId
+				end
+				if spellID then
+					self:startTracking(spellID, aura.auraInstanceID)
 				end
 			end
 		end
@@ -825,7 +814,7 @@ end
 
 
 function mounts:getTargetMount()
-	if C_Secrets.ShouldAurasBeSecret() then return end
+	if ShouldAurasBeSecret() then return end
 	local spellID, mountID = util.getUnitMount("target")
 	if mountID then
 		local _,_,_,_, isUsable = GetMountInfoByID(mountID)

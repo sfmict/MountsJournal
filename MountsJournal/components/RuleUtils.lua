@@ -19,16 +19,6 @@ function macroFrame:hasZoneSpell(spellID)
 end
 
 
-function macroFrame:hasPlayerBuff(spellID)
-	return util.checkAura("player", spellID, "HELPFUL")
-end
-
-
-function macroFrame:hasPlayerDebuff(spellID)
-	return util.checkAura("player", spellID, "HARMFUL")
-end
-
-
 function macroFrame:zoneMatch(zoneText)
 	local cz = ("/%s/%s/%s/%s/"):format(GetRealZoneText(), GetSubZoneText(), GetZoneText(), GetMinimapZoneText()):gsub("//", "/")
 	return cz:match(zoneText) and true

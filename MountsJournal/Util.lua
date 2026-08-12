@@ -195,24 +195,6 @@ function util.getMountInfoExtra(mount)
 end
 
 
-function util.checkAura(unit, spellID, filter)
-	if not UnitExists(unit) then return end
-	local GetAuraSlots, GetAuraDataBySlot, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot
-	repeat
-		ctok, a,b,c,d,e = GetAuraSlots(unit, filter, 5, ctok)
-		while a do
-			local data = GetAuraDataBySlot(unit, a)
-			if data then
-				local auraID = data.spellId
-				if not issecretvalue(auraID) and auraID == spellID then return true end
-			end
-			a,b,c,d,e = b,c,d,e
-		end
-	until not ctok
-	return false
-end
-
-
 function util.getUnitMount(unit)
 	if not UnitExists(unit) or C_Secrets.ShouldAurasBeSecret() then return end
 	local GetAuraSlots, GetAuraDataBySlot, ctok, a,b,c,d,e = C_UnitAuras.GetAuraSlots, C_UnitAuras.GetAuraDataBySlot

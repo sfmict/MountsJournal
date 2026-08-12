@@ -416,13 +416,14 @@ end
 -- hbuff HAS BUFF
 conds.hbuff = {}
 
-function conds.hbuff:getFuncText(value, _, isNot)
+function conds.hbuff:getFuncText(value, addKey, isNot)
+	addKey("v.GetPlayerAuraBySpellID = C_UnitAuras.GetPlayerAuraBySpellID")
 	local secrecy = GetSpellAuraSecrecy(value)
 	if secrecy == 2 then
 		local notText = isNot and "not " or ""
-		return ("notSAuras and %sself:hasPlayerBuff(%s)"):format(notText, value), true
+		return ("notSAuras and %sv.GetPlayerAuraBySpellID(%s)"):format(notText, value), true
 	elseif secrecy == 0 then
-		return ("self:hasPlayerBuff(%s)"):format(value)
+		return ("v.GetPlayerAuraBySpellID(%s)"):format(value)
 	end
 	return "false", true
 end
@@ -432,16 +433,7 @@ end
 -- hdebuff HAS DEBUFF
 conds.hdebuff = {}
 
-function conds.hdebuff:getFuncText(value, _, isNot)
-	local secrecy = GetSpellAuraSecrecy(value)
-	if secrecy == 2 then
-		local notText = isNot and "not " or ""
-		return ("notSAuras and %sself:hasPlayerDebuff(%s)"):format(notText, value), true
-	elseif secrecy == 0 then
-		return ("self:hasPlayerDebuff(%s)"):format(value)
-	end
-	return "false", true
-end
+conds.hdebuff.getFuncText = conds.hbuff.getFuncText
 
 
 ---------------------------------------------------

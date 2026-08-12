@@ -1628,14 +1628,12 @@ journal.SPELLS_CHANGED = journal.updateListAndDisplay
 function journal:updateMounted(isMounted)
 	self:updateListAndDisplay()
 	self.mountSpecial:SetEnabled(isMounted)
-	self.mountSpeed:SetShown(mounts.config.statCollection and isMounted)
+	self.mountSpeed:SetShown(mounts.config.statCollection and mounts.trackableID ~= nil)
 end
 
 
 function journal:COMPANION_UPDATE(companionType)
-	if companionType == "MOUNT"
-	and (InCombatLockdown() or C_Secrets.ShouldAurasBeSecret())
-	then
+	if companionType == "MOUNT" then
 		C_Timer.After(0, function() self:updateMounted(util.isMounted()) end)
 	end
 end
