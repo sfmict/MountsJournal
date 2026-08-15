@@ -6,8 +6,7 @@ externals:
 		site: https://www.curseforge.com/wow/addons/libthingsload
 		url: https://github.com/sfmict/LibThingsLoad
 		tag: latest
-	MountsJournal/libs/CallbackHandler-1.0: https://repos.curseforge.com/wow/callbackhandler/trunk/CallbackHandler-1.0
-	MountsJournal/libs/AceComm-3.0: https://repos.curseforge.com/wow/ace3/trunk/AceComm-3.0
+	MountsJournal/libs/ChatThrottleLib: https://repos.curseforge.com/wow/chatthrottlelib/trunk
 	MountsJournalUI/libs/LibSFDropDown:
 		site: https://www.curseforge.com/wow/addons/libsfdropdown
 		url: https://github.com/sfmict/LibSFDropDown
@@ -17,10 +16,12 @@ enable-nolib-creation: no
 
 ignore:
 	- .*\.md$
+	- .*\.txt$
 	- _config\.yml
 	- _test\.lua
 	- libs/.*\.toc$
 	- libs/LibStub/tests
+	- libs/ChatThrottleLib/ChatThrottleStats\.lua
 	- mountMenu/Family\.lua
 
 move-folders:

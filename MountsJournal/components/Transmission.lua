@@ -1,7 +1,7 @@
 local addon, ns = ...
 local L, util, mounts = ns.L, ns.util, ns.mounts
-local type, select, Ambiguate, UnitInRaid, UnitInParty, IsGuildMember, BNGetNumFriends, C_BattleNet = type, select, Ambiguate, UnitInRaid, UnitInParty, IsGuildMember, BNGetNumFriends, C_BattleNet
-local AddMessageEventFilter = ChatFrameUtil.AddMessageEventFilter
+local type, select, next, tconcat, GetServerTime, Ambiguate, UnitInRaid, UnitInParty, IsGuildMember, BNGetNumFriends = type, select, next, table.concat, GetServerTime, Ambiguate, UnitInRaid, UnitInParty, IsGuildMember, BNGetNumFriends
+local C_BattleNet, AddMessageEventFilter = C_BattleNet, ChatFrameUtil.AddMessageEventFilter
 
 
 local function checkApps(i, guid)
@@ -83,6 +83,94 @@ AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT_LEADER", filterFunc)
 -- end)
 
 
+-- COMM
+local CTL = assert(ChatThrottleLib, "Requires ChatThrottleLib")
+local comm = CreateFrame("FRAME")
+comm:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
+comm:RegisterEvent("CHAT_MSG_ADDON")
+comm.pool = {}
+
+
+function comm:registerPrefix(prefix, func)
+	self[prefix] = func
+	C_ChatInfo.RegisterAddonMessagePrefix(prefix)
+end
+
+
+function comm:sendMessage(prefix, message, distribution, target, prio, cb, arg)
+	local maxLen = 255
+	local len = #message
+	local func = cb and function(sent, sendResult) cb(arg, sent, len, sendResult) end
+
+	local force
+	if message:match("^[\001-\004]") then
+		if len + 1 <= maxLen then
+			message = "\004"..message
+		else
+			force = true
+		end
+	end
+
+	if len <= maxLen and not force then
+		CTL:SendAddonMessage(prio, prefix, message, distribution, target, prefix, func, len)
+	else
+		maxLen = maxLen - 1
+		local chunk = "\001"..message:sub(1, maxLen)
+		CTL:SendAddonMessage(prio, prefix, chunk, distribution, target, prefix, func, maxLen)
+
+		local pos = 1 + maxLen
+		while pos + maxLen <= len do
+			chunk = "\002"..message:sub(pos, pos + maxLen - 1)
+			CTL:SendAddonMessage(prio, prefix, chunk, distribution, target, prefix, func, pos + maxLen - 1)
+			pos = pos + maxLen
+		end
+
+		chunk = "\003"..message:sub(pos)
+		CTL:SendAddonMessage(prio, prefix, chunk, distribution, target, prefix, func, len)
+	end
+end
+
+
+function comm:CHAT_MSG_ADDON(prefix, message, distribution, sender)
+	if not self[prefix] then return end
+	sender = Ambiguate(sender, "none")
+	local control, text = message:match("^([\001-\004])(.*)")
+
+	if control then
+		if control == "\004" then
+			self[prefix](text, distribution, sender)
+			return
+		end
+
+		local st = GetServerTime()
+		for k, v in next, self.pool do
+			if st - v.st > 300 then
+				self.pool[k] = nil
+			end
+		end
+
+		local k = prefix.."\000"..distribution.."\000"..sender
+
+		if control == "\001" then
+			self.pool[k] = {text, st = st}
+		elseif control == "\002" then
+			local t = self.pool[k]
+			if t then t[#t+1] = text end
+		elseif control == "\003" then
+			local t = self.pool[k]
+			if t then
+				self.pool[k] = nil
+				t[#t+1] = text
+				self[prefix](tconcat(t, ""), distribution, sender)
+			end
+		end
+	else
+		self[prefix](message, distribution, sender)
+	end
+end
+
+
+-- TOOLTIP
 local function showTooltip(lines)
 	if not ItemRefTooltip:IsShown() then
 		ItemRefTooltip:SetOwner(UIParent, "ANCHOR_PRESERVE")
@@ -102,15 +190,13 @@ local function showTooltip(lines)
 end
 
 
--- RECEIVING DATA
-local comm = LibStub("AceComm-3.0")
-local delayedImport = CreateFrame("FRAME")
+-- DATA TRANSFER
 local tooltipLoading, receivedData
 
 
 local function requestData(characterName, dataType, id)
 	local transmitString = util.getStringFromData({m = "dr", t = dataType, id = id})
-	comm:SendCommMessage(addon, transmitString, "WHISPER", characterName)
+	comm:sendMessage(addon, transmitString, "WHISPER", characterName, "NORMAL")
 end
 
 
@@ -198,11 +284,12 @@ local function dataImport(dataType, id, data, characterName)
 			{2, L[dataType], id == "" and DEFAULT or id, 1,1,1,r,g,b},
 			{1, ERR_NOT_IN_COMBAT, 1,0,0}
 		})
-		delayedImport:SetScript("OnEvent", function()
-			delayedImport:UnregisterEvent("PLAYER_REGEN_ENABLED")
+		comm.PLAYER_REGEN_ENABLED = function(self)
+			self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+			self.PLAYER_REGEN_ENABLED = nil
 			dataImport(dataType, id, data, characterName)
-		end)
-		delayedImport:RegisterEvent("PLAYER_REGEN_ENABLED")
+		end
+		comm:RegisterEvent("PLAYER_REGEN_ENABLED")
 		return
 	end
 	ItemRefTooltip:Hide()
@@ -231,14 +318,14 @@ end
 local function transmitData(data, characterName)
 	local encoded = getTransmitData(data)
 	if encoded then
-		comm:SendCommMessage(addon, encoded, "WHISPER", characterName, "BULK", function(id, done, total)
-			comm:SendCommMessage(addon.."P", done.." "..total.." "..id, "WHISPER", characterName, "ALERT")
+		comm:sendMessage(addon, encoded, "WHISPER", characterName, "BULK", function(id, done, total)
+			comm:sendMessage(addon.."P", done.." "..total.." "..id, "WHISPER", characterName, "ALERT")
 		end, data.t..":"..data.id)
 	end
 end
 
 
-local function handleComm(prefix, message, distribution, sender)
+local function handleComm(message, distribution, sender)
 	local data = util.getDataFromString(message)
 	if type(data) == "table" and data.m and data.t and data.id then
 		if data.m == "d" then
@@ -255,7 +342,7 @@ local function handleComm(prefix, message, distribution, sender)
 end
 
 
-local function handleProgressComm(prefix, message, distribution, sender)
+local function handleProgressComm(message, distribution, sender)
 	if tooltipLoading and ItemRefTooltip:IsShown() then
 		receivedData = true
 		local done, total, id = (" "):split(message, 3)
@@ -276,5 +363,5 @@ local function handleProgressComm(prefix, message, distribution, sender)
 end
 
 
-comm:RegisterComm(addon, handleComm)
-comm:RegisterComm(addon.."P", handleProgressComm)
+comm:registerPrefix(addon, handleComm)
+comm:registerPrefix(addon.."P", handleProgressComm)
