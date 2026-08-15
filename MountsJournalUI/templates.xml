@@ -67,7 +67,10 @@
 				</Layers>
 			</Frame>
 
-			<Button parentKey="slotButton" scale=".69" inherits="MountEquipmentButtonTemplate,SecureActionButtonTemplate" mixin="MJMountEquipmentMixin" hidden="true">
+			<Button parentKey="slotButton" scale=".69" inherits="MountEquipmentButtonTemplate,SecureActionButtonTemplate" hidden="true">
+				<Mixins>
+					<Mixin key="MJMountEquipmentMixin" source="local"/>
+				</Mixins>
 				<Anchors>
 					<Anchor point="LEFT" relativeKey="$parent.mountCount" relativePoint="RIGHT" x="15"/>
 				</Anchors>
@@ -143,7 +146,10 @@
 				</Anchors>
 			</Button>
 
-			<Button parentKey="OpenDynamicFlightSkillTreeButton" inherits="MJDynamicFlightFlyoutButtonTemplate" mixin="MJDynamicFlightSkillTreeButtonMixin">
+			<Button parentKey="OpenDynamicFlightSkillTreeButton" inherits="MJDynamicFlightFlyoutButtonTemplate">
+				<Mixins>
+					<Mixin key="MJDynamicFlightSkillTreeButtonMixin" source="local"/>
+				</Mixins>
 				<Anchors>
 					<Anchor point="RIGHT" relativeKey="$parent.summon1" relativePoint="LEFT" x="-35" y="0"/>
 				</Anchors>
@@ -177,7 +183,10 @@
 				</Scripts>
 			</Button>
 
-			<Button parentKey="DynamicFlightModeButton" inherits="MJDynamicFlightFlyoutButtonTemplate,SecureActionButtonTemplate" mixin="MJDynamicFlightModeButtonMixin">
+			<Button parentKey="DynamicFlightModeButton" inherits="MJDynamicFlightFlyoutButtonTemplate,SecureActionButtonTemplate">
+				<Mixins>
+					<Mixin key="MJDynamicFlightModeButtonMixin" source="local"/>
+				</Mixins>
 				<Anchors>
 					<Anchor point="RIGHT" relativeKey="$parent.summon1" relativePoint="LEFT" x="-68" y="0"/>
 				</Anchors>
@@ -217,7 +226,10 @@
 				</Layers>
 			</Button>
 
-			<Frame parentKey="navBar" clipChildren="true" inherits="NavBarTemplate" mixin="MJNavBarMixin" hidden="true">
+			<Frame parentKey="navBar" clipChildren="true" inherits="NavBarTemplate" hidden="true">
+				<Mixins>
+					<Mixin key="MJNavBarMixin" source="local"/>
+				</Mixins>
 				<Size x="600" y="32"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="5" y="-60"/>
@@ -639,7 +651,10 @@
 									<Anchor point="LEFT" relativeKey="$parent.icon" relativePoint="RIGHT" x="-2" y="0"/>
 								</Anchors>
 							</CheckButton>
-							<Button parentKey="petSelectionBtn" inherits="MJPetSelectionBtnTemplate" mixin="MJSetPetMixin">
+							<Button parentKey="petSelectionBtn" inherits="MJPetSelectionBtnTemplate">
+								<Mixins>
+									<Mixin key="MJSetPetMixin" source="local"/>
+								</Mixins>
 								<Anchors>
 									<Anchor point="LEFT" relativeKey="$parent.name" relativePoint="RIGHT" x="12"/>
 								</Anchors>
@@ -896,7 +911,10 @@
 				</Frames>
 			</Frame>
 
-			<Frame parentKey="worldMap" useParentLevel="false" hidden="true" inherits="InsetFrameTemplate" mixin="MJMapCanvasMixin">
+			<Frame parentKey="worldMap" useParentLevel="false" hidden="true" inherits="InsetFrameTemplate">
+				<Mixins>
+					<Mixin key="MJMapCanvasMixin" source="local"/>
+				</Mixins>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeKey="$parent.rightInset"/>
 					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.rightInset" x="0" y="209"/>
@@ -1019,7 +1037,10 @@
 							<Anchor point="LEFT" relativeKey="$parent.relationMap" relativePoint="RIGHT" x="0" y="0"/>
 						</Anchors>
 					</Button>
-					<Frame parentKey="existingLists" inherits="MJDarkPanelTemplate" enableMouse="true" mixin="MJExistingListsMixin" hidden="true">
+					<Frame parentKey="existingLists" inherits="MJDarkPanelTemplate" enableMouse="true" hidden="true">
+						<Mixins>
+							<Mixin key="MJExistingListsMixin" source="local"/>
+						</Mixins>
 						<Anchors>
 							<Anchor point="TOPLEFT" relativeKey="$parent.$parent" relativePoint="TOPRIGHT"/>
 							<Anchor point="BOTTOMLEFT" relativeKey="$parent.$parent" relativePoint="BOTTOMRIGHT"/>
@@ -1370,7 +1391,16 @@
 		</Scripts>
 	</Button>
 
+	<ModelScene name="MJNonInteractableModelSceneMixinTemplate" inherits="NonInteractableModelSceneMixinTemplate" virtual="true">
+		<KeyValues>
+			<KeyValue key="allowOverlappedModels" value="true" type="boolean"/>
+		</KeyValues>
+	</ModelScene>
+
 	<ModelScene name="MJWrappedAndUnwrappedModelScene" inherits="WrappedAndUnwrappedModelScene" virtual="true">
+		<KeyValues>
+			<KeyValue key="allowOverlappedModels" value="true" type="boolean"/>
+		</KeyValues>
 		<Scripts>
 			<OnHide inherit="prepend">
 				self.isLeftButtonDown = false
@@ -2138,7 +2168,10 @@
 					<Anchor point="TOPLEFT" x="4" y="-4"/>
 				</Anchors>
 			</Button>
-			<Button parentKey="petSelectionBtn" scale=".7" inherits="MJPetSelectionBtnTemplate" mixin="MJSetPetToModelMixin">
+			<Button parentKey="petSelectionBtn" scale=".7" inherits="MJPetSelectionBtnTemplate">
+				<Mixins>
+					<Mixin key="MJSetPetToModelMixin" source="local"/>
+				</Mixins>
 				<Anchors>
 					<Anchor point="TOPRIGHT" x="-12" y="-7"/>
 				</Anchors>
@@ -2923,7 +2956,10 @@
 		</Scripts>
 	</Button>
 
-	<Frame name="MJMountCustomAnimationPanel" mixin="MJMountCustomAnimationMixin" hidden="true" virtual="true">
+	<Frame name="MJMountCustomAnimationPanel" hidden="true" virtual="true">
+		<Mixins>
+			<Mixin key="MJMountCustomAnimationMixin" source="local"/>
+		</Mixins>
 		<Size x="175" y="66"/>
 		<Layers>
 			<Layer level="BACKGROUND">
@@ -3101,7 +3137,7 @@
 	<Frame name="MJTooltipModel" clampedToScreen="true" inherits="TooltipBackdropTemplate" parent="UIParent" frameStrata="TOOLTIP" hidden="true">
 		<Size x="200" y="200"/>
 		<Frames>
-			<ModelScene parentKey="model" inherits="NonInteractableModelSceneMixinTemplate">
+			<ModelScene parentKey="model" inherits="MJNonInteractableModelSceneMixinTemplate">
 				<Size x="184" y="184"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="8" y="-8"/>
@@ -3256,7 +3292,7 @@
 	<Button name="MJPetListModelButton" inherits="BackdropTemplate" virtual="true">
 		<Size x="108" y="108"/>
 		<Frames>
-			<ModelScene parentKey="modelScene" useParentLevel="true" inherits="NonInteractableModelSceneMixinTemplate">
+			<ModelScene parentKey="modelScene" useParentLevel="true" inherits="MJNonInteractableModelSceneMixinTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT" x="4" y="-4"/>
 					<Anchor point="BOTTOMRIGHT" x="-4" y="4"/>
@@ -3367,7 +3403,10 @@
 		</Scripts>
 	</Button>
 
-	<Frame name="MJCompanionsPanel" inherits="MJDarkPanelTemplate" mixin="MJCompanionsPanelMixin" enableMouse="true" hidden="true" virtual="true">
+	<Frame name="MJCompanionsPanel" inherits="MJDarkPanelTemplate" enableMouse="true" hidden="true" virtual="true">
+		<Mixins>
+			<Mixin key="MJCompanionsPanelMixin" source="local"/>
+		</Mixins>
 		<Frames>
 			<Frame parentKey="controlPanel" useParentLevel="false" inherits="InsetFrameTemplate">
 				<Size y="27"/>

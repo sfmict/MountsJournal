@@ -691,7 +691,8 @@ function util.refreshMacro()
 end
 
 
-MJMacroMixin = {}
+local MJMacroMixin = {}
+ns.MJMacroMixin = MJMacroMixin
 
 
 function MJMacroMixin:onLoad()

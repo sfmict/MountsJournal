@@ -270,6 +270,7 @@ L["Malformed link"] = "格式错误的链接"
 L["Transmission error"] = "传输错误"
 L["Receiving data from %s"] = "正在从 %s 接收数据"
 L["Received from"] = "接收自"
+L["Chat is restricted due to secrets."] = "由于秘密，聊天受到限制。"
 -- ANIMATIONS
 L["Default"] = "默认"
 L["Mount special"] = "坐骑特效"

@@ -8,7 +8,6 @@ local BACKPACK_CONTAINER, NUM_TOTAL_EQUIPPED_BAG_SLOTS = BACKPACK_CONTAINER, NUM
 local next, rawget, wipe, GetTime, random, floor = next, rawget, wipe, GetTime, math.random, math.floor
 local mounts = CreateFrame("Frame", "MountsJournal")
 ns.mounts = util.setEventsMixin(mounts)
-mounts.stState = 0
 
 
 mounts:SetScript("OnEvent", function(self, event, ...) self[event](self, ...) end)
@@ -137,10 +136,6 @@ function mounts:ADDON_LOADED(addonName)
 			t[k] = {0, 0, 0}
 			return t[k]
 		end})
-		self.maxCounter = 1 -- to avoid div by 0
-		for k, v in next, self.stat do
-			if self.maxCounter < v[1] then self.maxCounter = v[1] end
-		end
 
 		MountsJournalChar = MountsJournalChar or {}
 		self.charDB = MountsJournalChar
@@ -164,6 +159,7 @@ function mounts:ADDON_LOADED(addonName)
 		self.mapList = {}
 		self.list = {}
 		self.empty = {}
+		self.st = {}
 
 		self.mapVashjir = {
 			[201] = true, -- Лес Келп’тар
@@ -186,6 +182,7 @@ function mounts:ADDON_LOADED(addonName)
 			t[spellID] = 1 - rarity * .01
 			return t[spellID]
 		end})
+		self.listMaxCache = setmetatable({}, {__mode = "k"})
 		self.counterWeight = setmetatable({}, {__index = function(t, spellID)
 			return (1 - self:getMountSummons(spellID) / self.maxCounter)^3
 		end})
@@ -294,8 +291,7 @@ end
 
 
 function mounts:ADDON_RESTRICTION_STATE_CHANGED(stType, stState)
-	self.stType = stType
-	self.stState = stState
+	self.st[stType] = stState
 	self:event("RESTRICTION_CHANGED", stType, stState)
 end
 
@@ -487,22 +483,23 @@ end
 do
 	local GetGlidingInfo, GetSpellCharges, GetUnitSpeed, mountStat = C_PlayerInfo.GetGlidingInfo, C_Spell.GetSpellCharges, GetUnitSpeed
 	local function tracking(self, elapsed)
-		local isGliding, _, speed = GetGlidingInfo()
-		local isThrill
-		if isGliding then
-			local data = GetSpellCharges(372608)
-			isThrill = data and data.cooldownDuration <= 6.003
-		else
-			speed = GetUnitSpeed("player")
-		end
 		if ShouldAurasBeSecret() and not IsMounted() then
 			self:stopTracking()
+			return
+		end
+		local isGliding, _, speed = GetGlidingInfo()
+		local noThrill
+		if isGliding then
+			local data = GetSpellCharges(372608)
+			noThrill = data and data.cooldownDuration > 6.003
+		else
+			speed = GetUnitSpeed("player")
 		end
 		if not issecretvalue(speed) and speed > 0 then
 			mountStat[2] = mountStat[2] + elapsed
 			mountStat[3] = mountStat[3] + speed * elapsed
 		end
-		self:event("MOUNT_SPEED_UPDATE", speed, isGliding and not isThrill)
+		self:event("MOUNT_SPEED_UPDATE", speed, noThrill)
 	end
 
 
@@ -582,9 +579,13 @@ end
 function mounts:addMountSummoned(spellID)
 	local mountStat = self.stat[spellID]
 	mountStat[1] = mountStat[1] + 1
-	if self.maxCounter < mountStat[1] then
-		self.maxCounter = mountStat[1]
+
+	for ids, cached in next, self.listMaxCache do
+		if ids[spellID] and cached < mountStat[1] then
+			self.listMaxCache[ids] = mountStat[1]
+		end
 	end
+
 	self:event("MOUNT_SUMMONED")
 end
 
@@ -825,6 +826,26 @@ function mounts:getTargetMount()
 end
 
 
+function mounts:mountToggle(ids, spellID)
+	ids[spellID] = not ids[spellID] or nil
+	self.listMaxCache[ids] = nil
+end
+
+
+function mounts:getListMaxCounter(ids)
+	local cached = self.listMaxCache[ids]
+	if not cached then
+		cached = 1 -- to avoid div by 0
+		for spellID in next, ids do
+			local count = self:getMountSummons(spellID)
+			if cached < count then cached = count end
+		end
+		self.listMaxCache[ids] = cached
+	end
+	return cached
+end
+
+
 function mounts:summon(spellID)
 	spellID = spellID or self.summonedSpellID
 	if spellID then
@@ -872,6 +893,9 @@ do
 				end
 			end
 		else
+			if mWeight == self.counterWeight then
+				self.maxCounter = self:getListMaxCounter(ids)
+			end
 			for spellID in next, ids do
 				if self:isMountUsable(spellID) then
 					-- mWeight is 0..1 factor; .99 + 1.5 clamps result to 1..100

@@ -1,4 +1,8 @@
-MJMountEquipmentMixin = {}
+local _, ns = ...
+
+
+local MJMountEquipmentMixin = {}
+ns.MJMountEquipmentMixin = MJMountEquipmentMixin
 
 
 function MJMountEquipmentMixin:onLoad()

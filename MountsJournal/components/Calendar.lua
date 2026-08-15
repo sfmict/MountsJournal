@@ -194,8 +194,8 @@ end
 calendar:on("LOGOUT", calendar.checkHolidayNames)
 
 
-function calendar:RESTRICTION_CHANGED(_, stState)
-	if stState == 0 then
+function calendar:RESTRICTION_CHANGED(stType, stState)
+	if stType == Enum.AddOnRestrictionType.Chat and stState == Enum.AddOnRestrictionState.Inactive then
 		self:off("RESTRICTION_CHANGED")
 		self:updateTodayEvents()
 	end

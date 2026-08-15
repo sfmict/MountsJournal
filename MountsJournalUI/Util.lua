@@ -321,7 +321,7 @@ do
 	local hstr = hour.." "..mstr
 	local dstr = day.." "..hstr
 	function util.getTimeBreakDown(time)
-		local d,h,m,s = ChatFrame_TimeBreakDown(time)
+		local d,h,m,s = ChatFrameUtil.TimeBreakDown(time)
 		if d > 0 then
 			return dstr:format(d,h,m,s)
 		elseif h > 0 then

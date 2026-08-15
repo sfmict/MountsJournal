@@ -99,7 +99,8 @@ function setPetMixin:refresh()
 end
 
 
-MJSetPetMixin = util.setMixin({}, setPetMixin)
+local MJSetPetMixin = util.setMixin({}, setPetMixin)
+ns.MJSetPetMixin = MJSetPetMixin
 
 
 function MJSetPetMixin:onEvent(event, ...) self[event](self, ...) end
@@ -168,7 +169,8 @@ end
 MJSetPetMixin.PET_JOURNAL_LIST_UPDATE = MJSetPetMixin.updatePetForMount
 
 
-MJSetPetToModelMixin = util.setMixin({}, setPetMixin)
+local MJSetPetToModelMixin = util.setMixin({}, setPetMixin)
+ns.MJSetPetToModelMixin = MJSetPetToModelMixin
 
 
 function MJSetPetToModelMixin:onClick()
@@ -186,7 +188,8 @@ function MJSetPetToModelMixin:mountSelect()
 end
 
 
-MJCompanionsPanelMixin = util.createFromEventsMixin()
+local MJCompanionsPanelMixin = util.createFromEventsMixin()
+ns.MJCompanionsPanelMixin = MJCompanionsPanelMixin
 
 
 function MJCompanionsPanelMixin:onEvent(event, ...) self[event](self, ...) end

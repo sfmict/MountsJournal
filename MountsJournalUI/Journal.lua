@@ -1626,8 +1626,10 @@ journal.SPELLS_CHANGED = journal.updateListAndDisplay
 
 
 function journal:updateMounted(isMounted)
-	self:updateListAndDisplay()
-	self.mountSpecial:SetEnabled(isMounted)
+	if self.mountSpecial:IsEnabled() ~= isMounted then
+		self:updateListAndDisplay()
+		self.mountSpecial:SetEnabled(isMounted)
+	end
 	self.mountSpeed:SetShown(mounts.config.statCollection and mounts.trackableID ~= nil)
 end
 
@@ -2374,8 +2376,7 @@ function journal:mountToggle(mountType, spellID, mountID, list, zoneMounts)
 		list = self:createMountList(self.listMapID, zoneMounts)
 	end
 
-	local tList = list[mountType]
-	tList[spellID] = not tList[spellID] or nil
+	mounts:mountToggle(list[mountType], spellID)
 	self:getRemoveMountList(self.listMapID, zoneMounts)
 
 	local btn = self:getMountButtonByMountID(mountID)

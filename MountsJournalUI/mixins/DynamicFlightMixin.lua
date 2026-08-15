@@ -1,4 +1,8 @@
-MJDynamicFlightModeButtonMixin = {}
+local _, ns = ...
+
+
+local MJDynamicFlightModeButtonMixin = {}
+ns.MJDynamicFlightModeButtonMixin = MJDynamicFlightModeButtonMixin
 
 
 function MJDynamicFlightModeButtonMixin:onLoad()
@@ -60,7 +64,8 @@ function MJDynamicFlightModeButtonMixin:onEnter()
 end
 
 
-MJDynamicFlightSkillTreeButtonMixin = {}
+local MJDynamicFlightSkillTreeButtonMixin = {}
+ns.MJDynamicFlightSkillTreeButtonMixin = MJDynamicFlightSkillTreeButtonMixin
 
 
 function MJDynamicFlightSkillTreeButtonMixin:onLoad()

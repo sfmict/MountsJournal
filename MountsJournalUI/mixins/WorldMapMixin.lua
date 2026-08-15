@@ -1,6 +1,9 @@
 local addon, ns = ...
 local util = ns.util
-MJMapCanvasMixin = util.createFromEventsMixin()
+
+
+local MJMapCanvasMixin = util.createFromEventsMixin()
+ns.MJMapCanvasMixin = MJMapCanvasMixin
 
 
 function MJMapCanvasMixin:onLoad()

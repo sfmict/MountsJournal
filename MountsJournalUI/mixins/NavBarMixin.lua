@@ -2,7 +2,8 @@ local addon, ns = ...
 local util = ns.util
 
 
-MJNavBarMixin = util.createFromEventsMixin()
+local MJNavBarMixin = util.createFromEventsMixin()
+ns.MJNavBarMixin = MJNavBarMixin
 
 
 function MJNavBarMixin:onLoad()

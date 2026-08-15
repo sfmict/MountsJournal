@@ -239,6 +239,12 @@ function util.getRarityColor(mountID)
 end
 
 
+function util.isChatRestricted()
+	local chatState = ns.mounts.st[Enum.AddOnRestrictionType.Chat]
+	return chatState and chatState ~= Enum.AddOnRestrictionState.Inactive
+end
+
+
 do
 	local compressedCache, encodeForWoWAddonChannel, decodeForWoWAddonChannel
 
@@ -381,6 +387,10 @@ end
 
 
 function util.insertChatLink(...)
+	if util.isChatRestricted() then
+		print(addon..":", NORMAL_FONT_COLOR:WrapTextInColorCode(L["Chat is restricted due to secrets."]))
+		return
+	end
 	local editBox = ChatEdit_GetActiveWindow() or GetCurrentKeyBoardFocus()
 	if editBox then
 		editBox:Insert(util.getLink(...))
@@ -454,7 +464,6 @@ end
 
 
 function util.doEmote(...)
-	if ns.mounts.stState == 0 and not GetCVarBool("addonChatRestrictionsForced") then
-		C_ChatInfo.PerformEmote(...)
-	end
+	if util.isChatRestricted() then return end
+	C_ChatInfo.PerformEmote(...)
 end

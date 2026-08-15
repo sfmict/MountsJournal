@@ -302,7 +302,8 @@ ns.journal:on("MODULES_INIT", function(journal)
 end)
 
 
-MJMountCustomAnimationMixin = {}
+local MJMountCustomAnimationMixin = {}
+ns.MJMountCustomAnimationMixin = MJMountCustomAnimationMixin
 
 
 function MJMountCustomAnimationMixin:onLoad()

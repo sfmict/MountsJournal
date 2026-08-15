@@ -1,6 +1,7 @@
 local addon, ns = ...
 local L, util, mounts = ns.L, ns.util, ns.mounts
 local type, select, Ambiguate, UnitInRaid, UnitInParty, IsGuildMember, BNGetNumFriends, C_BattleNet = type, select, Ambiguate, UnitInRaid, UnitInParty, IsGuildMember, BNGetNumFriends, C_BattleNet
+local AddMessageEventFilter = ChatFrameUtil.AddMessageEventFilter
 
 
 local function checkApps(i, guid)
@@ -56,21 +57,21 @@ local function filterFunc(_, event, msg, player, l, cs, t, flag, channelId, ...)
 end
 
 
-ChatFrame_AddMessageEventFilter("CHAT_MSG_CHANNEL", filterFunc)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_YELL", filterFunc)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_GUILD", filterFunc)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_OFFICER", filterFunc)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_PARTY", filterFunc)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_PARTY_LEADER", filterFunc)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID", filterFunc)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_RAID_LEADER", filterFunc)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_SAY", filterFunc)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER", filterFunc)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterFunc)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_BN_WHISPER", filterFunc)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_BN_WHISPER_INFORM", filterFunc)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT", filterFunc)
-ChatFrame_AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT_LEADER", filterFunc)
+AddMessageEventFilter("CHAT_MSG_CHANNEL", filterFunc)
+AddMessageEventFilter("CHAT_MSG_YELL", filterFunc)
+AddMessageEventFilter("CHAT_MSG_GUILD", filterFunc)
+AddMessageEventFilter("CHAT_MSG_OFFICER", filterFunc)
+AddMessageEventFilter("CHAT_MSG_PARTY", filterFunc)
+AddMessageEventFilter("CHAT_MSG_PARTY_LEADER", filterFunc)
+AddMessageEventFilter("CHAT_MSG_RAID", filterFunc)
+AddMessageEventFilter("CHAT_MSG_RAID_LEADER", filterFunc)
+AddMessageEventFilter("CHAT_MSG_SAY", filterFunc)
+AddMessageEventFilter("CHAT_MSG_WHISPER", filterFunc)
+AddMessageEventFilter("CHAT_MSG_WHISPER_INFORM", filterFunc)
+AddMessageEventFilter("CHAT_MSG_BN_WHISPER", filterFunc)
+AddMessageEventFilter("CHAT_MSG_BN_WHISPER_INFORM", filterFunc)
+AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT", filterFunc)
+AddMessageEventFilter("CHAT_MSG_INSTANCE_CHAT_LEADER", filterFunc)
 
 
 -- TEST

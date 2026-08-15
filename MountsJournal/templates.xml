@@ -1,7 +1,10 @@
 <Ui>
 	<Script file="mixins/MacroMixin.lua"/>
 
-	<Button name="MJSecureActionButtonTemplate" inherits="SecureActionButtonTemplate" mixin="MJMacroMixin" virtual="true">
+	<Button name="MJSecureActionButtonTemplate" inherits="SecureActionButtonTemplate" virtual="true">
+		<Mixins>
+			<Mixin key="MJMacroMixin" source="local"/>
+		</Mixins>
 		<Scripts>
 			<OnLoad method="onLoad"/>
 			<OnEvent method="onEvent"/>

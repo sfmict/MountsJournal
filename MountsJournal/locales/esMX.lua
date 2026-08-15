@@ -270,6 +270,7 @@ L["Malformed link"] = "Enlace malformado"
 L["Transmission error"] = "Error de transmisión"
 L["Receiving data from %s"] = "Recibiendo datos de %s"
 L["Received from"] = "Recibido de"
+L["Chat is restricted due to secrets."] = "El chat está restringido debido a secretos."
 -- ANIMATIONS
 L["Default"] = "Por defecto"
 L["Mount special"] = "Especial de montura"

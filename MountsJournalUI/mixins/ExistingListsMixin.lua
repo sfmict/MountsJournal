@@ -2,7 +2,8 @@ local _, ns = ...
 local L = ns.L
 
 
-MJExistingListsMixin = {}
+local MJExistingListsMixin = {}
+ns.MJExistingListsMixin = MJExistingListsMixin
 
 
 function MJExistingListsMixin:onLoad()

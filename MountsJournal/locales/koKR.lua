@@ -270,6 +270,7 @@ L["Malformed link"] = "잘못된 링크"
 L["Transmission error"] = "전송 오류"
 L["Receiving data from %s"] = "%s에서 데이터 수신 중"
 L["Received from"] = "받은 곳"
+L["Chat is restricted due to secrets."] = "비밀 때문에 채팅이 제한됩니다."
 -- ANIMATIONS
 L["Default"] = "기본"
 L["Mount special"] = "특수한 탈것"
