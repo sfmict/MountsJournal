@@ -168,34 +168,43 @@ function calendar:saveHolidayName(eventID, name)
 end
 
 
-function calendar:checkHolidayNames()
-	if not self.needToCheck then return end
-	local holidayIDs = {}
-	for _, ruleSet in ipairs(self.ruleSets) do
-		for _, rules in ipairs(ruleSet) do
-			for _, rule in ipairs(rules) do
-				for _, cond in ipairs(rule) do
-					if cond[2] == "holiday" then
-						holidayIDs[cond[3]] = true
-					end
+do
+	local function checkRules(rules, holidayIDs)
+		for _, rule in ipairs(rules) do
+			for _, cond in ipairs(rule) do
+				if cond[2] == "holiday" then
+					holidayIDs[cond[3]] = true
+				end
+			end
+			if rule.rules then
+				checkRules(rule.rules, holidayIDs)
+			end
+		end
+	end
+
+	function calendar:checkHolidayNames()
+		if not self.needToCheck then return end
+		local holidayIDs = {}
+		for _, ruleSet in ipairs(self.ruleSets) do
+			for _, rules in ipairs(ruleSet) do
+				checkRules(rules, holidayIDs)
+			end
+		end
+
+		for lang, holidayNames in next, mounts.globalDB.holidayNames do
+			for eventID in next, holidayNames do
+				if not holidayIDs[eventID] then
+					holidayNames[eventID] = nil
 				end
 			end
 		end
 	end
-
-	for lang, holidayNames in next, mounts.globalDB.holidayNames do
-		for eventID in next, holidayNames do
-			if not holidayIDs[eventID] then
-				holidayNames[eventID] = nil
-			end
-		end
-	end
+	calendar:on("LOGOUT", calendar.checkHolidayNames)
 end
-calendar:on("LOGOUT", calendar.checkHolidayNames)
 
 
-function calendar:RESTRICTION_CHANGED(stType, stState)
-	if stType == Enum.AddOnRestrictionType.Chat and stState == Enum.AddOnRestrictionState.Inactive then
+function calendar:RESTRICTION_CHANGED(rType, rState)
+	if rType == Enum.AddOnRestrictionType.Chat and rState == Enum.AddOnRestrictionState.Inactive then
 		self:off("RESTRICTION_CHANGED")
 		self:updateTodayEvents()
 	end
@@ -259,16 +268,23 @@ calendar:on("ADDON_INIT", function(self)
 	local names = self.holidayNames
 	local numNoName = 0
 
-	for _, ruleSet in ipairs(self.ruleSets) do
-		for _, rules in ipairs(ruleSet) do
-			for _, rule in ipairs(rules) do
-				for _, cond in ipairs(rule) do
-					if cond[2] == "holiday" and not names[cond[3]] then
-						numNoName = numNoName + 1
-						names[cond[3]] = false
-					end
+	local function addNames(rules)
+		for _, rule in ipairs(rules) do
+			for _, cond in ipairs(rule) do
+				if cond[2] == "holiday" and not names[cond[3]] then
+					numNoName = numNoName + 1
+					names[cond[3]] = false
 				end
 			end
+			if rule.rules then
+				addNames(rule.rules)
+			end
+		end
+	end
+
+	for _, ruleSet in ipairs(self.ruleSets) do
+		for _, rules in ipairs(ruleSet) do
+			addNames(rules)
 		end
 	end
 

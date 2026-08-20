@@ -115,7 +115,8 @@ function journal:init()
 		self:RegisterEvent("SPELLS_CHANGED")
 		self:RegisterUnitEvent("UNIT_PORTRAIT_UPDATE", "player")
 		self:on("MOUNT_SPEED_UPDATE", self.updateSpeed)
-		self:on("MOUNTED_UPDATE", self.updateMounted)
+		    :on("MOUNTED_UPDATE", self.updateMounted)
+		    :on("RESTRICTION_CHANGED", self.updateMounted)
 		self:updateCollectionTabs()
 		local notCombat = not InCombatLockdown()
 		self.leftInset:EnableKeyboard(notCombat)
@@ -137,7 +138,8 @@ function journal:init()
 		self:UnregisterEvent("SPELLS_CHANGED")
 		self:UnregisterEvent("UNIT_PORTRAIT_UPDATE")
 		self:off("MOUNT_SPEED_UPDATE", self.updateSpeed)
-		self:off("MOUNTED_UPDATE", self.updateMounted)
+		    :off("MOUNTED_UPDATE", self.updateMounted)
+		    :off("RESTRICTION_CHANGED", self.updateMounted)
 		self:updateCollectionTabs()
 	end)
 
@@ -1397,8 +1399,9 @@ function journal:init()
 	self:RegisterEvent("SPELLS_CHANGED")
 	self:RegisterUnitEvent("UNIT_PORTRAIT_UPDATE", "player")
 	self:on("MOUNT_SPEED_UPDATE", self.updateSpeed)
-	self:on("MOUNTED_UPDATE", self.updateMounted)
-	self:on("PET_STATUS_UPDATE", self.updateMountsList)
+	    :on("MOUNTED_UPDATE", self.updateMounted)
+	    :on("RESTRICTION_CHANGED", self.updateMounted)
+	    :on("PET_STATUS_UPDATE", self.updateMountsList)
 
 	self.lastMountListUpdate = 0
 	self:updateCollectionTabs(true)
@@ -1625,18 +1628,20 @@ end
 journal.SPELLS_CHANGED = journal.updateListAndDisplay
 
 
-function journal:updateMounted(isMounted)
-	if self.mountSpecial:IsEnabled() ~= isMounted then
+function journal:updateMounted()
+	local isMounted = util.isMounted()
+	if self._isMounted ~= isMounted then
+		self._isMounted = isMounted
 		self:updateListAndDisplay()
-		self.mountSpecial:SetEnabled(isMounted)
 	end
+	self.mountSpecial:SetEnabled(isMounted and not util.isChatRestricted())
 	self.mountSpeed:SetShown(mounts.config.statCollection and mounts.trackableID ~= nil)
 end
 
 
 function journal:COMPANION_UPDATE(companionType)
 	if companionType == "MOUNT" then
-		C_Timer.After(0, function() self:updateMounted(util.isMounted()) end)
+		C_Timer.After(0, function() self:updateMounted() end)
 	end
 end
 

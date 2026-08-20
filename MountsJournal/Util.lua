@@ -223,6 +223,11 @@ function util.isMounted()
 end
 
 
+function util.isChatRestricted()
+	return ns.mounts.st[Enum.AddOnRestrictionType.Chat] ~= Enum.AddOnRestrictionState.Inactive
+end
+
+
 function util.getRarityColor(mountID)
 	local rarity = ns.mountsDB[mountID][3]
 	if rarity > 50 then
@@ -236,12 +241,6 @@ function util.getRarityColor(mountID)
 	else
 		return ITEM_QUALITY_COLORS[5].color
 	end
-end
-
-
-function util.isChatRestricted()
-	local chatState = ns.mounts.st[Enum.AddOnRestrictionType.Chat]
-	return chatState and chatState ~= Enum.AddOnRestrictionState.Inactive
 end
 
 

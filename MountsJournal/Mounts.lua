@@ -159,7 +159,6 @@ function mounts:ADDON_LOADED(addonName)
 		self.mapList = {}
 		self.list = {}
 		self.empty = {}
-		self.st = {}
 
 		self.mapVashjir = {
 			[201] = true, -- Лес Келп’тар
@@ -174,6 +173,12 @@ function mounts:ADDON_LOADED(addonName)
 			{itemID = 37011},
 			{mountID = 1799},
 		}
+
+		-- restrictions
+		self.st = {}
+		for _, v in next, Enum.AddOnRestrictionType do
+			self.st[v] = C_RestrictedActions.GetAddOnRestrictionState(v)
+		end
 
 		-- mount weight
 		self.rarityWeight = setmetatable({}, {__index = function(t, spellID)
@@ -290,9 +295,9 @@ function mounts:PLAYER_LOGOUT()
 end
 
 
-function mounts:ADDON_RESTRICTION_STATE_CHANGED(stType, stState)
-	self.st[stType] = stState
-	self:event("RESTRICTION_CHANGED", stType, stState)
+function mounts:ADDON_RESTRICTION_STATE_CHANGED(rType, rState)
+	self.st[rType] = rState
+	self:event("RESTRICTION_CHANGED", rType, rState)
 end
 
 
