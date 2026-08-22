@@ -212,6 +212,8 @@ function pets:setPetJournalFiltersBackup()
 	local backup = self.petJournalFiltersBackup
 	backup.collected = C_PetJournal.IsFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED)
 	backup.notCollected = C_PetJournal.IsFilterChecked(LE_PET_JOURNAL_FILTER_NOT_COLLECTED)
+	backup.battlePets = C_PetJournal.IsFilterChecked(LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS)
+	backup.nonCombatPets = C_PetJournal.IsFilterChecked(LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS)
 	backup.allTypes = true
 	for i = 1, C_PetJournal.GetNumPetTypes() do
 		backup.types[i] = C_PetJournal.IsPetTypeChecked(i)
@@ -224,10 +226,16 @@ function pets:setPetJournalFiltersBackup()
 	end
 
 	if not backup.collected then
-		C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED, true)
+		C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS, true)
 	end
 	if not backup.notCollected then
 		C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_NOT_COLLECTED, true)
+	end
+	if not backup.battlePets then
+		C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED, true)
+	end
+	if not backup.nonCombatPets then
+		C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS, true)
 	end
 	if not backup.allTypes then
 		C_PetJournal.SetAllPetTypesChecked(true)
@@ -235,9 +243,7 @@ function pets:setPetJournalFiltersBackup()
 	if not backup.allSources then
 		C_PetJournal.SetAllPetSourcesChecked(true)
 	end
-	if backup.search ~= "" then
-		C_PetJournal.ClearSearchFilter()
-	end
+	C_PetJournal.ClearSearchFilter()
 end
 
 
@@ -248,6 +254,12 @@ function pets:restorePetJournalFilters()
 	end
 	if not backup.notCollected then
 		C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_NOT_COLLECTED, backup.notCollected)
+	end
+	if not backup.battlePets then
+		C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED, backup.battlePets)
+	end
+	if not backup.nonCombatPets then
+		C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS, backup.nonCombatPets)
 	end
 	if not backup.allTypes then
 		for i = 1, C_PetJournal.GetNumPetTypes() do

@@ -11,9 +11,9 @@ function setPetMixin:onEnter()
 
 	if self.displayID and self.speciesID then
 		local cardModelSceneID, loadoutModelSceneID = C_PetJournal.GetPetModelSceneInfoBySpeciesID(self.speciesID)
-		MJTooltipModel.model:SetFromModelSceneID(loadoutModelSceneID)
+		MJTooltipModel.model:SetFromModelSceneID(cardModelSceneID)
 
-		local battlePetActor = MJTooltipModel.model:GetActorByTag("pet")
+		local battlePetActor = MJTooltipModel.model:GetActorByTag("unwrapped")
 		if battlePetActor then
 			battlePetActor:SetModelByCreatureDisplayID(self.displayID)
 			battlePetActor:SetAnimationBlendOperation(Enum.ModelBlendOperation.None)
@@ -25,19 +25,20 @@ function setPetMixin:onEnter()
 			GameTooltip:SetOwner(self, "ANCHOR_NONE")
 			GameTooltip:SetPoint("BOTTOMLEFT", MJTooltipModel, "TOPLEFT", 0, -2)
 			GameTooltip:SetText(L["Summonable Battle Pet"])
-			local description
-			if self.id then
-				if type(self.id) == "number" then
-					description = self.id == 1 and PET_JOURNAL_SUMMON_RANDOM_FAVORITE_PET or L["Summon Random Battle Pet"]
-				else
-					description = self.name
-				end
-			else
-				description = L["No Battle Pet"]
-			end
-			GameTooltip:AddLine(description, 1, 1, 1)
+			GameTooltip:AddLine(self.name, 1, 1, 1)
 			GameTooltip:Show()
 		end
+	else
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+		GameTooltip:SetText(L["Summonable Battle Pet"])
+		local description
+		if type(self.id) == "number" then
+			description = self.id == 1 and PET_JOURNAL_SUMMON_RANDOM_FAVORITE_PET or L["Summon Random Battle Pet"]
+		else
+			description = L["No Battle Pet"]
+		end
+		GameTooltip:AddLine(description, 1, 1, 1)
+		GameTooltip:Show()
 	end
 end
 

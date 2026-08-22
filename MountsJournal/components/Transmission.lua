@@ -20,13 +20,13 @@ local function filterFunc(_, event, msg, player, l, cs, t, flag, channelId, ...)
 	or event == "CHAT_MSG_CHANNEL" and type(channelId) == "number" and channelId > 0
 	then return end
 
-	local newMsg, finish, start, newStart, id, characterName, dataType, anyLinkFound = "", 0
+	local newMsg, finish, start, newStart, id, target, dataType, anyLinkFound = "", 0
 	while true do
 		newStart = finish + 1
-		start, finish, characterName, dataType, id = msg:find("%[MountsJournal:(.-):(.-):(.-):MJ%]", newStart)
-		if characterName and dataType and id then
+		start, finish, target, dataType, id = msg:find("%[MountsJournal:(.-):(.-):(.-):MJ%]", newStart)
+		if target and dataType and id then
 			newMsg = newMsg..msg:sub(newStart, start - 1)
-			newMsg = newMsg..("|HMountsJournalH:%s|h|cFFCC33FF[MJ:%s - %s:%s]|r|h"):format(dataType, characterName, L[dataType], id)
+			newMsg = newMsg..("|HMountsJournalH:%s:%s|h|cFFCC33FF[MJ:%s - %s:%s]|r|h"):format(dataType, id, target, L[dataType], id == "" and DEFAULT or id)
 			anyLinkFound = true
 		else
 			break
@@ -97,7 +97,8 @@ function comm:registerPrefix(prefix, func)
 end
 
 
-function comm:sendMessage(prefix, message, distribution, target, prio, cb, arg)
+function comm:sendMessage(prefix, message, chattype, target, prio, cb, arg)
+	local queueName = prefix
 	local maxLen = 255
 	local len = #message
 	local func = cb and function(sent, sendResult) cb(arg, sent, len, sendResult) end
@@ -112,33 +113,33 @@ function comm:sendMessage(prefix, message, distribution, target, prio, cb, arg)
 	end
 
 	if len <= maxLen and not force then
-		CTL:SendAddonMessage(prio, prefix, message, distribution, target, prefix, func, len)
+		CTL:SendAddonMessage(prio, prefix, message, chattype, target, queueName, func, len)
 	else
 		maxLen = maxLen - 1
 		local chunk = "\001"..message:sub(1, maxLen)
-		CTL:SendAddonMessage(prio, prefix, chunk, distribution, target, prefix, func, maxLen)
+		CTL:SendAddonMessage(prio, prefix, chunk, chattype, target, queueName, func, maxLen)
 
 		local pos = 1 + maxLen
 		while pos + maxLen <= len do
 			chunk = "\002"..message:sub(pos, pos + maxLen - 1)
-			CTL:SendAddonMessage(prio, prefix, chunk, distribution, target, prefix, func, pos + maxLen - 1)
+			CTL:SendAddonMessage(prio, prefix, chunk, chattype, target, queueName, func, pos + maxLen - 1)
 			pos = pos + maxLen
 		end
 
 		chunk = "\003"..message:sub(pos)
-		CTL:SendAddonMessage(prio, prefix, chunk, distribution, target, prefix, func, len)
+		CTL:SendAddonMessage(prio, prefix, chunk, chattype, target, queueName, func, len)
 	end
 end
 
 
-function comm:CHAT_MSG_ADDON(prefix, message, distribution, sender)
+function comm:CHAT_MSG_ADDON(prefix, message, chattype, sender)
 	if not self[prefix] then return end
 	sender = Ambiguate(sender, "none")
 	local control, text = message:match("^([\001-\004])(.*)")
 
 	if control then
 		if control == "\004" then
-			self[prefix](text, distribution, sender)
+			self[prefix](text, chattype, sender)
 			return
 		end
 
@@ -149,7 +150,7 @@ function comm:CHAT_MSG_ADDON(prefix, message, distribution, sender)
 			end
 		end
 
-		local k = prefix.."\000"..distribution.."\000"..sender
+		local k = prefix.."\000"..chattype.."\000"..sender
 
 		if control == "\001" then
 			self.pool[k] = {text, st = st}
@@ -161,11 +162,11 @@ function comm:CHAT_MSG_ADDON(prefix, message, distribution, sender)
 			if t then
 				self.pool[k] = nil
 				t[#t+1] = text
-				self[prefix](tconcat(t, ""), distribution, sender)
+				self[prefix](tconcat(t, ""), chattype, sender)
 			end
 		end
 	else
-		self[prefix](message, distribution, sender)
+		self[prefix](message, chattype, sender)
 	end
 end
 
@@ -194,38 +195,38 @@ end
 local tooltipLoading, receivedData
 
 
-local function requestData(characterName, dataType, id)
+local function requestData(target, dataType, id)
 	local transmitString = util.getStringFromData({m = "dr", t = dataType, id = id})
-	comm:sendMessage(addon, transmitString, "WHISPER", characterName, "NORMAL")
+	comm:sendMessage(addon, transmitString, "WHISPER", target, "NORMAL")
 end
 
 
 do
 	local timer
 	LinkUtil.RegisterLinkHandler("MountsJournalH", function(link, text, linkData, contextData)
-		local _,_, dataType, characterName, typeLang, id = text:gsub("|[Cc]%x%x%x%x%x%x%x%x", ""):gsub("|[Rr]", ""):find("|HMountsJournalH:(.-)|h%[MJ:(.-) %- (.-):(.-)%]|h")
-		if dataType and characterName and typeLang and id then
+		local _,_, dataType, id, target = text:gsub("|[Cc]%x%x%x%x%x%x%x%x", ""):gsub("|[Rr]", ""):find("|HMountsJournalH:(.-):(.-)|h%[MJ:(.-) %- .-%]|h")
+		if dataType and id and target then
 			id = util.deobfuscateName(id)
 			if IsShiftKeyDown() then
-				util.insertChatLink(dataType, id, characterName)
+				util.insertChatLink(dataType, id, target)
 			else
-				characterName = util.deobfuscateName(characterName)
+				target = util.deobfuscateName(target)
 				local r,g,b = NIGHT_FAE_BLUE_COLOR:GetRGB()
 				local displayID = id == "" and DEFAULT or id
 				showTooltip({
-					{2, typeLang, displayID, 1,1,1,r,g,b},
-					{1, L["Requesting data from %s ..."]:format(characterName), 1,.8,0},
+					{2, L[dataType], displayID, 1,1,1,r,g,b},
+					{1, L["Requesting data from %s ..."]:format(target), 1,.8,0},
 				})
 				tooltipLoading = true
 				receivedData = false
-				requestData(characterName, dataType, id)
+				requestData(target, dataType, id)
 
 				if timer and not timer:IsCancelled() then timer:Cancel() end
 				timer = C_Timer.NewTicker(5, function()
 					if tooltipLoading and not receivedData and ItemRefTooltip:IsShown() then
 						showTooltip({
-							{2, typeLang, displayID, 1,1,1,r,g,b},
-							{1, L["Error not receiving data from %s ..."]:format(characterName), 1,0,0},
+							{2, L[dataType], displayID, 1,1,1,r,g,b},
+							{1, L["Error not receiving data from %s ..."]:format(target), 1,0,0},
 						})
 					end
 				end, 1)
@@ -277,7 +278,7 @@ local function getTransmitData(data)
 end
 
 
-local function dataImport(dataType, id, data, characterName)
+local function dataImport(dataType, id, data, sender)
 	if InCombatLockdown() then
 		local r,g,b = NIGHT_FAE_BLUE_COLOR:GetRGB()
 		showTooltip({
@@ -287,7 +288,7 @@ local function dataImport(dataType, id, data, characterName)
 		comm.PLAYER_REGEN_ENABLED = function(self)
 			self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 			self.PLAYER_REGEN_ENABLED = nil
-			dataImport(dataType, id, data, characterName)
+			dataImport(dataType, id, data, sender)
 		end
 		comm:RegisterEvent("PLAYER_REGEN_ENABLED")
 		return
@@ -297,35 +298,35 @@ local function dataImport(dataType, id, data, characterName)
 	if dataType == "Profile" then
 		if type(data) ~= "table" then return end
 		util.openJournalTab(3)
-		ns.journal.bgFrame.profilesMenu:dataImport(data, id, characterName)
+		ns.journal.bgFrame.profilesMenu:dataImport(data, id, sender)
 	elseif dataType == "Rule Set" then
 		if type(data) ~= "table" then return end
 		util.openJournalTab(1, 3)
-		ns.ruleConfig:dataImportRuleSet(data, id, characterName)
+		ns.ruleConfig:dataImportRuleSet(data, id, sender)
 	elseif dataType == "Rule" then
 		if type(data) ~= "table" then return end
 		util.openJournalTab(1, 3)
-		ns.ruleConfig:dataImportRule(data, id, characterName)
+		ns.ruleConfig:dataImportRule(data, id, sender)
 	elseif dataType == "Snippet" then
 		if type(data) ~= "string" then return end
 		util.openJournalTab(1, 3)
 		if not ns.ruleConfig.snippetToggle:GetChecked() then ns.ruleConfig.snippetToggle:Click() end
-		ns.snippets:dataImport(data, id, characterName)
+		ns.snippets:dataImport(data, id, sender)
 	end
 end
 
 
-local function transmitData(data, characterName)
+local function transmitData(data, target)
 	local encoded = getTransmitData(data)
 	if encoded then
-		comm:sendMessage(addon, encoded, "WHISPER", characterName, "BULK", function(id, done, total)
-			comm:sendMessage(addon.."P", done.." "..total.." "..id, "WHISPER", characterName, "ALERT")
+		comm:sendMessage(addon, encoded, "WHISPER", target, "BULK", function(id, done, total)
+			comm:sendMessage(addon.."P", done.." "..total.." "..id, "WHISPER", target, "ALERT")
 		end, data.t..":"..data.id)
 	end
 end
 
 
-local function handleComm(message, distribution, sender)
+local function handleComm(message, chattype, sender)
 	local data = util.getDataFromString(message)
 	if type(data) == "table" and data.m and data.t and data.id then
 		if data.m == "d" then
@@ -342,7 +343,7 @@ local function handleComm(message, distribution, sender)
 end
 
 
-local function handleProgressComm(message, distribution, sender)
+local function handleProgressComm(message, chattype, sender)
 	if tooltipLoading and ItemRefTooltip:IsShown() then
 		receivedData = true
 		local done, total, id = (" "):split(message, 3)
