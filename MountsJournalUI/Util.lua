@@ -45,10 +45,10 @@ util.expColors = setmetatable({
 	"F48CBA", -- warlords of draenor
 	"AAD372", -- legion
 	"FFF468", -- battle for azeroth
-	"b2a4ed", -- shadowlands
+	"B2A4ED", -- shadowlands
 	"53B39F", -- dragonflight
 	"90CCDD", -- the war within
-	"7a91ff", -- midnight
+	"7A91FF", -- midnight
 }, {
 	__index = function(self, key)
 		self[key] = "E8E8E8"

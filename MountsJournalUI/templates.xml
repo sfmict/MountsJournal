@@ -195,6 +195,9 @@
 						<Texture parentKey="texture" setAllPoints="true"/>
 					</Layer>
 				</Layers>
+				<Frames>
+					<Cooldown parentKey="cooldown" inherits="CooldownFrameTemplate"/>
+				</Frames>
 				<Scripts>
 					<OnLoad method="onLoad"/>
 					<OnShow method="onShow"/>
@@ -1079,11 +1082,11 @@
 				<Anchors>
 					<Anchor point="BOTTOMLEFT" x="4" y="4"/>
 				</Anchors>
+				<Attributes>
+					<Attribute name="useOnKeyDown" type="boolean" value="false"/>
+					<Attribute name="type" value="macro"/>
+				</Attributes>
 				<Scripts>
-					<OnLoad>
-						self:SetAttribute("useOnKeyDown", false)
-						self:SetAttribute("type", "macro")
-					</OnLoad>
 					<OnLeave function="GameTooltip_Hide"/>
 				</Scripts>
 			</Button>
@@ -1376,7 +1379,7 @@
 		</Scripts>
 	</Button>
 
-	<Button name="MJResizeButtonTemplate" virtual="true">
+	<Button name="MJResizeButtonTemplate" registerForDrag="LeftButton" virtual="true">
 		<Size x="16" y="16"/>
 		<Anchors>
 			<Anchor point="BOTTOMRIGHT"/>
@@ -1385,7 +1388,6 @@
 		<HighlightTexture file="Interface\ChatFrame\UI-ChatIM-SizeGrabber-Highlight"/>
 		<PushedTexture file="Interface\ChatFrame\UI-ChatIM-SizeGrabber-Down"/>
 		<Scripts>
-			<OnLoad>self:RegisterForDrag("LeftButton")</OnLoad>
 			<OnEnter>if SetCursor then SetCursor("UI_RESIZE_CURSOR") end</OnEnter>
 			<OnLeave>if SetCursor then SetCursor(nil) end</OnLeave>
 		</Scripts>
@@ -2848,14 +2850,12 @@
 		</Layers>
 	</Button>
 
-	<Button name="MJSecureMacroButtonTemplate" inherits="MJIconButtonTemplate,SecureActionButtonTemplate" virtual="true">
+	<Button name="MJSecureMacroButtonTemplate" registerForClicks="AnyUp" registerForDrag="LeftButton" inherits="MJIconButtonTemplate,SecureActionButtonTemplate" virtual="true">
+		<Attributes>
+			<Attribute name="useOnKeyDown" type="boolean" value="false"/>
+			<Attribute name="type" value="click"/>
+		</Attributes>
 		<Scripts>
-			<OnLoad>
-				self:SetAttribute("useOnKeyDown", false)
-				self:SetAttribute("type", "click")
-				self:RegisterForClicks("AnyUp")
-				self:RegisterForDrag("LeftButton")
-			</OnLoad>
 			<OnLeave>
 				GameTooltip:Hide()
 			</OnLeave>
@@ -3180,7 +3180,7 @@
 		</Layers>
 	</Frame>
 
-	<Button name="MJPetListButton" motionScriptsWhileDisabled="true" virtual="true">
+	<Button name="MJPetListButton" registerForClicks="LeftButtonUp,RightButtonUp" motionScriptsWhileDisabled="true" virtual="true">
 		<Size x="216" y="41"/>
 		<Layers>
 			<Layer level="BACKGROUND">
@@ -3242,9 +3242,6 @@
 			<KeyValue key="LibSFDropDownNoGMEvent" value="true" type="boolean"/>
 		</KeyValues>
 		<Scripts>
-			<OnLoad>
-				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-			</OnLoad>
 			<OnClick>
 				local frame = self:GetParent()
 				while not frame.selectButtonClick do
@@ -3289,7 +3286,7 @@
 		</Scripts>
 	</Button>
 
-	<Button name="MJPetListModelButton" inherits="BackdropTemplate" virtual="true">
+	<Button name="MJPetListModelButton" registerForClicks="LeftButtonUp,RightButtonUp" inherits="BackdropTemplate" virtual="true">
 		<Size x="108" y="108"/>
 		<Frames>
 			<ModelScene parentKey="modelScene" useParentLevel="true" inherits="MJNonInteractableModelSceneMixinTemplate">
@@ -3350,7 +3347,6 @@
 		</Layers>
 		<Scripts>
 			<OnLoad>
-				self:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 				self:SetBackdrop(MountsJournalUtil.modelScenebackdrop)
 				self:SetBackdropColor(.1, .1, .1, .9)
 			</OnLoad>

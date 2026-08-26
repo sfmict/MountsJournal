@@ -162,6 +162,12 @@ iconData:SetScript("OnShow", function(self)
 	self.selectedText:SetPoint("TOPRIGHT", self.selectedIconBtn, "TOPLEFT", -5, 0)
 	self.selectedText:SetText(ICON_SELECTION_TITLE_CURRENT)
 
+	-- ARROW
+	self.arrow = self:CreateTexture(nil, "BACKGROUND")
+	self.arrow:SetTexture("Interface/ChatFrame/ChatFrameExpandArrow")
+	self.arrow:SetTexCoord(1, 0, 0, 1)
+	self.arrow:SetSize(8, 12)
+
 	-- SEARCH BOX
 	self.searchBox = CreateFrame("Editbox", nil, self, "SearchBoxTemplate")
 	self.searchBox:SetPoint("TOPLEFT", 20, -28)
@@ -241,6 +247,7 @@ function iconData:init(btn, func)
 		self.func = func
 		self:SetPoint("LEFT", btn, "RIGHT", 5, 0)
 		self:Show()
+		self.arrow:SetPoint("LEFT", btn, "RIGHT", -1, 0)
 		self.selectedIcon = btn.icon:GetTexture()
 		self.selectedIconBtn.icon:SetTexture(self.selectedIcon)
 		self:refreshFilters()

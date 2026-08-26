@@ -195,46 +195,58 @@ pets:on("ADDON_INIT", pets.setSummonEvery)
 
 function pets:setPetJournalFiltersBackup()
 	local backup = {
+		search = C_PetJournal.GetSearchFilter(),
 		collected = C_PetJournal.IsFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED),
-		notCollected = C_PetJournal.IsFilterChecked(LE_PET_JOURNAL_FILTER_NOT_COLLECTED),
+		-- notCollected = C_PetJournal.IsFilterChecked(LE_PET_JOURNAL_FILTER_NOT_COLLECTED),
 		battlePets = C_PetJournal.IsFilterChecked(LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS),
 		nonCombatPets = C_PetJournal.IsFilterChecked(LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS),
-		search = C_PetJournal.GetSearchFilter(),
 		types = {},
 		sources = {},
 	}
+	backup.allTypes = true
 	for i = 1, C_PetJournal.GetNumPetTypes() do
 		backup.types[i] = C_PetJournal.IsPetTypeChecked(i)
+		if not backup.types[i] then backup.allTypes = false end
 	end
+	backup.allSources = true
 	for i = 1, C_PetJournal.GetNumPetSources() do
 		backup.sources[i] = C_PetJournal.IsPetSourceChecked(i)
+		if not backup.sources[i] then backup.allSources = false end
 	end
 	self.petJournalFiltersBackup = backup
 
-	C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED, true)
-	C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_NOT_COLLECTED, false)
-	C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS, true)
-	C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS, true)
-	C_PetJournal.SetAllPetTypesChecked(true)
-	C_PetJournal.SetAllPetSourcesChecked(true)
-	C_PetJournal.ClearSearchFilter()
+	if backup.search ~= "" then C_PetJournal.ClearSearchFilter() end
+	if not backup.collected then C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED, true) end
+	-- if backup.notCollected then C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_NOT_COLLECTED, false) end
+	if not backup.battlePets then C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS, true) end
+	if not backup.nonCombatPets then C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS, true) end
+	if not backup.allTypes then C_PetJournal.SetAllPetTypesChecked(true) end
+	if not backup.allSources then C_PetJournal.SetAllPetSourcesChecked(true) end
 end
 
 
 function pets:restorePetJournalFilters()
 	local backup = self.petJournalFiltersBackup
+	if not backup then return end
 	self.petJournalFiltersBackup = nil
-	C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED, backup.collected)
-	C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_NOT_COLLECTED, backup.notCollected)
-	C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS, backup.battlePets)
-	C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS, backup.nonCombatPets)
-	for i = 1, C_PetJournal.GetNumPetTypes() do
-		C_PetJournal.SetPetTypeFilter(i, backup.types[i])
+
+	if backup.search ~= "" then C_PetJournal.SetSearchFilter(backup.search) end
+	if not backup.collected then C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_COLLECTED, backup.collected) end
+	-- if backup.notCollected then C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_NOT_COLLECTED, backup.notCollected) end
+	if not backup.battlePets then C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_TYPE_BATTLE_PETS, backup.battlePets) end
+	if not backup.nonCombatPets then C_PetJournal.SetFilterChecked(LE_PET_JOURNAL_FILTER_TYPE_NON_COMBAT_PETS, backup.nonCombatPets) end
+
+	if not backup.allTypes then
+		for i = 1, C_PetJournal.GetNumPetTypes() do
+			if not backup.types[i] then C_PetJournal.SetPetTypeFilter(i, backup.types[i]) end
+		end
 	end
-	for i = 1, C_PetJournal.GetNumPetSources() do
-		C_PetJournal.SetPetSourceChecked(i, backup.sources[i])
+
+	if not backup.allSources then
+		for i = 1, C_PetJournal.GetNumPetSources() do
+			if not backup.sources[i] then C_PetJournal.SetPetSourceChecked(i, backup.sources[i]) end
+		end
 	end
-	C_PetJournal.SetSearchFilter(backup.search)
 end
 
 

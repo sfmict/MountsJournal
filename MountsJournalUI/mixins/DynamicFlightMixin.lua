@@ -22,21 +22,38 @@ function MJDynamicFlightModeButtonMixin:updateIcon()
 end
 
 
+function MJDynamicFlightModeButtonMixin:updateCooldown()
+	local cooldownInfo = C_Spell.GetSpellCooldown(61304)
+	if cooldownInfo then
+		CooldownFrame_Set(self.cooldown, cooldownInfo.startTime, cooldownInfo.duration, cooldownInfo.isEnabled)
+	else
+		CooldownFrame_Clear(self.cooldown)
+	end
+end
+
+
 function MJDynamicFlightModeButtonMixin:onShow()
 	self:RegisterUnitEvent("UNIT_SPELLCAST_SUCCEEDED", "player")
+	self:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 	self:updateIcon()
+	self:updateCooldown()
 end
 
 
 function MJDynamicFlightModeButtonMixin:onHide()
 	self:UnregisterEvent("UNIT_SPELLCAST_SUCCEEDED")
+	self:UnregisterEvent("SPELL_UPDATE_COOLDOWN")
 end
 
 
-function MJDynamicFlightModeButtonMixin:onEvent()
-	self:updateIcon()
-	if GameTooltip:GetOwner() == self then
-		self:displayTooltip()
+function MJDynamicFlightModeButtonMixin:onEvent(event)
+	if event == "SPELL_UPDATE_COOLDOWN" then
+		self:updateCooldown()
+	else
+		self:updateIcon()
+		if GameTooltip:GetOwner() == self then
+			self:displayTooltip()
+		end
 	end
 end
 
@@ -76,11 +93,7 @@ end
 
 function MJDynamicFlightSkillTreeButtonMixin:onClick()
 	GenericTraitUI_LoadUI()
-	if GenericTraitFrame.SetConfigIDBySystemID then -- midnight
-		GenericTraitFrame:SetConfigIDBySystemID(Constants.MountDynamicFlightConsts.TRAIT_SYSTEM_ID)
-	else
-		GenericTraitFrame:SetSystemID(Constants.MountDynamicFlightConsts.TRAIT_SYSTEM_ID)
-	end
+	GenericTraitFrame:SetConfigIDBySystemID(Constants.MountDynamicFlightConsts.TRAIT_SYSTEM_ID)
 	GenericTraitFrame:SetTreeID(Constants.MountDynamicFlightConsts.TREE_ID)
 	ToggleFrame(GenericTraitFrame)
 end

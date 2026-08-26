@@ -13,8 +13,12 @@
 		</Scripts>
 	</Button>
 
-	<Button name="MJSecureBarButtonTemplate" inherits="SecureActionButtonTemplate" virtual="true">
+	<Button name="MJSecureBarButtonTemplate" registerForClicks="AnyUp" registerForDrag="LeftButton" inherits="SecureActionButtonTemplate" virtual="true">
 		<Size x="45" y="45"/>
+		<Attributes>
+			<Attribute name="useOnKeyDown" type="boolean" value="false"/>
+			<Attribute name="type" value="click"/>
+		</Attributes>
 		<Layers>
 			<Layer level="BACKGROUND">
 				<Texture parentKey="icon"/>
@@ -47,12 +51,6 @@
 			</Anchors>
 		</HighlightTexture>
 		<Scripts>
-			<OnLoad>
-				self:SetAttribute("useOnKeyDown", false)
-				self:SetAttribute("type", "click")
-				self:RegisterForClicks("AnyUp")
-				self:RegisterForDrag("LeftButton")
-			</OnLoad>
 			<OnLeave>
 				GameTooltip:Hide()
 			</OnLeave>

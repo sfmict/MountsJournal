@@ -617,6 +617,8 @@ function journal:init()
 	-- SCROLL DRAG SORTING
 	local dropIndicator = CreateFrame("FRAME")
 	dropIndicator:Hide()
+	dropIndicator:SetFrameStrata("DIALOG")
+	dropIndicator:SetFixedFrameStrata(true)
 	dropIndicator.bg = dropIndicator:CreateTexture(nil, "BACKGROUND")
 	dropIndicator.bg:SetAllPoints()
 	dropIndicator.bg:SetColorTexture(.5, .5, 1, .5)
@@ -624,7 +626,6 @@ function journal:init()
 	local function onDropEnter(isShown, frame)
 		if isShown then
 			dropIndicator:SetParent(frame)
-			dropIndicator:SetFrameStrata("DIALOG")
 			dropIndicator:SetAllPoints(frame)
 			dropIndicator:Show()
 		else
@@ -1555,6 +1556,7 @@ do
 	end
 
 	function journal:hideFrames()
+		self.CollectionsJournal.CloseButton:Hide()
 		for _, frame in ipairs({self.MountJournal:GetChildren()}) do
 			if not frame:IsProtected() then
 				self.frameState[frame] = frame:IsShown()
@@ -1569,6 +1571,7 @@ end
 
 
 function journal:restoreFrames()
+	self.CollectionsJournal.CloseButton:Show()
 	for frame, shown in pairs(self.frameState) do
 		self.frameState[frame] = nil
 		frame.SetShown = nil
@@ -1676,7 +1679,7 @@ end
 
 
 function journal:setMountTooltip(mountID, spellID, showDescription)
-	local _, name, _,_,_,_,_,_,_, faction = util.getMountInfo(mountID)
+	local isMount, name, _,_,_,_,_,_,_, faction = util.getMountInfo(mountID)
 	local expansion, familyID, _,_, descriptionText, sourceText, _, mountType = util.getMountInfoExtra(mountID)
 	GameTooltip:SetText(name, nil, nil, nil, nil, true)
 
@@ -1741,7 +1744,7 @@ function journal:setMountTooltip(mountID, spellID, showDescription)
 	--@do-not-package@
 	GameTooltip:AddLine(" ")
 	util.addTooltipDLine("TypeID", mountType)
-	util.addTooltipDLine("MountID", mountID)
+	if isMount then util.addTooltipDLine("MountID", mountID) end
 	util.addTooltipDLine("SpellID", spellID)
 	--@end-do-not-package@
 end

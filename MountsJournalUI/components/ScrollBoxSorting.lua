@@ -3,6 +3,8 @@ local util = ns.util
 
 local cover = CreateFrame("FRAME")
 cover:Hide()
+cover:SetFrameStrata("DIALOG")
+cover:SetFixedFrameStrata(true)
 cover.bg = cover:CreateTexture(nil, "BACKGROUND")
 cover.bg:SetAllPoints()
 cover.bg:SetColorTexture(.2, .2, .2, .6)
@@ -14,7 +16,6 @@ end)
 function cover:setCover(frame)
 	self:SetParent(frame)
 	self:SetAllPoints(frame)
-	self:SetFrameStrata("DIALOG")
 	self:Show()
 end
 
