@@ -41,6 +41,7 @@ ruleEditor:HookScript("OnShow", function(self)
 	self.menu = LibStub("LibSFDropDown-1.5"):SetMixin({})
 	self.menu:ddHideWhenButtonHidden(self)
 	self.menu:ddSetDisplayMode(addon)
+	self.menu:ddSetAutoMenuDirection(true)
 	self.menu:ddSetInitFunc(function(dd, level, value)
 		if value.custom then
 			for i = 1, #value do

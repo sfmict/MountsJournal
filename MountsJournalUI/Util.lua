@@ -36,19 +36,33 @@ end)
 
 
 -- EXPANSIONS
+util.expBG = { -- interface/credits/creditsscreenkeyart
+	3804588, --  1 classic
+	3794944, --  2 burning crusade
+	3804665, --  3 wrath of the lich king
+	3804679, --  4 cataclysm
+	3804685, --  5 mists of pandaria
+	3804693, --  6 warlords of draenor
+	3794988, --  7 legion
+	3804702, --  8 battle for azeroth
+	3795023, --  9 shadowlands
+	4547575, -- 10 dragonflight
+	5703593, -- 11 the war within
+	7242870, -- 12 midnight
+}
 util.expColors = setmetatable({
-	"D6AB7D", -- classic
-	"E43E5A", -- burning crusade
-	"3FC7EB", -- wrath of the lich king
-	"FF7C0A", -- cataclysm
-	"00EF88", -- mists of pandaria
-	"F48CBA", -- warlords of draenor
-	"AAD372", -- legion
-	"FFF468", -- battle for azeroth
-	"B2A4ED", -- shadowlands
-	"53B39F", -- dragonflight
-	"90CCDD", -- the war within
-	"7A91FF", -- midnight
+	"D6AB7D", --  1
+	"E43E5A", --  2
+	"3FC7EB", --  3
+	"FF7C0A", --  4
+	"00EF88", --  5
+	"F48CBA", --  6
+	"AAD372", --  7
+	"FFF468", --  8
+	"B2A4ED", --  9
+	"53B39F", -- 10
+	"90CCDD", -- 11
+	"7A91FF", -- 12
 }, {
 	__index = function(self, key)
 		self[key] = "E8E8E8"
@@ -56,18 +70,18 @@ util.expColors = setmetatable({
 	end
 })
 util.expIcons = setmetatable({
-	1385726,
-	1378987,
-	607688,
-	536055,
-	901157,
-	1134497,
-	1715536,
-	3256381,
-	4465334,
-	5409250,
-	6980554,
-	7966634,
+	1385726, --  1
+	1378987, --  2
+	607688,  --  3
+	536055,  --  4
+	901157,  --  5
+	1134497, --  6
+	1715536, --  7
+	3256381, --  8
+	4465334, --  9
+	5409250, -- 10
+	6980554, -- 11
+	7966634, -- 12
 }, {
 	__index = function(self, key)
 		self[key] = [[Interface\EncounterJournal\UI-EJ-BOSS-Default]]
@@ -211,6 +225,7 @@ end
 do
 	local cover = CreateFrame("BUTTON")
 	cover:Hide()
+	cover:SetPropagateMouseMotion(true)
 
 	local copyBox = CreateFrame("Editbox")
 	copyBox:Hide()
@@ -251,12 +266,6 @@ do
 		copyBox.fontString = self.fontString
 		copyBox.fontString:Hide()
 		copyBox:SetFrameLevel(self:GetFrameLevel() - 1)
-	end)
-	cover:SetScript("OnEnter", function(self)
-		self.fontString:GetScript("OnEnter")(self.fontString)
-	end)
-	cover:SetScript("OnLeave", function(self)
-		self.fontString:GetScript("OnLeave")(self.fontString)
 	end)
 
 	local function fontString_OnEnter(self)

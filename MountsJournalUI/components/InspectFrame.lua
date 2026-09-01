@@ -11,6 +11,10 @@ ns.journal:on("MODULES_INIT", function(journal)
 	inspectFrame:SetMovable(true)
 	inspectFrame:SetResizable(true)
 	inspectFrame:RegisterForDrag("LeftButton")
+	inspectFrame.bg = inspectFrame:CreateTexture(nil, "BACKGROUND", nil, 2)
+	inspectFrame.bg:SetPoint("TOPLEFT", inspectFrame.Bg, 2, 0)
+	inspectFrame.bg:SetPoint("BOTTOMRIGHT", inspectFrame.Bg, -2, 2)
+	inspectFrame.bg:SetTexture(374154)
 
 	inspectFrame:SetScript("OnDragStart", inspectFrame.StartMoving)
 	inspectFrame:SetScript("OnDragStop", function(self)
@@ -61,18 +65,25 @@ ns.journal:on("MODULES_INIT", function(journal)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
 
+	local onUpdate = function()
+		journal:event("INSPECT_RESIZED")
+	end
+
 	inspectFrame.resize = CreateFrame("BUTTON", nil, inspectFrame, "MJResizeButtonTemplate")
 	inspectFrame.resize:SetScript("OnDragStart", function(btn)
 		local parent = btn:GetParent()
 		local minWidth, minHeight = 442, 520
 		local maxWidth = UIParent:GetWidth() - parent:GetLeft() - 10
 		local maxHeight = parent:GetTop() - 10
+		parent:SetScript("OnUpdate", onUpdate)
 		parent:SetResizeBounds(minWidth, minHeight, maxWidth, maxHeight)
 		parent:StartSizing("BOTTOMRIGHT", true)
 	end)
 	inspectFrame.resize:SetScript("OnDragStop", function(btn)
 		local parent = btn:GetParent()
+		parent:SetScript("OnUpdate", nil)
 		parent:GetScript("OnDragStop")(parent)
+		journal:event("INSPECT_RESIZED")
 	end)
 
 	local settings = CreateFrame("BUTTON", nil, inspectFrame, "MJSettingsButtonTemplate")

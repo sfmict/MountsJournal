@@ -521,12 +521,20 @@
 					<Anchor point="BOTTOMRIGHT" relativeKey="$parent.rightInset" relativePoint="BOTTOMRIGHT" x="-3" y="3"/>
 				</Anchors>
 				<Layers>
-					<Layer level="BACKGROUND">
+					<Layer level="BACKGROUND" textureSubLevel="1">
 						<Texture parentKey="yesMountsTex" file="Interface\PetBattles\MountJournal-BG" setAllPoints="true">
-							<TexCoords left="0" right="0.78515625" top="0" bottom="1"/>
+							<TexCoords left="0" right=".78515625" top="0" bottom="1"/>
 						</Texture>
 						<Texture parentKey="noMountsTex" file="Interface\PetBattles\MountJournal-NoMounts" setAllPoints="true" hidden="true">
-							<TexCoords left="0" right="0.78515625" top="0" bottom="1"/>
+							<TexCoords left="0" right=".78515625" top="0" bottom="1"/>
+						</Texture>
+					</Layer>
+					<Layer level="BACKGROUND" textureSubLevel="2">
+						<Texture parentKey="bg">
+							<Anchors>
+								<Anchor point="TOP"/>
+							</Anchors>
+							<TexCoords left="0" right=".67578125" top="0" bottom="1"/>
 						</Texture>
 					</Layer>
 					<Layer level="OVERLAY">
@@ -562,12 +570,12 @@
 								</Texture>
 							</Layer>
 							<Layer level="OVERLAY">
-								<FontString inherits="GameFontNormalSmall" justifyH="CENTER" parentKey="rarityValue">
+								<FontString parentKey="rarityValue" inherits="GameFontNormalSmall" justifyH="CENTER">
 									<Anchors>
 										<Anchor point="BOTTOM" relativePoint="TOP" relativeKey="$parent.icon" x="4" y="2"/>
 									</Anchors>
 								</FontString>
-								<FontString inherits="GameFontHighlightSmall" justifyH="CENTER" parentKey="link" alpha=".5">
+								<FontString parentKey="link" inherits="GameFontHighlightSmall" justifyH="CENTER" alpha=".5">
 									<Anchors>
 										<Anchor point="TOP" y="3"/>
 									</Anchors>
@@ -582,20 +590,20 @@
 										</OnLeave>
 									</Scripts>
 								</FontString>
-								<FontString inherits="GameFontHighlightLarge" justifyH="LEFT" justifyV="MIDDLE" parentKey="name" maxLines="2">
+								<FontString parentKey="name" inherits="GameFontHighlightLarge" justifyH="LEFT" justifyV="MIDDLE" maxLines="2">
 									<Size y="35"/>
 									<Anchors>
 										<Anchor point="LEFT" relativePoint="RIGHT" relativeKey="$parent.icon" x="20" y="0"/>
 										<Anchor point="RIGHT" x="-57"/>
 									</Anchors>
 								</FontString>
-								<FontString inherits="GameFontHighlight" justifyH="LEFT" parentKey="source">
+								<FontString parentKey="source" inherits="GameFontHighlight" justifyH="LEFT">
 									<Size x="345" y="0"/>
 									<Anchors>
 										<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeKey="$parent.icon" x="0" y="-6"/>
 									</Anchors>
 								</FontString>
-								<FontString inherits="GameFontNormal" justifyH="LEFT" parentKey="lore">
+								<FontString parentKey="lore" inherits="GameFontNormal" justifyH="LEFT">
 									<Size x="345" y="0"/>
 									<Anchors>
 										<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeKey="$parent.source"/>
@@ -2141,6 +2149,14 @@
 
 	<Button name="MJGridModelSceneTemplate" propagateMouseInput="Clicks" inherits="BackdropTemplate,MJMountListButtonScripsTemplate" virtual="true">
 		<Layers>
+			<Layer level="BACKGROUND" textureSubLevel="1">
+				<Texture parentKey="expBG">
+					<Anchors>
+						<Anchor point="TOP"/>
+					</Anchors>
+					<TexCoords left="0" right=".67578125" top="0" bottom="1"/>
+				</Texture>
+			</Layer>
 			<Layer level="BACKGROUND" textureSubLevel="2">
 				<Texture parentKey="factionIcon">
 					<Anchors>

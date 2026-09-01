@@ -445,9 +445,14 @@ config:SetScript("OnShow", function(self)
 		self.coloredMountNames:SetPoint("TOPLEFT", self.mountListGroup, grx, gry)
 		self.coloredMountNames.Text:SetPoint("RIGHT", self.mountListGroup, -4, 0)
 
+		-- EXPANSION ART
+		self.expansionArt = createCheckbox(self.mountListGroup, L["Show mount expansion art"], L["Show mount expansion art"], L["MOUNT_EXPANSION_ART_DESCRIPTION"])
+		self.expansionArt:SetPoint("TOPLEFT", self.coloredMountNames, "BOTTOMLEFT", 0, -3)
+		self.expansionArt.Text:SetPoint("RIGHT", self.mountListGroup, -4, 0)
+
 		-- ARROW BUTTONS
 		self.arrowButtons = createCheckbox(self.mountListGroup, L["Enable arrow buttons to browse mounts"])
-		self.arrowButtons:SetPoint("TOPLEFT", self.coloredMountNames, "BOTTOMLEFT", 0, -3)
+		self.arrowButtons:SetPoint("TOPLEFT", self.expansionArt, "BOTTOMLEFT", 0, -3)
 		self.arrowButtons.Text:SetPoint("RIGHT", self.mountListGroup, -4, 0)
 
 		-- TYPE SELECTION BUTTONS
@@ -631,6 +636,7 @@ config:SetScript("OnShow", function(self)
 		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
 		self.coloredMountNames:SetChecked(mounts.config.coloredMountNames)
+		self.expansionArt:SetChecked(mounts.config.showExpansionArt)
 		self.arrowButtons:SetChecked(mounts.config.arrowButtonsBrowse)
 		self.showTypeSelBtn:SetChecked(mounts.config.showTypeSelBtn)
 		self.copyMountTarget:SetChecked(mounts.config.copyMountTarget)
@@ -678,6 +684,7 @@ config:SetScript("OnShow", function(self)
 		mounts.config.noPetInRaid = self.noPetInRaid:GetChecked()
 		mounts.config.noPetInGroup = self.noPetInGroup:GetChecked()
 		mounts.config.coloredMountNames = self.coloredMountNames:GetChecked()
+		mounts.config.showExpansionArt = self.expansionArt:GetChecked()
 		mounts.config.arrowButtonsBrowse = self.arrowButtons:GetChecked()
 		mounts.config.showTypeSelBtn = self.showTypeSelBtn:GetChecked()
 		mounts.config.copyMountTarget = self.copyMountTarget:GetChecked()

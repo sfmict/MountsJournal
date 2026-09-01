@@ -87,6 +87,9 @@ function mounts:ADDON_LOADED(addonName)
 		if self.config.coloredMountNames == nil then
 			self.config.coloredMountNames = true
 		end
+		-- if self.config.showExpansionArt == nil then
+		-- 	self.config.showExpansionArt = true
+		-- end
 		if self.config.arrowButtonsBrowse == nil then
 			self.config.arrowButtonsBrowse = true
 		end

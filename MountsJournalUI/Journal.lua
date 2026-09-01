@@ -682,6 +682,14 @@ function journal:init()
 		mountDisplay:SetScript("OnUpdate", modelSceneControlsHide)
 	end)
 
+	self.mountDisplay:SetScript("OnShow", function(frame)
+		if not (frame:IsShown() and frame.bg:IsShown()) then return end
+		local width, height = frame:GetSize()
+		local tWidth, tHeight = frame.bg:GetSize()
+		local scale = math.min(width/tWidth, height/tHeight)
+		frame.bg:SetScale(scale)
+	end)
+
 	-- WOWHEAD LINK
 	self.mountDisplay.info.link:HookScript("OnEnter", function()
 		self.modelScene:GetScript("OnEnter")(self.modelScene)
@@ -704,6 +712,7 @@ function journal:init()
 		local info = {}
 
 		local langs = {
+			"de", "en", "es", "mx", "fr", "it", "pt", "ru", "ko", "cn", "tw",
 			de = "Deutsch",
 			en = "English",
 			es = "Español",
@@ -720,10 +729,10 @@ function journal:init()
 		info.func = function(btn)
 			mounts.config.wowheadLinkLang = btn.value
 			langButton:SetText(btn.value)
-			self:updateMountDisplay(true)
+			self:setWowheadLink()
 		end
 
-		for i, lang in ipairs({"de", "en", "es", "mx", "fr", "it", "pt", "ru", "ko", "cn", "tw"}) do
+		for i, lang in ipairs(langs) do
 			info.value = lang
 			info.text = langs[lang]
 			info.checked = lang == mounts.config.wowheadLinkLang
@@ -1007,7 +1016,7 @@ function journal:init()
 	mssBtn:ddHideWhenButtonHidden()
 	mssBtn:ddSetNoGlobalMouseEvent(true)
 
-	mssBtn:ddSetInitFunc(function(btn, level)
+	mssBtn:ddSetInitFunc(function(dd, level)
 		local info = {}
 
 		info.keepShownOnClick = true
@@ -1017,27 +1026,27 @@ function journal:init()
 		info.func = function(_,_,_, checked)
 			mounts.cameraConfig.xAccelerationEnabled = checked
 		end
-		btn:ddAddButton(info)
+		dd:ddAddButton(info)
 
 		info.customFrame = self.xInitialAcceleration
 		info.OnLoad = function(frame)
 			frame:setValue(mounts.cameraConfig.xInitialAcceleration)
 		end
-		btn:ddAddButton(info)
+		dd:ddAddButton(info)
 
 		info.customFrame = self.xAcceleration
 		info.OnLoad = function(frame)
 			frame:setValue(mounts.cameraConfig.xAcceleration)
 		end
-		btn:ddAddButton(info)
+		dd:ddAddButton(info)
 
 		info.customFrame = self.xMinSpeed
 		info.OnLoad = function(frame)
 			frame:setValue(mounts.cameraConfig.xMinSpeed)
 		end
-		btn:ddAddButton(info)
+		dd:ddAddButton(info)
 
-		btn:ddAddSpace()
+		dd:ddAddSpace()
 
 		info.customFrame = nil
 		info.text = L["Enable Acceleration around the Y-axis"]
@@ -1045,25 +1054,57 @@ function journal:init()
 		info.func = function(_,_,_, checked)
 			mounts.cameraConfig.yAccelerationEnabled = checked
 		end
-		btn:ddAddButton(info)
+		dd:ddAddButton(info)
 
 		info.customFrame = self.yInitialAcceleration
 		info.OnLoad = function(frame)
 			frame:setValue(mounts.cameraConfig.yInitialAcceleration)
 		end
-		btn:ddAddButton(info)
+		dd:ddAddButton(info)
 
 		info.customFrame = self.yAcceleration
 		info.OnLoad = function(frame)
 			frame:setValue(mounts.cameraConfig.yAcceleration)
 		end
-		btn:ddAddButton(info)
+		dd:ddAddButton(info)
 
 		info.customFrame = self.yMinSpeed
 		info.OnLoad = function(frame)
 			frame:setValue(mounts.cameraConfig.yMinSpeed)
 		end
-		btn:ddAddButton(info)
+		dd:ddAddButton(info)
+
+		dd:ddAddSpace(level)
+
+		info.isNotRadio = nil
+		info.customFrame = nil
+		info.OnLoad = nil
+		info.notCheckable = true
+		info.isTitle = true
+		info.text = BACKGROUND
+		dd:ddAddButton(info)
+
+		info.notCheckable = nil
+		info.isTitle = nil
+
+		info.func = function(btn)
+			mounts.config.modelBackground = btn.value
+			journal:setModelSceneBackground()
+			dd:ddRefresh(level)
+		end
+		info.checked = function(btn) return btn.value == mounts.config.modelBackground end
+
+		info.text = NONE
+		info.value = "none"
+		dd:ddAddButton(info)
+
+		info.text = DEFAULT
+		info.value = nil
+		dd:ddAddButton(info)
+
+		info.text = L["Expansion art"]
+		info.value = "exp"
+		dd:ddAddButton(info)
 	end)
 
 	mssBtn:SetScript("OnClick", function(btn)
@@ -1406,6 +1447,7 @@ function journal:init()
 
 	self.lastMountListUpdate = 0
 	self:updateCollectionTabs(true)
+	self:setModelSceneBackground()
 	self:setScrollGridMounts()
 	self:setArrowSelectMount(mounts.config.arrowButtonsBrowse)
 	self:setMJFiltersBackup()
@@ -1979,18 +2021,20 @@ end
 
 
 function journal:defaultInitMountButton(btn, data)
-	local isMount, creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = util.getMountInfo(data.mountID)
+	local mountID = data.mountID
+	local isMount, creatureName, spellID, icon, active, isUsable, sourceType, isFavorite, isFactionSpecific, faction, isFiltered, isCollected = util.getMountInfo(mountID)
+	local expansion = util.getMountInfoExtra(mountID)
 
 	local needsFanfare, qualityColor
 	if isMount then
-		needsFanfare = C_MountJournal.NeedsFanfare(data.mountID)
-		qualityColor = util.getRarityColor(data.mountID)
+		needsFanfare = C_MountJournal.NeedsFanfare(mountID)
+		qualityColor = util.getRarityColor(mountID)
 	else
 		qualityColor = HIGHLIGHT_FONT_COLOR
 	end
 
 	btn.spellID = spellID
-	btn.mountID = data.mountID
+	btn.mountID = mountID
 
 	btn.dragButton.icon:SetTexture(needsFanfare and COLLECTIONS_FANFARE_ICON or icon)
 	btn.dragButton.icon:SetVertexColor(1, 1, 1)
@@ -2014,7 +2058,7 @@ function journal:defaultInitMountButton(btn, data)
 	btn.new:SetShown(needsFanfare)
 	btn.newGlow:SetShown(needsFanfare)
 	btn.background:SetVertexColor(1, 1, 1)
-	btn.selectedTexture:SetShown(data.mountID == self.selectedMountID)
+	btn.selectedTexture:SetShown(mountID == self.selectedMountID)
 
 	if isFactionSpecific then
 		btn.factionIcon:SetAtlas(faction == 0 and "MountJournalIcons-Horde" or "MountJournalIcons-Alliance")
@@ -2167,9 +2211,20 @@ function journal:gridModelSceneInit(btn, data, force)
 	btn.petSelectionBtn:mountSelect()
 	self:updateMountToggleButton(btn)
 
+	local width = btn:GetWidth()
+	btn.expBG:SetSize(width, width * (1024/1384))
+	btn.expBG:SetShown(mounts.config.showExpansionArt)
+
 	if oldMountID == mountID and not force then return end
 
-	local _,_, rarity, creatureID, descriptionText, sourceText, isSelfMount, mountType, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = util.getMountInfoExtra(mountID)
+	local expansion, _, rarity, creatureID, descriptionText, sourceText, isSelfMount, mountType, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = util.getMountInfoExtra(mountID)
+
+	local expAlpha = .15
+	if expansion >= 9 or expansion == 10 or expansion == 12 then
+		expAlpha = .3
+	end
+	btn.expBG:SetAlpha(expAlpha)
+	btn.expBG:SetTexture(util.expBG[expansion])
 
 	if rarity then
 		btn.rarity:SetText(rarity.."%")
@@ -2529,6 +2584,62 @@ function journal:updateMapSettings()
 end
 
 
+function journal:setModelSceneBackground()
+	local yesTex = self.mountDisplay.yesMountsTex
+	local bgTex = self.mountDisplay.bg
+	self:off("JOURNAL_RESIZED.MountDisplay")
+	    :off("INSPECT_RESIZED.MountDisplay")
+
+	if mounts.config.modelBackground == nil then
+		yesTex:SetTexture("Interface/PetBattles/MountJournal-BG")
+		yesTex:SetVertexColor(1, 1, 1)
+		bgTex:Hide()
+	elseif mounts.config.modelBackground == "none" then
+		yesTex:SetColorTexture(.04, .04, .04, .9)
+		yesTex:SetVertexColor(1, 1, 1)
+		bgTex:Hide()
+	elseif mounts.config.modelBackground == "exp" then
+		if self.selectedMountID then
+			local expansion = util.getMountInfoExtra(self.selectedMountID)
+			bgTex:SetTexture(util.expBG[expansion])
+		end
+		yesTex:SetTexture(137056)
+		yesTex:SetVertexColor(.1, .1, .1, .9)
+		bgTex:SetSize(1384, 1024)
+		bgTex:SetTexCoord(0, .67578125, 0, 1)
+		bgTex:SetAlpha(.8)
+		bgTex:ClearAllPoints()
+		bgTex:SetPoint("TOP")
+		bgTex:Show()
+		local updateSize = function()
+			self.mountDisplay:GetScript("OnShow")(self.mountDisplay)
+		end
+		updateSize()
+		self:on("JOURNAL_RESIZED.MountDisplay", updateSize)
+		    :on("INSPECT_RESIZED.MountDisplay", updateSize)
+	end
+end
+
+
+function journal:setWowheadLink()
+	local lang = mounts.config.wowheadLinkLang
+	local info = self.mountDisplay.info
+	local link = "wowhead.com"..(lang == "en" and "" or "/"..lang)
+
+	if type(self.selectedMountID) == "number" then
+		link = link.."/mount/"..self.selectedMountID
+	elseif self.selectedMountID.itemID then
+		link = link.."/item="..self.selectedMountID.itemID
+	else
+		link = link.."/spell="..self.selectedSpellID
+	end
+
+	info.link:SetShown(mounts.config.showWowheadLink)
+	info.linkLang:SetShown(mounts.config.showWowheadLink)
+	info.link:SetText(link)
+end
+
+
 function journal:setMountToModelScene(modelScene, creatureID, isSelfMount, animID, disablePlayerMountPreview, spellVisualKitID)
 	local mountActor = modelScene:GetActorByTag("unwrapped")
 	if mountActor then
@@ -2566,7 +2677,7 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 		local needsFanfare = isMount and C_MountJournal.NeedsFanfare(self.selectedMountID)
 
 		if self.mountDisplay.lastMountID ~= self.selectedMountID or forceSceneChange or MountJournal_GetPendingMountChanges() then
-			local _,_, rarity, creatureDisplayID, descriptionText, sourceText, isSelfMount, mountType, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = util.getMountInfoExtra(self.selectedMountID)
+			local expansion, _, rarity, creatureDisplayID, descriptionText, sourceText, isSelfMount, mountType, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = util.getMountInfoExtra(self.selectedMountID)
 			if not creatureID then
 				if self.mountDisplay.lastMountID == self.selectedMountID then
 					creatureID = self.mountDisplay.lastCreatureID
@@ -2580,6 +2691,10 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 			self.mountDisplay.lastMountID = self.selectedMountID
 			self.mountDisplay.lastCreatureID = creatureID
 
+			if mounts.config.modelBackground == "exp" then
+				self.mountDisplay.bg:SetTexture(util.expBG[expansion])
+			end
+
 			if rarity then
 				info.rarityValue:SetText(rarity.."%")
 				info.rarityValue:Show()
@@ -2587,19 +2702,7 @@ function journal:updateMountDisplay(forceSceneChange, creatureID)
 				info.rarityValue:Hide()
 			end
 
-			local lang = mounts.config.wowheadLinkLang
-			local link = "wowhead.com"..(lang == "en" and "" or "/"..lang)
-			if isMount then
-				link = link.."/mount/"..self.selectedMountID
-			elseif self.selectedMountID.itemID then
-				link = link.."/item="..self.selectedMountID.itemID
-			else
-				link = link.."/spell="..self.selectedSpellID
-			end
-
-			info.link:SetShown(mounts.config.showWowheadLink)
-			info.linkLang:SetShown(mounts.config.showWowheadLink)
-			info.link:SetText(link)
+			self:setWowheadLink()
 			info.name:SetText(creatureName)
 			info.source:SetText(sourceText)
 			info.lore:SetText(descriptionText)

@@ -58,6 +58,7 @@ function tags:init()
 	self.mountOptionsMenu:ddHideWhenButtonHidden(journal.bgFrame)
 	self.mountOptionsMenu:ddSetInitFunc(function(...) self:mountOptionsMenu_Init(...) end)
 	self.mountOptionsMenu:ddSetDisplayMode(addon)
+	self.mountOptionsMenu:ddSetAutoMenuDirection(true)
 
 	journal.scrollBox:RegisterCallback(journal.scrollBox.Event.OnDataRangeChanged, function()
 		if self.doNotHideMenu then return end
