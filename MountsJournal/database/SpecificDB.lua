@@ -6,6 +6,7 @@ ns.specificDB = {
 		[61425] = true, -- 280 Traveler's Tundra Mammoth (Alliance)
 		[61447] = true, -- 284 Traveler's Tundra Mammoth (Horde)
 		[122708] = true, -- 460 Grand Expedition Yak
+		[142515] = true, -- 2982 Hearthkeeper's Wandering Caravan
 		[264058] = true, -- 1039 Mighty Caravan Brutosaur
 		[457485] = true, -- 2237 Grizzly Hills Packmaster
 	},
@@ -26,6 +27,7 @@ ns.specificDB = {
 		[93326] = true, -- 407 Sandstone Drake
 		[121820] = true, -- 455 Obsidian Nightwing
 		[122708] = true, -- 460 Grand Expedition Yak
+		[142515] = true, -- 2982 Hearthkeeper's Wandering Caravan
 		[245723] = true, -- 959 Stormwind Skychaser (Alliance)
 		[245725] = true, -- 960 Orgrimmar Interceptor (Horde)
 		[261395] = true, -- 1025 The Hivemind
