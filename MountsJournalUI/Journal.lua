@@ -2212,7 +2212,7 @@ function journal:gridModelSceneInit(btn, data, force)
 	self:updateMountToggleButton(btn)
 
 	local width = btn:GetWidth()
-	btn.expBG:SetSize(width, width * (1024/1384))
+	btn.expBG:SetSize(width, width * util.expBGK)
 	btn.expBG:SetShown(mounts.config.showExpansionArt)
 
 	if oldMountID == mountID and not force then return end
@@ -2220,8 +2220,8 @@ function journal:gridModelSceneInit(btn, data, force)
 	local expansion, _, rarity, creatureID, descriptionText, sourceText, isSelfMount, mountType, modelSceneID, animID, spellVisualKitID, disablePlayerMountPreview = util.getMountInfoExtra(mountID)
 
 	local expAlpha = .15
-	if expansion >= 9 or expansion == 10 or expansion == 12 then
-		expAlpha = .3
+	if expansion == 9 or expansion == 10 or expansion == 12 then
+		expAlpha = .25
 	end
 	btn.expBG:SetAlpha(expAlpha)
 	btn.expBG:SetTexture(util.expBG[expansion])
@@ -2586,18 +2586,16 @@ end
 
 function journal:setModelSceneBackground()
 	local yesTex = self.mountDisplay.yesMountsTex
+	yesTex:SetVertexColor(1, 1, 1)
 	local bgTex = self.mountDisplay.bg
+	bgTex:Hide()
 	self:off("JOURNAL_RESIZED.MountDisplay")
 	    :off("INSPECT_RESIZED.MountDisplay")
 
 	if mounts.config.modelBackground == nil then
 		yesTex:SetTexture("Interface/PetBattles/MountJournal-BG")
-		yesTex:SetVertexColor(1, 1, 1)
-		bgTex:Hide()
 	elseif mounts.config.modelBackground == "none" then
 		yesTex:SetColorTexture(.04, .04, .04, .9)
-		yesTex:SetVertexColor(1, 1, 1)
-		bgTex:Hide()
 	elseif mounts.config.modelBackground == "exp" then
 		if self.selectedMountID then
 			local expansion = util.getMountInfoExtra(self.selectedMountID)
@@ -2605,9 +2603,9 @@ function journal:setModelSceneBackground()
 		end
 		yesTex:SetTexture(137056)
 		yesTex:SetVertexColor(.1, .1, .1, .9)
-		bgTex:SetSize(1384, 1024)
+		bgTex:SetSize(util.expBGWidth , util.expBGHeight)
 		bgTex:SetTexCoord(0, .67578125, 0, 1)
-		bgTex:SetAlpha(.8)
+		bgTex:SetAlpha(.6)
 		bgTex:ClearAllPoints()
 		bgTex:SetPoint("TOP")
 		bgTex:Show()

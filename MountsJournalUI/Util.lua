@@ -36,6 +36,9 @@ end)
 
 
 -- EXPANSIONS
+util.expBGWidth = 1384
+util.expBGHeight = 1024
+util.expBGK = util.expBGHeight / util.expBGWidth
 util.expBG = { -- interface/credits/creditsscreenkeyart
 	3804588, --  1 classic
 	3794944, --  2 burning crusade
