@@ -495,16 +495,14 @@ rules:SetScript("OnShow", function(self)
 	end)
 
 	self.scrollBox:RegisterCallback(self.scrollBox.Event.OnDataRangeChanged, function()
-		if self.doNotHideMenu then return end
+		if self.keepOpenMenu then return end
 		self.ruleMenu:ddOnHide()
 	end)
 
 	-- EVENTS
 	macroFrame:on("RULE_LIST_UPDATE", function()
 		if self:IsShown() then
-			self.doNotHideMenu = true
 			self:updateRuleList()
-			self.doNotHideMenu = nil
 		end
 	end)
 
@@ -923,7 +921,9 @@ end
 
 
 function rules:updateRuleList()
+	self.keepOpenMenu = true
 	self.scrollBox:SetDataProvider(self.dataProvider, ScrollBoxConstants.RetainScrollPosition)
+	self.keepOpenMenu = nil
 end
 
 

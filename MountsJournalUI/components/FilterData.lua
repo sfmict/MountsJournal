@@ -707,7 +707,9 @@ end
 
 
 function journal:updateScrollMountList()
+	self.tags.keepOpenMenu = true
 	self.scrollBox:SetDataProvider(self.dataProvider, ScrollBoxConstants.RetainScrollPosition)
+	self.tags.keepOpenMenu = nil
 end
 
 
@@ -717,12 +719,9 @@ function journal:updateMountsList()
 	local timeSinceLastUpdate = utime - self.lastMountListUpdate
 	if timeSinceLastUpdate < .2 then
 		self.mountListUpdatePending = true
-		local doNotHideMenu = self.tags.doNotHideMenu
 		C_Timer.After(.2 - timeSinceLastUpdate, function()
 			self.mountListUpdatePending = false
-			self.tags.doNotHideMenu = doNotHideMenu
 			self:updateMountsList()
-			self.tags.doNotHideMenu = nil
 		end)
 		return
 	end

@@ -139,9 +139,7 @@ function tags.mountMenu.main(dd, level)
 				mounts.globalDB.hiddenMounts = nil
 			end
 		end
-		tags.doNotHideMenu = true
 		journal:updateMountsList()
-		tags.doNotHideMenu = nil
 	end
 	info.checked = journal:isMountHidden(tags.menuSpellID)
 	dd:ddAddButton(info, level)

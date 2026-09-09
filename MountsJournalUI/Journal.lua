@@ -1665,9 +1665,7 @@ end
 
 
 function journal:updateListAndDisplay()
-	self.tags.doNotHideMenu = true
 	self:updateScrollMountList()
-	self.tags.doNotHideMenu = nil
 	self:updateMountDisplay()
 end
 journal.SPELLS_CHANGED = journal.updateListAndDisplay

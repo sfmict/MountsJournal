@@ -61,7 +61,7 @@ function tags:init()
 	self.mountOptionsMenu:ddSetAutoMenuDirection(true)
 
 	journal.scrollBox:RegisterCallback(journal.scrollBox.Event.OnDataRangeChanged, function()
-		if self.doNotHideMenu then return end
+		if self.keepOpenMenu then return end
 		self.mountOptionsMenu:ddOnHide()
 	end)
 end
@@ -252,9 +252,7 @@ end
 
 
 function tags:updateOrSortMountList()
-	self.doNotHideMenu = true
 	journal:updateMountsListWithSortCheck("tags")
-	self.doNotHideMenu = nil
 end
 
 
