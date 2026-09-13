@@ -272,6 +272,7 @@ end
 
 do
 	local function onClick(btn)
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		journal:resetFilterByInfo(btn.info, true)
 	end
 
@@ -416,6 +417,13 @@ function journal:setAllFilters(typeFilter, enabled)
 	for k in pairs(filter) do
 		filter[k] = enabled
 	end
+end
+
+
+function journal:setFilterOnly(typeFilter, value)
+	self:setAllFilters(typeFilter, false)
+	mounts.filters[typeFilter][value] = true
+	self:updateMountsList()
 end
 
 

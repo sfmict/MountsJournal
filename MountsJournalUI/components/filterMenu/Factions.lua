@@ -42,9 +42,7 @@ function journal.filters.factions(dd, level)
 		icon = "interface/worldmap/worldmappartyicon",
 		OnClick = function(btn)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			journal:setAllFilters("factions", false)
-			factions[btn.value] = true
-			journal:updateMountsList()
+			journal:setFilterOnly("factions", btn.value)
 			dd:ddRefresh(level)
 		end,
 	}}

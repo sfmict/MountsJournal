@@ -87,6 +87,15 @@ function tags:setAllFilterTags(enabled)
 end
 
 
+function tags:setFilterTagOnly(tag)
+	self.filter.noTag = false
+	self.filter.withAllTags = false
+	self:setAllFilterTags(false)
+	self.filter.tags[tag][2] = true
+	journal:updateMountsList()
+end
+
+
 function tags:hideDropDown(mouseBtn)
 	if mouseBtn == "LeftButton" then
 		self.mountOptionsMenu:ddCloseMenus()

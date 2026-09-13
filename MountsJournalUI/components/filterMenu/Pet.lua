@@ -43,9 +43,7 @@ function journal.filters.pet(dd, level)
 		icon = "interface/worldmap/worldmappartyicon",
 		OnClick = function(btn)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			journal:setAllFilters("pet", false)
-			pet[btn.value] = true
-			journal:updateMountsList()
+			journal:setFilterOnly("pet", btn.value)
 			dd:ddRefresh(level)
 		end,
 	}}

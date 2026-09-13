@@ -6,6 +6,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 	local tooltip = CreateFrame("GameTooltip", addon.."Tooltip", UIParent, "GameTooltipTemplate")
 	tooltip:Hide()
 	tooltip:SetScript("OnUpdate", GameTooltip_OnUpdate)
+	tooltip:HookScript("OnShow", function() ns.journal.customTooltip:Hide() end)
 	local tm = journal.bgFrame.targetMount
 	tm:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 	tm.checkedTexture:SetShown(ns.mounts.config.autoTargetMount)

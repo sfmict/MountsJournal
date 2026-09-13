@@ -1119,10 +1119,9 @@ function journal:init()
 		btn.isHover = true
 		btn.highlight:Show()
 		btn:SetAlpha(1)
-		GameTooltip:SetOwner(btn, "ANCHOR_NONE")
-		GameTooltip:SetPoint("RIGHT", btn, "LEFT", 14, 0)
+		self.customTooltip:point("RIGHT", btn, "LEFT", 14, 0)
 		self:setMountTooltip(self.selectedMountID, self.selectedSpellID)
-		GameTooltip:Show()
+		self.customTooltip:Show()
 	end)
 
 	msMountHint:SetScript("OnLeave", function(btn)
@@ -1721,71 +1720,105 @@ end
 function journal:setMountTooltip(mountID, spellID, showDescription)
 	local isMount, name, _,_,_,_,_,_,_, faction = util.getMountInfo(mountID)
 	local expansion, familyID, _,_, descriptionText, sourceText, _, mountType = util.getMountInfoExtra(mountID)
-	GameTooltip:SetText(name, nil, nil, nil, nil, true)
+	local ct = self.customTooltip
+	ct:setTitle(name, true)
 
 	-- type
-	local mType, typeStr = util.mountTypes[mountType]
-	if type(mType) == "table" then
-		typeStr = L["MOUNT_TYPE_"..mType[1]]
-		for i = 2, #mType do
-			typeStr = ("%s, %s"):format(typeStr, L["MOUNT_TYPE_"..mType[i]])
-		end
-	else
-		typeStr = L["MOUNT_TYPE_"..mType]
+	local mType = util.mountTypes[mountType]
+	local typeFunc = function(value)
+		self:setFilterOnly("types", value)
+		self:updateBtnFilters()
 	end
-	util.addTooltipDLine(L["types"], typeStr)
+	if type(mType) == "table" then
+		local info = {}
+		for i = 1, #mType do
+			info[#info + 1] = {
+				text = L["MOUNT_TYPE_"..mType[i]],
+				value = mType[i],
+			}
+		end
+		ct:addLine(L["types"], info, typeFunc)
+	else
+		ct:addLine(L["types"], L["MOUNT_TYPE_"..mType], typeFunc, mType)
+	end
 
 	-- family
+	local familyFunc = function(value)
+		self:setFilterOnly("family", value)
+	end
 	if type(familyID) == "table" then
 		for i = 1, #familyID do
-			util.addTooltipDLine(i == 1 and L["Family"] or " ", self:getFamilyPath(familyID[i]))
+			ct:addLine(i == 1 and L["Family"] or " ", self:getFamilyPath(familyID[i]), familyFunc, familyID[i])
 		end
 	else
-		util.addTooltipDLine(L["Family"], self:getFamilyPath(familyID))
+		ct:addLine(L["Family"],  self:getFamilyPath(familyID), familyFunc, familyID)
 	end
 
 	-- tags
 	local mTags = self.tags.mountTags[spellID]
 	if mTags then
-		util.addTooltipDLine(L["tags"], concat(GetKeysArray(mTags), ", "))
+		local info = {}
+		for tag in next, mTags do
+			info[#info + 1] = {
+				text = tag,
+				value = tag,
+			}
+		end
+		ct:addLine(L["tags"], info, function(tag)
+			self.tags:setFilterTagOnly(tag)
+		end)
 	end
 
 	-- faction
-	util.addTooltipDLine(L["factions"], L["MOUNT_FACTION_"..((faction or 2) + 1)])
+	ct:addLine(L["factions"], L["MOUNT_FACTION_"..((faction or 2) + 1)], function()
+		journal:setFilterOnly("factions", (faction or 2) + 1)
+	end)
 
 	-- expanstion
-	util.addTooltipDLine(EXPANSION_FILTER_TEXT, _G["EXPANSION_NAME"..(expansion - 1)])
+	ct:addLine(EXPANSION_FILTER_TEXT, _G["EXPANSION_NAME"..(expansion - 1)], function()
+		journal:setFilterOnly("expansions", expansion)
+	end)
 
 	-- receipt date
 	local mountDate = mounts:getMountDate(spellID)
 	if mountDate then
 		local tDate = date("*t", mountDate)
-		util.addTooltipDLine(L["Receipt date"], FormatShortDate(tDate.day, tDate.month, tDate.year))
+		ct:addLine(L["Receipt date"], FormatShortDate(tDate.day, tDate.month, tDate.year))
 	end
 
 	-- statistic
 	local summons = mounts:getMountSummons(spellID)
-	if summons > 0 then util.addTooltipDLine(SUMMONS, summons) end
+	if summons > 0 then
+		ct:addLine(SUMMONS, summons)
+	end
 
 	local mountTime = mounts:getMountTime(spellID)
-	if mountTime > 0 then util.addTooltipDLine(L["Travel time"], util.getTimeBreakDown(mountTime)) end
+	if mountTime > 0 then
+		ct:addLine(L["Travel time"], util.getTimeBreakDown(mountTime))
+	end
 
 	local mountDistance = mounts:getMountDistance(spellID)
 	if mountDistance > 0 then
-		util.addTooltipDLine(L["Travel distance"], util:getFormattedDistance(mountDistance))
-		util.addTooltipDLine(L["Avg. speed"], util:getFormattedAvgSpeed(mountDistance, mountTime))
+		ct:addLine(L["Travel distance"], util:getFormattedDistance(mountDistance))
+		ct:addLine(L["Avg. speed"], util:getFormattedAvgSpeed(mountDistance, mountTime))
 	end
 
 	if showDescription or not mounts.config.mountDescriptionToggle then
-		GameTooltip:AddLine(" ")
-		GameTooltip:AddLine(sourceText, 1,1,1, true)
-		GameTooltip:AddLine(descriptionText, 1,1,1, true)
+		ct:addLine(" ")
+		ct:addLine(sourceText, true)
+		ct:addLine(descriptionText, true)
 	end
 	--@do-not-package@
 	GameTooltip:AddLine(" ")
-	util.addTooltipDLine("TypeID", mountType)
-	if isMount then util.addTooltipDLine("MountID", mountID) end
-	util.addTooltipDLine("SpellID", spellID)
+	ct:addLine(" ")
+	ct:addLine("TypeID", mountType, function()
+		self.searchBox:SetText("-tp "..mountType)
+		self:updateMountsList()
+	end)
+	if isMount then
+		ct:addLine("MountID", mountID)
+	end
+	ct:addLine("SpellID", spellID)
 	--@end-do-not-package@
 end
 

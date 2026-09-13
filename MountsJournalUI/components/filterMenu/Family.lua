@@ -33,9 +33,7 @@ function journal.filters.family(dd, level, subFamily)
 
 		widgets[1].OnClick = function(btn)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			journal:setAllFilters("family", false)
-			filterFamily[btn.value] = true
-			journal:updateMountsList()
+			journal:setFilterOnly("family", btn.value)
 			dd:ddRefresh(level)
 			dd:ddRefresh(level - 1)
 		end
@@ -83,9 +81,7 @@ function journal.filters.family(dd, level, subFamily)
 
 		widgets[1].OnClick = function(btn)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			journal:setAllFilters("family", false)
-			filterFamily[btn.value] = true
-			journal:updateMountsList()
+			journal:setFilterOnly("family", btn.value)
 			dd:ddRefresh(level)
 		end
 		local func = function(btn, _,_, checked)

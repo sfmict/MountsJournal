@@ -33,9 +33,8 @@ function journal.filters.sources(dd, level)
 		icon = "interface/worldmap/worldmappartyicon",
 		OnClick = function(btn)
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-			journal:setAllFilters("sources", false)
-			sources[btn.value] = true
-			journal:updateMountsList()
+			journal:setFilterOnly("sources", btn.value)
+			journal:updateBtnFilters()
 			dd:ddRefresh(level)
 		end,
 	}}
