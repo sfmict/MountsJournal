@@ -43,7 +43,12 @@ ns.newMounts = {
 	[3103] = true, -- 1305206 Crested Aqua Leafmimic
 	[3104] = true, -- 1305207 Crested Verdant Leafmimic
 	[3105] = true, -- 1305209 Crested Violet Leafmimic
+	[3107] = true, -- 1309109 Cerulean Prideclaw
+	[3108] = true, -- 1309110 [PH] Purple Cat Mount
+	[3109] = true, -- 1309112 [PH] Brown Cat Mount
+	[3110] = true, -- 1309114 [PH] White Blue Cat Mount
 	[3119] = true, -- 1309340 Wintry Witchwick's Rider
+	[3125] = true, -- 1309376 Veteran Adventurer's Loyal Companion
 }
 
 
@@ -1715,7 +1720,12 @@ ns.mountsDB = {
 	[3103] = {12, 2505, 0}, -- 1305206 Crested Aqua Leafmimic
 	[3104] = {12, 2505, 0}, -- 1305207 Crested Verdant Leafmimic
 	[3105] = {12, 2505, 0}, -- 1305209 Crested Violet Leafmimic
+	[3107] = {12, 705, 0}, -- 1309109 Cerulean Prideclaw
+	[3108] = {12, 0, 0}, -- 1309110 [PH] Purple Cat Mount
+	[3109] = {12, 0, 0}, -- 1309112 [PH] Brown Cat Mount
+	[3110] = {12, 0, 0}, -- 1309114 [PH] White Blue Cat Mount
 	[3119] = {12, 2904, 0}, -- 1309340 Wintry Witchwick's Rider
+	[3125] = {12, 600, 0}, -- 1309376 Veteran Adventurer's Loyal Companion
 	--@do-not-package@
 	-- ?? china or removed
 	[1715] = {11, 2915, 0}, -- 405623 Броненосец-волчок
