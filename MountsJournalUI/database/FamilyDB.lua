@@ -210,6 +210,7 @@ ns.familyDB = {
 		["Nether Rays"] = 2302,
 		["Stingrays"] = 2303,
 		["Shalewings"] = 2304,
+		["Zothwing Seekers"] = 2305,
 	},
 	["Razorwing"] = 2400,
 	["Reptiles"] = {
@@ -538,6 +539,7 @@ ns.familyDBIcons = {
 		["Nether Rays"] = 132191,
 		["Shalewings"] = 5009628,
 		["Stingrays"] = 1418615,
+		["Zothwing Seekers"] = 7673157,
 	},
 	["Razorwing"] = 3897764,
 	["Reptiles"] = {
