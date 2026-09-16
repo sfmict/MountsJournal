@@ -89,7 +89,6 @@ end
 
 function tags:setFilterTagOnly(tag)
 	self.filter.noTag = false
-	self.filter.withAllTags = false
 	self:setAllFilterTags(false)
 	self.filter.tags[tag][2] = true
 	journal:updateMountsList()
@@ -257,6 +256,19 @@ end
 function tags:getTagInMount(spellID, tag)
 	local mountTags = self.mountTags[spellID]
 	if mountTags then return mountTags[tag] end
+end
+
+
+function tags:getMountTags(spellID)
+	local mountTags = self.mountTags[spellID]
+	if not mountTags then return end
+	local list = {}
+	for i = 1, #self.sortedTags do
+		if mountTags[self.sortedTags[i]] then
+			list[#list + 1] = self.sortedTags[i]
+		end
+	end
+	return list
 end
 
 

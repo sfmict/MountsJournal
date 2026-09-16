@@ -1755,16 +1755,9 @@ function journal:setMountTooltip(mountID, spellID, showDescription)
 	end
 
 	-- tags
-	local mTags = self.tags.mountTags[spellID]
+	local mTags = self.tags:getMountTags(spellID)
 	if mTags then
-		local info = {}
-		for tag in next, mTags do
-			info[#info + 1] = {
-				text = tag,
-				value = tag,
-			}
-		end
-		ct:addLine(L["tags"], info, function(tag)
+		ct:addLine(L["tags"], mTags, function(tag)
 			self.tags:setFilterTagOnly(tag)
 		end)
 	end

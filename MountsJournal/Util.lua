@@ -15,7 +15,7 @@ function eventsMixin:on(event, func)
 		events[event] = handlerList
 	end
 
-	local k = tostring(self)..(name or tostring(func))
+	local k = name or func
 	if handlerList[k] then
 		for i = #handlerList, 1, -1 do
 			if handlerList[i] == handlerList[k] then
@@ -39,7 +39,7 @@ function eventsMixin:off(event, func)
 	local handlerList = events[event]
 	if handlerList then
 		if name or func then
-			local k = tostring(self)..(name or tostring(func))
+			local k = name or func
 			local handler = handlerList[k]
 			if handler then
 				for i = #handlerList, 1, -1 do

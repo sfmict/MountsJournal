@@ -257,6 +257,7 @@ do
 	end)
 
 	cover:SetScript("OnClick", function(self)
+		copyBox:Hide()
 		copyBox:SetParent(self:GetParent())
 		copyBox:ClearAllPoints()
 		copyBox:SetPoint("TOPLEFT", self.fontString, -2, 0)

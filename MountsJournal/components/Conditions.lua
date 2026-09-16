@@ -7,6 +7,8 @@ local conds = {}
 ns.conditions = conds
 
 
+-- v.t1 = {[1]=true,[2]=true,...}
+-- v.t1[expr]
 local function genNumInList(values, expr, addKey, ...)
 	if type(values) ~= "table" then
 		return strconcat(expr, ' == ', values)
@@ -18,6 +20,8 @@ local function genNumInList(values, expr, addKey, ...)
 	return strconcat(var, "[", expr, "]")
 end
 
+-- v.t2 = {['str1']=true,['str2']=true,...}
+-- v.t2[expr]
 local function genStrInList(values, expr, addKey, ...)
 	if type(values) ~= "table" then
 		return strconcat(expr, " == '", values, "'")
@@ -29,12 +33,16 @@ local function genStrInList(values, expr, addKey, ...)
 	return strconcat(var, "[", expr, "]")
 end
 
+-- v.t3 = {v1,v2,...}
+-- func(v.t3)
 local function genTableCheck(values, funcStr, addKey, ...)
 	local var = ("_"):join("v.t", ...)
 	addKey(strconcat(var, " = {", concat(values, ","), "}"))
 	return funcStr:format(var)
 end
 
+-- v.t4 = {[v1]=true,[v2]=true,...}
+-- func(v.t4)
 local function genATableCheck(values, funcStr, addKey, ...)
 	local var = ("_"):join("v.t", ...)
 	addKey(strconcat(var, " = {[", concat(values, "]=true,["), "]=true}"))

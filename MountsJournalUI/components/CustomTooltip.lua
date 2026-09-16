@@ -120,7 +120,7 @@ function ct:setTitle(text, wrap)
 end
 
 
-function ct:addString(prevString, text, func, value)
+local function addString(prevString, text, func, value)
 	local str = strPool:Acquire()
 	str:SetTextColor(NIGHT_FAE_BLUE_COLOR:GetRGB())
 	str:SetText(text)
@@ -135,6 +135,15 @@ function ct:addString(prevString, text, func, value)
 	str.func = func or nil
 	str.value = value
 	return str:GetStringWidth(), str
+end
+
+
+local function getInfoTextValue(info)
+	if type(info) == "string" then
+		return info, info
+	else
+		return info.text, info.value
+	end
 end
 
 
@@ -156,26 +165,36 @@ function ct:addLine(textLeft, info, func, value)
 		width = strLeft:GetStringWidth()
 	end
 	strLeft.func = nil
+	self.lines[#self.lines + 1] = strLeft
 
 	local rWidth, str
 	if infoType == "string" or infoType == "number" then
-		rWidth, str = self:addString(nil, info, func, value)
+		rWidth, str = addString(nil, info, func, value)
 		width = width + hSpacing + rWidth
 		str:SetPoint("TOP", strLeft)
 	elseif infoType == "table" then
-		local len, sepWidth, sepStr, curStr = #info
-		width = width + hSpacing
-		rWidth, str = self:addString(nil, info[1].text, func, info[1].value)
+		local len, sepWidth, sepStr, firstStr, curStr = #info
+		local curMaxWidth = math.max(maxWidth, self.width)
+		local text, value = getInfoTextValue(info[len])
+		rWidth, firstStr = addString(nil, text, func, value)
+		str = firstStr
+		width = width + hSpacing + rWidth
 		str:SetPoint("TOP", strLeft)
-		for i = 2, len do
-			sepWidth, sepStr = self:addString(str, ", ")
-			rWidth, curStr = self:addString(sepStr, info[i].text, func, info[i].value)
+
+		for i = len-1, 1, -1 do
+			sepWidth, sepStr = addString(str, ", ")
+			text, value = getInfoTextValue(info[i])
+			rWidth, curStr = addString(sepStr, text, func, value)
 			width = width + sepWidth + rWidth
-			if width > maxWidth then
-				width = width - sepWidth
+			if width > curMaxWidth then
+				width = width - sepWidth - rWidth
 				sepStr:Hide()
 				curStr:Hide()
-				self:addLine(" ", {unpack(info, i)}, func)
+				sepWidth, sepStr = addString(nil, ",")
+				firstStr:SetPoint("RIGHT", sepStr, "LEFT")
+				sepStr:SetPoint("TOP", strLeft)
+				width = width + sepWidth
+				self:addLine(" ", {unpack(info, 1, i)}, func)
 				break
 			end
 			str = curStr
@@ -183,5 +202,4 @@ function ct:addLine(textLeft, info, func, value)
 	end
 
 	self.width = math.max(self.width, width)
-	self.lines[#self.lines+1] = strLeft
 end

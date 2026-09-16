@@ -138,11 +138,13 @@ local function ApplyFromModelSceneCameraInfo(self, modelSceneCameraInfo, transit
 	modelSceneCameraInfo.maxZoomDistance = modelSceneCameraInfo.maxZoomDistance + 8
 
 	local transitionalCameraInfo = self:CalculateTransitionalValues(self.modelSceneCameraInfo, modelSceneCameraInfo, modificationType)
+	local tx, ty, tz = transitionalCameraInfo.zoomedTargetOffset:GetXYZ()
+	local zy, zp, zr = transitionalCameraInfo.zoomedYawOffset, transitionalCameraInfo.zoomedPitchOffset, transitionalCameraInfo.zoomedRollOffset
 	self.modelSceneCameraInfo = modelSceneCameraInfo
 
 	self:SetTarget(transitionalCameraInfo.target:GetXYZ())
-	self:SetTargetSpline(TryCreateZoomSpline(transitionalCameraInfo.zoomedTargetOffset:GetXYZ()), self:GetTargetSpline())
-	self:SetOrientationSpline(TryCreateZoomSpline(transitionalCameraInfo.zoomedYawOffset, transitionalCameraInfo.zoomedPitchOffset, transitionalCameraInfo.zoomedRollOffset), self:GetOrientationSpline())
+	self:SetTargetSpline(TryCreateZoomSpline(tx, ty, tz, self:GetTargetSpline()))
+	self:SetOrientationSpline(TryCreateZoomSpline(zy, zp, zr, self:GetOrientationSpline()))
 
 	self:SetMinZoomDistance(transitionalCameraInfo.minZoomDistance)
 	self:SetMaxZoomDistance(transitionalCameraInfo.maxZoomDistance)
@@ -353,7 +355,7 @@ local function UpdateInterpolationTargets(self, elapsed)
 		local dot = math.abs(self.qw*tw + self.qx*tx + self.qy*ty + self.qz*tz)
 		local angle = 2 * math.acos(dot > 1 and 1 or dot)
 
-		-- .00087 = .5°
+		-- .0087 = .5°
 		if self.interpolatedQ == 2 and angle < .0087 or angle == 0 then
 			self.qw, self.qx, self.qy, self.qz = tw, tx, ty, tz
 			self.interpolatedQ = nil
