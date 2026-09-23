@@ -833,6 +833,7 @@ function journal:init()
 	local function filterClick(btn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		self:setBtnFilters(btn:GetParent():GetParent().id)
+		self:scrollToSelectedMount()
 	end
 
 	local function filterEnter(btn)
@@ -919,6 +920,7 @@ function journal:init()
 			OnClick = function(btn)
 				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 				self:resetFilterByInfo(btn.value, true)
+				self:scrollToSelectedMount()
 				dd:ddCloseMenus()
 				if self.shownPanel.startIndex ~= 0 then dd:Click() end
 			end,
@@ -1728,6 +1730,7 @@ function journal:setMountTooltip(mountID, spellID, showDescription)
 	local typeFunc = function(value)
 		self:setFilterOnly("types", value)
 		self:updateBtnFilters()
+		self:setSelectedMount(mountID)
 	end
 	if type(mType) == "table" then
 		local info = {}
@@ -1745,6 +1748,7 @@ function journal:setMountTooltip(mountID, spellID, showDescription)
 	-- family
 	local familyFunc = function(value)
 		self:setFilterOnly("family", value)
+		self:setSelectedMount(mountID)
 	end
 	if type(familyID) == "table" then
 		for i = 1, #familyID do
@@ -1759,17 +1763,20 @@ function journal:setMountTooltip(mountID, spellID, showDescription)
 	if mTags then
 		ct:addLine(L["tags"], mTags, function(tag)
 			self.tags:setFilterTagOnly(tag)
+			self:setSelectedMount(mountID)
 		end)
 	end
 
 	-- faction
 	ct:addLine(L["factions"], L["MOUNT_FACTION_"..((faction or 2) + 1)], function()
-		journal:setFilterOnly("factions", (faction or 2) + 1)
+		self:setFilterOnly("factions", (faction or 2) + 1)
+		self:setSelectedMount(mountID)
 	end)
 
 	-- expanstion
 	ct:addLine(EXPANSION_FILTER_TEXT, _G["EXPANSION_NAME"..(expansion - 1)], function()
-		journal:setFilterOnly("expansions", expansion)
+		self:setFilterOnly("expansions", expansion)
+		self:setSelectedMount(mountID)
 	end)
 
 	-- receipt date
@@ -2819,6 +2826,28 @@ function journal:getMountButtonByMountID(mountID)
 end
 
 
+function journal:scrollToSelectedMount(index, toEdge)
+	if not index then
+		index = self:getMountDataByMountID(self.selectedMountID)
+		if not index then return end
+	end
+
+
+	if toEdge then
+		local scrollOffset = self.scrollBox:GetDerivedScrollOffset()
+		local indexOffset = self.scrollBox:GetExtentUntil(index)
+
+		if indexOffset < scrollOffset then
+			self.scrollBox:ScrollToElementDataIndex(index, ScrollBoxConstants.AlignBegin)
+		elseif indexOffset + self.scrollBox:GetElementExtent(index) > scrollOffset + self.scrollBox:GetVisibleExtent() then
+			self.scrollBox:ScrollToElementDataIndex(index, ScrollBoxConstants.AlignEnd)
+		end
+	else
+		self.scrollBox:ScrollToElementDataIndex(index)
+	end
+end
+
+
 function journal:setSelectedMount(mountID, spellID, index)
 	local scrollTo = not spellID
 	if not spellID then
@@ -2843,20 +2872,7 @@ function journal:setSelectedMount(mountID, spellID, index)
 	end
 
 	if scrollTo then
-		if not index then
-			index = self:getMountDataByMountID(mountID)
-		end
-
-		if index then
-			local scrollOffset = self.scrollBox:GetDerivedScrollOffset()
-			local indexOffset = self.scrollBox:GetExtentUntil(index)
-
-			if indexOffset < scrollOffset then
-				self.scrollBox:ScrollToElementDataIndex(index, ScrollBoxConstants.AlignBegin)
-			elseif indexOffset + self.scrollBox:GetElementExtent(index) > scrollOffset + self.scrollBox:GetVisibleExtent() then
-				self.scrollBox:ScrollToElementDataIndex(index, ScrollBoxConstants.AlignEnd)
-			end
-		end
+		self:scrollToSelectedMount(index, true)
 	end
 
 	self:event("MOUNT_SELECT")

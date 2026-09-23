@@ -10,8 +10,8 @@ ct:SetFrameStrata("TOOLTIP")
 ct:EnableMouse(true)
 ct.lines = {}
 SharedTooltip_OnLoad(ct)
-local underline = ct:CreateTexture(nil, "BACKGROUND")
-underline:SetSize(1, 1)
+local underline = ct:CreateTexture(nil, "ARTWORK")
+underline:SetSize(1.1, 1.1)
 GameTooltip:HookScript("OnShow", function() ct:Hide() end)
 
 
@@ -122,7 +122,13 @@ end
 
 local function addString(prevString, text, func, value)
 	local str = strPool:Acquire()
-	str:SetTextColor(NIGHT_FAE_BLUE_COLOR:GetRGB())
+	local r,g,b = NIGHT_FAE_BLUE_COLOR:GetRGB()
+	if func then
+		r = Saturate(r - .1)
+		g = Saturate(g + .1)
+		b = Saturate(b - .1)
+	end
+	str:SetTextColor(r,g,b)
 	str:SetText(text)
 	str:SetWordWrap(false)
 	str:SetJustifyH("RIGHT")
@@ -132,7 +138,7 @@ local function addString(prevString, text, func, value)
 	else
 		str:SetPoint("RIGHT", -margin, 0)
 	end
-	str.func = func or nil
+	str.func = func
 	str.value = value
 	return str:GetStringWidth(), str
 end

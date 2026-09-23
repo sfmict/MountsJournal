@@ -639,7 +639,7 @@ end
 function rules:ruleCheck(rule)
 	if type(rule) ~= "table"
 	or rule.action and (rule.name or rule.rules)
-	or not (type(rule.action) == "table" or (type(rule.name) == "string" and  type(rule.rules) == "table"))
+	or not (type(rule.action) == "table" or (type(rule.name) == "string" and type(rule.rules) == "table"))
 	then return end
 
 	if rule.action then

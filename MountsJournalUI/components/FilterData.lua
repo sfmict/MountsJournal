@@ -2,7 +2,7 @@ local _, ns = ...
 local L, journal, util, mounts = ns.L, ns.journal, ns.util, ns.mounts
 local newMounts, mountsDB, specificDB, classDB = ns.newMounts, ns.mountsDB, ns.specificDB, ns.classDB
 local C_MountJournal, C_Timer, GetTime = C_MountJournal, C_Timer, GetTime
-local next, pairs, ipairs, select, type, math, tonumber = next, pairs, ipairs, select, type, math, tonumber
+local next, pairs, ipairs, type, math, tonumber = next, pairs, ipairs, type, math, tonumber
 local wipe, sort, select = wipe, table.sort, select
 
 
@@ -274,6 +274,7 @@ do
 	local function onClick(btn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		journal:resetFilterByInfo(btn.info, true)
+		journal:scrollToSelectedMount()
 	end
 
 
@@ -433,6 +434,7 @@ function journal:clearBtnFilters()
 	self:setAllFilters("selected", true)
 	self:updateBtnFilters()
 	self:updateMountsList()
+	self:scrollToSelectedMount()
 end
 
 
@@ -444,6 +446,7 @@ function journal:resetToDefaultFilters()
 
 	self:updateBtnFilters()
 	self:updateMountsList()
+	self:scrollToSelectedMount()
 	self:setCountMounts()
 end
 

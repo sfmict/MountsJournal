@@ -79,7 +79,7 @@ config:SetScript("OnShow", function(self)
 			editBox:SetNumber(editBox.defValue or editBox.min)
 		end
 		local onMouseWheel = function(editBox, delta)
-			if editBox:IsEnabled() then
+			if editBox:IsEnabled() and editBox:HasFocus() then
 				local value = (tonumber(editBox:GetText()) or editBox.min) + delta
 				if value >= editBox.min and value <= editBox.max then
 					editBox:SetNumber(value)
