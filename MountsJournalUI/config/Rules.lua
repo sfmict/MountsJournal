@@ -913,8 +913,8 @@ function rules:ruleButtonInit(btn, node)
 end
 
 
-function rules:ruleGroupInit(btn, node, isDrag)
-	self:ruleButtonInit(btn, node, isDrag)
+function rules:ruleGroupInit(btn, node)
+	self:ruleButtonInit(btn, node)
 	btn.order:SetText(btn.id)
 	btn:updateState(node)
 end
