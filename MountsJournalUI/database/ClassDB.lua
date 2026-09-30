@@ -14,7 +14,7 @@ DRUID = 11
 DEMONHUNTER = 12
 EVOKER = 13
 ]]
---ns.classFilterIDs = {1,2,3,4,5,6,7,8,9,10,11,12,13}
+ns.classFilterIDs = {2,9}
 ns.classDB = {
 	[229388] = 1, -- 867 Battlelord's Bloodthirsty War Wyrm
 	[1255482] = 1, -- 2731 Felscorned War Wyrm

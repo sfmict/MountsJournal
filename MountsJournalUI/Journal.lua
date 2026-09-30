@@ -93,12 +93,6 @@ function journal:init()
 		end
 	end
 
-	-- ADDITIONAL MOUNTS
-	for spellID, mount in next, ns.additionalMounts do
-		if mount.allCreature then self.mountsWithMultipleModels[mount] = true end
-		self.mountIDs[#self.mountIDs + 1] = mount
-	end
-
 	-- BACKGROUND FRAME
 	self.bgFrame = CreateFrame("FRAME", "MountsJournalBackground", self.useMountsJournalButton, "MJMountJournalFrameTemplate")
 	self.bgFrame:SetPoint("TOPLEFT", self.CollectionsJournal, "TOPLEFT", 0, 0)
@@ -760,22 +754,22 @@ function journal:init()
 	rarityValue:SetMouseClickEnabled(false)
 
 	-- MOUNT DESCRIPTION TOGGLE
-	local mountDescriptionToggle = self.mountDisplay.info.mountDescriptionToggle
-	mountDescriptionToggle.vertical = true
-	mountDescriptionToggle:SetPropagateMouseMotion(true)
-	mountDescriptionToggle:SetChecked(mounts.config.mountDescriptionToggle)
+	-- local mountDescriptionToggle = self.mountDisplay.info.mountDescriptionToggle
+	-- mountDescriptionToggle.vertical = true
+	-- mountDescriptionToggle:SetPropagateMouseMotion(true)
+	-- mountDescriptionToggle:SetChecked(mounts.config.mountDescriptionToggle)
 
-	local function setShownDescription(btn)
-		local checked = btn:GetChecked()
-		self.mountDisplay.info.lore:SetShown(checked)
-		self.mountDisplay.info.source:SetShown(checked)
-		mounts.config.mountDescriptionToggle = checked
+	-- local function setShownDescription(btn)
+	-- 	local checked = btn:GetChecked()
+	-- 	self.mountDisplay.info.lore:SetShown(checked)
+	-- 	self.mountDisplay.info.source:SetShown(checked)
+	-- 	mounts.config.mountDescriptionToggle = checked
 
-		local activeCamera = self.modelScene.activeCamera
-		if activeCamera then activeCamera:updateYOffset() end
-	end
-	setShownDescription(mountDescriptionToggle)
-	mountDescriptionToggle:HookScript("OnClick", setShownDescription)
+	-- 	local activeCamera = self.modelScene.activeCamera
+	-- 	if activeCamera then activeCamera:updateYOffset() end
+	-- end
+	-- setShownDescription(mountDescriptionToggle)
+	-- mountDescriptionToggle:HookScript("OnClick", setShownDescription)
 
 	-- SEARCH BOX
 	self.searchBox:HookScript("OnTextChanged", function(editBox, userInput)
@@ -1530,10 +1524,9 @@ end)
 
 function journal:getMinMaxSize()
 	local minWidth, minHeight = self.CollectionsJournal:GetSize()
-	local minTabWidth = (self.CollectionsJournal.Tabs[self.CollectionsJournal.numTabs]:GetRight() or 0) - self.CollectionsJournal:GetLeft() + self.bgFrame:GetRight() - self.bgFrame.Tabs[#self.bgFrame.Tabs]:GetLeft() + 20
 	local maxWidth = UIParent:GetWidth() - self.bgFrame:GetLeft() - 10
 	local maxHeight = self.bgFrame:GetTop() - CollectionsJournalTab1:GetHeight()
-	return max(minWidth, minTabWidth), minHeight, maxWidth, maxHeight
+	return minWidth, minHeight, maxWidth, maxHeight
 end
 
 
@@ -1658,10 +1651,10 @@ end
 
 function journal:updateCollectionTabs(force)
 	local tab = CollectionsJournalTab1
-	if tab:IsProtected() and not force then return end
-	local relativeFrame = self.bgFrame:IsShown() and self.bgFrame or CollectionsJournal
-	local point, _, rPoint, x, y = tab:GetPoint()
-	tab:SetPoint(point, relativeFrame, rPoint, x, y)
+	-- if tab:IsProtected() and not force then return end
+	-- local relativeFrame = self.bgFrame:IsShown() and self.bgFrame or CollectionsJournal
+	-- local point, _, rPoint, x, y = tab:GetPoint()
+	-- tab:SetPoint(point, relativeFrame, rPoint, x, y)
 end
 
 
@@ -2059,8 +2052,8 @@ function journal:defaultInitMountButton(btn, data)
 	local needsFanfare, qualityColor
 	if isMount then
 		needsFanfare = C_MountJournal.NeedsFanfare(mountID)
-		qualityColor = util.getRarityColor(mountID)
-	else
+		-- qualityColor = util.getRarityColor(mountID)
+	-- else
 		qualityColor = HIGHLIGHT_FONT_COLOR
 	end
 
@@ -2131,8 +2124,8 @@ function journal:gridInitMountButton(btn, data)
 	local needsFanfare, qualityColor
 	if isMount then
 		needsFanfare = C_MountJournal.NeedsFanfare(mountID)
-		qualityColor = util.getRarityColor(mountID)
-	else
+	-- 	qualityColor = util.getRarityColor(mountID)
+	-- else
 		qualityColor = HIGHLIGHT_FONT_COLOR
 	end
 
@@ -2184,8 +2177,8 @@ function journal:gridModelSceneInit(btn, data, force)
 	local needsFanfare, qualityColor
 	if isMount then
 		needsFanfare = C_MountJournal.NeedsFanfare(mountID)
-		qualityColor = util.getRarityColor(mountID)
-	else
+	-- 	qualityColor = util.getRarityColor(mountID)
+	-- else
 		qualityColor = HIGHLIGHT_FONT_COLOR
 	end
 
@@ -2653,7 +2646,7 @@ end
 function journal:setWowheadLink()
 	local lang = mounts.config.wowheadLinkLang
 	local info = self.mountDisplay.info
-	local link = "wowhead.com"..(lang == "en" and "" or "/"..lang)
+	local link = "wowhead.com/forever"..(lang == "en" and "" or "/"..lang)
 
 	if type(self.selectedMountID) == "number" then
 		link = link.."/mount/"..self.selectedMountID

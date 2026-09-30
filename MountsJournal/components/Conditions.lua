@@ -163,36 +163,9 @@ end
 -- spec
 conds.spec = {}
 
-function conds.spec:getFuncText(values, addKey, _, ...)
-	local vals
-
-	if type(values) == "table" then
-		local num = 0
-		vals = {}
-		for i = 1, GetNumSpecializations() do
-			local specID = GetSpecializationInfo(i)
-			for j = 1, #values do
-				if specID == values[j] then
-					num = num + 1
-					vals[num] = i
-					break
-				end
-			end
-		end
-		if num == 0 then return "false"
-		elseif num == 1 then vals = vals[1] end
-	else
-		for i = 1, GetNumSpecializations() do
-			if values == GetSpecializationInfo(i) then
-				vals = i
-				break
-			end
-		end
-		if vals == nil then return "false" end
-	end
-
-	addKey("v.GetSpecialization = C_SpecializationInfo.GetSpecialization")
-	return genNumInList(vals, "v.GetSpecialization()", addKey, ...)
+function conds.spec:getFuncText(value, addKey)
+	addKey("v.GetActiveSpecGroup = C_SpecializationInfo.GetActiveSpecGroup")
+	return ("(v.GetActiveSpecGroup() == %s)"):format(value)
 end
 
 
@@ -343,17 +316,17 @@ end
 
 ---------------------------------------------------
 -- fs FLIGHT STYLE
-conds.fs = {}
+-- conds.fs = {}
 
-function conds.fs:getFuncText(value, addKey)
-	local spellID = GetDynamicFlightModeSpellID()
-	addKey("v.GetSpellTexture = C_Spell.GetSpellTexture")
-	if value == 1 then
-		return ("(v.GetSpellTexture(%s) ~= 5142726)"):format(spellID)
-	else
-		return ("(v.GetSpellTexture(%s) == 5142726)"):format(spellID)
-	end
-end
+-- function conds.fs:getFuncText(value, addKey)
+-- 	local spellID = GetDynamicFlightModeSpellID()
+-- 	addKey("v.GetSpellTexture = C_Spell.GetSpellTexture")
+-- 	if value == 1 then
+-- 		return ("(v.GetSpellTexture(%s) ~= 5142726)"):format(spellID)
+-- 	else
+-- 		return ("(v.GetSpellTexture(%s) == 5142726)"):format(spellID)
+-- 	end
+-- end
 
 
 ---------------------------------------------------

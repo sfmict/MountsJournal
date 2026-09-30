@@ -25,9 +25,8 @@ function journal.filters.class(dd, level)
 	end
 	info.checked = function(btn) return specific[btn.value] end
 
-	--local classes = ns.classFilterIDs
-	for i = 1, GetNumClasses() do
-		local localized, className, id = GetClassInfo(i)
+	for i = 1,  #ns.classFilterIDs do
+		local localized, className, id = GetClassInfo(ns.classFilterIDs[i])
 		local classColor = C_ClassColor.GetClassColor(className)
 		local t = CLASS_ICON_TCOORDS[className]
 		info.text = classColor:WrapTextInColorCode(localized)

@@ -94,7 +94,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 			v.list[numTiers - i + 1] = tier
 		end
 	end
-	EJ_SelectTier(currentTier)
+	-- EJ_SelectTier(currentTier)
 	if EncounterJournal then
 		if EncounterJournal.instanceID then EJ_SelectInstance(EncounterJournal.instanceID) end
 		if EncounterJournal.encounterID then EJ_SelectEncounter(EncounterJournal.encounterID) end

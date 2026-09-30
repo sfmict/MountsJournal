@@ -47,36 +47,36 @@ function journal.filters.specific(dd, level)
 	end
 	info.checked = function(btn) return specific[btn.value] end
 
-	for k, t in pairs(specificDB) do
-		info.text = L[k]
-		info.icon = icons[k]
-		info.value = k
-		dd:ddAddButton(info, level)
-	end
+	-- for k, t in pairs(specificDB) do
+	-- 	info.text = L[k]
+	-- 	info.icon = icons[k]
+	-- 	info.value = k
+	-- 	dd:ddAddButton(info, level)
+	-- end
 
-	info.text = C_Spell.GetSpellName(428079)
-	info.icon = 618976
-	info.value = "rideAlong"
-	info.OnTooltipShow = function(btn, tooltip)
-		tooltip:SetSpellByID(428079)
-	end
-	dd:ddAddButton(info, level)
+	-- info.text = C_Spell.GetSpellName(428079)
+	-- info.icon = 618976
+	-- info.value = "rideAlong"
+	-- info.OnTooltipShow = function(btn, tooltip)
+	-- 	tooltip:SetSpellByID(428079)
+	-- end
+	-- dd:ddAddButton(info, level)
 
-	info.OnTooltipShow = nil
-	info.text = L["transform"]
-	info.icon = 461140
-	info.value = "transform"
-	dd:ddAddButton(info, level)
+	-- info.OnTooltipShow = nil
+	-- info.text = L["transform"]
+	-- info.icon = 461140
+	-- info.value = "transform"
+	-- dd:ddAddButton(info, level)
 
-	info.text = L["Multiple Models"]
-	info.icon = 237185
-	info.value = "multipleModels"
-	dd:ddAddButton(info, level)
+	-- info.text = L["Multiple Models"]
+	-- info.icon = 237185
+	-- info.value = "multipleModels"
+	-- dd:ddAddButton(info, level)
 
-	info.text = L["additional"]
-	info.icon = ns.familyDBIcons.additional[0]
-	info.value = "additional"
-	dd:ddAddButton(info, level)
+	-- info.text = L["additional"]
+	-- info.icon = ns.familyDBIcons.additional[0]
+	-- info.value = "additional"
+	-- dd:ddAddButton(info, level)
 
 	local widgets = info.widgets
 	local func = info.func

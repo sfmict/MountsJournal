@@ -96,129 +96,129 @@ end
 
 ----------------------------------------------------------------------
 -- SOAR
-local soar = createMountFromSpell(369536, 442, 10, 4, true, 430747)
+-- local soar = createMountFromSpell(369536, 442, 10, 4, true, 430747)
 
-if raceID == 52 or raceID == 70 then
-	soar.creatureID = "player"
-	soar.isShown = true
-else
-	-- MALE ID 198587 or FEMALE ID 200550
-	soar.creatureID = UnitSex("player") == 2 and 110241 or 111204
-	soar.isShown = false
-end
+-- if raceID == 52 or raceID == 70 then
+-- 	soar.creatureID = "player"
+-- 	soar.isShown = true
+-- else
+-- 	-- MALE ID 198587 or FEMALE ID 200550
+-- 	soar.creatureID = UnitSex("player") == 2 and 110241 or 111204
+-- 	soar.isShown = false
+-- end
 
-function soar:canUse()
-	return not mounts.sFlags.isSubmerged
-	   and util.isSpellKnown(self.spellID)
-	   and C_Spell.IsSpellUsable(self.spellID)
-	   and C_Spell.GetSpellCooldown(self.spellID).startTime == 0
-	   and C_Spell.GetSpellCooldown(61304).startTime == 0
-end
+-- function soar:canUse()
+-- 	return not mounts.sFlags.isSubmerged
+-- 	   and util.isSpellKnown(self.spellID)
+-- 	   and C_Spell.IsSpellUsable(self.spellID)
+-- 	   and C_Spell.GetSpellCooldown(self.spellID).startTime == 0
+-- 	   and C_Spell.GetSpellCooldown(61304).startTime == 0
+-- end
 
 
 ----------------------------------------------------------------------
 -- RUNNING WILD
-local runningWild = createMountFromSpell(87840, 230, 4, 719, true)
+-- local runningWild = createMountFromSpell(87840, 230, 4, 719, true)
 
-if raceID == 22 then
-	runningWild.creatureID = "player"
-	runningWild.isShown = true
-else
-	-- MALE ID 45254 or FEMALE ID 39725
-	runningWild.creatureID = UnitSex("player") == 2 and 34344 or 37389
-	runningWild.isShown = false
-end
+-- if raceID == 22 then
+-- 	runningWild.creatureID = "player"
+-- 	runningWild.isShown = true
+-- else
+-- 	-- MALE ID 45254 or FEMALE ID 39725
+-- 	runningWild.creatureID = UnitSex("player") == 2 and 34344 or 37389
+-- 	runningWild.isShown = false
+-- end
 
 
 ----------------------------------------------------------------------
 -- TRAVEL FORM
-local travelForm = createMountFromSpell(783, 442, 2, 4, true)
-travelForm.isShown = classID == 11
+-- local travelForm = createMountFromSpell(783, 442, 2, 4, true)
+-- travelForm.isShown = classID == 11
 
-if raceID == 6 then -- Tauren
-	travelForm.creatureID = 21244
-elseif raceID == 8 then -- Troll
-	travelForm.creatureID = 37730
-elseif raceID == 22 then -- Worgen
-	travelForm.creatureID = 37729
-elseif raceID == 28 then -- Highmountain Tauren
-	travelForm.creatureID = 81439
-elseif raceID == 31 then -- Zandalari Troll
-	travelForm.creatureID = 91215
-elseif raceID == 32 then -- Kul Tiran
-	travelForm.creatureID = 88351
-elseif raceID == 86 or raceID == 91 then -- Haranir
-	travelForm.creatureID = 115606
-else -- Night Elf
-	travelForm.creatureID = 21243
-end
+-- if raceID == 6 then -- Tauren
+-- 	travelForm.creatureID = 21244
+-- elseif raceID == 8 then -- Troll
+-- 	travelForm.creatureID = 37730
+-- elseif raceID == 22 then -- Worgen
+-- 	travelForm.creatureID = 37729
+-- elseif raceID == 28 then -- Highmountain Tauren
+-- 	travelForm.creatureID = 81439
+-- elseif raceID == 31 then -- Zandalari Troll
+-- 	travelForm.creatureID = 91215
+-- elseif raceID == 32 then -- Kul Tiran
+-- 	travelForm.creatureID = 88351
+-- elseif raceID == 86 or raceID == 91 then -- Haranir
+-- 	travelForm.creatureID = 115606
+-- else -- Night Elf
+-- 	travelForm.creatureID = 21243
+-- end
 
 -- ChrCustomizationDisplayInfo -> SpellShapeshiftFormID = 27
-travelForm.allCreature = {
-	21243, -- Night Elf
-	21244, -- Tauren
-	37729, -- Worgen
-	37730, -- Troll
-	37728,
-	81439, -- Highmountain Tauren
-	88351, -- Kul Tiran
-	--88355,
-	91215, -- Zandalari Troll
-	91256,
-	74305, -- Lunarwing Night Elf
-	74304, -- Lunarwing Tauren, Highmountain Tauren
-	74307, -- Lunarwing Worgen, Kul Tiran
-	74306, -- Lunarwing Troll, Zandalari Troll
-	137376, -- Lunarwing, legion Remix
-	115606, -- Haranir Bat (no textures) 138668
-	-- dark bird
-	20857, --37727,
-	-- owls
-	64328, 64330, 64329, 64331,
-	-- moths
-	95198, 95199,
-	-- crows
-	20872, 80962, 32546,
-	-- bats
-	116324, 116323,
-	-- big owls
-	113164, 116202, 116203,
-}
+-- travelForm.allCreature = {
+-- 	21243, -- Night Elf
+-- 	21244, -- Tauren
+-- 	37729, -- Worgen
+-- 	37730, -- Troll
+-- 	37728,
+-- 	81439, -- Highmountain Tauren
+-- 	88351, -- Kul Tiran
+-- 	--88355,
+-- 	91215, -- Zandalari Troll
+-- 	91256,
+-- 	74305, -- Lunarwing Night Elf
+-- 	74304, -- Lunarwing Tauren, Highmountain Tauren
+-- 	74307, -- Lunarwing Worgen, Kul Tiran
+-- 	74306, -- Lunarwing Troll, Zandalari Troll
+-- 	137376, -- Lunarwing, legion Remix
+-- 	115606, -- Haranir Bat (no textures) 138668
+-- 	-- dark bird
+-- 	20857, --37727,
+-- 	-- owls
+-- 	64328, 64330, 64329, 64331,
+-- 	-- moths
+-- 	95198, 95199,
+-- 	-- crows
+-- 	20872, 80962, 32546,
+-- 	-- bats
+-- 	116324, 116323,
+-- 	-- big owls
+-- 	113164, 116202, 116203,
+-- }
 
-function travelForm:canUse()
-	return util.isSpellKnown(self.spellID)
-	   and C_Spell.IsSpellUsable(self.spellID)
-	   and C_Spell.GetSpellCooldown(self.spellID).startTime == 0
-	   and C_Spell.GetSpellCooldown(61304).startTime == 0
-end
+-- function travelForm:canUse()
+-- 	return util.isSpellKnown(self.spellID)
+-- 	   and C_Spell.IsSpellUsable(self.spellID)
+-- 	   and C_Spell.GetSpellCooldown(self.spellID).startTime == 0
+-- 	   and C_Spell.GetSpellCooldown(61304).startTime == 0
+-- end
 
 
 ----------------------------------------------------------------------
 -- G-99 Breakneck
-local breakneck = createMountFromSpell(460013, 230, 11, 4, false)
+-- local breakneck = createMountFromSpell(460013, 230, 11, 4, false)
 
-breakneck.animID = 484
-breakneck.creatureID = 124253
-breakneck.allCreature = {
-	124253,
-	125048,
-	125049,
-	125050,
-	125051,
-	--125052,
-}
+-- breakneck.animID = 484
+-- breakneck.creatureID = 124253
+-- breakneck.allCreature = {
+-- 	124253,
+-- 	125048,
+-- 	125049,
+-- 	125050,
+-- 	125051,
+-- 	--125052,
+-- }
 
-function breakneck:isUsable()
-	if mounts.instanceID ~= 2706 then return false end
-	if self:isActive() then return true end
-	local zoneAbilities = C_ZoneAbility.GetActiveAbilities()
-	for i = 1, #zoneAbilities do
-		local abilitySpellID = zoneAbilities[i].spellID
-		if self.spellID == (FindSpellOverrideByID(abilitySpellID) or abilitySpellID) then return true end
-	end
-	return false
-end
-breakneck.canUse = breakneck.isUsable
+-- function breakneck:isUsable()
+-- 	if mounts.instanceID ~= 2706 then return false end
+-- 	if self:isActive() then return true end
+-- 	local zoneAbilities = C_ZoneAbility.GetActiveAbilities()
+-- 	for i = 1, #zoneAbilities do
+-- 		local abilitySpellID = zoneAbilities[i].spellID
+-- 		if self.spellID == (FindSpellOverrideByID(abilitySpellID) or abilitySpellID) then return true end
+-- 	end
+-- 	return false
+-- end
+-- breakneck.canUse = breakneck.isUsable
 
 
 ----------------------------------------------------------------------
@@ -283,12 +283,12 @@ end
 
 ----------------------------------------------------------------------
 -- MAGIC BROOM
-mounts:on("ADDON_INIT", function()
-	local magicBroom = createMountFromItem(37011, 47977, 21939, 442, 2, 4, function(self, tooltipInfo)
-		if tooltipInfo.lines[5] then
-			self.sourceText = tooltipInfo.lines[5].leftText
-			self.description = tooltipInfo.lines[4].leftText
-		end
-	end)
-	magicBroom.familyID = {2, 2904}
-end)
+-- mounts:on("ADDON_INIT", function()
+-- 	local magicBroom = createMountFromItem(37011, 47977, 21939, 442, 2, 4, function(self, tooltipInfo)
+-- 		if tooltipInfo.lines[5] then
+-- 			self.sourceText = tooltipInfo.lines[5].leftText
+-- 			self.description = tooltipInfo.lines[4].leftText
+-- 		end
+-- 	end)
+-- 	magicBroom.familyID = {2, 2904}
+-- end)

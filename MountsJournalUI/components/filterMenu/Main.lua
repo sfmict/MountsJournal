@@ -75,13 +75,13 @@ function journal.filters.main(dd, level)
 
 	info.indent = nil
 	info.disabled = nil
-	info.text = L["Only new"]
-	info.func = function(_,_,_, checked)
-		mounts.filters.onlyNew = checked
-		journal:updateMountsList()
-	end
-	info.checked = mounts.filters.onlyNew
-	dd:ddAddButton(info, level)
+	-- info.text = L["Only new"]
+	-- info.func = function(_,_,_, checked)
+	-- 	mounts.filters.onlyNew = checked
+	-- 	journal:updateMountsList()
+	-- end
+	-- info.checked = mounts.filters.onlyNew
+	-- dd:ddAddButton(info, level)
 
 	dd:ddAddSpace(level)
 
@@ -111,9 +111,9 @@ function journal.filters.main(dd, level)
 	info.value = "family"
 	dd:ddAddButton(info, level)
 
-	info.text = L["expansions"]
-	info.value = "expansions"
-	dd:ddAddButton(info, level)
+	-- info.text = L["expansions"]
+	-- info.value = "expansions"
+	-- dd:ddAddButton(info, level)
 
 	info.text = COLOR
 	info.value = "color"
@@ -127,9 +127,9 @@ function journal.filters.main(dd, level)
 	info.value = "pet"
 	dd:ddAddButton(info, level)
 
-	info.text = L["Rarity"]
-	info.value = "rarity"
-	dd:ddAddButton(info, level)
+	-- info.text = L["Rarity"]
+	-- info.value = "rarity"
+	-- dd:ddAddButton(info, level)
 
 	info.text = L["Chance of summoning"]
 	info.value = "chance"

@@ -199,211 +199,211 @@ config:SetScript("OnShow", function(self)
 	self.rightPanelScroll:SetPoint("TOPLEFT", self.rightPanel, 4, -6)
 	self.rightPanelScroll:SetPoint("BOTTOMRIGHT", self.rightPanel, -26, 5)
 
-	do -- HERB GROUP
-		self.herbGroup = createGroupPanel(self.rightPanelScroll.child, nil, 3, -2)
+	-- do -- HERB GROUP
+	-- 	self.herbGroup = createGroupPanel(self.rightPanelScroll.child, nil, 3, -2)
 
-		-- USE HERBALISM MOUNTS
-		self.useHerbMounts = createCheckbox(self.herbGroup, L["UseHerbMounts"], L["UseHerbMounts"], L["UseHerbMountsDescription"])
-		self.useHerbMounts:SetPoint("TOPLEFT", self.herbGroup, grx, gry)
+	-- 	-- USE HERBALISM MOUNTS
+	-- 	self.useHerbMounts = createCheckbox(self.herbGroup, L["UseHerbMounts"], L["UseHerbMounts"], L["UseHerbMountsDescription"])
+	-- 	self.useHerbMounts:SetPoint("TOPLEFT", self.herbGroup, grx, gry)
 
-		-- USE HERBALISM MOUNTS ON HERBALISM ZONES
-		self.herbMountsOnZones = createCheckboxChild(self.useHerbMounts, L["UseHerbMountsOnZones"], L["UseHerbMountsOnZones"], L["UseHerbMountsDescription"], function()
-			return mounts.config.herbMountsOnZones
-		end)
+	-- 	-- USE HERBALISM MOUNTS ON HERBALISM ZONES
+	-- 	self.herbMountsOnZones = createCheckboxChild(self.useHerbMounts, L["UseHerbMountsOnZones"], L["UseHerbMountsOnZones"], L["UseHerbMountsDescription"], function()
+	-- 		return mounts.config.herbMountsOnZones
+	-- 	end)
 
-		setGroupHeight(self.herbGroup, self.herbMountsOnZones)
-	end
+	-- 	setGroupHeight(self.herbGroup, self.herbMountsOnZones)
+	-- end
 
-	do -- REPAIR GROUP
-		self.repairGroup = createGroupPanel(self.rightPanelScroll.child, self.herbGroup, 0, -8)
+	-- do -- REPAIR GROUP
+	-- 	self.repairGroup = createGroupPanel(self.rightPanelScroll.child, self.herbGroup, 0, -8)
 
-		-- USE REPAIR MOUNTS
-		self.useRepairMounts = createCheckbox(self.repairGroup, L["If item durability is less than"], L["If item durability is less than"], L["UseRepairMountsDescription"])
-		self.useRepairMounts:SetPoint("TOPLEFT", self.repairGroup, grx, gry)
+	-- 	-- USE REPAIR MOUNTS
+	-- 	self.useRepairMounts = createCheckbox(self.repairGroup, L["If item durability is less than"], L["If item durability is less than"], L["UseRepairMountsDescription"])
+	-- 	self.useRepairMounts:SetPoint("TOPLEFT", self.repairGroup, grx, gry)
 
-		-- editbox
-		self.repairPercent = createNumberBox(self.repairGroup, 0, 100)
-		self.repairPercent:SetPoint("LEFT", self.useRepairMounts.Text, "RIGHT", 3, 0)
-		util.setCheckboxChild(self.useRepairMounts, self.repairPercent)
+	-- 	-- editbox
+	-- 	self.repairPercent = createNumberBox(self.repairGroup, 0, 100)
+	-- 	self.repairPercent:SetPoint("LEFT", self.useRepairMounts.Text, "RIGHT", 3, 0)
+	-- 	util.setCheckboxChild(self.useRepairMounts, self.repairPercent)
 
-		-- text
-		self.repairPercentText = self.repairPercent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-		self.repairPercentText:SetPoint("LEFT", self.repairPercent, "RIGHT", 3, 0)
-		self.repairPercentText:SetText("%")
+	-- 	-- text
+	-- 	self.repairPercentText = self.repairPercent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	-- 	self.repairPercentText:SetPoint("LEFT", self.repairPercent, "RIGHT", 3, 0)
+	-- 	self.repairPercentText:SetText("%")
 
-		-- USE REPAIR MOUNTS IN FLYABLE ZONES
-		self.repairFlyable = createCheckboxChild(self.useRepairMounts, L["In flyable zones"], L["In flyable zones"], L["UseRepairMountsDescription"])
+	-- 	-- USE REPAIR MOUNTS IN FLYABLE ZONES
+	-- 	self.repairFlyable = createCheckboxChild(self.useRepairMounts, L["In flyable zones"], L["In flyable zones"], L["UseRepairMountsDescription"])
 
-		-- editbox
-		self.repairFlyablePercent = createNumberBox(self.repairGroup, 0, 100)
-		self.repairFlyablePercent:SetPoint("LEFT", self.repairFlyable.Text, "RIGHT", 3, 0)
-		util.setCheckboxChild(self.repairFlyable, self.repairFlyablePercent)
+	-- 	-- editbox
+	-- 	self.repairFlyablePercent = createNumberBox(self.repairGroup, 0, 100)
+	-- 	self.repairFlyablePercent:SetPoint("LEFT", self.repairFlyable.Text, "RIGHT", 3, 0)
+	-- 	util.setCheckboxChild(self.repairFlyable, self.repairFlyablePercent)
 
-		-- text
-		self.repairFlyablePercentText = self.repairPercent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-		self.repairFlyablePercentText:SetPoint("LEFT", self.repairFlyablePercent, "RIGHT", 3, 0)
-		self.repairFlyablePercentText:SetText("%")
+	-- 	-- text
+	-- 	self.repairFlyablePercentText = self.repairPercent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+	-- 	self.repairFlyablePercentText:SetPoint("LEFT", self.repairFlyablePercent, "RIGHT", 3, 0)
+	-- 	self.repairFlyablePercentText:SetText("%")
 
-		-- FREE SLOTS NUM
-		self.freeSlots = createCheckbox(self.repairGroup, L["If the number of free slots in bags is less"])
-		self.freeSlots:SetPoint("TOPLEFT", self.repairFlyable, "BOTTOMLEFT", -20, -3)
-		-- self.freeSlots.Text:SetPoint("RIGHT", self.repairGroup, -37, 0) -- width isn't redered correctly
-		self.freeSlots.Text:SetWidth(264)
+	-- 	-- FREE SLOTS NUM
+	-- 	self.freeSlots = createCheckbox(self.repairGroup, L["If the number of free slots in bags is less"])
+	-- 	self.freeSlots:SetPoint("TOPLEFT", self.repairFlyable, "BOTTOMLEFT", -20, -3)
+	-- 	-- self.freeSlots.Text:SetPoint("RIGHT", self.repairGroup, -37, 0) -- width isn't redered correctly
+	-- 	self.freeSlots.Text:SetWidth(264)
 
-		-- editbox
-		self.freeSlotsNum = createNumberBox(self.repairGroup, 1, 999)
-		self.freeSlotsNum:SetPoint("LEFT", self.freeSlots.Text, self.freeSlots.Text:GetWrappedWidth() + 3, 0)
-		util.setCheckboxChild(self.freeSlots, self.freeSlotsNum)
+	-- 	-- editbox
+	-- 	self.freeSlotsNum = createNumberBox(self.repairGroup, 1, 999)
+	-- 	self.freeSlotsNum:SetPoint("LEFT", self.freeSlots.Text, self.freeSlots.Text:GetWrappedWidth() + 3, 0)
+	-- 	util.setCheckboxChild(self.freeSlots, self.freeSlotsNum)
 
-		-- REPAIR MOUNTS COMBOBOX
-		self.repairMountsCombobox = lsfdd:CreateModernButtonOriginal(self.repairGroup, 230)
-		self.repairMountsCombobox:SetPoint("TOPLEFT", self.freeSlots, "BOTTOMLEFT", 2, -8)
-		self.repairMountsCombobox:ddSetDisplayMode(addon)
-		self.repairMountsCombobox:ddSetInitFunc(function(self, level)
-			local info = {}
+	-- 	-- REPAIR MOUNTS COMBOBOX
+	-- 	self.repairMountsCombobox = lsfdd:CreateModernButtonOriginal(self.repairGroup, 230)
+	-- 	self.repairMountsCombobox:SetPoint("TOPLEFT", self.freeSlots, "BOTTOMLEFT", 2, -8)
+	-- 	self.repairMountsCombobox:ddSetDisplayMode(addon)
+	-- 	self.repairMountsCombobox:ddSetInitFunc(function(self, level)
+	-- 		local info = {}
 
-			info.text = L["Random available mount"]
-			info.value = nil
-			info.icon = randomMountIcon
-			info.checked = function(btn) return self:ddGetSelectedValue() == btn.value end
-			info.func = function(btn)
-				self:ddSetSelectedValue(btn.value)
-				enableBtns()
-			end
-			self:ddAddButton(info, level)
+	-- 		info.text = L["Random available mount"]
+	-- 		info.value = nil
+	-- 		info.icon = randomMountIcon
+	-- 		info.checked = function(btn) return self:ddGetSelectedValue() == btn.value end
+	-- 		info.func = function(btn)
+	-- 			self:ddSetSelectedValue(btn.value)
+	-- 			enableBtns()
+	-- 		end
+	-- 		self:ddAddButton(info, level)
 
-			info.tooltipWhileDisabled = true
-			for spellID in pairs(specificDB.repair) do
-				local mountID = C_MountJournal.GetMountFromSpell(spellID)
-				local name, _, icon, _,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
-				if not shouldHideOnChar then
-					info.text = name
-					info.icon = icon
-					info.value = spellID
-					info.disabled = not isCollected
-					info.checked = function(btn) return self:ddGetSelectedValue() == btn.value end
-					info.func = function(btn)
-						self:ddSetSelectedValue(btn.value)
-						enableBtns()
-					end
-					info.OnTooltipShow = function(btn, tooltip)
-						tooltip:SetMountBySpellID(spellID)
-					end
-					self:ddAddButton(info, level)
-				end
-			end
-		end)
+	-- 		info.tooltipWhileDisabled = true
+	-- 		for spellID in pairs(specificDB.repair) do
+	-- 			local mountID = C_MountJournal.GetMountFromSpell(spellID)
+	-- 			local name, _, icon, _,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(mountID)
+	-- 			if not shouldHideOnChar then
+	-- 				info.text = name
+	-- 				info.icon = icon
+	-- 				info.value = spellID
+	-- 				info.disabled = not isCollected
+	-- 				info.checked = function(btn) return self:ddGetSelectedValue() == btn.value end
+	-- 				info.func = function(btn)
+	-- 					self:ddSetSelectedValue(btn.value)
+	-- 					enableBtns()
+	-- 				end
+	-- 				info.OnTooltipShow = function(btn, tooltip)
+	-- 					tooltip:SetMountBySpellID(spellID)
+	-- 				end
+	-- 				self:ddAddButton(info, level)
+	-- 			end
+	-- 		end
+	-- 	end)
 
-		setGroupHeight(self.repairGroup, self.repairMountsCombobox)
-	end
+	-- 	setGroupHeight(self.repairGroup, self.repairMountsCombobox)
+	-- end
 
-	do -- MAGIC BROOM GROUP
-		self.magicBroomGroup = createGroupPanel(self.rightPanelScroll.child, self.repairGroup, 0, -8)
+	-- do -- MAGIC BROOM GROUP
+	-- 	self.magicBroomGroup = createGroupPanel(self.rightPanelScroll.child, self.repairGroup, 0, -8)
 
-		-- USE MAGIC BROOM
-		self.useMagicBroom = createCheckbox(self.magicBroomGroup, L["UseHallowsEndMounts"], L["UseHallowsEndMounts"], L["UseHallowsEndMountsDescription"])
-		self.useMagicBroom:SetPoint("TOPLEFT", self.magicBroomGroup, grx, gry)
-		self.useMagicBroom.Text:SetPoint("RIGHT", self.magicBroomGroup, -4, 0)
+	-- 	-- USE MAGIC BROOM
+	-- 	self.useMagicBroom = createCheckbox(self.magicBroomGroup, L["UseHallowsEndMounts"], L["UseHallowsEndMounts"], L["UseHallowsEndMountsDescription"])
+	-- 	self.useMagicBroom:SetPoint("TOPLEFT", self.magicBroomGroup, grx, gry)
+	-- 	self.useMagicBroom.Text:SetPoint("RIGHT", self.magicBroomGroup, -4, 0)
 
-		-- MAGIC BROOM COMBOBOX
-		self.magicBroomCombobox = lsfdd:CreateModernButtonOriginal(self.magicBroomGroup, 230)
-		self.magicBroomCombobox:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 20, -8)
-		self.magicBroomCombobox:ddSetDisplayMode(addon)
+	-- 	-- MAGIC BROOM COMBOBOX
+	-- 	self.magicBroomCombobox = lsfdd:CreateModernButtonOriginal(self.magicBroomGroup, 230)
+	-- 	self.magicBroomCombobox:SetPoint("TOPLEFT", self.useMagicBroom, "BOTTOMLEFT", 20, -8)
+	-- 	self.magicBroomCombobox:ddSetDisplayMode(addon)
 
-		ltl:SetScriptAfter(self.magicBroomCombobox, "OnClick", "Items",
-			function(btn)
-				local t = {}
-				for i, data in ipairs(mounts.magicBrooms) do
-					if data.itemID then t[#t + 1] = data.itemID end
-				end
-				return t
-			end,
-			function(btn)
-				PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
-				btn:ddToggle(1, nil, btn, -5, 0)
-			end
-		)
+	-- 	ltl:SetScriptAfter(self.magicBroomCombobox, "OnClick", "Items",
+	-- 		function(btn)
+	-- 			local t = {}
+	-- 			for i, data in ipairs(mounts.magicBrooms) do
+	-- 				if data.itemID then t[#t + 1] = data.itemID end
+	-- 			end
+	-- 			return t
+	-- 		end,
+	-- 		function(btn)
+	-- 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+	-- 			btn:ddToggle(1, nil, btn, -5, 0)
+	-- 		end
+	-- 	)
 
-		self.magicBroomCombobox:ddSetInitFunc(function(self, level)
-			local info = {}
+	-- 	self.magicBroomCombobox:ddSetInitFunc(function(self, level)
+	-- 		local info = {}
 
-			info.text = L["Random available mount"]
-			info.value = nil
-			info.icon = randomMountIcon
-			info.checked = function(btn) return self:ddGetSelectedValue() == btn.value end
-			info.func = function(btn)
-				self:ddSetSelectedValue(btn.value)
-				enableBtns()
-			end
-			self:ddAddButton(info, level)
+	-- 		info.text = L["Random available mount"]
+	-- 		info.value = nil
+	-- 		info.icon = randomMountIcon
+	-- 		info.checked = function(btn) return self:ddGetSelectedValue() == btn.value end
+	-- 		info.func = function(btn)
+	-- 			self:ddSetSelectedValue(btn.value)
+	-- 			enableBtns()
+	-- 		end
+	-- 		self:ddAddButton(info, level)
 
-			info.tooltipWhileDisabled = true
-			for i, data in ipairs(mounts.magicBrooms) do
-				if data.mountID then
-					local name, spellID, icon, _,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(data.mountID)
-					info.disabled = not isCollected
-					info.text = name
-					info.icon = icon
-					info.value = data
-					info.checked = function(btn)
-						local selectedValue = self:ddGetSelectedValue()
-						return selectedValue and selectedValue.mountID == btn.value.mountID
-					end
-					info.func = function(btn)
-						self:ddSetSelectedValue(btn.value)
-						enableBtns()
-					end
-					info.OnTooltipShow = function(btn, tooltip)
-						tooltip:SetMountBySpellID(spellID)
-					end
-					self:ddAddButton(info, level)
-				elseif data.itemID then
-					info.disabled = nil
-					info.text = ltl:GetItemName(data.itemID)
-					info.icon = ltl:GetItemIcon(data.itemID)
-					info.value = data
-					info.checked = function(btn)
-						local selectedValue = self:ddGetSelectedValue()
-						return selectedValue and selectedValue.itemID == btn.value.itemID
-					end
-					info.func = function(btn)
-						self:ddSetSelectedValue(btn.value)
-						enableBtns()
-					end
-					info.OnTooltipShow = function(btn, tooltip)
-						tooltip:SetHyperlink(ltl:GetItemLink(data.itemID))
-					end
-					self:ddAddButton(info, level)
-				end
-			end
-		end)
-		util.setCheckboxChild(self.useMagicBroom, self.magicBroomCombobox)
+	-- 		info.tooltipWhileDisabled = true
+	-- 		for i, data in ipairs(mounts.magicBrooms) do
+	-- 			if data.mountID then
+	-- 				local name, spellID, icon, _,_,_,_,_,_, shouldHideOnChar, isCollected = C_MountJournal.GetMountInfoByID(data.mountID)
+	-- 				info.disabled = not isCollected
+	-- 				info.text = name
+	-- 				info.icon = icon
+	-- 				info.value = data
+	-- 				info.checked = function(btn)
+	-- 					local selectedValue = self:ddGetSelectedValue()
+	-- 					return selectedValue and selectedValue.mountID == btn.value.mountID
+	-- 				end
+	-- 				info.func = function(btn)
+	-- 					self:ddSetSelectedValue(btn.value)
+	-- 					enableBtns()
+	-- 				end
+	-- 				info.OnTooltipShow = function(btn, tooltip)
+	-- 					tooltip:SetMountBySpellID(spellID)
+	-- 				end
+	-- 				self:ddAddButton(info, level)
+	-- 			elseif data.itemID then
+	-- 				info.disabled = nil
+	-- 				info.text = ltl:GetItemName(data.itemID)
+	-- 				info.icon = ltl:GetItemIcon(data.itemID)
+	-- 				info.value = data
+	-- 				info.checked = function(btn)
+	-- 					local selectedValue = self:ddGetSelectedValue()
+	-- 					return selectedValue and selectedValue.itemID == btn.value.itemID
+	-- 				end
+	-- 				info.func = function(btn)
+	-- 					self:ddSetSelectedValue(btn.value)
+	-- 					enableBtns()
+	-- 				end
+	-- 				info.OnTooltipShow = function(btn, tooltip)
+	-- 					tooltip:SetHyperlink(ltl:GetItemLink(data.itemID))
+	-- 				end
+	-- 				self:ddAddButton(info, level)
+	-- 			end
+	-- 		end
+	-- 	end)
+	-- 	util.setCheckboxChild(self.useMagicBroom, self.magicBroomCombobox)
 
-		setGroupHeight(self.magicBroomGroup, self.magicBroomCombobox)
-	end
+	-- 	setGroupHeight(self.magicBroomGroup, self.magicBroomCombobox)
+	-- end
 
-	do -- USE UNDERLIGHT ANGLER
-		if C_Item.DoesItemExistByID(133755) then
-			self.underlightAnglerGroup = createGroupPanel(self.rightPanelScroll.child, self.magicBroomGroup, 0, -8)
+	-- do -- USE UNDERLIGHT ANGLER
+	-- 	if C_Item.DoesItemExistByID(133755) then
+	-- 		self.underlightAnglerGroup = createGroupPanel(self.rightPanelScroll.child, self.magicBroomGroup, 0, -8)
 
-			self.useUnderlightAngler = createCheckbox(self.underlightAnglerGroup, nil, nil, L["UseUnderlightAnglerDescription"])
-			self.useUnderlightAngler:SetPoint("TOPLEFT", self.underlightAnglerGroup, grx, gry)
-			local underlightAngler = Item:CreateFromItemID(133755)
-			underlightAngler:ContinueOnItemLoad(function()
-				self.useUnderlightAngler.Text:SetText(L["Use %s"]:format(underlightAngler:GetItemLink()))
-				self.useUnderlightAngler.tooltipText = L["Use %s"]:format(underlightAngler:GetItemName())
-			end)
-			util.setHyperlinkTooltip(self.useUnderlightAngler)
+	-- 		self.useUnderlightAngler = createCheckbox(self.underlightAnglerGroup, nil, nil, L["UseUnderlightAnglerDescription"])
+	-- 		self.useUnderlightAngler:SetPoint("TOPLEFT", self.underlightAnglerGroup, grx, gry)
+	-- 		local underlightAngler = Item:CreateFromItemID(133755)
+	-- 		underlightAngler:ContinueOnItemLoad(function()
+	-- 			self.useUnderlightAngler.Text:SetText(L["Use %s"]:format(underlightAngler:GetItemLink()))
+	-- 			self.useUnderlightAngler.tooltipText = L["Use %s"]:format(underlightAngler:GetItemName())
+	-- 		end)
+	-- 		util.setHyperlinkTooltip(self.useUnderlightAngler)
 
-			-- AUTO USE UNDERLIGHT ANGLER
-			self.autoUseUnderlightAngler = createCheckboxChild(self.useUnderlightAngler, L["Use automatically"])
+	-- 		-- AUTO USE UNDERLIGHT ANGLER
+	-- 		self.autoUseUnderlightAngler = createCheckboxChild(self.useUnderlightAngler, L["Use automatically"])
 
-			setGroupHeight(self.underlightAnglerGroup, self.autoUseUnderlightAngler)
-		end
-	end
+	-- 		setGroupHeight(self.underlightAnglerGroup, self.autoUseUnderlightAngler)
+	-- 	end
+	-- end
 
 	do -- PET GROUP
-		self.petGroup = createGroupPanel(self.rightPanelScroll.child, self.underlightAnglerGroup or self.magicBroomGroup, 0, -8)
+		self.petGroup = createGroupPanel(self.rightPanelScroll.child, nil, 3, -2)
 
 		-- SUMMON PET EVERY N MINUTES
 		self.summonPetEvery = createCheckbox(self.petGroup, L["Summon a pet every"])
@@ -441,13 +441,13 @@ config:SetScript("OnShow", function(self)
 		self.mountListGroup = createGroupPanel(self.rightPanelScroll.child, self.petGroup, 0, -8)
 
 		-- COLORIZED NAMES
-		self.coloredMountNames = createCheckbox(self.mountListGroup, L["Colored mount names by rarity"])
-		self.coloredMountNames:SetPoint("TOPLEFT", self.mountListGroup, grx, gry)
-		self.coloredMountNames.Text:SetPoint("RIGHT", self.mountListGroup, -4, 0)
+		-- self.coloredMountNames = createCheckbox(self.mountListGroup, L["Colored mount names by rarity"])
+		-- self.coloredMountNames:SetPoint("TOPLEFT", self.mountListGroup, grx, gry)
+		-- self.coloredMountNames.Text:SetPoint("RIGHT", self.mountListGroup, -4, 0)
 
 		-- EXPANSION ART
 		self.expansionArt = createCheckbox(self.mountListGroup, L["Show mount expansion art"], L["Show mount expansion art"], L["MOUNT_EXPANSION_ART_DESCRIPTION"])
-		self.expansionArt:SetPoint("TOPLEFT", self.coloredMountNames, "BOTTOMLEFT", 0, -3)
+		self.expansionArt:SetPoint("TOPLEFT", self.mountListGroup, grx, gry)
 		self.expansionArt.Text:SetPoint("RIGHT", self.mountListGroup, -4, 0)
 
 		-- ARROW BUTTONS
@@ -523,25 +523,25 @@ config:SetScript("OnShow", function(self)
 	self.statisticCollection.Text:SetPoint("RIGHT", self.rightPanelScroll)
 
 	do -- TOOLTIP GROUP
-		self.tooltipGroup = createGroupPanel(self.rightPanelScroll.child, self.statisticCollection, -grx, -10)
+		-- self.tooltipGroup = createGroupPanel(self.rightPanelScroll.child, self.statisticCollection, -grx, -10)
 
 		-- TOOLTIP MOUNT
-		self.tooltipMount = createCheckbox(self.tooltipGroup, L["Show mount in unit tooltip"])
-		self.tooltipMount:SetPoint("TOPLEFT", self.tooltipGroup, grx, gry)
-		self.tooltipMount.Text:SetPoint("RIGHT", self.tooltipGroup, -4, 0)
+		self.tooltipMount = createCheckbox(self.rightPanelScroll.child, L["Show mount in unit tooltip"])
+		self.tooltipMount:SetPoint("TOPLEFT", self.statisticCollection, "BOTTOMLEFT", 0, -15)
+		self.tooltipMount.Text:SetPoint("RIGHT", self.rightPanelScroll, -4, 0)
 
 		-- TOOLTIP ITEMS
-		self.tooltipItems = createCheckbox(self.tooltipGroup, L["Add information to item tooltip"])
-		self.tooltipItems:SetPoint("TOPLEFT", self.tooltipMount, "BOTTOMLEFT", 0, -3)
-		self.tooltipItems.Text:SetPoint("RIGHT", self.tooltipGroup, -4, 0)
+		-- self.tooltipItems = createCheckbox(self.tooltipGroup, L["Add information to item tooltip"])
+		-- self.tooltipItems:SetPoint("TOPLEFT", self.tooltipMount, "BOTTOMLEFT", 0, -3)
+		-- self.tooltipItems.Text:SetPoint("RIGHT", self.tooltipGroup, -4, 0)
 
-		setGroupHeight(self.tooltipGroup, self.tooltipItems)
+		-- setGroupHeight(self.tooltipGroup, self.tooltipItems)
 	end
 
 	-- RESET HELP
 	self.resetHelp = CreateFrame("BUTTON", nil, self.rightPanelScroll.child, "UIPanelButtonTemplate")
 	self.resetHelp:SetSize(128, 22)
-	self.resetHelp:SetPoint("TOPLEFT", self.tooltipItems, "BOTTOMLEFT", 0, -15)
+	self.resetHelp:SetPoint("TOPLEFT", self.tooltipMount, "BOTTOMLEFT", 0, -15)
 	self.resetHelp:SetText(RESET_TUTORIALS)
 	self.resetHelp:SetScript("OnClick", function(btn)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
@@ -591,43 +591,43 @@ config:SetScript("OnShow", function(self)
 		self.waterJump:SetChecked(mounts.config.waterJump)
 		self.summon1Icon.icon:SetTexture(mounts.config.summon1Icon)
 		self.summon2Icon.icon:SetTexture(mounts.config.summon2Icon)
-		self.useHerbMounts:SetChecked(mounts.config.useHerbMounts)
-		for _, child in ipairs(self.useHerbMounts.childs) do
-			child:SetChecked(child:checkFunc())
-		end
-		self.useRepairMounts:SetChecked(mounts.config.useRepairMounts)
-		self.repairFlyable:SetChecked(mounts.config.useRepairFlyable)
-		self.repairPercent:SetNumber(tonumber(mounts.config.useRepairMountsDurability) or 0)
-		self.repairFlyablePercent:SetNumber(tonumber(mounts.config.useRepairFlyableDurability) or 0)
-		self.freeSlots:SetChecked(mounts.config.useRepairFreeSlots)
-		self.freeSlotsNum:SetNumber(tonumber(mounts.config.useRepairFreeSlotsNum) or 0)
-		self.repairMountsCombobox:ddSetSelectedValue(mounts.config.repairSelectedMount)
-		if mounts.config.repairSelectedMount then
-			local mountID = C_MountJournal.GetMountFromSpell(mounts.config.repairSelectedMount)
-			local name, _, icon = C_MountJournal.GetMountInfoByID(mountID)
-			self.repairMountsCombobox:ddSetSelectedText(name, icon)
-		else
-			self.repairMountsCombobox:ddSetSelectedText(L["Random available mount"], randomMountIcon)
-		end
-		self.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
-		self.magicBroomCombobox:ddSetSelectedValue(mounts.config.broomSelectedMount)
-		if mounts.config.broomSelectedMount then
-			if mounts.config.broomSelectedMount.mountID then
-				local name, _, icon = C_MountJournal.GetMountInfoByID(mounts.config.broomSelectedMount.mountID)
-				self.magicBroomCombobox:ddSetSelectedText(name, icon)
-			elseif mounts.config.broomSelectedMount.itemID then
-				local item = Item:CreateFromItemID(mounts.config.broomSelectedMount.itemID)
-				item:ContinueOnItemLoad(function()
-					self.magicBroomCombobox:ddSetSelectedText(item:GetItemName(), item:GetItemIcon())
-				end)
-			end
-		else
-			self.magicBroomCombobox:ddSetSelectedText(L["Random available mount"], randomMountIcon)
-		end
-		if self.useUnderlightAngler then
-			self.useUnderlightAngler:SetChecked(mounts.config.useUnderlightAngler)
-			self.autoUseUnderlightAngler:SetChecked(mounts.config.autoUseUnderlightAngler)
-		end
+		-- self.useHerbMounts:SetChecked(mounts.config.useHerbMounts)
+		-- for _, child in ipairs(self.useHerbMounts.childs) do
+		-- 	child:SetChecked(child:checkFunc())
+		-- end
+		-- self.useRepairMounts:SetChecked(mounts.config.useRepairMounts)
+		-- self.repairFlyable:SetChecked(mounts.config.useRepairFlyable)
+		-- self.repairPercent:SetNumber(tonumber(mounts.config.useRepairMountsDurability) or 0)
+		-- self.repairFlyablePercent:SetNumber(tonumber(mounts.config.useRepairFlyableDurability) or 0)
+		-- self.freeSlots:SetChecked(mounts.config.useRepairFreeSlots)
+		-- self.freeSlotsNum:SetNumber(tonumber(mounts.config.useRepairFreeSlotsNum) or 0)
+		-- self.repairMountsCombobox:ddSetSelectedValue(mounts.config.repairSelectedMount)
+		-- if mounts.config.repairSelectedMount then
+		-- 	local mountID = C_MountJournal.GetMountFromSpell(mounts.config.repairSelectedMount)
+		-- 	local name, _, icon = C_MountJournal.GetMountInfoByID(mountID)
+		-- 	self.repairMountsCombobox:ddSetSelectedText(name, icon)
+		-- else
+		-- 	self.repairMountsCombobox:ddSetSelectedText(L["Random available mount"], randomMountIcon)
+		-- end
+		-- self.useMagicBroom:SetChecked(mounts.config.useMagicBroom)
+		-- self.magicBroomCombobox:ddSetSelectedValue(mounts.config.broomSelectedMount)
+		-- if mounts.config.broomSelectedMount then
+		-- 	if mounts.config.broomSelectedMount.mountID then
+		-- 		local name, _, icon = C_MountJournal.GetMountInfoByID(mounts.config.broomSelectedMount.mountID)
+		-- 		self.magicBroomCombobox:ddSetSelectedText(name, icon)
+		-- 	elseif mounts.config.broomSelectedMount.itemID then
+		-- 		local item = Item:CreateFromItemID(mounts.config.broomSelectedMount.itemID)
+		-- 		item:ContinueOnItemLoad(function()
+		-- 			self.magicBroomCombobox:ddSetSelectedText(item:GetItemName(), item:GetItemIcon())
+		-- 		end)
+		-- 	end
+		-- else
+		-- 	self.magicBroomCombobox:ddSetSelectedText(L["Random available mount"], randomMountIcon)
+		-- end
+		-- if self.useUnderlightAngler then
+		-- 	self.useUnderlightAngler:SetChecked(mounts.config.useUnderlightAngler)
+		-- 	self.autoUseUnderlightAngler:SetChecked(mounts.config.autoUseUnderlightAngler)
+		-- end
 		self.summonPetEvery:SetChecked(mounts.config.summonPetEvery)
 		self.summonPetEveryN:SetNumber(tonumber(mounts.config.summonPetEveryN) or 1)
 		for _, child in ipairs(self.summonPetEvery.childs) do
@@ -635,7 +635,7 @@ config:SetScript("OnShow", function(self)
 		end
 		self.noPetInRaid:SetChecked(mounts.config.noPetInRaid)
 		self.noPetInGroup:SetChecked(mounts.config.noPetInGroup)
-		self.coloredMountNames:SetChecked(mounts.config.coloredMountNames)
+		-- self.coloredMountNames:SetChecked(mounts.config.coloredMountNames)
 		self.expansionArt:SetChecked(mounts.config.showExpansionArt)
 		self.arrowButtons:SetChecked(mounts.config.arrowButtonsBrowse)
 		self.showTypeSelBtn:SetChecked(mounts.config.showTypeSelBtn)
@@ -646,7 +646,7 @@ config:SetScript("OnShow", function(self)
 		self.showWowheadLink:SetChecked(mounts.config.showWowheadLink)
 		self.statisticCollection:SetChecked(mounts.config.statCollection)
 		self.tooltipMount:SetChecked(mounts.config.tooltipMount)
-		self.tooltipItems:SetChecked(mounts.config.tooltipItems)
+		-- self.tooltipItems:SetChecked(mounts.config.tooltipItems)
 		self.resetHelp:Enable()
 		self.cancelBtn:Disable()
 		self.applyBtn:Disable()
@@ -663,27 +663,27 @@ config:SetScript("OnShow", function(self)
 	-- COMMIT
 	self.OnCommit = function(self)
 		binding.unboundMessage:Hide()
-		mounts.config.useHerbMounts = self.useHerbMounts:GetChecked()
-		mounts.config.herbMountsOnZones = self.herbMountsOnZones:GetChecked()
-		mounts.config.useRepairMounts = self.useRepairMounts:GetChecked()
-		mounts.config.useRepairMountsDurability = tonumber(self.repairPercent:GetText()) or 0
-		mounts.config.useRepairFlyable = self.repairFlyable:GetChecked()
-		mounts.config.useRepairFlyableDurability = tonumber(self.repairFlyablePercent:GetText()) or 0
-		mounts.config.useRepairFreeSlots = self.freeSlots:GetChecked()
-		mounts.config.useRepairFreeSlotsNum = tonumber(self.freeSlotsNum:GetText()) or 0
-		mounts.config.repairSelectedMount = self.repairMountsCombobox:ddGetSelectedValue()
-		mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
-		mounts.config.broomSelectedMount = self.magicBroomCombobox:ddGetSelectedValue()
-		if self.useUnderlightAngler then
-			mounts.config.useUnderlightAngler = self.useUnderlightAngler:GetChecked()
-			mounts.config.autoUseUnderlightAngler = self.autoUseUnderlightAngler:GetChecked()
-		end
+		-- mounts.config.useHerbMounts = self.useHerbMounts:GetChecked()
+		-- mounts.config.herbMountsOnZones = self.herbMountsOnZones:GetChecked()
+		-- mounts.config.useRepairMounts = self.useRepairMounts:GetChecked()
+		-- mounts.config.useRepairMountsDurability = tonumber(self.repairPercent:GetText()) or 0
+		-- mounts.config.useRepairFlyable = self.repairFlyable:GetChecked()
+		-- mounts.config.useRepairFlyableDurability = tonumber(self.repairFlyablePercent:GetText()) or 0
+		-- mounts.config.useRepairFreeSlots = self.freeSlots:GetChecked()
+		-- mounts.config.useRepairFreeSlotsNum = tonumber(self.freeSlotsNum:GetText()) or 0
+		-- mounts.config.repairSelectedMount = self.repairMountsCombobox:ddGetSelectedValue()
+		-- mounts.config.useMagicBroom = self.useMagicBroom:GetChecked()
+		-- mounts.config.broomSelectedMount = self.magicBroomCombobox:ddGetSelectedValue()
+		-- if self.useUnderlightAngler then
+		-- 	mounts.config.useUnderlightAngler = self.useUnderlightAngler:GetChecked()
+		-- 	mounts.config.autoUseUnderlightAngler = self.autoUseUnderlightAngler:GetChecked()
+		-- end
 		mounts.config.summonPetEvery = self.summonPetEvery:GetChecked()
 		mounts.config.summonPetEveryN = tonumber(self.summonPetEveryN:GetText()) or 1
 		mounts.config.summonPetOnlyFavorites = self.summonPetOnlyFavorites:GetChecked()
 		mounts.config.noPetInRaid = self.noPetInRaid:GetChecked()
 		mounts.config.noPetInGroup = self.noPetInGroup:GetChecked()
-		mounts.config.coloredMountNames = self.coloredMountNames:GetChecked()
+		-- mounts.config.coloredMountNames = self.coloredMountNames:GetChecked()
 		mounts.config.showExpansionArt = self.expansionArt:GetChecked()
 		mounts.config.arrowButtonsBrowse = self.arrowButtons:GetChecked()
 		mounts.config.showTypeSelBtn = self.showTypeSelBtn:GetChecked()
@@ -693,7 +693,7 @@ config:SetScript("OnShow", function(self)
 		mounts.config.showWowheadLink = self.showWowheadLink:GetChecked()
 		mounts.config.statCollection = self.statisticCollection:GetChecked()
 		mounts.config.tooltipMount = self.tooltipMount:GetChecked()
-		mounts.config.tooltipItems = self.tooltipItems:GetChecked()
+		-- mounts.config.tooltipItems = self.tooltipItems:GetChecked()
 
 		updateBtnIcon(1)
 		updateBtnIcon(2)

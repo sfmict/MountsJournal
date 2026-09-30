@@ -174,18 +174,20 @@ function conds.class:getValueList(values, func)
 
 	for i = 1, GetNumClasses() do
 		local localized, className, id = GetClassInfo(i)
-		local classColor = C_ClassColor.GetClassColor(className)
-		local t = CLASS_ICON_TCOORDS[className]
-		list[i] = createCheckableInfo(
-			classColor:WrapTextInColorCode(localized), id, func, checked, nil,
-			"Interface/Glues/CharacterCreate/UI-CharacterCreate-Classes",
-			{
-				tCoordLeft = t[1],
-				tCoordRight = t[2],
-				tCoordTop = t[3],
-				tCoordBottom = t[4],
-			}
-		)
+		if className then
+			local classColor = C_ClassColor.GetClassColor(className)
+			local t = CLASS_ICON_TCOORDS[className]
+			list[#list + 1] = createCheckableInfo(
+				classColor:WrapTextInColorCode(localized), id, func, checked, nil,
+				"Interface/Glues/CharacterCreate/UI-CharacterCreate-Classes",
+				{
+					tCoordLeft = t[1],
+					tCoordRight = t[2],
+					tCoordTop = t[3],
+					tCoordBottom = t[4],
+				}
+			)
+		end
 	end
 
 	return list
@@ -194,48 +196,18 @@ end
 
 ---------------------------------------------------
 -- spec
-conds.spec.text = SPECIALIZATION
+conds.spec.text = LEVEL_UP_DUALSPEC
 conds.spec.onlyOne = true
 
-function conds.spec:getValue(values)
-	local names = {}
-	for i, value in ipairs(values) do
-		local _, name, _, specIcon, _, className, class = GetSpecializationInfoByID(value)
-		if name then
-			local classColor = C_ClassColor.GetClassColor(className)
-			local icon = CreateSimpleTextureMarkup(specIcon, ns.RULE_ICON_SIZE)
-			names[#names + 1] = ("%s%s - %s"):format(icon, classColor:WrapTextInColorCode(class), name)
-		end
-	end
-	return names
+function conds.spec:getValue(value)
+	return value == 1 and DUAL_SPEC_PRIMARY or DUAL_SPEC_SECONDARY
 end
 
-function conds.spec.sort(values)
-	local list, n = {}, 1
-	for i = 1, GetNumClasses() do
-		for j = 1, C_SpecializationInfo.GetNumSpecializationsForClassID(i) do
-			local id = GetSpecializationInfoForClassID(i, j)
-			list[id] = n
-			n = n + 1
-		end
-	end
-	sort(values, function(a, b) return list[a] < list[b] end)
-end
-
-function conds.spec:getValueList(values, func)
+function conds.spec:getValueList(value, func)
 	local list = {}
-	local checked = function(btn) return tContains(values, btn.value) end
-
-	for i = 1, GetNumClasses() do
-		for j = 1, C_SpecializationInfo.GetNumSpecializationsForClassID(i) do
-			local id = GetSpecializationInfoForClassID(i, j)
-			local _, name, _, specIcon, _, className, class = GetSpecializationInfoByID(id)
-			local classColor = C_ClassColor.GetClassColor(className)
-			local text = ("%s - %s"):format(classColor:WrapTextInColorCode(class), name)
-			list[#list + 1] = createCheckableInfo(text, id, func, checked, nil, specIcon)
-		end
+	for i = 1, 2 do
+		list[i] = createRadioInfo(self:getValue(i), i, func, i == value)
 	end
-
 	return list
 end
 
@@ -471,27 +443,27 @@ conds.lvleq.getValue = conds.mcond.getValue
 
 ---------------------------------------------------
 -- fs FLIGHT STYLE
-conds.fs.text = L["Flight style"]
-conds.fs.onlyOne = true
+-- conds.fs.text = L["Flight style"]
+-- conds.fs.onlyOne = true
 
-function conds.fs:getName(value)
-	if value == 1 then return ACCESSIBILITY_ADV_FLY_LABEL, 5142725 end
-	return L["Steady Flight"], 5142726
-end
+-- function conds.fs:getName(value)
+-- 	if value == 1 then return ACCESSIBILITY_ADV_FLY_LABEL, 5142725 end
+-- 	return L["Steady Flight"], 5142726
+-- end
 
-function conds.fs:getValue(value)
-	local name, icon = self:getName(value)
-	return CreateSimpleTextureMarkup(icon, ns.RULE_ICON_SIZE)..name
-end
+-- function conds.fs:getValue(value)
+-- 	local name, icon = self:getName(value)
+-- 	return CreateSimpleTextureMarkup(icon, ns.RULE_ICON_SIZE)..name
+-- end
 
-function conds.fs:getValueList(value, func)
-	local list = {}
-	for i = 1, 2 do
-		local name, icon = self:getName(i)
-		list[i] = createRadioInfo(name, i, func, i == value, nil, icon)
-	end
-	return list
-end
+-- function conds.fs:getValueList(value, func)
+-- 	local list = {}
+-- 	for i = 1, 2 do
+-- 		local name, icon = self:getName(i)
+-- 		list[i] = createRadioInfo(name, i, func, i == value, nil, icon)
+-- 	end
+-- 	return list
+-- end
 
 
 ---------------------------------------------------
@@ -738,24 +710,25 @@ local RACE_KEYS = {
 	6, -- Tauren
 	7, -- Gnome
 	8, -- Troll
-	9, -- Goblin
-	10, -- BloodElf
-	11, -- Draenei
-	22, -- Worgen
-	24, -- Pandaren
-	27, -- Nightborne
-	28, -- HighmountainTauren
-	29, -- VoidElf
-	30, -- LightforgedDraenei
-	31, -- ZandalariTroll
-	32, -- KulTiran
-	34, -- DarkIronDwarf
-	35, -- Vulpera
-	36, -- MagharOrc
-	37, -- Mechagnome
-	52, -- Dracthyr
-	84, -- EarthenDwarf
-	86, -- Harronir
+	-- 9, -- Goblin
+	-- 10, -- BloodElf
+	-- 11, -- Draenei
+	-- 22, -- Worgen
+	-- 24, -- Pandaren
+	-- 27, -- Nightborne
+	-- 28, -- HighmountainTauren
+	-- 29, -- VoidElf
+	-- 30, -- LightforgedDraenei
+	-- 31, -- ZandalariTroll
+	-- 32, -- KulTiran
+	-- 34, -- DarkIronDwarf
+	-- 35, -- Vulpera
+	-- 36, -- MagharOrc
+	-- 37, -- Mechagnome
+	-- 52, -- Dracthyr
+	-- 84, -- EarthenDwarf
+	-- 86, -- Harronir
+	96, -- Skyborne
 }
 local RACE_LABELS = {}
 for i = 1, #RACE_KEYS do
@@ -1033,7 +1006,10 @@ function conds.difficulty:getValueList(values, func)
 
 	for i = 1, #ids do
 		local id = ids[i]
-		list[i] = createCheckableInfo(getDifficultyName(id), id, func, checked)
+		local name = getDifficultyName(id)
+		if name then
+			list[#list + 1] = createCheckableInfo(name, id, func, checked)
+		end
 	end
 
 	return list

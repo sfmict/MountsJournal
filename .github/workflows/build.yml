@@ -3,7 +3,7 @@ name: "Build"
 on:
   push:
     tags:
-      - v*
+      - fv*
 
 jobs:
   release:
@@ -27,17 +27,6 @@ jobs:
         cd .mountColors
         node genDB.js
         git -C $GITHUB_WORKSPACE add -f MountsJournalUI/database/ColorDB.lua
-
-    - name: download rarity tool
-      uses: actions/checkout@v6
-      with:
-        repository: sfmict/MountRarity
-        token: ${{ secrets.OAUTH }}
-        path: .mountRarity
-
-    - name: updating rarity
-      id: rarity
-      run: node .mountRarity/updateRarity.js
 
     - name: download packager
       uses: actions/checkout@v6

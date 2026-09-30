@@ -138,7 +138,7 @@ end
 
 function MJSetPetMixin:updatePetForMount()
 	local _, owned = C_PetJournal.GetNumPets()
-	if owned > 0 and not self.owned or self.owned > owned then
+	if owned > 0 and not self.owned or self.owned and self.owned > owned then
 		local petForMount, needUpdate = ns.pets:getPetForProfileList(ns.mounts.defProfile.petForMount)
 
 		if petForMount then

@@ -90,25 +90,25 @@ ns.journal:on("MODULES_INIT", function(journal)
 			animation = 562,
 			type = 1,
 		},
-		{
-			name = SUMMON,
-			animation = 1496,
-		},
-		{
-			name = C_Spell.GetSpellName(372610), -- Skyward Ascent
-			animation = 1726,
-			type = 1,
-		},
-		{
-			name = C_Spell.GetSpellName(372608), -- Surge Forward
-			animation = 1680,
-			type = 1,
-		},
-		{
-			name = C_Spell.GetSpellName(361584), -- Whirling Surge
-			animation = 1534,
-			type = 1,
-		},
+		-- {
+		-- 	name = SUMMON,
+		-- 	animation = 1496,
+		-- },
+		-- {
+		-- 	name = C_Spell.GetSpellName(372610), -- Skyward Ascent
+		-- 	animation = 1726,
+		-- 	type = 1,
+		-- },
+		-- {
+		-- 	name = C_Spell.GetSpellName(372608), -- Surge Forward
+		-- 	animation = 1680,
+		-- 	type = 1,
+		-- },
+		-- {
+		-- 	name = C_Spell.GetSpellName(361584), -- Whirling Surge
+		-- 	animation = 1534,
+		-- 	type = 1,
+		-- },
 	}
 
 	dd.customAnimationPanel = CreateFrame("FRAME", nil, journal.modelScene, "MJMountCustomAnimationPanel")

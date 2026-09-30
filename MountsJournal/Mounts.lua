@@ -38,8 +38,8 @@ end
 
 function mounts:ADDON_LOADED(addonName)
 	if addonName == addon then
-		local mapInfo = MapUtil.GetMapParentInfo(C_Map.GetFallbackWorldMapID(), Enum.UIMapType.Cosmic, true)
-		self.defMountsListID = mapInfo and mapInfo.mapID or 946 -- WORLD
+		local mapInfo = MapUtil.GetMapParentInfo(C_Map.GetFallbackWorldMapID(), Enum.UIMapType.World, true)
+		self.defMountsListID = mapInfo and mapInfo.mapID or 947 -- WORLD
 
 		MountsJournalDB = MountsJournalDB or {}
 		self.globalDB = MountsJournalDB
@@ -116,7 +116,9 @@ function mounts:ADDON_LOADED(addonName)
 		self.config.macrosConfig = self.config.macrosConfig or {}
 		for i = 1, GetNumClasses() do
 			local _, className = GetClassInfo(i)
-			self.config.macrosConfig[className] = self.config.macrosConfig[className] or {}
+			if className then
+				self.config.macrosConfig[className] = self.config.macrosConfig[className] or {}
+			end
 		end
 		self.config.camera = self.config.camera or {}
 		self.cameraConfig = self.config.camera

@@ -83,33 +83,35 @@ util.secureButtonNameSecondMount = addon.."_SecondMount"
 
 -- 1 FLY, 2 GROUND, 3 SWIMMING
 util.mountTypes = setmetatable({
-	[242] = 1,
-	[247] = 1,
-	[402] = 1,
-	[407] = {1, 3},
-	[411] = 1,
-	[424] = 1,
-	[426] = 1,
-	[430] = 1,
-	[436] = {1, 3},
-	[437] = 1,
-	[442] = 1,
-	[444] = 1,
-	[445] = 1,
-	[446] = 1,
-	[447] = 1,
-	[230] = 2,
 	[241] = 2,
-	[284] = 2,
-	[408] = 2,
-	[412] = {2, 3},
-	[231] = 3,
-	[232] = 3,
-	[254] = 3,
+	[454] = 2,
+	[455] = 2,
+	[456] = 2,
+	[457] = 2,
+	[458] = 2,
+	[459] = 2,
+	[460] = 2,
+	[461] = 2,
+	[462] = 2,
+	[463] = 2,
+	[464] = 2,
+	[465] = 2,
+	[466] = 2,
+	[467] = 2,
+	[468] = 2,
+	[469] = 2,
+	[470] = 2,
+	[471] = 2,
+	[472] = 2,
+	[473] = 2,
+	[474] = 2,
+	[485] = 2,
+	[487] = 2,
+	[453] = 2, -- 3?
 }, {
 	__index = function(self, key)
 		if type(key) == "number" then
-			self[key] = 1
+			self[key] = 2
 			return self[key]
 		end
 	end
@@ -205,12 +207,12 @@ function util.getUnitMount(unit)
 			local data = GetAuraDataBySlot(unit, a)
 			if data and not issecretvalue(data.spellId) then
 				local auraID = data.spellId
-				if ns.additionalMountBuffs[auraID] then
-					return ns.additionalMountBuffs[auraID].spellID, nil, data.auraInstanceID
-				else
+				-- if ns.additionalMountBuffs[auraID] then
+					-- return ns.additionalMountBuffs[auraID].spellID, nil, data.auraInstanceID
+				-- else
 					local mountID = C_MountJournal.GetMountFromSpell(auraID)
 					if mountID then return auraID, mountID, data.auraInstanceID end
-				end
+				-- end
 			end
 			a,b,c,d,e = b,c,d,e
 		end

@@ -593,7 +593,7 @@
 								<FontString parentKey="name" inherits="GameFontHighlightLarge" justifyH="LEFT" justifyV="MIDDLE" maxLines="2">
 									<Size y="35"/>
 									<Anchors>
-										<Anchor point="LEFT" relativePoint="RIGHT" relativeKey="$parent.icon" x="20" y="0"/>
+										<Anchor point="LEFT" relativePoint="RIGHT" relativeKey="$parent.icon" x="10" y="0"/>
 										<Anchor point="RIGHT" x="-57"/>
 									</Anchors>
 								</FontString>
@@ -656,7 +656,7 @@
 									</OnLeave>
 								</Scripts>
 							</Button>
-							<CheckButton parentKey="mountDescriptionToggle" inherits="MJArrowToggle">
+							<CheckButton parentKey="mountDescriptionToggle" inherits="MJArrowToggle" hidden="true">
 								<Size x="20" y="40"/>
 								<Anchors>
 									<Anchor point="LEFT" relativeKey="$parent.icon" relativePoint="RIGHT" x="-2" y="0"/>
@@ -1018,7 +1018,7 @@
 							<Anchor point="TOPLEFT" x="15" y="-5"/>
 						</Anchors>
 					</CheckButton>
-					<Frame parentKey="relationMap">
+					<Frame parentKey="relationMap" clipChildren="true">
 						<Size x="210" y="30"/>
 						<Layers>
 							<Layer level="BACKGROUND">

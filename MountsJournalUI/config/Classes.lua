@@ -37,33 +37,35 @@ classConfig:SetScript("OnShow", function(self)
 
 	for i = 1, GetNumClasses() do
 		local localized, className = GetClassInfo(i)
-		local classColor = C_ClassColor.GetClassColor(className)
-		local classFrame = CreateFrame("BUTTON", nil, self.leftPanel, "MJClassButtonTemplate")
-		local classMacrosConfig = self.macrosConfig[className]
+		if className then
+			local classColor = C_ClassColor.GetClassColor(className)
+			local classFrame = CreateFrame("BUTTON", nil, self.leftPanel, "MJClassButtonTemplate")
+			local classMacrosConfig = self.macrosConfig[className]
 
-		if lastClassFrame then
-			classFrame:SetPoint("TOPLEFT", lastClassFrame, "BOTTOMLEFT", 0, 0)
-		else
-			classFrame:SetPoint("TOPLEFT", self.leftPanel, 3, -3)
-		end
-		lastClassFrame = classFrame
-		classFrame.key = className
-		classFrame.default = util.getClassMacro(className, false, function()
-			classFrame.default = util.getClassMacro(className)
-			classFrame.defaultCombat = util.getClassMacro(className, true, nil, classMacrosConfig)
-			if self.rightPanel and self.rightPanel.currentBtn == classFrame then
-				classFrame:Click()
+			if lastClassFrame then
+				classFrame:SetPoint("TOPLEFT", lastClassFrame, "BOTTOMLEFT", 0, 0)
+			else
+				classFrame:SetPoint("TOPLEFT", self.leftPanel, 3, -3)
 			end
-		end)
-		classFrame.defaultCombat = util.getClassMacro(className, true, nil, classMacrosConfig)
-		classFrame.name:SetText(classColor:WrapTextInColorCode(localized))
-		classFrame.check:SetVertexColor(classColor:GetRGB())
-		classFrame.highlight:SetVertexColor(classColor:GetRGB())
-		classFrame.icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[className]))
-		classFrame:SetScript("OnClick", classClickFunc)
+			lastClassFrame = classFrame
+			classFrame.key = className
+			classFrame.default = util.getClassMacro(className, false, function()
+				classFrame.default = util.getClassMacro(className)
+				classFrame.defaultCombat = util.getClassMacro(className, true, nil, classMacrosConfig)
+				if self.rightPanel and self.rightPanel.currentBtn == classFrame then
+					classFrame:Click()
+				end
+			end)
+			classFrame.defaultCombat = util.getClassMacro(className, true, nil, classMacrosConfig)
+			classFrame.name:SetText(classColor:WrapTextInColorCode(localized))
+			classFrame.check:SetVertexColor(classColor:GetRGB())
+			classFrame.highlight:SetVertexColor(classColor:GetRGB())
+			classFrame.icon:SetTexCoord(unpack(CLASS_ICON_TCOORDS[className]))
+			classFrame:SetScript("OnClick", classClickFunc)
 
-		if playerClassName == className then
-			firstClassFrame = classFrame
+			if playerClassName == className then
+				firstClassFrame = classFrame
+			end
 		end
 	end
 
@@ -237,13 +239,13 @@ do
 
 
 	local classOptions = {
-		PRIEST = {
-			{
-				key = "useLevitation",
-				text = L["CLASS_USEWHENCHARACTERFALLS"],
-				hlink = C_Spell.GetSpellLink(111759),
-			},
-		},
+		-- PRIEST = {
+		-- 	{
+		-- 		key = "useLevitation",
+		-- 		text = L["CLASS_USEWHENCHARACTERFALLS"],
+		-- 		hlink = C_Spell.GetSpellLink(111759),
+		-- 	},
+		-- },
 		DEATHKNIGHT = {
 			{
 				key = "usePathOfFrost",
