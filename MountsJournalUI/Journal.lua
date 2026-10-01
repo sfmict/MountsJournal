@@ -1767,10 +1767,10 @@ function journal:setMountTooltip(mountID, spellID, showDescription)
 	end)
 
 	-- expanstion
-	ct:addLine(EXPANSION_FILTER_TEXT, _G["EXPANSION_NAME"..(expansion - 1)], function()
-		self:setFilterOnly("expansions", expansion)
-		self:setSelectedMount(mountID)
-	end)
+	-- ct:addLine(EXPANSION_FILTER_TEXT, _G["EXPANSION_NAME"..(expansion - 1)], function()
+	-- 	self:setFilterOnly("expansions", expansion)
+	-- 	self:setSelectedMount(mountID)
+	-- end)
 
 	-- receipt date
 	local mountDate = mounts:getMountDate(spellID)
