@@ -1,4 +1,4 @@
-<Ui>
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
 	<Script file="mixins/MacroMixin.lua"/>
 
 	<Button name="MJSecureActionButtonTemplate" inherits="SecureActionButtonTemplate" virtual="true">

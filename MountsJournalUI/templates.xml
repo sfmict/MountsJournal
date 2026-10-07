@@ -1,4 +1,4 @@
-<Ui>
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
 	<Script file="mixins/NavBarMixin.lua"/>
 	<Script file="mixins/WorldMapMixin.lua"/>
 	<Script file="mixins/ExistingListsMixin.lua"/>
@@ -2078,7 +2078,7 @@
 						<Anchor point="CENTER"/>
 					</Anchors>
 				</Texture>
-				<Texture parentKey="highlight" file="Interface/Buttons/ButtonHilight-Square" setAllPoints="true=" alphaMode="ADD" hidden="true"/>
+				<Texture parentKey="highlight" file="Interface/Buttons/ButtonHilight-Square" setAllPoints="true" alphaMode="ADD" hidden="true"/>
 			</Layer>
 			<Layer level="OVERLAY" textureSubLevel="2">
 				<Texture parentKey="favorite" atlas="PetJournal-FavoritesIcon">
@@ -2117,7 +2117,7 @@
 				</Texture>
 			</Layer>
 			<Layer level="BACKGROUND">
-				<Texture parentKey="toggleBG" alpha=".4" hidden="t">
+				<Texture parentKey="toggleBG" alpha=".4" hidden="true">
 					<Anchors>
 						<Anchor point="TOPLEFT" relativeKey="$parent.toggle1" x="-1" y="1"/>
 					</Anchors>
@@ -2809,7 +2809,7 @@
 
 	<Button name="MJCollapseButtonTemplate" virtual="true">
 		<Size y="18"/>
-		<layers>
+		<Layers>
 			<Layer level="ARTWORK">
 				<Texture parentKey="toggle" file="Interface/Buttons/UI-MinusButton-UP">
 					<Size x="14" y="14"/>
@@ -2818,7 +2818,7 @@
 					</Anchors>
 				</Texture>
 			</Layer>
-		</layers>
+		</Layers>
 		<ButtonText parentKey="text" justifyH="LEFT" wordwrap="false">
 			<Anchors>
 				<Anchor point="LEFT" x="20" y="0"/>
