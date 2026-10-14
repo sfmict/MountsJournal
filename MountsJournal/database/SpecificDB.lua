@@ -9,10 +9,12 @@ ns.specificDB = {
 		[142515] = true, -- 2982 Hearthkeeper's Wandering Caravan
 		[264058] = true, -- 1039 Mighty Caravan Brutosaur
 		[457485] = true, -- 2237 Grizzly Hills Packmaster
+		[1313788] = true, -- 3137 Sporebearer Fungal Strider
 	},
 	auctioneer = {
 		[264058] = true, -- 1039 Mighty Caravan Brutosaur
 		[465235] = true, -- 2265 Trader's Gilded Brutosaur
+		[1313788] = true, -- 3137 Sporebearer Fungal Strider
 	},
 	passenger = {
 		[55531] = true, -- 240 Mechano-Hog (Horde)
@@ -35,5 +37,6 @@ ns.specificDB = {
 		[307256] = true, -- 1287 Explorer's Jungle Hopper
 		[307263] = true, -- 1288 Explorer's Dunetrekker
 		[465235] = true, -- 2265 Trader's Gilded Brutosaur
+		[1313788] = true, -- 3137 Sporebearer Fungal Strider
 	}
 }
