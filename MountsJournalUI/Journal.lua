@@ -2,7 +2,7 @@ local addon, ns = ...
 local L, util, mounts = ns.L, ns.util, ns.mounts
 local C_MountJournal, C_PetJournal, C_Timer, InCombatLockdown = C_MountJournal, C_PetJournal, C_Timer, InCombatLockdown
 local next, pairs, ipairs, type, math = next, pairs, ipairs, type, math
-local wipe, tinsert, sort, concat, select = wipe, table.insert, table.sort, table.concat, select
+local wipe, tinsert, sort, select = wipe, table.insert, table.sort, select
 local journal = CreateFrame("FRAME", "MountsJournalFrame")
 ns.journal = util.setEventsMixin(journal)
 
