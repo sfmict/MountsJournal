@@ -1,6 +1,6 @@
 local _, ns = ...
 local util = ns.util
-local type, concat, IsPlayerMoving, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras, GetCVarBool = type, table.concat, IsPlayerMoving, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, EquipItemByName, IsMounted, IsSubmerged, C_UnitAuras, GetCVarBool
+local type, concat, IsPlayerMoving, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, IsMounted, IsSubmerged, C_UnitAuras, GetCVarBool = type, table.concat, IsPlayerMoving, IsFalling, InCombatLockdown, GetTime, C_Item, C_Spell, GetInventoryItemID, GetInventoryItemLink, IsMounted, IsSubmerged, C_UnitAuras, GetCVarBool
 local macroFrame = CreateFrame("FRAME")
 ns.macroFrame = util.setEventsMixin(macroFrame)
 
@@ -467,7 +467,7 @@ end
 function macroFrame:PLAYER_REGEN_ENABLED()
 	if self.needEquipFishingRod then
 		self.needEquipFishingRod = nil
-		EquipItemByName(self.fishingRodID)
+		C_Item.EquipItemByName(self.fishingRodID)
 	elseif IsSubmerged() then
 		self:autoEquip()
 	end
@@ -482,7 +482,7 @@ function macroFrame:ITEM_UNLOCKED(bag, slot)
 		if InCombatLockdown() then
 			self.needEquipFishingRod = true
 		else
-			EquipItemByName(self.fishingRodID)
+			C_Item.EquipItemByName(self.fishingRodID)
 		end
 	elseif bag == 28
 	and GetInventoryItemID("player", 28)
@@ -502,7 +502,7 @@ function macroFrame:updateFishingRod()
 	if InCombatLockdown() then return end
 	if self.fishingSlotID == self.fishingRodID then
 		if self.charMacrosConfig.itemSlot28 then
-			EquipItemByName(self.charMacrosConfig.itemSlot28)
+			C_Item.EquipItemByName(self.charMacrosConfig.itemSlot28)
 			self.charMacrosConfig.itemSlot28 = nil
 		elseif isNotFishingBuff() then
 			local action = EquipmentManager_UnequipItemInSlot(28)
@@ -512,7 +512,7 @@ function macroFrame:updateFishingRod()
 		end
 	else
 		self.charMacrosConfig.itemSlot28 = GetInventoryItemLink("player", 28)
-		EquipItemByName(self.fishingRodID)
+		C_Item.EquipItemByName(self.fishingRodID)
 	end
 end
 
@@ -523,7 +523,7 @@ function macroFrame:autoEquip()
 		if IsSubmerged() then
 			if curFishingRod ~= self.fishingRodID then
 				self.charMacrosConfig.itemSlot28 = GetInventoryItemLink("player", 28)
-				EquipItemByName(self.fishingRodID)
+				C_Item.EquipItemByName(self.fishingRodID)
 			elseif isNotFishingBuff() then
 				local action = EquipmentManager_UnequipItemInSlot(28)
 				if action and EquipmentManager_RunAction(action) then
@@ -531,7 +531,7 @@ function macroFrame:autoEquip()
 				end
 			end
 		elseif IsMounted() and curFishingRod == self.fishingRodID and self.charMacrosConfig.itemSlot28 then
-			EquipItemByName(self.charMacrosConfig.itemSlot28)
+			C_Item.EquipItemByName(self.charMacrosConfig.itemSlot28)
 			self.charMacrosConfig.itemSlot28 = nil
 		end
 	end
