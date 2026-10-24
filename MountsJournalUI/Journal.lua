@@ -196,7 +196,11 @@ function journal:init()
 	sMountJournal:SetFrameRef("randomButton", randomButton)
 	sMountJournal:SetFrameRef("useMountsJournalButton", self.useMountsJournalButton)
 	sMountJournal:SetFrameRef("bgFrame", self.bgFrame)
-	sMountJournal:SetFrameRef("CollectionsJournalTab1", CollectionsJournalTab1)
+	if self.CollectionsJournal.TabContainer then -- 12.1.7
+		sMountJournal:SetFrameRef("TabContainer", self.CollectionsJournal.TabContainer)
+	else -- 12.1.5
+		sMountJournal:SetFrameRef("CollectionsJournalTab1", CollectionsJournalTab1)
+	end
 	sMountJournal:SetAttribute("useDefaultJournal", mounts.config.useDefaultJournal)
 	sMountJournal:SetAttribute("isShow", true)
 	sMountJournal:SetAttribute("_onshow", [[
@@ -210,8 +214,7 @@ function journal:init()
 	sMountJournal:SetAttribute("update", [[
 		local randomButton = self:GetFrameRef("randomButton")
 		local useMountsJournalButton = self:GetFrameRef("useMountsJournalButton")
-		local bgFrame = self:GetFrameRef("bgFrame")
-		local tab, rFrame = self:GetFrameRef("CollectionsJournalTab1")
+		local bgFrame, rFrame = self:GetFrameRef("bgFrame")
 
 		if self:GetAttribute("isShow") then
 			useMountsJournalButton:Show()
@@ -233,9 +236,20 @@ function journal:init()
 			rFrame = "$parent"
 		end
 
-		if tab:IsProtected() then
-			local point, _, rPoint, x, y = tab:GetPoint()
-			tab:SetPoint(point, rFrame, rPoint, x, y)
+		local tab = self:GetFrameRef("CollectionsJournalTab1")
+		if tab then -- 12.1.5
+			if tab:IsProtected() then
+				local point, _, rPoint, x, y = tab:GetPoint()
+				tab:SetPoint(point, rFrame, rPoint, x, y)
+			end
+		else -- 12.1.7
+			local tabs = self:GetFrameRef("TabContainer")
+			if tabs and tabs:IsProtected() then
+				for i = 1, tabs:GetNumPoints() do
+					local point, _, rPoint, x, y = tabs:GetPoint(i)
+					tabs:SetPoint(point, rFrame, rPoint, x, y)
+				end
+			end
 		end
 	]])
 	sMountJournal:SetFrameRef("DynamicFlightModeButton", self.bgFrame.DynamicFlightModeButton)
@@ -351,12 +365,6 @@ function journal:init()
 	self.bgFrame.numTabs = 3
 	PanelTemplates_SetTab(self.bgFrame, self.bgFrame.numTabs)
 	sMountJournal:SetAttribute("numTabs", self.bgFrame.numTabs)
-
-	-- SET SIZE
-	local minWidth, minHeight, maxWidth, maxHeight = self:getMinMaxSize()
-	local width = Clamp(mounts.config.journalWidth or minWidth, minWidth, maxWidth)
-	local height = Clamp(mounts.config.journalHeight or minHeight, minHeight, maxHeight)
-	self.bgFrame:SetSize(width, height)
 
 	-- DYNAMIC FLIGHT
 	hooksecurefunc(self.MountJournal.ToggleDynamicFlightFlyoutButton, "UpdateVisibility", function()
@@ -1378,10 +1386,10 @@ function journal:init()
 		parent:StopMovingOrSizing()
 		parent.isSizing = nil
 		mounts.config.journalWidth, mounts.config.journalHeight = parent:GetSize()
+		self.curWidth, self.curHeight = mounts.config.journalWidth, mounts.config.journalHeight
 		self.bgFrame:ClearAllPoints()
 		self.bgFrame:SetPoint("TOPLEFT", self.CollectionsJournal, "TOPLEFT", 0, 0)
-		self:setScrollGridMounts(true)
-		self:event("JOURNAL_RESIZED")
+		self:updateSize()
 	end)
 
 	-- MOUNT SPECIAL
@@ -1447,6 +1455,7 @@ function journal:init()
 	    :on("PET_STATUS_UPDATE", self.updateMountsList)
 
 	self.lastMountListUpdate = 0
+	self:updateSize()
 	self:updateCollectionTabs(true)
 	self:setModelSceneBackground()
 	self:setScrollGridMounts()
@@ -1530,11 +1539,28 @@ end)
 
 function journal:getMinMaxSize()
 	local minWidth, minHeight = self.CollectionsJournal:GetSize()
-	local minTabWidth = (self.CollectionsJournal.Tabs[self.CollectionsJournal.numTabs]:GetRight() or 0) - self.CollectionsJournal:GetLeft() + self.bgFrame:GetRight() - self.bgFrame.Tabs[#self.bgFrame.Tabs]:GetLeft() + 20
+	local tabContainer = self.CollectionsJournal.TabContainer or self.CollectionsJournal -- 12.1.7 fix
+	local minTabWidth = (tabContainer.Tabs[tabContainer.numTabs]:GetRight() or 0) - self.CollectionsJournal:GetLeft() + self.bgFrame:GetRight() - self.bgFrame.Tabs[#self.bgFrame.Tabs]:GetLeft() + 20
 	local maxWidth = UIParent:GetWidth() - self.bgFrame:GetLeft() - 10
 	local maxHeight = self.bgFrame:GetTop() - CollectionsJournalTab1:GetHeight()
 	return max(minWidth, minTabWidth), minHeight, maxWidth, maxHeight
 end
+
+
+function journal:updateSize()
+	if not self.bgFrame then return end
+	local minWidth, minHeight, maxWidth, maxHeight = self:getMinMaxSize()
+	local width = Clamp(mounts.config.journalWidth or minWidth, minWidth, maxWidth)
+	local height = Clamp(mounts.config.journalHeight or minHeight, minHeight, maxHeight)
+
+	if (self.curWidth or 0) ~= width or (self.curHeight or 0) ~= height then
+		self.curWidth, self.curHeight = width, height
+		self.bgFrame:SetSize(width, height)
+		self:setScrollGridMounts(true)
+		self:event("JOURNAL_RESIZED")
+	end
+end
+hooksecurefunc("CollectionsJournal_UpdateSelectedTab", GenerateFlatClosure(journal.updateSize, journal))
 
 
 function journal:setMJFiltersBackup()
@@ -1657,11 +1683,21 @@ end
 
 
 function journal:updateCollectionTabs(force)
-	local tab = CollectionsJournalTab1
-	if tab:IsProtected() and not force then return end
-	local relativeFrame = self.bgFrame:IsShown() and self.bgFrame or CollectionsJournal
-	local point, _, rPoint, x, y = tab:GetPoint()
-	tab:SetPoint(point, relativeFrame, rPoint, x, y)
+	local tabs = self.CollectionsJournal.TabContainer
+	if tabs then -- 12.1.7
+		if tabs:IsProtected() and not force then return end
+		local relativeFrame = self.bgFrame:IsShown() and self.bgFrame or CollectionsJournal
+		for i = 1, tabs:GetNumPoints() do
+			local point, _, rPoint, x, y = tabs:GetPoint(i)
+			tabs:SetPoint(point, relativeFrame, rPoint, x, y)
+		end
+	else -- 12.1.5
+		local tab = CollectionsJournalTab1
+		if tab:IsProtected() and not force then return end
+		local relativeFrame = self.bgFrame:IsShown() and self.bgFrame or CollectionsJournal
+		local point, _, rPoint, x, y = tab:GetPoint()
+		tab:SetPoint(point, relativeFrame, rPoint, x, y)
+	end
 end
 
 
@@ -2640,9 +2676,7 @@ function journal:setModelSceneBackground()
 		bgTex:ClearAllPoints()
 		bgTex:SetPoint("TOP")
 		bgTex:Show()
-		local updateSize = function()
-			self.mountDisplay:GetScript("OnShow")(self.mountDisplay)
-		end
+		local updateSize = GenerateFlatClosure(self.mountDisplay:GetScript("OnShow"), self.mountDisplay)
 		updateSize()
 		self:on("JOURNAL_RESIZED.MountDisplay", updateSize)
 		    :on("INSPECT_RESIZED.MountDisplay", updateSize)
