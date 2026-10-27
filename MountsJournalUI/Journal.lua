@@ -1394,7 +1394,8 @@ function journal:init()
 		self.curWidth, self.curHeight = mounts.config.journalWidth, mounts.config.journalHeight
 		self.bgFrame:ClearAllPoints()
 		self.bgFrame:SetPoint("TOPLEFT", self.CollectionsJournal, "TOPLEFT", 0, 0)
-		self:updateSize()
+		self:setScrollGridMounts(true)
+		self:event("JOURNAL_RESIZED")
 	end)
 
 	-- MOUNT SPECIAL
@@ -1553,12 +1554,14 @@ end
 
 
 function journal:updateSize()
-	if not self.bgFrame then return end
+	if not self.bgFrame or InCombatLockdown() then return end
 	local minWidth, minHeight, maxWidth, maxHeight = self:getMinMaxSize()
 	local width = Clamp(mounts.config.journalWidth or minWidth, minWidth, maxWidth)
 	local height = Clamp(mounts.config.journalHeight or minHeight, minHeight, maxHeight)
 
-	if (self.curWidth or 0) ~= width or (self.curHeight or 0) ~= height then
+	if math.abs((self.curWidth or 0) - width) > .001
+	or math.abs((self.curHeight or 0) - height) > .001
+	then
 		self.curWidth, self.curHeight = width, height
 		self.bgFrame:SetSize(width, height)
 		self:setScrollGridMounts(true)

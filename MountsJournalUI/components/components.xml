@@ -1,6 +1,7 @@
 <Ui>
 	<Script file="Binding.lua"/>
 	<Script file="ForAllIndentsAndPurposes.lua"/>
+	<Script file="CopyBox.lua"/>
 	<Script file="ScrollBoxSorting.lua"/>
 	<Script file="CustomTooltip.lua"/>
 

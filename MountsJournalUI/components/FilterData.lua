@@ -315,16 +315,14 @@ do
 	local function add(list, text, defFilters, filters, k)
 		local info = list[text]
 		if info then
-			local i = 4
-			while info[i] do
-				i = i + 3
-			end
+			local i = info.i
 			info[i] = defFilters
 			info[i + 1] = filters
 			info[i + 2] = k
+			info.i = i + 3
 			return
 		end
-		list[text] = {defFilters, filters, k}
+		list[text] = {defFilters, filters, k, i = 4}
 		list[#list + 1] = text
 	end
 

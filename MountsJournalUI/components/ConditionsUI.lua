@@ -973,9 +973,10 @@ conds.difficulty.onlyOne = true
 local function getDifficultyName(value)
 	if value == 0 then return WORLD end
 	local name, instanceType, _,_,_,_,_, isLFR, minPlayers, maxPlayers = GetDifficultyInfo(value)
-	local separator = " |cff808080|||r "
 
 	if name then
+		local separator = " |cff808080|||r "
+
 		if instanceType == "raid" then
 			name = name..separator..LEGENDARY_ORANGE_COLOR:WrapTextInColorCode(RAID)
 		elseif instanceType == "party" then
@@ -992,7 +993,7 @@ end
 function conds.difficulty:getValue(values)
 	local names = {}
 	for i, value in ipairs(values) do
-		names[i] = getDifficultyName(value)
+		names[i] = getDifficultyName(value) or ""
 	end
 	return names
 end
@@ -1033,7 +1034,11 @@ function conds.difficulty:getValueList(values, func)
 
 	for i = 1, #ids do
 		local id = ids[i]
-		list[i] = createCheckableInfo(getDifficultyName(id), id, func, checked)
+		local name = getDifficultyName(id)
+
+		if name then
+			list[i] = createCheckableInfo(name, id, func, checked)
+		end
 	end
 
 	return list
