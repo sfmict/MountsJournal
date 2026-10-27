@@ -706,11 +706,11 @@
 									</OnMouseUp>
 								</Scripts>
 							</Button>
-							<Frame parentKey="mountHint" inherits="MJHelpPlate" scale=".7" alpha=".5">
+							<Button parentKey="mountHint" inherits="MJHelpPlate" scale=".7" alpha=".5">
 								<Anchors>
 									<Anchor point="TOP" relativeKey="$parent.modelSceneSettingsButton" relativePoint="BOTTOM" y="15"/>
 								</Anchors>
-							</Frame>
+							</Button>
 						</Frames>
 					</Frame>
 					<ModelScene parentKey="modelScene" useParentLevel="true" inherits="MJWrappedAndUnwrappedModelScene">
@@ -2326,6 +2326,14 @@
 				self.highlight:Hide()
 				GameTooltip:Hide()
 			</OnLeave>
+			<OnMouseDown>
+				if self:GetScript("OnClick") then
+					self.I:SetScale(.9)
+				end
+			</OnMouseDown>
+			<OnMouseUp>
+				self.I:SetScale(1)
+			</OnMouseUp>
 		</Scripts>
 	</Frame>
 

@@ -74,7 +74,7 @@ local model_OnEnter, model_OnLeave do
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end)
 
-	local hint = CreateFrame("Frame", nil, nil, "MJHelpPlate,MJMotionPropagateTemplate")
+	local hint = CreateFrame("BUTTON", nil, nil, "MJHelpPlate,MJMotionPropagateTemplate")
 	hint:Hide()
 	hint:SetScale(.7)
 	hint:SetAlpha(.5)
@@ -90,7 +90,11 @@ local model_OnEnter, model_OnLeave do
 	hint:SetScript("OnLeave", function(hint)
 		hint.highlight:Hide()
 		hint:SetAlpha(.5)
-		GameTooltip:Hide()
+		local ct = journal.customTooltip
+		if not ct:isFixed() then ct:Hide() end
+	end)
+	hint:SetScript("OnClick", function()
+		journal.customTooltip:setFixedToggle()
 	end)
 
 	function model_OnEnter(btn)

@@ -1138,7 +1138,12 @@ function journal:init()
 		btn.isHover = nil
 		btn.highlight:Hide()
 		btn:SetAlpha(.5)
-		GameTooltip:Hide()
+		local ct = self.customTooltip
+		if not ct:isFixed() then ct:Hide() end
+	end)
+
+	msMountHint:SetScript("OnClick", function(btn)
+		self.customTooltip:setFixedToggle()
 	end)
 
 	local function updateMountHint()

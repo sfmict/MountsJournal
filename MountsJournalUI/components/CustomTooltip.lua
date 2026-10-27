@@ -10,6 +10,7 @@ ct:SetFrameStrata("TOOLTIP")
 ct:EnableMouse(true)
 ct.lines = {}
 SharedTooltip_OnLoad(ct)
+ct.borderR, ct.borderG, ct.borderB, ct.borderA = ct.NineSlice:GetBorderColor()
 local underline = ct:CreateTexture(nil, "ARTWORK")
 underline:SetSize(1.1, 1.1)
 GameTooltip:HookScript("OnShow", function() ct:Hide() end)
@@ -75,6 +76,7 @@ ct:SetScript("OnHide", function(self)
 	wipe(self.lines)
 	self:SetScript("OnUpdate", nil)
 	self:UnregisterEvent("GLOBAL_MOUSE_DOWN")
+	self:setFixed(false)
 end)
 
 
@@ -82,6 +84,26 @@ ct:SetScript("OnEvent", function(self)
 	if self:IsMouseOver() or self.anchorFrame:IsMouseOver() then return end
 	self:Hide()
 end)
+
+
+function ct:setFixed(isFixed)
+	self.fixed = isFixed
+	if isFixed then
+		self.NineSlice:SetBorderColor(.8, .6, 0, self.borderA)
+	else
+		self.NineSlice:SetBorderColor(self.borderR, self.borderG, self.borderB, self.borderA)
+	end
+end
+
+
+function ct:isFixed()
+	return self.fixed
+end
+
+
+function ct:setFixedToggle()
+	self:setFixed(not self:isFixed())
+end
 
 
 function ct:updateHeight()
