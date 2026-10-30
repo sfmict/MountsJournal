@@ -107,6 +107,7 @@ function journal:init()
 
 	self.bgFrame:SetScript("OnShow", function()
 		self.CollectionsJournal.NineSlice:Hide()
+		self.CollectionsJournal.CloseButton:Hide()
 		self:RegisterEvent("COMPANION_UPDATE")
 		self:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 		self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
@@ -130,6 +131,7 @@ function journal:init()
 
 	self.bgFrame:SetScript("OnHide", function()
 		self.CollectionsJournal.NineSlice:Show()
+		self.CollectionsJournal.CloseButton:Show()
 		self:UnregisterEvent("COMPANION_UPDATE")
 		self:UnregisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 		self:UnregisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
@@ -1450,6 +1452,7 @@ function journal:init()
 
 	-- INIT
 	self.CollectionsJournal.NineSlice:Hide()
+	self.CollectionsJournal.CloseButton:Hide()
 	self:RegisterEvent("COMPANION_UPDATE")
 	self:RegisterEvent("UI_MODEL_SCENE_INFO_UPDATED")
 	self:RegisterEvent("MOUNT_JOURNAL_USABILITY_CHANGED")
@@ -1633,7 +1636,6 @@ do
 	end
 
 	function journal:hideFrames()
-		self.CollectionsJournal.CloseButton:Hide()
 		for _, frame in ipairs({self.MountJournal:GetChildren()}) do
 			if not frame:IsProtected() then
 				self.frameState[frame] = frame:IsShown()
@@ -1648,7 +1650,6 @@ end
 
 
 function journal:restoreFrames()
-	self.CollectionsJournal.CloseButton:Show()
 	for frame, shown in pairs(self.frameState) do
 		self.frameState[frame] = nil
 		frame.SetShown = nil
