@@ -308,10 +308,15 @@ end
 
 do
 	local text = "%s/"..L["ABBR_HOUR"].." = %s/"..L["ABBR_HOUR"]
-	function util:getFormattedAvgSpeed(distance, time)
-		local avgSpeed = time > 0 and distance / time * 3600 or 0
+	function util:getFormattedAvgSpeed(avgSpeed)
+		avgSpeed = avgSpeed * 3600
 		return text:format(self.getImperialFormat(avgSpeed), self.getMetricFormat(avgSpeed))
 	end
+end
+
+
+function util:getFormattedAvgSpeedByTimeDistance(tTime, distance)
+	return self:getFormattedAvgSpeed(tTime > 0 and distance / tTime or 0)
 end
 
 

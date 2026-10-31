@@ -36,7 +36,7 @@
 				</Scripts>
 			</Button>
 
-			<Frame parentKey="mountCount" useParentLevel="false" inherits="InsetFrameTemplate3">
+			<Button parentKey="mountCount" useParentLevel="false" inherits="InsetFrameTemplate3">
 				<Size x="130" y="34"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="70" y="-25"/>
@@ -65,7 +65,7 @@
 						</FontString>
 					</Layer>
 				</Layers>
-			</Frame>
+			</Button>
 
 			<Button parentKey="slotButton" scale=".69" inherits="MountEquipmentButtonTemplate,SecureActionButtonTemplate" hidden="true">
 				<Mixins>
@@ -1892,6 +1892,47 @@
 		</Scripts>
 	</Button>
 
+	<Button name="MJMountDragButtonTemplate" virtual="true">
+		<Size x="40" y="40"/>
+		<Anchors>
+			<Anchor point="RIGHT" relativePoint="LEFT" x="0" y="0"/>
+		</Anchors>
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture parentKey="icon">
+					<Size x="38" y="38"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="ARTWORK" textureSubLevel="1">
+				<Texture parentKey="qualityBorder" file="Interface/Common/WhiteIconFrame">
+					<Size x="38" y="38"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY" textureSubLevel="1">
+				<Texture file="Interface/BUTTONS/UI-GroupLoot-Pass-Up" parentKey="hidden" hidden="true">
+					<Size x="25" y="25"/>
+					<Anchors>
+						<Anchor point="CENTER"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+			<Layer level="OVERLAY" textureSubLevel="2">
+				<Texture parentKey="favorite" atlas="PetJournal-FavoritesIcon">
+					<Size x="20" y="20"/>
+					<Anchors>
+						<Anchor point="TOPLEFT" x="-4" y="5"/>
+					</Anchors>
+				</Texture>
+			</Layer>
+		</Layers>
+	</Button>
+
 	<Button name="MJMountDefaultListButtonTemplate" inherits="MJMountListButtonScripsTemplate" virtual="true">
 		<Layers>
 			<Layer level="BACKGROUND">
@@ -1938,28 +1979,8 @@
 			<KeyValue key="LibSFDropDownNoGMEvent" value="true" type="boolean"/>
 		</KeyValues>
 		<Frames>
-			<Button parentKey="dragButton" motionScriptsWhileDisabled="true">
-				<Size x="40" y="40"/>
-				<Anchors>
-					<Anchor point="RIGHT" relativePoint="LEFT" x="0" y="0"/>
-				</Anchors>
+			<Button parentKey="dragButton" motionScriptsWhileDisabled="true" inherits="MJMountDragButtonTemplate">
 				<Layers>
-					<Layer level="ARTWORK">
-						<Texture parentKey="icon">
-							<Size x="38" y="38"/>
-							<Anchors>
-								<Anchor point="CENTER"/>
-							</Anchors>
-						</Texture>
-					</Layer>
-					<Layer level="ARTWORK" textureSubLevel="1">
-						<Texture parentKey="qualityBorder" file="Interface/Common/WhiteIconFrame">
-							<Size x="38" y="38"/>
-							<Anchors>
-								<Anchor point="CENTER"/>
-							</Anchors>
-						</Texture>
-					</Layer>
 					<Layer level="ARTWORK" textureSubLevel="2">
 						<FontString inherits="GameFontNormal" parentKey="mountWeight">
 							<Anchors>
@@ -1976,21 +1997,7 @@
 						<Texture file="Interface\Buttons\CheckButtonHilight" parentKey="activeTexture" alphaMode="ADD" setAllPoints="true"/>
 					</Layer>
 					<Layer level="OVERLAY" textureSubLevel="1">
-						<Texture file="Interface/BUTTONS/UI-GroupLoot-Pass-Up" parentKey="hidden" hidden="true">
-							<Size x="25" y="25"/>
-							<Anchors>
-								<Anchor point="CENTER"/>
-							</Anchors>
-						</Texture>
 						<Texture parentKey="highlight" file="Interface/Buttons/ButtonHilight-Square" setAllPoints="true" alphaMode="ADD" hidden="true"/>
-					</Layer>
-					<Layer level="OVERLAY" textureSubLevel="2">
-						<Texture parentKey="favorite" atlas="PetJournal-FavoritesIcon">
-							<Size x="20" y="20"/>
-							<Anchors>
-								<Anchor point="TOPLEFT" x="-4" y="5"/>
-							</Anchors>
-						</Texture>
 					</Layer>
 				</Layers>
 				<KeyValues>

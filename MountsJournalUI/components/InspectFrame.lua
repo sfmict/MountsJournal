@@ -6,6 +6,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 	local inspectFrame = CreateFrame("FRAME", nil, journal.bgFrame, "DefaultPanelTemplate,MJEscHideTemplate")
 	journal.inspectFrame = inspectFrame
 	inspectFrame:SetFrameLevel(journal.bgFrame:GetFrameLevel() + 1000)
+	inspectFrame:SetFlattensRenderLayers(true)
 	inspectFrame:SetClampedToScreen(true)
 	inspectFrame:EnableMouse(true)
 	inspectFrame:SetMovable(true)

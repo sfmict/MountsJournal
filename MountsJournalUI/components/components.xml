@@ -22,6 +22,9 @@
 	<Script file="Help.lua"/>
 	<Script file="InspectFrame.lua"/>
 
+	<Include file="statisticFrame.xml"/>
+	<Script file="StatisticFrame.lua"/>
+
 	<Include file="filterMenu\filterMenu.xml"/>
 	<Include file="mountMenu\mountMenu.xml"/>
 </Ui>

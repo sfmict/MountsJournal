@@ -384,8 +384,28 @@ function journal:init()
 
 	-- MOUNT COUNT
 	self.mountCount.collectedLabel:SetText(L["Collected:"])
-	self.mountCount:SetScript("OnLeave", GameTooltip_Hide)
+	self.mountCount:SetScript("OnLeave", function(frame)
+		frame.BorderTopRight:SetVertexColor(1, 1, 1)
+		frame.BorderBottomRight:SetVertexColor(1, 1, 1)
+		frame.BorderRightMiddle:SetVertexColor(1, 1, 1)
+		frame.BorderTopLeft:SetVertexColor(1, 1, 1)
+		frame.BorderBottomLeft:SetVertexColor(1, 1, 1)
+		frame.BorderLeftMiddle:SetVertexColor(1, 1, 1)
+		frame.BorderTopMiddle:SetVertexColor(1, 1, 1)
+		frame.BorderBottomMiddle:SetVertexColor(1, 1, 1)
+
+		GameTooltip:Hide()
+	end)
 	self.mountCount:SetScript("OnEnter", function(frame)
+		frame.BorderTopRight:SetVertexColor(.8, .6, 0)
+		frame.BorderBottomRight:SetVertexColor(.8, .6, 0)
+		frame.BorderRightMiddle:SetVertexColor(.8, .6, 0)
+		frame.BorderTopLeft:SetVertexColor(.8, .6, 0)
+		frame.BorderBottomLeft:SetVertexColor(.8, .6, 0)
+		frame.BorderLeftMiddle:SetVertexColor(.8, .6, 0)
+		frame.BorderTopMiddle:SetVertexColor(.8, .6, 0)
+		frame.BorderBottomMiddle:SetVertexColor(.8, .6, 0)
+
 		local summons, mountTime, mountDistance = 0, 0, 0
 		for k, v in next, mounts.stat do
 			summons = summons + v[1]
@@ -395,16 +415,20 @@ function journal:init()
 		if summons == 0 and mountTime == 0 and mountDistance == 0 then return end
 
 		GameTooltip:SetOwner(frame, "ANCHOR_TOPLEFT")
-		GameTooltip:SetText(TOTAL)
+		GameTooltip:SetText(STATISTICS)
 
 		if summons > 0 then util.addTooltipDLine(SUMMONS, summons) end
 		if mountTime > 0 then util.addTooltipDLine(L["Travel time"], util.getTimeBreakDown(mountTime)) end
 		if mountDistance > 0 then
 			util.addTooltipDLine(L["Travel distance"], util:getFormattedDistance(mountDistance))
-			util.addTooltipDLine(L["Avg. speed"], util:getFormattedAvgSpeed(mountDistance, mountTime))
+			util.addTooltipDLine(L["Avg. speed"], util:getFormattedAvgSpeedByTimeDistance(mountDistance, mountTime))
 		end
 
 		GameTooltip:Show()
+	end)
+	self.mountCount:SetScript("OnClick", function()
+		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+		self.statisticFrame:SetShown(not self.statisticFrame:IsShown())
 	end)
 	self:updateCountMounts()
 	self:RegisterEvent("COMPANION_LEARNED")
@@ -1845,7 +1869,7 @@ function journal:setMountTooltip(mountID, spellID, showDescription)
 	local mountDistance = mounts:getMountDistance(spellID)
 	if mountDistance > 0 then
 		ct:addLine(L["Travel distance"], util:getFormattedDistance(mountDistance))
-		ct:addLine(L["Avg. speed"], util:getFormattedAvgSpeed(mountDistance, mountTime))
+		ct:addLine(L["Avg. speed"], util:getFormattedAvgSpeedByTimeDistance(mountDistance, mountTime))
 	end
 
 	if showDescription or not mounts.config.mountDescriptionToggle then
