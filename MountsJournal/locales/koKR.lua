@@ -53,6 +53,7 @@ L["CreateMacroTooltip"] = "생성된 매크로는 선택된 탈것을 소환하�
 L["or key bind"] = "또는 키 바인딩"
 L["ERR_MOUNT_NO_SELECTED"] = "유효한 선택된 탈것이 없습니다."
 L["Collected:"] = "수집됨"
+L["Latest Additions"] = "최근 추가됨"
 L["Shown:"] = "표시됨:"
 L["hidden for character"] = "캐릭터용으로 숨김"
 L["only hidden"] = "숨겨진 것만"

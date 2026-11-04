@@ -36,12 +36,81 @@
 				</Scripts>
 			</Button>
 
-			<Button parentKey="mountCount" useParentLevel="false" inherits="InsetFrameTemplate3">
+			<Button parentKey="mountCount">
 				<Size x="130" y="34"/>
 				<Anchors>
 					<Anchor point="TOPLEFT" x="70" y="-25"/>
 				</Anchors>
 				<Layers>
+					<Layer level="BACKGROUND">
+						<Texture parentKey="TopLeft" desaturated="true" file="Interface\Buttons\UI-Panel-Button-Up">
+							<Size x="12" y="7"/>
+							<Anchors>
+								<Anchor point="TOPLEFT"/>
+							</Anchors>
+							<TexCoords left="0" right="0.09375" top="0" bottom="0.21875"/>
+						</Texture>
+						<Texture parentKey="BottomLeft" desaturated="true" file="Interface\Buttons\UI-Panel-Button-Up">
+							<Size x="12" y="7"/>
+							<Anchors>
+								<Anchor point="BOTTOMLEFT"/>
+							</Anchors>
+							<TexCoords left="0" right="0.09375" top="0.46875" bottom="0.6875"/>
+						</Texture>
+						<Texture parentKey="Left" desaturated="true" file="Interface\Buttons\UI-Panel-Button-Up">
+							<Size x="12"/>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeKey="$parent.TopLeft" relativePoint="BOTTOMLEFT"/>
+								<Anchor point="BOTTOMLEFT" relativeKey="$parent.BottomLeft" relativePoint="TOPLEFT"/>
+							</Anchors>
+							<TexCoords left="0" right="0.09375" top="0.25" bottom="0.4375"/>
+						</Texture>
+						<Texture parentKey="TopRight" desaturated="true" file="Interface\Buttons\UI-Panel-Button-Up">
+							<Size x="12" y="7"/>
+							<Anchors>
+								<Anchor point="TOPRIGHT"/>
+							</Anchors>
+							<TexCoords left="0.53125" right="0.625" top="0" bottom="0.21875"/>
+						</Texture>
+						<Texture parentKey="BottomRight" desaturated="true" file="Interface\Buttons\UI-Panel-Button-Up">
+							<Size x="12" y="7"/>
+							<Anchors>
+								<Anchor point="BOTTOMRIGHT"/>
+							</Anchors>
+							<TexCoords left="0.53125" right="0.625" top="0.46875" bottom="0.6875"/>
+						</Texture>
+						<Texture parentKey="Right" desaturated="true" file="Interface\Buttons\UI-Panel-Button-Up">
+							<Size x="12"/>
+							<Anchors>
+								<Anchor point="TOPRIGHT" relativeKey="$parent.TopRight" relativePoint="BOTTOMRIGHT"/>
+								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.BottomRight" relativePoint="TOPRIGHT"/>
+							</Anchors>
+							<TexCoords left="0.53125" right="0.625" top="0.25" bottom="0.4375"/>
+						</Texture>
+						<Texture parentKey="Top" desaturated="true" file="Interface\Buttons\UI-Panel-Button-Up">
+							<Size y="7"/>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeKey="$parent.TopLeft" relativePoint="TOPRIGHT"/>
+								<Anchor point="TOPRIGHT" relativeKey="$parent.TopRight" relativePoint="TOPLEFT"/>
+							</Anchors>
+							<TexCoords left="0.1015625" right="0.5234375" top="0" bottom="0.21875"/>
+						</Texture>
+						<Texture parentKey="Bottom" desaturated="true" file="Interface\Buttons\UI-Panel-Button-Up">
+							<Size y="7"/>
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativeKey="$parent.BottomLeft" relativePoint="BOTTOMRIGHT"/>
+								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.BottomRight" relativePoint="BOTTOMLEFT"/>
+							</Anchors>
+							<TexCoords left="0.1015625" right="0.5234375" top="0.46875" bottom="0.6875"/>
+						</Texture>
+						<Texture parentKey="Middle" desaturated="true" file="Interface\Buttons\UI-Panel-Button-Up">
+							<Anchors>
+								<Anchor point="TOPLEFT" relativeKey="$parent.TopLeft" relativePoint="BOTTOMRIGHT"/>
+								<Anchor point="BOTTOMRIGHT" relativeKey="$parent.BottomRight" relativePoint="TOPLEFT"/>
+							</Anchors>
+							<TexCoords left="0.1015625" right="0.5234375" top="0.25" bottom="0.4375"/>
+						</Texture>
+					</Layer>
 					<Layer level="ARTWORK">
 						<FontString parentKey="count" inherits="GameFontHighlightSmall" justifyH="RIGHT">
 							<Anchors>
@@ -55,16 +124,47 @@
 						</FontString>
 						<FontString parentKey="collected" inherits="GameFontHighlightSmall" justifyH="RIGHT">
 							<Anchors>
-								<Anchor point="RIGHT" x="-10" y="-6"/>
+								<Anchor point="TOPRIGHT" relativeKey="$parent.count" relativePoint="BOTTOMRIGHT" y="-2"/>
 							</Anchors>
 						</FontString>
 						<FontString parentKey="collectedLabel" inherits="GameFontNormalSmall" justifyH="LEFT">
 							<Anchors>
-								<Anchor point="LEFT" x="10" y="-6"/>
+								<Anchor point="TOPLEFT" relativeKey="$parent.label" relativePoint="BOTTOMLEFT" y="-2"/>
 							</Anchors>
 						</FontString>
 					</Layer>
 				</Layers>
+				<HighlightTexture file="Interface\Buttons\UI-Panel-Button-Highlight2" alphaMode="ADD" alpha=".3">
+					<TexCoords left="0" right="0.625" top="0" bottom="0.6875"/>
+				</HighlightTexture>
+				<Scripts>
+					<OnMouseDown>
+						self.TopLeft:SetTexture("Interface\\Buttons\\UI-Panel-Button-Down")
+						self.BottomLeft:SetTexture("Interface\\Buttons\\UI-Panel-Button-Down")
+						self.Left:SetTexture("Interface\\Buttons\\UI-Panel-Button-Down")
+						self.TopRight:SetTexture("Interface\\Buttons\\UI-Panel-Button-Down")
+						self.BottomRight:SetTexture("Interface\\Buttons\\UI-Panel-Button-Down")
+						self.Right:SetTexture("Interface\\Buttons\\UI-Panel-Button-Down")
+						self.Top:SetTexture("Interface\\Buttons\\UI-Panel-Button-Down")
+						self.Bottom:SetTexture("Interface\\Buttons\\UI-Panel-Button-Down")
+						self.Middle:SetTexture("Interface\\Buttons\\UI-Panel-Button-Down")
+						self.count:AdjustPointsOffset(-2, -2)
+						self.label:AdjustPointsOffset(-2, -2)
+					</OnMouseDown>
+					<OnMouseUp>
+						self.TopLeft:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up")
+						self.BottomLeft:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up")
+						self.Left:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up")
+						self.TopRight:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up")
+						self.BottomRight:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up")
+						self.Right:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up")
+						self.Top:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up")
+						self.Bottom:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up")
+						self.Middle:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up")
+						self.count:AdjustPointsOffset(2, 2)
+						self.label:AdjustPointsOffset(2, 2)
+					</OnMouseUp>
+				</Scripts>
 			</Button>
 
 			<Button parentKey="slotButton" scale=".69" inherits="MountEquipmentButtonTemplate,SecureActionButtonTemplate" hidden="true">
@@ -3681,7 +3781,11 @@
 				self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 			</OnHide>
 			<OnEvent>
-				self:EnableKeyboard(event == "PLAYER_REGEN_ENABLED")
+				if event == "PLAYER_REGEN_ENABLED" then
+					self:EnableKeyboard(true)
+				elseif event == "PLAYER_REGEN_DISABLED" then
+					self:EnableKeyboard(false)
+				end
 			</OnEvent>
 		</Scripts>
 	</Frame>

@@ -53,6 +53,7 @@ L["CreateMacroTooltip"] = "Созданный макрос использует�
 L["or key bind"] = "или назначить клавишу"
 L["ERR_MOUNT_NO_SELECTED"] = "У вас нет выбранного средства передвижения, подходящего для езды по этой зоне."
 L["Collected:"] = "Собрано:"
+L["Latest Additions"] = "Последние добавления"
 L["Shown:"] = "Показано:"
 L["hidden for character"] = "Скрытые для персонажа"
 L["only hidden"] = "Только скрытые"

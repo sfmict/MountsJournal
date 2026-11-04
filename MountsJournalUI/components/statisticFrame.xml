@@ -1,5 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
-	<Button name="MJMountStatisticListButtonTemplate" virtual="true">
+	<Button name="MJMountStatsListButtonTemplate" virtual="true">
 		<Size y="40"/>
 		<Layers>
 			<Layer level="BACKGROUND">

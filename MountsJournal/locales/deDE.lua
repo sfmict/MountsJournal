@@ -53,6 +53,7 @@ L["CreateMacroTooltip"] = "Das erstellte Makro wird verwendet, um die ausgewähl
 L["or key bind"] = "oder Tastenbindung"
 L["ERR_MOUNT_NO_SELECTED"] = "Du hast keine gültigen Reittiere ausgewählt."
 L["Collected:"] = "Gesammelt"
+L["Latest Additions"] = "Zuletzt hinzugefügt"
 L["Shown:"] = "Abgebildet:"
 L["hidden for character"] = "Versteckt für Charakter"
 L["only hidden"] = "Nur versteckte"

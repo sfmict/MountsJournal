@@ -517,13 +517,13 @@ config:SetScript("OnShow", function(self)
 	self.showWowheadLink:SetPoint("TOPLEFT", self.openLinks, "BOTTOMLEFT", 0, -15)
 	self.showWowheadLink.Text:SetPoint("RIGHT", self.rightPanelScroll)
 
-	-- STATISTIC COLLECTION
-	self.statisticCollection = createCheckbox(self.rightPanelScroll.child, L["Enable statistics collection"], L["Enable statistics collection"], L["STATISTICS_DESCRIPTION"])
-	self.statisticCollection:SetPoint("TOPLEFT", self.showWowheadLink, "BOTTOMLEFT", 0, -15)
-	self.statisticCollection.Text:SetPoint("RIGHT", self.rightPanelScroll)
+	-- STATISTICS COLLECTION
+	self.statisticsCollection = createCheckbox(self.rightPanelScroll.child, L["Enable statistics collection"], L["Enable statistics collection"], L["STATISTICS_DESCRIPTION"])
+	self.statisticsCollection:SetPoint("TOPLEFT", self.showWowheadLink, "BOTTOMLEFT", 0, -15)
+	self.statisticsCollection.Text:SetPoint("RIGHT", self.rightPanelScroll)
 
 	do -- TOOLTIP GROUP
-		self.tooltipGroup = createGroupPanel(self.rightPanelScroll.child, self.statisticCollection, -grx, -10)
+		self.tooltipGroup = createGroupPanel(self.rightPanelScroll.child, self.statisticsCollection, -grx, -10)
 
 		-- TOOLTIP MOUNT
 		self.tooltipMount = createCheckbox(self.tooltipGroup, L["Show mount in unit tooltip"])
@@ -644,7 +644,7 @@ config:SetScript("OnShow", function(self)
 		self.randomMountEvery:ddSetSelectedText(self.randomMountEvery.getValueText(mounts.config.randomMountEvery))
 		self.openLinks:SetChecked(mounts.config.openHyperlinks)
 		self.showWowheadLink:SetChecked(mounts.config.showWowheadLink)
-		self.statisticCollection:SetChecked(mounts.config.statCollection)
+		self.statisticsCollection:SetChecked(mounts.config.statCollection)
 		self.tooltipMount:SetChecked(mounts.config.tooltipMount)
 		self.tooltipItems:SetChecked(mounts.config.tooltipItems)
 		self.resetHelp:Enable()
@@ -691,7 +691,7 @@ config:SetScript("OnShow", function(self)
 		mounts.config.randomMountEvery = self.randomMountEvery:ddGetSelectedValue()
 		mounts.config.openHyperlinks = self.openLinks:GetChecked()
 		mounts.config.showWowheadLink = self.showWowheadLink:GetChecked()
-		mounts.config.statCollection = self.statisticCollection:GetChecked()
+		mounts.config.statCollection = self.statisticsCollection:GetChecked()
 		mounts.config.tooltipMount = self.tooltipMount:GetChecked()
 		mounts.config.tooltipItems = self.tooltipItems:GetChecked()
 

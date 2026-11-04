@@ -246,6 +246,12 @@ function util.addTooltipDLine(s1, s2)
 end
 
 
+function util.formatDate(value)
+	local tDate = date("*t", value)
+	return FormatShortDate(tDate.day, tDate.month, tDate.year)
+end
+
+
 do
 	local day = DAY_ONELETTER_ABBR:gsub(" ", "")
 	local hour = HOUR_ONELETTER_ABBR:gsub(" ", "")
@@ -254,7 +260,7 @@ do
 	local mstr = minute.." "..second
 	local hstr = hour.." "..mstr
 	local dstr = day.." "..hstr
-	function util.getTimeBreakDown(time)
+	function util.timeBreakDown(time)
 		local d,h,m,s = ChatFrameUtil.TimeBreakDown(time)
 		if d > 0 then
 			return dstr:format(d,h,m,s)
@@ -300,7 +306,7 @@ end
 
 do
 	local text = "%s = %s"
-	function util:getFormattedDistance(distance)
+	function util:formatDistance(distance)
 		return text:format(self.getImperialFormat(distance), self.getMetricFormat(distance))
 	end
 end
@@ -308,15 +314,15 @@ end
 
 do
 	local text = "%s/"..L["ABBR_HOUR"].." = %s/"..L["ABBR_HOUR"]
-	function util:getFormattedAvgSpeed(avgSpeed)
+	function util:formatAvgSpeed(avgSpeed)
 		avgSpeed = avgSpeed * 3600
 		return text:format(self.getImperialFormat(avgSpeed), self.getMetricFormat(avgSpeed))
 	end
 end
 
 
-function util:getFormattedAvgSpeedByTimeDistance(tTime, distance)
-	return self:getFormattedAvgSpeed(tTime > 0 and distance / tTime or 0)
+function util:formatAvgSpeedByTimeDistance(travelTime, distance)
+	return self:formatAvgSpeed(travelTime > 0 and distance / travelTime or 0)
 end
 
 

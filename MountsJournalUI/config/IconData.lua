@@ -22,7 +22,8 @@ local function fillOutExtraIconsWithSpells(extraIcons, icons)
 		for i = 1, skillLineInfo.numSpellBookItems do
 			local spellIndex = skillLineInfo.itemIndexOffset + i
 			local spellType, ID = C_SpellBook.GetSpellBookItemType(spellIndex, Enum.SpellBookSpellBank.Player)
-			if spellType ~= "FUTURESPELL" then
+
+			if spellType ~= Enum.SpellBookItemType.FutureSpell then
 				local fileID = C_SpellBook.GetSpellBookItemTexture(spellIndex, Enum.SpellBookSpellBank.Player)
 				if fileID ~= nil and not icons[fileID] then
 					local name = C_SpellBook.GetSpellBookItemName(spellIndex, Enum.SpellBookSpellBank.Player)
@@ -31,7 +32,7 @@ local function fillOutExtraIconsWithSpells(extraIcons, icons)
 				end
 			end
 
-			if spellType == "FLYOUT" then
+			if spellType == Enum.SpellBookItemType.Flyout then
 				local _, _, numSlots, isKnown = GetFlyoutInfo(ID)
 				if isKnown and (numSlots > 0) then
 					for k = 1, numSlots do

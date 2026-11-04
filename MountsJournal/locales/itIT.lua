@@ -53,6 +53,7 @@ L["CreateMacroTooltip"] = "La macro creata viene usata per evocare le cavalcatur
 L["or key bind"] = "o tasto di scelta rapida"
 L["ERR_MOUNT_NO_SELECTED"] = "Non hai cavalcature selezionate valide."
 L["Collected:"] = "Raccolte:"
+L["Latest Additions"] = "Ultime aggiunte"
 L["Shown:"] = "Mostrate:"
 L["hidden for character"] = "Nascoste per personaggio"
 L["only hidden"] = "Solo nascoste"

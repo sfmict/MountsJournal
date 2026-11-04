@@ -3,15 +3,9 @@ local L, util, mounts = ns.L, ns.util, ns.mounts
 
 
 ns.journal:on("MODULES_INIT", function(journal)
-	local stFr = CreateFrame("FRAME", nil, journal.bgFrame, "DefaultPanelTemplate,MJEscHideTemplate")
-	journal.statisticFrame = stFr
-	stFr:SetSize(352, 424)
-	stFr:SetFrameLevel(journal.bgFrame:GetFrameLevel() + 1001)
-	stFr:SetFlattensRenderLayers(true)
-	stFr:SetClampedToScreen(true)
-	stFr:EnableMouse(true)
-	stFr:SetMovable(true)
-	stFr:RegisterForDrag("LeftButton")
+	local stFr = CreateFrame("FRAME", nil, nil, "DefaultPanelTemplate,MJEscHideTemplate")
+	journal.statsFrame = stFr
+	stFr:Hide()
 
 	stFr:SetScript("OnDragStart", stFr.StartMoving)
 	stFr:SetScript("OnDragStop", function(self)
@@ -21,11 +15,18 @@ ns.journal:on("MODULES_INIT", function(journal)
 		mounts.config.statisticFrameX = x * scale
 		mounts.config.statisticFrameY = y * scale
 	end)
-	stFr:HookScript("OnHide", function(self)
-		self:Hide()
-	end)
+	stFr:HookScript("OnHide", stFr.Hide)
 
-	stFr:HookScript("OnShow", function(self)
+	local escOnShow = stFr:GetScript("OnShow")
+	stFr:SetScript("OnShow", function(self)
+		self:SetSize(352, 434)
+		self:SetParent(journal.bgFrame) -- TitleContainer frameLevel fix
+		self:SetFrameLevel(journal.bgFrame:GetFrameLevel() + 1001)
+		self:SetFlattensRenderLayers(true)
+		self:SetClampedToScreen(true)
+		self:EnableMouse(true)
+		self:SetMovable(true)
+		self:RegisterForDrag("LeftButton")
 		self:SetTitle(STATISTICS)
 
 		-- POSITION
@@ -41,23 +42,23 @@ ns.journal:on("MODULES_INIT", function(journal)
 		self.close = CreateFrame("BUTTON", nil, self, "UIPanelCloseButtonNoScripts")
 		self.close:SetSize(22, 22)
 		self.close:SetPoint("TOPRIGHT", 0, 0)
-		self.close:SetFrameLevel(self:GetFrameLevel() + 1)
+		self.close:SetFrameLevel(self:GetFrameLevel() + 520)
 		self.close:SetScript("OnClick", function(btn)
 			btn:GetParent():Hide()
 			PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 		end)
 
 		-- COMBOBOX
-		self.statisticType = LibStub("LibSFDropDown-1.5"):CreateModernButtonOriginal(self)
-		self.statisticType:SetPoint("TOPLEFT", 8, -22)
-		self.statisticType:SetPoint("RIGHT", -4, 0)
+		self.statsType = LibStub("LibSFDropDown-1.5"):CreateModernButtonOriginal(self)
+		self.statsType:SetPoint("TOPLEFT", 8, -22)
+		self.statsType:SetPoint("RIGHT", -4, 0)
 
-		self.statisticType:ddSetDisplayMode(addon)
-		self.statisticType:ddSetMinMenuWidth(self.statisticType:GetWidth() - 20)
-		self.statisticType:ddSetSelectedValue(1)
-		self.statisticType:ddSetSelectedText(L["Latest Additions"])
+		self.statsType:ddSetDisplayMode(addon)
+		self.statsType:ddSetMinMenuWidth(self.statsType:GetWidth() - 20)
+		self.statsType:ddSetSelectedValue(1)
+		self.statsType:ddSetSelectedText(L["Latest Additions"])
 
-		self.statisticType:ddSetInitFunc(function(dd, level)
+		self.statsType:ddSetInitFunc(function(dd, level)
 			local info = {}
 
 			info.func = function(btn)
@@ -72,19 +73,101 @@ ns.journal:on("MODULES_INIT", function(journal)
 			end
 		end)
 
+		-- MODES
+		self.statsModes = {
+			[1] = { -- Latest Additions
+				getValue = function(spellID)
+					local value = mounts:getMountDate(spellID)
+					if value then return value, util.formatDate(value) end
+				end,
+			},
+			[2] = { -- Summons
+				getValue = function(spellID)
+					local value = mounts:getMountSummons(spellID)
+					if value > 0 then return value, value end
+				end,
+				getTotal = function(self, mode)
+					return self.totalStr:format(mode.sumValue)
+				end,
+			},
+			[3] = { -- Travel time
+				getValue = function(spellID)
+					local value = mounts:getMountTime(spellID)
+					if value > 0 then return value, util.timeBreakDown(value) end
+				end,
+				getTotal = function(self, mode)
+					return self.totalStr:format(util.timeBreakDown(mode.sumValue))
+				end,
+			},
+			[4] = { -- Travel distance
+				getValue = function(spellID)
+					local value = mounts:getMountDistance(spellID)
+					if value > 0 then return value, util:formatDistance(value) end
+				end,
+				getTotal = function(self, mode)
+					return self.totalStr:format(util:formatDistance(mode.sumValue))
+				end,
+			},
+			[5] = { -- Avg. speed
+				getValue = function(spellID, mode)
+					local mTime = mounts:getMountTime(spellID)
+					local distance = mounts:getMountDistance(spellID)
+					if mTime and mTime > 0 and distance then
+						local value = distance / mTime
+						mode.sumTime = mode.sumTime + mTime
+						mode.sumDistance = mode.sumDistance + distance
+						return value, util:formatAvgSpeed(value)
+					end
+				end,
+				getTotal = function(self, mode)
+					return L["Avg. speed"]..":  "..util:formatAvgSpeedByTimeDistance(mode.sumTime, mode.sumDistance)
+				end,
+			},
+		}
+
 		-- INSET
 		self.inset = CreateFrame("FRAME", nil, self, "InsetFrameTemplate")
-		self.inset:SetPoint("TOP", self.statisticType, "BOTTOM")
+		self.inset:SetPoint("TOP", self.statsType, "BOTTOM")
 		self.inset:SetPoint("LEFT", 6, 0)
-		self.inset:SetPoint("BOTTOMRIGHT", -18, 5)
+		self.inset:SetPoint("BOTTOMRIGHT", -18, 20)
 
 		-- BUTTON LIST INIT
+		local function btnEnter(btn)
+			GameTooltip:SetOwner(btn, "ANCHOR_RIGHT")
+			GameTooltip:SetText(btn.data.name)
+
+			local spellID = btn.data.spellID
+			local mountDate = mounts:getMountDate(spellID)
+			if mountDate then
+				util.addTooltipDLine(L["Receipt date"], util.formatDate(mountDate))
+			end
+
+			local summons = mounts:getMountSummons(spellID)
+			if summons > 0 then
+				 util.addTooltipDLine(SUMMONS, summons)
+			end
+
+			local mountTime = mounts:getMountTime(spellID)
+			if mountTime > 0 then
+				util.addTooltipDLine(L["Travel time"], util.timeBreakDown(mountTime))
+			end
+
+			local mountDistance = mounts:getMountDistance(spellID)
+			if mountDistance > 0 then
+				util.addTooltipDLine(L["Travel distance"], util:formatDistance(mountDistance))
+				util.addTooltipDLine(L["Avg. speed"], util:formatAvgSpeedByTimeDistance(mountTime, mountDistance))
+			end
+
+			GameTooltip:Show()
+		end
 		local function btnClick(btn)
-			journal:setSelectedMount(btn.mount)
+			journal:setSelectedMount(btn.data.mount)
 		end
 
-		local function onAcqure(owner, btn, data, new)
+		local function onAcquire(owner, btn, data, new)
 			if new then
+				btn:SetScript("OnEnter", btnEnter)
+				btn:SetScript("OnLeave", GameTooltip_Hide)
 				btn:SetScript("OnClick", btnClick)
 			end
 		end
@@ -104,19 +187,25 @@ ns.journal:on("MODULES_INIT", function(journal)
 		local right = 0
 		local spacing = 0
 		self.view = CreateScrollBoxListLinearView(top, bottom, left, right, spacing)
-		self.view:SetElementInitializer("MJMountStatisticListButtonTemplate", function(...) self:buttonInit(...) end)
-		self.view:RegisterCallback(self.view.Event.OnAcquiredFrame, onAcqure, self)
+		self.view:SetElementInitializer("MJMountStatsListButtonTemplate", function(...) self:buttonInit(...) end)
+		self.view:RegisterCallback(self.view.Event.OnAcquiredFrame, onAcquire, self)
 
 		ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.scrollBar, self.view)
 
+		-- TOTAL
+		self.totalFontStr = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+		self.totalFontStr:SetPoint("BOTTOMRIGHT", -28, 4)
+		self.totalStr = TOTAL..":  %s"
+
 		-- INIT
-		self:SetScript("OnShow", function(self) self:updateList() end)
+		self:SetScript("OnShow", function(self)
+			escOnShow(self)
+			self:updateList()
+		end)
 		self:GetScript("OnShow")(self)
 	end)
 
 	function stFr:buttonInit(btn, data)
-		btn.mount = data.mount
-
 		local qualityColor = data.isMount and util.getRarityColor(data.mount) or HIGHLIGHT_FONT_COLOR
 
 		btn.dragButton.icon:SetTexture(data.icon)
@@ -124,37 +213,30 @@ ns.journal:on("MODULES_INIT", function(journal)
 		btn.dragButton.hidden:SetShown(journal:isMountHidden(data.spellID))
 		btn.dragButton.favorite:SetShown(data.isFavorite)
 
+		btn.data = data
 		btn.name:SetText(data.name)
 		btn.name:SetTextColor((mounts.config.coloredMountNames and qualityColor or NORMAL_FONT_COLOR):GetRGB())
+		btn.value:SetText(data.fValue)
 
-		local selectedType, vText = self.statisticType:ddGetSelectedValue()
-		if selectedType == 1 then
-			local tDate = date("*t", data.value)
-			vText = FormatShortDate(tDate.day, tDate.month, tDate.year)
-		elseif selectedType == 2 then
-			vText = data.value
-		elseif selectedType == 3 then
-			vText = util.getTimeBreakDown(data.value)
-		elseif selectedType == 4 then
-			vText = util:getFormattedDistance(data.value)
-		elseif selectedType == 5 then
-			vText = util:getFormattedAvgSpeed(data.value)
-		end
-		btn.value:SetText(vText)
-
-		btn.stat:SetShown(selectedType ~= 1)
-		if selectedType ~= 1 then
+		local statShown = self.statsType:ddGetSelectedValue() ~= 1
+		btn.stat:SetShown(statShown)
+		if statShown then
 			btn.stat:SetWidth((btn.background:GetWidth() - 6) * data.value / self.maxValue)
 		end
 	end
 
-	function stFr:setMountList(list, func)
+	function stFr:updateList()
+		local selectedType = self.statsType:ddGetSelectedValue()
+		local mode = self.statsModes[selectedType]
+		local list = {}
 		self.maxValue = 0
+		mode.sumValue, mode.sumTime, mode.sumDistance = 0, 0, 0
+
 		for i = 1, #journal.mountIDs do
 			local mount = journal.mountIDs[i]
 			local isMount, name, spellID, icon, _,_,_, isFavorite = util.getMountInfo(mount)
-			local value = func(spellID)
-			if value and value > 0 then
+			local value, fValue = mode.getValue(spellID, mode)
+			if value then
 				list[#list + 1] = {
 					mount = mount,
 					isMount = isMount,
@@ -163,40 +245,17 @@ ns.journal:on("MODULES_INIT", function(journal)
 					icon = icon,
 					isFavorite = isFavorite,
 					value = value,
+					fValue = fValue,
 				}
 				self.maxValue = math.max(self.maxValue, value)
+				mode.sumValue = mode.sumValue + value
 			end
 		end
-	end
 
-	function stFr:updateList()
-		local list = {}
-		local selectedType = self.statisticType:ddGetSelectedValue()
-
-		if selectedType == 1 then
-			self:setMountList(list, function(spellID)
-				return mounts:getMountDate(spellID)
-			end)
-		elseif selectedType == 2 then
-			self:setMountList(list, function(spellID)
-				return mounts:getMountSummons(spellID)
-			end)
-		elseif selectedType == 3 then
-			self:setMountList(list, function(spellID)
-				return mounts:getMountTime(spellID)
-			end)
-		elseif selectedType == 4 then
-			self:setMountList(list, function(spellID)
-				return mounts:getMountDistance(spellID)
-			end)
-		elseif selectedType == 5 then
-			self:setMountList(list, function(spellID)
-				local mTime = mounts:getMountTime(spellID)
-				local distance = mounts:getMountDistance(spellID)
-				if mTime and mTime > 0 and distance then
-					return distance / mTime
-				end
-			end)
+		local hasTotal = mode.getTotal ~= nil
+		self.totalFontStr:SetShown(hasTotal)
+		if hasTotal then
+			self.totalFontStr:SetText(mode.getTotal(self, mode))
 		end
 
 		sort(list, function(a, b)

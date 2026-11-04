@@ -318,7 +318,7 @@ rules:SetScript("OnShow", function(self)
 		btn.collapseExpand.highlight:SetRotation(arrowRotation)
 	end
 
-	local function onAcqure(owner, btn, data, new)
+	local function onAcquire(owner, btn, data, new)
 		if new then
 			if btn.collapseExpand then
 				btn:RegisterForClicks("LeftButtonUp", "RightButtonUp", "MiddleButtonUp")
@@ -366,7 +366,7 @@ rules:SetScript("OnShow", function(self)
 		end
 	end)
 
-	self.scrollBox:RegisterCallback(self.view.Event.OnAcquiredFrame, onAcqure, self)
+	self.scrollBox:RegisterCallback(self.view.Event.OnAcquiredFrame, onAcquire, self)
 	ScrollUtil.InitScrollBoxListWithScrollBar(self.scrollBox, self.scrollBar, self.view)
 
 	local scrollBoxAnchorsWithBar = {

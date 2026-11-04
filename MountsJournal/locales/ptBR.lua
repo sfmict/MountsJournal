@@ -53,6 +53,7 @@ L["CreateMacroTooltip"] = "A macro criada é usada para evocar as montagens sele
 L["or key bind"] = "ou atalho de teclado"
 L["ERR_MOUNT_NO_SELECTED"] = "Você não tem nenhuma montaria selecionada válida."
 L["Collected:"] = "Coletada"
+L["Latest Additions"] = "Adições recentes"
 L["Shown:"] = "Mostrando:"
 L["hidden for character"] = "Oculto para o personagem"
 L["only hidden"] = "Apenas ocultas"

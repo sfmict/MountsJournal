@@ -53,6 +53,7 @@ L["CreateMacroTooltip"] = "La macro créée est utilisée pour invoquer la montu
 L["or key bind"] = "ou raccourcis"
 L["ERR_MOUNT_NO_SELECTED"] = "Vous n'avez aucune monture sélectionnée valide."
 L["Collected:"] = "Collecté"
+L["Latest Additions"] = "Derniers ajouts"
 L["Shown:"] = "Montré:"
 L["hidden for character"] = "Caché pour le personnage"
 L["only hidden"] = "Uniquement caché"

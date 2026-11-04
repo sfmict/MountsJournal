@@ -53,6 +53,7 @@ L["CreateMacroTooltip"] = "The created macro is used to summon the selected moun
 L["or key bind"] = "or key bind"
 L["ERR_MOUNT_NO_SELECTED"] = "You have no valid selected mounts."
 L["Collected:"] = "Collected"
+L["Latest Additions"] = "Latest Additions"
 L["Shown:"] = "Shown:"
 L["hidden for character"] = "Hidden For Character"
 L["only hidden"] = "Only hidden"
