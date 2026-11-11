@@ -19,7 +19,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 
 	local escOnShow = stFr:GetScript("OnShow")
 	stFr:SetScript("OnShow", function(self)
-		self:SetSize(352, 434)
+		self:SetSize(356, 434)
 		self:SetParent(journal.bgFrame) -- TitleContainer frameLevel fix
 		self:SetFrameLevel(journal.bgFrame:GetFrameLevel() + 1001)
 		self:SetFlattensRenderLayers(true)
@@ -128,8 +128,8 @@ ns.journal:on("MODULES_INIT", function(journal)
 		-- INSET
 		self.inset = CreateFrame("FRAME", nil, self, "InsetFrameTemplate")
 		self.inset:SetPoint("TOP", self.statsType, "BOTTOM")
-		self.inset:SetPoint("LEFT", 6, 0)
-		self.inset:SetPoint("BOTTOMRIGHT", -18, 20)
+		self.inset:SetPoint("LEFT", 8, 0)
+		self.inset:SetPoint("BOTTOMRIGHT", -20, 20)
 
 		-- BUTTON LIST INIT
 		local function btnEnter(btn)
@@ -194,7 +194,7 @@ ns.journal:on("MODULES_INIT", function(journal)
 
 		-- TOTAL
 		self.totalFontStr = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-		self.totalFontStr:SetPoint("BOTTOMRIGHT", -28, 4)
+		self.totalFontStr:SetPoint("BOTTOMRIGHT", -30, 5)
 		self.totalStr = TOTAL..":  %s"
 
 		-- INIT

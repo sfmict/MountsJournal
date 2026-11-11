@@ -102,8 +102,10 @@ local model_OnEnter, model_OnLeave do
 		inspect:SetParent(btn)
 		inspect:SetPoint("BOTTOMRIGHT", -8, 4)
 		inspect:Show()
-		journal.customTooltip:Hide()
-		hint:SetParent(btn)
+		if hint:GetParent() ~= btn then
+			journal.customTooltip:Hide()
+			hint:SetParent(btn)
+		end
 		hint:Show()
 	end
 

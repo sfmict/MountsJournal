@@ -443,11 +443,11 @@ local function resetPosition(self)
 	self:SetZoomDistance(self.modelSceneCameraInfo.zoomDistance)
 	self:startInterpolatedQ()
 	self.xOffset = 0
-	self.yOffset = self.defYOffset + (mounts.config.mountDescriptionToggle and self.yOffsetDelta or 0)
+	self:updateYOffset()
 end
 
 local function updateYOffset(self)
-	self.yOffset = self.yOffset + (mounts.config.mountDescriptionToggle and 1 or -1) * self.yOffsetDelta
+	self.yOffset = self.defYOffset + (mounts.config.mountDescriptionToggle and self.yOffsetDelta or 0)
 end
 
 local function onGridMouseDown(self, button)
