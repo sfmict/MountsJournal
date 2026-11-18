@@ -3804,8 +3804,8 @@
 		<Scripts>
 			<OnLoad>
 				self:SetBackdrop(MountsJournalUtil.sliderPanelBackdrop)
-				self:SetBackdropColor(.1, .1, .1, .5)
-				self:SetBackdropBorderColor(.1, .1, .1, .5)
+				self:SetBackdropColor(.1, .1, .1, .7)
+				self:SetBackdropBorderColor(.1, .1, .1, .7)
 			</OnLoad>
 		</Scripts>
 	</Frame>
@@ -3902,7 +3902,7 @@
 			<Button parentKey="up" propagateMouseInput="Motion">
 				<Size x="17" y="11"/>
 				<Anchors>
-					<Anchor point="TOPRIGHT" x="-40" y="-12"/>
+					<Anchor point="BOTTOMRIGHT" relativePoint="RIGHT" x="-40" y="4"/>
 				</Anchors>
 				<NormalTexture atlas="minimal-scrollbar-arrow-top"/>
 				<PushedTexture atlas="minimal-scrollbar-arrow-top-down"/>
@@ -3911,7 +3911,7 @@
 			<Button parentKey="down" propagateMouseInput="Motion">
 				<Size x="17" y="11"/>
 				<Anchors>
-					<Anchor point="BOTTOMRIGHT" x="-40" y="12"/>
+					<Anchor point="TOPRIGHT" relativePoint="RIGHT" x="-40" y="-4"/>
 				</Anchors>
 				<NormalTexture atlas="minimal-scrollbar-arrow-bottom"/>
 				<PushedTexture atlas="minimal-scrollbar-arrow-bottom-down"/>

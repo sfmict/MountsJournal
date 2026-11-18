@@ -273,7 +273,7 @@ rules:SetScript("OnShow", function(self)
 		PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
 	end
 	local function btnEnter(btn)
-		if #btn.data > 3
+		if btn.isTruncated
 		or btn.cond1:IsTruncated()
 		or btn.cond2:IsTruncated()
 		or btn.cond3:IsTruncated()
@@ -364,6 +364,10 @@ rules:SetScript("OnShow", function(self)
 		else
 			factory(groupTemp, groupInit)
 		end
+	end)
+
+	self.view:SetElementExtentCalculator(function(index, node)
+		return node:GetData().isDisabled and 43 or 55
 	end)
 
 	self.scrollBox:RegisterCallback(self.view.Event.OnAcquiredFrame, onAcquire, self)
@@ -803,15 +807,15 @@ function rules:getCondValueDisplay(cond)
 end
 
 
-function rules:getActionValueText(action, ...)
+function rules:getActionValueText(action, noIcon)
 	if action[2] == nil then return "" end
-	return actions[action[1]]:getValue(action[2], ...) or RED_FONT_COLOR:WrapTextInColorCode(tostringall(action[2]))
+	return actions[action[1]]:getValue(action[2], noIcon) or RED_FONT_COLOR:WrapTextInColorCode(tostringall(action[2]))
 end
 
 
-function rules:getActionValueDisplay(action, ...)
+function rules:getActionValueDisplay(action, noIcon)
 	local actionType = actions[action[1]]
-	return actionType.getValueDisplay and actionType:getValueDisplay(action[2], ...) or self:getActionValueText(action, ...)
+	return actionType.getValueDisplay and actionType:getValueDisplay(action[2], noIcon) or self:getActionValueText(action, noIcon)
 end
 
 
@@ -821,7 +825,7 @@ function rules:getCondText(cond)
 	local condText = "|cff44cc44"..conds[cond[2]].text
 	if cond[1] then condText = self.condNotStr..condText end
 	if value == "" then
-		return condText
+		return condText.."|r"
 	else
 		return ("%s:|r |cffeeeeee%s|r"):format(condText, value), condText, values
 	end
@@ -844,10 +848,11 @@ function rules:setCondTooltip(rule)
 end
 
 
-function rules:getActionText(rule, ...)
+function rules:getActionText(rule)
 	local action = rule.action
 	if action then
-		local value = self:getActionValueDisplay(action, ...)
+		local noIcon = true
+		local value = self:getActionValueDisplay(action, noIcon)
 		local actionType = actions[action[1]]
 		if value == "" then
 			return actionType.text
@@ -873,10 +878,27 @@ function rules:ruleButtonInit(btn, node)
 	btn.id = data.id
 	btn.data = data.rule
 	btn.list = data.list
-	btn:SetAlpha(data.isDisabled and .3 or 1)
-	btn.action:SetText(self:getActionText(btn.data, true))
+	btn.isTruncated = nil
+
+	btn.action:SetText(self:getActionText(btn.data))
 	btn.up:SetShown(btn.id > 1)
 	btn.down:SetShown(#btn.list > btn.id)
+
+	if data.isDisabled then
+		btn:SetAlpha(.5)
+		btn:DesaturateHierarchy(1)
+		btn.action:SetAlpha(.7)
+		btn.cond1:SetAlpha(.7)
+		btn.cond2:SetAlpha(.7)
+		btn.cond3:Hide()
+	else
+		btn:SetAlpha(1)
+		btn:DesaturateHierarchy(0)
+		btn.action:SetAlpha(1)
+		btn.cond1:SetAlpha(1)
+		btn.cond2:SetAlpha(1)
+		btn.cond3:Show()
+	end
 
 	if btn.data.action then
 		local icon, text, r,g,b, mountID, spellID, itemLink = self:getActionIcon(btn.data)
@@ -893,7 +915,7 @@ function rules:ruleButtonInit(btn, node)
 	end
 
 	btn.cond2:ClearAllPoints()
-	if #btn.data == 2 then
+	if #btn.data == 2 or data.isDisabled and #btn.data > 2 then
 		btn.cond2:SetPoint("TOPRIGHT", btn, "RIGHT", -62, -1)
 	else
 		btn.cond2:SetPoint("RIGHT", -62, 0)
@@ -906,9 +928,17 @@ function rules:ruleButtonInit(btn, node)
 		btn.cond3:SetText()
 	else
 		btn.cond1:SetText(self:getCondText(btn.data[1]))
-		btn.cond2:SetText(self:getCondText(btn.data[2]))
-		local text = self:getCondText(btn.data[3])
-		btn.cond3:SetText(#btn.data > 3 and text.."…" or text)
+		local text2 = self:getCondText(btn.data[2])
+		local text3 = self:getCondText(btn.data[3])
+
+		if data.isDisabled then
+			btn.isTruncated = #btn.data > 2
+			btn.cond2:SetText(btn.isTruncated and text2.."…" or text2)
+		else
+			btn.cond2:SetText(text2)
+			btn.isTruncated = #btn.data > 3
+			btn.cond3:SetText(btn.isTruncated and text3.."…" or text3)
+		end
 	end
 end
 

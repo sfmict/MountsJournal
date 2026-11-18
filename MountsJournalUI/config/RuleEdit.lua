@@ -594,6 +594,19 @@ function ruleEditor:openCondTypeMenu(btn, btnData)
 end
 
 
+function ruleEditor:getActionTypeText(actionData)
+	local action = actions[actionData[1]]
+	if action then
+		local icon, _, r,g,b = action:getIcon()
+		r = math.floor((r or 1) * 255 + .5)
+		g = math.floor((g or 1) * 255 + .5)
+		b = math.floor((b or 1) * 255 + .5)
+		return ("|T%s:%s:%2$s:0:0:%2$s:%2$s:0:%2$s:0:%2$s:%s:%s:%s|t %s"):format(icon, ns.RULE_ICON_SIZE, r,g,b, action.text)
+	end
+	return ""
+end
+
+
 function ruleEditor:setActionOption()
 	local actionData = self.data.action
 	local panel = self.actionPanel
@@ -602,7 +615,7 @@ function ruleEditor:setActionOption()
 		self.actionText:SetText(L["Action"])
 		panel.groupName:Hide()
 		panel.optionType:Show()
-		panel.optionType:SetText(actionData[1] and actions[actionData[1]].text or "")
+		panel.optionType:SetText(self:getActionTypeText(actionData))
 		self:setActionValueOption()
 	else
 		self.actionText:SetText(LFG_LIST_BAD_NAME)
@@ -717,7 +730,7 @@ function ruleEditor:openActionTypeMenu(btn)
 	local function func(f)
 		actionData[1] = f.value
 		actionData[2] = nil
-		btn.text:SetText(actions[f.value].text)
+		btn.text:SetText(self:getActionTypeText(actionData))
 		self:setActionValueOption(true)
 		self:ruleCheck()
 	end

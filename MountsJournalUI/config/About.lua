@@ -18,14 +18,27 @@ aboutConfig:SetScript("OnShow", function(self)
 	self.model:PlayAnimKit(1371)
 
 	self.model2 = CreateFrame("PlayerModel", nil, self)
-	self.model2:SetFrameLevel(self:GetFrameLevel())
-	self.model2:SetPoint("TOPLEFT", self, "TOP")
-	self.model2:SetPoint("BOTTOMRIGHT")
-	self.model2:MakeCurrentCameraCustom()
-	self.model2:SetPosition(.65, .12, .2)
-	self.model2:SetRotation(-math.pi/2.1)
-	self.model2:SetDisplayInfo(121956)
-	self.model2:SetAnimation(1262)
+	local model2 = self.model2
+	model2:SetFrameLevel(self:GetFrameLevel())
+	model2:SetPoint("TOPRIGHT", -3, -3)
+	model2:SetPoint("BOTTOMRIGHT", -3, 3)
+	model2:SetWidth((self:GetHeight() - 6) * .715953307393)
+
+	model2:SetScript("OnModelLoaded", function(model2)
+		model2:SetModelScale(1)
+		model2:SetPosition(0, 0, 0)
+		model2:RefreshCamera()
+		model2:MakeCurrentCameraCustom()
+		model2:SetPosition(1.2, .26, .35)
+		model2:SetFacing(-math.pi / 2.1)
+		model2:SetAnimation(1262)
+	end)
+
+	model2:SetDisplayInfo(121956)
+
+	ns.journal:on("JOURNAL_RESIZED.about", function()
+		model2:SetWidth((self:GetHeight() - 6) * .715953307393)
+	end)
 
 	-- ADDON NAME
 	local addonName = self:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")

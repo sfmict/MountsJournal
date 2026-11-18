@@ -185,28 +185,20 @@ function test:PLAYER_ENTERING_WORLD()
 	-- end
 
 	-- JOURNAL OPEN
-	-- ns.util.openJournalTab(3, 3)
-	--ns.ruleConfig.snippetToggle:Click() -- snippets
-	--ns.snippets.addSnipBtn:Click() -- codeEdit
-	--journal.mountDisplay.info.petSelectionBtn:Click()
+	C_Timer.After(0, function()
+		-- ns.util.openJournalTab(1, 3)
+		--ns.ruleConfig.snippetToggle:Click() -- snippets
+		--ns.snippets.addSnipBtn:Click() -- codeEdit
+		--journal.mountDisplay.info.petSelectionBtn:Click()
 
-	-- local bgWidth = journal.bgFrame:GetWidth()
-	-- for i = 1, sbg:GetNumPoints() do
-	-- 	local point, rframe, rpoint, x, y = sbg:GetPoint(i)
-	-- 	sbg:SetPoint(point, rframe, rpoint, x + bgWidth, y)
-	-- end
+		-- ns.ruleConfig.addRule:Click()
 
-	-- sbg:SetSize(sbg:GetSize())
-	-- sbg:ClearAllPoints()
-	-- sbg:SetPoint("TOPLEFT", journal.bgFrame, "TOPRIGHT", 5, -60)
-	-- sbg.Tabs[3]:Click()
-	-- ns.ruleConfig.addRule:Click()
-
-	-- journal.navBarBtn:Click()
-	-- journal.mapSettings.existingListsToggle:Click()
-	-- journal.navBar:setMapID(1033)
-	-- journal.navBar:setMapID(909)
-	-- journal.navBar:setMapID(980)
+		-- journal.navBarBtn:Click()
+		-- journal.mapSettings.existingListsToggle:Click()
+		-- journal.navBar:setMapID(1033)
+		-- journal.navBar:setMapID(909)
+		-- journal.navBar:setMapID(980)
+	end)
 
 	-- CONFIG OPEN
 	-- local configName = "HidingBar"

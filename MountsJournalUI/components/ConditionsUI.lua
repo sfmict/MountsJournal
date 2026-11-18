@@ -9,7 +9,7 @@ local sName_ID = "%s |cff808080<%s>|r"
 local sIcon_Name_ID = "%s%s |cff808080<%s>|r"
 local sGrayName = "|cffaaaaaa%s|r"
 local sGrayName_ID = "|cffaaaaaa%s|r |cff808080<%s>|r"
-ns.RULE_ICON_SIZE = 14
+ns.RULE_ICON_SIZE = 16
 
 
 ---------------------------------------------------

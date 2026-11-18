@@ -96,6 +96,7 @@ config:SetScript("OnShow", function(self)
 			f:SetScript("OnEnterPressed", onEnterPressed)
 			f:SetScript("OnEditFocusLost", onEditFocusLost)
 			f:SetScript("OnMouseWheel", onMouseWheel)
+			fpde(getmetatable(f))
 			return f
 		end
 	end
@@ -247,12 +248,12 @@ config:SetScript("OnShow", function(self)
 		-- FREE SLOTS NUM
 		self.freeSlots = createCheckbox(self.repairGroup, L["If the number of free slots in bags is less"])
 		self.freeSlots:SetPoint("TOPLEFT", self.repairFlyable, "BOTTOMLEFT", -20, -3)
-		-- self.freeSlots.Text:SetPoint("RIGHT", self.repairGroup, -37, 0) -- width isn't redered correctly
+		-- self.freeSlots.Text:SetPoint("RIGHT", self.repairGroup, -37, 0) -- width isn't rendered correctly
 		self.freeSlots.Text:SetWidth(264)
 
 		-- editbox
 		self.freeSlotsNum = createNumberBox(self.repairGroup, 1, 999)
-		self.freeSlotsNum:SetPoint("LEFT", self.freeSlots.Text, self.freeSlots.Text:GetWrappedWidth() + 3, 0)
+		C_Timer.After(0, function() self.freeSlotsNum:SetPoint("LEFT", self.freeSlots.Text, self.freeSlots.Text:GetWrappedWidth() + 3, 0) end)
 		util.setCheckboxChild(self.freeSlots, self.freeSlotsNum)
 
 		-- REPAIR MOUNTS COMBOBOX

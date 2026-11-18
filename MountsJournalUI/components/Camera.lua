@@ -139,12 +139,12 @@ local function ApplyFromModelSceneCameraInfo(self, modelSceneCameraInfo, transit
 
 	local transitionalCameraInfo = self:CalculateTransitionalValues(self.modelSceneCameraInfo, modelSceneCameraInfo, modificationType)
 	local tx, ty, tz = transitionalCameraInfo.zoomedTargetOffset:GetXYZ()
-	local zy, zp, zr = transitionalCameraInfo.zoomedYawOffset, transitionalCameraInfo.zoomedPitchOffset, transitionalCameraInfo.zoomedRollOffset
+	-- local zy, zp, zr = transitionalCameraInfo.zoomedYawOffset, transitionalCameraInfo.zoomedPitchOffset, transitionalCameraInfo.zoomedRollOffset
 	self.modelSceneCameraInfo = modelSceneCameraInfo
 
 	self:SetTarget(transitionalCameraInfo.target:GetXYZ())
 	self:SetTargetSpline(TryCreateZoomSpline(tx, ty, tz, self:GetTargetSpline()))
-	self:SetOrientationSpline(TryCreateZoomSpline(zy, zp, zr, self:GetOrientationSpline()))
+	-- self:SetOrientationSpline(TryCreateZoomSpline(zy, zp, zr, self:GetOrientationSpline()))
 
 	self:SetMinZoomDistance(transitionalCameraInfo.minZoomDistance)
 	self:SetMaxZoomDistance(transitionalCameraInfo.maxZoomDistance)
@@ -443,11 +443,11 @@ local function resetPosition(self)
 	self:SetZoomDistance(self.modelSceneCameraInfo.zoomDistance)
 	self:startInterpolatedQ()
 	self.xOffset = 0
-	self:updateYOffset()
+	self.yOffset = self.defYOffset + (mounts.config.mountDescriptionToggle and self.yOffsetDelta or 0)
 end
 
 local function updateYOffset(self)
-	self.yOffset = self.defYOffset + (mounts.config.mountDescriptionToggle and self.yOffsetDelta or 0)
+	self.yOffset = self.yOffset + (mounts.config.mountDescriptionToggle and 1 or -1) * self.yOffsetDelta
 end
 
 local function onGridMouseDown(self, button)
