@@ -96,7 +96,6 @@ config:SetScript("OnShow", function(self)
 			f:SetScript("OnEnterPressed", onEnterPressed)
 			f:SetScript("OnEditFocusLost", onEditFocusLost)
 			f:SetScript("OnMouseWheel", onMouseWheel)
-			fpde(getmetatable(f))
 			return f
 		end
 	end
