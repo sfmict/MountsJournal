@@ -72,8 +72,8 @@ function actions.rmountt:getValueList(value, func)
 	end
 
 	local list = {}
-	list[0] = createArrowInfo(L["Selected profile"], getTList(0))
-	list[1] = createArrowInfo(DEFAULT, getTList(1))
+	list[1] = createArrowInfo(L["Selected profile"], getTList(0))
+	list[2] = createArrowInfo(DEFAULT, getTList(1))
 
 	local profiles = {}
 	for k in next, mounts.profiles do profiles[#profiles + 1] = k end
