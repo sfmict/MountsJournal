@@ -212,9 +212,11 @@ ns.journal:on("MODULES_INIT", function(journal)
 	function dd:getExportProfile(profile)
 		local exportProfile = util:copyTable(profile)
 		exportProfile.zoneMounts = util:copyTable(ns.mounts:getProfileZoneMounts(profile))
-		exportProfile.petForMount = util:copyTable(ns.mounts:getProfilePetForMount(profile))
+		exportProfile.petForMount = {}
+		exportProfile.petSpecies = ns.pets:getExportPetSpecies(ns.mounts:getProfilePetForMount(profile))
 		exportProfile.zoneMountsFromProfile = nil
 		exportProfile.petListFromProfile = nil
+		fpde(exportProfile)
 		return exportProfile
 	end
 
@@ -235,6 +237,10 @@ ns.journal:on("MODULES_INIT", function(journal)
 		-- links from old exports point to the sender's profiles
 		profile.zoneMountsFromProfile = nil
 		profile.petListFromProfile = nil
+		if type(profile.petSpecies) == "table" then
+			profile.petForMount = ns.pets:getImportPetForMount(profile.petSpecies)
+		end
+		profile.petSpecies = nil
 		profiles[name] = profile
 		ns.mounts:checkProfile(profiles[name])
 		self:setProfile(name)

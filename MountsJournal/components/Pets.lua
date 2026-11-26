@@ -49,6 +49,49 @@ function pets:getPetForProfile(profilePetForMount, spellID)
 end
 
 
+-- pet GUIDs are personal, so pets are exported by species
+function pets:getExportPetSpecies(profilePetForMount)
+	local petForMount = self:getPetForProfileList(profilePetForMount)
+	if not petForMount then return end
+	local petSpecies = {}
+	for spellID, petID in next, petForMount do
+		if type(petID) == "number" then -- random pet
+			petSpecies[spellID] = petID
+		else
+			local speciesID = C_PetJournal.GetPetInfoByPetID(petID)
+			if speciesID then petSpecies[spellID] = tostring(speciesID) end
+		end
+	end
+	return petSpecies
+end
+
+
+function pets:getImportPetForMount(petSpecies)
+	local petForMount, petBySpecies = {}
+	for spellID, pet in next, petSpecies do
+		local petID
+		if type(pet) == "number" then -- random pet
+			petID = pet
+		elseif type(pet) == "string" then
+			pet = tonumber(pet)
+			if pet then
+				if not petBySpecies then
+					petBySpecies = {}
+					for i = 1, #self.list do
+						local id = self.list[i]
+						local speciesID = C_PetJournal.GetPetInfoByPetID(id)
+						if speciesID and not petBySpecies[speciesID] then petBySpecies[speciesID] = id end
+					end
+				end
+				petID = petBySpecies[pet]
+			end
+		end
+		if petID then self:setPetForProfile(petForMount, spellID, petID) end
+	end
+	return petForMount
+end
+
+
 function pets:dismiss()
 	if InCombatLockdown() then return end
 	local petID = C_PetJournal.GetSummonedPetGUID()
