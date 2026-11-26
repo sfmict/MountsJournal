@@ -576,9 +576,10 @@ end
 
 
 function rules:resetRules()
+	local list = self.rules
 	StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(L["Reset Rules"]), nil, function()
-		wipe(self.rules)
-		self.rules[1] = mounts:getDefaultRule()
+		wipe(list)
+		list[1] = mounts:getDefaultRule()
 		self:updateFilters()
 		macroFrame:setRuleFuncs()
 	end)
@@ -618,8 +619,11 @@ end
 
 
 function rules:remove(list, order)
+	local rule = list[order]
 	StaticPopup_Show(util.addonName.."YOU_WANT", NORMAL_FONT_COLOR:WrapTextInColorCode(L["Remove Rule %s"]:format(self:getRulePath(list, order))), nil, function()
-		tremove(list, order)
+		local i = tIndexOf(list, rule)
+		if not i then return end
+		tremove(list, i)
 		self:updateFilters()
 		macroFrame:setRuleFuncs()
 	end)
@@ -649,7 +653,7 @@ function rules:ruleCheck(rule)
 	if rule.action then
 		local action = rule.action
 		if type(action) ~= "table"
-		or not actions[action[1]]
+		or type(actions[action[1]]) ~= "table"
 		or actions[action[1]].getValue and not action[2]
 		or actions[action[1]].isNumeric and type(action[2]) ~= "number"
 		then return end
@@ -658,7 +662,7 @@ function rules:ruleCheck(rule)
 	for i = 1, #rule do
 		local cond = rule[i]
 		if type(cond) ~= "table"
-		or not conds[cond[2]]
+		or type(conds[cond[2]]) ~= "table"
 		or not cond[3] and conds[cond[2]].getValue
 		or conds[cond[2]].isNumeric and type(cond[3]) ~= "number"
 		then return end

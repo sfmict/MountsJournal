@@ -190,6 +190,18 @@ do
 	end
 
 
+	local function renameSnippet(list, oldName, name)
+		for _, rule in ipairs(list) do
+			for _, cond in ipairs(rule) do
+				if cond[2] == "snip" and cond[3] == oldName then
+					cond[3] = name
+				end
+			end
+			if rule.rules then renameSnippet(rule.rules, oldName, name) end
+		end
+	end
+
+
 	function snippets:edit(oldName, name, code)
 		if oldName ~= name then
 			if self.snippets[name] then
@@ -199,13 +211,7 @@ do
 			self.snippets[oldName] = nil
 			for _, ruleSet in ipairs(ns.macroFrame.ruleSetConfig) do
 				for _, rules in ipairs(ruleSet) do
-					for _, rule in ipairs(rules) do
-						for _, cond in ipairs(rule) do
-							if cond[2] == "snip" and cond[3] == oldName then
-								cond[3] = name
-							end
-						end
-					end
+					renameSnippet(rules, oldName, name)
 				end
 			end
 			ns.macroFrame:setRuleFuncs()

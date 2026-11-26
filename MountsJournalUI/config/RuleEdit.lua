@@ -249,7 +249,7 @@ ruleEditor:HookScript("OnShow", function(self)
 		local currentMap = ns.journal.mapSettings.CurrentMap
 		saveStatus(panel, currentMap)
 		panel.SetPoint(currentMap, "LEFT", mapControl, 134, 0)
-		panel.SetPoint(currentMap, "RIGHt", mapControl, -3, 0)
+		panel.SetPoint(currentMap, "RIGHT", mapControl, -3, 0)
 
 		local dnr = ns.journal.mapSettings.dnr
 		saveStatus(panel, dnr)
