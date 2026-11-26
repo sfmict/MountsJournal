@@ -51,7 +51,7 @@ function binding:createBindingButton(parent, index, command)
 	button:SetScript("OnShow", button_OnShow)
 	button:SetScript("OnClick", button_OnClick)
 	button:SetScript("OnMouseWheel", button_OnMouseWheel)
-	util.setEventsMixin(button):on("SET_BINDING", button_OnShow)
+	util.setEventsMixin(button):on("SET_BINDING."..command..index, button_OnShow)
 	self:setButtonText(button)
 	return button
 end

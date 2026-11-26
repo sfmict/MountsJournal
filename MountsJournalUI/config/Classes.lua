@@ -373,7 +373,8 @@ do
 			if option.childs then
 				optionFrame.childs = optionFrame.childs or {}
 				local isEnabled = optionFrame:GetChecked()
-				lastOptionFrame, subIndent = optionFrame, 0
+				local subIndent = 0
+				lastOptionFrame = optionFrame
 				for i, subOption in ipairs(option.childs) do
 					lastOptionFrame, subIndent = self:createOption(subOption, prefix, lastOptionFrame, i == 1 and 20 or subIndent)
 					lastOptionFrame:SetEnabled(isEnabled)
@@ -443,7 +444,7 @@ end
 
 function classConfig:combatMacroSave()
 	local text = self.combatMacroEditBox:GetEditBox():GetText()
-	if text == self.rightPanel.currentBtn.default then
+	if text == self.rightPanel.currentBtn.defaultCombat then
 		self.currentMacrosConfig.combatMacro = nil
 	else
 		self.currentMacrosConfig.combatMacro = text
