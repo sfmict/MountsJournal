@@ -262,8 +262,18 @@ local function getScaledCursorDelta(self)
 	return x / scale, y / scale
 end
 
+local function updateYawSign(self)
+	-- upside down: world up is screen down, so yaw rotates the other way on screen
+	self.yawSign = math.cos(self:GetPitch()) < 0 and -1 or 1
+end
+
 local function OnUpdate(self, elapsed)
-	if self:IsLeftMouseButtonDown() then
+	local leftDown = self:IsLeftMouseButtonDown()
+	-- the sign is fixed for the whole drag and the following inertia
+	if leftDown and not self.wasLeftDown then updateYawSign(self) end
+	self.wasLeftDown = leftDown
+
+	if leftDown then
 		local deltaX, deltaY = getScaledCursorDelta(self)
 		self:setAcceleration(deltaX, deltaY, elapsed)
 		self:HandleMouseMovement(self.buttonModes.leftX, deltaX)
@@ -281,9 +291,17 @@ local function OnUpdate(self, elapsed)
 	local shiftDown = IsShiftKeyDown()
 	-- interpolation starts when shift is released
 	if not shiftDown and self.wasShiftDown then
-		local yaw, pitch = quaternion_ToYawPitchRoll(self.qw, self.qx, self.qy, self.qz)
+		local yaw, pitch, roll = quaternion_ToYawPitchRoll(self.qw, self.qx, self.qy, self.qz)
+		-- (yaw, pitch, roll) == (yaw + pi, pi - pitch, roll + pi)
+		-- pick the one with roll closer to the target roll to minimize the twist around view axis
+		local rollDiff = (roll - self:GetRoll() + math.pi) % pi2 - math.pi
+		if math.abs(rollDiff) > math.pi / 2 then
+			yaw = yaw + math.pi
+			pitch = math.pi - pitch
+		end
 		self:SetYaw(yaw)
 		self:SetPitch(pitch)
+		updateYawSign(self)
 
 		local speed = 0
 		if self.pendingYawDelta ~= 0 or self.pendingPitchDelta ~= 0 then
@@ -306,7 +324,7 @@ local function OnUpdate(self, elapsed)
 			)
 		else
 			if self.interpolatedQ ~= 2 then self.interpolatedQ = nil end
-			self:SetYaw(self:GetYaw() - self.pendingYawDelta)
+			self:SetYaw(self:GetYaw() - self.pendingYawDelta * (self.yawSign or 1))
 			self:SetPitch(self:GetPitch() - self.pendingPitchDelta)
 
 			if self.interpolatedQ == nil then
@@ -434,6 +452,7 @@ local function resetPosition(self)
 	self.accY = nil
 	self.pendingYawDelta = 0
 	self.pendingPitchDelta = 0
+	self.yawSign = nil
 	-- self.interpolatedYaw = normalizeRad(self.interpolatedYaw, self.modelSceneCameraInfo.yaw)
 	-- self.interpolatedPitch = normalizeRad(self.interpolatedPitch, self.modelSceneCameraInfo.pitch)
 	-- self.interpolatedRoll = normalizeRad(self.interpolatedRoll, self.modelSceneCameraInfo.roll)
