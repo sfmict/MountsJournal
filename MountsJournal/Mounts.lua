@@ -355,9 +355,10 @@ function mounts:setUsableRepairMounts()
 			end
 		end
 	else
-		local _,_,_,_,_,_,_,_,_, shouldHideOnChar = GetMountInfoByID(self.config.repairSelectedMount)
-		if shouldHideOnChar then
-			self.config.repairSelectedMount = self.config.repairSelectedMount == 61425 and 61447 or 61425
+		local mountID = GetMountFromSpell(self.config.repairSelectedMount)
+		local _,_,_,_,_,_,_,_,_, shouldHideOnChar = GetMountInfoByID(mountID)
+		if shouldHideOnChar and (mountID == 61425 or mountID == 61447) then
+			self.config.repairSelectedMount = mountID == 61425 and 61447 or 61425
 		end
 		self.usableRepairMounts[self.config.repairSelectedMount] = true
 	end
@@ -447,16 +448,16 @@ do
 		if issecretvalue(spellID) then return end
 
 		local petID
-		if self.fromPriority then
+		if self.fromPriority and spellID == self.summonedSpellID then
 			for i = 1, #self.priorityProfiles do
 				petID = ns.pets:getPetForProfile(self:getProfilePetForMount(self.priorityProfiles[i]), spellID)
 				if petID then break end
 			end
-			self.fromPriority = nil
 		else
 			local profile = self.profiles[self.charDB.currentProfileName] or self.defProfile
 			petID = ns.pets:getPetForProfile(self:getProfilePetForMount(profile), spellID)
 		end
+		self.fromPriority = nil
 
 		if petID then
 			local groupType = util.getGroupType()
