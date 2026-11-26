@@ -497,6 +497,7 @@ end
 conds.zone = {}
 
 function conds.zone:getFuncText(value)
+	value = value:gsub("[%^%$%(%)%%%.%[%]%*%+%-%?]", "%%%1")
 	return ("self:zoneMatch('/%s/')"):format(value:gsub("['\\]", "\\%1"))
 end
 
