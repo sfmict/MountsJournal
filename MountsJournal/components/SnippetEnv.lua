@@ -72,17 +72,13 @@ local function loadSnippet(str)
 		return cache[str]
 	end
 
-	local loadedFunc, err = loadstring("return function(state) "..str.."\nend")
+	local func, err = loadstring("local state = ...; "..str)
 	if err then
 		return nil, err
-	elseif loadedFunc then
-		setfenv(loadedFunc, exec_env)
-		local success, func = pcall(loadedFunc)
-		if success then
-			cache[str] = func
-			return func
-		end
 	end
+	setfenv(func, exec_env)
+	cache[str] = func
+	return func
 end
 
 
@@ -105,7 +101,7 @@ do
 					return func
 				end
 			else
-				print(addon, "Snippet '"..k.."' dosn't exist")
+				print(addon, "Snippet '"..k.."' doesn't exist")
 			end
 			return function() end
 		end
