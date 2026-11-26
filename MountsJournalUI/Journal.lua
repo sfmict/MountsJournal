@@ -2150,6 +2150,7 @@ function journal:defaultInitMountButton(btn, data)
 		btn.dragButton:Enable()
 		btn.dragButton.icon:SetDesaturated()
 		btn.dragButton.icon:SetAlpha(1)
+		btn.dragButton.qualityBorder:SetAlpha(1)
 		btn.name:SetFontObject("GameFontNormal")
 	elseif isCollected then
 		btn.dragButton:Enable()
@@ -2206,6 +2207,7 @@ function journal:gridInitMountButton(btn, data)
 	if isUsable or needsFanfare then
 		btn.icon:SetDesaturated()
 		btn.icon:SetAlpha(1)
+		btn.qualityBorder:SetAlpha(1)
 	elseif isCollected then
 		btn.icon:SetDesaturated(true)
 		-- 150/255, 50/255, 50/255
@@ -2265,6 +2267,7 @@ function journal:gridModelSceneInit(btn, data, force)
 	if isUsable or needsFanfare then
 		drag.icon:SetDesaturated()
 		drag.icon:SetAlpha(1)
+		drag.qualityBorder:SetAlpha(1)
 	elseif isCollected then
 		drag.icon:SetDesaturated(true)
 		-- 150/255, 50/255, 50/255

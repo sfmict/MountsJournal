@@ -1037,7 +1037,7 @@ function conds.difficulty:getValueList(values, func)
 		local name = getDifficultyName(id)
 
 		if name then
-			list[i] = createCheckableInfo(name, id, func, checked)
+			list[#list + 1] = createCheckableInfo(name, id, func, checked)
 		end
 	end
 

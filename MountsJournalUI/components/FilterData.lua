@@ -138,6 +138,7 @@ function journal:sortMounts()
 			isFavorite = isFavorite,
 			isCollected = isCollected,
 			spellID = spellID,
+			additional = not isMount,
 		}
 		if isMount and numNeedingFanfare > 0 and C_MountJournal.NeedsFanfare(mount) then
 			data.needFanfare = true
