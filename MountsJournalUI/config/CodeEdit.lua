@@ -144,7 +144,7 @@ codeEdit:SetScript("OnShow", function(self)
 
 		colorScheme["local"] = theme["Global"] or theme["Keyword"]
 		colorScheme["pairs"] = theme["Global"] or theme["Keyword"]
-		colorScheme["iparis"] = theme["Global"] or theme["Keyword"]
+		colorScheme["ipairs"] = theme["Global"] or theme["Keyword"]
 		colorScheme["next"] = theme["Global"] or theme["Keyword"]
 
 		self.editBox:SetTextColor((theme["Text"] or HIGHLIGHT_FONT_COLOR):GetRGB())
@@ -324,7 +324,7 @@ return "" -- macro text (255 symbols) / nil
 	end)
 
 	self.completeBtn = CreateFrame("BUTTON", nil, self, "UIPanelButtonTemplate")
-	self.completeBtn:SetPoint("RIGHT", self.cancelBtn, "LEFt", -20, 0)
+	self.completeBtn:SetPoint("RIGHT", self.cancelBtn, "LEFT", -20, 0)
 	self.completeBtn:SetText(COMPLETE)
 	self.completeBtn:SetScript("OnClick", function(btn)
 		local p = btn:GetParent()
@@ -438,7 +438,7 @@ return "" -- macro text (255 symbols) / nil
 	-- ERROR TEXT
 	self.errText = self:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 	self.errText:SetPoint("TOPLEFT", self.codeBtn, "BOTTOMLEFT", 40, -10)
-	self.errText:SetPoint("RIGHT", self.completeBtn, "LEFt", -10, 0)
+	self.errText:SetPoint("RIGHT", self.completeBtn, "LEFT", -10, 0)
 	self.errText:SetPoint("BOTTOM", 0, 10)
 	self.errText:SetTextColor(1, 0, 0)
 	self.errText:SetJustifyH("LEFT")

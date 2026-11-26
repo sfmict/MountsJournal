@@ -192,10 +192,12 @@ end
 
 
 -- DATA TRANSFER
-local tooltipLoading, receivedData
+local tooltipLoading, receivedData, pendingRequest
 
 
 local function requestData(target, dataType, id)
+	-- only the answer to this request will be accepted
+	pendingRequest = {target = Ambiguate(target, "none"), t = dataType, id = id}
 	local transmitString = util.getStringFromData({m = "dr", t = dataType, id = id})
 	comm:sendMessage(addon, transmitString, "WHISPER", target, "NORMAL")
 end
@@ -330,6 +332,14 @@ local function handleComm(message, chattype, sender)
 	local data = util.getDataFromString(message)
 	if type(data) == "table" and data.m and data.t and data.id then
 		if data.m == "d" then
+			local req = pendingRequest
+			if not (req
+				and chattype == "WHISPER"
+				and sender == req.target
+				and data.t == req.t
+				and data.id == req.id)
+			then return end
+			pendingRequest = nil
 			tooltipLoading = nil
 			if data.d then
 				dataImport(data.t, data.id, data.d, sender)
@@ -357,7 +367,7 @@ local function handleProgressComm(message, chattype, sender)
 			showTooltip({
 				{2, L[dataType], dataID == "" and DEFAULT or dataID, 1,1,1,r,g,b},
 				{1, L["Receiving data from %s"]:format(sender), 1,.8,0},
-				{2, " ", ("|cFF%2x%2x00%d|cFF00FF00/%d"):format(red, green, done, total)}
+				{2, " ", ("|cFF%02x%02x00%d|cFF00FF00/%d"):format(red, green, done, total)}
 			})
 		end
 	end
