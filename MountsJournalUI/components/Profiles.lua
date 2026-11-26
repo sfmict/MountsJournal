@@ -209,10 +209,19 @@ ns.journal:on("MODULES_INIT", function(journal)
 		profile[key] = value
 	end
 
+	function dd:getExportProfile(profile)
+		local exportProfile = util:copyTable(profile)
+		exportProfile.zoneMounts = util:copyTable(ns.mounts:getProfileZoneMounts(profile))
+		exportProfile.petForMount = util:copyTable(ns.mounts:getProfilePetForMount(profile))
+		exportProfile.zoneMountsFromProfile = nil
+		exportProfile.petListFromProfile = nil
+		return exportProfile
+	end
+
 	function dd:export(profile)
 		ns.dataDialog:open({
 			type = "export",
-			data = {type = "profile", data = profile}
+			data = {type = "profile", data = self:getExportProfile(profile)}
 		})
 	end
 
@@ -223,6 +232,9 @@ ns.journal:on("MODULES_INIT", function(journal)
 			return
 		end
 		util.openJournalTab(3)
+		-- links from old exports point to the sender's profiles
+		profile.zoneMountsFromProfile = nil
+		profile.petListFromProfile = nil
 		profiles[name] = profile
 		ns.mounts:checkProfile(profiles[name])
 		self:setProfile(name)

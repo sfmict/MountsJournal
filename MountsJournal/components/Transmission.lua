@@ -243,7 +243,8 @@ end
 local function getTransmitData(data)
 	local toTransmit
 	if data.t == "Profile" then
-		toTransmit = data.id == "" and mounts.defProfile or mounts.profiles[data.id]
+		local profile = data.id == "" and mounts.defProfile or mounts.profiles[data.id]
+		toTransmit = profile and ns.journal.bgFrame.profilesMenu:getExportProfile(profile)
 	elseif data.t == "Rule Set" then
 		for i, ruleSet in ipairs(mounts.globalDB.ruleSets) do
 			if ruleSet.name == data.id then
