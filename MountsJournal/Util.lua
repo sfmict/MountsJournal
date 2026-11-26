@@ -5,6 +5,17 @@ local C_MountJournal, C_UnitAuras, UnitExists, IsInRaid, IsInGroup, IsSpellKnown
 local events, eventsMixin, dot = {}, {}, "."
 
 
+-- removing shifts indexes, so the list is replaced by a copy
+-- and an event being dispatched keeps iterating its own list
+local function copyList(list)
+	local newList = {}
+	for k, v in next, list do
+		newList[k] = v
+	end
+	return newList
+end
+
+
 function eventsMixin:on(event, func)
 	if type(event) ~= "string" or type(func) ~= "function" then return self end
 	local event, name = dot:split(event, 2)
@@ -17,6 +28,8 @@ function eventsMixin:on(event, func)
 
 	local k = name or func
 	if handlerList[k] then
+		handlerList = copyList(handlerList)
+		events[event] = handlerList
 		for i = #handlerList, 1, -1 do
 			if handlerList[i] == handlerList[k] then
 				tremove(handlerList, i)
@@ -42,6 +55,8 @@ function eventsMixin:off(event, func)
 			local k = name or func
 			local handler = handlerList[k]
 			if handler then
+				handlerList = copyList(handlerList)
+				events[event] = handlerList
 				for i = #handlerList, 1, -1 do
 					if handlerList[i] == handler then
 						tremove(handlerList, i)

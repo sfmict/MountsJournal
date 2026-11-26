@@ -205,7 +205,7 @@ end
 
 function calendar:RESTRICTION_CHANGED(rType, rState)
 	if rType == Enum.AddOnRestrictionType.Chat and rState == Enum.AddOnRestrictionState.Inactive then
-		self:off("RESTRICTION_CHANGED")
+		self:off("RESTRICTION_CHANGED", self.RESTRICTION_CHANGED)
 		self:updateTodayEvents()
 	end
 end
