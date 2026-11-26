@@ -99,8 +99,10 @@ function panel:setShown(show)
 	self:SetShown(show)
 	if show then
 		self:setPosition()
+		self.speed:SetShown(self.config.speedPos and mounts.mountAuraInstanceID ~= nil)
 	else
 		self:setLocked(false)
+		self.speed:Hide()
 	end
 end
 
@@ -166,9 +168,9 @@ function panel:setSpeed(pos)
 	self.config.speedPos = pos
 
 	if pos then
-		self.speed:SetShown(mounts.mountAuraInstanceID ~= nil)
+		self.speed:SetShown(self:IsShown() and mounts.mountAuraInstanceID ~= nil)
 		mounts:on("MOUNTED_UPDATE.summonPanel", function(_, isMounted)
-			self.speed:SetShown(isMounted)
+			self.speed:SetShown(isMounted and self:IsShown())
 		end)
 		      :on("MOUNT_SPEED_UPDATE.summonPanel", function(_, ...)
 			self.speed:SetText(util.getFormattedSpeed(...))
