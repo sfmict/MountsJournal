@@ -216,7 +216,6 @@ ns.journal:on("MODULES_INIT", function(journal)
 		exportProfile.petSpecies = ns.pets:getExportPetSpecies(ns.mounts:getProfilePetForMount(profile))
 		exportProfile.zoneMountsFromProfile = nil
 		exportProfile.petListFromProfile = nil
-		fpde(exportProfile)
 		return exportProfile
 	end
 
